@@ -280,6 +280,49 @@ endif(${SGW_AUTOTEST})
 ################################################################################
 # Specific part for oai_spgwc folder
 
+
+#for NAS
+set(NAS_DIR "${SRC_TOP_DIR}/nas")
+
+file(GLOB NAS_src_files
+    ${NAS_DIR}/*.c
+    ${NAS_DIR}/ies/*.c
+    ${NAS_DIR}/network/*.c
+    ${NAS_DIR}/mm/msg/*.c
+    ${NAS_DIR}/mm/*.c
+    ${NAS_DIR}/sm/*.c
+    ${NAS_DIR}/sm/msg/*.c
+    ${SRC_TOP_DIR}/utils/conversions.c
+    ${SRC_TOP_DIR}/utils/pid_file.c
+    ${SRC_TOP_DIR}/utils/hashtable.c
+    ${SRC_TOP_DIR}/utils/obj_hashtable.c
+    ${SRC_TOP_DIR}/utils/TLVDecoder.c
+    ${SRC_TOP_DIR}/utils/TLVEncoder.c
+    ${SRC_TOP_DIR}/utils/bstr/*.c
+    ${SRC_TOP_DIR}/nas/security/*.c
+    ${SRC_TOP_DIR}/common/nas/dynamic_memory_check.c
+    ${SRC_TOP_DIR}/common/nas/backtrace.c
+    ${SRC_TOP_DIR}/common/*.c
+)   
+
+set(NAS_include_files
+  ${NAS_DIR}/ies
+  ${NAS_DIR}/network
+  ${NAS_DIR}/mm
+  ${NAS_DIR}/mm/msg
+  ${NAS_DIR}/sm
+  ${NAS_DIR}/sm/msg
+  ${NAS_DIR}
+  ${NAS_DIR}/security
+  ${SRC_TOP_DIR}/utils
+  ${SRC_TOP_DIR}/utils/bstr
+  ${SRC_TOP_DIR}/ngap
+  ${SRC_TOP_DIR}/common
+  )
+
+add_library(NAS ${NAS_src_files} ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES})
+
+
 add_definitions("-DPACKAGE_NAME=\"SPGW-C\"")
 
 include_directories(${SRC_TOP_DIR}/pgwc)
@@ -287,12 +330,26 @@ include_directories(${SRC_TOP_DIR}/oai_spgwc)
 include_directories(${SRC_TOP_DIR}/common)
 include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/common/msg)
+include_directories(${SRC_TOP_DIR}/common/nas)
 include_directories(${SRC_TOP_DIR}/common/utils)
 include_directories(${SRC_TOP_DIR}/gtpv2c)
 include_directories(${SRC_TOP_DIR}/pfcp)
 include_directories(${SRC_TOP_DIR}/sgwc)
 include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
+include_directories(${SMF_API_SERVER_include_files})
+include_directories(${NAS_include_files})
+
+#include_directories(${SRC_TOP_DIR}/nas)
+#include_directories(${SRC_TOP_DIR}/nas/msg) 
+#include_directories(${SRC_TOP_DIR}/nas/ies)  
+#include_directories(${SRC_TOP_DIR}/nas/network)
+#include_directories(${SRC_TOP_DIR}/nas/mm/msg)
+#include_directories(${SRC_TOP_DIR}/nas/mm)
+#include_directories(${SRC_TOP_DIR}/nas/sm)
+#include_directories(${SRC_TOP_DIR}/nas/sm/msg)
+
+#include_directories(${SMF_API_SERVER_include_files})
 
 add_executable(spgwc
   ${SRC_TOP_DIR}/oai_spgwc/main.cpp
@@ -312,5 +369,5 @@ if(${SGW_AUTOTEST})
   SET(GTPV1U_LIB GTPV1U)
 endif(${SGW_AUTOTEST})
 
-target_link_libraries (spgwc ${ASAN} -Wl,--start-group CN_UTILS SGWC PGWC UDP ${GTPV1U_LIB} GTPV2C PFCP 3GPP_COMMON_TYPES gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system )
+target_link_libraries (spgwc ${ASAN} -Wl,--start-group CN_UTILS SGWC PGWC UDP ${GTPV1U_LIB} GTPV2C PFCP 3GPP_COMMON_TYPES -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
 

@@ -21,6 +21,7 @@
 set(ITTI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/itti)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/itti)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/msg)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/nas)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
