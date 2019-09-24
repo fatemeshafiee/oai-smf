@@ -145,8 +145,6 @@ install_pistache_from_git() {
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
     $SUDO make install
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
-    # enable syslog, Useless (defined in SPGW code)
-    sed -i '/#define SPDLOG_ENABLE_SYSLOG/s/^\/\///g' include/spdlog/tweakme.h
     popd
   fi
   return 0
