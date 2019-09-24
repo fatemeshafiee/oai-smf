@@ -1,3 +1,0 @@
-/home/button/smf/src/udm/build/CMakeFiles/rebuild_cache.dir
-/home/button/smf/src/udm/build/CMakeFiles/api-server.dir
-/home/button/smf/src/udm/build/CMakeFiles/edit_cache.dir
