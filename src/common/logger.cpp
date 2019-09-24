@@ -78,6 +78,8 @@ void Logger::_init( const char *app, const bool log_stdout, bool const log_rot_f
    m_udp       = new _Logger( "udp      ", m_sinks, ss.str().c_str() );
    m_pfcp      = new _Logger( "pfcp     ", m_sinks, ss.str().c_str() );
    m_pfcp_switch = new _Logger( "pfcp_sw  ", m_sinks, ss.str().c_str() );
+   m_smf_n10 = new _Logger( "smf_n10  ", m_sinks, ss.str().c_str() );
+   m_smf_api_server = new _Logger( "smf_api_server  ", m_sinks, ss.str().c_str() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
