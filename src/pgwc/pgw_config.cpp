@@ -594,3 +594,25 @@ pgw_config::~pgw_config()
 {
 }
 
+
+
+//------------------------------------------------------------------------------
+bool pgw_config::is_dotted_dnn_handled(const std::string& dnn, const pdu_session_type_t& pdn_session_type)
+{
+
+return true; //test
+  Logger::pgwc_app().debug( "DNN: %s", dnn.c_str());
+
+  for (int i = 0; i < pgw_cfg.num_apn; i++) {
+	  Logger::pgwc_app().debug( "apn_label: %s", pgw_cfg.apn[i].apn_label.c_str());
+    if (0 == dnn.compare(pgw_cfg.apn[i].apn_label)) {
+      if (pdn_session_type.pdu_session_type == pgw_cfg.apn[i].pdn_type.pdn_type) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+

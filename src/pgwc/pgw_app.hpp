@@ -28,12 +28,22 @@
 #ifndef FILE_PGW_APP_HPP_SEEN
 #define FILE_PGW_APP_HPP_SEEN
 
-
+#include "smf.h"
 #include "3gpp_29.274.h"
 #include "itti_msg_s5s8.hpp"
 #include "itti_msg_sxab.hpp"
 #include "pgw_context.hpp"
 #include "pgw_pco.hpp"
+#include "SmContextCreateData.h"
+#include "SmContextCreateError.h"
+#include "pistache/endpoint.h"
+#include "pistache/http.h"
+#include "pistache/router.h"
+#include "smf_msg.hpp"
+
+extern "C" {
+#include "sm_msg.h"
+}
 
 #include <map>
 #include <set>
@@ -64,6 +74,11 @@ private:
   mutable std::shared_mutex           m_imsi2pgw_context;
   mutable std::shared_mutex           m_s5s8lteid2pgw_context;
   mutable std::shared_mutex           m_seid2pgw_context;
+
+  //for SMF
+  std::map<supi64_t, std::shared_ptr<pgw_context>>  supi2pgw_context;
+  mutable std::shared_mutex           m_supi2smf_context;
+
 
   int apply_config(const pgw_config& cfg);
 
@@ -133,6 +148,68 @@ public:
   void handle_itti_msg (itti_sxab_association_setup_request& m);
 
   void restore_sx_sessions(const seid_t& seid) const;
+
+  /*
+   * Handle PDUSession_CreateSMContextRequest from AMF
+   * @param [std::shared_ptr<pdu_session_create_sm_context_request>&] sm_context_req_msg Request message
+   * @param [Pistache::Http::ResponseWriter& ] httpResponse To send a response to AMF
+   * @return void
+   */
+  void handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse);
+
+  /*
+   * Verify if SM Context is existed for this Supi
+   * @param [supi_t] supi
+   * @return True if existed, otherwise false
+   */
+  bool is_supi_2_smf_context(const supi64_t& supi) const;
+
+  /*
+   * Create/Update SMF context with the corresponding supi
+   * @param [supi_t] supi
+   * @param [std::shared_ptr<pgw_context>] sc Shared_ptr Pointer to an SMF context
+   * @return True if existed, otherwise false
+   */
+  void set_supi_2_smf_context(const supi64_t& supi, std::shared_ptr<pgw_context> sc);
+
+  /*
+   * Get SM Context
+   * @param [supi_t] Supi
+   * @return Shared pointer to SM context
+   */
+  std::shared_ptr<pgw_context>  supi_2_smf_context(const supi64_t& supi) const;
+
+  /*
+   * Check whether SMF uses local configuration instead of retrieving Session Management Data from UDM
+   * @param [std::string] dnn_selection_mode
+   * @return True if SMF uses the local configuration to check the validity of the UE request, False otherwise
+   */
+  bool is_use_local_configuration_subscription_data(const std::string& dnn_selection_mode);
+
+  /*
+   * Verify whether the Session Management Data is existed
+   * @param [supi_t] SUPI
+   * @param [std::string] DNN
+   * @param [snssai_t] S-NSSAI
+   * @return True if SMF uses the local configuration to check the validity of the UE request, False otherwise
+   */
+  bool is_supi_dnn_snssai_subscription_data(supi_t& supi, std::string& dnn, snssai_t& snssai);
+
+  /*
+   * Verify whether the UE request is valid according to the user subscription and with local policies
+   * @param [..]
+   * @return True if the request is valid, otherwise False
+   */
+  bool is_create_sm_context_request_valid();
+
+  /*
+   * Send create session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [ oai::smf::model::SmContextCreateError] smContextCreateError
+   *
+   */
+  void send_create_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
+
 };
 }
 #include "pgw_config.hpp"

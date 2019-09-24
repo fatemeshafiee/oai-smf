@@ -26,7 +26,7 @@
   \email: 
 */
 
-#include "3gpp_23.003_smf.h"
+#include "smf.h"
 #include "common_defs.h"
 #include "itti.hpp"
 #include "logger.hpp"

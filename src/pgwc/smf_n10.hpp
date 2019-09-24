@@ -28,7 +28,7 @@
 #ifndef FILE_SMF_N10_HPP_SEEN
 #define FILE_SMF_N10_HPP_SEEN
 
-#include "3gpp_23.003_smf.h"
+#include "smf.h"
 #include "3gpp_29.503.h"
 #include "pgw_context.hpp"
 #include <thread>

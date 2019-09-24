@@ -33,6 +33,9 @@
 #include "pgw_context.hpp"
 #include "pgw_paa_dynamic.hpp"
 #include "pgwc_procedure.hpp"
+#include "ProblemDetails.h"
+#include "3gpp_29.502.h"
+
 
 #include <algorithm>
 
@@ -967,8 +970,336 @@ std::string pgw_context::toString() const
     s.append(it->toString());
   }
 
-  //s.append("\tIMSI:\t"+toString(p.msisdn));
-  //apns.reserve(MAX_APN_PER_UE);
-  return s;
+	//s.append("\tIMSI:\t"+toString(p.msisdn));
+	//apns.reserve(MAX_APN_PER_UE);
+	return s;
+}
+
+
+
+
+//TTN
+//------------------------------------------------------------------------------
+void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse)
+{
+
+	Logger::pgwc_app().info("Handle AMF message");
+
+	//Step 1. get necessary information
+	Logger::pgwc_app().debug("Handle AMF message, supi " SUPI_64_FMT " ", sm_context_req_msg->get_supi());
+	std::string dnn = sm_context_req_msg->get_dnn();
+	//oai::smf::model::Snssai snssai_sm = smContextCreateData.getSNssai();
+	snssai_t snssai  =  sm_context_req_msg->get_snssai();
+
+
+	std::string requestType = sm_context_req_msg->get_request_type();
+	supi_t supi =  sm_context_req_msg->get_supi();
+	supi64_t supi64 = smf_supi_to_u64(supi);
+	uint32_t pdu_session_id = sm_context_req_msg->get_pdu_sessionId();
+
+	oai::smf::model::SmContextCreateError smContextCreateError;
+	oai::smf::model::ProblemDetails problem_details;
+	bool request_accepted = true;
+	//problem_details.setCause()
+
+	//Step 2. check the validity of the UE request, if valid send PDU Session Accept, otherwise send PDU Session Reject to AMF
+	if (!verify_sm_context_request(sm_context_req_msg)){ //TODO: Need to implement this function
+		// Not a valid request...
+		Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST, the request is not valid!");
+
+		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]); //TODO: add causes to header file
+		smContextCreateError.setError(problem_details);
+		//TODO: create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
+		send_create_session_response_error(smContextCreateError, Pistache::Http::Code::Forbidden, httpResponse);
+		return;
+	}
+
+	//store HttpResponse and session-related information to be used when receiving the response from UPF
+	pgwc::pdu_session_create_sm_context_response *sm_context_resp = new pdu_session_create_sm_context_response(httpResponse);
+	std::shared_ptr<pdu_session_create_sm_context_response> sm_context_resp_pending = std::shared_ptr<pdu_session_create_sm_context_response>(sm_context_resp);
+
+
+	//step 3. find pdn_connection
+	std::shared_ptr<dnn_context> sd;
+	bool find_dnn = find_dnn_context (dnn, sd);
+
+	//step 3.1. create dnn context if not exist
+	//At this step, this context should be existed
+	if (nullptr == sd.get()) {
+
+		Logger::pgwc_app().debug("DNN context (dnn_in_use %s) is not existed yet!", dnn.c_str());
+		dnn_context *d = new (dnn_context);
+
+		d->in_use = true;
+		d->dnn_in_use = dnn;
+		//ambr
+		//insert
+		sd = std::shared_ptr<dnn_context> (d);
+		insert_dnn(sd);
+	} else {
+		sd.get()->dnn_in_use = dnn;
+		Logger::pgwc_app().debug("DNN context (dnn_in_use %s) is already existed", dnn.c_str());
+	}
+
+	//step 3.2. create pdn connection if not exist
+	std::shared_ptr<pgw_pdn_connection> sp;
+	bool find_pdn = sd.get()->find_pdn_connection(pdu_session_id, sp);
+
+	if (nullptr == sp.get()){
+		Logger::pgwc_app().debug("Create a new PDN connection!");
+		//create a new pdn connection
+		pgw_pdn_connection *p = new (pgw_pdn_connection);
+		p->pdn_type.pdn_type = sm_context_req_msg->get_pdu_session_type();
+		p->pdn_type.pdn_type = PDN_TYPE_E_IPV4; //TODO: should be removed after get the correct information from NAS_MSG
+		p->pdu_session_id = pdu_session_id; //should check also nas_msg.pdusessionidentity ??
+		//amf id
+		p->amf_id = sm_context_req_msg->get_serving_nfId();
+		sp = std::shared_ptr<pgw_pdn_connection>(p);
+		sd->insert_pdn_connection(sp);
+	} else{
+		Logger::pgwc_app().debug("PDN connection is already existed!");
+		//TODO:
+	}
+
+
+	//pending session??
+	//step 4. check if supi is authenticated
+
+	//address allocation based on PDN type
+	//step 5. paa
+	bool set_paa = false;
+	paa_t paa = {};
+
+	//step 6. pco
+	//section 6.2.4.2, TS 24.501
+	//If the UE wants to use DHCPv4 for IPv4 address assignment, it shall indicate that to the network within the Extended
+	//protocol configuration options IE in the PDU SESSION ESTABLISHMENT REQUEST
+	//Extended protocol configuration options: See subclause 10.5.6.3A in 3GPP TS 24.008.
+
+	ExtendedProtocolConfigurationOptions extended_protocol_options = (sm_context_req_msg->get_nas_msg()).extendedprotocolconfigurationoptions;
+	//TODO: PCO
+	protocol_configuration_options_t pco_resp = {};
+	protocol_configuration_options_ids_t pco_ids = {
+			.pi_ipcp = 0,
+			.ci_dns_server_ipv4_address_request = 0,
+			.ci_ip_address_allocation_via_nas_signalling = 0,
+			.ci_ipv4_address_allocation_via_dhcpv4 = 0,
+			.ci_ipv4_link_mtu_request = 0};
+
+	//pgw_app_inst->process_pco_request(extended_protocol_options, pco_resp, pco_ids);
+
+
+	//step 7. address allocation based on PDN type
+	switch (sp->pdn_type.pdn_type) {
+	case PDN_TYPE_E_IPV4: {
+		if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) { //use NAS signalling
+			//use NAS signalling
+			//static or dynamic address allocation
+			bool paa_res = false; //how to define static or dynamic
+			//depend of subscription information: staticIpAddress in DNN Configuration
+			//TODO: check static IP address is available in the subscription information (SessionManagementSubscription) or in DHCP/DN-AAA
+			/*
+					  std::shared_ptr<session_management_subscription> ss;
+					sd.get()->find_dnn_subscription(snssai.sST, ss);
+					 if (nullptr != ss.get()){
+						 //ss.get()->
+					 }
+			 */
+
+			if ((not paa_res) || (not paa.is_ip_assigned())) {
+				bool success = paa_dynamic::get_instance().get_free_paa(sd->dnn_in_use, paa);
+				if (success) {
+					set_paa = true;
+				} else {
+					//cause: ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED; //check for 5G?
+				}
+				// Static IP address allocation
+			} else if ((paa_res) && (paa.is_ip_assigned())) {
+				set_paa = true;
+			}
+		} else { //use DHCP
+			//TODO: DHCP
+		}
+
+
+
+	}
+	break;
+
+	case PDN_TYPE_E_IPV6: {
+		//TODO:
+	}
+	break;
+
+	case PDN_TYPE_E_IPV4V6: {
+		//TODO:
+	}
+	break;
+
+	default:
+		Logger::pgwc_app().error( "Unknown PDN type %d", sp->pdn_type.pdn_type);
+		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PDUTYPE_NOT_SUPPORTED]);
+		smContextCreateError.setError(problem_details);
+		//TODO: create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
+		send_create_session_response_error(smContextCreateError, Pistache::Http::Code::Forbidden, httpResponse);
+		request_accepted = false;
+		break;
+	}
+
+	//step 8. create session establishment procedure and run the procedure
+
+	//if request is accepted
+	if (request_accepted){
+		if (set_paa) {
+			sm_context_resp_pending->set_paa(paa); //will be used when procedure is running
+			sp->set(paa);
+		} else {
+			// Valid PAA sent in CSR ?
+			//bool paa_res = csreq->gtp_ies.get(paa);
+			//if ((paa_res) && ( paa.is_ip_assigned())) {
+			//	sp->set(paa);
+			//}
+		}
+
+		session_establishment_procedure* proc = new session_establishment_procedure(sp);
+		std::shared_ptr<pgw_procedure> sproc = std::shared_ptr<pgw_procedure>(proc);
+
+		insert_procedure(sproc);
+		if (proc->run(sm_context_req_msg, sm_context_resp_pending, shared_from_this())) {
+			// error !
+			Logger::pgwc_app().info( "S5S8 CREATE_SESSION_REQUEST procedure failed");
+			remove_procedure(proc);
+		}
+
+	}else{ //if request is rejected
+
+	}
+
+	//step 9. send ITTI message to PGW s5s8 for the pending session?
+
+
+}
+
+
+//------------------------------------------------------------------------------
+bool pgw_context::find_dnn_context(const std::string& dnn, std::shared_ptr<dnn_context>& dnn_context)
+{
+	std::unique_lock<std::recursive_mutex> lock(m_context);
+	for (auto it : dnns) {
+		if (0 == dnn.compare(it->dnn_in_use)) {
+			dnn_context = it;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+//------------------------------------------------------------------------------
+void pgw_context::insert_dnn(std::shared_ptr<dnn_context>& sd)
+{
+	std::unique_lock<std::recursive_mutex> lock(m_context);
+	dnns.push_back(sd);
+}
+
+
+
+//------------------------------------------------------------------------------
+bool pgw_context::verify_sm_context_request(std::shared_ptr<pdu_session_create_sm_context_request>& create_sm_context_request_msg)
+{
+	//check the validity of the UE request according to the user subscription or local policies
+	//TODO:
+	return true;
+
+}
+
+
+//------------------------------------------------------------------------------
+bool pgw_context::find_pdn_connection(const std::string& dnn, const uint32_t pdu_session_id, dnn_pdn_t& pdn_connection)
+{
+	pdn_connection = {};
+	std::unique_lock<std::recursive_mutex> lock(m_context);
+	std::shared_ptr<dnn_context> sd;
+	if (find_dnn_context(dnn, sd)) {
+		std::shared_ptr<pgw_pdn_connection> sp;
+		if (sd.get()) {
+			Logger::pgwc_app().error( "[find_pdn_connection] found dnn_context");
+			if (sd->find_pdn_connection(pdu_session_id, sp)) {
+				// would need to make a pair of mutexes ?
+				pdn_connection = std::make_pair(sd, sp);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+//------------------------------------------------------------------------------
+void pgw_context::send_create_session_response_error(oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse)
+{
+	//Send reply to AMF
+	nlohmann::json jsonData;
+	to_json(jsonData, smContextCreateError);
+	std::string resBody = jsonData.dump();
+	httpResponse.send(code, resBody);
+}
+
+
+
+//------------------------------------------------------------------------------
+void dnn_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
+{
+	std::unique_lock<std::recursive_mutex> lock(m_context);
+	dnn_subscriptions.insert (std::pair ((uint8_t)snssai.sST, ss));
+
+}
+
+bool dnn_context::find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
+{
+	std::unique_lock<std::recursive_mutex> lock(m_context);
+	if (dnn_subscriptions.count(snssai.sST) > 0 ){
+		ss = dnn_subscriptions.at(snssai.sST);
+		return true;
+	}
+	return false;
+}
+
+
+bool dnn_context::find_pdn_connection(const uint32_t pdu_session_id , std::shared_ptr<pgw_pdn_connection>& pdn)
+{
+	pdn = {};
+
+	std::unique_lock<std::recursive_mutex> lock(m_context);
+	for (auto it : pdn_connections) {
+		if (pdu_session_id == it->pdu_session_id) {
+			pdn = it;
+			return true;
+		}
+	}
+	return false;
+
+}
+
+
+//------------------------------------------------------------------------------
+void dnn_context::insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp)
+{
+	std::unique_lock<std::recursive_mutex> lock(m_context);
+	pdn_connections.push_back(sp);
+}
+
+
+//------------------------------------------------------------------------------
+void session_management_subscription::insert_dnn_configuration(std::string dnn, dnn_configuration_t dnn_configuration){
+	dnn_configurations.insert(std::pair<std::string, dnn_configuration_t>(dnn,dnn_configuration));
+}
+
+//------------------------------------------------------------------------------
+dnn_configuration_t session_management_subscription::get_dnn_configuration(std::string dnn){
+	if (dnn_configurations.count(dnn) > 0){
+		return dnn_configurations.at(dnn);
+	} else
+		return dnn_configuration_t();
 }
 

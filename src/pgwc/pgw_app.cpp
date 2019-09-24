@@ -34,9 +34,19 @@
 #include "pgw_paa_dynamic.hpp"
 #include "pgw_s5s8.hpp"
 #include "pgwc_sxab.hpp"
+#include "smf_n10.hpp"
 #include "string.hpp"
+#include "SmContextCreateError.h"
+#include "3gpp_29.502.h"
+
+extern "C" {
+#include "sm_msg.h"
+#include "PDUSessionEstablishmentRequest.h"
+}
 
 #include <stdexcept>
+#include <iostream>
+#include <cstdlib>
 
 using namespace pgwc;
 
@@ -46,6 +56,7 @@ extern pgw_app *pgw_app_inst;
 extern pgw_config pgw_cfg;
 pgw_s5s8 *pgw_s5s8_inst = nullptr;
 pgwc_sxab *pgwc_sxab_inst = nullptr;
+smf_n10 *smf_n10_inst = nullptr;
 extern itti_mw *itti_inst;
 
 void pgw_app_task (void*);
@@ -286,6 +297,7 @@ pgw_app::pgw_app (const std::string& config_file) : m_s5s8_cp_teid_generator(), 
   try {
     pgw_s5s8_inst = new pgw_s5s8();
     pgwc_sxab_inst = new pgwc_sxab();
+    smf_n10_inst = new smf_n10();
   } catch (std::exception& e) {
     Logger::pgwc_app().error( "Cannot create PGW_APP: %s", e.what() );
     throw;
@@ -625,6 +637,146 @@ void pgw_app::handle_itti_msg (std::shared_ptr<itti_sxab_session_report_request>
   } else {
     Logger::pgwc_app().debug("Received SXAB SESSION REPORT REQUEST seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", snr->seid, snr->trxn_id);
   }
+}
+
+//------------------------------------------------------------------------------
+bool pgw_app::is_supi_2_smf_context(const supi64_t& supi) const
+{
+	//TODO
+	//context doesn't exist
+	return false;
+}
+
+//------------------------------------------------------------------------------
+std::shared_ptr<pgw_context>  pgw_app::supi_2_smf_context(const supi64_t& supi) const
+{
+	std::shared_lock lock(m_supi2smf_context);
+	return supi2pgw_context.at(supi);
+}
+
+//------------------------------------------------------------------------------
+void pgw_app::set_supi_2_smf_context(const supi64_t& supi, std::shared_ptr<pgw_context> sc)
+{
+	//TODO: from set_imsi64_2_pgw_context
+}
+
+//------------------------------------------------------------------------------
+bool pgw_app::is_use_local_configuration_subscription_data(const std::string& dnn_selection_mode)
+{
+	//TODO: should be implemented
+	return false; //get Session Management Subscription from UDM
+}
+
+//------------------------------------------------------------------------------
+bool pgw_app::is_supi_dnn_snssai_subscription_data(supi_t& supi, std::string& dnn, snssai_t& snssai)
+{
+	//TODO: should be implemented
+	return false; //Session Management Subscription from UDM isn't available
+}
+
+//------------------------------------------------------------------------------
+bool pgw_app::is_create_sm_context_request_valid()
+{
+	//TODO: should be implemented
+	return true;
+
+}
+
+//------------------------------------------------------------------------------
+void pgw_app::send_create_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code)
+{
+	//Send reply to AMF
+	nlohmann::json jsonData;
+	to_json(jsonData, smContextCreateError);
+	std::string resBody = jsonData.dump();
+
+	//httpResponse.headers().add<Pistache::Http::Header::Location>(url);
+	httpResponse.send(code, resBody);
+}
+
+//------------------------------------------------------------------------------
+void pgw_app::handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse){
+
+	//handle PDU Session Create SM Context Request as specified in section 4.3.2 3GPP TS 23.502
+
+	Logger::pgwc_app().info("Handle AMF message");
+
+	//Step 1. get necessary information
+	Logger::pgwc_app().debug("Handle AMF message, supi " SUPI_64_FMT " ", sm_context_req_msg->get_supi());
+	std::string dnn = sm_context_req_msg->get_dnn();
+
+	snssai_t snssai  =  sm_context_req_msg->get_snssai();
+	std::string requestType = sm_context_req_msg->get_request_type();
+	supi_t supi =  sm_context_req_msg->get_supi();
+	supi64_t supi64 = smf_supi_to_u64(supi);
+
+	oai::smf::model::ProblemDetails problem_details;
+
+	pdu_session_establishment_request_msg pdu_session_establishment_request = sm_context_req_msg->get_nas_msg() ;
+	pdu_session_type_t pdu_session_type = {.pdu_session_type = (uint8_t)pdu_session_establishment_request._pdusessiontype};
+
+	Logger::pgwc_app().debug("Handle AMF message, _pdusessiontype: %d", pdu_session_type.pdu_session_type);
+
+	//Step 2. check if the DNN requested is valid
+	if (not pgw_cfg.is_dotted_dnn_handled(dnn, pdu_session_type)) {
+		// Not a valid request...
+		Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST unknown requested APN %s, ignore message", dnn.c_str());
+		oai::smf::model::SmContextCreateError smContextCreateError;
+		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_DNN_DENIED]);
+		//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
+		//Send response to AMF
+		send_create_session_response(httpResponse, smContextCreateError, Pistache::Http::Code::Forbidden);
+		return;
+	}
+
+	//Step 3. create a context for this supi if not existed, otherwise update
+	std::shared_ptr<pgw_context> sc;
+	if (is_supi_2_smf_context(supi64)) {
+		Logger::pgwc_app().debug("Update PGW context\n");
+		sc = supi_2_smf_context(supi64);
+	} else {
+		Logger::pgwc_app().debug("Create a new PGW context\n");
+		sc = std::shared_ptr<pgw_context>(new pgw_context());
+		set_supi_2_smf_context(supi64, sc);
+	}
+
+	//update context with dnn information
+	std::shared_ptr<dnn_context> sd;
+
+	if (!sc.get()->find_dnn_context(dnn, sd)) {
+		if (nullptr == sd.get()){
+			//create a new one and insert to the list
+			Logger::pgwc_app().debug("Create a DNN context and add to the PGW context\n");
+			sd = std::shared_ptr<dnn_context>(new dnn_context(dnn));
+			//sd.get()->in_use = true;
+			sc.get()->insert_dnn(sd);
+		}
+	}
+
+	// step 4. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
+	std::string dnn_selection_mode = sm_context_req_msg->get_dnn_selection_mode();
+	if (not is_use_local_configuration_subscription_data(dnn_selection_mode) && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai))
+	{
+		//uses a dummy UDM to test this part
+		Logger::pgwc_app().debug("Retrieve Session Management Subscription data from UDM");
+		std::shared_ptr<session_management_subscription> subscription = std::shared_ptr<session_management_subscription>(new session_management_subscription (snssai));
+		if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
+			//update dnn_context with subscription info
+			sd.get()->insert_dnn_subscription(snssai, subscription);
+			//debug
+			//dnn_configuration_t dnn_configuration = subscription.get()->get_dnn_configuration(dnn);
+			//Logger::pgwc_app().debug("Retrieve Session Management Subscription data from UDM %s, %s, %s, %s", pdu_session_type_e2str[dnn_configuration.pdu_session_types.default_session_type.pdu_session_type].c_str(), ssc_mode_e2str[dnn_configuration.ssc_modes.default_ssc_mode.ssc_mode].c_str(), dnn_configuration.session_ambr.uplink.c_str(), dnn_configuration.session_ambr.downlink.c_str());
+		}
+
+	}
+
+	//Step 4. check the validity of the UE request, if valid send PDU Session Accept, otherwise send PDU Session Reject to AMF
+
+	//Step 5. let the context handle the message
+	//in this step, SMF will send N4 Session Establishment/Modification to UPF (step 10a, section 4.3.2 3GPP 23.502)
+	//SMF, then, sends response to AMF
+	sc.get()->handle_amf_msg(sm_context_req_msg, httpResponse);
+
 }
 
 

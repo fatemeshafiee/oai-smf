@@ -36,10 +36,23 @@
 
 #include "3gpp_24.008.h"
 #include "3gpp_29.274.h"
+#include "3gpp_29.503.h"
 #include "common_root_types.h"
 #include "itti_msg_s5s8.hpp"
 #include "pgwc_procedure.hpp"
 #include "uint_generator.hpp"
+#include "SmContextCreateData.h"
+#include "pistache/endpoint.h"
+#include "pistache/http.h"
+#include "pistache/router.h"
+#include "SmContextCreateError.h"
+#include "smf_msg.hpp"
+
+extern "C" {
+#include "sm_msg.h"
+#include "PDUSessionEstablishmentRequest.h"
+}
+
 
 
 namespace pgwc {
@@ -225,15 +238,19 @@ public:
   std::map<uint8_t,pgw_eps_bearer> eps_bearers;
   bool                             released; //(release access bearers request)
 
-  //----------------------------------------------------------------------------
-  // PFCP related members
-  //----------------------------------------------------------------------------
-  // PFCP Session
-  uint64_t seid;
-  pfcp::fseid_t  up_fseid;
-  //
-  util::uint_generator<uint16_t>   pdr_id_generator;
-  util::uint_generator<uint32_t>   far_id_generator;
+	//----------------------------------------------------------------------------
+	// PFCP related members
+	//----------------------------------------------------------------------------
+	// PFCP Session
+	uint64_t seid;
+	pfcp::fseid_t  up_fseid;
+	//
+	util::uint_generator<uint16_t>   pdr_id_generator;
+	util::uint_generator<uint32_t>   far_id_generator;
+
+
+	uint32_t pdu_session_id;
+	std::string amf_id;
 };
 
 
@@ -270,9 +287,63 @@ public:
   mutable std::recursive_mutex                     m_context;
 };
 
+
+class session_management_subscription {
+public:
+	session_management_subscription(snssai_t snssai): single_nssai(snssai), dnn_configurations() {}
+	void insert_dnn_configuration(std::string dnn, dnn_configuration_t dnn_configuration);
+	dnn_configuration_t get_dnn_configuration(std::string dnn);
+private:
+	snssai_t single_nssai;
+	std::map <std::string, dnn_configuration_t> dnn_configurations;
+};
+
+/*
+ * Manage the DNN context
+ */
+class dnn_context {
+
+public:
+	dnn_context() : m_context(), in_use(false), pdn_connections() {
+	}
+
+	dnn_context(std::string dnn) : m_context(), in_use(false), pdn_connections(), dnn_in_use(dnn) {
+		// apn_ambr = {0};
+	}
+	dnn_context(dnn_context& b) = delete;
+
+	/* Insert a session management subscription into the DNN context */
+	void insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
+
+	/* Find the subscription from the DNN context */
+	bool find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
+
+	/* Find the PDN connection */
+	bool find_pdn_connection(const uint32_t pdu_session_id , std::shared_ptr<pgw_pdn_connection>& pdn);
+
+	/* Insert a PDN connection into the DNN context */
+	void insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp);
+
+	bool                  in_use;
+	std::string           dnn_in_use;           // The APN currently used, as received from the SGW.
+	//ambr_t          apn_ambr;                 // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
+
+	/* Store all PDN connections associated with this DNN context */
+	std::vector<std::shared_ptr<pgw_pdn_connection>> pdn_connections;
+
+	/* snssai-sst <-> session management subscription */
+	std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
+
+	mutable std::recursive_mutex                     m_context;
+};
+
+
+
 class pgw_context;
 
 typedef std::pair<std::shared_ptr<apn_context>, std::shared_ptr<pgw_pdn_connection>> pdn_duo_t;
+
+typedef std::pair<std::shared_ptr<dnn_context>, std::shared_ptr<pgw_pdn_connection>> dnn_pdn_t;
 
 class pgw_context : public std::enable_shared_from_this<pgw_context> {
 
@@ -309,28 +380,77 @@ public:
   void handle_itti_msg (itti_sxab_session_deletion_response& );
   void handle_itti_msg (std::shared_ptr<itti_sxab_session_report_request>&);
 
-  std::string  toString() const;
+	/*
+	 * Handle messages from AMF (e.g., PDU_SESSION_CREATESMContextRequest)
+	 * @param [oai::smf::model::SmContextCreateData] smContextCreateData
+	 * @param [pdu_session_establishment_request_msg] nas_msg N1 SM container
+	 * @param [Pistache::Http::ResponseWriter] httpResponse to reply to AMF
+	 * @return void
+	 */
+	void handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse);
+
+	/*
+	 * Find DNN context with name
+	 * @param [const std::string&] dnn
+	 * @param [std::shared_ptr<dnn_context>&] dnn_context dnn context to be found
+	 * @return void
+	 */
+	bool find_dnn_context(const std::string& dnn, std::shared_ptr<dnn_context>& dnn_context);
+
+	/*
+	 * Insert a DNN context into SMF context
+	 * @param [std::shared_ptr<dnn_context>&] sd Shared_ptr pointer to a DNN context
+	 * @return void
+	 */
+	void insert_dnn(std::shared_ptr<dnn_context>& sd);
+
+	/*
+	 * Send a response error to AMF (PDU Session Establishment Reject)
+	 * @param [oai::smf::model::SmContextCreateError&] smContextCreateError
+	 * @param [Pistache::Http::Code] code response code
+	 * @param [Pistache::Http::ResponseWriter] httpResponse to reply to AMF
+	 * @return void
+	 */
+	void send_create_session_response_error(oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse);
+
+	/*
+	 * Find DNN connection with APN name and PDU session ID
+	 * @param [const std::string&] dnn
+	 * @param [const uint32_t ] pdu_session_id PDU session ID
+	 * @param [dnn_pdn_t&] pdn_connection pdn connection to be found
+	 * @return void
+	 */
+	bool find_pdn_connection(const std::string& dnn, const uint32_t pdu_session_id, dnn_pdn_t& pdn_connection);
 
 
-  imsi_t         imsi;                           // IMSI (International Mobile Subscriber Identity) is the subscriber permanent identity.
-  bool                 imsi_unauthenticated_indicator; // This is an IMSI indicator to show the IMSI is unauthenticated.
-  // TO BE CHECKED me_identity_t    me_identity;       // Mobile Equipment Identity (e.g. IMEI/IMEISV).
-  msisdn_t               msisdn;                       // The basic MSISDN of the UE. The presence is dictated by its storage in the HSS.
-  //  selected_cn_operator_id                          // Selected core network operator identity (to support networksharing as defined in TS 23.251
-  // NOT IMPLEMENTED RAT type  Current RAT (implicit)
-  // NOT IMPLEMENTED Trace reference                        // Identifies a record or a collection of records for a particular trace.
-  // NOT IMPLEMENTED Trace type                             // Indicates the type of trace
-  // NOT IMPLEMENTED Trigger id                             // Identifies the entity that initiated the trace
-  // NOT IMPLEMENTED OMC identity                           // Identifies the OMC that shall receive the trace record(s).
 
-  std::vector<std::shared_ptr<apn_context>> apns; // was list
+	bool verify_sm_context_request(std::shared_ptr<pdu_session_create_sm_context_request>& create_sm_context_request_msg);
 
-  //--------------------------------------------
-  // internals
-  std::vector<std::shared_ptr<pgw_procedure>> pending_procedures;
+	std::vector<std::shared_ptr<dnn_context>> dnns;
 
-  // Big recursive lock
-  mutable std::recursive_mutex                m_context;
+
+	std::string  toString() const;
+
+
+	imsi_t         imsi;                           // IMSI (International Mobile Subscriber Identity) is the subscriber permanent identity.
+	bool                 imsi_unauthenticated_indicator; // This is an IMSI indicator to show the IMSI is unauthenticated.
+	// TO BE CHECKED me_identity_t    me_identity;       // Mobile Equipment Identity (e.g. IMEI/IMEISV).
+	msisdn_t               msisdn;                       // The basic MSISDN of the UE. The presence is dictated by its storage in the HSS.
+	//  selected_cn_operator_id                          // Selected core network operator identity (to support networksharing as defined in TS 23.251
+	// NOT IMPLEMENTED RAT type  Current RAT (implicit)
+	// NOT IMPLEMENTED Trace reference                        // Identifies a record or a collection of records for a particular trace.
+	// NOT IMPLEMENTED Trace type                             // Indicates the type of trace
+	// NOT IMPLEMENTED Trigger id                             // Identifies the entity that initiated the trace
+	// NOT IMPLEMENTED OMC identity                           // Identifies the OMC that shall receive the trace record(s).
+
+	std::vector<std::shared_ptr<apn_context>> apns; // was list
+
+	//--------------------------------------------
+	// internals
+	std::vector<std::shared_ptr<pgw_procedure>> pending_procedures;
+
+	// Big recursive lock
+	mutable std::recursive_mutex                m_context;
 };
 }
 

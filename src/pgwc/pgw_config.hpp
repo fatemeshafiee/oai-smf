@@ -35,6 +35,8 @@
 #include "pfcp.hpp"
 #include "thread_sched.hpp"
 
+#include "smf.h"
+
 #include <arpa/inet.h>
 #include <libconfig.h++>
 #include <netinet/in.h>
@@ -246,6 +248,7 @@ public:
   bool is_dotted_apn_handled(const std::string& apn, const pdn_type_t& pdn_type);
   int get_pfcp_node_id(pfcp::node_id_t& node_id);
   int get_pfcp_fseid(pfcp::fseid_t& fseid);
+  bool is_dotted_dnn_handled(const std::string& apn, const pdu_session_type_t& pdn_session_type);
 };
 
 } // namespace pgw

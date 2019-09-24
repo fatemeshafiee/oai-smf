@@ -36,6 +36,7 @@
 #include "msg_pfcp.hpp"
 #include "msg_gtpv2c.hpp"
 #include "uint_generator.hpp"
+#include "smf_msg.hpp"
 
 #include <memory>
 #include <mutex>
@@ -101,6 +102,11 @@ public:
           std::shared_ptr<pgwc::pgw_context> pc);
   void handle_itti_msg (itti_sxab_session_establishment_response& resp);
 
+  int run(std::shared_ptr<pdu_session_create_sm_context_request> sm_context_req,
+		  std::shared_ptr<pdu_session_create_sm_context_response> sm_context_resp,
+		  std::shared_ptr<pgwc::pgw_context> pc);
+
+
   //~session_establishment_procedure() {}
 
   std::shared_ptr<itti_s5s8_create_session_request>        s5_trigger;
@@ -108,6 +114,9 @@ public:
   std::shared_ptr<itti_sxab_session_establishment_request> sx_triggered;
   std::shared_ptr<pgw_pdn_connection>                      ppc;
   std::shared_ptr<pgwc::pgw_context>                       pc;
+
+  std::shared_ptr<pdu_session_create_sm_context_request> n11_trigger;
+  std::shared_ptr<pdu_session_create_sm_context_response> n11_triggered_pending;
 };
 
 //------------------------------------------------------------------------------

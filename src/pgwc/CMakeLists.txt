@@ -39,6 +39,8 @@ add_library (PGWC STATIC
   pgw_s5s8.cpp
   pgwc_procedure.cpp
   pgwc_sxab.cpp
+  smf_n10.cpp
+  smf_msg.cpp
   #pgw_pcef_emulation.cpp
 )
 
