@@ -104,6 +104,54 @@ install_spdlog_from_git() {
   return 0
 }
 
+#-------------------------------------------------------------------------------
+#arg1 is force (0 or 1) (no interactive script)
+#arg2 is debug (0 or 1) (install debug libraries)
+install_pistache_from_git() {
+  if [ $1 -eq 0 ]; then
+    read -p "Do you want to install Pistache ? <y/N> " prompt
+    OPTION=""
+  else
+    prompt='y'
+    OPTION="-y"
+  fi
+  if [ $2 -eq 0 ]; then
+    debug=0
+  else
+    debug=1
+  fi
+
+
+  if [[ $prompt =~ [yY](es)* ]]
+  then
+    GIT_URL=https://github.com/oktal/pistache.git
+    echo "Install Pistache from $GIT_URL"
+    pushd $OPENAIRCN_DIR/build/ext
+    echo "Downloading Pistache"
+    if [[ $OPTION =~ -[yY](es)* ]]
+    then
+      $SUDO rm -rf pistache
+    fi
+
+    git clone $GIT_URL
+    git submodule update --init
+    cd pistache && git checkout master
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    cd pistache
+    mkdir _build && cd _build
+    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    make
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    $SUDO make install
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    # enable syslog, Useless (defined in SPGW code)
+    sed -i '/#define SPDLOG_ENABLE_SYSLOG/s/^\/\///g' include/spdlog/tweakme.h
+    popd
+  fi
+  return 0
+}
+
 
 
 #-------------------------------------------------------------------------------
@@ -196,6 +244,9 @@ check_install_spgwc_deps() {
       libxml2-dev \
       openssl \
       python \
+      nettle-dev \
+      libcurl4 \
+      net-tools \
       pkg-config"
   elif [[ "$OS_BASEDISTRO" == "fedora" ]]; then
     PACKAGE_LIST="\
@@ -230,6 +281,9 @@ check_install_spgwc_deps() {
   ret=$?;[[ $ret -ne 0 ]] && return $ret
 
   install_spdlog_from_git $1 $2
+  ret=$?;[[ $ret -ne 0 ]] && return $ret
+  
+  install_pistache_from_git $1 $2
   ret=$?;[[ $ret -ne 0 ]] && return $ret
 
   return 0
