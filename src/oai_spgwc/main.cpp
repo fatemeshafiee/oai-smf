@@ -25,6 +25,12 @@
 #include "sgwc_app.hpp"
 #include "sgwc_config.hpp"
 
+#include "smf-api-server.h"
+#include "pistache/endpoint.h"
+#include "pistache/http.h"
+#include "pistache/router.h"
+
+
 #include <iostream>
 #include <thread>
 #include <signal.h>
@@ -37,6 +43,7 @@ using namespace pgwc;
 using namespace sgwc;
 using namespace util;
 using namespace std;
+using namespace oai::smf::api;
 
 itti_mw *itti_inst = nullptr;
 async_shell_cmd *async_shell_cmd_inst = nullptr;
@@ -127,6 +134,13 @@ int main(int argc, char **argv)
   // SGW application layer
   sgwc_app_inst = new sgwc_app(Options::getlibconfigConfig());
 
+  //SMF API server
+  Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(8080));
+  SMFApiServer smfApiServer(addr, pgw_app_inst);
+  smfApiServer.init(2);
+  //smfApiServer.start();
+  //smfApiServer.shutdown();
+ // std::thread smf_api_manager(&SMFApiServer::start, smfApiServer);
 
   FILE *fp = NULL;
   std::string filename = fmt::format("/tmp/spgwc_{}.status", getpid());

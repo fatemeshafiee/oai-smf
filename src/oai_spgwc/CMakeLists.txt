@@ -270,6 +270,7 @@ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/common/utils ${CMAKE_CURR
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/gtpv2c ${CMAKE_CURRENT_BINARY_DIR}/gtpv2c)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/pfcp ${CMAKE_CURRENT_BINARY_DIR}/pfcp)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/udp ${CMAKE_CURRENT_BINARY_DIR}/udp)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/api-server ${CMAKE_CURRENT_BINARY_DIR}/api-server)
 if(${SGW_AUTOTEST})
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/gtpv1u ${CMAKE_CURRENT_BINARY_DIR}/gtpv1u)
 endif(${SGW_AUTOTEST})
@@ -280,6 +281,24 @@ endif(${SGW_AUTOTEST})
 ################################################################################
 # Specific part for oai_spgwc folder
 
+#SMF_API
+set(SMF_API_SERVER_DIR "${SRC_TOP_DIR}/api-server")
+  
+file(GLOB SMF_API_SERVER_src_files
+    ${SMF_API_SERVER_DIR}/smf-api-server.cpp
+    ${SMF_API_SERVER_DIR}/model/*.cpp
+    ${SMF_API_SERVER_DIR}/api/*.cpp
+    ${SMF_API_SERVER_DIR}/impl/*.cpp
+)
+  
+ 
+set(SMF_API_SERVER_include_files
+  ${SMF_API_SERVER_DIR}/api
+  ${SMF_API_SERVER_DIR}/impl
+  ${SMF_API_SERVER_DIR}/model
+  ${SMF_API_SERVER_DIR}
+  )
+add_library(SMF_API ${SMF_API_SERVER_src_files})
 
 #for NAS
 set(NAS_DIR "${SRC_TOP_DIR}/nas")
@@ -369,5 +388,5 @@ if(${SGW_AUTOTEST})
   SET(GTPV1U_LIB GTPV1U)
 endif(${SGW_AUTOTEST})
 
-target_link_libraries (spgwc ${ASAN} -Wl,--start-group CN_UTILS SGWC PGWC UDP ${GTPV1U_LIB} GTPV2C PFCP 3GPP_COMMON_TYPES -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
+target_link_libraries (spgwc ${ASAN} -Wl,--start-group CN_UTILS SGWC PGWC UDP ${GTPV1U_LIB} GTPV2C PFCP 3GPP_COMMON_TYPES SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
 
