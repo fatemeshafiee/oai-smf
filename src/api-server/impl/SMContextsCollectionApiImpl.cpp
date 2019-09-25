@@ -17,8 +17,8 @@
 extern "C" {
 #include "nas_message.h"
 #include "mmData.h"
-#include "common_types.h"
-#include "common_defs.h"
+//#include "common_types.h"
+//#include "common_defs.h"
 }
 
 namespace oai {
@@ -34,18 +34,19 @@ SMContextsCollectionApiImpl::SMContextsCollectionApiImpl(std::shared_ptr<Pistach
 
 void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smContextMessage, Pistache::Http::ResponseWriter &response) {
 
+	Logger::smf_api_server().info("post_sm_contexts...");
+
+	//decode NAS message and assign the necessary informations to pgwc::pdu_session_create_sm_context_request and pass to SMF to handle this message
 	nas_message_decode_status_t   decode_status = {0};
 	nas_message_t	decoded_nas_msg;
 	memset (&decoded_nas_msg, 0, sizeof (nas_message_t));
 	int decoder_rc = RETURNok;
 	unsigned char data[100] = {'\0'}; //hardcoded for the moment
 
-	Logger::smf_api_server().info("post_sm_contexts...");
-
 	SmContextCreateData smContextCreateData = smContextMessage.getJsonData();
 	std::string n1SmMessage = smContextMessage.getBinaryDataN1SmMessage();
 
-       	//Decode and process nas message
+    //Decode and process nas message
 	//bsafe (disable temporarily warning for strncpy)
 	//std::strncpy((char *)data, n1SmMessage.c_str(), sizeof(data));
 
@@ -70,23 +71,51 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 			decoded_nas_msg.header.message_authentication_code);
 
 	//Get the value from AMF
-	//pgwc::pdu_session_create_sm_context_request create_sm_context_request_msg;
-
 	pgwc::pdu_session_create_sm_context_request *sm_context_req = new pgwc::pdu_session_create_sm_context_request();
 	std::shared_ptr<pgwc::pdu_session_create_sm_context_request> sm_context_req_msg = std::shared_ptr<pgwc::pdu_session_create_sm_context_request>(sm_context_req);
 
-
-
-
-
-	sm_context_req_msg->set_dnn(smContextCreateData.getDnn());
-	snssai_t snssai(smContextCreateData.getSNssai().getSst(), smContextCreateData.getSNssai().getSd());
-	sm_context_req_msg->set_snssai(snssai);
-	sm_context_req_msg->set_request_type(smContextCreateData.getRequestType());
+    //supi
 	supi_t supi =  {.length = 0};
 	smf_string_to_supi(&supi, smContextCreateData.getSupi().c_str());
-	//supi64_t supi64 = smf_supi_to_u64(supi);
 	sm_context_req_msg->set_supi(supi);
+    //dnn
+	sm_context_req_msg->set_dnn(smContextCreateData.getDnn());
+	//S-Nssai
+	snssai_t snssai(smContextCreateData.getSNssai().getSst(), smContextCreateData.getSNssai().getSd());
+	sm_context_req_msg->set_snssai(snssai);
+	//PDU session ID
+	sm_context_req_msg->set_pdu_session_id(smContextCreateData.getPduSessionId());
+	//AMF ID
+	sm_context_req_msg->set_serving_nf_id(smContextCreateData.getServingNfId()); //TODO: should be verified that AMF ID is stored in GUAMI or ServingNfId
+	//Request Type
+	sm_context_req_msg->set_request_type(smContextCreateData.getRequestType());
+    //PCF ID
+	// Priority Access
+	//User Location Information
+	//Access Type
+	// PEI
+	//GPSI
+	// UE presence in LADN service area
+	// DNN Selection Mode
+	sm_context_req_msg->set_dnn_selection_mode(smContextCreateData.getSelMode());
+	//Subscription for PDU Session Status Notification
+	// Trace requirement
+
+
+	//From N1 Container (NAS)
+    //Extended protocol discriminator (Mandatory)
+	//PDU session ID (Mandatory)
+	//PTI (Mandatory)
+	//Message type (Mandatory) (PDU SESSION ESTABLISHMENT REQUEST message identity)
+	//Integrity protection maximum data rate (Mandatory)
+	//PDU session type (Optional)
+	//SSC mode (Optional)
+	//5GSM capability (Optional)
+	//Maximum number of supported (Optional)
+	//Maximum number of supported packet filters (Optional)
+	//Always-on PDU session requested (Optional)
+	//SM PDU DN request container (Optional)
+	//Extended protocol configuration options (Optional) e.g, FOR DHCP
 
 	sm_context_req_msg->set_dnn_selection_mode(smContextCreateData.getSelMode());
 	//handle the message from pwg_app

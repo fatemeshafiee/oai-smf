@@ -1,8 +1,8 @@
 #ifndef FILE_3GPP_24_501_H_SEEN
 #define FILE_3GPP_24_501_H_SEEN
 
-#include <stdint.h>
-#include <stdbool.h>
+//#include <stdint.h>
+//#include <stdbool.h>
 
 // 9.3.1 Security header type
 #define SECURITY_HEADER_TYPE_NOT_PROTECTED                    0b0000

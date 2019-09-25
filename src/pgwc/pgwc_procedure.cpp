@@ -349,7 +349,7 @@ int session_establishment_procedure::run(std::shared_ptr<pdu_session_create_sm_c
     b.far_id_ul.second = far_id;
     b.pdr_id_ul = pdr_id;
     //b.ebi = it.eps_bearer_id;
-    b.ebi = sm_context_req->get_pdu_sessionId();
+    b.ebi = sm_context_req->get_pdu_session_id();
     pgw_eps_bearer b2 = b;
     ppc->add_eps_bearer(b2);
 

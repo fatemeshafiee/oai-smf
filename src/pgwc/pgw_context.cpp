@@ -995,7 +995,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 	std::string requestType = sm_context_req_msg->get_request_type();
 	supi_t supi =  sm_context_req_msg->get_supi();
 	supi64_t supi64 = smf_supi_to_u64(supi);
-	uint32_t pdu_session_id = sm_context_req_msg->get_pdu_sessionId();
+	uint32_t pdu_session_id = sm_context_req_msg->get_pdu_session_id();
 
 	oai::smf::model::SmContextCreateError smContextCreateError;
 	oai::smf::model::ProblemDetails problem_details;
@@ -1053,7 +1053,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 		p->pdn_type.pdn_type = PDN_TYPE_E_IPV4; //TODO: should be removed after get the correct information from NAS_MSG
 		p->pdu_session_id = pdu_session_id; //should check also nas_msg.pdusessionidentity ??
 		//amf id
-		p->amf_id = sm_context_req_msg->get_serving_nfId();
+		p->amf_id = sm_context_req_msg->get_serving_nf_id();
 		sp = std::shared_ptr<pgw_pdn_connection>(p);
 		sd->insert_pdn_connection(sp);
 	} else{
@@ -1076,7 +1076,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 	//protocol configuration options IE in the PDU SESSION ESTABLISHMENT REQUEST
 	//Extended protocol configuration options: See subclause 10.5.6.3A in 3GPP TS 24.008.
 
-	ExtendedProtocolConfigurationOptions extended_protocol_options = (sm_context_req_msg->get_nas_msg()).extendedprotocolconfigurationoptions;
+	//ExtendedProtocolConfigurationOptions extended_protocol_options = (sm_context_req_msg->get_nas_msg()).extendedprotocolconfigurationoptions;
 	//TODO: PCO
 	protocol_configuration_options_t pco_resp = {};
 	protocol_configuration_options_ids_t pco_ids = {

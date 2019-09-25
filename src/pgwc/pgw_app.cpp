@@ -39,11 +39,6 @@
 #include "SmContextCreateError.h"
 #include "3gpp_29.502.h"
 
-extern "C" {
-#include "sm_msg.h"
-#include "PDUSessionEstablishmentRequest.h"
-}
-
 #include <stdexcept>
 #include <iostream>
 #include <cstdlib>
@@ -698,22 +693,23 @@ void pgw_app::send_create_session_response(Pistache::Http::ResponseWriter& httpR
 void pgw_app::handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse){
 
 	//handle PDU Session Create SM Context Request as specified in section 4.3.2 3GPP TS 23.502
-
 	Logger::pgwc_app().info("Handle AMF message");
 
 	//Step 1. get necessary information
-	Logger::pgwc_app().debug("Handle AMF message, supi " SUPI_64_FMT " ", sm_context_req_msg->get_supi());
+
 	std::string dnn = sm_context_req_msg->get_dnn();
 
 	snssai_t snssai  =  sm_context_req_msg->get_snssai();
 	std::string requestType = sm_context_req_msg->get_request_type();
 	supi_t supi =  sm_context_req_msg->get_supi();
 	supi64_t supi64 = smf_supi_to_u64(supi);
-
 	oai::smf::model::ProblemDetails problem_details;
 
-	pdu_session_establishment_request_msg pdu_session_establishment_request = sm_context_req_msg->get_nas_msg() ;
-	pdu_session_type_t pdu_session_type = {.pdu_session_type = (uint8_t)pdu_session_establishment_request._pdusessiontype};
+	Logger::pgwc_app().debug("Handle AMF message, supi " SUPI_64_FMT " ", supi64);
+
+	//pdu_session_establishment_request_msg pdu_session_establishment_request = sm_context_req_msg->get_nas_msg() ;
+	//pdu_session_type_t pdu_session_type = {.pdu_session_type = (uint8_t)pdu_session_establishment_request._pdusessiontype};
+	pdu_session_type_t pdu_session_type = {.pdu_session_type = 0}; //to be removed
 
 	Logger::pgwc_app().debug("Handle AMF message, _pdusessiontype: %d", pdu_session_type.pdu_session_type);
 

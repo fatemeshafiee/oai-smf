@@ -1,19 +1,9 @@
 #include "common_types.h"
 #include "nas_message.h"
-//#include "log.h"
-#include "gcc_diag.h"
-
 #include "TLVDecoder.h"
 #include "TLVEncoder.h"
-
-#include <stdlib.h>             
-#include <string.h>             
-
-//#include "nas_itti_messaging.h"
 #include "secu_defs.h"
 #include "mmData.h"
-#include "dynamic_memory_check.h"
-
 
 /****************************************************************************/
 /*******************  L O C A L    D E F I N I T I O N S  *******************/

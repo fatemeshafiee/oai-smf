@@ -41,10 +41,6 @@
 #include "pistache/router.h"
 #include "smf_msg.hpp"
 
-extern "C" {
-#include "sm_msg.h"
-}
-
 #include <map>
 #include <set>
 #include <shared_mutex>

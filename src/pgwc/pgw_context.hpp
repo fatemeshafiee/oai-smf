@@ -48,15 +48,8 @@
 #include "SmContextCreateError.h"
 #include "smf_msg.hpp"
 
-extern "C" {
-#include "sm_msg.h"
-#include "PDUSessionEstablishmentRequest.h"
-}
-
-
 
 namespace pgwc {
-
 
 class pgw_eps_bearer {
 public:

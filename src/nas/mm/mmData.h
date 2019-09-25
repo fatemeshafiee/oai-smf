@@ -1,4 +1,7 @@
-#include "bstrlib.h"
+#ifndef FILE_MM_DATA_H_SEEN
+#define FILE_MM_DATA_H_SEEN
+
+//#include "bstrlib.h"
 #include "common_types.h"
 #include "securityDef.h"
 
@@ -41,3 +44,4 @@ typedef struct fivegmm_security_context_s {
 
   uint8_t   activated;
 } fivegmm_security_context_t;
+#endif

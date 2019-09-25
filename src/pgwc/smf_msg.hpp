@@ -29,26 +29,20 @@
 #define FILE_SMF_MSG_HPP_SEEN
 
 #include "smf.h"
-//#include "pistache/endpoint.h"
 #include "pistache/http.h"
-//#include "pistache/router.h"
-
-extern "C" {
-#include "PDUSessionEstablishmentRequest.h"
-}
 
 namespace pgwc {
-
 
 class pdu_session_create_sm_context_request {
 
 public:
-	pdu_session_create_sm_context_request(): nas_msg(), m_Supi(), m_UnauthenticatedSupi(true), m_PduSessionId(), m_Dnn(), m_SNssai() {}
+	//pdu_session_create_sm_context_request(): nas_msg(), m_Supi(), m_UnauthenticatedSupi(true), m_PduSessionId(), m_Dnn(), m_SNssai() {}
+	pdu_session_create_sm_context_request(): m_supi(), m_unauthenticated_supi(true), m_pdu_session_id(), m_dnn(), m_snssai() {}
 	supi_t get_supi() const;
 	void set_supi(supi_t const& value);
 
-	int32_t get_pdu_sessionId() const;
-	void set_pdu_sessionId(int32_t const value);
+	int32_t get_pdu_session_id() const;
+	void set_pdu_session_id(int32_t const value);
 
 	std::string get_dnn() const;
 	void set_dnn(std::string const& value);
@@ -56,14 +50,14 @@ public:
 	snssai_t get_snssai() const;
 	void set_snssai(snssai_t const& value);
 
-	std::string get_serving_nfId() const;
-	void set_serving_nfId(std::string const& value);
+	std::string get_serving_nf_id() const;
+	void set_serving_nf_id(std::string const& value);
 
 	std::string get_request_type() const;
 	void set_request_type(std::string const& value);
 
-	pdu_session_establishment_request_msg get_nas_msg() const;
-	void set_nas_msg(pdu_session_establishment_request_msg const& value);
+//	pdu_session_establishment_request_msg get_nas_msg() const;
+//	void set_nas_msg(pdu_session_establishment_request_msg const& value);
 
 	void set_dnn_selection_mode (std::string const& value);
 	std::string get_dnn_selection_mode () const;
@@ -72,25 +66,25 @@ public:
 
 
 private:
-	pdu_session_establishment_request_msg nas_msg;
-	supi_t m_Supi;
-	bool m_UnauthenticatedSupi;
+	//pdu_session_establishment_request_msg nas_msg;
+	supi_t m_supi;
+	bool m_unauthenticated_supi;
 	//std::string m_Pei;
 	//std::string m_Gpsi;
-	int32_t m_PduSessionId;
-	std::string m_Dnn;
-	snssai_t m_SNssai;
+	int32_t m_pdu_session_id;
+	std::string m_dnn;
+	snssai_t m_snssai;
 	//Snssai m_HplmnSnssai;
-	std::string m_ServingNfId; //AMF Id
+	std::string m_serving_nf_id; //AMF Id
 	//Guami m_Guami;
 	//std::string m_ServiceName;
 	//PlmnId m_ServingNetwork;
-	std::string m_RequestType;
+	std::string m_request_type;
 	//RefToBinaryData m_N1SmMsg;
-	std::string m_AnType;
+	std::string m_an_type;
 	//std::string m_SecondAnType;
-	std::string m_RatType;
-	std::string m_PresenceInLadn;
+	std::string m_rat_type;
+	std::string m_presence_in_ladn;
 	//UserLocation m_UeLocation;
 	//std::string m_UeTimeZone;
 	//UserLocation m_AddUeLocation;
@@ -105,7 +99,7 @@ private:
 	//std::string m_PcfId;
 	//std::string m_NrfUri;
 	//std::string m_SupportedFeatures;
-	std::string m_SelMode;
+	std::string m_dnn_selection_mode;//SelMode
 	//std::vector<BackupAmfInfo> m_BackupAmfInfo;
 	//TraceData m_TraceData;
 	//std::string m_UdmGroupId;
@@ -118,10 +112,11 @@ private:
 	//bool m_InvokeNef;
 	// bool m_MaPduIndication;
 	//RefToBinaryData m_N2SmInfo;
-	std::string m_SmContextRef;
+	//std::string m_SmContextRef;
+
+	//NAS
+	uint8_t m_pdu_session_type;
 };
-
-
 
 
 class pdu_session_create_sm_context_response {

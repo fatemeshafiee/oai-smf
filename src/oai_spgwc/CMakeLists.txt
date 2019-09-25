@@ -290,8 +290,7 @@ file(GLOB SMF_API_SERVER_src_files
     ${SMF_API_SERVER_DIR}/api/*.cpp
     ${SMF_API_SERVER_DIR}/impl/*.cpp
 )
-  
- 
+   
 set(SMF_API_SERVER_include_files
   ${SMF_API_SERVER_DIR}/api
   ${SMF_API_SERVER_DIR}/impl
@@ -317,10 +316,10 @@ file(GLOB NAS_src_files
     ${SRC_TOP_DIR}/utils/obj_hashtable.c
     ${SRC_TOP_DIR}/utils/TLVDecoder.c
     ${SRC_TOP_DIR}/utils/TLVEncoder.c
+    ${SRC_TOP_DIR}/utils/dynamic_memory_check.c
+    ${SRC_TOP_DIR}/utils/backtrace.c
     ${SRC_TOP_DIR}/utils/bstr/*.c
     ${SRC_TOP_DIR}/nas/security/*.c
-    ${SRC_TOP_DIR}/common/nas/dynamic_memory_check.c
-    ${SRC_TOP_DIR}/common/nas/backtrace.c
     ${SRC_TOP_DIR}/common/*.c
 )   
 
@@ -358,17 +357,6 @@ include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 include_directories(${SMF_API_SERVER_include_files})
 include_directories(${NAS_include_files})
-
-#include_directories(${SRC_TOP_DIR}/nas)
-#include_directories(${SRC_TOP_DIR}/nas/msg) 
-#include_directories(${SRC_TOP_DIR}/nas/ies)  
-#include_directories(${SRC_TOP_DIR}/nas/network)
-#include_directories(${SRC_TOP_DIR}/nas/mm/msg)
-#include_directories(${SRC_TOP_DIR}/nas/mm)
-#include_directories(${SRC_TOP_DIR}/nas/sm)
-#include_directories(${SRC_TOP_DIR}/nas/sm/msg)
-
-#include_directories(${SMF_API_SERVER_include_files})
 
 add_executable(spgwc
   ${SRC_TOP_DIR}/oai_spgwc/main.cpp

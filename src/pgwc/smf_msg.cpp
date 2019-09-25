@@ -32,58 +32,58 @@ using namespace pgwc;
 
 supi_t pdu_session_create_sm_context_request::get_supi() const
 {
-	return m_Supi;
+	return m_supi;
 }
-void pdu_session_create_sm_context_request::set_supi(supi_t const& value)
+void pdu_session_create_sm_context_request::set_supi(supi_t const& supi)
 {
-	m_Supi = value;
+	m_supi = supi;
 }
 
-int32_t pdu_session_create_sm_context_request::get_pdu_sessionId() const
+int32_t pdu_session_create_sm_context_request::get_pdu_session_id() const
 {
-
+   return m_pdu_session_id;
 }
-void pdu_session_create_sm_context_request::set_pdu_sessionId(int32_t const value)
+void pdu_session_create_sm_context_request::set_pdu_session_id(int32_t const pdu_session_id)
 {
-
+	m_pdu_session_id = pdu_session_id;
 }
 
 std::string pdu_session_create_sm_context_request::get_dnn() const
 {
-	return m_Dnn;
+	return m_dnn;
 }
-void pdu_session_create_sm_context_request::set_dnn(std::string const& value)
+void pdu_session_create_sm_context_request::set_dnn(std::string const& dnn)
 {
-	m_Dnn = value;
+	m_dnn = dnn;
 }
 
 snssai_t pdu_session_create_sm_context_request::get_snssai() const
 {
-	return m_SNssai;
+	return m_snssai;
 }
-void pdu_session_create_sm_context_request::set_snssai(snssai_t const& value)
+void pdu_session_create_sm_context_request::set_snssai(snssai_t const& snssai)
 {
-	m_SNssai = value;
+	m_snssai = snssai;
 }
 
-std::string pdu_session_create_sm_context_request::get_serving_nfId() const
+std::string pdu_session_create_sm_context_request::get_serving_nf_id() const
 {
-	return m_ServingNfId;
+	return m_serving_nf_id;
 }
-void pdu_session_create_sm_context_request::set_serving_nfId(std::string const& value)
+void pdu_session_create_sm_context_request::set_serving_nf_id(std::string const& serving_nf_id)
 {
-
+	m_serving_nf_id = serving_nf_id;
 }
 
 std::string pdu_session_create_sm_context_request::get_request_type() const
 {
-
+	return m_request_type;
 }
-void pdu_session_create_sm_context_request::set_request_type(std::string const& value)
+void pdu_session_create_sm_context_request::set_request_type(std::string const& request_type)
 {
-
+	m_request_type = request_type;
 }
-
+/*
 pdu_session_establishment_request_msg pdu_session_create_sm_context_request::get_nas_msg() const
 {
 	return nas_msg;
@@ -93,19 +93,20 @@ void pdu_session_create_sm_context_request::set_nas_msg(pdu_session_establishmen
 {
 	nas_msg = value;
 }
-
-void pdu_session_create_sm_context_request::set_dnn_selection_mode (std::string const& value)
+*/
+void pdu_session_create_sm_context_request::set_dnn_selection_mode (std::string const& dnn_selection_mode)
 {
-	m_SelMode = value;
+	m_dnn_selection_mode = dnn_selection_mode;
 }
 std::string pdu_session_create_sm_context_request::get_dnn_selection_mode () const
 {
-	return m_SelMode;
+	return m_dnn_selection_mode;
 }
 
 uint8_t pdu_session_create_sm_context_request::get_pdu_session_type ()
 {
-	return (uint8_t)nas_msg._pdusessiontype;
+	//return (uint8_t)nas_msg._pdusessiontype;
+	return m_pdu_session_type;
 }
 
 

@@ -135,9 +135,9 @@ int main(int argc, char **argv)
   sgwc_app_inst = new sgwc_app(Options::getlibconfigConfig());
 
   //SMF API server
-  Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(8080));
-  SMFApiServer smfApiServer(addr, pgw_app_inst);
-  smfApiServer.init(2);
+  //Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(8080));
+  //SMFApiServer smfApiServer(addr, pgw_app_inst);
+  //smfApiServer.init(2);
   //smfApiServer.start();
   //smfApiServer.shutdown();
  // std::thread smf_api_manager(&SMFApiServer::start, smfApiServer);
