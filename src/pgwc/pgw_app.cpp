@@ -65,11 +65,14 @@ int pgw_app::apply_config (const pgw_config& cfg)
     if (cfg.apn[ia].pool_id_iv4 >= 0) {
       int pool_id = cfg.apn[ia].pool_id_iv4;
       int range = be32toh(cfg.ue_pool_range_high[pool_id].s_addr) - be32toh(cfg.ue_pool_range_low[pool_id].s_addr) ;
-      paa_dynamic::get_instance().add_pool(cfg.apn[ia].apn_label, pool_id, cfg.ue_pool_range_low[pool_id], range);
+      paa_dynamic::get_instance().add_pool(cfg.apn[ia].apn, pool_id, cfg.ue_pool_range_low[pool_id], range);
+      //TODO: check with apn_label
+      Logger::pgwc_app().info("Applied config %s", cfg.apn[ia].apn.c_str());
     }
     if (cfg.apn[ia].pool_id_iv6 >= 0) {
       int pool_id = cfg.apn[ia].pool_id_iv6;
-      paa_dynamic::get_instance().add_pool(cfg.apn[ia].apn_label, pool_id, cfg.paa_pool6_prefix[pool_id], cfg.paa_pool6_prefix_len[pool_id]);
+      paa_dynamic::get_instance().add_pool(cfg.apn[ia].apn, pool_id, cfg.paa_pool6_prefix[pool_id], cfg.paa_pool6_prefix_len[pool_id]);
+      //TODO: check with apn_label
     }
   }
 
@@ -695,16 +698,15 @@ void pgw_app::handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_reque
 	//handle PDU Session Create SM Context Request as specified in section 4.3.2 3GPP TS 23.502
 	Logger::pgwc_app().info("Handle AMF message");
 
+	oai::smf::model::SmContextCreateError smContextCreateError;
+	oai::smf::model::ProblemDetails problem_details;
+
 	//Step 1. get necessary information
-
 	std::string dnn = sm_context_req_msg->get_dnn();
-
 	snssai_t snssai  =  sm_context_req_msg->get_snssai();
 	std::string requestType = sm_context_req_msg->get_request_type();
 	supi_t supi =  sm_context_req_msg->get_supi();
 	supi64_t supi64 = smf_supi_to_u64(supi);
-	oai::smf::model::ProblemDetails problem_details;
-
 	Logger::pgwc_app().debug("Handle AMF message, supi " SUPI_64_FMT " ", supi64);
 
 	pdu_session_type_t pdu_session_type = {.pdu_session_type = sm_context_req_msg->get_pdu_session_type()};
@@ -713,9 +715,9 @@ void pgw_app::handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_reque
 	//Step 2. check if the DNN requested is valid
 	if (not pgw_cfg.is_dotted_dnn_handled(dnn, pdu_session_type)) {
 		// Not a valid request...
-		Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST unknown requested APN %s, ignore message", dnn.c_str());
-		oai::smf::model::SmContextCreateError smContextCreateError;
+		Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST unknown requested APN %s, ignore message!", dnn.c_str());
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_DNN_DENIED]);
+		smContextCreateError.setError(problem_details);
 		//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
 		//Send response to AMF
 		send_create_session_response(httpResponse, smContextCreateError, Pistache::Http::Code::Forbidden);
@@ -759,7 +761,17 @@ void pgw_app::handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_reque
 			//debug
 			//dnn_configuration_t dnn_configuration = subscription.get()->get_dnn_configuration(dnn);
 			//Logger::pgwc_app().debug("Retrieve Session Management Subscription data from UDM %s, %s, %s, %s", pdu_session_type_e2str[dnn_configuration.pdu_session_types.default_session_type.pdu_session_type].c_str(), ssc_mode_e2str[dnn_configuration.ssc_modes.default_ssc_mode.ssc_mode].c_str(), dnn_configuration.session_ambr.uplink.c_str(), dnn_configuration.session_ambr.downlink.c_str());
+		} else {
+			// Not accept to establish a PDU session
+			Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST, couldn't retrieve the Session Management Subscription from UDM, ignore message!");
+			problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]);
+			smContextCreateError.setError(problem_details);
+			//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
+			//Send response to AMF
+			send_create_session_response(httpResponse, smContextCreateError, Pistache::Http::Code::Forbidden);
+			return;
 		}
+
 
 	}
 

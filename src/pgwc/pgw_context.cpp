@@ -1098,6 +1098,8 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 						 //ss.get()->
 					 }
 			 */
+			//TODO: set value for paa
+			paa.pdn_type.pdn_type = PDN_TYPE_E_IPV4;
 
 			if ((not paa_res) || (not paa.is_ip_assigned())) {
 				bool success = paa_dynamic::get_instance().get_free_paa(sd->dnn_in_use, paa);
@@ -1110,9 +1112,11 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 			} else if ((paa_res) && (paa.is_ip_assigned())) {
 				set_paa = true;
 			}
+			Logger::pgwc_app().info( "PAA, Ipv4 Address: %s", inet_ntoa (*((struct in_addr *)&paa.ipv4_address)));
 		} else { //use DHCP
 			//TODO: DHCP
 		}
+
 
 
 

@@ -101,8 +101,8 @@ void smf_n10_task (void *args_p)
 //------------------------------------------------------------------------------
 smf_n10::smf_n10 ()
 {
-  udm_addr = "172.55.55.101";//hardcoded for the moment
-  udm_port = 8181;
+  udm_addr = "172.55.55.101";//TODO: hardcoded for the moment (should get from configuration file)
+  udm_port = 8181;//TODO: hardcoded for the moment (should get from configuration file)
 
   Logger::smf_n10().startup("Starting...");
   if (itti_inst->create_task(TASK_SMF_N10, smf_n10_task, nullptr) ) {
@@ -172,7 +172,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 			}
 			else
 			{
-				Logger::smf_n10().warn("[get_sm_data] Couldn't GET response from UDM, URL %s, retry ...", url);
+				Logger::smf_n10().warn("[get_sm_data] Couldn't GET response from UDM, URL %s, retry ...", url.c_str());
 				//retry
 				numRetries++;
 			}
@@ -186,7 +186,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 
 		//retrieve SessionManagementSubscription and store in the context
 		for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin(); it != jsonData["dnnConfigurations"].end(); ++it ){
-			Logger::smf_n10().debug("[get_sm_data] KEY %s", it.key().c_str());
+			Logger::smf_n10().debug("[get_sm_data] DNN %s", it.key().c_str());
 			dnn_configuration_t dnn_configuration;
 
 			try {
