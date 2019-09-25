@@ -1091,15 +1091,16 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 			bool paa_res = false; //how to define static or dynamic
 			//depend of subscription information: staticIpAddress in DNN Configuration
 			//TODO: check static IP address is available in the subscription information (SessionManagementSubscription) or in DHCP/DN-AAA
-			/*
-					  std::shared_ptr<session_management_subscription> ss;
-					sd.get()->find_dnn_subscription(snssai.sST, ss);
-					 if (nullptr != ss.get()){
-						 //ss.get()->
-					 }
-			 */
-			//TODO: set value for paa
-			paa.pdn_type.pdn_type = PDN_TYPE_E_IPV4;
+
+			std::shared_ptr<session_management_subscription> ss;
+			std::shared_ptr<dnn_configuration_t> sdc;
+			sd.get()->find_dnn_subscription(snssai, ss);
+			if (nullptr != ss.get()){
+				ss.get()->find_dnn_configuration(sd->dnn_in_use, sdc);
+				if (nullptr != sdc.get()){
+					paa.pdn_type.pdn_type = sdc.get()->pdu_session_types.default_session_type.pdu_session_type;
+				}
+			}
 
 			if ((not paa_res) || (not paa.is_ip_assigned())) {
 				bool success = paa_dynamic::get_instance().get_free_paa(sd->dnn_in_use, paa);
@@ -1288,15 +1289,14 @@ void dnn_context::insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp)
 
 
 //------------------------------------------------------------------------------
-void session_management_subscription::insert_dnn_configuration(std::string dnn, dnn_configuration_t dnn_configuration){
-	dnn_configurations.insert(std::pair<std::string, dnn_configuration_t>(dnn,dnn_configuration));
+void session_management_subscription::insert_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t>& dnn_configuration){
+	dnn_configurations.insert(std::pair<std::string, std::shared_ptr<dnn_configuration_t>>(dnn,dnn_configuration));
 }
 
 //------------------------------------------------------------------------------
-dnn_configuration_t session_management_subscription::get_dnn_configuration(std::string dnn){
+void session_management_subscription::find_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t>& dnn_configuration){
 	if (dnn_configurations.count(dnn) > 0){
-		return dnn_configurations.at(dnn);
-	} else
-		return dnn_configuration_t();
+	   dnn_configuration = dnn_configurations.at(dnn);
+	}
 }
 

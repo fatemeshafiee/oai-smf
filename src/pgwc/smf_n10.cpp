@@ -187,7 +187,10 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 		//retrieve SessionManagementSubscription and store in the context
 		for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin(); it != jsonData["dnnConfigurations"].end(); ++it ){
 			Logger::smf_n10().debug("[get_sm_data] DNN %s", it.key().c_str());
-			dnn_configuration_t dnn_configuration;
+
+			dnn_configuration_t *dnn_configuration = new (dnn_configuration_t);
+			std::shared_ptr<dnn_configuration_t> sdc;
+			//subscription->find_dnn_configuration(it.key(), sdc);
 
 			try {
 				//PDU Session Type
@@ -201,26 +204,27 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 				} else if (default_session_type.compare("IPV4V6") == 0) {
 					pdu_session_type.pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
 				}
-				dnn_configuration.pdu_session_types.default_session_type = pdu_session_type;
+				dnn_configuration->pdu_session_types.default_session_type = pdu_session_type;
 
 				//Ssc_Mode
 				ssc_mode_t ssc_mode(ssc_mode_e::SSC_MODE_1);
 				std::string default_ssc_mode = it.value()["sscModes"]["defaultSscMode"];
 				Logger::smf_n10().debug("[get_sm_data] defaultSscMode %s", default_ssc_mode.c_str());
 				if (default_ssc_mode.compare("SSC_MODE_1") == 0) {
-					dnn_configuration.ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_1);
+					dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_1);
 				} else if (default_ssc_mode.compare("SSC_MODE_2") == 0) {
-					dnn_configuration.ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_2);
+					dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_2);
 				} else if (default_ssc_mode.compare("SSC_MODE_3") == 0) {
-					dnn_configuration.ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_3);
+					dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_3);
 				}
 
 				//session_ambr
-				dnn_configuration.session_ambr.uplink = it.value()["sessionAmbr"]["uplink"];
-				dnn_configuration.session_ambr.downlink = it.value()["sessionAmbr"]["downlink"];
-				Logger::smf_n10().debug("[get_sm_data] sessionAmbr uplink %s, downlink %s", dnn_configuration.session_ambr.uplink.c_str(), dnn_configuration.session_ambr.downlink.c_str());
+				dnn_configuration->session_ambr.uplink = it.value()["sessionAmbr"]["uplink"];
+				dnn_configuration->session_ambr.downlink = it.value()["sessionAmbr"]["downlink"];
+				Logger::smf_n10().debug("[get_sm_data] sessionAmbr uplink %s, downlink %s", dnn_configuration->session_ambr.uplink.c_str(), dnn_configuration->session_ambr.downlink.c_str());
 
-				subscription->insert_dnn_configuration(it.key(), dnn_configuration);
+				sdc = std::shared_ptr<dnn_configuration_t> (dnn_configuration);
+				subscription->insert_dnn_configuration(it.key(), sdc);
 			} catch (nlohmann::json::exception& e){
 				Logger::smf_n10().warn("[get_sm_data] exception message %s, exception id %d ", e.what(), e.id);
 				return false;

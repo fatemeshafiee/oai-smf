@@ -284,11 +284,11 @@ public:
 class session_management_subscription {
 public:
 	session_management_subscription(snssai_t snssai): single_nssai(snssai), dnn_configurations() {}
-	void insert_dnn_configuration(std::string dnn, dnn_configuration_t dnn_configuration);
-	dnn_configuration_t get_dnn_configuration(std::string dnn);
+	void insert_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t>& dnn_configuration);
+	void find_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t>& dnn_configuration);
 private:
 	snssai_t single_nssai;
-	std::map <std::string, dnn_configuration_t> dnn_configurations;
+	std::map <std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;
 };
 
 /*
