@@ -18,7 +18,8 @@
  * For more information about the OpenAirInterface (OAI) Software Alliance:
  *      contact@openairinterface.org
  */
-
+#ifndef FILE_3GPP_24_007_SEEN
+#define FILE_3GPP_24_007_SEEN
 
 #include <stdint.h>
 
@@ -29,3 +30,5 @@ typedef enum extended_protocol_discriminator_e {
   FIVEGS_MOBILITY_MANAGEMENT_MESSAGES =   0x7e,
 
 } extended_protocol_discriminator_t;
+
+#endif
