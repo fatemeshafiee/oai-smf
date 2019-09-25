@@ -348,8 +348,8 @@ static int _nas_message_header_encode (
   //printf("encoded nas security header type: %x\n",buffer[size-1]);
   //printf("encoded nas security header type: %x\n",header->security_header_type);
 
-  if (header->extended_protocol_discriminator == FIVEGS_MOBILITY_MANAGEMENT_MESSAGES) {
-    //printf("header->extended_protocol_discriminator == FIVEGS_MOBILITY_MANAGEMENT_MESSAGES\n");
+  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
+    //printf("header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES\n");
     //printf("%x\n",header->security_header_type);
     if (header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED) {
       //printf("header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED\n");
@@ -467,7 +467,7 @@ static int _nas_message_plain_encode (
   //OAILOG_FUNC_IN (LOG_NAS);
   int                                     bytes = TLV_PROTOCOL_NOT_SUPPORTED;
 
-  if (header->extended_protocol_discriminator == FIVEGS_MOBILITY_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
     /*
      * Encode EPS Mobility Management L3 message
      */
@@ -475,7 +475,7 @@ static int _nas_message_plain_encode (
     bytes = fivegmm_msg_encode ((MM_msg *) (&msg->mm), (uint8_t *) buffer, length);
 	//printf("fivegmm_msg_encode bytes:%d\n", bytes);
     //printf("Encode EPS Mobility Management L3 message 1.2.1.1.2\n");
-  } else if (header->extended_protocol_discriminator == FIVEGS_SESSION_MANAGEMENT_MESSAGES) {
+  } else if (header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     /*
      * Encode EPS Session Management L3 message
      */
@@ -754,7 +754,7 @@ static int _nas_message_header_decode (
   DECODE_U8 (buffer + size, header->security_header_type , size);
   //OAILOG_DEBUG(LOG_NAS,"security header type(%x)\n",header->security_header_type&0x0f);
   *is_sr = false;
-  if (header->extended_protocol_discriminator == FIVEGS_MOBILITY_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
     if (header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED) {
       if (status) {
         switch (header->security_header_type) {
@@ -1005,14 +1005,14 @@ static int _nas_message_plain_decode (
   //OAILOG_FUNC_IN (LOG_NAS);
   int                                     bytes = TLV_PROTOCOL_NOT_SUPPORTED;
   //printf("_nas_message_plain_decode extended_protocol_discriminator:%0x\n", header->extended_protocol_discriminator);
-  if (header->extended_protocol_discriminator == FIVEGS_MOBILITY_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
     /*
      * Decode 5G Mobility Management L3 message
      */
     //printf("calling mm_msg_decode\n");
     bytes = mm_msg_decode (&msg->mm, (uint8_t *) buffer, length);
 	//printf("mm_msg_decode bytes:%d\n", bytes);
-  } else if (header->extended_protocol_discriminator == FIVEGS_SESSION_MANAGEMENT_MESSAGES) {
+  } else if (header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     /*
      * Decode 5G Session Management L3 message
      */

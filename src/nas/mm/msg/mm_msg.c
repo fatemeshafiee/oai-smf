@@ -156,7 +156,7 @@ _fivegmm_msg_encode_header (
   /*
    * Check the protocol discriminator
    */
-  if (header->extended_protocol_discriminator != FIVEGS_MOBILITY_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator != EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
     //OAILOG_ERROR (LOG_NAS_EMM, "ESM-MSG   - Unexpected protocol discriminator: 0x%x\n", header->extended_protocol_discriminator);
     return (TLV_PROTOCOL_NOT_SUPPORTED);
   }
@@ -290,7 +290,7 @@ _fivegmm_msg_decode_header (
   /*
    * Check the protocol discriminator
    */
-  if (header->extended_protocol_discriminator != FIVEGS_MOBILITY_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator != EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
     //OAILOG_ERROR (LOG_NAS_EMM, "ESM-MSG   - Unexpected protocol discriminator: 0x%x\n", header->protocol_discriminator);
     return (TLV_PROTOCOL_NOT_SUPPORTED);
   }

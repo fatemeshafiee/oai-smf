@@ -707,10 +707,7 @@ void pgw_app::handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_reque
 
 	Logger::pgwc_app().debug("Handle AMF message, supi " SUPI_64_FMT " ", supi64);
 
-	//pdu_session_establishment_request_msg pdu_session_establishment_request = sm_context_req_msg->get_nas_msg() ;
-	//pdu_session_type_t pdu_session_type = {.pdu_session_type = (uint8_t)pdu_session_establishment_request._pdusessiontype};
-	pdu_session_type_t pdu_session_type = {.pdu_session_type = 0}; //to be removed
-
+	pdu_session_type_t pdu_session_type = {.pdu_session_type = sm_context_req_msg->get_pdu_session_type()};
 	Logger::pgwc_app().debug("Handle AMF message, _pdusessiontype: %d", pdu_session_type.pdu_session_type);
 
 	//Step 2. check if the DNN requested is valid

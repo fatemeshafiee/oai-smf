@@ -985,22 +985,17 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 
 	Logger::pgwc_app().info("Handle AMF message");
 
+	oai::smf::model::SmContextCreateError smContextCreateError;
+	oai::smf::model::ProblemDetails problem_details;
+	bool request_accepted = true;
+
 	//Step 1. get necessary information
-	Logger::pgwc_app().debug("Handle AMF message, supi " SUPI_64_FMT " ", sm_context_req_msg->get_supi());
 	std::string dnn = sm_context_req_msg->get_dnn();
-	//oai::smf::model::Snssai snssai_sm = smContextCreateData.getSNssai();
 	snssai_t snssai  =  sm_context_req_msg->get_snssai();
-
-
 	std::string requestType = sm_context_req_msg->get_request_type();
 	supi_t supi =  sm_context_req_msg->get_supi();
 	supi64_t supi64 = smf_supi_to_u64(supi);
 	uint32_t pdu_session_id = sm_context_req_msg->get_pdu_session_id();
-
-	oai::smf::model::SmContextCreateError smContextCreateError;
-	oai::smf::model::ProblemDetails problem_details;
-	bool request_accepted = true;
-	//problem_details.setCause()
 
 	//Step 2. check the validity of the UE request, if valid send PDU Session Accept, otherwise send PDU Session Reject to AMF
 	if (!verify_sm_context_request(sm_context_req_msg)){ //TODO: Need to implement this function
@@ -1050,7 +1045,6 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 		//create a new pdn connection
 		pgw_pdn_connection *p = new (pgw_pdn_connection);
 		p->pdn_type.pdn_type = sm_context_req_msg->get_pdu_session_type();
-		p->pdn_type.pdn_type = PDN_TYPE_E_IPV4; //TODO: should be removed after get the correct information from NAS_MSG
 		p->pdu_session_id = pdu_session_id; //should check also nas_msg.pdusessionidentity ??
 		//amf id
 		p->amf_id = sm_context_req_msg->get_serving_nf_id();
@@ -1060,7 +1054,6 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 		Logger::pgwc_app().debug("PDN connection is already existed!");
 		//TODO:
 	}
-
 
 	//pending session??
 	//step 4. check if supi is authenticated

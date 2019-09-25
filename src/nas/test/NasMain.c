@@ -20,7 +20,7 @@ int auth_request()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -31,7 +31,7 @@ int auth_request()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = AUTHENTICATION_REQUEST;
    
@@ -167,7 +167,7 @@ int auth_response()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -178,7 +178,7 @@ int auth_response()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = AUTHENTICATION_RESPONSE;
    
@@ -308,7 +308,7 @@ int auth_failure()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -319,7 +319,7 @@ int auth_failure()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = AUTHENTICATION_FAILURE;
    
@@ -447,7 +447,7 @@ int auth_reject()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -458,7 +458,7 @@ int auth_reject()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = AUTHENTICATION_REJECT;
    
@@ -583,7 +583,7 @@ int auth_result()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -594,7 +594,7 @@ int auth_result()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = AUTHENTICATION_RESULT;
    
@@ -730,7 +730,7 @@ int reg_request()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -741,7 +741,7 @@ int reg_request()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = REGISTRATION_REQUEST;
    
@@ -1062,7 +1062,7 @@ int reg_accept()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -1073,7 +1073,7 @@ int reg_accept()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = REGISTRATION_ACCEPT;
    
@@ -1457,7 +1457,7 @@ int reg_accept()
 		 
 	 }
 
-	 //##########  *********************  ±àÂë³¤¶ÈÎÊÌâµ¼ÖÂlistsize ²»ÕýÈ·,ÏêÏ¸Çë¿´´úÂë;
+	 //##########  *********************  ï¿½ï¿½ï¿½ë³¤ï¿½ï¿½ï¿½ï¿½ï¿½âµ¼ï¿½ï¿½listsize ï¿½ï¿½ï¿½ï¿½È·,ï¿½ï¿½Ï¸ï¿½ë¿´ï¿½ï¿½ï¿½ï¿½;
 	 #if 0
 	 int decode__5gs_tracking_area_identity_list ( _5GSTrackingAreaIdentityList * _5gstrackingareaidentitylist, uint8_t iei, uint8_t * buffer, uint32_t len  ) 
      {
@@ -1590,7 +1590,7 @@ int reg_complete()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -1601,7 +1601,7 @@ int reg_complete()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = REGISTRATION_COMPLETE;
    
@@ -1712,7 +1712,7 @@ int reg_reject()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -1723,7 +1723,7 @@ int reg_reject()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = REGISTRATION_REJECT;
    
@@ -1848,7 +1848,7 @@ int identity_request()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -1859,7 +1859,7 @@ int identity_request()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = IDENTITY_REQUEST;
    
@@ -1968,7 +1968,7 @@ int identity_response()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -1979,7 +1979,7 @@ int identity_response()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = IDENTITY_RESPONSE;
    
@@ -2149,7 +2149,7 @@ int security_mode_command()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -2160,7 +2160,7 @@ int security_mode_command()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = SECURITY_MODE_COMMAND;
    
@@ -2344,7 +2344,7 @@ int security_mode_complete()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -2355,7 +2355,7 @@ int security_mode_complete()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = SECURITY_MODE_COMPLETE;
    
@@ -2476,7 +2476,7 @@ int security_mode_reject()
 	 nas_message_t	nas_msg;
 	 memset (&nas_msg,		 0, sizeof (nas_message_t));
    
-	 nas_msg.header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 nas_msg.header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 uint8_t sequencenumber = 0xfe;
 	 //uint32_t mac = 0xffffeeee;
@@ -2487,7 +2487,7 @@ int security_mode_reject()
 	 nas_msg.security_protected.header = nas_msg.header;
    
 	 MM_msg * mm_msg = &nas_msg.plain.mm;
-	 mm_msg->header.extended_protocol_discriminator = FIVEGS_MOBILITY_MANAGEMENT_MESSAGES;
+	 mm_msg->header.extended_protocol_discriminator = EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES;
 	 mm_msg->header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
 	 mm_msg->header.message_type = SECURITY_MODE_REJECT;
    

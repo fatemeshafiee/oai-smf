@@ -247,7 +247,6 @@ int session_establishment_procedure::run(std::shared_ptr<pdu_session_create_sm_c
   itti_sxab_session_establishment_request *sx_ser = new itti_sxab_session_establishment_request(TASK_PGWC_APP, TASK_PGWC_SX);
   sx_ser->seid = 0;
   sx_ser->trxn_id = this->trxn_id;
-  //sx_ser->l_endpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4(0xC0A8A064), 8805);
   sx_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
   sx_triggered = std::shared_ptr<itti_sxab_session_establishment_request>(sx_ser);
 
@@ -267,7 +266,6 @@ int session_establishment_procedure::run(std::shared_ptr<pdu_session_create_sm_c
   sx_ser->pfcp_ies.set(cp_fseid);
 
 
- // for (auto it : s5_trigger->gtp_ies.bearer_contexts_to_be_created) {
     //*******************
     // UPLINK
     //*******************
@@ -353,7 +351,6 @@ int session_establishment_procedure::run(std::shared_ptr<pdu_session_create_sm_c
     pgw_eps_bearer b2 = b;
     ppc->add_eps_bearer(b2);
 
- // }
 
   // for finding procedure when receiving response
   pgw_app_inst->set_seid_2_pgw_context(cp_fseid.seid, pc);

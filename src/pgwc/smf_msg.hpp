@@ -30,6 +30,8 @@
 
 #include "smf.h"
 #include "pistache/http.h"
+#include "3gpp_29.274.h"
+#include "3gpp_24.007.h"
 
 namespace pgwc {
 
@@ -56,14 +58,26 @@ public:
 	std::string get_request_type() const;
 	void set_request_type(std::string const& value);
 
-//	pdu_session_establishment_request_msg get_nas_msg() const;
-//	void set_nas_msg(pdu_session_establishment_request_msg const& value);
+	//	pdu_session_establishment_request_msg get_nas_msg() const;
+	//	void set_nas_msg(pdu_session_establishment_request_msg const& value);
 
-	void set_dnn_selection_mode (std::string const& value);
-	std::string get_dnn_selection_mode () const;
+	void set_dnn_selection_mode(std::string const& value);
+	std::string get_dnn_selection_mode() const;
 
-	uint8_t get_pdu_session_type ();
+	extended_protocol_discriminator_t get_epd() const;
+	void set_epd(extended_protocol_discriminator_t const& epd);
 
+	procedure_transaction_id_t get_pti() const;
+	void set_pti(procedure_transaction_id_t const& pti);
+
+	uint8_t get_message_type() const;
+	void set_message_type(uint8_t const& message_type);
+
+	uint8_t get_pdu_session_type() const;
+	void set_pdu_session_type(uint8_t const& pdu_session_type);
+
+	ipmdr_t get_ipmdr() const;
+	void set_ipmdr(ipmdr_t const& ipmdr);
 
 private:
 	//pdu_session_establishment_request_msg nas_msg;
@@ -115,7 +129,27 @@ private:
 	//std::string m_SmContextRef;
 
 	//NAS
+	//Extended protocol discriminator (Mandatory)
+	extended_protocol_discriminator_t m_epd;
+	//PDU session ID (Mandatory)
+	//TODO: need to check with PDU_session_id from outside of NAS??
+	//PTI (Mandatory)
+	procedure_transaction_id_t m_pti;
+	//Message type (Mandatory) (PDU SESSION ESTABLISHMENT REQUEST message identity)
+	uint8_t m_message_type;
+	//Integrity protection maximum data rate (Mandatory)
+	ipmdr_t m_ipmdr;
+	//PDU session type (Optional)
 	uint8_t m_pdu_session_type;
+	//SSC mode (Optional)
+	//5GSM capability (Optional)
+	//Maximum number of supported (Optional)
+	//Maximum number of supported packet filters (Optional)
+	//Always-on PDU session requested (Optional)
+	//SM PDU DN request container (Optional)
+	//Extended protocol configuration options (Optional) e.g, FOR DHCP
+
+
 };
 
 
@@ -123,16 +157,16 @@ class pdu_session_create_sm_context_response {
 
 public:
 	pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& http_response): m_http_response(http_response) {}
-    void set_cause(uint8_t cause);
-    uint8_t get_cause();
-    void set_paa(paa_t paa);
-    paa_t get_paa();
-    Pistache::Http::ResponseWriter& get_http_response();
+	void set_cause(uint8_t cause);
+	uint8_t get_cause();
+	void set_paa(paa_t paa);
+	paa_t get_paa();
+	Pistache::Http::ResponseWriter& get_http_response();
 
 private:
-    uint8_t m_cause;
-    paa_t m_paa;
-    Pistache::Http::ResponseWriter& m_http_response;
+	uint8_t m_cause;
+	paa_t m_paa;
+	Pistache::Http::ResponseWriter& m_http_response;
 
 };
 
