@@ -33,3 +33,46 @@ openair-cn-cups
 RELEASE NOTES:
 
 v1.0.0 -> First release, Able to serve a MME with basic attach, detach, release, paging procedures, default bearer only.
+
+# OAI-SMF
+
+## Download source code from Gitlab
+git clone https://gitlab.eurecom.fr/oai/oai-cn5g-smf/
+cd oai-cn5g-smf/
+git checkout develop
+
+## install dependencies
+cd /oai-cn5g-smf/build/scripts
+./build_spgwc -I -f
+## build SMF
+./build_spgwc -c -V -b Debug -j
+
+## Create configuration file for SMF
+cd /oai-cn5g-smf/src/test/inputs
+./spgwc_conf.sh
+
+## launch SMF
+sudo spgwc -c /usr/local/etc/oai/spgw_c.conf -o 
+
+## Build UPF (SPGWU)
+git clone https://github.com/OPENAIRINTERFACE/openair-cn-cups/
+cd /openair-cn-cups/build/scripts
+./build_spgwu -I -f
+./build_spgwu -c -V -b Debug -j
+
+## Launch UPF
+cd /oai-cn5g-smf/src/test/inputs
+./spgwu_conf.sh
+sudo spgwu -c /usr/local/etc/oai/spgw_u.conf  -o
+
+## Build and launch UDM
+cd /oai-cn5g-smf/src/test/udm
+mkdir build
+cd build
+cmake ..
+make
+./udm-server
+
+###test with curl
+cd /oai-cn5g-smf/src/test/inputs
+curl -X POST http://127.0.0.1:8080/nsmf-pdusession/v1/sm-contexts --data @apitest.json
