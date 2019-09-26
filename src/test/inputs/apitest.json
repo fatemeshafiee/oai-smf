@@ -3,7 +3,7 @@
 	"supi": "208931234561000",
 	"pei": "pei",
 	"gpsi": "gpsi", 
-	"pduSessionId": 1, 
+	"pduSessionId": 5, 
 	"dnn": "default",
 	"sNssai": {"sst":1, "sd":123}, 
 	"hplmnSnssai": {"sst":1, "sd": 345}, 

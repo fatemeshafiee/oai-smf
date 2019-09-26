@@ -229,7 +229,6 @@ int session_establishment_procedure::run(std::shared_ptr<itti_s5s8_create_sessio
 //------------------------------------------------------------------------------
 int session_establishment_procedure::run(std::shared_ptr<pdu_session_create_sm_context_request> sm_context_req, std::shared_ptr<pdu_session_create_sm_context_response> sm_context_resp, std::shared_ptr<pgwc::pgw_context> pc)
 {
-	return 0;
 
   // TODO check if compatible with ongoing procedures if any
   pfcp::node_id_t up_node_id = {};
@@ -355,6 +354,7 @@ int session_establishment_procedure::run(std::shared_ptr<pdu_session_create_sm_c
   // for finding procedure when receiving response
   pgw_app_inst->set_seid_2_pgw_context(cp_fseid.seid, pc);
 
+
   Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_PGWC_SX", sx_ser->get_msg_name());
   int ret = itti_inst->send_msg(sx_triggered);
   if (RETURNok != ret) {
@@ -368,60 +368,73 @@ int session_establishment_procedure::run(std::shared_ptr<pdu_session_create_sm_c
 //------------------------------------------------------------------------------
 void session_establishment_procedure::handle_itti_msg (itti_sxab_session_establishment_response& resp)
 {
-  pfcp::cause_t cause = {};
-  resp.pfcp_ies.get(cause);
-  if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
-    resp.pfcp_ies.get(ppc->up_fseid);
-  }
+	Logger::pgwc_app().info( "session_establishment_procedure handle itti_sxab_session_establishment_response: pdu-session-id %d", n11_trigger.get()->get_pdu_session_id());
 
-  for (auto it : resp.pfcp_ies.created_pdrs) {
-    pfcp::pdr_id_t pdr_id = {};
-    pfcp::far_id_t far_id = {};
-    if (it.get(pdr_id)) {
-      pgw_eps_bearer b = {};
-      if (ppc->get_eps_bearer(pdr_id, b)) {
-        pfcp::fteid_t local_up_fteid = {};
-        if (it.get(local_up_fteid)) {
-          xgpp_conv::pfcp_to_core_fteid(local_up_fteid, b.pgw_fteid_s5_s8_up);
-          b.pgw_fteid_s5_s8_up.interface_type = S5_S8_PGW_GTP_U;
-          // comment if SPGW-C allocate up fteid
-          pgw_eps_bearer b2 = b;
-          ppc->add_eps_bearer(b2);
-        }
-          // uncomment if SPGW-C allocate up fteid
-          // ppc->add_eps_bearer(b);
-      } else {
-        Logger::pgwc_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
-      }
-    } else {
-      Logger::pgwc_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
-    }
-  }
+	 pfcp::cause_t cause = {};
+	  resp.pfcp_ies.get(cause);
+	  if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
+	    resp.pfcp_ies.get(ppc->up_fseid);
+	  }
 
-  for (auto it : s5_trigger->gtp_ies.bearer_contexts_to_be_created) {
-    pgw_eps_bearer b = {};
-    gtpv2c::bearer_context_created_within_create_session_response bcc = {};
-    ::cause_t bcc_cause = {.cause_value = REQUEST_ACCEPTED, .pce = 0, .bce = 0, .cs = 0};
-    if (not ppc->get_eps_bearer(it.eps_bearer_id, b)) {
-      bcc_cause.cause_value = SYSTEM_FAILURE;
-    } else {
-      if (b.pgw_fteid_s5_s8_up.is_zero()) {
-        bcc_cause.cause_value = SYSTEM_FAILURE;
-      } else {
-        bcc.set(b.pgw_fteid_s5_s8_up, 2);
-      }
-    }
-    bcc.set(b.ebi);
-    bcc.set(bcc_cause);
-    // only if modified bcc.set(bearer_level_qos);
-    s5_triggered_pending->gtp_ies.add_bearer_context_created(bcc);
-  }
+	  for (auto it : resp.pfcp_ies.created_pdrs) {
+	    pfcp::pdr_id_t pdr_id = {};
+	    pfcp::far_id_t far_id = {};
+	    if (it.get(pdr_id)) {
+	      pgw_eps_bearer b = {};
+	      if (ppc->get_eps_bearer(pdr_id, b)) {
+	        pfcp::fteid_t local_up_fteid = {};
+	        if (it.get(local_up_fteid)) {
+	          xgpp_conv::pfcp_to_core_fteid(local_up_fteid, b.pgw_fteid_s5_s8_up);
+	          b.pgw_fteid_s5_s8_up.interface_type = S5_S8_PGW_GTP_U;
+	          // comment if SPGW-C allocate up fteid
+	          pgw_eps_bearer b2 = b;
+	          ppc->add_eps_bearer(b2);
+	        }
+	          // uncomment if SPGW-C allocate up fteid
+	          // ppc->add_eps_bearer(b);
+	      } else {
+	        Logger::pgwc_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
+	      }
+	    } else {
+	      Logger::pgwc_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
+	    }
+	  }
 
-  Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_PGWC_S5S8", s5_triggered_pending->gtp_ies.get_msg_name());
-  int ret = itti_inst->send_msg(s5_triggered_pending);
-  if (RETURNok != ret) {
-    Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_PGWC_S5S8", s5_triggered_pending->gtp_ies.get_msg_name());
-  }
+	  ebi_t ebi = {};
+	  ebi.ebi = n11_trigger.get()->get_pdu_session_id();
+	    pgw_eps_bearer b = {};
+	    gtpv2c::bearer_context_created_within_create_session_response bcc = {};
+	    ::cause_t bcc_cause = {.cause_value = REQUEST_ACCEPTED, .pce = 0, .bce = 0, .cs = 0};
+	    if (not ppc->get_eps_bearer(ebi, b)) {
+	      bcc_cause.cause_value = SYSTEM_FAILURE;
+	    } else {
+	      if (b.pgw_fteid_s5_s8_up.is_zero()) {
+	        bcc_cause.cause_value = SYSTEM_FAILURE;
+	      } else {
+	        bcc.set(b.pgw_fteid_s5_s8_up, 2);
+	      }
+	    }
+	    bcc.set(b.ebi);
+	    bcc.set(bcc_cause);
+	    // only if modified bcc.set(bearer_level_qos);
+	  //  s5_triggered_pending->gtp_ies.add_bearer_context_created(bcc);
+	 // }
+
+
+  	//Send reply to AMF
+	Logger::pgwc_app().info( "Sending response to AMF!");
+  	nlohmann::json jsonData;
+	oai::smf::model::SmContextCreateError smContextCreateError;
+	oai::smf::model::ProblemDetails problem_details;
+	problem_details.setCause("[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED"); //TODO: add causes to header file
+	smContextCreateError.setError(problem_details);
+
+  	to_json(jsonData, smContextCreateError);
+  	std::string resBody = jsonData.dump();
+  	//issue: httpResponse has been free!!!
+  	//(n11_triggered_pending->get_http_response()).send(Pistache::Http::Code::Forbidden,resBody);
+	 //n11_triggered_pending.get()->send_msg_to_amf(resBody);
+
 }
 
 //------------------------------------------------------------------------------

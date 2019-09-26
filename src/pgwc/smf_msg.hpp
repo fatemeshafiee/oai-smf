@@ -157,16 +157,22 @@ class pdu_session_create_sm_context_response {
 
 public:
 	pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& http_response): m_http_response(http_response) {}
+	//pdu_session_create_sm_context_response(): {}
 	void set_cause(uint8_t cause);
 	uint8_t get_cause();
 	void set_paa(paa_t paa);
 	paa_t get_paa();
 	Pistache::Http::ResponseWriter& get_http_response();
+	void send_msg_to_amf(std::string resBody);
+
+	void set_http_code(Pistache::Http::Code code);
+	Pistache::Http::Code get_http_code();
 
 private:
 	uint8_t m_cause;
 	paa_t m_paa;
 	Pistache::Http::ResponseWriter& m_http_response;
+	Pistache::Http::Code m_code;
 
 };
 

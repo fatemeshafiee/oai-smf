@@ -186,4 +186,17 @@ Pistache::Http::ResponseWriter& pdu_session_create_sm_context_response::get_http
 
 }
 
+void pdu_session_create_sm_context_response::send_msg_to_amf(std::string resBody){
+	m_http_response.send(Pistache::Http::Code::Forbidden, resBody);//TEMP
+}
+
+void pdu_session_create_sm_context_response::set_http_code(Pistache::Http::Code code)
+{
+	m_code = code;
+}
+Pistache::Http::Code pdu_session_create_sm_context_response::get_http_code()
+{
+	return m_code;
+}
+
 

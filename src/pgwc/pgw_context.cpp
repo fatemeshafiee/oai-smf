@@ -1013,7 +1013,6 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 	pgwc::pdu_session_create_sm_context_response *sm_context_resp = new pdu_session_create_sm_context_response(httpResponse);
 	std::shared_ptr<pdu_session_create_sm_context_response> sm_context_resp_pending = std::shared_ptr<pdu_session_create_sm_context_response>(sm_context_resp);
 
-
 	//step 3. find pdn_connection
 	std::shared_ptr<dnn_context> sd;
 	bool find_dnn = find_dnn_context (dnn, sd);
@@ -1099,6 +1098,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 				ss.get()->find_dnn_configuration(sd->dnn_in_use, sdc);
 				if (nullptr != sdc.get()){
 					paa.pdn_type.pdn_type = sdc.get()->pdu_session_types.default_session_type.pdu_session_type;
+					//TODO: static ip addr
 				}
 			}
 
@@ -1117,7 +1117,6 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 		} else { //use DHCP
 			//TODO: DHCP
 		}
-
 
 
 
@@ -1165,7 +1164,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 		insert_procedure(sproc);
 		if (proc->run(sm_context_req_msg, sm_context_resp_pending, shared_from_this())) {
 			// error !
-			Logger::pgwc_app().info( "S5S8 CREATE_SESSION_REQUEST procedure failed");
+			Logger::pgwc_app().info( "PDU SESSION CREATE SM CONTEXT REQUEST procedure failed");
 			remove_procedure(proc);
 		}
 
@@ -1174,6 +1173,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 	}
 
 	//step 9. send ITTI message to PGW s5s8 for the pending session?
+    //TODO:
 
 
 }
