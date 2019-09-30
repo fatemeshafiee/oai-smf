@@ -23,7 +23,6 @@
 #ifndef FILE_COMMON_TYPES_SEEN
 #define FILE_COMMON_TYPES_SEEN
 
-#include <stdint.h>
 #include "3gpp_38.401.h"
 #include "3gpp_23.003.h"
 #include "3gpp_24.007.h"

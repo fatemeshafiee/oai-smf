@@ -32,6 +32,7 @@
 #include "pistache/http.h"
 #include "3gpp_29.274.h"
 #include "3gpp_24.007.h"
+#include "3gpp_24.501.h"
 
 namespace pgwc {
 
@@ -43,8 +44,8 @@ public:
 	supi_t get_supi() const;
 	void set_supi(supi_t const& value);
 
-	int32_t get_pdu_session_id() const;
-	void set_pdu_session_id(int32_t const value);
+	pdu_session_id_t get_pdu_session_id() const;
+	void set_pdu_session_id(pdu_session_id_t const value);
 
 	std::string get_dnn() const;
 	void set_dnn(std::string const& value);
@@ -55,8 +56,8 @@ public:
 	std::string get_serving_nf_id() const;
 	void set_serving_nf_id(std::string const& value);
 
-	std::string get_request_type() const;
-	void set_request_type(std::string const& value);
+	request_type_t get_request_type() const;
+	void set_request_type(request_type_t const& value);
 
 	//	pdu_session_establishment_request_msg get_nas_msg() const;
 	//	void set_nas_msg(pdu_session_establishment_request_msg const& value);
@@ -85,7 +86,7 @@ private:
 	bool m_unauthenticated_supi;
 	//std::string m_Pei;
 	//std::string m_Gpsi;
-	int32_t m_pdu_session_id;
+	pdu_session_id_t m_pdu_session_id;
 	std::string m_dnn;
 	snssai_t m_snssai;
 	//Snssai m_HplmnSnssai;
@@ -93,7 +94,7 @@ private:
 	//Guami m_Guami;
 	//std::string m_ServiceName;
 	//PlmnId m_ServingNetwork;
-	std::string m_request_type;
+	request_type_t m_request_type;
 	//RefToBinaryData m_N1SmMsg;
 	std::string m_an_type;
 	//std::string m_SecondAnType;
@@ -156,14 +157,14 @@ private:
 class pdu_session_create_sm_context_response {
 
 public:
-	pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& http_response): m_http_response(http_response) {}
+	pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& http_response): m_http_response(http_response.clone()) {	}
 	//pdu_session_create_sm_context_response(): {}
 	void set_cause(uint8_t cause);
 	uint8_t get_cause();
 	void set_paa(paa_t paa);
 	paa_t get_paa();
-	Pistache::Http::ResponseWriter& get_http_response();
 	void send_msg_to_amf(std::string resBody);
+	void set_http_response();
 
 	void set_http_code(Pistache::Http::Code code);
 	Pistache::Http::Code get_http_code();
@@ -171,9 +172,8 @@ public:
 private:
 	uint8_t m_cause;
 	paa_t m_paa;
-	Pistache::Http::ResponseWriter& m_http_response;
+	Pistache::Http::ResponseWriter m_http_response;
 	Pistache::Http::Code m_code;
-
 };
 
 }

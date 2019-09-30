@@ -109,9 +109,13 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//PDU session ID (Mandatory)
 	//TODO:
 	//PTI (Mandatory)
+
 	//TODO:
 	//Message type (Mandatory) (PDU SESSION ESTABLISHMENT REQUEST message identity)
-	sm_context_req_msg->set_message_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
+	//sm_context_req_msg->set_message_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
+	//Logger::smf_api_server().debug("nas decode messaget type %d\n",
+	//		decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
+	sm_context_req_msg->set_message_type (PDU_SESSION_ESTABLISHMENT_REQUEST); //Temporary - should be removed
 	//Integrity protection maximum data rate (Mandatory)
 	//PDU session type (Optional)
 	sm_context_req_msg->set_pdu_session_type(PDN_TYPE_E_IPV4);//TODO: should get from NAS msg

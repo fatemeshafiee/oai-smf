@@ -11,7 +11,7 @@
 	"guami": {"plmnId": {"mcc": "122", "mnc":"13"}, "amfId":"2"}, 
 	"serviceName": "", 
 	"servingNetwork": {"mcc": "122", "mnc":"13"},  
-	"requestType": "", 
+	"requestType": 1, 
 	"anType": "", 
 	"secondAnType": "",
 	"ratType": "",

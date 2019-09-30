@@ -104,9 +104,4 @@ typedef struct pdu_session_type_s {
 } pdu_session_type_t;
 
 
-
-
-
-
-
 #endif

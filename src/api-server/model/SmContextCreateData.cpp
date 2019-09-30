@@ -469,7 +469,7 @@ void SmContextCreateData::unsetGpsi()
 {
     m_GpsiIsSet = false;
 }
-int32_t SmContextCreateData::getPduSessionId() const
+uint8_t SmContextCreateData::getPduSessionId() const
 {
     return m_PduSessionId;
 }
@@ -589,11 +589,11 @@ void SmContextCreateData::setServingNetwork(PlmnId const& value)
     m_ServingNetwork = value;
     
 }
-std::string SmContextCreateData::getRequestType() const
+uint8_t SmContextCreateData::getRequestType() const
 {
     return m_RequestType;
 }
-void SmContextCreateData::setRequestType(std::string const& value)
+void SmContextCreateData::setRequestType(uint8_t const& value)
 {
     m_RequestType = value;
     m_RequestTypeIsSet = true;

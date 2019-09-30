@@ -31,6 +31,23 @@ typedef enum extended_protocol_discriminator_e {
 
 } extended_protocol_discriminator_t;
 
+/* Procedure transaction identity */
+//8 bits
+#define PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED   (uint8_t)0
+#define PROCEDURE_TRANSACTION_IDENTITY_FIRST        (uint8_t)1
+#define PROCEDURE_TRANSACTION_IDENTITY_LAST         (uint8_t)254
+#define PROCEDURE_TRANSACTION_IDENTITY_RESERVED     (uint8_t)255
+
+
+/* PDU Session Identity */
+typedef uint8_t pdu_session_id_t;
+
+//8 bits
+#define PDU_SESSION_IDENTITY_UNASSIGNED   (uint8_t)0
+#define PDU_SESSION_IDENTITY_FIRST        (uint8_t)1
+#define PDU_SESSION_IDENTITY_LAST         (uint8_t)15
+
+
 // Integrity protection maximum data rate
 typedef struct ipmdr_s {
   uint8_t ul;

@@ -88,7 +88,7 @@ public:
     /// <summary>
     /// 
     /// </summary>
-    int32_t getPduSessionId() const;
+    uint8_t getPduSessionId() const;
     void setPduSessionId(int32_t const value);
     bool pduSessionIdIsSet() const;
     void unsetPduSessionId();
@@ -140,8 +140,8 @@ public:
         /// <summary>
     /// 
     /// </summary>
-    std::string getRequestType() const;
-    void setRequestType(std::string const& value);
+    uint8_t getRequestType() const;
+    void setRequestType(uint8_t const& value);
     bool requestTypeIsSet() const;
     void unsetRequestType();
     /// <summary>
@@ -373,7 +373,7 @@ protected:
     bool m_PeiIsSet;
     std::string m_Gpsi;
     bool m_GpsiIsSet;
-    int32_t m_PduSessionId;
+    uint8_t m_PduSessionId;
     bool m_PduSessionIdIsSet;
     std::string m_Dnn;
     bool m_DnnIsSet;
@@ -389,7 +389,7 @@ protected:
     bool m_ServiceNameIsSet;
     PlmnId m_ServingNetwork;
 
-    std::string m_RequestType;
+    uint8_t m_RequestType;
     bool m_RequestTypeIsSet;
     RefToBinaryData m_N1SmMsg;
     bool m_N1SmMsgIsSet;

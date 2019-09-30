@@ -40,12 +40,12 @@ void pdu_session_create_sm_context_request::set_supi(supi_t const& supi)
 	m_supi = supi;
 }
 
-int32_t pdu_session_create_sm_context_request::get_pdu_session_id() const
+pdu_session_id_t pdu_session_create_sm_context_request::get_pdu_session_id() const
 {
 	return m_pdu_session_id;
 }
 
-void pdu_session_create_sm_context_request::set_pdu_session_id(int32_t const pdu_session_id)
+void pdu_session_create_sm_context_request::set_pdu_session_id(pdu_session_id_t const pdu_session_id)
 {
 	m_pdu_session_id = pdu_session_id;
 }
@@ -80,12 +80,12 @@ void pdu_session_create_sm_context_request::set_serving_nf_id(std::string const&
 	m_serving_nf_id = serving_nf_id;
 }
 
-std::string pdu_session_create_sm_context_request::get_request_type() const
+request_type_t pdu_session_create_sm_context_request::get_request_type() const
 {
 	return m_request_type;
 }
 
-void pdu_session_create_sm_context_request::set_request_type(std::string const& request_type)
+void pdu_session_create_sm_context_request::set_request_type(request_type_t const& request_type)
 {
 	m_request_type = request_type;
 }
@@ -179,15 +179,8 @@ paa_t pdu_session_create_sm_context_response::get_paa()
 	return m_paa;
 }
 
-
-Pistache::Http::ResponseWriter& pdu_session_create_sm_context_response::get_http_response()
-{
-	return m_http_response;
-
-}
-
 void pdu_session_create_sm_context_response::send_msg_to_amf(std::string resBody){
-	m_http_response.send(Pistache::Http::Code::Forbidden, resBody);//TEMP
+	m_http_response.send(m_code, resBody);
 }
 
 void pdu_session_create_sm_context_response::set_http_code(Pistache::Http::Code code)
