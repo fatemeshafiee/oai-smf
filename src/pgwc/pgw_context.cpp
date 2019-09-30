@@ -35,7 +35,7 @@
 #include "pgwc_procedure.hpp"
 #include "ProblemDetails.h"
 #include "3gpp_29.502.h"
-
+#include "3gpp_24.501.h"
 
 #include <algorithm>
 
@@ -992,7 +992,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_
 	//Step 1. get necessary information
 	std::string dnn = sm_context_req_msg->get_dnn();
 	snssai_t snssai  =  sm_context_req_msg->get_snssai();
-	std::string requestType = sm_context_req_msg->get_request_type();
+	request_type_t request_type = sm_context_req_msg->get_request_type();
 	supi_t supi =  sm_context_req_msg->get_supi();
 	supi64_t supi64 = smf_supi_to_u64(supi);
 	uint32_t pdu_session_id = sm_context_req_msg->get_pdu_session_id();

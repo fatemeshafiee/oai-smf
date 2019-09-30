@@ -33,6 +33,7 @@
 #include "pgw_pfcp_association.hpp"
 #include "pgwc_procedure.hpp"
 #include "pgw_context.hpp"
+#include "SmContextCreatedData.h"
 
 #include <algorithm>    // std::search
 
@@ -370,70 +371,85 @@ void session_establishment_procedure::handle_itti_msg (itti_sxab_session_establi
 {
 	Logger::pgwc_app().info( "session_establishment_procedure handle itti_sxab_session_establishment_response: pdu-session-id %d", n11_trigger.get()->get_pdu_session_id());
 
-	 pfcp::cause_t cause = {};
-	  resp.pfcp_ies.get(cause);
-	  if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
-	    resp.pfcp_ies.get(ppc->up_fseid);
-	  }
+	pfcp::cause_t cause = {};
+	resp.pfcp_ies.get(cause);
+	if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
+		resp.pfcp_ies.get(ppc->up_fseid);
+	}
 
-	  for (auto it : resp.pfcp_ies.created_pdrs) {
-	    pfcp::pdr_id_t pdr_id = {};
-	    pfcp::far_id_t far_id = {};
-	    if (it.get(pdr_id)) {
-	      pgw_eps_bearer b = {};
-	      if (ppc->get_eps_bearer(pdr_id, b)) {
-	        pfcp::fteid_t local_up_fteid = {};
-	        if (it.get(local_up_fteid)) {
-	          xgpp_conv::pfcp_to_core_fteid(local_up_fteid, b.pgw_fteid_s5_s8_up);
-	          b.pgw_fteid_s5_s8_up.interface_type = S5_S8_PGW_GTP_U;
-	          // comment if SPGW-C allocate up fteid
-	          pgw_eps_bearer b2 = b;
-	          ppc->add_eps_bearer(b2);
-	        }
-	          // uncomment if SPGW-C allocate up fteid
-	          // ppc->add_eps_bearer(b);
-	      } else {
-	        Logger::pgwc_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
-	      }
-	    } else {
-	      Logger::pgwc_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
-	    }
-	  }
+	for (auto it : resp.pfcp_ies.created_pdrs) {
+		pfcp::pdr_id_t pdr_id = {};
+		pfcp::far_id_t far_id = {};
+		if (it.get(pdr_id)) {
+			pgw_eps_bearer b = {};
+			if (ppc->get_eps_bearer(pdr_id, b)) {
+				pfcp::fteid_t local_up_fteid = {};
+				if (it.get(local_up_fteid)) {
+					xgpp_conv::pfcp_to_core_fteid(local_up_fteid, b.pgw_fteid_s5_s8_up);
+					b.pgw_fteid_s5_s8_up.interface_type = S5_S8_PGW_GTP_U;
+					// comment if SPGW-C allocate up fteid
+					pgw_eps_bearer b2 = b;
+					ppc->add_eps_bearer(b2);
+				}
+				// uncomment if SPGW-C allocate up fteid
+				// ppc->add_eps_bearer(b);
+			} else {
+				Logger::pgwc_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
+			}
+		} else {
+			Logger::pgwc_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
+		}
+	}
 
-	  ebi_t ebi = {};
-	  ebi.ebi = n11_trigger.get()->get_pdu_session_id();
-	    pgw_eps_bearer b = {};
-	    gtpv2c::bearer_context_created_within_create_session_response bcc = {};
-	    ::cause_t bcc_cause = {.cause_value = REQUEST_ACCEPTED, .pce = 0, .bce = 0, .cs = 0};
-	    if (not ppc->get_eps_bearer(ebi, b)) {
-	      bcc_cause.cause_value = SYSTEM_FAILURE;
-	    } else {
-	      if (b.pgw_fteid_s5_s8_up.is_zero()) {
-	        bcc_cause.cause_value = SYSTEM_FAILURE;
-	      } else {
-	        bcc.set(b.pgw_fteid_s5_s8_up, 2);
-	      }
-	    }
-	    bcc.set(b.ebi);
-	    bcc.set(bcc_cause);
-	    // only if modified bcc.set(bearer_level_qos);
-	  //  s5_triggered_pending->gtp_ies.add_bearer_context_created(bcc);
-	 // }
+	ebi_t ebi = {};
+	ebi.ebi = n11_trigger.get()->get_pdu_session_id();
+	pgw_eps_bearer b = {};
+	gtpv2c::bearer_context_created_within_create_session_response bcc = {};
+	::cause_t bcc_cause = {.cause_value = REQUEST_ACCEPTED, .pce = 0, .bce = 0, .cs = 0};
+	if (not ppc->get_eps_bearer(ebi, b)) {
+		bcc_cause.cause_value = SYSTEM_FAILURE;
+	} else {
+		if (b.pgw_fteid_s5_s8_up.is_zero()) {
+			bcc_cause.cause_value = SYSTEM_FAILURE;
+		} else {
+			bcc.set(b.pgw_fteid_s5_s8_up, 2);
+		}
+	}
+	bcc.set(b.ebi);
+	bcc.set(bcc_cause);
+	// only if modified bcc.set(bearer_level_qos);
+	//  s5_triggered_pending->gtp_ies.add_bearer_context_created(bcc);
+	// }
 
-
-  	//Send reply to AMF
+	//Send reply to AMF
 	Logger::pgwc_app().info( "Sending response to AMF!");
-  	nlohmann::json jsonData;
-	oai::smf::model::SmContextCreateError smContextCreateError;
-	oai::smf::model::ProblemDetails problem_details;
-	problem_details.setCause("[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED"); //TODO: add causes to header file
-	smContextCreateError.setError(problem_details);
+	nlohmann::json jsonData;
+	oai::smf::model::SmContextCreatedData smContextCreatedData;
 
-  	to_json(jsonData, smContextCreateError);
-  	std::string resBody = jsonData.dump();
-  	//issue: httpResponse has been free!!!
-  	//(n11_triggered_pending->get_http_response()).send(Pistache::Http::Code::Forbidden,resBody);
-	 //n11_triggered_pending.get()->send_msg_to_amf(resBody);
+	//PduSessionId
+	smContextCreatedData.setPduSessionId(n11_trigger.get()->get_pdu_session_id());
+	//Snssai
+	oai::smf::model::Snssai snssai;
+	snssai.setSst(n11_trigger.get()->get_snssai().sST);
+	snssai.setSd(n11_trigger.get()->get_snssai().sD);
+	smContextCreatedData.setSNssai(snssai);
+	//UpCnxState
+	//N2SmInfo (use NAS to encode)
+	//TODO:
+	//N2SmInfoType
+	//TODO: smContextCreatedData.setN2SmInfoType();
+	//std::vector<EbiArpMapping> m_AllocatedEbiList
+	//HoState
+	//Gpsi
+	//SmfServiceInstanceId - SMF instance ID
+	//RecoveryTime;
+	//SupportedFeatures
+
+	to_json(jsonData, smContextCreatedData);
+	std::string resBody = jsonData.dump();
+	//issue: httpResponse has been free!!!
+	n11_triggered_pending.get()->set_http_code(Pistache::Http::Code::Created);
+	n11_triggered_pending.get()->send_msg_to_amf(resBody);
 
 }
 

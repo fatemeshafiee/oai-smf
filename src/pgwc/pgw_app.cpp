@@ -38,6 +38,9 @@
 #include "string.hpp"
 #include "SmContextCreateError.h"
 #include "3gpp_29.502.h"
+#include "3gpp_24.007.h"
+#include "smf.h"
+#include "3gpp_24.501.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -696,21 +699,60 @@ void pgw_app::send_create_session_response(Pistache::Http::ResponseWriter& httpR
 void pgw_app::handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse){
 
 	//handle PDU Session Create SM Context Request as specified in section 4.3.2 3GPP TS 23.502
-	Logger::pgwc_app().info("Handle AMF message");
+
 
 	oai::smf::model::SmContextCreateError smContextCreateError;
 	oai::smf::model::ProblemDetails problem_details;
 
 	//Step 1. get necessary information
-	std::string dnn = sm_context_req_msg->get_dnn();
-	snssai_t snssai  =  sm_context_req_msg->get_snssai();
-	std::string requestType = sm_context_req_msg->get_request_type();
 	supi_t supi =  sm_context_req_msg->get_supi();
 	supi64_t supi64 = smf_supi_to_u64(supi);
-	Logger::pgwc_app().debug("Handle AMF message, supi " SUPI_64_FMT " ", supi64);
-
+	std::string dnn = sm_context_req_msg->get_dnn();
+	snssai_t snssai  =  sm_context_req_msg->get_snssai();
+	procedure_transaction_id_t pti = sm_context_req_msg->get_pti();
 	pdu_session_type_t pdu_session_type = {.pdu_session_type = sm_context_req_msg->get_pdu_session_type()};
-	Logger::pgwc_app().debug("Handle AMF message, _pdusessiontype: %d", pdu_session_type.pdu_session_type);
+	pdu_session_id_t pdu_session_id = sm_context_req_msg->get_pdu_session_id();
+	uint8_t message_type = sm_context_req_msg->get_message_type();
+	request_type_t request_type = sm_context_req_msg->get_request_type();
+
+	Logger::pgwc_app().info("Handle a PDU Session Create SM Context Request message from AMF, supi " SUPI_64_FMT ", dnn %s, snssai_sst %d", supi64, dnn.c_str(), snssai.sST );
+
+	//check pti
+	if ((pti.procedure_transaction_id == PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED) || (pti.procedure_transaction_id > PROCEDURE_TRANSACTION_IDENTITY_LAST)){
+		Logger::pgwc_app().warn(" Invalid PTI value (pti = %d)\n", pti.procedure_transaction_id);
+		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
+		smContextCreateError.setError(problem_details);
+		//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
+		//TODO: (24.501 (section 7.3.1)) NAS N1 SM message: response with a 5GSM STATUS message including cause "#81 Invalid PTI value"
+		//Send response to AMF
+		send_create_session_response(httpResponse, smContextCreateError, Pistache::Http::Code::Forbidden);
+	}
+
+	//check pdu session id
+	if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED) || (pdu_session_id > PDU_SESSION_IDENTITY_LAST)){
+		Logger::pgwc_app().warn(" Invalid PDU Session ID value (psi = %d)\n", pdu_session_id);
+		//TODO: (24.501 (section 7.3.2)) NAS N1 SM message: ignore the message
+		//return;
+	}
+
+	//check message type
+	if (message_type != PDU_SESSION_ESTABLISHMENT_REQUEST) {
+		Logger::pgwc_app().warn("Invalid message type (message type = %d)\n", message_type);
+		//TODO:
+		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
+		smContextCreateError.setError(problem_details);
+		//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
+		//TODO: (24.501 (section 7.4)) implementation dependent->do similar to UE: response with a 5GSM STATUS message including cause "#98 message type not compatible with protocol state."
+		//Send response to AMF
+		send_create_session_response(httpResponse, smContextCreateError, Pistache::Http::Code::Forbidden);
+	}
+
+	//check request type
+	if ((request_type & 0x07) != INITIAL_REQUEST){
+		Logger::pgwc_app().warn("Invalid request type (request type = %s)\n", request_type_e2str[request_type & 0x07]);
+		//TODO:
+	}
+
 
 	//Step 2. check if the DNN requested is valid
 	if (not pgw_cfg.is_dotted_dnn_handled(dnn, pdu_session_type)) {
