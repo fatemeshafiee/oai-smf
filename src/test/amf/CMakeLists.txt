@@ -1,9 +1,8 @@
 cmake_minimum_required (VERSION 3.2)
 
-project(udm-api-server)
+project(amf-api-server)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pg -g3" )
-
 
 include_directories(model)
 include_directories(api)
@@ -17,4 +16,5 @@ file(GLOB SRCS
 )
 
 add_executable(${PROJECT_NAME} ${SRCS} )
+#add_dependencies(${PROJECT_NAME} PISTACHE NLOHMANN)
 target_link_libraries(${PROJECT_NAME} pistache pthread)
