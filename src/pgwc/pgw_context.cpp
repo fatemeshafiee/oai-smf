@@ -1232,6 +1232,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 	//pgwc::pdu_session_create_sm_context_response *sm_context_resp = new pdu_session_create_sm_context_response(smreq->http_response);
 	std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
+	sm_context_resp->res.set_supi(supi);
 
 	//step 3. find pdn_connection
 	std::shared_ptr<dnn_context> sd;

@@ -90,18 +90,6 @@ void pdu_session_create_sm_context_request::set_request_type(request_type_t cons
 	m_request_type = request_type;
 }
 
-/*
-pdu_session_establishment_request_msg pdu_session_create_sm_context_request::get_nas_msg() const
-{
-	return nas_msg;
-
-}
-void pdu_session_create_sm_context_request::set_nas_msg(pdu_session_establishment_request_msg const& value)
-{
-	nas_msg = value;
-}
- */
-
 void pdu_session_create_sm_context_request::set_dnn_selection_mode(std::string const& dnn_selection_mode)
 {
 	m_dnn_selection_mode = dnn_selection_mode;
@@ -170,6 +158,16 @@ supi_t pdu_session_create_sm_context_response::get_supi() const
 void pdu_session_create_sm_context_response::set_supi(supi_t const& supi)
 {
 	m_supi = supi;
+}
+
+pdu_session_id_t pdu_session_create_sm_context_response::get_pdu_session_id() const
+{
+	return m_pdu_session_id;
+}
+
+void pdu_session_create_sm_context_response::set_pdu_session_id(pdu_session_id_t const pdu_session_id)
+{
+	m_pdu_session_id = pdu_session_id;
 }
 
 void pdu_session_create_sm_context_response::set_cause(uint8_t cause)

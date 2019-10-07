@@ -27,6 +27,7 @@ SessionManagementSubscriptionDataRetrievalApiImpl::SessionManagementSubscription
 //void SessionManagementSubscriptionDataRetrievalApiImpl::get_sm_data(const std::string &supi, const Pistache::Optional<std::string> &supportedFeatures, const Pistache::Optional<Snssai> &singleNssai, const Pistache::Optional<std::string> &dnn, const Pistache::Optional<PlmnId> &plmnId, const Pistache::Optional<Pistache::Http::Header::Raw> &ifNoneMatch, const Pistache::Optional<Pistache::Http::Header::Raw> &ifModifiedSince, Pistache::Http::ResponseWriter &response) {
 void SessionManagementSubscriptionDataRetrievalApiImpl::get_sm_data(const std::string &supi, const Pistache::Optional<Snssai> &singleNssai, const Pistache::Optional<std::string> &dnn, Pistache::Http::ResponseWriter &response) {
 
+	std::cout <<"Received a SessionManagementSubscriptionDataRetrieval with supi " << supi.c_str()<<std::endl;
 	/*
 	 {
 	   "singleNssai": {"sst":1, "sd":123},

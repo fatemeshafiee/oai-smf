@@ -162,6 +162,8 @@ public:
 
 	supi_t get_supi() const;
 	void set_supi(supi_t const& value);
+	pdu_session_id_t get_pdu_session_id() const;
+	void set_pdu_session_id(pdu_session_id_t const value);
 	void set_cause(uint8_t cause);
 	uint8_t get_cause();
 	void set_paa(paa_t paa);
@@ -171,6 +173,7 @@ public:
 
 private:
 	supi_t m_supi;
+	pdu_session_id_t m_pdu_session_id;
 	uint8_t m_cause;
 	paa_t m_paa;
 	//Pistache::Http::ResponseWriter m_http_response;

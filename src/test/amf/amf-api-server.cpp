@@ -71,7 +71,7 @@ int main() {
     std::vector<int> sigs{SIGQUIT, SIGINT, SIGTERM, SIGHUP};
     setUpUnixSignals(sigs);
 #endif
-    Pistache::Address addr("172.16.1.106", Pistache::Port(8080));
+    Pistache::Address addr("172.16.1.106", Pistache::Port(8282));
 
     httpEndpoint = new Pistache::Http::Endpoint((addr));
     auto router = std::make_shared<Pistache::Rest::Router>();

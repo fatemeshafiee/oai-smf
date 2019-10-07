@@ -102,7 +102,7 @@ void smf_n10_task (void *args_p)
 smf_n10::smf_n10 ()
 {
   udm_addr = "172.16.1.105";//TODO: hardcoded for the moment (should get from configuration file)
-  udm_port = 8080;//TODO: hardcoded for the moment (should get from configuration file)
+  udm_port = 8181;//TODO: hardcoded for the moment (should get from configuration file)
 
   Logger::smf_n10().startup("Starting...");
   if (itti_inst->create_task(TASK_SMF_N10, smf_n10_task, nullptr) ) {

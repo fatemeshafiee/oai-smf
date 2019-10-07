@@ -36,8 +36,8 @@
 
 #include <stdexcept>
 
-#define UDM_CURL_TIMEOUT_MS 100L
-#define UDM_NUMBER_RETRIES 3
+#define AMF_CURL_TIMEOUT_MS 100L
+#define AMF_NUMBER_RETRIES 3
 #define HTTP_STATUS_OK 200
 
 using namespace pgwc;
@@ -76,9 +76,7 @@ void smf_n11_task (void *args_p)
 		switch (msg->msg_type) {
 
 		case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE:
-			//if (itti_n10_get_session_management_subscription* m = dynamic_cast<itti_n10_get_session_management_subscription*>(msg)) {
-			//  smf_n10_inst->send_sm_data_get_msg(ref(*m));
-			//}
+			smf_n11_inst->send_msg_to_amf(std::static_pointer_cast<itti_n11_create_sm_context_response>(shared_msg));
 			break;
 
 
@@ -102,7 +100,7 @@ void smf_n11_task (void *args_p)
 smf_n11::smf_n11 ()
 {
 	amf_addr = "172.16.1.106";//TODO: hardcoded for the moment (should get from configuration file)
-	amf_port = 8080;//TODO: hardcoded for the moment (should get from configuration file)
+	amf_port = 8282;//TODO: hardcoded for the moment (should get from configuration file)
 
 	Logger::smf_n11().startup("Starting...");
 	if (itti_inst->create_task(TASK_SMF_N11, smf_n11_task, nullptr) ) {
@@ -131,9 +129,25 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 
 	CURL *curl = curl_easy_init();
 	//hardcoded for the moment, should get from NRF/configuration file
-	std::string url = amf_addr + ":" + std::to_string(amf_port) + "/ue-contexts/" + std::to_string(supi64) +"/n1-n2-messages";
+	std::string url = amf_addr + ":" + std::to_string(amf_port) + "/namf-comm/v1/ue-contexts/" + std::to_string(supi64) +"/n1-n2-messages";
 	Logger::smf_n11().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
-	std::string body = "";
+
+	//TODO: fill the content of N1N2MessageTransferReqData
+	jsonData["n1MessageContainer"]["n1MessageClass"] = "SM";
+	jsonData["n1MessageContainer"]["n1MessageContent"]["contentId"] = "n1MessageContent";
+	//jsonData["n2InfoContainer"]["n2InformationClass"] = "SM";
+	//jsonData["n2InfoContainer"]["smInfo"]["PduSessionId"] = 123;
+	//jsonData["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapMessageType"] = 123; //NGAP message
+	//jsonData["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_SETUP_REQ"; //NGAP message
+	//jsonData["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "NGAP DATA"; //NGAP message
+	//jsonData["n2InfoContainer"]["ranInfo"] = "SM";
+	jsonData["ppi"] = 1;
+	jsonData["pduSessionId"] = sm_context_res->res.get_pdu_session_id();
+	//jsonData["arp"]["priorityLevel"] = 1;
+	//jsonData["arp"]["preemptCap"] = "NOT_PREEMPT";
+	//jsonData["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";
+	std::string body = jsonData.dump();
+
 
 	if(curl) {
 		CURLcode res;
@@ -141,7 +155,7 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
 		curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
-		curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, UDM_CURL_TIMEOUT_MS);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
 
 		// Response information.
 		long httpCode(0);
@@ -154,7 +168,7 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)body.length());
 
 		int numRetries = 0;
-		while (numRetries < UDM_NUMBER_RETRIES){
+		while (numRetries < AMF_NUMBER_RETRIES){
 			res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 			Logger::smf_n11().debug("[send_msg_to_amf] Response from AMF, Http Code: %d ", httpCode);
@@ -162,15 +176,7 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 			if (httpCode == HTTP_STATUS_OK)
 			{
 				Logger::smf_n11().debug("[send_msg_to_amf] Got successful response from AMF, URL: %s ", url.c_str());
-				try{
-					jsonData = nlohmann::json::parse(*httpData.get());
-					//curl_easy_cleanup(curl);
-					break;
-				} catch (json::exception& e){
-					Logger::smf_n10().warn("[send_msg_to_amf] Couldn't Parse json data from AMF");
-
-				}
-				numRetries++;
+				break;
 			}
 			else
 			{

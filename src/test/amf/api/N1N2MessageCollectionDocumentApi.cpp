@@ -40,6 +40,7 @@ void N1N2MessageCollectionDocumentApi::setupRoutes() {
 void N1N2MessageCollectionDocumentApi::n1_n2_message_transfer_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
     // Getting the path params
     auto ueContextId = request.param(":ueContextId").as<std::string>();
+    std::cout <<"Received a N1N2MessageTrasfer request with ueID " << ueContextId.c_str()<<std::endl;
     
     // Getting the body param
     
