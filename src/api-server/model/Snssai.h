@@ -33,6 +33,9 @@ class  Snssai
 {
 public:
     Snssai();
+    Snssai(uint8_t sst,  uint32_t sd): m_Sst(sst), m_Sd(sd) {
+    	m_SdIsSet = true;
+    };
     virtual ~Snssai();
 
     void validate();

@@ -29,7 +29,10 @@ void IndividualSMContextApiImpl::retrieve_sm_context(const std::string &smContex
     response.send(Pistache::Http::Code::Ok, "Do some magic\n");
 }
 void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextRef, const SmContextUpdateData &smContextUpdateData, Pistache::Http::ResponseWriter &response) {
-    response.send(Pistache::Http::Code::Ok, "Do some magic\n");
+    //handle Nsmf_PDUSession_UpdateSMContext Request
+	//Handle the pdu_session_create_sm_context_request message in pwg_app
+	//m_smf_app->handle_amf_msg(sm_context_req_msg, response);
+	response.send(Pistache::Http::Code::Ok, "Do some magic\n");
 }
 
 }

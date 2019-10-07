@@ -31,6 +31,7 @@
 #include "3gpp_29.244.hpp"
 #include "3gpp_29.274.hpp"
 #include "itti_msg_s5s8.hpp"
+#include "itti_msg_n11.hpp"
 #include "itti_msg_sxab.hpp"
 #include "itti_msg_sx_restore.hpp"
 #include "msg_pfcp.hpp"
@@ -117,6 +118,31 @@ public:
 
   std::shared_ptr<pdu_session_create_sm_context_request> n11_trigger;
   std::shared_ptr<pdu_session_create_sm_context_response> n11_triggered_pending;
+};
+
+//------------------------------------------------------------------------------
+class session_create_sm_context_procedure : public pgw_procedure {
+public:
+  explicit session_create_sm_context_procedure(std::shared_ptr<pgw_pdn_connection>& sppc) : pgw_procedure(), ppc(sppc),
+      sx_triggered(), n11_triggered_pending(), n11_trigger() {}
+
+  int run(std::shared_ptr<itti_n11_create_sm_context_request> req,
+          std::shared_ptr<itti_n11_create_sm_context_response>resp,
+          std::shared_ptr<pgwc::pgw_context> pc);
+
+  void handle_itti_msg (itti_sxab_session_establishment_response& resp);
+
+
+  //~session_establishment_procedure() {}
+
+  std::shared_ptr<itti_s5s8_create_session_request>        s5_trigger;
+  std::shared_ptr<itti_s5s8_create_session_response>       s5_triggered_pending;
+  std::shared_ptr<itti_sxab_session_establishment_request> sx_triggered;
+  std::shared_ptr<pgw_pdn_connection>                      ppc;
+  std::shared_ptr<pgwc::pgw_context>                       pc;
+
+  std::shared_ptr<itti_n11_create_sm_context_request> n11_trigger;
+  std::shared_ptr<itti_n11_create_sm_context_response> n11_triggered_pending;
 };
 
 //------------------------------------------------------------------------------

@@ -32,6 +32,7 @@
 #include "3gpp_29.274.h"
 #include "itti_msg_s5s8.hpp"
 #include "itti_msg_sxab.hpp"
+#include "itti_msg_n11.hpp"
 #include "pgw_context.hpp"
 #include "pgw_pco.hpp"
 #include "SmContextCreateData.h"
@@ -153,6 +154,7 @@ public:
    */
   void handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse);
 
+  void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
   /*
    * Verify if SM Context is existed for this Supi
    * @param [supi_t] supi

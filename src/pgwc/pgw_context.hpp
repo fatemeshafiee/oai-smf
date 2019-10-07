@@ -306,10 +306,10 @@ public:
 	dnn_context(dnn_context& b) = delete;
 
 	/* Insert a session management subscription into the DNN context */
-	void insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
+	//void insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
 
 	/* Find the subscription from the DNN context */
-	bool find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
+	//bool find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
 
 	/* Find the PDN connection */
 	bool find_pdn_connection(const uint32_t pdu_session_id , std::shared_ptr<pgw_pdn_connection>& pdn);
@@ -325,7 +325,7 @@ public:
 	std::vector<std::shared_ptr<pgw_pdn_connection>> pdn_connections;
 
 	/* snssai-sst <-> session management subscription */
-	std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
+	//std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
 
 	mutable std::recursive_mutex                     m_context;
 };
@@ -381,6 +381,7 @@ public:
 	 * @return void
 	 */
 	void handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse);
+	void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
 	/*
 	 * Find DNN context with name
@@ -417,7 +418,7 @@ public:
 
 
 
-	bool verify_sm_context_request(std::shared_ptr<pdu_session_create_sm_context_request>& create_sm_context_request_msg);
+	bool verify_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
 	std::vector<std::shared_ptr<dnn_context>> dnns;
 
@@ -444,6 +445,19 @@ public:
 
 	// Big recursive lock
 	mutable std::recursive_mutex                m_context;
+
+
+	/* Insert a session management subscription into the DNN context */
+	void insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
+
+	/* Find the subscription from the DNN context */
+	bool find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
+
+	/* snssai-sst <-> session management subscription */
+	std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
+
+
+
 };
 }
 

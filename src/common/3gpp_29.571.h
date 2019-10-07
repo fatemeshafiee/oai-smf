@@ -20,49 +20,34 @@
  */
 
 
-#ifndef FILE_3GPP_29_503_SMF_SEEN
-#define FILE_3GPP_29_503_SMF_SEEN
+#ifndef FILE_3GPP_29_571_SEEN
+#define FILE_3GPP_29_571_SEEN
 
-#include "smf.h"
-#include "3gpp_29.571.h"
 
-enum ssc_mode_e {
-  SSC_MODE_1 = 1,
-  SSC_MODE_2 = 2,
-  SSC_MODE_3 = 3,
+typedef struct session_ambr_s {
+	std::string uplink;
+	std::string downlink;
+} session_ambr_t;
+
+enum preemtion_capability_e {
+	NOT_PREEMPT = 1,
+	MAY_PREEMPT = 2
 };
-static const std::vector<std::string> ssc_mode_e2str = {"Error", "SSC_MODE_1", "SSC_MODE_2", "SSC_MODE_3"};
+
+static const std::vector<std::string> preemtion_capability_e2str = {"Error", "NOT_PREEMPT", "MAY_PREEMPT"};
+
+typedef struct arp_s {
+	  uint8_t priority_level;// (integer 1-15)
+	  std::string preempt_cap;
+	  std::string preempt_vuln; //NOT_PREEMPTABLE, PREEMPTABLE
+} arp_5gc_t;
 
 
-typedef struct ssc_mode_s {
-  uint8_t ssc_mode;
-  ssc_mode_s() : ssc_mode(SSC_MODE_1) {}
-  ssc_mode_s(ssc_mode_e mode) : ssc_mode(mode) {}
-  ssc_mode_s(const struct ssc_mode_s& p) : ssc_mode(p.ssc_mode) {}
-} ssc_mode_t;
-
-
-typedef struct pdu_session_types_s {
-	pdu_session_type_t default_session_type;
-	std::vector<pdu_session_type_t> allowed_session_types;
-} pdu_session_types_t;
-
-typedef struct ssc_modes_s {
-	ssc_mode_t default_ssc_mode;
-	std::vector<ssc_mode_t> allowed_ssc_modes;
-} ssc_modes_t;
-
-
-
-typedef struct dnn_configuration_s {
-	pdu_session_types_t pdu_session_types;
-	ssc_modes_t ssc_modes;
-	session_ambr_t session_ambr;
-	//5gQoSProfile (subscribedDefaultQoS)
-	//5qi
-	//staticIpAddresses
-} dnn_configuration_t;
-
+typedef struct subscribed_default_qos_s{
+	uint8_t _5qi;
+	arp_5gc_t arp;
+	uint8_t priority_level;//1-127
+};
 
 
 

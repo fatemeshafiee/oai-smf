@@ -13,6 +13,7 @@
 #include "SMContextsCollectionApiImpl.h"
 #include "logger.hpp"
 #include "smf_msg.hpp"
+#include "itti_msg_n11.hpp"
 
 extern "C" {
 #include "nas_message.h"
@@ -73,24 +74,23 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 			decoded_nas_msg.header.message_authentication_code);
 
 	//Step 2. Create a pdu_session_create_sm_context_request message and store the necessary information
-	pgwc::pdu_session_create_sm_context_request *sm_context_req = new pgwc::pdu_session_create_sm_context_request();
-	std::shared_ptr<pgwc::pdu_session_create_sm_context_request> sm_context_req_msg = std::shared_ptr<pgwc::pdu_session_create_sm_context_request>(sm_context_req);
+	pgwc::pdu_session_create_sm_context_request sm_context_req_msg = {};
 
 	//supi
 	supi_t supi =  {.length = 0};
 	smf_string_to_supi(&supi, smContextCreateData.getSupi().c_str());
-	sm_context_req_msg->set_supi(supi);
+	sm_context_req_msg.set_supi(supi);
 	//dnn
-	sm_context_req_msg->set_dnn(smContextCreateData.getDnn());
+	sm_context_req_msg.set_dnn(smContextCreateData.getDnn());
 	//S-Nssai
 	snssai_t snssai(smContextCreateData.getSNssai().getSst(), smContextCreateData.getSNssai().getSd());
-	sm_context_req_msg->set_snssai(snssai);
+	sm_context_req_msg.set_snssai(snssai);
 	//PDU session ID
-	sm_context_req_msg->set_pdu_session_id(smContextCreateData.getPduSessionId());
+	sm_context_req_msg.set_pdu_session_id(smContextCreateData.getPduSessionId());
 	//AMF ID
-	sm_context_req_msg->set_serving_nf_id(smContextCreateData.getServingNfId()); //TODO: should be verified that AMF ID is stored in GUAMI or ServingNfId
+	sm_context_req_msg.set_serving_nf_id(smContextCreateData.getServingNfId()); //TODO: should be verified that AMF ID is stored in GUAMI or ServingNfId
 	//Request Type
-	sm_context_req_msg->set_request_type(smContextCreateData.getRequestType());
+	sm_context_req_msg.set_request_type(smContextCreateData.getRequestType());
 	//PCF ID
 	// Priority Access
 	//User Location Information
@@ -99,13 +99,13 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//GPSI
 	// UE presence in LADN service area
 	// DNN Selection Mode
-	sm_context_req_msg->set_dnn_selection_mode(smContextCreateData.getSelMode());
+	sm_context_req_msg.set_dnn_selection_mode(smContextCreateData.getSelMode());
 	//Subscription for PDU Session Status Notification
 	// Trace requirement
 
 	//From N1 Container (NAS)
 	//Extended protocol discriminator (Mandatory)
-	sm_context_req_msg->set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
+	sm_context_req_msg.set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
 	//PDU session ID (Mandatory)
 	//TODO:
 	//PTI (Mandatory)
@@ -115,10 +115,10 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//sm_context_req_msg->set_message_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
 	//Logger::smf_api_server().debug("nas decode messaget type %d\n",
 	//		decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
-	sm_context_req_msg->set_message_type (PDU_SESSION_ESTABLISHMENT_REQUEST); //Temporary - should be removed
+	sm_context_req_msg.set_message_type (PDU_SESSION_ESTABLISHMENT_REQUEST); //Temporary - should be removed
 	//Integrity protection maximum data rate (Mandatory)
 	//PDU session type (Optional)
-	sm_context_req_msg->set_pdu_session_type(PDN_TYPE_E_IPV4);//TODO: should get from NAS msg
+	sm_context_req_msg.set_pdu_session_type(PDN_TYPE_E_IPV4);//TODO: should get from NAS msg
 	//SSC mode (Optional)
 	//5GSM capability (Optional)
 	//Maximum number of supported (Optional)
@@ -128,7 +128,16 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//Extended protocol configuration options (Optional) e.g, FOR DHCP
 
 	//Step 3. Handle the pdu_session_create_sm_context_request message in pwg_app
-	m_smf_app->handle_amf_msg(sm_context_req_msg, response);
+	//m_smf_app->handle_amf_msg(sm_context_req_msg, response);
+
+    itti_n11_create_sm_context_request *itti_msg = new itti_n11_create_sm_context_request(TASK_SMF_N11, TASK_PGWC_APP, response);
+    itti_msg->req = sm_context_req_msg;
+
+    std::shared_ptr<itti_n11_create_sm_context_request> i = std::shared_ptr<itti_n11_create_sm_context_request>(itti_msg);
+
+    m_smf_app->handle_amf_msg(i);
+
+
 
 }
 

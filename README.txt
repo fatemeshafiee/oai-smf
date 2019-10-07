@@ -43,16 +43,16 @@ git checkout develop
 
 ## install dependencies
 cd /oai-cn5g-smf/build/scripts
-./build_spgwc -I -f
+./build_smf -I -f
 ## build SMF
-./build_spgwc -c -V -b Debug -j
+./build_smf -c -V -b Debug -j
 
 ## Create configuration file for SMF
 cd /oai-cn5g-smf/src/test/inputs
-./spgwc_conf.sh
+./smf_conf.sh
 
 ## launch SMF
-sudo spgwc -c /usr/local/etc/oai/spgw_c.conf -o 
+sudo smf -c /usr/local/etc/oai/smf.conf -o 
 
 ## Build UPF (SPGWU)
 git clone https://github.com/OPENAIRINTERFACE/openair-cn-cups/

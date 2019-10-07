@@ -40,6 +40,7 @@ add_library (PGWC STATIC
   pgwc_procedure.cpp
   pgwc_sxab.cpp
   smf_n10.cpp
+  smf_n11.cpp
   smf_msg.cpp
   #pgw_pcef_emulation.cpp
 )

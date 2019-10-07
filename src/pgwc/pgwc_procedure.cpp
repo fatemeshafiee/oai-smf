@@ -215,7 +215,7 @@ int session_establishment_procedure::run(std::shared_ptr<itti_s5s8_create_sessio
 
   }
 
-  // for finding procedure when receiving response
+  // for finding procedure when receiving the response
   pgw_app_inst->set_seid_2_pgw_context(cp_fseid.seid, pc);
 
   Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_PGWC_SX", sx_ser->get_msg_name());
@@ -420,7 +420,7 @@ void session_establishment_procedure::handle_itti_msg (itti_sxab_session_establi
 	// only if modified bcc.set(bearer_level_qos);
 	//  s5_triggered_pending->gtp_ies.add_bearer_context_created(bcc);
 	// }
-
+/*
 	//Send reply to AMF
 	Logger::pgwc_app().info( "Sending response to AMF!");
 	nlohmann::json jsonData;
@@ -450,6 +450,244 @@ void session_establishment_procedure::handle_itti_msg (itti_sxab_session_establi
 	//issue: httpResponse has been free!!!
 	n11_triggered_pending.get()->set_http_code(Pistache::Http::Code::Created);
 	n11_triggered_pending.get()->send_msg_to_amf(resBody);
+*/
+	//send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs
+
+}
+
+
+
+//------------------------------------------------------------------------------
+int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_context_request> sm_context_req, std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp, std::shared_ptr<pgwc::pgw_context> pc)
+{
+
+  // TODO check if compatible with ongoing procedures if any
+  pfcp::node_id_t up_node_id = {};
+  if (not pfcp_associations::get_instance().select_up_node(up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
+    // TODO
+	  sm_context_resp->res.set_cause(REMOTE_PEER_NOT_RESPONDING); //verify for 5G??
+    return RETURNerror;
+  }
+
+
+  //-------------------
+  n11_trigger = sm_context_req;
+  n11_triggered_pending = sm_context_resp;
+  ppc->generate_seid();
+  itti_sxab_session_establishment_request *sx_ser = new itti_sxab_session_establishment_request(TASK_PGWC_APP, TASK_PGWC_SX);
+  sx_ser->seid = 0;
+  sx_ser->trxn_id = this->trxn_id;
+  sx_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
+  sx_triggered = std::shared_ptr<itti_sxab_session_establishment_request>(sx_ser);
+
+  //-------------------
+  // IE node_id_t
+  //-------------------
+  pfcp::node_id_t node_id = {};
+  pgw_cfg.get_pfcp_node_id(node_id);
+  sx_ser->pfcp_ies.set(node_id);
+
+  //-------------------
+  // IE fseid_t
+  //-------------------
+  pfcp::fseid_t cp_fseid = {};
+  pgw_cfg.get_pfcp_fseid(cp_fseid);
+  cp_fseid.seid = ppc->seid;
+  sx_ser->pfcp_ies.set(cp_fseid);
+
+
+    //*******************
+    // UPLINK
+    //*******************
+    //-------------------
+    // IE create_far (Forwarding Action Rules)
+    //-------------------
+    pfcp::create_far                  create_far = {};
+    pfcp::far_id_t                    far_id = {}; //rule ID
+    pfcp::apply_action_t              apply_action = {};
+    pfcp::forwarding_parameters       forwarding_parameters = {};
+
+    // forwarding_parameters IEs
+    pfcp::destination_interface_t     destination_interface = {};
+
+    ppc->generate_far_id(far_id);
+    apply_action.forw = 1;
+
+    destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE; // ACCESS is for downlink, CORE for uplink
+    forwarding_parameters.set(destination_interface);
+
+    create_far.set(far_id);
+    create_far.set(apply_action);
+    create_far.set(forwarding_parameters); //should check since destination interface is directly set to FAR (as described in Table 5.8.2.11.6-1)
+
+    //-------------------
+    // IE create_pdr (section 5.8.2.11.3@TS 23.501)
+    //-------------------
+    pfcp::create_pdr                  create_pdr = {};
+    pfcp::pdr_id_t                    pdr_id = {};  //rule ID?
+    pfcp::precedence_t                precedence = {};
+    pfcp::pdi                         pdi = {}; //packet detection information
+    pfcp::outer_header_removal_t      outer_header_removal = {};
+    // pdi IEs
+    pfcp::source_interface_t         source_interface = {};
+    pfcp::fteid_t                    local_fteid = {};
+    pfcp::ue_ip_address_t            ue_ip_address = {};
+    pfcp::sdf_filter_t               sdf_filter = {};
+    pfcp::application_id_t           application_id = {};
+    pfcp::qfi_t                      qfi = {};
+
+    source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
+    local_fteid.ch   = 1;
+    //local_fteid.chid = 1;
+
+    xgpp_conv::paa_to_pfcp_ue_ip_address(sm_context_resp->res.get_paa(), ue_ip_address);
+
+    // DOIT simple
+    // shall uniquely identify the PDR among all the PDRs configured for that PFCP session.
+    ppc->generate_pdr_id(pdr_id);
+    //precedence.precedence = it.bearer_level_qos.pl; //TODO
+
+    //packet detection information
+    pdi.set(source_interface); //source interface
+    pdi.set(local_fteid); // CN tunnel info
+    pdi.set(ue_ip_address); //UE IP address
+    //TODO:
+    //network instance (no need in this version)
+    //QoS Flow ID
+
+    outer_header_removal.outer_header_removal_description = OUTER_HEADER_REMOVAL_GTPU_UDP_IPV4;
+
+    create_pdr.set(pdr_id);
+    create_pdr.set(precedence);
+    create_pdr.set(pdi);
+    create_pdr.set(outer_header_removal);
+    create_pdr.set(far_id);
+    //TODO: list of Usage reporting Rule IDs
+    //TODO: list of QoS Enforcement Rule IDs
+
+    //-------------------
+    // ADD IEs to message
+    //-------------------
+    sx_ser->pfcp_ies.set(create_pdr);
+    sx_ser->pfcp_ies.set(create_far);
+
+    // Have to backup far id and pdr id
+    pgw_eps_bearer b = {};
+    b.far_id_ul.first = true;
+    b.far_id_ul.second = far_id;
+    b.pdr_id_ul = pdr_id;
+    //b.ebi = it.eps_bearer_id;
+    b.ebi = sm_context_req->req.get_pdu_session_id();
+    pgw_eps_bearer b2 = b;
+    ppc->add_eps_bearer(b2);
+
+
+  // for finding procedure when receiving response
+  pgw_app_inst->set_seid_2_pgw_context(cp_fseid.seid, pc);
+
+
+  Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_PGWC_SX", sx_ser->get_msg_name());
+  int ret = itti_inst->send_msg(sx_triggered);
+  if (RETURNok != ret) {
+    Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_PGWC_SX", sx_ser->get_msg_name());
+    return RETURNerror;
+  }
+
+  return RETURNok;
+}
+
+//------------------------------------------------------------------------------
+void session_create_sm_context_procedure::handle_itti_msg (itti_sxab_session_establishment_response& resp)
+{
+	Logger::pgwc_app().info( "session_establishment_procedure handle itti_sxab_session_establishment_response: pdu-session-id %d", n11_trigger.get()->req.get_pdu_session_id());
+
+	pfcp::cause_t cause = {};
+	resp.pfcp_ies.get(cause);
+	if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
+		resp.pfcp_ies.get(ppc->up_fseid);
+	}
+
+	for (auto it : resp.pfcp_ies.created_pdrs) {
+		pfcp::pdr_id_t pdr_id = {};
+		pfcp::far_id_t far_id = {};
+		if (it.get(pdr_id)) {
+			pgw_eps_bearer b = {};
+			if (ppc->get_eps_bearer(pdr_id, b)) {
+				pfcp::fteid_t local_up_fteid = {};
+				if (it.get(local_up_fteid)) {
+					xgpp_conv::pfcp_to_core_fteid(local_up_fteid, b.pgw_fteid_s5_s8_up);
+					b.pgw_fteid_s5_s8_up.interface_type = S5_S8_PGW_GTP_U;
+					// comment if SPGW-C allocate up fteid
+					pgw_eps_bearer b2 = b;
+					ppc->add_eps_bearer(b2);
+				}
+				// uncomment if SPGW-C allocate up fteid
+				// ppc->add_eps_bearer(b);
+			} else {
+				Logger::pgwc_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
+			}
+		} else {
+			Logger::pgwc_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
+		}
+	}
+
+	ebi_t ebi = {};
+	ebi.ebi = n11_trigger.get()->req.get_pdu_session_id();
+	pgw_eps_bearer b = {};
+	gtpv2c::bearer_context_created_within_create_session_response bcc = {};
+	::cause_t bcc_cause = {.cause_value = REQUEST_ACCEPTED, .pce = 0, .bce = 0, .cs = 0};
+	if (not ppc->get_eps_bearer(ebi, b)) {
+		bcc_cause.cause_value = SYSTEM_FAILURE;
+	} else {
+		if (b.pgw_fteid_s5_s8_up.is_zero()) {
+			bcc_cause.cause_value = SYSTEM_FAILURE;
+		} else {
+			bcc.set(b.pgw_fteid_s5_s8_up, 2);
+		}
+	}
+	bcc.set(b.ebi);
+	bcc.set(bcc_cause);
+	// only if modified bcc.set(bearer_level_qos);
+	//  s5_triggered_pending->gtp_ies.add_bearer_context_created(bcc);
+	// }
+/*
+	//Send reply to AMF
+	Logger::pgwc_app().info( "Sending response to AMF!");
+	nlohmann::json jsonData;
+	oai::smf::model::SmContextCreatedData smContextCreatedData;
+
+	//PduSessionId
+	smContextCreatedData.setPduSessionId(n11_trigger.get()->get_pdu_session_id());
+	//Snssai
+	oai::smf::model::Snssai snssai;
+	snssai.setSst(n11_trigger.get()->get_snssai().sST);
+	snssai.setSd(n11_trigger.get()->get_snssai().sD);
+	smContextCreatedData.setSNssai(snssai);
+	//UpCnxState
+	//N2SmInfo (use NAS to encode)
+	//TODO:
+	//N2SmInfoType
+	//TODO: smContextCreatedData.setN2SmInfoType();
+	//std::vector<EbiArpMapping> m_AllocatedEbiList
+	//HoState
+	//Gpsi
+	//SmfServiceInstanceId - SMF instance ID
+	//RecoveryTime;
+	//SupportedFeatures
+
+	to_json(jsonData, smContextCreatedData);
+	std::string resBody = jsonData.dump();
+	//issue: httpResponse has been free!!!
+	n11_triggered_pending.get()->set_http_code(Pistache::Http::Code::Created);
+	n11_triggered_pending.get()->send_msg_to_amf(resBody);
+*/
+	//send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs
+	Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());
+
+	int ret = itti_inst->send_msg(n11_triggered_pending);
+	if (RETURNok != ret) {
+		Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  n11_triggered_pending->get_msg_name());
+	}
 
 }
 
