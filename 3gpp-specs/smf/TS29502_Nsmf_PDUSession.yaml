@@ -84,23 +84,23 @@ paths:
                       schema:
                         type: string
                 '400': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/400'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/400'
                 '403': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/403'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/403'
                 '404': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/404'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/404'
                 '411': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/411'
                 '413': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/413'
                 '415': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/415'
                 '429': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/429'
                 '500': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/500'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/500'
                 '503': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/503'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/503'
 
       responses:
         '201':
@@ -223,13 +223,13 @@ paths:
                       schema:
                         type: string 
         '411': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/411'
         '413': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/413'
         '415': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/415'
         '429': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/429'
 
         '500':
           description: unsuccessful creation of an SM context - internal server error
@@ -305,7 +305,7 @@ paths:
                       schema:
                         type: string                      
         default:
-          $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/default'
                
             
   /sm-contexts/{smContextRef}/retrieve:
@@ -336,25 +336,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/SmContextRetrievedData'
         '400':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/400'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/400'
         '403':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/403'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/403'
         '404':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/404'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/404'
         '411': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/411'
         '413': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/413'
         '415': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/415'
         '429': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/429'
         '500':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/500'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/500'
         '503':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/503'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/503'
         default:
-          $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/default'
   
   /sm-contexts/{smContextRef}/modify:  
     post:
@@ -548,13 +548,13 @@ paths:
                       schema:
                         type: string        
         '411': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/411'
         '413': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/413'
         '415': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/415'
         '429': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/429'
         '500':
           description: unsuccessful update of an SM context - Internal server error
           content:
@@ -622,7 +622,7 @@ paths:
                       schema:
                         type: string        
         default:
-          $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/default'
   
   /sm-contexts/{smContextRef}/release:
     post:
@@ -667,25 +667,25 @@ paths:
         '204':
           description: successful release of an SM context without content in the response
         '400':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/400'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/400'
         '403':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/403'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/403'
         '404':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/404'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/404'
         '411': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/411'
         '413': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/413'
         '415': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/415'
         '429': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/429'
         '500':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/500'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/500'
         '503':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/503'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/503'
         default:
-          $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/default'
 
   
   /pdu-sessions:
@@ -747,25 +747,25 @@ paths:
                 '204':
                   description: successful notificationof the status change
                 '400':
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/400'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/400'
                 '403': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/403'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/403'
                 '404':
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/404'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/404'
                 '411':
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/411'
                 '413':
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/413'
                 '415':
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/415'
                 '429':
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/429'
                 '500':
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/500'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/500'
                 '503':
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/503'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/503'
                 default:
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/default'
   
   
         update:  
@@ -843,13 +843,13 @@ paths:
                 '404':
                   $ref: '#/components/responses/VsmfUpdateError'
                 '411': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/411'
                 '413': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/413'
                 '415': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/415'
                 '429': 
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/429'
                 '500':
                   $ref: '#/components/responses/VsmfUpdateError'
                 '503':
@@ -857,7 +857,7 @@ paths:
                 '504':
                   $ref: '#/components/responses/VsmfUpdateError'
                 default:
-                  $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+                  $ref: '../TS29571_CommonData.yaml#/components/responses/default'
 
       responses:
         '201':
@@ -913,19 +913,19 @@ paths:
         '404':
           $ref: '#/components/responses/PduSessionCreateError'
         '411': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/411'
         '413': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/413'
         '415': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/415'
         '429': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/429'
         '500':
           $ref: '#/components/responses/PduSessionCreateError'
         '503':
           $ref: '#/components/responses/PduSessionCreateError'
         default:
-          $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/default'
   
   /pdu-sessions/{pduSessionRef}/modify:
     post:
@@ -1008,19 +1008,19 @@ paths:
         '404':
           $ref: '#/components/responses/HsmfUpdateError'
         '411': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/411'
         '413': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/413'
         '415': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/415'
         '429': 
-          $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/429'
         '500':
           $ref: '#/components/responses/HsmfUpdateError'
         '503':
           $ref: '#/components/responses/HsmfUpdateError'
         default:
-          $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/default'
 
   /pdu-sessions/{pduSessionRef}/release:
     post:
@@ -1046,25 +1046,25 @@ paths:
         '204':
           description: successful release of a PDU session
         '400':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/400'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/400'
         '403':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/403'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/403'
         '404':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/404'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/404'
         '411':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/411'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/411'
         '413':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/413'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/413'
         '415':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/415'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/415'
         '429':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/429'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/429'
         '500':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/500'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/500'
         '503':
-          $ref: 'TS29571_CommonData.yaml#/components/responses/503'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/503'
         default:
-          $ref: 'TS29571_CommonData.yaml#/components/responses/default'
+          $ref: '../TS29571_CommonData.yaml#/components/responses/default'
   
 components:
   securitySchemes:
@@ -1084,85 +1084,85 @@ components:
       type: object
       properties:
         supi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Supi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Supi'
         unauthenticatedSupi:
           type: boolean
           default:  false
         pei:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Pei'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Pei'
         gpsi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Gpsi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Gpsi'
         pduSessionId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionId'
         dnn:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Dnn'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Dnn'
         sNssai:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Snssai'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
         hplmnSnssai:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Snssai'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
         servingNfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         guami:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Guami'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Guami'
         serviceName:
-          $ref: 'TS29510_Nnrf_NFManagement.yaml#/components/schemas/ServiceName'
+          $ref: '../TS29510_Nnrf_NFManagement.yaml#/components/schemas/ServiceName'
         servingNetwork:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PlmnId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PlmnId'
         requestType:
           $ref: '#/components/schemas/RequestType'
         n1SmMsg:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         anType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         secondAnType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         ratType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RatType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType'
         presenceInLadn:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PresenceState'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PresenceState'
         ueLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         ueTimeZone:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TimeZone'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
         addUeLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         smContextStatusUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         hSmfUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         additionalHsmfUri:
           type: array
           items: 
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
           minItems: 1
         oldPduSessionId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionId'
         pduSessionsActivateList:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionId'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionId'
           minItems: 1
         ueEpsPdnConnection:
           $ref: '#/components/schemas/EpsPdnCnxContainer'
         hoState:
           $ref: '#/components/schemas/HoState'
         pcfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         nrfUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         supportedFeatures:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
         selMode:
           $ref: '#/components/schemas/DnnSelectionMode'
         backupAmfInfo:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/BackupAmfInfo'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/BackupAmfInfo'
           minItems: 1
         traceData:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TraceData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TraceData'
         udmGroupId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfGroupId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfGroupId'
         routingIndicator:
           type: string
         epsInterworkingInd:
@@ -1170,7 +1170,7 @@ components:
         indirectForwardingFlag:
           type: boolean
         targetId:
-          $ref: 'TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
+          $ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
         epsBearerCtxStatus:
           $ref: '#/components/schemas/EpsBearerContextStatus'
         cpCiotEnabled:
@@ -1183,9 +1183,9 @@ components:
           type: boolean
           default: false
         n2SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         smContextRef:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
       required:
         - servingNfId
         - servingNetwork
@@ -1196,15 +1196,15 @@ components:
       type: object
       properties:
         hSmfUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         pduSessionId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionId'
         sNssai:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Snssai'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
         upCnxState:
           $ref: '#/components/schemas/UpCnxState'
         n2SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfoType:
           $ref: '#/components/schemas/N2SmInfoType'
         allocatedEbiList:
@@ -1215,45 +1215,45 @@ components:
         hoState:
           $ref: '#/components/schemas/HoState'
         gpsi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Gpsi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Gpsi'
         smfServiceInstanceId:
           type: string
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'        
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'        
         supportedFeatures:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
 
     SmContextUpdateData:
       type: object
       properties:
         pei:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Pei'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Pei'
         servingNfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         guami:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Guami'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Guami'
         servingNetwork:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PlmnId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PlmnId'
         backupAmfInfo:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/BackupAmfInfo'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/BackupAmfInfo'
           minItems: 1
           nullable: true
         anType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         secondAnType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         ratType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RatType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType'
         presenceInLadn:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PresenceState'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PresenceState'
         ueLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         ueTimeZone:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TimeZone'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
         addUeLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         upCnxState:
           $ref: '#/components/schemas/UpCnxState'
         hoState:
@@ -1264,17 +1264,17 @@ components:
         failedToBeSwitched:
           type: boolean
         n1SmMsg:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfoType:
           $ref: '#/components/schemas/N2SmInfoType'
         targetId:
-          $ref: 'TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
+          $ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
         targetServingNfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         smContextStatusUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         dataForwarding:
           type: boolean
           default: false
@@ -1294,20 +1294,20 @@ components:
         cause:
           $ref: '#/components/schemas/Cause'
         ngApCause:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NgApCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause'
         5gMmCauseValue:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
         sNssai:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Snssai'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
         traceData:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TraceData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TraceData'
         epsInterworkingInd:
           $ref: '#/components/schemas/EpsInterworkingIndication'
         anTypeCanBeChanged:
           type: boolean
           default: false
         n2SmInfoExt1:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfoTypeExt1:
           $ref: '#/components/schemas/N2SmInfoType'
         maReleaseInd:
@@ -1338,9 +1338,9 @@ components:
             $ref: '#/components/schemas/EbiArpMapping'
           minItems: 1
         n1SmMsg:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfoType:
           $ref: '#/components/schemas/N2SmInfoType'
         epsBearerSetup:
@@ -1359,20 +1359,20 @@ components:
         cause:
           $ref: '#/components/schemas/Cause'
         ngApCause:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NgApCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause'
         5gMmCauseValue:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
         ueLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         ueTimeZone:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TimeZone'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
         addUeLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         vsmfReleaseOnly:
           type: boolean
           default: false
         n2SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfoType:
           $ref: '#/components/schemas/N2SmInfoType'
         ismfReleaseOnly:
@@ -1391,22 +1391,22 @@ components:
       type: object
       properties:
         supi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Supi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Supi'
         unauthenticatedSupi:
           type: boolean
           default: false
         pei:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Pei'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Pei'
         pduSessionId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionId'
         dnn:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Dnn'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Dnn'
         sNssai:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Snssai'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
         vsmfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         servingNetwork:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PlmnId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PlmnId'
         requestType:
           $ref: '#/components/schemas/RequestType'
         epsBearerId:
@@ -1415,33 +1415,33 @@ components:
             $ref: '#/components/schemas/EpsBearerId'
           minItems: 1
         pgwS8cFteid:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
         vsmfPduSessionUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         vcnTunnelInfo:
           $ref: '#/components/schemas/TunnelInfo'
         anType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         secondAnType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         ratType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RatType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType'
         ueLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         ueTimeZone:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TimeZone'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
         addUeLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         gpsi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Gpsi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Gpsi'
         n1SmInfoFromUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         unknownN1SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         supportedFeatures:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
         hPcfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         hoPreparationIndication:
           type: boolean
         selMode:
@@ -1450,7 +1450,7 @@ components:
           type: boolean
           default: false
         udmGroupId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfGroupId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfGroupId'
         routingIndicator:
           type: string
         epsInterworkingInd:
@@ -1458,19 +1458,19 @@ components:
         vSmfServiceInstanceId:
           type: string
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'
         roamingChargingProfile:
-          $ref: 'TS32291_Nchf_ConvergedCharging.yaml#/components/schemas/RoamingChargingProfile'
+          $ref: '../TS32291_Nchf_ConvergedCharging.yaml#/components/schemas/RoamingChargingProfile'
         chargingId:
           type: string
         oldPduSessionId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionId'
         epsBearerCtxStatus:
           $ref: '#/components/schemas/EpsBearerContextStatus'
         amfNfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         guami:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Guami'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Guami'
         cpCiotEnabled:
           type: boolean
           default: false
@@ -1491,34 +1491,34 @@ components:
       type: object
       properties:
         pduSessionType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionType'
         sscMode:
           type: string
           pattern: '^[0-7]$'
         hcnTunnelInfo:
           $ref: '#/components/schemas/TunnelInfo'
         sessionAmbr:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ambr'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ambr'
         qosFlowsSetupList:
           type: array
           items:
             $ref: '#/components/schemas/QosFlowSetupItem'
           minItems: 1
         hSmfInstanceId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         pduSessionId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionId'
         sNssai:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Snssai'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
         enablePauseCharging:
           type: boolean
           default: false
         ueIpv4Address:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv4Addr'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ipv4Addr'
         ueIpv6Prefix:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv6Prefix'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ipv6Prefix'
         n1SmInfoToUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         epsPdnCnxInfo:
           $ref: '#/components/schemas/EpsPdnCnxInfo'
         epsBearerInfo:
@@ -1527,22 +1527,22 @@ components:
             $ref: '#/components/schemas/EpsBearerInfo'
           minItems: 1
         supportedFeatures:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
         maxIntegrityProtectedDataRate:
           $ref: '#/components/schemas/MaxIntegrityProtectedDataRate'
         alwaysOnGranted:
           type: boolean
           default: false
         gpsi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Gpsi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Gpsi'
         upSecurity:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UpSecurity'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UpSecurity'
         roamingChargingProfile:
-          $ref: 'TS32291_Nchf_ConvergedCharging.yaml#/components/schemas/RoamingChargingProfile'
+          $ref: '../TS32291_Nchf_ConvergedCharging.yaml#/components/schemas/RoamingChargingProfile'
         hSmfServiceInstanceId:
           type: string
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'
       required:
         - pduSessionType
         - sscMode
@@ -1554,31 +1554,31 @@ components:
         requestIndication:
           $ref: '#/components/schemas/RequestIndication'
         pei:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Pei'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Pei'
         vcnTunnelInfo:
           $ref: '#/components/schemas/TunnelInfo'
         servingNetwork:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PlmnId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PlmnId'
         anType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         secondAnType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         ratType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RatType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType'
         ueLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         ueTimeZone:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TimeZone'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
         addUeLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         pauseCharging:
           type: boolean
         pti:
           $ref: '#/components/schemas/ProcedureTransactionId'
         n1SmInfoFromUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         unknownN1SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         qosFlowsRelNotifyList:
           type: array
           items:
@@ -1609,9 +1609,9 @@ components:
         cause:
           $ref: '#/components/schemas/Cause'
         ngApCause:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NgApCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause'
         5gMmCauseValue:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
         alwaysOnRequested:
           type: boolean
           default: false
@@ -1620,12 +1620,12 @@ components:
         secondaryRatUsageReport:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageReport'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageReport'
           minItems: 1
         secondaryRatUsageInfo:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageInfo'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageInfo'
           minItems: 1        
         anTypeCanBeChanged:
           type: boolean
@@ -1639,7 +1639,7 @@ components:
       type: object
       properties:
         n1SmInfoToUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
 
     ReleaseData:
       type: object
@@ -1647,24 +1647,24 @@ components:
         cause:
           $ref: '#/components/schemas/Cause'
         ngApCause:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NgApCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause'
         5gMmCauseValue:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
         ueLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         ueTimeZone:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TimeZone'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
         addUeLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         secondaryRatUsageReport:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageReport'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageReport'
           minItems: 1
         secondaryRatUsageInfo:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageInfo'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageInfo'
           minItems: 1        
 
       
@@ -1674,7 +1674,7 @@ components:
         requestIndication:
           $ref: '#/components/schemas/RequestIndication'
         sessionAmbr:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ambr'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ambr'
         qosFlowsAddModRequestList:
           type: array
           items:
@@ -1708,20 +1708,20 @@ components:
         pti:
           $ref: '#/components/schemas/ProcedureTransactionId'
         n1SmInfoToUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         alwaysOnGranted:
           type: boolean
           default: false
         hsmfPduSessionUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         supportedFeatures:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/SupportedFeatures'
         cause:
           $ref: '#/components/schemas/Cause'
         n1smCause:
           type: string
         backOffTimer:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DurationSec'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DurationSec'
         maReleaseInd:
           $ref: '#/components/schemas/MaReleaseIndication'
       required:
@@ -1751,15 +1751,15 @@ components:
             $ref: '#/components/schemas/QosFlowItem'
           minItems: 1
         n1SmInfoFromUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         unknownN1SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         ueLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         ueTimeZone:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TimeZone'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
         addUeLocation:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UserLocation'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
         assignedEbiList:
           type: array
           items:
@@ -1778,12 +1778,12 @@ components:
         secondaryRatUsageReport:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageReport'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageReport'
           minItems: 1
         secondaryRatUsageInfo:
           type: array
           items:
-            $ref: 'TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageInfo'
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/SecondaryRatUsageInfo'
           minItems: 1        
 
     StatusNotification:
@@ -1798,7 +1798,7 @@ components:
       type: object
       properties:
         qfi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Qfi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Qfi'
         cause:
           $ref: '#/components/schemas/Cause'
       required:
@@ -1808,13 +1808,13 @@ components:
       type: object
       properties:
         qfi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Qfi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Qfi'
         qosRules:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
         ebi:
           $ref: '#/components/schemas/EpsBearerId'
         qosFlowDescription:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
         qosFlowProfile:
           $ref: '#/components/schemas/QosFlowProfile'
       required:
@@ -1825,13 +1825,13 @@ components:
       type: object
       properties:
         qfi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Qfi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Qfi'
         ebi:
           $ref: '#/components/schemas/EpsBearerId'
         qosRules:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
         qosFlowDescription:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
         qosFlowProfile:
           $ref: '#/components/schemas/QosFlowProfile'
       required:
@@ -1841,11 +1841,11 @@ components:
       type: object
       properties:
         qfi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Qfi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Qfi'
         qosRules:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
         qosFlowDescription:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
       required:
         - qfi
     
@@ -1853,19 +1853,19 @@ components:
       type: object
       properties:
         5qi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/5Qi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/5Qi'
         nonDynamic5Qi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NonDynamic5Qi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NonDynamic5Qi'
         dynamic5Qi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Dynamic5Qi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Dynamic5Qi'
         arp:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Arp'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Arp'
         gbrQosFlowInfo:
           $ref: '#/components/schemas/GbrQosFlowInformation'
         rqa:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/ReflectiveQoSAttribute'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/ReflectiveQoSAttribute'
         additionalQosFlowInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AdditionalQosFlowInfo'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AdditionalQosFlowInfo'
       required:
         - 5qi
     
@@ -1873,19 +1873,19 @@ components:
       type: object
       properties:
         maxFbrDl:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/BitRate'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/BitRate'
         maxFbrUl:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/BitRate'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/BitRate'
         guaFbrDl:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/BitRate'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/BitRate'
         guaFbrUl:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/BitRate'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/BitRate'
         notifControl:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NotificationControl'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NotificationControl'
         maxPacketLossRateDl:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PacketLossRate'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PacketLossRate'
         maxPacketLossRateUl:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PacketLossRate'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PacketLossRate'
       required:
         - maxFbrDl
         - maxFbrUl
@@ -1896,7 +1896,7 @@ components:
       type: object
       properties:
         qfi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Qfi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Qfi'
         notificationCause:
           $ref: '#/components/schemas/NotificationCause'
       required:
@@ -1933,9 +1933,9 @@ components:
       type: object
       properties:
         ipv4Addr:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv4Addr'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ipv4Addr'
         ipv6Addr:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv6Addr'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ipv6Addr'
         gtpTeid:
           $ref: '#/components/schemas/Teid'
       required:
@@ -1956,9 +1956,9 @@ components:
       type: object
       properties:
         pgwS8cFteid:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
         pgwNodeName:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
       required:
         - pgwS8cFteid
     
@@ -1968,9 +1968,9 @@ components:
         ebi:
           $ref: '#/components/schemas/EpsBearerId'
         pgwS8uFteid:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
         bearerLevelQoS:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Bytes'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Bytes'
       required:
         - ebi
         - pgwS8uFteid
@@ -1990,7 +1990,7 @@ components:
         epsBearerId:
           $ref: '#/components/schemas/EpsBearerId'
         arp:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Arp'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Arp'
       required:
         - epsBearerId
         - arp
@@ -1999,11 +1999,11 @@ components:
       type: object
       properties:
         error:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
         n1SmMsg:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'
       required:
         - error
     
@@ -2011,17 +2011,17 @@ components:
       type: object
       properties:
         error:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
         n1SmMsg:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         n2SmInfoType:
           $ref: '#/components/schemas/N2SmInfoType'
         upCnxState:
           $ref: '#/components/schemas/UpCnxState'
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'
       required:
         - error
     
@@ -2029,16 +2029,16 @@ components:
       type: object
       properties:
         error:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
         n1smCause:
           type: string
           pattern: '^[A-F0-9]{2}$'
         n1SmInfoToUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         backOffTimer:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DurationSec'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DurationSec'
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'
       required:
         - error
     
@@ -2046,18 +2046,18 @@ components:
       type: object
       properties:
         error:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
         pti:
           $ref: '#/components/schemas/ProcedureTransactionId'
         n1smCause:
           type: string
           pattern: '^[A-F0-9]{2}$'
         n1SmInfoToUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         backOffTimer:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DurationSec'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DurationSec'
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'
       required:
         - error
 
@@ -2065,27 +2065,27 @@ components:
       type: object
       properties:
         error:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/ProblemDetails'
         pti:
           $ref: '#/components/schemas/ProcedureTransactionId'
         n1smCause:
           type: string
           pattern: '^[A-F0-9]{2}$'
         n1SmInfoFromUe:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         unknownN1SmInfo:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
         failedToAssignEbiList:
           type: array
           items:
             $ref: '#/components/schemas/EpsBearerId'
           minItems: 1
         ngApCause:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NgApCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause'
         5gMmCauseValue:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'
       required:
         - error
 
@@ -2093,71 +2093,71 @@ components:
       type: object
       properties:
         supi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Supi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Supi'
         unauthenticatedSupi:
           type: boolean
           default:  false
         pei:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Pei'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Pei'
         gpsi:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Gpsi'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Gpsi'
         pduSessionId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionId'
         dnn:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Dnn'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Dnn'
         sNssai:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Snssai'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
         hplmnSnssai:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Snssai'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
         servingNfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         guami:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Guami'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Guami'
         serviceName:
-          $ref: 'TS29510_Nnrf_NFManagement.yaml#/components/schemas/ServiceName'
+          $ref: '../TS29510_Nnrf_NFManagement.yaml#/components/schemas/ServiceName'
         servingNetwork:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PlmnId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PlmnId'
         anType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/AccessType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
         ratType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/RatType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType'
         smContextStatusUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         hSmfUri:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Uri'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
         pcfId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         selMode:
           $ref: '#/components/schemas/DnnSelectionMode'
         traceData:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/TraceData'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TraceData'
         udmGroupId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfGroupId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfGroupId'
         routingIndicator:
           type: string
         epsInterworkingInd:
           $ref: '#/components/schemas/EpsInterworkingIndication'
         pduSessionType:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/PduSessionType'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PduSessionType'
         sscMode:
           type: string
           pattern: '^[0-7]$'
         sessionAmbr:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ambr'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ambr'
         qosFlowsSetupList:
           type: array
           items:
             $ref: '#/components/schemas/QosFlowSetupItem'
           minItems: 1
         hSmfInstanceId:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
         enablePauseCharging:
           type: boolean
           default: false
         ueIpv4Address:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv4Addr'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ipv4Addr'
         ueIpv6Prefix:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/Ipv6Prefix'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Ipv6Prefix'
         epsPdnCnxInfo:
           $ref: '#/components/schemas/EpsPdnCnxInfo'
         epsBearerInfo:
@@ -2171,11 +2171,11 @@ components:
           type: boolean
           default: false
         upSecurity:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/UpSecurity'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UpSecurity'
         hSmfServiceInstanceId:
           type: string
         recoveryTime:
-          $ref: 'TS29571_CommonData.yaml#/components/schemas/DateTime'
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/DateTime'
       required:
         - pduSessionId
         - dnn
