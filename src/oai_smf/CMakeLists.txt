@@ -279,7 +279,7 @@ endif(${SGW_AUTOTEST})
 #ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/test ${CMAKE_CURRENT_BINARY_DIR}/test)
 
 ################################################################################
-# Specific part for oai_spgwc folder
+# Specific part for oai_smf folder
 
 #SMF_API
 set(SMF_API_SERVER_DIR "${SRC_TOP_DIR}/api-server")
@@ -341,10 +341,10 @@ set(NAS_include_files
 add_library(NAS ${NAS_src_files} ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES})
 
 
-add_definitions("-DPACKAGE_NAME=\"SPGW-C\"")
+add_definitions("-DPACKAGE_NAME=\"SMF\"")
 
 include_directories(${SRC_TOP_DIR}/pgwc)
-include_directories(${SRC_TOP_DIR}/oai_spgwc)
+include_directories(${SRC_TOP_DIR}/oai_smf)
 include_directories(${SRC_TOP_DIR}/common)
 include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/common/msg)
@@ -358,16 +358,16 @@ include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 include_directories(${SMF_API_SERVER_include_files})
 include_directories(${NAS_include_files})
 
-add_executable(spgwc
-  ${SRC_TOP_DIR}/oai_spgwc/main.cpp
-  ${SRC_TOP_DIR}/oai_spgwc/options.cpp
+add_executable(smf
+  ${SRC_TOP_DIR}/oai_smf/main.cpp
+  ${SRC_TOP_DIR}/oai_smf/options.cpp
   ${SRC_TOP_DIR}/itti/itti.cpp
   ${SRC_TOP_DIR}/itti/itti_msg.cpp
   )
 
 IF(STATIC_LINKING)
     SET(CMAKE_EXE_LINKER_FLAGS "-static")
-    SET_TARGET_PROPERTIES(spgwc PROPERTIES LINK_SEARCH_END_STATIC 1)
+    SET_TARGET_PROPERTIES(smf PROPERTIES LINK_SEARCH_END_STATIC 1)
     # asan do not support static linking
     SET(ASAN)
 ENDIF(STATIC_LINKING)
@@ -376,5 +376,5 @@ if(${SGW_AUTOTEST})
   SET(GTPV1U_LIB GTPV1U)
 endif(${SGW_AUTOTEST})
 
-target_link_libraries (spgwc ${ASAN} -Wl,--start-group CN_UTILS SGWC PGWC UDP ${GTPV1U_LIB} GTPV2C PFCP 3GPP_COMMON_TYPES SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
+target_link_libraries (smf ${ASAN} -Wl,--start-group CN_UTILS SGWC PGWC UDP ${GTPV1U_LIB} GTPV2C PFCP 3GPP_COMMON_TYPES SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
 

@@ -18,16 +18,18 @@
 # For more information about the OpenAirInterface (OAI) Software Alliance:
 #      contact@openairinterface.org
 ################################################################################
-include_directories(${SRC_TOP_DIR}/common)
-include_directories(${SRC_TOP_DIR}/itti)
-include_directories(${SRC_TOP_DIR}/common/msg)
-include_directories(${SRC_TOP_DIR}/common/utils)
-include_directories(${SRC_TOP_DIR}/oai_smf)
-include_directories(${SRC_TOP_DIR}/pfcp)
-include_directories(${SRC_TOP_DIR}/udp)
-include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
+cmake_minimum_required (VERSION 3.0.2)
+# Override options for SMF
+set (  PACKAGE_NAME                    "SMF" )
+set (  STATIC_LINKING                   False )
+#############################################
+# Base directories, compatible with legacy OAI building
+################################################
+set (OPENAIRCN_DIR   $ENV{OPENAIRCN_DIR})
+set (BUILD_TOP_DIR   ${OPENAIRCN_DIR}/build)
+set (SRC_TOP_DIR     $ENV{OPENAIRCN_DIR}/src)
 
-add_library(PFCP STATIC
-    3gpp_29.244.cpp
-    pfcp.cpp
-    )
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../src/oai_smf/CMakeLists.txt)
+
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/sgwc ${CMAKE_CURRENT_BINARY_DIR}/sgwc)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/pgwc ${CMAKE_CURRENT_BINARY_DIR}/pgwc)
