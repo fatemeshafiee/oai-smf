@@ -1,6 +1,7 @@
 #ifndef MM_MSG_H_
 #define MM_MSG_H_
 
+
 #include "mmMsgDef.h"
 #include "AuthenticationRequest.h"
 #include "AuthenticationResponse.h"

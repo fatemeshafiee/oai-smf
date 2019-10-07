@@ -162,6 +162,16 @@ void pdu_session_create_sm_context_request::set_ipmdr(ipmdr_t const& ipmdr)
 
 
 //------------------------------------------------------------------
+supi_t pdu_session_create_sm_context_response::get_supi() const
+{
+	return m_supi;
+}
+
+void pdu_session_create_sm_context_response::set_supi(supi_t const& supi)
+{
+	m_supi = supi;
+}
+
 void pdu_session_create_sm_context_response::set_cause(uint8_t cause)
 {
 	m_cause = cause;
@@ -177,10 +187,6 @@ void pdu_session_create_sm_context_response::set_paa(paa_t paa)
 paa_t pdu_session_create_sm_context_response::get_paa()
 {
 	return m_paa;
-}
-
-void pdu_session_create_sm_context_response::send_msg_to_amf(std::string resBody){
-	m_http_response.send(m_code, resBody);
 }
 
 void pdu_session_create_sm_context_response::set_http_code(Pistache::Http::Code code)

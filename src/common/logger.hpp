@@ -105,6 +105,7 @@ public:
    static _Logger &pfcp() { return *singleton().m_pfcp; }
    static _Logger &pfcp_switch() { return *singleton().m_pfcp_switch; }
    static _Logger &smf_n10() { return *singleton().m_smf_n10; }
+   static _Logger &smf_n11() { return *singleton().m_smf_n11; }
    static _Logger &smf_api_server() { return *singleton().m_smf_api_server; }
 
 private:
@@ -148,6 +149,7 @@ private:
    _Logger *m_pfcp;
    _Logger *m_pfcp_switch;
    _Logger *m_smf_n10;
+   _Logger *m_smf_n11;
    _Logger *m_smf_api_server;
 };
 
