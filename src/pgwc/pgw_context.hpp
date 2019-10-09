@@ -38,7 +38,6 @@
 #include "3gpp_29.274.h"
 #include "3gpp_29.503.h"
 #include "common_root_types.h"
-#include "itti_msg_s5s8.hpp"
 #include "pgwc_procedure.hpp"
 #include "uint_generator.hpp"
 #include "SmContextCreateData.h"
@@ -187,7 +186,6 @@ public:
   void release_pdr_id(const pfcp::pdr_id_t& pdr_id);
   void generate_far_id(pfcp::far_id_t& far_id);
   void release_far_id(const pfcp::far_id_t& far_id);
-  void create_procedure(itti_s5s8_create_session_response& m);
   void insert_procedure(pgw_procedure* proc);
 
 
@@ -345,7 +343,6 @@ public:
 
   pgw_context(pgw_context& b) = delete;
 
-  //void create_procedure(itti_s5s8_create_session_request& csreq);
   void insert_procedure(std::shared_ptr<pgw_procedure>& sproc);
   bool find_procedure(const uint64_t& trxn_id, std::shared_ptr<pgw_procedure>& proc);
   void remove_procedure(pgw_procedure* proc);
@@ -363,11 +360,6 @@ public:
   void delete_apn_context(std::shared_ptr<apn_context>& sa);
   void delete_pdn_connection(std::shared_ptr<apn_context>& sa , std::shared_ptr<pgw_pdn_connection>& sp);
 
-  void handle_itti_msg (std::shared_ptr<itti_s5s8_create_session_request> s5_trigger);
-  void handle_itti_msg (std::shared_ptr<itti_s5s8_delete_session_request> s5_trigger);
-  void handle_itti_msg (std::shared_ptr<itti_s5s8_modify_bearer_request> s5_trigger);
-  void handle_itti_msg (std::shared_ptr<itti_s5s8_release_access_bearers_request> s5_trigger);
-  void handle_itti_msg (itti_s5s8_downlink_data_notification_acknowledge& );
   void handle_itti_msg (itti_sxab_session_establishment_response& );
   void handle_itti_msg (itti_sxab_session_modification_response& );
   void handle_itti_msg (itti_sxab_session_deletion_response& );
@@ -375,13 +367,10 @@ public:
 
 	/*
 	 * Handle messages from AMF (e.g., PDU_SESSION_CREATESMContextRequest)
-	 * @param [oai::smf::model::SmContextCreateData] smContextCreateData
-	 * @param [pdu_session_establishment_request_msg] nas_msg N1 SM container
-	 * @param [Pistache::Http::ResponseWriter] httpResponse to reply to AMF
+	 * @param [std::shared_ptr<itti_n11_create_sm_context_request] smreq Request message
 	 * @return void
 	 */
-	void handle_amf_msg (std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse);
-	void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+		void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
 	/*
 	 * Find DNN context with name

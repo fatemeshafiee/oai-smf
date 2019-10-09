@@ -25,7 +25,6 @@ include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/gtpv2c)
 include_directories(${SRC_TOP_DIR}/pfcp)
 include_directories(${SRC_TOP_DIR}/pgwc)
-include_directories(${SRC_TOP_DIR}/sgwc)
 include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
@@ -36,7 +35,6 @@ add_library (PGWC STATIC
   pgw_context.cpp
   pgw_pfcp_association.cpp
   pgw_pco.cpp
-  pgw_s5s8.cpp
   pgwc_procedure.cpp
   pgwc_sxab.cpp
   smf_n10.cpp

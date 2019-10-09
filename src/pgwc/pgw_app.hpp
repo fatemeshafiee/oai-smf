@@ -30,7 +30,6 @@
 
 #include "smf.h"
 #include "3gpp_29.274.h"
-#include "itti_msg_s5s8.hpp"
 #include "itti_msg_sxab.hpp"
 #include "itti_msg_n11.hpp"
 #include "pgw_context.hpp"
@@ -104,13 +103,6 @@ public:
   pgw_app(pgw_app const&)    = delete;
   void operator=(pgw_app const&)     = delete;
 
-  void send_create_session_response_cause (const uint64_t gtpc_tx_id, const teid_t teid, const endpoint& r_endpoint, const cause_t &cause) const;
-  void send_delete_session_response_cause_request_accepted (const uint64_t gtpc_tx_id, const teid_t teid, const endpoint& r_endpoint) const;
-  void send_delete_session_response_cause_context_not_found (const uint64_t gtpc_tx_id, const teid_t teid, const endpoint& r_endpoint) const;
-  void send_modify_bearer_response_cause_context_not_found (const uint64_t gtpc_tx_id, const teid_t teid, const endpoint& r_endpoint) const;
-  void send_release_access_bearers_response_cause_context_not_found(const uint64_t gtpc_tx_id, const teid_t teid, const endpoint& r_endpoint) const;
-  void send_release_access_bearers_response_cause_request_accepted(const uint64_t gtpc_tx_id, const teid_t teid, const endpoint& r_endpoint) const;
-
   fteid_t build_s5s8_cp_fteid(const struct in_addr ipv4_address, const teid_t teid);
   fteid_t generate_s5s8_cp_fteid(const struct in_addr ipv4_address);
   void free_s5s8_cp_fteid(const fteid_t& fteid);
@@ -133,11 +125,6 @@ public:
     protocol_configuration_options_t& pco_resp,
     protocol_configuration_options_ids_t & pco_ids);
 
-  void handle_itti_msg (std::shared_ptr<itti_s5s8_create_session_request> m);
-  void handle_itti_msg (std::shared_ptr<itti_s5s8_delete_session_request> m);
-  void handle_itti_msg (std::shared_ptr<itti_s5s8_modify_bearer_request> m);
-  void handle_itti_msg (std::shared_ptr<itti_s5s8_release_access_bearers_request> m);
-  void handle_itti_msg (itti_s5s8_downlink_data_notification_acknowledge& m);
   void handle_itti_msg (itti_sxab_session_establishment_response& m);
   void handle_itti_msg (itti_sxab_session_modification_response& m);
   void handle_itti_msg (itti_sxab_session_deletion_response& m);
@@ -148,13 +135,10 @@ public:
 
   /*
    * Handle PDUSession_CreateSMContextRequest from AMF
-   * @param [std::shared_ptr<pdu_session_create_sm_context_request>&] sm_context_req_msg Request message
-   * @param [Pistache::Http::ResponseWriter& ] httpResponse To send a response to AMF
+   * @param [std::shared_ptr<itti_n11_create_sm_context_request>&] Request message
    * @return void
    */
-  void handle_amf_msg(std::shared_ptr<pdu_session_create_sm_context_request>& sm_context_req_msg, Pistache::Http::ResponseWriter &httpResponse);
-
-  void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+   void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
   /*
    * Verify if SM Context is existed for this Supi
    * @param [supi_t] supi

@@ -22,9 +22,6 @@
 #include "pid_file.hpp"
 #include "pgw_app.hpp"
 #include "pgw_config.hpp"
-#include "sgwc_app.hpp"
-#include "sgwc_config.hpp"
-
 #include "smf-api-server.h"
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
@@ -40,7 +37,6 @@
 
 using namespace gtpv2c;
 using namespace pgwc;
-using namespace sgwc;
 using namespace util;
 using namespace std;
 using namespace oai::smf::api;
@@ -48,20 +44,18 @@ using namespace oai::smf::api;
 itti_mw *itti_inst = nullptr;
 async_shell_cmd *async_shell_cmd_inst = nullptr;
 pgw_app *pgw_app_inst = nullptr;
-sgwc_app *sgwc_app_inst = nullptr;
 pgw_config pgw_cfg;
-sgwc_config sgwc_cfg;
 
 void send_heartbeat_to_tasks(const uint32_t sequence);
 
 //------------------------------------------------------------------------------
 void send_heartbeat_to_tasks(const uint32_t sequence)
 {
-  itti_msg_ping *itti_msg = new itti_msg_ping(TASK_SGWC_APP, TASK_ALL, sequence);
+  itti_msg_ping *itti_msg = new itti_msg_ping(TASK_PGWC_APP, TASK_ALL, sequence);
   std::shared_ptr<itti_msg_ping> i = std::shared_ptr<itti_msg_ping>(itti_msg);
   int ret = itti_inst->send_broadcast_msg(i);
   if (RETURNok != ret) {
-    Logger::sgwc_app().error( "Could not send ITTI message %s to task TASK_ALL", i->get_msg_name());
+    Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_ALL", i->get_msg_name());
   }
 }
 
@@ -70,15 +64,13 @@ void my_app_signal_handler(int s)
 {
   std::cout << "Caught signal " << s << std::endl;
   Logger::system().startup( "exiting" );
-  itti_inst->send_terminate_msg(TASK_SGWC_APP);
+  itti_inst->send_terminate_msg(TASK_PGWC_APP);
   itti_inst->wait_tasks_end();
   std::cout << "Freeing Allocated memory..." << std::endl;
   if (async_shell_cmd_inst) delete async_shell_cmd_inst; async_shell_cmd_inst = nullptr;
   std::cout << "Async Shell CMD memory done." << std::endl;
   if (itti_inst) delete itti_inst; itti_inst = nullptr;
   std::cout << "ITTI memory done." << std::endl;
-  if (sgwc_app_inst) delete sgwc_app_inst; sgwc_app_inst = nullptr;
-  std::cout << "SGW APP memory done." << std::endl;
   if (pgw_app_inst) delete pgw_app_inst; pgw_app_inst = nullptr;
   std::cout << "PGW APP memory done." << std::endl;
   std::cout << "Freeing Allocated memory done" << std::endl;
@@ -99,7 +91,7 @@ int main(int argc, char **argv)
   // Logger
   Logger::init( "spgwc" , Options::getlogStdout() , Options::getlogRotFilelog());
 
-  Logger::sgwc_app().startup( "Options parsed" );
+  Logger::pgwc_app().startup( "Options parsed" );
 
   struct sigaction sigIntHandler;
   sigIntHandler.sa_handler = my_app_signal_handler;
@@ -108,8 +100,6 @@ int main(int argc, char **argv)
   sigaction(SIGINT, &sigIntHandler, NULL);
 
   // Config
-  sgwc_cfg.load(Options::getlibconfigConfig());
-  sgwc_cfg.display();
   pgw_cfg.load(Options::getlibconfigConfig());
   pgw_cfg.display();
 
@@ -118,7 +108,7 @@ int main(int argc, char **argv)
   itti_inst->start(pgw_cfg.itti.itti_timer_sched_params);
 
   // system command
-  async_shell_cmd_inst = new async_shell_cmd(sgwc_cfg.itti.async_cmd_sched_params);
+  async_shell_cmd_inst = new async_shell_cmd(pgw_cfg.itti.async_cmd_sched_params);
 
   // PGW application layer
   pgw_app_inst = new pgw_app(Options::getlibconfigConfig());
@@ -131,8 +121,6 @@ int main(int argc, char **argv)
     exit (-EDEADLK);
   }
 
-  // SGW application layer
-  sgwc_app_inst = new sgwc_app(Options::getlibconfigConfig());
 
   //SMF API server
   Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(8080));
