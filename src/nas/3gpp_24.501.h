@@ -75,8 +75,9 @@ extern "C" {
 #define ULNAS_TRANSPORT                         0b01100111
 #define DLNAS_TRANSPORT                         0b01101000
 
-
+//0b11******
 //5GS Session Management Messages
+/*
 enum pdu_session_message_e {
 	PDU_SESSION_ESTABLISHMENT_REQUEST = 193,
 	PDU_SESSION_ESTABLISHMENT_ACCEPT = 194,
@@ -94,27 +95,29 @@ enum pdu_session_message_e {
 	PDU_SESSION_RELEASE_COMMAND = 211,
 	PDU_SESSION_RELEASE_COMPLETE = 212
 };
+*/
 
-#define PDUSessionEstablishmentRequest      0b11000001
-#define PDUSessionEstablishmentAccept       0b11000010
-#define PDUSessionEstablishmentReject       0b11000011
+#define PDU_SESSION_ESTABLISHMENT_REQUEST       0b11000001
+#define PDU_SESSION_ESTABLISHMENT_ACCPET        0b11000010
+#define PDU_SESSION_ESTABLISHMENT_REJECT        0b11000011
 
-#define PDUSessionAuthenticationCommand     0b11000101
-#define PDUSessionAuthenticationComplete    0b11000110
-#define PDUSessionAuthenticationResult      0b11000111
+#define PDU_SESSION_AUTHENTICATION_COMMAND      0b11000101
+#define PDU_SESSION_AUTHENTICATION_COMPLETE     0b11000110
+#define PDU_SESSION_AUTHENTICATION_RESULT       0b11000111
 
-#define PDUSessionModificationRequest       0b11001001
-#define PDUSessionModificationReject        0b11001010
-#define PDUSessionModificationCommand       0b11001011
-#define PDUSessionModificationComplete      0b11001100
-#define PDUSessionModificationCommandReject 0b11001101
+#define PDU_SESSION_MODIFICATION_REQUEST        0b11001001
+#define PDU_SESSION_MODIFICATION_REJECT         0b11001010
+#define PDU_SESSION_MODIFICATION_COMMAND        0b11001011
+#define PDU_SESSION_MODIFICATION_COMPLETE       0b11001100
+#define PDU_SESSION_MODIFICATION_COMMANDREJECT  0b11001101
 
-#define PDUSessionReleaseRequest            0b11010001
-#define PDUSessionReleaseReject             0b11010010
-#define PDUSessionReleaseCommand            0b11010011
-#define PDUSessionReleaseComplete           0b11010100
+#define PDU_SESSION_RELEASE_REQUEST             0b11010001
+#define PDU_SESSION_RELEASE_REJECT              0b11010010
+#define PDU_SESSION_RELEASE_COMMAND             0b11010011
+#define PDU_SESSION_RELEASE_COMPLETE            0b11010100
 
-#define _5GSMStatus                         0b11010110
+#define _5GSM_STAUS                             0b11010110
+
 
 
 // 9.11.3.47 Request type
