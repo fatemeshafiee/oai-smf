@@ -1,3 +1,6 @@
+#ifndef _PDUSESSIONAUTHENTICATIONRESULT_H_
+#define _PDUSESSIONAUTHENTICATIONRESULT_H_
+
 #include <stdint.h>
 
 #include "ExtendedProtocolDiscriminator.h"
@@ -47,3 +50,5 @@ typedef struct pdu_session_authentication_result_msg_tag{
 
 int decode_pdu_session_authentication_result(pdu_session_authentication_result_msg *pdusessionauthenticationresult, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_authentication_result(pdu_session_authentication_result_msg *pdusessionauthenticationresult, uint8_t *buffer, uint32_t len);
+
+#endif

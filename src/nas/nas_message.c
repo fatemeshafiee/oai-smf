@@ -479,7 +479,7 @@ static int _nas_message_plain_encode (
     /*
      * Encode EPS Session Management L3 message
      */
-    //bytes = fivegsm_msg_encode ((SM_msg *) (&msg->sm), (uint8_t *) buffer, length);
+    bytes = fivegsm_msg_encode ((SM_msg *) (&msg->sm), (uint8_t *) buffer, length);
   } else {
     /*
      * Discard L3 messages with not supported protocol discriminator
@@ -1016,7 +1016,7 @@ static int _nas_message_plain_decode (
     /*
      * Decode 5G Session Management L3 message
      */
-    //bytes = sm_msg_decode (&msg->esm, (uint8_t *) buffer, length);
+    bytes = sm_msg_decode (&msg->sm, (uint8_t *) buffer, length);
     printf("\ndukl esm_msg_decode\n");
   } else {
     /*
