@@ -1,3 +1,6 @@
+#ifndef _PDUSESSIONMODIFICATIONREJECT_H_
+#define _PDUSESSIONMODIFICATIONREJECT_H_
+
 #include <stdint.h>
 
 #include "ExtendedProtocolDiscriminator.h"
@@ -56,3 +59,5 @@ typedef struct pdu_session_modification_reject_msg_tag{
 
 int decode_pdu_session_modification_reject(pdu_session_modification_reject_msg *pdusessionmodificationreject, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_modification_reject(pdu_session_modification_reject_msg *pdusessionmodificationreject, uint8_t *buffer, uint32_t len);
+
+#endif

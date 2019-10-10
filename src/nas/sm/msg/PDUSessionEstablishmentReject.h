@@ -1,3 +1,6 @@
+#ifndef _PDUSESSIONESTABLISHMENTREJECT_H_
+#define _PDUSESSIONESTABLISHMENTREJECT_H_
+
 #include <stdint.h>
 
 #include "ExtendedProtocolDiscriminator.h"
@@ -68,3 +71,5 @@ typedef struct pdu_session_establishment_reject_msg_tag{
 
 int decode_pdu_session_establishment_reject(pdu_session_establishment_reject_msg *pdusessionestablishmentreject, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_establishment_reject(pdu_session_establishment_reject_msg *pdusessionestablishmentreject, uint8_t *buffer, uint32_t len);
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef _PDUSESSIONRELEASECOMMAND_H_
+#define _PDUSESSIONRELEASECOMMAND_H_
+
 #include <stdint.h>
 
 #include "ExtendedProtocolDiscriminator.h"
@@ -61,3 +64,5 @@ typedef struct pdu_session_release_command_msg_tag{
 
 int decode_pdu_session_release_command(pdu_session_release_command_msg *pdusessionreleasecommand, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_release_command(pdu_session_release_command_msg *pdusessionreleasecommand, uint8_t *buffer, uint32_t len);
+
+#endif

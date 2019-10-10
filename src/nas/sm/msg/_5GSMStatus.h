@@ -1,3 +1,6 @@
+#ifndef __5GSMSTATUS_H_
+#define __5GSMSTATUS_H_
+
 #include <stdint.h>
 
 #include "ExtendedProtocolDiscriminator.h"
@@ -36,3 +39,5 @@ typedef struct _5gsm_status_msg_tag{
 
 int decode__5gsm_status(_5gsm_status_msg *_5gsmstatus, uint8_t *buffer, uint32_t len);
 int encode__5gsm_status(_5gsm_status_msg *_5gsmstatus, uint8_t *buffer, uint32_t len);
+
+#endif

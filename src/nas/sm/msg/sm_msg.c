@@ -65,6 +65,7 @@ sm_msg_decode (
 
     //OAILOG_ERROR (LOG_NAS, "ESM-MSG   - Failed to decode ESM message header " "(%d)\n", header_result);
     //OAILOG_FUNC_RETURN (LOG_NAS, header_result);
+    return header_result;
   }
 
   buffer += header_result;
@@ -118,7 +119,7 @@ sm_msg_decode (
       case PDU_SESSION_RELEASE_COMPLETE:
 	  	   decode_result = decode_pdu_session_release_complete(&msg->specific_msg.pdu_session_release_complete, buffer, len);
 	  break;
-	  case _5GSM_STATUS:
+	  case _5GSM_STAUS:
 	  	   decode_result = decode__5gsm_status(&msg->specific_msg._5gsm_status, buffer, len);
 	  break;
 
@@ -131,6 +132,7 @@ sm_msg_decode (
   if (decode_result < 0) {
     //OAILOG_ERROR (LOG_NAS, "SM-MSG   - Failed to decode L3 ESM message 0x%x " "(%u)\n", msg->header.message_type, decode_result);
     //OAILOG_FUNC_RETURN (LOG_NAS, decode_result);
+    return decode_result;
   } else {
     /*
      * Message has been decoded and security header removed, handle it has a
@@ -233,7 +235,7 @@ fivegsm_msg_encode (
       case PDU_SESSION_RELEASE_COMPLETE:
 	  	   encode_result = encode_pdu_session_release_complete(&msg->specific_msg.pdu_session_release_complete, buffer, len);
 	  break;
-	  case _5GSM_STATUS:
+	  case _5GSM_STAUS:
 	  	   encode_result = encode__5gsm_status(&msg->specific_msg._5gsm_status, buffer, len);
 	  break;
 

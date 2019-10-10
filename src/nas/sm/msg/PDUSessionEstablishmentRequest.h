@@ -1,3 +1,6 @@
+#ifndef _PDUSESSIONESTABLISHMENTREQUEST_H_
+#define _PDUSESSIONESTABLISHMENTREQUEST_H_
+
 #include <stdint.h>
 
 #include "ExtendedProtocolDiscriminator.h"
@@ -82,3 +85,5 @@ typedef struct pdu_session_establishment_request_msg_tag{
 
 int decode_pdu_session_establishment_request(pdu_session_establishment_request_msg *pdusessionestablishmentrequest, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_establishment_request(pdu_session_establishment_request_msg *pdusessionestablishmentrequest, uint8_t *buffer, uint32_t len);
+
+#endif

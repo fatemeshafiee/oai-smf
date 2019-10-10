@@ -1,3 +1,6 @@
+#ifndef _PDUSESSIONMODIFICATIONCOMPLETE_H_
+#define _PDUSESSIONMODIFICATIONCOMPLETE_H_
+
 #include <stdint.h>
 
 #include "ExtendedProtocolDiscriminator.h"
@@ -40,3 +43,5 @@ typedef struct pdu_session_modification_complete_msg_tag{
 
 int decode_pdu_session_modification_complete(pdu_session_modification_complete_msg *pdusessionmodificationcomplete, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_modification_complete(pdu_session_modification_complete_msg *pdusessionmodificationcomplete, uint8_t *buffer, uint32_t len);
+
+#endif
