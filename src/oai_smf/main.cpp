@@ -21,7 +21,7 @@
 #include "options.hpp"
 #include "pid_file.hpp"
 #include "pgw_app.hpp"
-#include "pgw_config.hpp"
+#include "smf_config.hpp"
 #include "smf-api-server.h"
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
@@ -44,7 +44,7 @@ using namespace oai::smf::api;
 itti_mw *itti_inst = nullptr;
 async_shell_cmd *async_shell_cmd_inst = nullptr;
 pgw_app *pgw_app_inst = nullptr;
-pgw_config pgw_cfg;
+smf_config smf_cfg;
 
 void send_heartbeat_to_tasks(const uint32_t sequence);
 
@@ -100,22 +100,22 @@ int main(int argc, char **argv)
   sigaction(SIGINT, &sigIntHandler, NULL);
 
   // Config
-  pgw_cfg.load(Options::getlibconfigConfig());
-  pgw_cfg.display();
+  smf_cfg.load(Options::getlibconfigConfig());
+  smf_cfg.display();
 
   // Inter task Interface
   itti_inst = new itti_mw();
-  itti_inst->start(pgw_cfg.itti.itti_timer_sched_params);
+  itti_inst->start(smf_cfg.itti.itti_timer_sched_params);
 
   // system command
-  async_shell_cmd_inst = new async_shell_cmd(pgw_cfg.itti.async_cmd_sched_params);
+  async_shell_cmd_inst = new async_shell_cmd(smf_cfg.itti.async_cmd_sched_params);
 
   // PGW application layer
   pgw_app_inst = new pgw_app(Options::getlibconfigConfig());
 
   // PID file
   // Currently hard-coded value. TODO: add as config option.
-   string pid_file_name = get_exe_absolute_path("/var/run", pgw_cfg.instance);
+   string pid_file_name = get_exe_absolute_path("/var/run", smf_cfg.instance);
   if (! is_pid_file_lock_success(pid_file_name.c_str())) {
     Logger::pgwc_app().error( "Lock PID file %s failed\n", pid_file_name.c_str());
     exit (-EDEADLK);

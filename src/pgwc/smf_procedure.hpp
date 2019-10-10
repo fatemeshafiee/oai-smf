@@ -18,10 +18,10 @@
  * For more information about the OpenAirInterface (OAI) Software Alliance:
  *      contact@openairinterface.org
  */
-#ifndef FILE_PGWC_PROCEDURE_HPP_SEEN
-#define FILE_PGWC_PROCEDURE_HPP_SEEN
+#ifndef FILE_SMF_PROCEDURE_HPP_SEEN
+#define FILE_SMF_PROCEDURE_HPP_SEEN
 
-/*! \file pgwc_procedure.hpp
+/*! \file smf_procedure.hpp
   \brief
   \author Lionel Gauthier
   \company Eurecom
@@ -31,8 +31,8 @@
 #include "3gpp_29.244.hpp"
 #include "3gpp_29.274.hpp"
 #include "itti_msg_n11.hpp"
-#include "itti_msg_sxab.hpp"
-#include "itti_msg_sx_restore.hpp"
+#include "itti_msg_n4.hpp"
+#include "itti_msg_n4_restore.hpp"
 #include "msg_pfcp.hpp"
 #include "msg_gtpv2c.hpp"
 #include "uint_generator.hpp"
@@ -49,7 +49,7 @@ class pgw_context;
 class pgw_pdn_connection;
 
 //------------------------------------------------------------------------------
-class pgw_procedure {
+class smf_procedure {
 private:
   static uint64_t              trxn_id_generator;
 
@@ -59,13 +59,13 @@ private:
 
 public:
   uint64_t              trxn_id;
-  pgw_procedure(){trxn_id = generate_trxn_id();}
-  explicit pgw_procedure(uint64_t tx){trxn_id = tx;}
-  virtual ~pgw_procedure(){}
+  smf_procedure(){trxn_id = generate_trxn_id();}
+  explicit smf_procedure(uint64_t tx){trxn_id = tx;}
+  virtual ~smf_procedure(){}
   virtual itti_msg_type_t get_procedure_type(){return ITTI_MSG_TYPE_NONE;}
-  virtual void handle_itti_msg (itti_sxab_session_establishment_response& resp) {}
-  virtual void handle_itti_msg (itti_sxab_session_modification_response& resp) {}
-  virtual void handle_itti_msg (itti_sxab_session_deletion_response& resp) {}
+  virtual void handle_itti_msg (itti_n4_session_establishment_response& resp) {}
+  virtual void handle_itti_msg (itti_n4_session_modification_response& resp) {}
+  virtual void handle_itti_msg (itti_n4_session_deletion_response& resp) {}
   //tual void handle_itti_msg (itti_s5s8_downlink_data_notification_acknowledge& resp) {}
 };
 
@@ -74,16 +74,16 @@ class sgw_eps_bearer_context;
 class sgw_pdn_connection;
 
 //------------------------------------------------------------------------------
-class sx_session_restore_procedure : public pgw_procedure {
+class sx_session_restore_procedure : public smf_procedure {
 public:
-  explicit sx_session_restore_procedure(std::set<pfcp::fseid_t>& sessions2restore) : pgw_procedure(), pending_sessions(sessions2restore),
+  explicit sx_session_restore_procedure(std::set<pfcp::fseid_t>& sessions2restore) : smf_procedure(), pending_sessions(sessions2restore),
   restored_sessions()
   {
     sessions2restore.clear();
   }
 
   int run();
-  //void handle_itti_msg (itti_sxab_session_establishment_response& resp);
+  //void handle_itti_msg (itti_n4_session_establishment_response& resp);
 
   //~sx_session_restore_procedure() {}
 
@@ -92,18 +92,18 @@ public:
 };
 
 //------------------------------------------------------------------------------
-class session_create_sm_context_procedure : public pgw_procedure {
+class session_create_sm_context_procedure : public smf_procedure {
 public:
-  explicit session_create_sm_context_procedure(std::shared_ptr<pgw_pdn_connection>& sppc) : pgw_procedure(), ppc(sppc),
+  explicit session_create_sm_context_procedure(std::shared_ptr<pgw_pdn_connection>& sppc) : smf_procedure(), ppc(sppc),
       sx_triggered(), n11_triggered_pending(), n11_trigger() {}
 
   int run(std::shared_ptr<itti_n11_create_sm_context_request> req,
           std::shared_ptr<itti_n11_create_sm_context_response>resp,
           std::shared_ptr<pgwc::pgw_context> pc);
 
-  void handle_itti_msg (itti_sxab_session_establishment_response& resp);
+  void handle_itti_msg (itti_n4_session_establishment_response& resp);
 
-  std::shared_ptr<itti_sxab_session_establishment_request> sx_triggered;
+  std::shared_ptr<itti_n4_session_establishment_request> sx_triggered;
   std::shared_ptr<pgw_pdn_connection>                      ppc;
   std::shared_ptr<pgwc::pgw_context>                       pc;
 

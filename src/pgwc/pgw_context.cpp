@@ -29,10 +29,10 @@
 #include "itti.hpp"
 #include "logger.hpp"
 #include "pgw_app.hpp"
-#include "pgw_config.hpp"
+#include "smf_config.hpp"
 #include "pgw_context.hpp"
-#include "pgw_paa_dynamic.hpp"
-#include "pgwc_procedure.hpp"
+#include "smf_paa_dynamic.hpp"
+#include "smf_procedure.hpp"
 #include "ProblemDetails.h"
 #include "3gpp_29.502.h"
 #include "3gpp_24.501.h"
@@ -43,7 +43,7 @@ using namespace pgwc;
 
 extern itti_mw *itti_inst;
 extern pgwc::pgw_app *pgw_app_inst;
-extern pgwc::pgw_config pgw_cfg;
+extern pgwc::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
 void pgw_eps_bearer::release_access_bearer()
@@ -179,7 +179,7 @@ void pgw_pdn_connection::deallocate_ressources(const std::string& apn)
 void pgw_pdn_connection::generate_seid()
 {
   // DO it simple now:
-  seid = pgw_fteid_s5_s8_cp.teid_gre_key | (((uint64_t)pgw_cfg.instance) << 32);
+  seid = pgw_fteid_s5_s8_cp.teid_gre_key | (((uint64_t)smf_cfg.instance) << 32);
 }
 //------------------------------------------------------------------------------
 // TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
@@ -402,17 +402,17 @@ bool pgw_context::find_apn_context(const std::string& apn, std::shared_ptr<apn_c
   return false;
 }
 //------------------------------------------------------------------------------
-void pgw_context::insert_procedure(std::shared_ptr<pgw_procedure>& sproc)
+void pgw_context::insert_procedure(std::shared_ptr<smf_procedure>& sproc)
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
   pending_procedures.push_back(sproc);
 }
 //------------------------------------------------------------------------------
-bool pgw_context::find_procedure(const uint64_t& trxn_id, std::shared_ptr<pgw_procedure>& proc)
+bool pgw_context::find_procedure(const uint64_t& trxn_id, std::shared_ptr<smf_procedure>& proc)
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
   auto found = std::find_if(pending_procedures.begin(), pending_procedures.end(),
-                   [trxn_id](std::shared_ptr<pgw_procedure> const& i) -> bool { return i->trxn_id == trxn_id;});
+                   [trxn_id](std::shared_ptr<smf_procedure> const& i) -> bool { return i->trxn_id == trxn_id;});
   if (found != pending_procedures.end()) {
     proc = *found;
     return true;
@@ -420,10 +420,10 @@ bool pgw_context::find_procedure(const uint64_t& trxn_id, std::shared_ptr<pgw_pr
   return false;
 }
 //------------------------------------------------------------------------------
-void pgw_context::remove_procedure(pgw_procedure* proc)
+void pgw_context::remove_procedure(smf_procedure* proc)
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
-  auto found = std::find_if(pending_procedures.begin(), pending_procedures.end(), [proc](std::shared_ptr<pgw_procedure> const& i) {
+  auto found = std::find_if(pending_procedures.begin(), pending_procedures.end(), [proc](std::shared_ptr<smf_procedure> const& i) {
     return i.get() == proc;
   });
   if (found != pending_procedures.end()) {
@@ -433,45 +433,45 @@ void pgw_context::remove_procedure(pgw_procedure* proc)
 
 
 //------------------------------------------------------------------------------
-void pgw_context::handle_itti_msg (itti_sxab_session_establishment_response& seresp)
+void pgw_context::handle_itti_msg (itti_n4_session_establishment_response& seresp)
 {
-  std::shared_ptr<pgw_procedure> proc = {};
+  std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(seresp.trxn_id, proc)) {
-    Logger::pgwc_app().debug("Received SXAB SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", seresp.seid, seresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", seresp.seid, seresp.trxn_id);
     proc->handle_itti_msg(seresp);
     remove_procedure(proc.get());
   } else {
-    Logger::pgwc_app().debug("Received SXAB SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_procedure not found, discarded!", seresp.seid, seresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", seresp.seid, seresp.trxn_id);
   }
 }
 //------------------------------------------------------------------------------
-void pgw_context::handle_itti_msg (itti_sxab_session_modification_response& smresp)
+void pgw_context::handle_itti_msg (itti_n4_session_modification_response& smresp)
 {
-  std::shared_ptr<pgw_procedure> proc = {};
+  std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(smresp.trxn_id, proc)) {
-    Logger::pgwc_app().debug("Received SXAB SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", smresp.seid, smresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", smresp.seid, smresp.trxn_id);
     proc->handle_itti_msg(smresp);
     remove_procedure(proc.get());
   } else {
-    Logger::pgwc_app().debug("Received SXAB SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_procedure not found, discarded!", smresp.seid, smresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", smresp.seid, smresp.trxn_id);
   }
   std::cout << toString() << std::endl;
 }
 //------------------------------------------------------------------------------
-void pgw_context::handle_itti_msg (itti_sxab_session_deletion_response& sdresp)
+void pgw_context::handle_itti_msg (itti_n4_session_deletion_response& sdresp)
 {
-  std::shared_ptr<pgw_procedure> proc = {};
+  std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(sdresp.trxn_id, proc)) {
-    Logger::pgwc_app().debug("Received SXAB SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", sdresp.seid, sdresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", sdresp.seid, sdresp.trxn_id);
     proc->handle_itti_msg(sdresp);
     remove_procedure(proc.get());
   } else {
-    Logger::pgwc_app().debug("Received SXAB SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_procedure not found, discarded!", sdresp.seid, sdresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", sdresp.seid, sdresp.trxn_id);
   }
   std::cout << toString() << std::endl;
 }
 //------------------------------------------------------------------------------
-void pgw_context::handle_itti_msg (std::shared_ptr<itti_sxab_session_report_request>& req)
+void pgw_context::handle_itti_msg (std::shared_ptr<itti_n4_session_report_request>& req)
 {/*
   pfcp::report_type_t report_type;
   if (req->pfcp_ies.get(report_type)) {
@@ -486,7 +486,7 @@ void pgw_context::handle_itti_msg (std::shared_ptr<itti_sxab_session_report_requ
           ebi_t ebi;
           if (find_pdn_connection(pdr_id, ppc, ebi)) {
             downlink_data_report_procedure* p = new downlink_data_report_procedure(req);
-            std::shared_ptr<pgw_procedure> sproc = std::shared_ptr<pgw_procedure>(p);
+            std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(p);
             insert_procedure(sproc);
             if (p->run(shared_from_this(), ppc, ebi)) {
               // TODO handle error code
@@ -735,7 +735,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 		sm_context_resp->http_response.send(Pistache::Http::Code::Created, resBody);
 
 		session_create_sm_context_procedure* proc = new session_create_sm_context_procedure(sp);
-		std::shared_ptr<pgw_procedure> sproc = std::shared_ptr<pgw_procedure>(proc);
+		std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
 
 		insert_procedure(sproc);
 		if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {

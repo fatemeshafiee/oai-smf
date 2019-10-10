@@ -30,10 +30,10 @@
 
 #include "smf.h"
 #include "3gpp_29.274.h"
-#include "itti_msg_sxab.hpp"
+#include "itti_msg_n4.hpp"
 #include "itti_msg_n11.hpp"
 #include "pgw_context.hpp"
-#include "pgw_pco.hpp"
+#include "smf_pco.hpp"
 #include "SmContextCreateData.h"
 #include "SmContextCreateError.h"
 #include "pistache/endpoint.h"
@@ -50,7 +50,7 @@
 namespace pgwc {
 
 //typedef std::pair<shared_ptr<pgw_context>,shared_ptr<pgw_pdn_connection>> zzz;
-class   pgw_config; // same namespace
+class   smf_config; // same namespace
 
 class pgw_app {
 private:
@@ -76,7 +76,7 @@ private:
   mutable std::shared_mutex           m_supi2smf_context;
 
 
-  int apply_config(const pgw_config& cfg);
+  int apply_config(const smf_config& cfg);
 
   teid_t generate_s5s8_cp_teid();
   void free_s5s8c_teid(const teid_t& teid_s5s8_cp);
@@ -125,11 +125,11 @@ public:
     protocol_configuration_options_t& pco_resp,
     protocol_configuration_options_ids_t & pco_ids);
 
-  void handle_itti_msg (itti_sxab_session_establishment_response& m);
-  void handle_itti_msg (itti_sxab_session_modification_response& m);
-  void handle_itti_msg (itti_sxab_session_deletion_response& m);
-  void handle_itti_msg (std::shared_ptr<itti_sxab_session_report_request> snr);
-  void handle_itti_msg (itti_sxab_association_setup_request& m);
+  void handle_itti_msg (itti_n4_session_establishment_response& m);
+  void handle_itti_msg (itti_n4_session_modification_response& m);
+  void handle_itti_msg (itti_n4_session_deletion_response& m);
+  void handle_itti_msg (std::shared_ptr<itti_n4_session_report_request> snr);
+  void handle_itti_msg (itti_n4_association_setup_request& m);
 
   void restore_sx_sessions(const seid_t& seid) const;
 
@@ -194,6 +194,6 @@ public:
 
 };
 }
-#include "pgw_config.hpp"
+#include "smf_config.hpp"
 
 #endif /* FILE_PGW_APP_HPP_SEEN */

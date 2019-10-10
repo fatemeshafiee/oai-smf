@@ -31,8 +31,8 @@
 #include "conversions.hpp"
 #include "itti.hpp"
 #include "logger.hpp"
-#include "pgw_paa_dynamic.hpp"
-#include "pgwc_sxab.hpp"
+#include "smf_paa_dynamic.hpp"
+#include "smf_n4.hpp"
 #include "smf_n10.hpp"
 #include "smf_n11.hpp"
 #include "string.hpp"
@@ -51,8 +51,8 @@ using namespace pgwc;
 #define SYSTEM_CMD_MAX_STR_SIZE 512
 extern util::async_shell_cmd *async_shell_cmd_inst;
 extern pgw_app *pgw_app_inst;
-extern pgw_config pgw_cfg;
-pgwc_sxab *pgwc_sxab_inst = nullptr;
+extern smf_config smf_cfg;
+smf_n4 *smf_n4_inst = nullptr;
 smf_n10 *smf_n10_inst = nullptr;
 smf_n11 *smf_n11_inst = nullptr;
 extern itti_mw *itti_inst;
@@ -60,7 +60,7 @@ extern itti_mw *itti_inst;
 void pgw_app_task (void*);
 
 //------------------------------------------------------------------------------
-int pgw_app::apply_config (const pgw_config& cfg)
+int pgw_app::apply_config (const smf_config& cfg)
 {
   Logger::pgwc_app().info("Apply config...");
 
@@ -216,26 +216,26 @@ void pgw_app_task (void*)
     auto *msg = shared_msg.get();
     switch (msg->msg_type) {
 
-    case SXAB_SESSION_ESTABLISHMENT_RESPONSE:
-      if (itti_sxab_session_establishment_response* m = dynamic_cast<itti_sxab_session_establishment_response*>(msg)) {
+    case N4_SESSION_ESTABLISHMENT_RESPONSE:
+      if (itti_n4_session_establishment_response* m = dynamic_cast<itti_n4_session_establishment_response*>(msg)) {
         pgw_app_inst->handle_itti_msg(std::ref(*m));
       }
       break;
 
-    case SXAB_SESSION_MODIFICATION_RESPONSE:
-      if (itti_sxab_session_modification_response* m = dynamic_cast<itti_sxab_session_modification_response*>(msg)) {
+    case N4_SESSION_MODIFICATION_RESPONSE:
+      if (itti_n4_session_modification_response* m = dynamic_cast<itti_n4_session_modification_response*>(msg)) {
         pgw_app_inst->handle_itti_msg(std::ref(*m));
       }
       break;
 
-    case SXAB_SESSION_DELETION_RESPONSE:
-      if (itti_sxab_session_deletion_response* m = dynamic_cast<itti_sxab_session_deletion_response*>(msg)) {
+    case N4_SESSION_DELETION_RESPONSE:
+      if (itti_n4_session_deletion_response* m = dynamic_cast<itti_n4_session_deletion_response*>(msg)) {
         pgw_app_inst->handle_itti_msg(std::ref(*m));
       }
       break;
 
-    case SXAB_SESSION_REPORT_REQUEST:
-      pgw_app_inst->handle_itti_msg(std::static_pointer_cast<itti_sxab_session_report_request>(shared_msg));
+    case N4_SESSION_REPORT_REQUEST:
+      pgw_app_inst->handle_itti_msg(std::static_pointer_cast<itti_n4_session_report_request>(shared_msg));
       break;
 
     case TIME_OUT:
@@ -266,7 +266,7 @@ pgw_app::pgw_app (const std::string& config_file) : m_s5s8_cp_teid_generator(), 
   s5s8lteid2pgw_context = {};
   s5s8cplteid = {};
 
-  apply_config (pgw_cfg);
+  apply_config (smf_cfg);
 
   if (itti_inst->create_task(TASK_PGWC_APP, pgw_app_task, nullptr) ) {
     Logger::pgwc_app().error( "Cannot create task TASK_PGWC_APP" );
@@ -274,7 +274,7 @@ pgw_app::pgw_app (const std::string& config_file) : m_s5s8_cp_teid_generator(), 
   }
 
   try {
-    pgwc_sxab_inst = new pgwc_sxab();
+    smf_n4_inst = new smf_n4();
     smf_n10_inst = new smf_n10();
     smf_n11_inst = new smf_n11();
   } catch (std::exception& e) {
@@ -287,27 +287,27 @@ pgw_app::pgw_app (const std::string& config_file) : m_s5s8_cp_teid_generator(), 
 
 
 //------------------------------------------------------------------------------
-void pgw_app::handle_itti_msg (itti_sxab_session_establishment_response& seresp)
+void pgw_app::handle_itti_msg (itti_n4_session_establishment_response& seresp)
 {
   std::shared_ptr<pgw_context> pc = {};
   if (seid_2_pgw_context(seresp.seid, pc)) {
     pc.get()->handle_itti_msg(seresp);
   } else {
-    Logger::pgwc_app().debug("Received SXAB SESSION ESTABLISHMENT RESPONSE seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", seresp.seid, seresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", seresp.seid, seresp.trxn_id);
   }
 }
 //------------------------------------------------------------------------------
-void pgw_app::handle_itti_msg (itti_sxab_session_modification_response& smresp)
+void pgw_app::handle_itti_msg (itti_n4_session_modification_response& smresp)
 {
   std::shared_ptr<pgw_context> pc = {};
   if (seid_2_pgw_context(smresp.seid, pc)) {
     pc.get()->handle_itti_msg(smresp);
   } else {
-    Logger::pgwc_app().debug("Received SXAB SESSION MODIFICATION RESPONSE seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", smresp.seid, smresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION MODIFICATION RESPONSE seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", smresp.seid, smresp.trxn_id);
   }
 }
 //------------------------------------------------------------------------------
-void pgw_app::handle_itti_msg (itti_sxab_session_deletion_response& smresp)
+void pgw_app::handle_itti_msg (itti_n4_session_deletion_response& smresp)
 {
   std::shared_ptr<pgw_context> pc = {};
   if (seid_2_pgw_context(smresp.seid, pc)) {
@@ -317,18 +317,18 @@ void pgw_app::handle_itti_msg (itti_sxab_session_deletion_response& smresp)
       delete_pgw_context(pc);
     }
   } else {
-    Logger::pgwc_app().debug("Received SXAB SESSION DELETION RESPONSE seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", smresp.seid, smresp.trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION DELETION RESPONSE seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", smresp.seid, smresp.trxn_id);
   }
 }
 
 //------------------------------------------------------------------------------
-void pgw_app::handle_itti_msg (std::shared_ptr<itti_sxab_session_report_request> snr)
+void pgw_app::handle_itti_msg (std::shared_ptr<itti_n4_session_report_request> snr)
 {
   std::shared_ptr<pgw_context> pc = {};
   if (seid_2_pgw_context(snr->seid, pc)) {
     pc.get()->handle_itti_msg(snr);
   } else {
-    Logger::pgwc_app().debug("Received SXAB SESSION REPORT REQUEST seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", snr->seid, snr->trxn_id);
+    Logger::pgwc_app().debug("Received N4 SESSION REPORT REQUEST seid" TEID_FMT "  pfcp_tx_id %" PRIX64", pgw_context not found, discarded!", snr->seid, snr->trxn_id);
   }
 }
 
@@ -396,7 +396,7 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 
 
 	//Step 2. check if the DNN requested is valid
-	if (not pgw_cfg.is_dotted_dnn_handled(dnn, pdu_session_type)) {
+	if (not smf_cfg.is_dotted_dnn_handled(dnn, pdu_session_type)) {
 		// Not a valid request...
 		Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST unknown requested APN %s, ignore message!", dnn.c_str());
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_DNN_DENIED]);

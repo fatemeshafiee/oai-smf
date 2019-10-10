@@ -19,28 +19,28 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pgwc_sxab.hpp
+/*! \file smf_n4.hpp
    \author  Lionel GAUTHIER
    \date 2019
    \email: lionel.gauthier@eurecom.fr
 */
 
-#ifndef FILE_PGWC_SXAB_HPP_SEEN
-#define FILE_PGWC_SXAB_HPP_SEEN
+#ifndef FILE_SMF_N4_HPP_SEEN
+#define FILE_SMF_N4_HPP_SEEN
 
-#include "itti_msg_sxab.hpp"
+#include "itti_msg_n4.hpp"
 #include "pfcp.hpp"
-#include "pgw_pfcp_association.hpp"
+#include "smf_pfcp_association.hpp"
 
 #include <thread>
 
 namespace pgwc {
 
-#define TASK_PGWC_SX_TRIGGER_HEARTBEAT_REQUEST     (0)
-#define TASK_PGWC_SX_TIMEOUT_HEARTBEAT_REQUEST     (1)
-#define TASK_PGWC_SX_TIMEOUT_ASSOCIATION_REQUEST   (2)
+#define TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST     (0)
+#define TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST     (1)
+#define TASK_SMF_N4_TIMEOUT_ASSOCIATION_REQUEST   (2)
 
-class pgwc_sxab  : public pfcp::pfcp_l4_stack {
+class smf_n4  : public pfcp::pfcp_l4_stack {
 private:
   std::thread::id                      thread_id;
   std::thread                          thread;
@@ -50,42 +50,42 @@ private:
   pfcp::cp_function_features_t   cp_function_features;
 
 public:
-  pgwc_sxab();
-  pgwc_sxab(pgwc_sxab const&)    = delete;
-  void operator=(pgwc_sxab const&)     = delete;
+  smf_n4();
+  smf_n4(smf_n4 const&)    = delete;
+  void operator=(smf_n4 const&)     = delete;
 
 
-  void handle_itti_msg (itti_sxab_heartbeat_request& s) {};
-  void handle_itti_msg (itti_sxab_heartbeat_response& s) {};
-  void handle_itti_msg (itti_sxab_association_setup_request& s) {};
-  void handle_itti_msg (itti_sxab_association_setup_response& s) {};
-  void handle_itti_msg (itti_sxab_association_update_request& s) {};
-  void handle_itti_msg (itti_sxab_association_update_response& s) {};
-  void handle_itti_msg (itti_sxab_association_release_request& s) {};
-  void handle_itti_msg (itti_sxab_association_release_response& s) {};
-  void handle_itti_msg (itti_sxab_version_not_supported_response& s) {};
-  void handle_itti_msg (itti_sxab_node_report_response& s) {};
-  void handle_itti_msg (itti_sxab_session_set_deletion_request& s) {};
-  void handle_itti_msg (itti_sxab_session_establishment_request& s) {};
-  void handle_itti_msg (itti_sxab_session_modification_request& s) {};
-  void handle_itti_msg (itti_sxab_session_deletion_request& s) {};
-  void handle_itti_msg (itti_sxab_session_report_response& s) {};
+  void handle_itti_msg (itti_n4_heartbeat_request& s) {};
+  void handle_itti_msg (itti_n4_heartbeat_response& s) {};
+  void handle_itti_msg (itti_n4_association_setup_request& s) {};
+  void handle_itti_msg (itti_n4_association_setup_response& s) {};
+  void handle_itti_msg (itti_n4_association_update_request& s) {};
+  void handle_itti_msg (itti_n4_association_update_response& s) {};
+  void handle_itti_msg (itti_n4_association_release_request& s) {};
+  void handle_itti_msg (itti_n4_association_release_response& s) {};
+  void handle_itti_msg (itti_n4_version_not_supported_response& s) {};
+  void handle_itti_msg (itti_n4_node_report_response& s) {};
+  void handle_itti_msg (itti_n4_session_set_deletion_request& s) {};
+  void handle_itti_msg (itti_n4_session_establishment_request& s) {};
+  void handle_itti_msg (itti_n4_session_modification_request& s) {};
+  void handle_itti_msg (itti_n4_session_deletion_request& s) {};
+  void handle_itti_msg (itti_n4_session_report_response& s) {};
 
-  void send_sx_msg (itti_sxab_heartbeat_request& s) {};
-  void send_sx_msg (itti_sxab_heartbeat_response& s) {};
-  void send_sx_msg (itti_sxab_association_setup_request& s) {};
-  void send_sx_msg (itti_sxab_association_setup_response& s);
-  void send_sx_msg (itti_sxab_association_update_request& s) {};
-  void send_sx_msg (itti_sxab_association_update_response& s) {};
-  void send_sx_msg (itti_sxab_association_release_request& s) {};
-  void send_sx_msg (itti_sxab_association_release_response& s) {};
-  void send_sx_msg (itti_sxab_version_not_supported_response& s) {};
-  void send_sx_msg (itti_sxab_node_report_request& s) {};
-  void send_sx_msg (itti_sxab_session_set_deletion_response& s) {};
-  void send_sx_msg (itti_sxab_session_establishment_request& s);
-  void send_sx_msg (itti_sxab_session_modification_request& s);
-  void send_sx_msg (itti_sxab_session_deletion_request& s);
-  void send_sx_msg (itti_sxab_session_report_response& s);
+  void send_n4_msg (itti_n4_heartbeat_request& s) {};
+  void send_n4_msg (itti_n4_heartbeat_response& s) {};
+  void send_n4_msg (itti_n4_association_setup_request& s) {};
+  void send_n4_msg (itti_n4_association_setup_response& s);
+  void send_n4_msg (itti_n4_association_update_request& s) {};
+  void send_n4_msg (itti_n4_association_update_response& s) {};
+  void send_n4_msg (itti_n4_association_release_request& s) {};
+  void send_n4_msg (itti_n4_association_release_response& s) {};
+  void send_n4_msg (itti_n4_version_not_supported_response& s) {};
+  void send_n4_msg (itti_n4_node_report_request& s) {};
+  void send_n4_msg (itti_n4_session_set_deletion_response& s) {};
+  void send_n4_msg (itti_n4_session_establishment_request& s);
+  void send_n4_msg (itti_n4_session_modification_request& s);
+  void send_n4_msg (itti_n4_session_deletion_request& s);
+  void send_n4_msg (itti_n4_session_report_response& s);
 
   void send_heartbeat_request(std::shared_ptr<pfcp_association>& a);
   void send_heartbeat_response(const endpoint& r_endpoint, const uint64_t trxn_id);
@@ -105,4 +105,4 @@ public:
   void time_out_itti_event(const uint32_t timer_id);
 };
 }
-#endif /* FILE_PGWC_SXAB_HPP_SEEN */
+#endif /* FILE_SMF_N4_HPP_SEEN */

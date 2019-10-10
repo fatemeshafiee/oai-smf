@@ -1,5 +1,5 @@
 # prompt has been removed for easier Ctrl+C Ctrl+V
-sudo ifconfig eno1:sxc 172.55.55.101 up # SPGW-C SXab interface
+sudo ifconfig eno1:sxc 172.55.55.101 up # SMF N4 interface
 sudo ifconfig eno1:s5c 172.58.58.102 up # SGW-C S5S8 interface
 sudo ifconfig eno1:p5c 172.58.58.101 up # PGW-C S5S8 interface
 sudo ifconfig eno1:s11 172.16.1.104 up  # SGW-C S11 interface

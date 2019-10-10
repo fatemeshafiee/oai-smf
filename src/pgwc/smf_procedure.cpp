@@ -25,13 +25,13 @@
 #include "3gpp_conversions.hpp"
 #include "conversions.hpp"
 #include "itti.hpp"
-#include "itti_msg_sx_restore.hpp"
+#include "itti_msg_n4_restore.hpp"
 #include "logger.hpp"
 #include "msg_gtpv2c.hpp"
 #include "pgw_app.hpp"
-#include "pgw_config.hpp"
-#include "pgw_pfcp_association.hpp"
-#include "pgwc_procedure.hpp"
+#include "smf_config.hpp"
+#include "smf_pfcp_association.hpp"
+#include "smf_procedure.hpp"
 #include "pgw_context.hpp"
 #include "SmContextCreatedData.h"
 
@@ -43,20 +43,20 @@ using namespace std;
 
 extern itti_mw *itti_inst;
 extern pgwc::pgw_app *pgw_app_inst;
-extern pgwc::pgw_config pgw_cfg;
+extern pgwc::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
 int sx_session_restore_procedure::run()
 {
   if (pending_sessions.size()) {
-    itti_sx_restore *itti_msg = nullptr;
+    itti_n4_restore *itti_msg = nullptr;
     for (std::set<pfcp::fseid_t>::iterator it=pending_sessions.begin(); it!=pending_sessions.end();++it) {
       if (!itti_msg) {
-        itti_msg = new itti_sx_restore(TASK_PGWC_SX, TASK_PGWC_APP);
+        itti_msg = new itti_n4_restore(TASK_SMF_N4, TASK_PGWC_APP);
       }
       itti_msg->sessions.insert(*it);
       if (itti_msg->sessions.size() >= 64) {
-        std::shared_ptr<itti_sx_restore> i = std::shared_ptr<itti_sx_restore>(itti_msg);
+        std::shared_ptr<itti_n4_restore> i = std::shared_ptr<itti_n4_restore>(itti_msg);
         int ret = itti_inst->send_msg(i);
         if (RETURNok != ret) {
           Logger::pgwc_sx().error( "Could not send ITTI message %s to task TASK_PGWC_APP", i->get_msg_name());
@@ -65,7 +65,7 @@ int sx_session_restore_procedure::run()
       }
     }
     if (itti_msg) {
-      std::shared_ptr<itti_sx_restore> i = std::shared_ptr<itti_sx_restore>(itti_msg);
+      std::shared_ptr<itti_n4_restore> i = std::shared_ptr<itti_n4_restore>(itti_msg);
       int ret = itti_inst->send_msg(i);
       if (RETURNok != ret) {
         Logger::pgwc_sx().error( "Could not send ITTI message %s to task TASK_PGWC_APP", i->get_msg_name());
@@ -94,24 +94,24 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   n11_trigger = sm_context_req;
   n11_triggered_pending = sm_context_resp;
   ppc->generate_seid();
-  itti_sxab_session_establishment_request *sx_ser = new itti_sxab_session_establishment_request(TASK_PGWC_APP, TASK_PGWC_SX);
+  itti_n4_session_establishment_request *sx_ser = new itti_n4_session_establishment_request(TASK_PGWC_APP, TASK_SMF_N4);
   sx_ser->seid = 0;
   sx_ser->trxn_id = this->trxn_id;
   sx_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
-  sx_triggered = std::shared_ptr<itti_sxab_session_establishment_request>(sx_ser);
+  sx_triggered = std::shared_ptr<itti_n4_session_establishment_request>(sx_ser);
 
   //-------------------
   // IE node_id_t
   //-------------------
   pfcp::node_id_t node_id = {};
-  pgw_cfg.get_pfcp_node_id(node_id);
+  smf_cfg.get_pfcp_node_id(node_id);
   sx_ser->pfcp_ies.set(node_id);
 
   //-------------------
   // IE fseid_t
   //-------------------
   pfcp::fseid_t cp_fseid = {};
-  pgw_cfg.get_pfcp_fseid(cp_fseid);
+  smf_cfg.get_pfcp_fseid(cp_fseid);
   cp_fseid.seid = ppc->seid;
   sx_ser->pfcp_ies.set(cp_fseid);
 
@@ -206,10 +206,10 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   pgw_app_inst->set_seid_2_pgw_context(cp_fseid.seid, pc);
 
 
-  Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_PGWC_SX", sx_ser->get_msg_name());
+  Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_SMF_N4", sx_ser->get_msg_name());
   int ret = itti_inst->send_msg(sx_triggered);
   if (RETURNok != ret) {
-    Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_PGWC_SX", sx_ser->get_msg_name());
+    Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_SMF_N4", sx_ser->get_msg_name());
     return RETURNerror;
   }
 
@@ -217,9 +217,9 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 }
 
 //------------------------------------------------------------------------------
-void session_create_sm_context_procedure::handle_itti_msg (itti_sxab_session_establishment_response& resp)
+void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_establishment_response& resp)
 {
-	Logger::pgwc_app().info( "session_create_sm_context_procedure handle itti_sxab_session_establishment_response: pdu-session-id %d", n11_trigger.get()->req.get_pdu_session_id());
+	Logger::pgwc_app().info( "session_create_sm_context_procedure handle itti_n4_session_establishment_response: pdu-session-id %d", n11_trigger.get()->req.get_pdu_session_id());
 
 	pfcp::cause_t cause = {};
 	resp.pfcp_ies.get(cause);

@@ -38,7 +38,7 @@
 #include "3gpp_29.274.h"
 #include "3gpp_29.503.h"
 #include "common_root_types.h"
-#include "pgwc_procedure.hpp"
+#include "smf_procedure.hpp"
 #include "uint_generator.hpp"
 #include "SmContextCreateData.h"
 #include "pistache/endpoint.h"
@@ -186,7 +186,7 @@ public:
   void release_pdr_id(const pfcp::pdr_id_t& pdr_id);
   void generate_far_id(pfcp::far_id_t& far_id);
   void release_far_id(const pfcp::far_id_t& far_id);
-  void insert_procedure(pgw_procedure* proc);
+  void insert_procedure(smf_procedure* proc);
 
 
   bool ipv4;                                // IP Address(es): IPv4 address and/or IPv6 prefix
@@ -303,12 +303,6 @@ public:
 	}
 	dnn_context(dnn_context& b) = delete;
 
-	/* Insert a session management subscription into the DNN context */
-	//void insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
-
-	/* Find the subscription from the DNN context */
-	//bool find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss);
-
 	/* Find the PDN connection */
 	bool find_pdn_connection(const uint32_t pdu_session_id , std::shared_ptr<pgw_pdn_connection>& pdn);
 
@@ -321,9 +315,6 @@ public:
 
 	/* Store all PDN connections associated with this DNN context */
 	std::vector<std::shared_ptr<pgw_pdn_connection>> pdn_connections;
-
-	/* snssai-sst <-> session management subscription */
-	//std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
 
 	mutable std::recursive_mutex                     m_context;
 };
@@ -343,9 +334,9 @@ public:
 
   pgw_context(pgw_context& b) = delete;
 
-  void insert_procedure(std::shared_ptr<pgw_procedure>& sproc);
-  bool find_procedure(const uint64_t& trxn_id, std::shared_ptr<pgw_procedure>& proc);
-  void remove_procedure(pgw_procedure* proc);
+  void insert_procedure(std::shared_ptr<smf_procedure>& sproc);
+  bool find_procedure(const uint64_t& trxn_id, std::shared_ptr<smf_procedure>& proc);
+  void remove_procedure(smf_procedure* proc);
 
 #define IS_FIND_PDN_WITH_LOCAL_TEID true
 #define IS_FIND_PDN_WITH_PEER_TEID  false
@@ -360,10 +351,10 @@ public:
   void delete_apn_context(std::shared_ptr<apn_context>& sa);
   void delete_pdn_connection(std::shared_ptr<apn_context>& sa , std::shared_ptr<pgw_pdn_connection>& sp);
 
-  void handle_itti_msg (itti_sxab_session_establishment_response& );
-  void handle_itti_msg (itti_sxab_session_modification_response& );
-  void handle_itti_msg (itti_sxab_session_deletion_response& );
-  void handle_itti_msg (std::shared_ptr<itti_sxab_session_report_request>&);
+  void handle_itti_msg (itti_n4_session_establishment_response& );
+  void handle_itti_msg (itti_n4_session_modification_response& );
+  void handle_itti_msg (itti_n4_session_deletion_response& );
+  void handle_itti_msg (std::shared_ptr<itti_n4_session_report_request>&);
 
 	/*
 	 * Handle messages from AMF (e.g., PDU_SESSION_CREATESMContextRequest)
@@ -430,7 +421,7 @@ public:
 
 	//--------------------------------------------
 	// internals
-	std::vector<std::shared_ptr<pgw_procedure>> pending_procedures;
+	std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
 
 	// Big recursive lock
 	mutable std::recursive_mutex                m_context;

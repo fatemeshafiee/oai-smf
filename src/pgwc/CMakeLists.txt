@@ -31,12 +31,12 @@ include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
 add_library (PGWC STATIC
   pgw_app.cpp
-  pgw_config.cpp
+  smf_config.cpp
   pgw_context.cpp
-  pgw_pfcp_association.cpp
-  pgw_pco.cpp
-  pgwc_procedure.cpp
-  pgwc_sxab.cpp
+  smf_pfcp_association.cpp
+  smf_pco.cpp
+  smf_procedure.cpp
+  smf_n4.cpp
   smf_n10.cpp
   smf_n11.cpp
   smf_msg.cpp

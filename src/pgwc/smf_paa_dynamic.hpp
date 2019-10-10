@@ -19,15 +19,15 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pgw_paa_dynamic.hpp
+/*! \file smf_paa_dynamic.hpp
 * \brief
 * \author Lionel Gauthier
 * \company Eurecom
 * \email: lionel.gauthier@eurecom.fr
 */
 
-#ifndef FILE_PGW_PAA_DYNAMIC_HPP_SEEN
-#define FILE_PGW_PAA_DYNAMIC_HPP_SEEN
+#ifndef FILE_SMF_PAA_DYNAMIC_HPP_SEEN
+#define FILE_SMF_PAA_DYNAMIC_HPP_SEEN
 
 #include "logger.hpp"
 

@@ -19,14 +19,14 @@
  *      contact@openairinterface.org
  */
 
-/*! \file sgwc_eps_bearer_context.hpp
+/*! \file smf_pco.hpp
   \brief
   \author Lionel Gauthier
   \company Eurecom
   \email: lionel.gauthier@eurecom.fr
 */
-#ifndef FILE_PGW_PCO_HPP_SEEN
-#define FILE_PGW_PCO_HPP_SEEN
+#ifndef FILE_SMF_PCO_HPP_SEEN
+#define FILE_SMF_PCO_HPP_SEEN
 
 #include <stdint.h>
 

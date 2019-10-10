@@ -19,7 +19,7 @@
  *      contact@openairinterface.org
  */
 
-/*! \file spgwu_pfcp_association.cpp
+/*! \file smf_pfcp_association.cpp
    \brief
    \author  Lionel GAUTHIER
    \date 2019
@@ -27,15 +27,15 @@
 */
 #include "common_defs.h"
 #include "logger.hpp"
-#include "pgw_pfcp_association.hpp"
-#include "pgwc_procedure.hpp"
-#include "pgwc_sxab.hpp"
+#include "smf_pfcp_association.hpp"
+#include "smf_procedure.hpp"
+#include "smf_n4.hpp"
 
 using namespace pgwc;
 using namespace std;
 
 extern itti_mw    *itti_inst;
-extern pgwc_sxab  *pgwc_sxab_inst;
+extern smf_n4  *smf_n4_inst;
 //------------------------------------------------------------------------------
 void pfcp_association::notify_add_session(const pfcp::fseid_t& cp_fseid)
 {
@@ -167,7 +167,7 @@ void pfcp_associations::restore_sx_sessions(const pfcp::node_id_t& node_id)
 //------------------------------------------------------------------------------
 void pfcp_associations::trigger_heartbeat_request_procedure(std::shared_ptr<pfcp_association>& s)
 {
-  s->timer_heartbeat = itti_inst->timer_setup(PFCP_ASSOCIATION_HEARTBEAT_INTERVAL_SEC,0, TASK_PGWC_SX, TASK_PGWC_SX_TRIGGER_HEARTBEAT_REQUEST, s->hash_node_id);
+  s->timer_heartbeat = itti_inst->timer_setup(PFCP_ASSOCIATION_HEARTBEAT_INTERVAL_SEC,0, TASK_SMF_N4, TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST, s->hash_node_id);
 }
 //------------------------------------------------------------------------------
 void pfcp_associations::initiate_heartbeat_request(timer_id_t timer_id, uint64_t arg2_user)
@@ -179,7 +179,7 @@ void pfcp_associations::initiate_heartbeat_request(timer_id_t timer_id, uint64_t
   else {
     Logger::pgwc_sx().info( "PFCP HEARTBEAT PROCEDURE hash %u starting", hash_node_id);
     pit->second->num_retries_timer_heartbeat = 0;
-    pgwc_sxab_inst->send_heartbeat_request(pit->second);
+    smf_n4_inst->send_heartbeat_request(pit->second);
   }
 }
 //------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ void pfcp_associations::timeout_heartbeat_request(timer_id_t timer_id, uint64_t 
     if (pit->second->num_retries_timer_heartbeat < PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES) {
       Logger::pgwc_sx().info( "PFCP HEARTBEAT PROCEDURE hash %u TIMED OUT (retrie %d)", hash_node_id, pit->second->num_retries_timer_heartbeat);
       pit->second->num_retries_timer_heartbeat++;
-      pgwc_sxab_inst->send_heartbeat_request(pit->second);
+      smf_n4_inst->send_heartbeat_request(pit->second);
     } else {
       Logger::pgwc_sx().warn( "PFCP HEARTBEAT PROCEDURE FAILED after %d retries! TODO", PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES);
     }

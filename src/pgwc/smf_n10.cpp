@@ -166,7 +166,6 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 					break;
 				} catch (json::exception& e){
 					Logger::smf_n10().warn("[get_sm_data] Couldn't Parse json data from UDM");
-
 				}
 				numRetries++;
 			}
@@ -229,12 +228,9 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 				Logger::smf_n10().warn("[get_sm_data] exception message %s, exception id %d ", e.what(), e.id);
 				return false;
 			}
-
 		}
-
 		return true;
 	} else{
-
 		return false;
 	}
 
