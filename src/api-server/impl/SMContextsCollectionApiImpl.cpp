@@ -96,7 +96,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//User Location Information
 	//Access Type
 	// PEI
-	//GPSI
+	// GPSI
 	// UE presence in LADN service area
 	// DNN Selection Mode
 	sm_context_req_msg.set_dnn_selection_mode(smContextCreateData.getSelMode());
@@ -115,7 +115,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//sm_context_req_msg->set_message_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
 	//Logger::smf_api_server().debug("nas decode messaget type %d\n",
 	//		decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
-	sm_context_req_msg.set_message_type (PDU_SESSION_ESTABLISHMENT_REQUEST); //Temporary - should be removed
+	sm_context_req_msg.set_message_type (PDU_SESSION_ESTABLISHMENT_REQUEST); //Temporary - should be removed (get from NAS)
 	//Integrity protection maximum data rate (Mandatory)
 	//PDU session type (Optional)
 	sm_context_req_msg.set_pdu_session_type(PDN_TYPE_E_IPV4);//TODO: should get from NAS msg

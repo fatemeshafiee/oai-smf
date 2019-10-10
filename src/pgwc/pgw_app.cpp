@@ -313,7 +313,7 @@ void pgw_app::handle_itti_msg (itti_n4_session_deletion_response& smresp)
   if (seid_2_pgw_context(smresp.seid, pc)) {
     pc.get()->handle_itti_msg(smresp);
 
-    if (pc->apns.size() == 0) {
+    if (pc->dnns.size() == 0) {
       delete_pgw_context(pc);
     }
   } else {
@@ -336,12 +336,7 @@ void pgw_app::handle_itti_msg (std::shared_ptr<itti_n4_session_report_request> s
 //------------------------------------------------------------------------------
 void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq)
 {
-
-
 	//handle PDU Session Create SM Context Request as specified in section 4.3.2 3GPP TS 23.502
-	pdu_session_create_sm_context_request sm_context_req_msg = smreq->req;
-
-
 	oai::smf::model::SmContextCreateError smContextCreateError;
 	oai::smf::model::ProblemDetails problem_details;
 
@@ -363,6 +358,7 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 		Logger::pgwc_app().warn(" Invalid PTI value (pti = %d)\n", pti.procedure_transaction_id);
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
 		smContextCreateError.setError(problem_details);
+		//TODO: to be completed when finishing NAS implementation
 		//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
 		//TODO: (24.501 (section 7.3.1)) NAS N1 SM message: response with a 5GSM STATUS message including cause "#81 Invalid PTI value"
 		//Send response to AMF
@@ -382,6 +378,7 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 		//TODO:
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
 		smContextCreateError.setError(problem_details);
+		//TODO: to be completed when finishing NAS implementation
 		//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
 		//TODO: (24.501 (section 7.4)) implementation dependent->do similar to UE: response with a 5GSM STATUS message including cause "#98 message type not compatible with protocol state."
 		//Send response to AMF
@@ -392,8 +389,8 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 	if ((request_type & 0x07) != INITIAL_REQUEST){
 		Logger::pgwc_app().warn("Invalid request type (request type = %s)\n", request_type_e2str[request_type & 0x07]);
 		//TODO:
+		//return
 	}
-
 
 	//Step 2. check if the DNN requested is valid
 	if (not smf_cfg.is_dotted_dnn_handled(dnn, pdu_session_type)) {
@@ -401,6 +398,7 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 		Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST unknown requested APN %s, ignore message!", dnn.c_str());
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_DNN_DENIED]);
 		smContextCreateError.setError(problem_details);
+		//TODO: to be completed when finishing NAS implementation
 		//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
 		//Send response to AMF
 		send_create_session_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden);
@@ -410,10 +408,10 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 	//Step 3. create a context for this supi if not existed, otherwise update
 	std::shared_ptr<pgw_context> sc;
 	if (is_supi_2_smf_context(supi64)) {
-		Logger::pgwc_app().debug("Update PGW context\n");
+		Logger::pgwc_app().debug("Update SMF context with SUPI " SUPI_64_FMT "", supi64);
 		sc = supi_2_smf_context(supi64);
 	} else {
-		Logger::pgwc_app().debug("Create a new PGW context\n");
+		Logger::pgwc_app().debug("Create a new SMF context with SUPI " SUPI_64_FMT "", supi64);
 		sc = std::shared_ptr<pgw_context>(new pgw_context());
 		set_supi_2_smf_context(supi64, sc);
 	}
@@ -424,7 +422,7 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 	if (!sc.get()->find_dnn_context(dnn, sd)) {
 		if (nullptr == sd.get()){
 			//create a new one and insert to the list
-			Logger::pgwc_app().debug("Create a DNN context and add to the PGW context\n");
+			Logger::pgwc_app().debug("Create a DNN context and add to the SMF context\n");
 			sd = std::shared_ptr<dnn_context>(new dnn_context(dnn));
 			//sd.get()->in_use = true;
 			sc.get()->insert_dnn(sd);
@@ -433,7 +431,7 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 
 	// step 4. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
 	std::string dnn_selection_mode = smreq->req.get_dnn_selection_mode();
-	if (not is_use_local_configuration_subscription_data(dnn_selection_mode) && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai))
+	if (not use_local_configuration_subscription_data(dnn_selection_mode) && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai))
 	{
 		//uses a dummy UDM to test this part
 		Logger::pgwc_app().debug("Retrieve Session Management Subscription data from UDM");
@@ -441,24 +439,18 @@ void pgw_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 		if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
 			//update dnn_context with subscription info
 			sc.get()->insert_dnn_subscription(snssai, subscription);
-			//debug
-			//dnn_configuration_t dnn_configuration = subscription.get()->get_dnn_configuration(dnn);
-			//Logger::pgwc_app().debug("Retrieve Session Management Subscription data from UDM %s, %s, %s, %s", pdu_session_type_e2str[dnn_configuration.pdu_session_types.default_session_type.pdu_session_type].c_str(), ssc_mode_e2str[dnn_configuration.ssc_modes.default_ssc_mode.ssc_mode].c_str(), dnn_configuration.session_ambr.uplink.c_str(), dnn_configuration.session_ambr.downlink.c_str());
 		} else {
 			// Not accept to establish a PDU session
 			Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST, couldn't retrieve the Session Management Subscription from UDM, ignore message!");
 			problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]);
 			smContextCreateError.setError(problem_details);
+			//TODO: to be completed when finishing NAS implementation
 			//create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
 			//Send response to AMF
 			send_create_session_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden);
 			return;
 		}
-
-
 	}
-
-	//Step 4. check the validity of the UE request, if valid send PDU Session Accept, otherwise send PDU Session Reject to AMF
 
 	//Step 5. let the context handle the message
 	//in this step, SMF will send N4 Session Establishment/Modification to UPF (step 10a, section 4.3.2 3GPP 23.502)
@@ -490,7 +482,7 @@ void pgw_app::set_supi_2_smf_context(const supi64_t& supi, std::shared_ptr<pgw_c
 }
 
 //------------------------------------------------------------------------------
-bool pgw_app::is_use_local_configuration_subscription_data(const std::string& dnn_selection_mode)
+bool pgw_app::use_local_configuration_subscription_data(const std::string& dnn_selection_mode)
 {
 	//TODO: should be implemented
 	return false; //get Session Management Subscription from UDM

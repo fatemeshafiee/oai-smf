@@ -227,181 +227,6 @@ std::string pgw_pdn_connection::toString() const
 }
 
 //------------------------------------------------------------------------------
-void apn_context::insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp)
-{
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  pdn_connections.push_back(sp);
-}
-//------------------------------------------------------------------------------
-bool apn_context::find_pdn_connection(const teid_t xgw_s5s8c_teid, const bool is_local_teid, std::shared_ptr<pgw_pdn_connection>& pdn)
-{
-  pdn = {};
-  if (is_local_teid) {
-    std::unique_lock<std::recursive_mutex> lock(m_context);
-    for (auto it : pdn_connections) {
-      if (xgw_s5s8c_teid == it->pgw_fteid_s5_s8_cp.teid_gre_key) {
-        pdn = it;
-        return true;
-      }
-    }
-    return false;
-  } else {
-    std::unique_lock<std::recursive_mutex> lock(m_context);
-    for (auto it : pdn_connections) {
-      if (xgw_s5s8c_teid == it->sgw_fteid_s5_s8_cp.teid_gre_key) {
-        pdn = it;
-        return true;
-      }
-    }
-    return false;
-  }
-}
-
-//------------------------------------------------------------------------------
-bool apn_context::find_pdn_connection(const pfcp::pdr_id_t& pdr_id, std::shared_ptr<pgw_pdn_connection>& pdn, ebi_t& ebi)
-{
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  for (auto pit : pdn_connections) {
-    if (pit->has_eps_bearer(pdr_id, ebi)) {
-      pdn = pit; // May make pair
-      return true;
-    }
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
-void apn_context::delete_pdn_connection(std::shared_ptr<pgw_pdn_connection>& pdn_connection)
-{
-  if (pdn_connection.get()) {
-    pdn_connection->deallocate_ressources(apn_in_use);
-    // remove it from collection
-    std::unique_lock<std::recursive_mutex> lock(m_context);
-    for (std::vector<std::shared_ptr<pgw_pdn_connection>>::iterator it=pdn_connections.begin(); it!=pdn_connections.end(); ++it) {
-      if (pdn_connection.get() == (*it).get()) {
-        pdn_connection->deallocate_ressources(apn_in_use);
-        pdn_connections.erase(it);
-        return;
-      }
-    }
-  }
-}
-//------------------------------------------------------------------------------
-void apn_context::deallocate_ressources()
-{
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  for (std::vector<std::shared_ptr<pgw_pdn_connection>>::iterator it=pdn_connections.begin(); it!=pdn_connections.end(); ++it) {
-    (*it)->deallocate_ressources(apn_in_use);
-  }
-  pdn_connections.clear();
-  in_use = false;
-  apn_ambr = {0};
-}
-//------------------------------------------------------------------------------
-std::string apn_context::toString() const
-{
-  std::string s = {};
-  s.append("APN CONTEXT:\n");
-  s.append("\tIn use:\t\t\t\t").append(std::to_string(in_use)).append("\n");
-  s.append("\tAPN:\t\t\t\t").append(apn_in_use).append("\n");
-  s.append("\tAPN AMBR Bitrate Uplink:\t").append(std::to_string(apn_ambr.br_ul)).append("\n");
-  s.append("\tAPN AMBR Bitrate Downlink:\t").append(std::to_string(apn_ambr.br_dl)).append("\n");
-  for (auto it : pdn_connections) {
-    s.append(it->toString());
-  }
-  return s;
-}
-
-//------------------------------------------------------------------------------
-bool pgw_context::find_pdn_connection(const teid_t xgw_s5s8c_teid, const bool is_local_teid, pdn_duo_t& pdn_connection)
-{
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  for (auto ait : apns) {
-    std::shared_ptr<pgw_pdn_connection> sp;
-    if (ait->find_pdn_connection(xgw_s5s8c_teid, is_local_teid, sp)) {
-      pdn_connection = make_pair(ait, sp);
-      return true;
-    }
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
-bool pgw_context::find_pdn_connection(const pfcp::pdr_id_t& pdr_id, std::shared_ptr<pgw_pdn_connection>& pdn, ebi_t& ebi)
-{
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  for (auto ait : apns) {
-    std::shared_ptr<pgw_pdn_connection> sp;
-    if (ait->find_pdn_connection(pdr_id, sp, ebi)) {
-      pdn = sp; // May make pair
-      return true;
-    }
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
-bool pgw_context::find_pdn_connection(const std::string& apn, const teid_t xgw_s5s8c_teid, const bool is_local_teid, pdn_duo_t& pdn_connection)
-{
-  pdn_connection = {};
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  std::shared_ptr<apn_context> sa;
-  if (find_apn_context(apn, sa)) {
-    std::shared_ptr<pgw_pdn_connection> sp;
-    if (sa.get()) {
-      if (sa->find_pdn_connection(xgw_s5s8c_teid, is_local_teid, sp)) {
-        // would need to make a pair of mutexes ?
-        pdn_connection = make_pair(sa, sp);
-        return true;
-      }
-    }
-  }
-  return false;
-}
-//------------------------------------------------------------------------------
-void pgw_context::delete_apn_context(std::shared_ptr<apn_context>& sa)
-{
-  if (sa.get()) {
-    std::unique_lock<std::recursive_mutex> lock(m_context);
-    for (std::vector<std::shared_ptr<apn_context>>::iterator ait=apns.begin(); ait!=apns.end(); ++ait) {
-    //for (auto ait : apns) {
-      if ((*ait).get() == sa.get()) {
-        (*ait)->deallocate_ressources();
-        apns.erase(ait);
-        return;
-      }
-    }
-  }
-}
-//------------------------------------------------------------------------------
-void pgw_context::delete_pdn_connection(std::shared_ptr<apn_context>& sa , std::shared_ptr<pgw_pdn_connection>& sp)
-{
-  if (sa.get()) {
-    sa->delete_pdn_connection(sp);
-    if (sa->get_num_pdn_connections() == 0) {
-      delete_apn_context(sa);
-    }
-  }
-}
-//------------------------------------------------------------------------------
-void pgw_context::insert_apn(std::shared_ptr<apn_context>& sa)
-{
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  apns.push_back(sa);
-}
-//------------------------------------------------------------------------------
-bool pgw_context::find_apn_context(const std::string& apn, std::shared_ptr<apn_context>& apn_context)
-{
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  for (auto it : apns) {
-    if (0 == apn.compare(it->apn_in_use)) {
-      apn_context = it;
-      return true;
-    }
-  }
-  return false;
-}
-//------------------------------------------------------------------------------
 void pgw_context::insert_procedure(std::shared_ptr<smf_procedure>& sproc)
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
@@ -522,7 +347,7 @@ std::string pgw_context::toString() const
   s.append("PGW CONTEXT:\n");
   s.append("\tIMSI:\t\t\t\t").append(imsi.toString()).append("\n");
   s.append("\tIMSI UNAUTHENTICATED:\t\t").append(std::to_string(imsi_unauthenticated_indicator)).append("\n");
-  for (auto it : apns) {
+  for (auto it : dnns) {
     s.append(it->toString());
   }
 
@@ -539,7 +364,7 @@ std::string pgw_context::toString() const
 void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq)
 {
 
-	Logger::pgwc_app().info("Handle AMF message");
+	Logger::pgwc_app().info("Handle a PDU Session Create SM Context Request message from AMF");
 	pdu_session_create_sm_context_request sm_context_req_msg = smreq->req;
 
 	oai::smf::model::SmContextCreateError smContextCreateError;
@@ -561,6 +386,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]); //TODO: add causes to header file
 		smContextCreateError.setError(problem_details);
+		//TODO: to be completed when finishing NAS implementation
 		//TODO: create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
 		send_create_session_response_error(smContextCreateError, Pistache::Http::Code::Forbidden, smreq->http_response);
 		return;
@@ -568,26 +394,22 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 	//store HttpResponse and session-related information to be used when receiving the response from UPF
 	itti_n11_create_sm_context_response *sm_context_resp = new itti_n11_create_sm_context_response(TASK_PGWC_APP, TASK_SMF_N11, smreq->http_response);
-
-	//pgwc::pdu_session_create_sm_context_response *sm_context_resp = new pdu_session_create_sm_context_response(smreq->http_response);
 	std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
 	sm_context_resp->res.set_supi(supi);
 
-	//step 3. find pdn_connection
+	//Step 3. find pdn_connection
 	std::shared_ptr<dnn_context> sd;
 	bool find_dnn = find_dnn_context (dnn, sd);
 
 	//step 3.1. create dnn context if not exist
 	//At this step, this context should be existed
 	if (nullptr == sd.get()) {
-
 		Logger::pgwc_app().debug("DNN context (dnn_in_use %s) is not existed yet!", dnn.c_str());
 		dnn_context *d = new (dnn_context);
 
 		d->in_use = true;
 		d->dnn_in_use = dnn;
 		//ambr
-		//insert
 		sd = std::shared_ptr<dnn_context> (d);
 		insert_dnn(sd);
 	} else {
@@ -615,14 +437,14 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	}
 
 	//pending session??
-	//step 4. check if supi is authenticated
+	//Step 4. check if supi is authenticated
 
 	//address allocation based on PDN type
-	//step 5. paa
+	//Step 5. paa
 	bool set_paa = false;
 	paa_t paa = {};
 
-	//step 6. pco
+	//Step 6. pco
 	//section 6.2.4.2, TS 24.501
 	//If the UE wants to use DHCPv4 for IPv4 address assignment, it shall indicate that to the network within the Extended
 	//protocol configuration options IE in the PDU SESSION ESTABLISHMENT REQUEST
@@ -640,8 +462,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 	//pgw_app_inst->process_pco_request(extended_protocol_options, pco_resp, pco_ids);
 
-
-	//step 7. address allocation based on PDN type
+	//Step 7. address allocation based on PDN type
 	switch (sp->pdn_type.pdn_type) {
 	case PDN_TYPE_E_IPV4: {
 		if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) { //use NAS signalling
@@ -678,8 +499,6 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 			//TODO: DHCP
 		}
 
-
-
 	}
 	break;
 
@@ -697,6 +516,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 		Logger::pgwc_app().error( "Unknown PDN type %d", sp->pdn_type.pdn_type);
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PDUTYPE_NOT_SUPPORTED]);
 		smContextCreateError.setError(problem_details);
+		//TODO: to be completed when finishing NAS implementation
 		//TODO: create a PDU Session Establishment Response by relying on NAS and assign to smContextCeateError.m_N1SmMsg
 		send_create_session_response_error(smContextCreateError, Pistache::Http::Code::Forbidden, sm_context_resp->http_response);
 		request_accepted = false;
@@ -706,7 +526,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	//TODO: if "Integrity Protection is required", check UE Integrity Protection Maximum Data Rate
 	//TODO: (Optional) Secondary authentication/authorization
 
-	//step 8. create session establishment procedure and run the procedure
+	//Step 8. create session establishment procedure and run the procedure
 	//if request is accepted
 	if (request_accepted){
 		if (set_paa) {
@@ -720,8 +540,6 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 			//}
 		}
 
-		//IMPORTANT!!
-		//should send PDU SessionCreate SM Context Response here in stead of after receiving N4 Session Establishment Response
 		//Send reply to AMF
 		//location header contains the URI of the created resource
 		Logger::pgwc_app().info("Sending response to AMF!");
@@ -755,7 +573,6 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 }
 
-
 //------------------------------------------------------------------------------
 bool pgw_context::find_dnn_context(const std::string& dnn, std::shared_ptr<dnn_context>& dnn_context)
 {
@@ -769,7 +586,6 @@ bool pgw_context::find_dnn_context(const std::string& dnn, std::shared_ptr<dnn_c
 	return false;
 }
 
-
 //------------------------------------------------------------------------------
 void pgw_context::insert_dnn(std::shared_ptr<dnn_context>& sd)
 {
@@ -777,38 +593,13 @@ void pgw_context::insert_dnn(std::shared_ptr<dnn_context>& sd)
 	dnns.push_back(sd);
 }
 
-
-
 //------------------------------------------------------------------------------
 bool pgw_context::verify_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq)
 {
 	//check the validity of the UE request according to the user subscription or local policies
 	//TODO:
 	return true;
-
 }
-
-
-//------------------------------------------------------------------------------
-bool pgw_context::find_pdn_connection(const std::string& dnn, const uint32_t pdu_session_id, dnn_pdn_t& pdn_connection)
-{
-	pdn_connection = {};
-	std::unique_lock<std::recursive_mutex> lock(m_context);
-	std::shared_ptr<dnn_context> sd;
-	if (find_dnn_context(dnn, sd)) {
-		std::shared_ptr<pgw_pdn_connection> sp;
-		if (sd.get()) {
-			Logger::pgwc_app().error( "[find_pdn_connection] found dnn_context");
-			if (sd->find_pdn_connection(pdu_session_id, sp)) {
-				// would need to make a pair of mutexes ?
-				pdn_connection = std::make_pair(sd, sp);
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 
 //------------------------------------------------------------------------------
 void pgw_context::send_create_session_response_error(oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse)
@@ -820,28 +611,7 @@ void pgw_context::send_create_session_response_error(oai::smf::model::SmContextC
 	httpResponse.send(code, resBody);
 }
 
-/*
-
 //------------------------------------------------------------------------------
-void dnn_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
-{
-	std::unique_lock<std::recursive_mutex> lock(m_context);
-	dnn_subscriptions.insert (std::pair ((uint8_t)snssai.sST, ss));
-
-}
-
-bool dnn_context::find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
-{
-	std::unique_lock<std::recursive_mutex> lock(m_context);
-	if (dnn_subscriptions.count(snssai.sST) > 0 ){
-		ss = dnn_subscriptions.at(snssai.sST);
-		return true;
-	}
-	return false;
-}
-
-*/
-
 bool dnn_context::find_pdn_connection(const uint32_t pdu_session_id , std::shared_ptr<pgw_pdn_connection>& pdn)
 {
 	pdn = {};
@@ -854,9 +624,7 @@ bool dnn_context::find_pdn_connection(const uint32_t pdu_session_id , std::share
 		}
 	}
 	return false;
-
 }
-
 
 //------------------------------------------------------------------------------
 void dnn_context::insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp)
@@ -865,6 +633,20 @@ void dnn_context::insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp)
 	pdn_connections.push_back(sp);
 }
 
+//------------------------------------------------------------------------------
+std::string dnn_context::toString() const
+{
+  std::string s = {};
+  s.append("DNN CONTEXT:\n");
+  s.append("\tIn use:\t\t\t\t").append(std::to_string(in_use)).append("\n");
+  s.append("\tAPN:\t\t\t\t").append(dnn_in_use).append("\n");
+  //s.append("\tAPN AMBR Bitrate Uplink:\t").append(std::to_string(apn_ambr.br_ul)).append("\n");
+  //s.append("\tAPN AMBR Bitrate Downlink:\t").append(std::to_string(apn_ambr.br_dl)).append("\n");
+  for (auto it : pdn_connections) {
+    s.append(it->toString());
+  }
+  return s;
+}
 
 //------------------------------------------------------------------------------
 void session_management_subscription::insert_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t>& dnn_configuration){
@@ -878,7 +660,6 @@ void session_management_subscription::find_dnn_configuration(std::string dnn, st
 	}
 }
 
-
 //------------------------------------------------------------------------------
 void pgw_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
 {
@@ -887,6 +668,7 @@ void pgw_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<sessi
 
 }
 
+//------------------------------------------------------------------------------
 bool pgw_context::find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
 {
 	std::unique_lock<std::recursive_mutex> lock(m_context);
@@ -896,7 +678,3 @@ bool pgw_context::find_dnn_subscription(const snssai_t snssai, std::shared_ptr<s
 	}
 	return false;
 }
-
-
-
-

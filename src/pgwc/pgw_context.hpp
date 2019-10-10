@@ -245,40 +245,6 @@ public:
 };
 
 
-class apn_context {
-
-public:
-  apn_context() : m_context(), in_use(false), pdn_connections() {
-    apn_ambr = {0};
-  }
-
-  apn_context(apn_context& b) = delete;
-
-  void insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp);
-  bool find_pdn_connection(const teid_t xgw_s5s8c_teid, const bool is_local_teid, std::shared_ptr<pgw_pdn_connection>& pdn);
-  bool find_pdn_connection(const pfcp::pdr_id_t& pdr_id, std::shared_ptr<pgw_pdn_connection>& pdn, ebi_t& ebi);
-  void delete_pdn_connection(std::shared_ptr<pgw_pdn_connection>& pdn_connection);
-  int get_num_pdn_connections() const {return pdn_connections.size();};
-  // deallocate_ressources is for releasing LTE resources prior to the deletion of objects
-  // since shared_ptr is actually heavy used for handling objects, deletion of object instances cannot be always guaranteed
-  // when removing them from a collection, so that is why actually the deallocation of resources is not done in the destructor of objects.
-  void deallocate_ressources();
-
-  std::string toString() const;
-
-  bool                  in_use;
-  std::string           apn_in_use;               // The APN currently used, as received from the SGW.
-  ambr_t          apn_ambr;                 // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
-  // APN Rate Control: The APN-Rate-Control limits the maximum number of uplink/downlink packets and the maximum number of
-  //                   additional exception report packets per a specific time unit (e.g. minute, hour, day, week) for this APN. It includes an
-  //                   indication as to whether or not Exception reports may still be sent when the limit has been met.
-  // key is local s5s8 teid
-  //map<teid_t, shared_ptr<pgw_pdn_connection>> pdn_connections;
-  std::vector<std::shared_ptr<pgw_pdn_connection>> pdn_connections; // was list
-  mutable std::recursive_mutex                     m_context;
-};
-
-
 class session_management_subscription {
 public:
 	session_management_subscription(snssai_t snssai): single_nssai(snssai), dnn_configurations() {}
@@ -309,6 +275,8 @@ public:
 	/* Insert a PDN connection into the DNN context */
 	void insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp);
 
+	std::string toString() const;
+
 	bool                  in_use;
 	std::string           dnn_in_use;           // The APN currently used, as received from the SGW.
 	//ambr_t          apn_ambr;                 // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
@@ -323,14 +291,10 @@ public:
 
 class pgw_context;
 
-typedef std::pair<std::shared_ptr<apn_context>, std::shared_ptr<pgw_pdn_connection>> pdn_duo_t;
-
-typedef std::pair<std::shared_ptr<dnn_context>, std::shared_ptr<pgw_pdn_connection>> dnn_pdn_t;
-
 class pgw_context : public std::enable_shared_from_this<pgw_context> {
 
 public:
-  pgw_context() : m_context(), imsi(), imsi_unauthenticated_indicator(false), apns(), pending_procedures(), msisdn() {}
+  pgw_context() : m_context(), imsi(), imsi_unauthenticated_indicator(false), pending_procedures(), msisdn() {}
 
   pgw_context(pgw_context& b) = delete;
 
@@ -341,15 +305,7 @@ public:
 #define IS_FIND_PDN_WITH_LOCAL_TEID true
 #define IS_FIND_PDN_WITH_PEER_TEID  false
 
-  bool find_pdn_connection(const std::string& apn, const teid_t xgw_s5s8c_teid, const bool is_local_teid, pdn_duo_t& pdn_connection);
-  bool find_pdn_connection(const teid_t xgw_s5s8c_teid, const bool is_local_teid, pdn_duo_t& pdn_connection);
   bool find_pdn_connection(const pfcp::pdr_id_t& pdr_id, std::shared_ptr<pgw_pdn_connection>& pdn, ebi_t& ebi);
-  void insert_apn(std::shared_ptr<apn_context>& sa);
-  bool find_apn_context(const std::string& apn, std::shared_ptr<apn_context>& apn_context);
-  int get_num_apn_contexts() {return apns.size();};
-
-  void delete_apn_context(std::shared_ptr<apn_context>& sa);
-  void delete_pdn_connection(std::shared_ptr<apn_context>& sa , std::shared_ptr<pgw_pdn_connection>& sp);
 
   void handle_itti_msg (itti_n4_session_establishment_response& );
   void handle_itti_msg (itti_n4_session_modification_response& );
@@ -387,17 +343,6 @@ public:
 	 */
 	void send_create_session_response_error(oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse);
 
-	/*
-	 * Find DNN connection with APN name and PDU session ID
-	 * @param [const std::string&] dnn
-	 * @param [const uint32_t ] pdu_session_id PDU session ID
-	 * @param [dnn_pdn_t&] pdn_connection pdn connection to be found
-	 * @return void
-	 */
-	bool find_pdn_connection(const std::string& dnn, const uint32_t pdu_session_id, dnn_pdn_t& pdn_connection);
-
-
-
 	bool verify_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
 	std::vector<std::shared_ptr<dnn_context>> dnns;
@@ -416,8 +361,6 @@ public:
 	// NOT IMPLEMENTED Trace type                             // Indicates the type of trace
 	// NOT IMPLEMENTED Trigger id                             // Identifies the entity that initiated the trace
 	// NOT IMPLEMENTED OMC identity                           // Identifies the OMC that shall receive the trace record(s).
-
-	std::vector<std::shared_ptr<apn_context>> apns; // was list
 
 	//--------------------------------------------
 	// internals

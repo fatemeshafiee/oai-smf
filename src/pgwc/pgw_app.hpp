@@ -166,7 +166,7 @@ public:
    * @param [std::string] dnn_selection_mode
    * @return True if SMF uses the local configuration to check the validity of the UE request, False otherwise
    */
-  bool is_use_local_configuration_subscription_data(const std::string& dnn_selection_mode);
+  bool use_local_configuration_subscription_data(const std::string& dnn_selection_mode);
 
   /*
    * Verify whether the Session Management Data is existed

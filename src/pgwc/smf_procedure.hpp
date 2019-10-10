@@ -44,7 +44,6 @@
 
 namespace pgwc {
 
-class apn_context;
 class pgw_context;
 class pgw_pdn_connection;
 
