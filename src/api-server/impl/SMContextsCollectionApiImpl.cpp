@@ -18,7 +18,7 @@
 extern "C" {
 #include "nas_message.h"
 #include "mmData.h"
-#include "NasMain.h"
+//#include "NasMain.h"
 }
 
 namespace oai {
