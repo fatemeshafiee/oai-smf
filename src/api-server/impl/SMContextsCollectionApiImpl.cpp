@@ -65,7 +65,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
 	//decode the NAS message (using NAS lib)
 	// comment to fix a unknown bug
-	//decoder_rc = nas_message_decode (data, &decoded_nas_msg, sizeof(data), security, &decode_status);
+	decoder_rc = nas_message_decode (data, &decoded_nas_msg, sizeof(data), security, &decode_status);
 
 	Logger::smf_api_server().debug("nas header  decode extended_protocol_discriminator %d, security_header_type:%d,sequence_number:%d,message_authentication_code:%d\n",
 			decoded_nas_msg.header.extended_protocol_discriminator,
