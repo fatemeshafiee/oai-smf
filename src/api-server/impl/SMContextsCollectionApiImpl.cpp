@@ -18,6 +18,7 @@
 extern "C" {
 #include "nas_message.h"
 #include "mmData.h"
+#include "NasMain.h"
 }
 
 namespace oai {
@@ -52,7 +53,8 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//bsafe (disable temporarily warning for strncpy)
 	//std::strncpy((char *)data, n1SmMessage.c_str(), sizeof(data));
 
-	memcpy ((void *)data, (void *)n1SmMessage.c_str(),sizeof(data));
+	memcpy ((void *)data, (void *)n1SmMessage.c_str(),strlen(n1SmMessage.c_str()));
+	//establishment_request(data);
 
 	//use a temporary security mechanism
 	fivegmm_security_context_t * security = ( fivegmm_security_context_t *) std::calloc(1,sizeof(fivegmm_security_context_t));

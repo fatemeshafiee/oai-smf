@@ -120,6 +120,7 @@ int nas_message_encode (
   //printf("_nas_message_header_encode, size:%d\n", size);
   if (size < 0) {
     //OAILOG_FUNC_RETURN (LOG_NAS, TLV_BUFFER_TOO_SHORT);
+    return TLV_BUFFER_TOO_SHORT;
   } else if (size > 2) {
     /*
      * Encode security protected NAS message
@@ -348,7 +349,8 @@ static int _nas_message_header_encode (
   //printf("encoded nas security header type: %x\n",buffer[size-1]);
   //printf("encoded nas security header type: %x\n",header->security_header_type);
 
-  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES ||
+  	  header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     //printf("header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES\n");
     //printf("%x\n",header->security_header_type);
     if (header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED) {
@@ -359,16 +361,17 @@ static int _nas_message_header_encode (
          */
         //OAILOG_WARNING(LOG_NAS, "NET-API   - The size of the header (%u) " "exceeds the buffer length (%lu)\n", NAS_MESSAGE_SECURITY_HEADER_SIZE, length);
         //OAILOG_FUNC_RETURN (LOG_NAS, RETURNerror);
+        return RETURNerror;
       }
 
       /*
        * Encode the message authentication code
        */
-	  //ENCODE_U32 (buffer + size, header->message_authentication_code, size);
+	  ENCODE_U32 (buffer + size, header->message_authentication_code, size);
 	  /*
        * Encode the sequence number
        */
-      //ENCODE_U8 (buffer + size, header->sequence_number, size);
+      ENCODE_U8 (buffer + size, header->sequence_number, size);
     }
   }
   return size;
@@ -754,7 +757,8 @@ static int _nas_message_header_decode (
   DECODE_U8 (buffer + size, header->security_header_type , size);
   //OAILOG_DEBUG(LOG_NAS,"security header type(%x)\n",header->security_header_type&0x0f);
   *is_sr = false;
-  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES ||
+  	  header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     if (header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED) {
       if (status) {
         switch (header->security_header_type) {
@@ -785,11 +789,12 @@ static int _nas_message_header_decode (
          */
          //OAILOG_WARNING(LOG_NAS, "NET-API   - The size of the header (%u) " "exceeds the buffer length (%lu)\n", NAS_MESSAGE_SECURITY_HEADER_SIZE, length);
          //OAILOG_FUNC_RETURN (LOG_NAS, RETURNerror);
+         return RETURNerror;
         }
         // Decode the message authentication code
-        //DECODE_U32 (buffer + size, header->message_authentication_code, size);
+        DECODE_U32 (buffer + size, header->message_authentication_code, size);
         // Decode the sequence number
-        //DECODE_U8 (buffer + size, header->sequence_number, size);
+        DECODE_U8 (buffer + size, header->sequence_number, size);
 
 		#if 0
 		printf("decode size:%d, message_authentication_code:0x%x,sequence_number:0x%x\n",
