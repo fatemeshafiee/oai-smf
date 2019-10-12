@@ -84,28 +84,32 @@ int pgw_app::apply_config (const smf_config& cfg)
 }
 
 //------------------------------------------------------------------------------
-teid_t pgw_app::generate_s5s8_cp_teid() {
-  std::unique_lock<std::mutex> ls(m_s5s8_cp_teid_generator);
-  teid_t teid =  ++teid_s5s8_cp_generator;
-  while ((is_s5s8c_teid_exist(teid)) || (teid == UNASSIGNED_TEID)) {
-    teid =  ++teid_s5s8_cp_generator;
+uint64_t pgw_app::generate_seid() {
+  std::unique_lock<std::mutex> ls(m_seid_n4_generator);
+  uint64_t seid =  ++seid_n4_generator;
+  while ((is_seid_n4_exist(seid)) || (seid == UNASSIGNED_SEID)) {
+    seid =  ++seid_n4_generator;
   }
-  s5s8cplteid.insert(teid);
+  set_seid_n4.insert(seid);
   ls.unlock();
-  return teid;
+  return seid;
+}
+
+
+//------------------------------------------------------------------------------
+bool pgw_app::is_seid_n4_exist(const uint64_t& seid) const
+{
+  return bool{set_seid_n4.count(seid) > 0};
 }
 
 //------------------------------------------------------------------------------
-bool pgw_app::is_s5s8c_teid_exist(const teid_t& teid_s5s8_cp) const
+void pgw_app::free_seid_n4(const uint64_t& seid)
 {
-  return bool{s5s8cplteid.count(teid_s5s8_cp) > 0};
+	std::unique_lock<std::mutex> ls(m_seid_n4_generator);
+	set_seid_n4.erase (seid);
+	ls.unlock();
 }
 
-//------------------------------------------------------------------------------
-void pgw_app::free_s5s8c_teid(const teid_t& teid_s5s8_cp)
-{
-  s5s8cplteid.erase (teid_s5s8_cp); // can return value of erase
-}
 
 //------------------------------------------------------------------------------
 bool pgw_app::is_imsi64_2_pgw_context(const imsi64_t& imsi64) const
@@ -141,54 +145,6 @@ bool pgw_app::seid_2_pgw_context(const seid_t& seid, std::shared_ptr<pgw_context
     return true;
   }
   return false;
-}
-
-//------------------------------------------------------------------------------
-fteid_t pgw_app::build_s5s8_cp_fteid(const struct in_addr ipv4_address, const teid_t teid)
-{
-  fteid_t fteid = {};
-  fteid.interface_type = S5_S8_PGW_GTP_C;
-  fteid.v4 = 1;
-  fteid.ipv4_address = ipv4_address;
-  fteid.v6 = 0;
-  fteid.ipv6_address = in6addr_any;
-  fteid.teid_gre_key = teid;
-  return fteid;
-}
-//------------------------------------------------------------------------------
-fteid_t pgw_app::generate_s5s8_cp_fteid(const struct in_addr ipv4_address)
-{
-  teid_t teid = generate_s5s8_cp_teid();
-  return build_s5s8_cp_fteid(ipv4_address, teid);
-}
-//------------------------------------------------------------------------------
-void  pgw_app::free_s5s8_cp_fteid(const fteid_t& fteid)
-{
-  std::unique_lock lock(m_s5s8lteid2pgw_context);
-  s5s8lteid2pgw_context.erase(fteid.teid_gre_key);
-  free_s5s8c_teid(fteid.teid_gre_key);
-}
-//------------------------------------------------------------------------------
-bool pgw_app::is_s5s8cpgw_fteid_2_pgw_context(const fteid_t& ls5s8_fteid) const
-{
-  std::shared_lock lock(m_s5s8lteid2pgw_context);
-  return bool{s5s8lteid2pgw_context.count(ls5s8_fteid.teid_gre_key) > 0};
-}
-//------------------------------------------------------------------------------
-std::shared_ptr<pgw_context> pgw_app::s5s8cpgw_fteid_2_pgw_context(fteid_t& ls5s8_fteid)
-{
-  if (is_s5s8cpgw_fteid_2_pgw_context(ls5s8_fteid)) {
-    return s5s8lteid2pgw_context.at(ls5s8_fteid.teid_gre_key);
-  } else {
-    return std::shared_ptr<pgw_context>(nullptr);
-  }
-
-}
-//------------------------------------------------------------------------------
-void pgw_app::set_s5s8cpgw_fteid_2_pgw_context(fteid_t& ls5s8_fteid, std::shared_ptr<pgw_context> spc)
-{
-  std::unique_lock lock(m_s5s8lteid2pgw_context);
-  s5s8lteid2pgw_context[ls5s8_fteid.teid_gre_key] = spc;
 }
 
 //------------------------------------------------------------------------------
@@ -257,14 +213,12 @@ void pgw_app_task (void*)
 }
 
 //------------------------------------------------------------------------------
-pgw_app::pgw_app (const std::string& config_file) : m_s5s8_cp_teid_generator(), m_imsi2pgw_context(), m_s5s8lteid2pgw_context(), m_seid2pgw_context()
+pgw_app::pgw_app (const std::string& config_file) : m_imsi2pgw_context(), m_seid2pgw_context()
 {
   Logger::pgwc_app().startup("Starting...");
 
-  teid_s5s8_cp_generator = 0;
   imsi2pgw_context = {};
-  s5s8lteid2pgw_context = {};
-  s5s8cplteid = {};
+  set_seid_n4 = {};
 
   apply_config (smf_cfg);
 

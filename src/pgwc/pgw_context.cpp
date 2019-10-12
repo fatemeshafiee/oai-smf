@@ -172,15 +172,20 @@ void pgw_pdn_connection::deallocate_ressources(const std::string& apn)
   if (ipv4) {
     paa_dynamic::get_instance().release_paa(apn, ipv4_address);
   }
-  pgw_app_inst->free_s5s8_cp_fteid(pgw_fteid_s5_s8_cp);
+  //pgw_app_inst->free_s5s8_cp_fteid(pgw_fteid_s5_s8_cp);
   clear();
 }
 //------------------------------------------------------------------------------
 void pgw_pdn_connection::generate_seid()
 {
   // DO it simple now:
-  seid = pgw_fteid_s5_s8_cp.teid_gre_key | (((uint64_t)smf_cfg.instance) << 32);
+ // seid = pgw_fteid_s5_s8_cp.teid_gre_key | (((uint64_t)smf_cfg.instance) << 32);
 }
+
+void pgw_pdn_connection::set_seid(const uint64_t& s){
+	seid = s;
+}
+
 //------------------------------------------------------------------------------
 // TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
 void pgw_pdn_connection::generate_far_id(pfcp::far_id_t& far_id)
@@ -216,8 +221,6 @@ std::string pgw_pdn_connection::toString() const
     s.append("\tPAA IPv4:\t\t\t").append(conv::toString(ipv4_address)).append("\n");
   if (ipv6)
     s.append("\tPAA IPv6:\t\t\t").append(conv::toString(ipv6_address)).append("\n");
-  s.append("\tSGW FTEID S5S8 CP:\t\t").append(sgw_fteid_s5_s8_cp.toString()).append("\n");
-  s.append("\tPGW FTEID S5S8 CP:\t\t").append(pgw_fteid_s5_s8_cp.toString()).append("\n");
   s.append("\tDefault EBI:\t\t\t").append(std::to_string(default_bearer.ebi)).append("\n");
   s.append("\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
   for (auto it : eps_bearers) {
@@ -639,7 +642,7 @@ std::string dnn_context::toString() const
   std::string s = {};
   s.append("DNN CONTEXT:\n");
   s.append("\tIn use:\t\t\t\t").append(std::to_string(in_use)).append("\n");
-  s.append("\tAPN:\t\t\t\t").append(dnn_in_use).append("\n");
+  s.append("\tDNN:\t\t\t\t").append(dnn_in_use).append("\n");
   //s.append("\tAPN AMBR Bitrate Uplink:\t").append(std::to_string(apn_ambr.br_ul)).append("\n");
   //s.append("\tAPN AMBR Bitrate Downlink:\t").append(std::to_string(apn_ambr.br_dl)).append("\n");
   for (auto it : pdn_connections) {

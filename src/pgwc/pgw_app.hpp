@@ -49,26 +49,22 @@
 
 namespace pgwc {
 
-//typedef std::pair<shared_ptr<pgw_context>,shared_ptr<pgw_pdn_connection>> zzz;
 class   smf_config; // same namespace
 
 class pgw_app {
 private:
   std::thread::id                     thread_id;
   std::thread                         thread;
-  // teid generators (linear)
-  teid_t                        teid_s5s8_cp_generator;
+
+  //seid generator
+  uint64_t                        seid_n4_generator;
+  std::mutex                      m_seid_n4_generator;
+  std::set<uint64_t>              set_seid_n4;
 
   std::map<imsi64_t, std::shared_ptr<pgw_context>>  imsi2pgw_context;
-  std::map<teid_t, std::shared_ptr<pgw_context>>    s5s8lteid2pgw_context;
   std::map<seid_t, std::shared_ptr<pgw_context>>    seid2pgw_context;
 
-  std::set<teid_t>              s5s8cplteid;
-
-  std::mutex                          m_s5s8_cp_teid_generator;
-
   mutable std::shared_mutex           m_imsi2pgw_context;
-  mutable std::shared_mutex           m_s5s8lteid2pgw_context;
   mutable std::shared_mutex           m_seid2pgw_context;
 
   //for SMF
@@ -78,15 +74,6 @@ private:
 
   int apply_config(const smf_config& cfg);
 
-  teid_t generate_s5s8_cp_teid();
-  void free_s5s8c_teid(const teid_t& teid_s5s8_cp);
-  bool is_s5s8c_teid_exist(const teid_t& teid_s5s8_cp) const;
-  //teid_t generate_s5s8_up_teid();
-  //void free_s5s8u_teid(const teid_t& teid_s5s8_up);
-  //bool is_s5s8u_teid_exist(teid_t& teid_s5s8_up);
-
-  // s5s8crteid2pgw_eps_bearer_context collection
-  bool is_s5s8cpgw_fteid_2_pgw_context(const fteid_t& ls5s8_fteid) const;
   bool is_imsi64_2_pgw_context(const imsi64_t& imsi64) const;
   std::shared_ptr<pgw_context> imsi64_2_pgw_context(const imsi64_t& imsi64) const;
   void set_imsi64_2_pgw_context(const imsi64_t& imsi64, std::shared_ptr<pgw_context> pc);
@@ -102,12 +89,6 @@ public:
   explicit pgw_app(const std::string& config_file);
   pgw_app(pgw_app const&)    = delete;
   void operator=(pgw_app const&)     = delete;
-
-  fteid_t build_s5s8_cp_fteid(const struct in_addr ipv4_address, const teid_t teid);
-  fteid_t generate_s5s8_cp_fteid(const struct in_addr ipv4_address);
-  void free_s5s8_cp_fteid(const fteid_t& fteid);
-  void set_s5s8cpgw_fteid_2_pgw_context(fteid_t& rs5s8_fteid, std::shared_ptr<pgw_context> spc);
-  std::shared_ptr<pgw_context> s5s8cpgw_fteid_2_pgw_context(fteid_t& ls5s8_fteid);
 
   void set_seid_2_pgw_context(const seid_t& seid, std::shared_ptr<pgw_context>& pc);
   bool seid_2_pgw_context(const seid_t& seid, std::shared_ptr<pgw_context>& pc) const;
@@ -132,6 +113,10 @@ public:
   void handle_itti_msg (itti_n4_association_setup_request& m);
 
   void restore_sx_sessions(const seid_t& seid) const;
+
+  uint64_t generate_seid();
+  bool is_seid_n4_exist(const uint64_t& s) const;
+  void free_seid_n4(const uint64_t& seid);
 
   /*
    * Handle PDUSession_CreateSMContextRequest from AMF
