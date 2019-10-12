@@ -44,16 +44,19 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	nas_message_t	decoded_nas_msg;
 	memset (&decoded_nas_msg, 0, sizeof (nas_message_t));
 	int decoder_rc = RETURNok;
-	unsigned char data[100] = {'\0'}; //hardcoded for the moment
+	//unsigned char data[100] = {'\0'}; //hardcoded for the moment
 
 	SmContextCreateData smContextCreateData = smContextMessage.getJsonData();
 	std::string n1SmMessage = smContextMessage.getBinaryDataN1SmMessage();
+
+	unsigned int n1SmMsgLen = strlen(n1SmMessage.c_str());
+	unsigned char *data = (unsigned char *)malloc(n1SmMsgLen + 1);//hardcoded for the moment
 
 	//Decode and process nas message
 	//bsafe (disable temporarily warning for strncpy)
 	//std::strncpy((char *)data, n1SmMessage.c_str(), sizeof(data));
 
-	memcpy ((void *)data, (void *)n1SmMessage.c_str(),strlen(n1SmMessage.c_str()));
+	memcpy ((void *)data, (void *)n1SmMessage.c_str(),n1SmMsgLen);
 	//establishment_request(data);
 
 	//use a temporary security mechanism
@@ -67,7 +70,10 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
 	//decode the NAS message (using NAS lib)
 	// comment to fix a unknown bug
-	decoder_rc = nas_message_decode (data, &decoded_nas_msg, sizeof(data), security, &decode_status);
+	decoder_rc = nas_message_decode (data, &decoded_nas_msg, n1SmMsgLen, security, &decode_status);
+
+	free(data);
+	data = NULL;
 
 	Logger::smf_api_server().debug("nas header  decode extended_protocol_discriminator %d, security_header_type:%d,sequence_number:%d,message_authentication_code:%d\n",
 			decoded_nas_msg.header.extended_protocol_discriminator,
