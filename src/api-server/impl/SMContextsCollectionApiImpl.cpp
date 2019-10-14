@@ -228,7 +228,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 			printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((decoded_nas_msg.plain.sm.specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((decoded_nas_msg.plain.sm.specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((decoded_nas_msg.plain.sm.specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((decoded_nas_msg.plain.sm.specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[3]));
 			printf("PDU_SESSION_RELEASE_COMPLETE------------ end\n");
 		break;
-		case _5GSM_STAUS:
+		case _5GSM_STATUS:
 			printf("_5GSM_STAUS------------ start\n");
 			printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_nas_msg.plain.sm.header.extended_protocol_discriminator,decoded_nas_msg.plain.sm.header.pdu_session_identity,decoded_nas_msg.plain.sm.header.proeduer_transaction_identity,decoded_nas_msg.plain.sm.header.message_type);
 			printf("_5gsmcause: 0x%x\n",decoded_nas_msg.plain.sm.specific_msg._5gsm_status._5gsmcause);
