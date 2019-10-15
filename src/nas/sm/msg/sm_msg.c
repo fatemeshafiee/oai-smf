@@ -309,7 +309,7 @@ _fivegsm_msg_decode_header (
   /*
    * Decode the procedure transaction identity
    */
-  DECODE_U8 (buffer + size, header->proeduer_transaction_identity, size);
+  DECODE_U8 (buffer + size, header->procedure_transaction_identity, size);
   /*
    * Decode the message type
    */
@@ -380,7 +380,7 @@ _fivegsm_msg_encode_header (
   /*
    * Encode the procedure transaction identity
    */
-  ENCODE_U8 (buffer + size, header->proeduer_transaction_identity, size);
+  ENCODE_U8 (buffer + size, header->procedure_transaction_identity, size);
   /*
    * Encode the message type
    */

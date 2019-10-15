@@ -12,7 +12,7 @@ typedef struct {
   //pti_t procedure_transaction_identity;
   uint8_t extended_protocol_discriminator;
   uint8_t pdu_session_identity;
-  uint8_t proeduer_transaction_identity;
+  uint8_t procedure_transaction_identity;
   uint8_t message_type;
 } __attribute__((__packed__)) sm_msg_header_t;
 

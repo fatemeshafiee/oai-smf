@@ -43,7 +43,8 @@ static void
 smf_string_to_supi (supi_t * const supi,
                        char const * const supi_str)
 {
-    strncpy(supi->data, supi_str, SUPI_DIGITS_MAX + 1);
+    //strncpy(supi->data, supi_str, SUPI_DIGITS_MAX + 1);
+    memcpy((void *) supi->data, (void *) supi_str, SUPI_DIGITS_MAX + 1);
     supi->length = strlen(supi->data);
     return;
 }

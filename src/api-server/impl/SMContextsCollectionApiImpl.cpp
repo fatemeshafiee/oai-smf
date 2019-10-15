@@ -66,6 +66,8 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	supi_t supi =  {.length = 0};
 	smf_string_to_supi(&supi, smContextCreateData.getSupi().c_str());
 	sm_context_req_msg.set_supi(supi);
+	Logger::smf_api_server().info("Supi %s", smContextCreateData.getSupi().c_str());
+
 	//dnn
 	sm_context_req_msg.set_dnn(smContextCreateData.getDnn());
 	//S-Nssai
@@ -93,18 +95,23 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//Extended protocol discriminator (Mandatory)
 	sm_context_req_msg.set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
 	//PDU session ID (Mandatory)
-	//TODO:
+	sm_context_req_msg.set_pdu_session_id(decoded_nas_msg.plain.sm.header.pdu_session_identity);
 	//PTI (Mandatory)
+	procedure_transaction_id_t pti = {.procedure_transaction_id = decoded_nas_msg.plain.sm.header.procedure_transaction_identity};
+	sm_context_req_msg.set_pti(pti);
 
-	//TODO:
 	//Message type (Mandatory) (PDU SESSION ESTABLISHMENT REQUEST message identity)
-	//sm_context_req_msg->set_message_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
-	//Logger::smf_api_server().debug("nas decode messaget type %d\n",
-	//		decoded_nas_msg.plain.sm.pdu_session_establishment_request.messagetype);
+	sm_context_req_msg.set_message_type(decoded_nas_msg.plain.sm.header.message_type);
 	sm_context_req_msg.set_message_type (PDU_SESSION_ESTABLISHMENT_REQUEST); //Temporary - should be removed (get from NAS)
+
 	//Integrity protection maximum data rate (Mandatory)
+
 	//PDU session type (Optional)
-	sm_context_req_msg.set_pdu_session_type(PDN_TYPE_E_IPV4);//TODO: should get from NAS msg
+	sm_context_req_msg.set_pdu_session_type(PDN_TYPE_E_IPV4);
+	if (decoded_nas_msg.plain.sm.header.message_type == PDU_SESSION_ESTABLISHMENT_REQUEST){
+		sm_context_req_msg.set_pdu_session_type(decoded_nas_msg.plain.sm.specific_msg.pdu_session_establishment_request._pdusessiontype.pdu_session_type_value);
+	}
+
 	//SSC mode (Optional)
 	//5GSM capability (Optional)
 	//Maximum number of supported (Optional)
@@ -118,7 +125,6 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
     itti_n11_create_sm_context_request *itti_msg = new itti_n11_create_sm_context_request(TASK_SMF_N11, TASK_PGWC_APP, response);
     itti_msg->req = sm_context_req_msg;
-
     std::shared_ptr<itti_n11_create_sm_context_request> i = std::shared_ptr<itti_n11_create_sm_context_request>(itti_msg);
 
     m_smf_app->handle_amf_msg(i);

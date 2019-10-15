@@ -2620,7 +2620,7 @@ int  establishment_request(unsigned char * encode_data)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-	sm_msg->header.proeduer_transaction_identity = 1;
+	sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_REQUEST;
 
 	/*********************sm_msg->specific_msg.pdu_session_establishment_request statr******************************/
@@ -2736,10 +2736,10 @@ int  establishment_request(unsigned char * encode_data)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
 	sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
 	//printf("message type:0x%x\n",sm_msg->specific_msg.pdu_session_establishment_request.messagetype);
@@ -2813,9 +2813,9 @@ int  establishment_request(unsigned char * encode_data)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
 	decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -2863,7 +2863,7 @@ int establishment_accept(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-	sm_msg->header.proeduer_transaction_identity = 1;
+	sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCPET;
 
 	/*********************sm_msg->specific_msg.pdu_session_establishment_accept statr******************************/
@@ -3017,10 +3017,10 @@ int establishment_accept(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
 	sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
 	//printf("message type:0x%x\n",sm_msg->specific_msg.pdu_session_establishment_request.messagetype);
@@ -3084,9 +3084,9 @@ int establishment_accept(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
 	decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -3131,7 +3131,7 @@ int establishment_reject(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_REJECT;
 
 /*********************sm_msg->specific_msg.pdu_session_establishment_reject statr******************************/
@@ -3227,10 +3227,10 @@ int establishment_reject(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -3289,9 +3289,9 @@ int establishment_reject(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -3329,7 +3329,7 @@ int authentication_command(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_AUTHENTICATION_COMMAND;
 
 /*********************sm_msg->specific_msg.pdu_session_authentication_command statr******************************/
@@ -3414,10 +3414,10 @@ int authentication_command(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -3472,9 +3472,9 @@ int authentication_command(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -3508,7 +3508,7 @@ int authentication_complete(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_AUTHENTICATION_COMPLETE;
 
 /*********************sm_msg->specific_msg.pdu_session_authentication_complete statr******************************/
@@ -3593,10 +3593,10 @@ int authentication_complete(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -3651,9 +3651,9 @@ int authentication_complete(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -3687,7 +3687,7 @@ int authentication_result(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_AUTHENTICATION_RESULT;
 
 /*********************sm_msg->specific_msg.pdu_session_authentication_result statr******************************/
@@ -3772,10 +3772,10 @@ int authentication_result(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -3830,9 +3830,9 @@ int authentication_result(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -3872,7 +3872,7 @@ int modification_reject(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_MODIFICATION_REJECT;
 
 /*********************sm_msg->specific_msg.pdu_session_modification_reject statr******************************/
@@ -3958,10 +3958,10 @@ int modification_reject(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -4018,9 +4018,9 @@ int modification_reject(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -4063,7 +4063,7 @@ int modification_complete(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMPLETE;
 
 /*********************sm_msg->specific_msg.pdu_session_modification_complete statr******************************/
@@ -4143,10 +4143,10 @@ int modification_complete(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -4200,9 +4200,9 @@ int modification_complete(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -4236,7 +4236,7 @@ int modification_command_reject(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMANDREJECT;
 
 /*********************sm_msg->specific_msg.pdu_session_modification_command_reject statr******************************/
@@ -4317,10 +4317,10 @@ int modification_command_reject(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -4375,9 +4375,9 @@ int modification_command_reject(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -4412,7 +4412,7 @@ int release_request(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_RELEASE_REQUEST;
 
 /*********************sm_msg->specific_msg.pdu_session_release_request statr******************************/
@@ -4493,10 +4493,10 @@ int release_request(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -4551,9 +4551,9 @@ int release_request(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -4587,7 +4587,7 @@ int release_reject(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_RELEASE_REJECT;
 
 /*********************sm_msg->specific_msg.pdu_session_release_reject statr******************************/
@@ -4668,10 +4668,10 @@ int release_reject(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -4726,9 +4726,9 @@ int release_reject(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -4762,7 +4762,7 @@ int release_command(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_RELEASE_COMMAND;
 
 /*********************sm_msg->specific_msg.pdu_session_release_command statr******************************/
@@ -4856,10 +4856,10 @@ int release_command(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -4917,9 +4917,9 @@ int release_command(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -4956,7 +4956,7 @@ int release_complete(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = PDU_SESSION_RELEASE_COMPLETE;
 
 /*********************sm_msg->specific_msg.pdu_session_release_complete statr******************************/
@@ -5039,10 +5039,10 @@ int release_complete(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -5097,9 +5097,9 @@ int release_complete(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
@@ -5133,7 +5133,7 @@ int _5gsm_status_(void)
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
-    sm_msg->header.proeduer_transaction_identity = 1;
+    sm_msg->header.procedure_transaction_identity = 1;
 	sm_msg->header.message_type = _5GSM_STAUS;
 
 /*********************sm_msg->specific_msg._5gsm_status statr******************************/
@@ -5202,10 +5202,10 @@ int _5gsm_status_(void)
 
 
 
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n",
 	sm_msg->header.extended_protocol_discriminator,
     sm_msg->header.pdu_session_identity,
-	sm_msg->header.proeduer_transaction_identity,
+	sm_msg->header.procedure_transaction_identity,
 	sm_msg->header.message_type);
 
    
@@ -5259,9 +5259,9 @@ int _5gsm_status_(void)
 
 	SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
    
-	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+	printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
     decoded_sm_msg->header.pdu_session_identity,
-	decoded_sm_msg->header.proeduer_transaction_identity,
+	decoded_sm_msg->header.procedure_transaction_identity,
 	decoded_sm_msg->header.message_type);
 
 	printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
