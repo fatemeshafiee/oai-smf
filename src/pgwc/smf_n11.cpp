@@ -31,6 +31,7 @@
 #include "itti.hpp"
 #include "logger.hpp"
 #include "smf_n11.hpp"
+#include "pgw_app.hpp"
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
@@ -39,6 +40,7 @@
 #define AMF_CURL_TIMEOUT_MS 100L
 #define AMF_NUMBER_RETRIES 3
 #define HTTP_STATUS_OK 200
+#define DEBUG 1
 
 using namespace pgwc;
 using namespace std;
@@ -46,6 +48,7 @@ using json = nlohmann::json;
 
 extern itti_mw *itti_inst;
 extern smf_n11   *smf_n11_inst;
+extern pgwc::pgw_app *pgw_app_inst;
 void smf_n11_task (void*);
 
 /*
@@ -119,6 +122,8 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 	//use curl to send data for the moment
 
 	nlohmann::json jsonData;
+	std::string n1_message;
+
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	struct curl_slist *headers = NULL;
 	headers = curl_slist_append(headers, "Accept: application/json");
@@ -132,9 +137,19 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 	std::string url = amf_addr + ":" + std::to_string(amf_port) + "/namf-comm/v1/ue-contexts/" + std::to_string(supi64) +"/n1-n2-messages";
 	Logger::smf_n11().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
 
-	//TODO: fill the content of N1N2MessageTransferReqData
+	//N1 SM container
+	if (sm_context_res->res.get_cause() != REQUEST_ACCEPTED) { //PDU Session Establishment Reject
+    	pgw_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
+	} else { //PDU Session Establishment Accept
+		pgw_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
+    	//pgw_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_ACCPET, n1_message); //need cause?
+	}
+
 	jsonData["n1MessageContainer"]["n1MessageClass"] = "SM";
-	jsonData["n1MessageContainer"]["n1MessageContent"]["contentId"] = "n1MessageContent";
+	jsonData["n1MessageContainer"]["n1MessageContent"]["contentId"] = n1_message.c_str();
+	Logger::smf_n11().debug("n1MessageContent: %s\n ", n1_message.c_str());
+
+	//TODO: fill the content of N1N2MessageTransferReqData
 	//jsonData["n2InfoContainer"]["n2InformationClass"] = "SM";
 	//jsonData["n2InfoContainer"]["smInfo"]["PduSessionId"] = 123;
 	//jsonData["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapMessageType"] = 123; //NGAP message
@@ -187,7 +202,7 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 		}
 		curl_easy_cleanup(curl);
 	}
-	//TODO: process the response if neccessary
+	//TODO: process the response if necessary
 
 }
 

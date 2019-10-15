@@ -287,7 +287,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 	//address, interface identifier, Session-AMBR, selected PDU Session Type, Reflective QoS Timer (if available),
 	//P-CSCF address(es), [Always-on PDU Session])))
 
-    //send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs
+    //send ITTI message to N11 interface to trigger N1N2MessageTransfer towards AMFs
 	Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());
 
 	int ret = itti_inst->send_msg(n11_triggered_pending);

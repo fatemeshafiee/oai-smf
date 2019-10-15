@@ -41,6 +41,11 @@
 #include "pistache/router.h"
 #include "smf_msg.hpp"
 
+extern "C"{
+#include "nas_message.h"
+#include "mmData.h"
+}
+
 #include <map>
 #include <set>
 #include <shared_mutex>
@@ -176,6 +181,45 @@ public:
    *
    */
   void send_create_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
+
+  /*
+   * Create N1 SM Container to send to AMF (using NAS lib)
+   * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res
+   * @param [uint8_t] msg_type Type of N1 message
+   * @param [std::string&] nas_msg_str store NAS message in form of string
+   *
+   */
+  void create_n1_sm_container(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res, uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause = 0);
+
+  //for testing purpose!!
+  void create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause = 0);
+
+
+  /*
+    * Create N1 SM Container to send to AMF (using NAS lib)
+    * @param [std::shared_ptr<itti_n11_create_sm_context_request>] sm_context_req
+    * @param [uint8_t] msg_type Type of N1 message
+    * @param [std::string&] nas_msg_str store NAS message in form of string
+    *
+    */
+   void create_n1_sm_container(std::shared_ptr<itti_n11_create_sm_context_request> sm_context_req, uint8_t msg_type, std::string& nas_msg_str,  uint8_t sm_cause = 0);
+
+  /*
+    * Create N2 SM Information to send to AMF (using NAS lib)
+    * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res
+    * @param [uint8_t] msg_type Type of N2 message
+    * @param [std::string&] ngap_msg_str store NGAP message in form of string
+    *
+    */
+   void create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str);
+
+   /*
+     * Decode N1 SM Container into the NAS mesasge (using NAS lib)
+     * @param [nas_message_t&] nas_msg Store NAS message after decoded
+     * @param [std::string&] n1_sm_msg N1 SM Container from AMF
+     * @return status of the decode process
+     */
+   uint8_t decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg);
 
 };
 }

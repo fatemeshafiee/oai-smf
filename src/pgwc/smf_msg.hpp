@@ -159,7 +159,6 @@ class pdu_session_create_sm_context_response {
 public:
 	pdu_session_create_sm_context_response(){ }
 
-
 	supi_t get_supi() const;
 	void set_supi(supi_t const& value);
 	pdu_session_id_t get_pdu_session_id() const;
@@ -176,7 +175,6 @@ private:
 	pdu_session_id_t m_pdu_session_id;
 	uint8_t m_cause;
 	paa_t m_paa;
-	//Pistache::Http::ResponseWriter m_http_response;
 	Pistache::Http::Code m_code;
 };
 

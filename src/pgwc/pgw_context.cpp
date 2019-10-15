@@ -399,6 +399,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	itti_n11_create_sm_context_response *sm_context_resp = new itti_n11_create_sm_context_response(TASK_PGWC_APP, TASK_SMF_N11, smreq->http_response);
 	std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
 	sm_context_resp->res.set_supi(supi);
+	sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
 
 	//Step 3. find pdn_connection
 	std::shared_ptr<dnn_context> sd;
@@ -543,13 +544,12 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 			//}
 		}
 
-		//Send reply to AMF
+		//Send reply to AMF (PDUSession_CreateSMContextResponse including Cause, SMContextId)
 		//location header contains the URI of the created resource
 		Logger::pgwc_app().info("Sending response to AMF!");
 		nlohmann::json jsonData;
 		oai::smf::model::SmContextCreatedData smContextCreatedData;
 		//include only SmfServiceInstanceId (See section 6.1.6.2.3, 3GPP TS 29.502 v16.0.0)
-
 
 		to_json(jsonData, smContextCreatedData);
 		std::string resBody = jsonData.dump();
@@ -566,12 +566,54 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 		}
 
 	}else{ //if request is rejected
-        //TODO:
+		//TODO:
 		//un-subscribe to the modifications of Session Management Subscription data for (SUPI, DNN, S-NSSAI)
 	}
 
-	//step 9. send ITTI message to SMF N11 for the pending session?
-    //TODO:
+	//step 9. if error when establishing the pdu session, send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs
+	if (sm_context_resp->res.get_cause() != REQUEST_ACCEPTED) {
+		//clear pco, ambr
+        //TODO:
+		//free paa
+		paa_t free_paa = {};
+		free_paa = sm_context_resp->res.get_paa();
+		if (free_paa.is_ip_assigned()){
+			switch (sp->pdn_type.pdn_type) {
+			case PDN_TYPE_E_IPV4:
+			case PDN_TYPE_E_IPV4V6:
+				paa_dynamic::get_instance().release_paa (sd->dnn_in_use, free_paa.ipv4_address);
+				break;
+
+			case PDN_TYPE_E_IPV6:
+			case PDN_TYPE_E_NON_IP:
+			default:;
+			}
+			//sm_context_resp->res.clear_paa(); //TODO:
+		}
+		//clear the created context??
+		//TODO:
+
+/*
+		for (auto it : sm_context_resp->res.bearer_contexts_to_be_created) {
+			gtpv2c::bearer_context_created_within_create_session_response bcc = {};
+			cause_t bcc_cause = {.cause_value = NO_RESOURCES_AVAILABLE, .pce = 0, .bce = 0, .cs = 0};
+			bcc.set(it.eps_bearer_id);
+			bcc.set(bcc_cause);
+			//sm_context_resp->res.add_bearer_context_created(bcc);
+		}
+*/
+		//send ITTI message to N11 interface to trigger N1N2MessageTransfer towards AMFs
+		//with N1SM container with a PDU Session Establishment Reject message
+		//TODO
+		//sm_context_resp_pending->res.set
+		Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_SMF_N11", sm_context_resp_pending->get_msg_name());
+
+		int ret = itti_inst->send_msg(sm_context_resp_pending);
+		if (RETURNok != ret) {
+			Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  sm_context_resp_pending->get_msg_name());
+		}
+
+	}
 
 
 }
