@@ -18,7 +18,7 @@
 extern "C" {
 #include "nas_message.h"
 #include "mmData.h"
-//#include "NasMain.h"
+#include "nas_sm_encode_to_json.h"
 }
 
 namespace oai {
@@ -44,7 +44,8 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
 	SmContextCreateData smContextCreateData = smContextMessage.getJsonData();
 	std::string n1_sm_msg = smContextMessage.getBinaryDataN1SmMessage();
-        //FOR DEBUG ONLY!!, GENERATE A PDU SESSION ESTABLISHMENT MESSAGE HERE!!
+    //FOR DEBUG ONLY!!, GENERATE A PDU SESSION ESTABLISHMENT MESSAGE HERE!!
+	//sm_encode_establishment_request();
 	//m_smf_app->create_n1_sm_container(PDU_SESSION_ESTABLISHMENT_REQUEST, n1_sm_msg);
 
 	Logger::smf_api_server().debug("smContextMessage, n1 sm msg %s",n1_sm_msg.c_str());

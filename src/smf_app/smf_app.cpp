@@ -535,7 +535,7 @@ void smf_app::create_n1_sm_container(std::shared_ptr<itti_n11_create_sm_context_
 		sm_msg->specific_msg.pdu_session_establishment_reject._5gsmcause = sm_cause;
 		sm_msg->specific_msg.pdu_session_establishment_reject.presence = 0x1f;
 
-		sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.unit = VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1_HOUR;
+		sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.unit = GPRSTIMER3_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1_HOUR;
 		sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.timeValue = 0;
 
 		sm_msg->specific_msg.pdu_session_establishment_reject.allowedsscmode.is_ssc1_allowed = SSC_MODE1_ALLOWED;
@@ -632,7 +632,6 @@ void smf_app::create_n1_sm_container(std::shared_ptr<itti_n11_create_sm_context_
 				decoded_sm_msg->header.message_type);
 
 		printf("decoded_nas_msg.security_protected.plain.sm = %d\n",sizeof(decoded_nas_msg.security_protected.plain.sm));
-
 
 		printf("_5gsmcause: 0x%x\n",decoded_sm_msg->specific_msg.pdu_session_establishment_reject._5gsmcause);
 		printf("gprstimer3 --- unit_bits_H3: 0x%x,timeValue_bits_L5: 0x%x\n",decoded_sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.unit,decoded_sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.timeValue);
@@ -817,7 +816,10 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
-		printf("Data = %s\n",data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
@@ -832,7 +834,1032 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 	}
 	break;
 
-	case PDU_SESSION_ESTABLISHMENT_REJECT: {}
+	case PDU_SESSION_ESTABLISHMENT_REJECT: {
+		sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_REJECT;
+		sm_msg->specific_msg.pdu_session_establishment_reject._5gsmcause = 0b00001000;
+
+		sm_msg->specific_msg.pdu_session_establishment_reject.presence = 0x1f;
+
+		sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.unit = GPRSTIMER3_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1_HOUR;
+		sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.timeValue = 0;
+
+		sm_msg->specific_msg.pdu_session_establishment_reject.allowedsscmode.is_ssc1_allowed = SSC_MODE1_ALLOWED;
+		sm_msg->specific_msg.pdu_session_establishment_reject.allowedsscmode.is_ssc2_allowed = SSC_MODE2_NOT_ALLOWED;
+		sm_msg->specific_msg.pdu_session_establishment_reject.allowedsscmode.is_ssc3_allowed = SSC_MODE3_ALLOWED;
+
+		unsigned char bitStream_eapmessage[2] = {0x01,0x02};
+		bstring eapmessage_tmp = bfromcstralloc(2, "\0");
+		eapmessage_tmp->slen = 2;
+		memcpy(eapmessage_tmp->data,bitStream_eapmessage,sizeof(bitStream_eapmessage));
+		sm_msg->specific_msg.pdu_session_establishment_reject.eapmessage = eapmessage_tmp;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+		bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+		bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+		bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+		bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+		bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+		//extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+		extendedprotocolconfigurationoptions_tmp->slen = 4;
+		memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+		sm_msg->specific_msg.pdu_session_establishment_reject._5gsmcongestionreattemptindicator.abo = THE_BACKOFF_TIMER_IS_APPLIED_IN_ALL_PLMNS;
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+			//return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_establishment_reject._5gsmcause);
+	    printf("gprstimer3 --- unit_bits_H3: 0x%x,timeValue_bits_L5: 0x%x\n",sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.unit,sm_msg->specific_msg.pdu_session_establishment_reject.gprstimer3.timeValue);
+		printf("allowedsscmode --- is_ssc1_allowed: 0x%x, is_ssc2_allowed: 0x%x, is_ssc3_allowed: 0x%x\n",sm_msg->specific_msg.pdu_session_establishment_reject.allowedsscmode.is_ssc1_allowed,sm_msg->specific_msg.pdu_session_establishment_reject.allowedsscmode.is_ssc2_allowed,sm_msg->specific_msg.pdu_session_establishment_reject.allowedsscmode.is_ssc3_allowed);
+		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(sm_msg->specific_msg.pdu_session_establishment_reject.eapmessage->data[0]),(unsigned char )(sm_msg->specific_msg.pdu_session_establishment_reject.eapmessage->data[1]));
+		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[3]));
+	    printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",sm_msg->specific_msg.pdu_session_establishment_reject._5gsmcongestionreattemptindicator.abo);
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_AUTHENTICATION_COMMAND:{
+		sm_msg->header.message_type = PDU_SESSION_AUTHENTICATION_COMMAND;
+		unsigned char bitStream_eapmessage[2] = {0x01,0x02};
+	    bstring eapmessage_tmp = bfromcstralloc(2, "\0");
+	    eapmessage_tmp->slen = 2;
+	    memcpy(eapmessage_tmp->data,bitStream_eapmessage,sizeof(bitStream_eapmessage));
+		sm_msg->specific_msg.pdu_session_authentication_command.eapmessage = eapmessage_tmp;
+
+		sm_msg->specific_msg.pdu_session_authentication_command.presence = 0x01;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+	/*********************sm_msg->specific_msg.pdu_session_authentication_command end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(sm_msg->specific_msg.pdu_session_authentication_command.eapmessage->data[0]),(unsigned char )(sm_msg->specific_msg.pdu_session_authentication_command.eapmessage->data[1]));
+		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_AUTHENTICATION_COMPLETE:{
+		sm_msg->header.message_type = PDU_SESSION_AUTHENTICATION_COMPLETE;
+
+		unsigned char bitStream_eapmessage[2] = {0x01,0x02};
+	    bstring eapmessage_tmp = bfromcstralloc(2, "\0");
+	    eapmessage_tmp->slen = 2;
+	    memcpy(eapmessage_tmp->data,bitStream_eapmessage,sizeof(bitStream_eapmessage));
+		sm_msg->specific_msg.pdu_session_authentication_complete.eapmessage = eapmessage_tmp;
+
+		sm_msg->specific_msg.pdu_session_authentication_complete.presence = 0x01;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+	/*********************sm_msg->specific_msg.pdu_session_authentication_complete end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(sm_msg->specific_msg.pdu_session_authentication_complete.eapmessage->data[0]),(unsigned char )(sm_msg->specific_msg.pdu_session_authentication_complete.eapmessage->data[1]));
+		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_AUTHENTICATION_RESULT:{
+		sm_msg->header.message_type = PDU_SESSION_AUTHENTICATION_RESULT;
+
+		sm_msg->specific_msg.pdu_session_authentication_result.presence = 0x03;
+
+		unsigned char bitStream_eapmessage[2] = {0x01,0x02};
+	    bstring eapmessage_tmp = bfromcstralloc(2, "\0");
+	    eapmessage_tmp->slen = 2;
+	    memcpy(eapmessage_tmp->data,bitStream_eapmessage,sizeof(bitStream_eapmessage));
+		sm_msg->specific_msg.pdu_session_authentication_result.eapmessage = eapmessage_tmp;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+	/*********************sm_msg->specific_msg.pdu_session_authentication_result end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(sm_msg->specific_msg.pdu_session_authentication_result.eapmessage->data[0]),(unsigned char )(sm_msg->specific_msg.pdu_session_authentication_result.eapmessage->data[1]));
+		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_MODIFICATION_REQUEST:{
+		sm_msg->header.message_type = PDU_SESSION_MODIFICATION_REQUEST;
+	}
+	break;
+
+	case PDU_SESSION_MODIFICATION_REJECT:{
+		sm_msg->header.message_type = PDU_SESSION_MODIFICATION_REJECT;
+
+		sm_msg->specific_msg.pdu_session_modification_reject._5gsmcause = 0b00001000;
+
+		sm_msg->specific_msg.pdu_session_modification_reject.presence = 0x07;
+
+		sm_msg->specific_msg.pdu_session_modification_reject.gprstimer3.unit = GPRSTIMER3_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1_HOUR;
+		sm_msg->specific_msg.pdu_session_modification_reject.gprstimer3.timeValue = 0;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+		sm_msg->specific_msg.pdu_session_modification_reject._5gsmcongestionreattemptindicator.abo = THE_BACKOFF_TIMER_IS_APPLIED_IN_ALL_PLMNS;
+
+	/*********************sm_msg->specific_msg.pdu_session_modification_reject end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_modification_reject._5gsmcause);
+	    printf("gprstimer3 --- unit_bits_H3: 0x%x,timeValue_bits_L5: 0x%x\n",sm_msg->specific_msg.pdu_session_modification_reject.gprstimer3.unit,sm_msg->specific_msg.pdu_session_modification_reject.gprstimer3.timeValue);
+		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[3]));
+	    printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",sm_msg->specific_msg.pdu_session_modification_reject._5gsmcongestionreattemptindicator.abo);
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_MODIFICATION_COMMAND:{
+		sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
+	}
+	break;
+
+	case PDU_SESSION_MODIFICATION_COMPLETE:{
+		sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMPLETE;
+
+		sm_msg->specific_msg.pdu_session_modification_complete.presence = 0x01;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+
+	/*********************sm_msg->specific_msg.pdu_session_modification_complete end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_MODIFICATION_COMMANDREJECT:{
+		sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMANDREJECT;
+
+		sm_msg->specific_msg.pdu_session_modification_command_reject._5gsmcause = 0b00001000;
+
+		sm_msg->specific_msg.pdu_session_modification_command_reject.presence = 0x01;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+	/*********************sm_msg->specific_msg.pdu_session_modification_command_reject end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_modification_command_reject._5gsmcause);
+	    printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_RELEASE_REQUEST:{
+		sm_msg->header.message_type = PDU_SESSION_RELEASE_REQUEST;
+
+		sm_msg->specific_msg.pdu_session_release_request.presence = 0x03;
+
+		sm_msg->specific_msg.pdu_session_release_request._5gsmcause = 0b00001000;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+	/*********************sm_msg->specific_msg.pdu_session_release_request end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_release_request._5gsmcause);
+	    printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_RELEASE_REJECT:{
+		sm_msg->header.message_type = PDU_SESSION_RELEASE_REJECT;
+
+		sm_msg->specific_msg.pdu_session_release_reject._5gsmcause = 0b00001000;
+
+		sm_msg->specific_msg.pdu_session_release_reject.presence = 0x01;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+	/*********************sm_msg->specific_msg.pdu_session_release_reject end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_release_reject._5gsmcause);
+	    printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_RELEASE_COMMAND:{
+		sm_msg->header.message_type = PDU_SESSION_RELEASE_COMMAND;
+
+		sm_msg->specific_msg.pdu_session_release_command._5gsmcause = 0b00001000;
+
+		sm_msg->specific_msg.pdu_session_release_command.presence = 0x0f;
+
+		sm_msg->specific_msg.pdu_session_release_command.gprstimer3.unit = GPRSTIMER3_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1_HOUR;
+		sm_msg->specific_msg.pdu_session_release_command.gprstimer3.timeValue = 0;
+
+		unsigned char bitStream_eapmessage[2] = {0x01,0x02};
+	    bstring eapmessage_tmp = bfromcstralloc(2, "\0");
+	    eapmessage_tmp->slen = 2;
+	    memcpy(eapmessage_tmp->data,bitStream_eapmessage,sizeof(bitStream_eapmessage));
+		sm_msg->specific_msg.pdu_session_release_command.eapmessage = eapmessage_tmp;
+
+		sm_msg->specific_msg.pdu_session_release_command._5gsmcongestionreattemptindicator.abo = THE_BACKOFF_TIMER_IS_APPLIED_IN_ALL_PLMNS;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+
+
+	/*********************sm_msg->specific_msg.pdu_session_release_command end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_release_command._5gsmcause);
+	    printf("gprstimer3 --- unit_bits_H3: 0x%x,timeValue_bits_L5: 0x%x\n",sm_msg->specific_msg.pdu_session_release_command.gprstimer3.unit,sm_msg->specific_msg.pdu_session_release_command.gprstimer3.timeValue);
+		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(sm_msg->specific_msg.pdu_session_release_command.eapmessage->data[0]),(unsigned char )(sm_msg->specific_msg.pdu_session_release_command.eapmessage->data[1]));
+		printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",sm_msg->specific_msg.pdu_session_release_command._5gsmcongestionreattemptindicator.abo);
+		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case PDU_SESSION_RELEASE_COMPLETE:{
+		sm_msg->header.message_type = PDU_SESSION_RELEASE_COMPLETE;
+
+		sm_msg->specific_msg.pdu_session_release_complete.presence = 0x03;
+
+		sm_msg->specific_msg.pdu_session_release_complete._5gsmcause = 0b00001000;
+
+		unsigned char bitStream_extendedprotocolconfigurationoptions[4];
+	    bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
+	    bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
+	    bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
+	    bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
+	    bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
+	    //extendedprotocolconfigurationoptions_tmp->data = bitStream_extendedprotocolconfigurationoptions;
+	    extendedprotocolconfigurationoptions_tmp->slen = 4;
+	    memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
+		sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
+
+
+
+	/*********************sm_msg->specific_msg.pdu_session_release_complete end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_release_complete._5gsmcause);
+	    printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[3]));
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
+	break;
+
+	case _5GSM_STATUS:{
+		sm_msg->header.message_type = _5GSM_STATUS;
+
+		sm_msg->specific_msg._5gsm_status._5gsmcause = 0b00001000;
+
+
+/*********************sm_msg->specific_msg._5gsm_status end******************************/
+
+		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
+
+		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
+		nas_msg.plain.sm = *sm_msg;
+
+		//complete sm msg content
+		if(size <= 0){
+		//	return -1;
+		}
+
+		//construct security context
+		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
+		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		security->dl_count.overflow = 0xffff;
+		security->dl_count.seq_num =  0x23;
+		security->knas_enc[0] = 0x14;
+		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		security->knas_int[0] = 0x41;
+		//complete sercurity context
+
+
+		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
+
+		#if 0
+		printf("1 start nas_message_encode \n");
+		printf("security %p\n",security);
+		printf("info %p\n",info);
+		#endif
+
+		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
+				nas_msg.header.extended_protocol_discriminator,
+				nas_msg.header.security_header_type,
+				nas_msg.header.sequence_number,
+				nas_msg.header.message_authentication_code);
+
+
+
+		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,proeduer_transaction_identity:0x%x, message type:0x%x\n",
+		sm_msg->header.extended_protocol_discriminator,
+	    sm_msg->header.pdu_session_identity,
+		sm_msg->header.procedure_transaction_identity,
+		sm_msg->header.message_type);
+
+
+		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg._5gsm_status._5gsmcause);
+
+
+		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+
+		//nas_msg_str = reinterpret_cast<char*> (data);
+		printf("Data = ");
+		for(int i = 0;i<bytes;i++)
+			printf("Data = %02x ",data[i]);
+		printf("\n");
+		std::string n1Message ((char*) data,  bytes);
+		nas_msg_str = n1Message;
+		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+	}
 	break;
 
 	default:
@@ -864,8 +1891,10 @@ uint8_t smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std:
 	int decoder_rc = RETURNok;
 
 	unsigned int n1SmMsgLen = strlen(n1_sm_msg.c_str());
-	unsigned char *data = (unsigned char *)malloc(n1SmMsgLen + 1);//hardcoded for the moment
 	unsigned char datavalue[512]  = {'\0'}; // = (unsigned char *)malloc(n1SmMsgLen/2 + 1);
+#if 1
+
+	unsigned char *data = (unsigned char *)malloc(n1SmMsgLen + 1);//hardcoded for the moment
 	memset(data,0,n1SmMsgLen + 1);
 
 	memcpy ((void *)data, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
@@ -897,9 +1926,12 @@ uint8_t smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std:
 		i++;
 	}
 	printf("\n");
+
 	free(data);
 	data = NULL;
-
+#else
+	memcpy ((void *)datavalue, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
+#endif
 	//use a temporary security mechanism
 	fivegmm_security_context_t * security = ( fivegmm_security_context_t *) std::calloc(1,sizeof(fivegmm_security_context_t));
 	security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
@@ -924,7 +1956,7 @@ uint8_t smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std:
 	switch(nas_msg.plain.sm.header.message_type)
 	{
 	case PDU_SESSION_ESTABLISHMENT_REQUEST:
-		printf("PDU_SESSION_ESTABLISHMENT_REQUEST------------ start\n");
+		printf("PDU_SESSION_ESTABLISHMENT_REQUEST------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("intergrity buffer:0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.intergrityprotectionmaximumdatarate)->data[0]),(unsigned char )((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.intergrityprotectionmaximumdatarate)->data[1]));
 		printf("_pdusessiontype bits_3:0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_establishment_request._pdusessiontype.pdu_session_type_value);
@@ -934,15 +1966,15 @@ uint8_t smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std:
 		printf("Always-on bits_1 --- APSR:0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.alwaysonpdusessionrequested.apsr_requested);
 		printf("sm_pdu_dn buffer:0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.smpdudnrequestcontainer)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.smpdudnrequestcontainer)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.smpdudnrequestcontainer)->data[2]));
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_ESTABLISHMENT_REQUEST------------ end\n");
+		printf("PDU_SESSION_ESTABLISHMENT_REQUEST------------ decode end\n");
 		break;
 	case PDU_SESSION_ESTABLISHMENT_ACCPET:
-		printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ start\n");
+		printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
-		printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ end\n");
+		printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ decode end\n");
 		break;
 	case PDU_SESSION_ESTABLISHMENT_REJECT:
-		printf("PDU_SESSION_ESTABLISHMENT_REJECT------------ start\n");
+		printf("PDU_SESSION_ESTABLISHMENT_REJECT------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("_5gsmcause: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject._5gsmcause);
 		printf("gprstimer3 --- unit_bits_H3: 0x%x,timeValue_bits_L5: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject.gprstimer3.unit,nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject.gprstimer3.timeValue);
@@ -950,99 +1982,99 @@ uint8_t smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std:
 		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject.eapmessage->data[0]),(unsigned char )(nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject.eapmessage->data[1]));
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[3]));
 		printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_establishment_reject._5gsmcongestionreattemptindicator.abo);
-		printf("PDU_SESSION_ESTABLISHMENT_REJECT------------ end\n");
+		printf("PDU_SESSION_ESTABLISHMENT_REJECT------------ decode end\n");
 		break;
 	case PDU_SESSION_AUTHENTICATION_COMMAND:
-		printf("PDU_SESSION_AUTHENTICATION_COMMAND------------ start\n");
+		printf("PDU_SESSION_AUTHENTICATION_COMMAND------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(nas_msg.plain.sm.specific_msg.pdu_session_authentication_command.eapmessage->data[0]),(unsigned char )(nas_msg.plain.sm.specific_msg.pdu_session_authentication_command.eapmessage->data[1]));
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_command.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_AUTHENTICATION_COMMAND------------ end\n");
+		printf("PDU_SESSION_AUTHENTICATION_COMMAND------------ decode end\n");
 		break;
 	case PDU_SESSION_AUTHENTICATION_COMPLETE:
-		printf("PDU_SESSION_AUTHENTICATION_COMPLETE------------ start\n");
+		printf("PDU_SESSION_AUTHENTICATION_COMPLETE------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(nas_msg.plain.sm.specific_msg.pdu_session_authentication_complete.eapmessage->data[0]),(unsigned char )(nas_msg.plain.sm.specific_msg.pdu_session_authentication_complete.eapmessage->data[1]));
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_AUTHENTICATION_COMPLETE------------ end\n");
+		printf("PDU_SESSION_AUTHENTICATION_COMPLETE------------ decode end\n");
 		break;
 	case PDU_SESSION_AUTHENTICATION_RESULT:
-		printf("PDU_SESSION_AUTHENTICATION_RESULT------------ start\n");
+		printf("PDU_SESSION_AUTHENTICATION_RESULT------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(nas_msg.plain.sm.specific_msg.pdu_session_authentication_result.eapmessage->data[0]),(unsigned char )(nas_msg.plain.sm.specific_msg.pdu_session_authentication_result.eapmessage->data[1]));
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_AUTHENTICATION_RESULT------------ end\n");
+		printf("PDU_SESSION_AUTHENTICATION_RESULT------------ decode end\n");
 		break;
 	case PDU_SESSION_MODIFICATION_REQUEST:
-		printf("PDU_SESSION_MODIFICATION_REQUEST------------ start\n");
+		printf("PDU_SESSION_MODIFICATION_REQUEST------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 
-		printf("PDU_SESSION_MODIFICATION_REQUEST------------ end\n");
+		printf("PDU_SESSION_MODIFICATION_REQUEST------------ decode end\n");
 		break;
 	case PDU_SESSION_MODIFICATION_REJECT:
-		printf("PDU_SESSION_MODIFICATION_REJECT------------ start\n");
+		printf("PDU_SESSION_MODIFICATION_REJECT------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("_5gsmcause: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_modification_reject._5gsmcause);
 		printf("gprstimer3 --- unit_bits_H3: 0x%x,timeValue_bits_L5: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_modification_reject.gprstimer3.unit,nas_msg.plain.sm.specific_msg.pdu_session_modification_reject.gprstimer3.timeValue);
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[3]));
 		printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_modification_reject._5gsmcongestionreattemptindicator.abo);
-		printf("PDU_SESSION_MODIFICATION_REJECT------------ end\n");
+		printf("PDU_SESSION_MODIFICATION_REJECT------------ decode end\n");
 		break;
 	case PDU_SESSION_MODIFICATION_COMMAND:
-		printf("PDU_SESSION_MODIFICATION_COMMAND------------ start\n");
+		printf("PDU_SESSION_MODIFICATION_COMMAND------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 
-		printf("PDU_SESSION_MODIFICATION_COMMAND------------ end\n");
+		printf("PDU_SESSION_MODIFICATION_COMMAND------------ decode end\n");
 		break;
 	case PDU_SESSION_MODIFICATION_COMPLETE:
-		printf("PDU_SESSION_MODIFICATION_COMPLETE------------ start\n");
+		printf("PDU_SESSION_MODIFICATION_COMPLETE------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_MODIFICATION_COMPLETE------------ end\n");
+		printf("PDU_SESSION_MODIFICATION_COMPLETE------------ decode end\n");
 		break;
 	case PDU_SESSION_MODIFICATION_COMMANDREJECT:
-		printf("PDU_SESSION_MODIFICATION_COMMANDREJECT------------ start\n");
+		printf("PDU_SESSION_MODIFICATION_COMMANDREJECT------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("_5gsmcause: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_modification_command_reject._5gsmcause);
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_MODIFICATION_COMMANDREJECT------------ end\n");
+		printf("PDU_SESSION_MODIFICATION_COMMANDREJECT------------ decode end\n");
 		break;
 	case PDU_SESSION_RELEASE_REQUEST:
-		printf("PDU_SESSION_RELEASE_REQUEST------------ start\n");
+		printf("PDU_SESSION_RELEASE_REQUEST------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("_5gsmcause: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_release_request._5gsmcause);
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_RELEASE_REQUEST------------ end\n");
+		printf("PDU_SESSION_RELEASE_REQUEST------------ decode end\n");
 		break;
 	case PDU_SESSION_RELEASE_REJECT:
-		printf("PDU_SESSION_RELEASE_REJECT------------ start\n");
+		printf("PDU_SESSION_RELEASE_REJECT------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("_5gsmcause: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_release_reject._5gsmcause);
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_RELEASE_REJECT------------ end\n");
+		printf("PDU_SESSION_RELEASE_REJECT------------ decode end\n");
 		break;
 	case PDU_SESSION_RELEASE_COMMAND:
-		printf("PDU_SESSION_RELEASE_COMMAND------------ start\n");
+		printf("PDU_SESSION_RELEASE_COMMAND------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("_5gsmcause: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_release_command._5gsmcause);
 		printf("gprstimer3 --- unit_bits_H3: 0x%x,timeValue_bits_L5: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_release_command.gprstimer3.unit,nas_msg.plain.sm.specific_msg.pdu_session_release_command.gprstimer3.timeValue);
 		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(nas_msg.plain.sm.specific_msg.pdu_session_release_command.eapmessage->data[0]),(unsigned char )(nas_msg.plain.sm.specific_msg.pdu_session_release_command.eapmessage->data[1]));
 		printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_release_command._5gsmcongestionreattemptindicator.abo);
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_RELEASE_COMMAND------------ end\n");
+		printf("PDU_SESSION_RELEASE_COMMAND------------ decode end\n");
 		break;
 	case PDU_SESSION_RELEASE_COMPLETE:
-		printf("PDU_SESSION_RELEASE_COMPLETE------------ start\n");
+		printf("PDU_SESSION_RELEASE_COMPLETE------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("_5gsmcause: 0x%x\n",nas_msg.plain.sm.specific_msg.pdu_session_release_complete._5gsmcause);
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((nas_msg.plain.sm.specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[3]));
-		printf("PDU_SESSION_RELEASE_COMPLETE------------ end\n");
+		printf("PDU_SESSION_RELEASE_COMPLETE------------ decode end\n");
 		break;
 	case _5GSM_STATUS:
-		printf("_5GSM_STAUS------------ start\n");
+		printf("_5GSM_STAUS------------ decode start\n");
 		printf("sm header,extended_protocol_discriminator:0x%x,pdu_session_identity:0x%x,procedure_transaction_identity:0x%x, message type:0x%x\n", nas_msg.plain.sm.header.extended_protocol_discriminator,nas_msg.plain.sm.header.pdu_session_identity,nas_msg.plain.sm.header.procedure_transaction_identity,nas_msg.plain.sm.header.message_type);
 		printf("_5gsmcause: 0x%x\n",nas_msg.plain.sm.specific_msg._5gsm_status._5gsmcause);
-		printf("_5GSM_STAUS------------ end\n");
+		printf("_5GSM_STAUS------------ decode end\n");
 		break;
 
 	}
