@@ -929,7 +929,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1013,7 +1013,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1099,7 +1099,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1185,7 +1185,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1278,7 +1278,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1362,7 +1362,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1444,7 +1444,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1526,7 +1526,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1607,7 +1607,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1705,7 +1705,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1789,7 +1789,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
@@ -1858,7 +1858,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::pgwc_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
 	}
 	break;
 
