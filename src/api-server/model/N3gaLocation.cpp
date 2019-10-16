@@ -14,7 +14,7 @@
 #include "N3gaLocation.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 N3gaLocation::N3gaLocation()

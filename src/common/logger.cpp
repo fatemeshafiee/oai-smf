@@ -52,22 +52,15 @@ void Logger::_init( const char *app, const bool log_stdout, bool const log_rot_f
    ss << "[%Y-%m-%dT%H:%M:%S.%f] [" << app << "] [%n] [%l] %v";
 
    m_async_cmd = new _Logger( "async_c  ", m_sinks, ss.str().c_str() );
-   m_enb_s1u   = new _Logger( "enb_s1u  ", m_sinks, ss.str().c_str() );
    m_gtpv1_u   = new _Logger( "gtpv1_u  ", m_sinks, ss.str().c_str() );
    m_gtpv2_c   = new _Logger( "gtpv2_c  ", m_sinks, ss.str().c_str() );
-   //m_gx        = new _Logger( "gx      ", m_sinks, ss.str().c_str() );
    m_itti      = new _Logger( "itti     ", m_sinks, ss.str().c_str() );
-   m_mme_s11   = new _Logger( "mme_s11  ", m_sinks, ss.str().c_str() );
-   m_pgwc_app  = new _Logger( "pgwc_app ", m_sinks, ss.str().c_str() );
-   m_pgwc_sx   = new _Logger( "pgwc_sx  ", m_sinks, ss.str().c_str() );
-   m_sgwc_s11  = new _Logger( "sgwc_s11 ", m_sinks, ss.str().c_str() );
-   m_spgwu_app = new _Logger( "spgwu_app", m_sinks, ss.str().c_str() );
-   m_spgwu_s1u = new _Logger( "spgwu_s1u", m_sinks, ss.str().c_str() );
-   m_spgwu_sx  = new _Logger( "spgwu_sx ", m_sinks, ss.str().c_str() );
+   m_smf_app  = new _Logger( "smf_app ", m_sinks, ss.str().c_str() );
    m_system    = new _Logger( "system   ", m_sinks, ss.str().c_str() );
    m_udp       = new _Logger( "udp      ", m_sinks, ss.str().c_str() );
    m_pfcp      = new _Logger( "pfcp     ", m_sinks, ss.str().c_str() );
    m_pfcp_switch = new _Logger( "pfcp_sw  ", m_sinks, ss.str().c_str() );
+   m_smf_n4   = new _Logger( "smf_n4  ", m_sinks, ss.str().c_str() );
    m_smf_n10 = new _Logger( "smf_n10  ", m_sinks, ss.str().c_str() );
    m_smf_n11 = new _Logger( "smf_n11  ", m_sinks, ss.str().c_str() );
    m_smf_api_server = new _Logger( "smf_api_server  ", m_sinks, ss.str().c_str() );

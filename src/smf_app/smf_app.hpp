@@ -19,20 +19,20 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pgw_app.hpp
-   \author  Lionel GAUTHIER
+/*! \file smf_app.hpp
+   \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
    \date 2018
-   \email: lionel.gauthier@eurecom.fr
+   \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
 */
 
-#ifndef FILE_PGW_APP_HPP_SEEN
-#define FILE_PGW_APP_HPP_SEEN
+#ifndef FILE_SMF_APP_HPP_SEEN
+#define FILE_SMF_APP_HPP_SEEN
 
 #include "smf.h"
 #include "3gpp_29.274.h"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_n11.hpp"
-#include "pgw_context.hpp"
+#include "smf_context.hpp"
 #include "smf_pco.hpp"
 #include "SmContextCreateData.h"
 #include "SmContextCreateError.h"
@@ -52,11 +52,11 @@ extern "C"{
 #include <string>
 #include <thread>
 
-namespace pgwc {
+namespace smf {
 
 class   smf_config; // same namespace
 
-class pgw_app {
+class smf_app {
 private:
   std::thread::id                     thread_id;
   std::thread                         thread;
@@ -66,39 +66,28 @@ private:
   std::mutex                      m_seid_n4_generator;
   std::set<uint64_t>              set_seid_n4;
 
-  std::map<imsi64_t, std::shared_ptr<pgw_context>>  imsi2pgw_context;
-  std::map<seid_t, std::shared_ptr<pgw_context>>    seid2pgw_context;
+  std::map<seid_t, std::shared_ptr<smf_context>>    seid2smf_context;
+  mutable std::shared_mutex           m_seid2smf_context;
 
-  mutable std::shared_mutex           m_imsi2pgw_context;
-  mutable std::shared_mutex           m_seid2pgw_context;
-
-  //for SMF
-  std::map<supi64_t, std::shared_ptr<pgw_context>>  supi2pgw_context;
+  std::map<supi64_t, std::shared_ptr<smf_context>>  supi2smf_context;
   mutable std::shared_mutex           m_supi2smf_context;
 
-
   int apply_config(const smf_config& cfg);
-
-  bool is_imsi64_2_pgw_context(const imsi64_t& imsi64) const;
-  std::shared_ptr<pgw_context> imsi64_2_pgw_context(const imsi64_t& imsi64) const;
-  void set_imsi64_2_pgw_context(const imsi64_t& imsi64, std::shared_ptr<pgw_context> pc);
-
 
   int pco_push_protocol_or_container_id(protocol_configuration_options_t& pco, pco_protocol_or_container_id_t * const poc_id /* STOLEN_REF poc_id->contents*/);
   int process_pco_request_ipcp(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id);
   int process_pco_dns_server_request(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id);
   int process_pco_link_mtu_request(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id);
 
-
 public:
-  explicit pgw_app(const std::string& config_file);
-  pgw_app(pgw_app const&)    = delete;
-  void operator=(pgw_app const&)     = delete;
+  explicit smf_app(const std::string& config_file);
+  smf_app(smf_app const&)    = delete;
+  void operator=(smf_app const&)     = delete;
 
-  void set_seid_2_pgw_context(const seid_t& seid, std::shared_ptr<pgw_context>& pc);
-  bool seid_2_pgw_context(const seid_t& seid, std::shared_ptr<pgw_context>& pc) const;
+  void set_seid_2_smf_context(const seid_t& seid, std::shared_ptr<smf_context>& pc);
+  bool seid_2_smf_context(const seid_t& seid, std::shared_ptr<smf_context>& pc) const;
 
-  void delete_pgw_context(std::shared_ptr<pgw_context> spc);
+  void delete_smf_context(std::shared_ptr<smf_context> spc);
 
   int static_paa_get_free_paa (const std::string& apn, paa_t& paa);
   int static_paa_release_address (const std::string& apn, struct in_addr& addr);
@@ -139,17 +128,17 @@ public:
   /*
    * Create/Update SMF context with the corresponding supi
    * @param [supi_t] supi
-   * @param [std::shared_ptr<pgw_context>] sc Shared_ptr Pointer to an SMF context
+   * @param [std::shared_ptr<smf_context>] sc Shared_ptr Pointer to an SMF context
    * @return True if existed, otherwise false
    */
-  void set_supi_2_smf_context(const supi64_t& supi, std::shared_ptr<pgw_context> sc);
+  void set_supi_2_smf_context(const supi64_t& supi, std::shared_ptr<smf_context> sc);
 
   /*
    * Get SM Context
    * @param [supi_t] Supi
    * @return Shared pointer to SM context
    */
-  std::shared_ptr<pgw_context>  supi_2_smf_context(const supi64_t& supi) const;
+  std::shared_ptr<smf_context>  supi_2_smf_context(const supi64_t& supi) const;
 
   /*
    * Check whether SMF uses local configuration instead of retrieving Session Management Data from UDM
@@ -177,10 +166,10 @@ public:
   /*
    * Send create session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [ oai::smf::model::SmContextCreateError] smContextCreateError
+   * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
    *
    */
-  void send_create_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
+  void send_create_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
 
   /*
    * Create N1 SM Container to send to AMF (using NAS lib)
@@ -225,4 +214,4 @@ public:
 }
 #include "smf_config.hpp"
 
-#endif /* FILE_PGW_APP_HPP_SEEN */
+#endif /* FILE_SMF_APP_HPP_SEEN */

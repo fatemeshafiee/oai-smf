@@ -14,7 +14,7 @@
 #include "SecondaryRatUsageInfo.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 SecondaryRatUsageInfo::SecondaryRatUsageInfo()

@@ -35,23 +35,23 @@
 #include "ProblemDetails.h"
 #include "ReleaseData.h"
 #include <string>
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace api {
 
-using namespace oai::smf::model;
+using namespace oai::smf_server::model;
 
-class IndividualPDUSessionHSMFApiImpl : public oai::smf::api::IndividualPDUSessionHSMFApi {
+class IndividualPDUSessionHSMFApiImpl : public oai::smf_server::api::IndividualPDUSessionHSMFApi {
 public:
-    IndividualPDUSessionHSMFApiImpl(std::shared_ptr<Pistache::Rest::Router>, pgwc::pgw_app *smf_app_inst);
+    IndividualPDUSessionHSMFApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst);
     ~IndividualPDUSessionHSMFApiImpl() {}
 
     void release_pdu_session(const std::string &pduSessionRef, const ReleaseData &releaseData, Pistache::Http::ResponseWriter &response);
     void update_pdu_session(const std::string &pduSessionRef, const HsmfUpdateData &hsmfUpdateData, Pistache::Http::ResponseWriter &response);
 private:
-    pgwc::pgw_app *m_smf_app;
+    smf::smf_app *m_smf_app;
 };
 
 }

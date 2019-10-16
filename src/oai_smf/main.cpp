@@ -20,7 +20,7 @@
 #include "logger.hpp"
 #include "options.hpp"
 #include "pid_file.hpp"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 #include "smf_config.hpp"
 #include "smf-api-server.h"
 #include "pistache/endpoint.h"
@@ -36,14 +36,14 @@
 #include <unistd.h> // get_pid(), pause()
 
 using namespace gtpv2c;
-using namespace pgwc;
+using namespace smf;
 using namespace util;
 using namespace std;
-using namespace oai::smf::api;
+using namespace oai::smf_server::api;
 
 itti_mw *itti_inst = nullptr;
 async_shell_cmd *async_shell_cmd_inst = nullptr;
-pgw_app *pgw_app_inst = nullptr;
+smf_app *smf_app_inst = nullptr;
 smf_config smf_cfg;
 
 void send_heartbeat_to_tasks(const uint32_t sequence);
@@ -51,11 +51,11 @@ void send_heartbeat_to_tasks(const uint32_t sequence);
 //------------------------------------------------------------------------------
 void send_heartbeat_to_tasks(const uint32_t sequence)
 {
-  itti_msg_ping *itti_msg = new itti_msg_ping(TASK_PGWC_APP, TASK_ALL, sequence);
+  itti_msg_ping *itti_msg = new itti_msg_ping(TASK_SMF_APP, TASK_ALL, sequence);
   std::shared_ptr<itti_msg_ping> i = std::shared_ptr<itti_msg_ping>(itti_msg);
   int ret = itti_inst->send_broadcast_msg(i);
   if (RETURNok != ret) {
-    Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_ALL", i->get_msg_name());
+    Logger::smf_app().error( "Could not send ITTI message %s to task TASK_ALL", i->get_msg_name());
   }
 }
 
@@ -64,14 +64,14 @@ void my_app_signal_handler(int s)
 {
   std::cout << "Caught signal " << s << std::endl;
   Logger::system().startup( "exiting" );
-  itti_inst->send_terminate_msg(TASK_PGWC_APP);
+  itti_inst->send_terminate_msg(TASK_SMF_APP);
   itti_inst->wait_tasks_end();
   std::cout << "Freeing Allocated memory..." << std::endl;
   if (async_shell_cmd_inst) delete async_shell_cmd_inst; async_shell_cmd_inst = nullptr;
   std::cout << "Async Shell CMD memory done." << std::endl;
   if (itti_inst) delete itti_inst; itti_inst = nullptr;
   std::cout << "ITTI memory done." << std::endl;
-  if (pgw_app_inst) delete pgw_app_inst; pgw_app_inst = nullptr;
+  if (smf_app_inst) delete smf_app_inst; smf_app_inst = nullptr;
   std::cout << "PGW APP memory done." << std::endl;
   std::cout << "Freeing Allocated memory done" << std::endl;
   exit(0);
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
   // Logger
   Logger::init( "spgwc" , Options::getlogStdout() , Options::getlogRotFilelog());
 
-  Logger::pgwc_app().startup( "Options parsed" );
+  Logger::smf_app().startup( "Options parsed" );
 
   struct sigaction sigIntHandler;
   sigIntHandler.sa_handler = my_app_signal_handler;
@@ -110,28 +110,29 @@ int main(int argc, char **argv)
   // system command
   async_shell_cmd_inst = new async_shell_cmd(smf_cfg.itti.async_cmd_sched_params);
 
-  // PGW application layer
-  pgw_app_inst = new pgw_app(Options::getlibconfigConfig());
+  // SMF application layer
+  smf_app_inst = new smf_app(Options::getlibconfigConfig());
 
   // PID file
   // Currently hard-coded value. TODO: add as config option.
    string pid_file_name = get_exe_absolute_path("/var/run", smf_cfg.instance);
   if (! is_pid_file_lock_success(pid_file_name.c_str())) {
-    Logger::pgwc_app().error( "Lock PID file %s failed\n", pid_file_name.c_str());
+    Logger::smf_app().error( "Lock PID file %s failed\n", pid_file_name.c_str());
     exit (-EDEADLK);
   }
 
 
   //SMF API server
-  Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(8080));
-  SMFApiServer smfApiServer(addr, pgw_app_inst);
+  //Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(8080));
+  Pistache::Address addr(std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.n11.addr4))) , Pistache::Port(smf_cfg.n11.port));
+  SMFApiServer smfApiServer(addr, smf_app_inst);
   smfApiServer.init(2);
   //smfApiServer.start();
   //smfApiServer.shutdown();
   std::thread smf_api_manager(&SMFApiServer::start, smfApiServer);
 
   FILE *fp = NULL;
-  std::string filename = fmt::format("/tmp/spgwc_{}.status", getpid());
+  std::string filename = fmt::format("/tmp/smf_{}.status", getpid());
   fp = fopen(filename.c_str(), "w+");
   fprintf(fp, "STARTED\n");
   fflush(fp);

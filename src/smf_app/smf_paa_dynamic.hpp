@@ -229,7 +229,7 @@ public:
             return true;
           }
         }
-        Logger::pgwc_app().warn("Could not get PAA PDN_TYPE_E_IPV4 for APN %s", apn_label.c_str());
+        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4 for APN %s", apn_label.c_str());
         return false;
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4V6) {
         bool success = false;
@@ -247,7 +247,7 @@ public:
           }
           ipv4_pools[*it4].free_address(paa.ipv4_address);
         }
-        Logger::pgwc_app().warn("Could not get PAA PDN_TYPE_E_IPV4V6 for APN %s", apn_label.c_str());
+        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4V6 for APN %s", apn_label.c_str());
         return false;
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV6) {
         for (std::vector<uint32_t>::const_iterator it6 = apn_pool.ipv6_pool_ids.begin();it6 != apn_pool.ipv6_pool_ids.end(); ++it6) {
@@ -255,11 +255,11 @@ public:
             return true;
           }
         }
-        Logger::pgwc_app().warn("Could not get PAA PDN_TYPE_E_IPV6 for APN %s", apn_label.c_str());
+        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV6 for APN %s", apn_label.c_str());
         return false;
       }
     }
-    Logger::pgwc_app().warn("Could not get PAA for APN %s", apn_label.c_str());
+    Logger::smf_app().warn("Could not get PAA for APN %s", apn_label.c_str());
     return false;
   }
 
@@ -287,7 +287,7 @@ public:
         return true;
       }
     }
-    Logger::pgwc_app().warn("Could not release PAA for APN %s", apn_label.c_str());
+    Logger::smf_app().warn("Could not release PAA for APN %s", apn_label.c_str());
     return false;
   }
 
@@ -301,7 +301,7 @@ public:
         }
       }
     }
-    Logger::pgwc_app().warn("Could not release PAA for APN %s", apn_label.c_str());
+    Logger::smf_app().warn("Could not release PAA for APN %s", apn_label.c_str());
     return false;
   }
 

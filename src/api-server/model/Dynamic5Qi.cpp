@@ -14,7 +14,7 @@
 #include "Dynamic5Qi.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 Dynamic5Qi::Dynamic5Qi()

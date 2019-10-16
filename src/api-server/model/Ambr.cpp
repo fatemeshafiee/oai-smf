@@ -14,7 +14,7 @@
 #include "Ambr.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 Ambr::Ambr()

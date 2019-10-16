@@ -34,7 +34,7 @@
 
 #include <thread>
 
-namespace pgwc {
+namespace smf {
 
 #define TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST     (0)
 #define TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST     (1)

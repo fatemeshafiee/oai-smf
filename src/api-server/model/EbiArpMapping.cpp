@@ -14,7 +14,7 @@
 #include "EbiArpMapping.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 EbiArpMapping::EbiArpMapping()

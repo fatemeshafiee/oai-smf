@@ -14,7 +14,7 @@
 #include "RequestIndication.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 RequestIndication::RequestIndication()

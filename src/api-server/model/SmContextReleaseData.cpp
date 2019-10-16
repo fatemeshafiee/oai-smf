@@ -14,7 +14,7 @@
 #include "SmContextReleaseData.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 SmContextReleaseData::SmContextReleaseData()

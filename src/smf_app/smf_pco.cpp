@@ -32,16 +32,16 @@
 #include "rfc_1877.h"
 
 #include "logger.hpp"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 #include "smf_config.hpp"
 #include "smf_pco.hpp"
 
-using  namespace pgwc;
+using  namespace smf;
 
 extern smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
-int pgw_app::pco_push_protocol_or_container_id(protocol_configuration_options_t& pco, pco_protocol_or_container_id_t * const poc_id)
+int smf_app::pco_push_protocol_or_container_id(protocol_configuration_options_t& pco, pco_protocol_or_container_id_t * const poc_id)
 {
   if (PCO_UNSPEC_MAXIMUM_PROTOCOL_ID_OR_CONTAINER_ID <= pco.num_protocol_or_container_id) {
     return RETURNerror;
@@ -56,7 +56,7 @@ int pgw_app::pco_push_protocol_or_container_id(protocol_configuration_options_t&
 }
 
 //------------------------------------------------------------------------------
-int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id)
+int smf_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id)
 {
   in_addr_t                               ipcp_dns_prim_ipv4_addr = INADDR_NONE;
   in_addr_t                               ipcp_dns_sec_ipv4_addr = INADDR_NONE;
@@ -75,14 +75,14 @@ int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
   uint8_t                                 ipcp_out_code = 0;
   uint16_t                                ipcp_out_length = 0;
 
-  Logger::pgwc_app().debug("PCO: Protocol identifier IPCP length %u\n", poc_id->length_of_protocol_id_contents);
+  Logger::smf_app().debug("PCO: Protocol identifier IPCP length %u\n", poc_id->length_of_protocol_id_contents);
 
   ipcp_req_code = poc_id->protocol_id_contents.at(pco_in_index++);
   UNUSED(ipcp_req_code);
   ipcp_req_identifier = poc_id->protocol_id_contents.at(pco_in_index++);
   ipcp_req_length = (((uint16_t) poc_id->protocol_id_contents.at(pco_in_index)) << 8) | ((uint16_t) poc_id->protocol_id_contents.at(pco_in_index + 1));
   UNUSED(ipcp_req_length);
-  Logger::pgwc_app().trace("PCO: Protocol identifier IPCP (0x%x) code 0x%x identifier 0x%x length %u", poc_id->protocol_id, ipcp_req_code, ipcp_req_identifier, ipcp_req_length);
+  Logger::smf_app().trace("PCO: Protocol identifier IPCP (0x%x) code 0x%x identifier 0x%x length %u", poc_id->protocol_id, ipcp_req_code, ipcp_req_identifier, ipcp_req_length);
   pco_in_index += 2;
   ipcp_req_remaining_length = ipcp_req_remaining_length - 1 - 1 - 2;
   ipcp_out_length = 1 + 1 + 2;
@@ -98,7 +98,7 @@ int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
     ipcp_req_option = poc_id->protocol_id_contents.at(pco_in_index);
     ipcp_req_option_length = poc_id->protocol_id_contents.at(pco_in_index + 1);
     ipcp_req_remaining_length = ipcp_req_remaining_length - ipcp_req_option_length;
-    Logger::pgwc_app().trace("PCO: Protocol identifier IPCP ipcp_option %u ipcp_option_length %u ipcp_remaining_length %lu pco_in_index %lu",
+    Logger::smf_app().trace("PCO: Protocol identifier IPCP ipcp_option %u ipcp_option_length %u ipcp_remaining_length %lu pco_in_index %lu",
         ipcp_req_option, ipcp_req_option_length, ipcp_req_remaining_length, pco_in_index);
 
     switch (ipcp_req_option) {
@@ -112,13 +112,13 @@ int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
            * returning the IP address of a valid DNS server.
            * By default, no primary DNS address is provided.
            */
-          Logger::pgwc_app().trace("PCO: Protocol identifier IPCP option PRIMARY_DNS_SERVER_IP_ADDRESS length %u", ipcp_req_option_length);
+          Logger::smf_app().trace("PCO: Protocol identifier IPCP option PRIMARY_DNS_SERVER_IP_ADDRESS length %u", ipcp_req_option_length);
           if (ipcp_req_option_length >= 6) {
             ipcp_dns_prim_ipv4_addr = htonl((((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2)) << 24) |
                 (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3)) << 16) |
                 (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4)) << 8) |
                 (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
-            Logger::pgwc_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_prim_ipv4_addr 0x%x", ipcp_dns_prim_ipv4_addr);
+            Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_prim_ipv4_addr 0x%x", ipcp_dns_prim_ipv4_addr);
 
             if (ipcp_dns_prim_ipv4_addr == INADDR_ANY) {
               ipcp_out_dns_prim_ipv4_addr = smf_cfg.default_dnsv4.s_addr;
@@ -136,7 +136,7 @@ int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
               ipcp_out_dns_prim_ipv4_addr = ipcp_dns_prim_ipv4_addr;
             }
 
-            Logger::pgwc_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_prim_ipv4_addr 0x%x", ipcp_out_dns_prim_ipv4_addr);
+            Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_prim_ipv4_addr 0x%x", ipcp_out_dns_prim_ipv4_addr);
           }
           uint8_t idp[6] = {0};
           idp[0] = IPCP_OPTION_PRIMARY_DNS_SERVER_IP_ADDRESS;
@@ -161,14 +161,14 @@ int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
            * returning the IP address of a valid DNS server.
            * By default, no secondary DNS address is provided.
            */
-          Logger::pgwc_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS length %u", ipcp_req_option_length);
+          Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS length %u", ipcp_req_option_length);
 
           if (ipcp_req_option_length >= 6) {
             ipcp_dns_sec_ipv4_addr = htonl((((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2)) << 24) |
                 (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3)) << 16) |
                 (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4)) << 8) |
                 (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
-            Logger::pgwc_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_sec_ipv4_addr 0x%x", ipcp_dns_sec_ipv4_addr);
+            Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_sec_ipv4_addr 0x%x", ipcp_dns_sec_ipv4_addr);
 
             if (ipcp_dns_sec_ipv4_addr == INADDR_ANY) {
               ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
@@ -180,7 +180,7 @@ int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
               ipcp_out_dns_sec_ipv4_addr = ipcp_dns_sec_ipv4_addr;
             }
 
-            Logger::pgwc_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_sec_ipv4_addr 0x%x", ipcp_out_dns_sec_ipv4_addr);
+            Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_sec_ipv4_addr 0x%x", ipcp_out_dns_sec_ipv4_addr);
           }
           uint8_t ids[6] = {0};
           ids[0] = IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS;
@@ -196,7 +196,7 @@ int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
         break;
 
       default:
-        Logger::pgwc_app().debug("PCO: Protocol identifier IPCP option 0x%04X unknown\n", ipcp_req_option);
+        Logger::smf_app().debug("PCO: Protocol identifier IPCP option 0x%04X unknown\n", ipcp_req_option);
     }
     pco_in_index += ipcp_req_option_length;
   }
@@ -212,13 +212,13 @@ int pgw_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
 }
 
 //------------------------------------------------------------------------------
-int pgw_app::process_pco_dns_server_request(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id)
+int smf_app::process_pco_dns_server_request(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id)
 {
   in_addr_t                               ipcp_out_dns_prim_ipv4_addr = smf_cfg.default_dnsv4.s_addr;
   pco_protocol_or_container_id_t    poc_id_resp = {0};
   uint8_t                                 dns_array[4];
 
-  Logger::pgwc_app().debug("PCO: Protocol identifier IPCP option DNS Server Request");
+  Logger::smf_app().debug("PCO: Protocol identifier IPCP option DNS Server Request");
   poc_id_resp.protocol_id = PCO_CONTAINER_IDENTIFIER_DNS_SERVER_IPV4_ADDRESS;
   poc_id_resp.length_of_protocol_id_contents = 4;
   dns_array[0] = (uint8_t) (ipcp_out_dns_prim_ipv4_addr & 0x000000FF);
@@ -231,12 +231,12 @@ int pgw_app::process_pco_dns_server_request(protocol_configuration_options_t& pc
   return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
 }
 //------------------------------------------------------------------------------
-int pgw_app::process_pco_link_mtu_request(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id)
+int smf_app::process_pco_link_mtu_request(protocol_configuration_options_t& pco_resp, const pco_protocol_or_container_id_t * const poc_id)
 {
   pco_protocol_or_container_id_t          poc_id_resp = {0};
   uint8_t                                 mtu_array[2];
 
-  Logger::pgwc_app().debug("PCO: Protocol identifier IPCP option Link MTU Request");
+  Logger::smf_app().debug("PCO: Protocol identifier IPCP option Link MTU Request");
   poc_id_resp.protocol_id = PCO_CONTAINER_IDENTIFIER_IPV4_LINK_MTU;
   poc_id_resp.length_of_protocol_id_contents = 2;
   mtu_array[0] = (uint8_t)(smf_cfg.ue_mtu >> 8);
@@ -248,7 +248,7 @@ int pgw_app::process_pco_link_mtu_request(protocol_configuration_options_t& pco_
 }
 
 //------------------------------------------------------------------------------
-int pgw_app::process_pco_request(
+int smf_app::process_pco_request(
   const protocol_configuration_options_t& pco_req,
   protocol_configuration_options_t& pco_resp,
   protocol_configuration_options_ids_t & pco_ids) {
@@ -262,7 +262,7 @@ int pgw_app::process_pco_request(
       break;
 
     default:
-      Logger::pgwc_app().warn("PCO: configuration protocol 0x%X not supported now", pco_req.configuration_protocol);
+      Logger::smf_app().warn("PCO: configuration protocol 0x%X not supported now", pco_req.configuration_protocol);
       break;
   }
 
@@ -280,7 +280,7 @@ int pgw_app::process_pco_request(
       break;
 
     case PCO_CONTAINER_IDENTIFIER_IP_ADDRESS_ALLOCATION_VIA_NAS_SIGNALLING:
-      Logger::pgwc_app().debug("PCO: Allocation via NAS signaling requested");
+      Logger::smf_app().debug("PCO: Allocation via NAS signaling requested");
       pco_ids.ci_ip_address_allocation_via_nas_signalling = true;
       break;
 
@@ -290,7 +290,7 @@ int pgw_app::process_pco_request(
       break;
 
     default:
-      Logger::pgwc_app().warn("PCO: Protocol/container identifier 0x%04X not supported now",
+      Logger::smf_app().warn("PCO: Protocol/container identifier 0x%04X not supported now",
         pco_req.protocol_or_container_ids[id].protocol_id);
     }
   }

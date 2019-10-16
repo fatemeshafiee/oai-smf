@@ -35,7 +35,7 @@
 #include <nlohmann/json.hpp>
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 /// <summary>

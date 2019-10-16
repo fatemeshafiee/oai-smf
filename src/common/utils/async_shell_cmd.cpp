@@ -96,7 +96,7 @@ void async_cmd_task (void* args_p)
       break;
 
     default:
-      Logger::pgwc_app().info( "no handler for msg type %d", msg->msg_type);
+      Logger::smf_app().info( "no handler for msg type %d", msg->msg_type);
     }
 
   } while (true);

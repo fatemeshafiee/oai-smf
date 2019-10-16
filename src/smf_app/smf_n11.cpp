@@ -31,7 +31,8 @@
 #include "itti.hpp"
 #include "logger.hpp"
 #include "smf_n11.hpp"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
+#include "smf_config.hpp"
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
@@ -42,13 +43,14 @@
 #define HTTP_STATUS_OK 200
 #define DEBUG 1
 
-using namespace pgwc;
+using namespace smf;
 using namespace std;
 using json = nlohmann::json;
 
 extern itti_mw *itti_inst;
 extern smf_n11   *smf_n11_inst;
-extern pgwc::pgw_app *pgw_app_inst;
+extern smf::smf_app *smf_app_inst;
+extern smf_config smf_cfg;
 void smf_n11_task (void*);
 
 /*
@@ -102,9 +104,6 @@ void smf_n11_task (void *args_p)
 //------------------------------------------------------------------------------
 smf_n11::smf_n11 ()
 {
-	amf_addr = "172.16.1.106";//TODO: hardcoded for the moment (should get from configuration file)
-	amf_port = 8282;//TODO: hardcoded for the moment (should get from configuration file)
-
 	Logger::smf_n11().startup("Starting...");
 	if (itti_inst->create_task(TASK_SMF_N11, smf_n11_task, nullptr) ) {
 		Logger::smf_n11().error( "Cannot create task TASK_SMF_N11" );
@@ -134,15 +133,15 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 
 	CURL *curl = curl_easy_init();
 	//hardcoded for the moment, should get from NRF/configuration file
-	std::string url = amf_addr + ":" + std::to_string(amf_port) + "/namf-comm/v1/ue-contexts/" + std::to_string(supi64) +"/n1-n2-messages";
+	std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v1/ue-contexts/" + std::to_string(supi64) +"/n1-n2-messages";
 	Logger::smf_n11().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
 
 	//N1 SM container
 	if (sm_context_res->res.get_cause() != REQUEST_ACCEPTED) { //PDU Session Establishment Reject
-    	pgw_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
+    	smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
 	} else { //PDU Session Establishment Accept
-		pgw_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
-    	//pgw_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_ACCPET, n1_message); //need cause?
+		smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
+    	//smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_ACCPET, n1_message); //need cause?
 	}
 
 	jsonData["n1MessageContainer"]["n1MessageClass"] = "SM";

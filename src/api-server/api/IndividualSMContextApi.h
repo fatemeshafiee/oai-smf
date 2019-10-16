@@ -35,10 +35,10 @@
 #include <string>
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace api {
 
-using namespace oai::smf::model;
+using namespace oai::smf_server::model;
 
 class  IndividualSMContextApi {
 public:

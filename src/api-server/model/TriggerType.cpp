@@ -14,7 +14,7 @@
 #include "TriggerType.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 TriggerType::TriggerType()

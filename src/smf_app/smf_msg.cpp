@@ -28,7 +28,7 @@
 #include "smf_msg.hpp"
 
 
-using namespace pgwc;
+using namespace smf;
 
 supi_t pdu_session_create_sm_context_request::get_supi() const
 {

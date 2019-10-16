@@ -14,7 +14,7 @@
 #include "UserLocation.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 UserLocation::UserLocation()

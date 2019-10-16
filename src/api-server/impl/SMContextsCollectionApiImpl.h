@@ -33,22 +33,22 @@
 #include "ProblemDetails.h"
 #include "SmContextCreateError.h"
 #include "SmContextCreatedData.h"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace api {
 
-using namespace oai::smf::model;
+using namespace oai::smf_server::model;
 
-class SMContextsCollectionApiImpl : public oai::smf::api::SMContextsCollectionApi {
+class SMContextsCollectionApiImpl : public oai::smf_server::api::SMContextsCollectionApi {
 public:
-    SMContextsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router>, pgwc::pgw_app *smf_app_inst);
+    SMContextsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst);
     ~SMContextsCollectionApiImpl() {}
 
     void post_sm_contexts(const SmContextMessage &smContextMessage, Pistache::Http::ResponseWriter &response);
 private:
-    pgwc::pgw_app *m_smf_app;
+    smf::smf_app *m_smf_app;
 };
 
 }

@@ -14,7 +14,7 @@
 #include "SmContextCreateData.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 SmContextCreateData::SmContextCreateData()

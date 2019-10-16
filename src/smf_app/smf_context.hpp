@@ -19,14 +19,14 @@
  *      contact@openairinterface.org
  */
 
-/*! \file sgwc_eps_bearer_context.hpp
+/*! \file smf_context.hpp
   \brief
   \author Lionel Gauthier
   \company Eurecom
   \email: lionel.gauthier@eurecom.fr
 */
-#ifndef FILE_PGW_EPS_BEARER_CONTEXT_HPP_SEEN
-#define FILE_PGW_EPS_BEARER_CONTEXT_HPP_SEEN
+#ifndef FILE_SMF_CONTEXT_HPP_SEEN
+#define FILE_SMF_CONTEXT_HPP_SEEN
 
 #include <map>
 #include <mutex>
@@ -48,7 +48,7 @@
 #include "smf_msg.hpp"
 
 
-namespace pgwc {
+namespace smf {
 
 class pgw_eps_bearer {
 public:
@@ -280,14 +280,14 @@ public:
 
 
 
-class pgw_context;
+class smf_context;
 
-class pgw_context : public std::enable_shared_from_this<pgw_context> {
+class smf_context : public std::enable_shared_from_this<smf_context> {
 
 public:
-  pgw_context() : m_context(), imsi(), imsi_unauthenticated_indicator(false), pending_procedures(), msisdn() {}
+  smf_context() : m_context(), imsi(), imsi_unauthenticated_indicator(false), pending_procedures(), msisdn() {}
 
-  pgw_context(pgw_context& b) = delete;
+  smf_context(smf_context& b) = delete;
 
   void insert_procedure(std::shared_ptr<smf_procedure>& sproc);
   bool find_procedure(const uint64_t& trxn_id, std::shared_ptr<smf_procedure>& proc);
@@ -327,12 +327,12 @@ public:
 
 	/*
 	 * Send a response error to AMF (PDU Session Establishment Reject)
-	 * @param [oai::smf::model::SmContextCreateError&] smContextCreateError
+	 * @param [oai::smf_server::model::SmContextCreateError&] smContextCreateError
 	 * @param [Pistache::Http::Code] code response code
 	 * @param [Pistache::Http::ResponseWriter] httpResponse to reply to AMF
 	 * @return void
 	 */
-	void send_create_session_response_error(oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse);
+	void send_create_session_response_error(oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse);
 
 	bool verify_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
@@ -372,6 +372,7 @@ public:
 
 
 
+	supi_t         supi;
 };
 }
 

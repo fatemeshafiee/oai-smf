@@ -14,7 +14,7 @@
 #include "QosFlowProfile.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 QosFlowProfile::QosFlowProfile()

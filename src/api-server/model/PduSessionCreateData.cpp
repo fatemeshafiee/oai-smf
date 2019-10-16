@@ -14,7 +14,7 @@
 #include "PduSessionCreateData.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 PduSessionCreateData::PduSessionCreateData()

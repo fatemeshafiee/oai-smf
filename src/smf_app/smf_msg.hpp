@@ -34,7 +34,7 @@
 #include "3gpp_24.007.h"
 #include "3gpp_24.501.h"
 
-namespace pgwc {
+namespace smf {
 
 class pdu_session_create_sm_context_request {
 

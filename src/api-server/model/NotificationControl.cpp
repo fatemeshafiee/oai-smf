@@ -14,7 +14,7 @@
 #include "NotificationControl.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 NotificationControl::NotificationControl()

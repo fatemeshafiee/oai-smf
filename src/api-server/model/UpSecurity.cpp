@@ -14,7 +14,7 @@
 #include "UpSecurity.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 UpSecurity::UpSecurity()

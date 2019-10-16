@@ -14,7 +14,7 @@
 #include "Snssai.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 Snssai::Snssai()

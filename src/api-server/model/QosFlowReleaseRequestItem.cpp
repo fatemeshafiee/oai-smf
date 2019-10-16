@@ -14,7 +14,7 @@
 #include "QosFlowReleaseRequestItem.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 QosFlowReleaseRequestItem::QosFlowReleaseRequestItem()

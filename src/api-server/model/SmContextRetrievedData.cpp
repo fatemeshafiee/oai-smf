@@ -14,7 +14,7 @@
 #include "SmContextRetrievedData.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 SmContextRetrievedData::SmContextRetrievedData()

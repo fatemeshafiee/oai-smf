@@ -19,7 +19,7 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pgw_context.cpp
+/*! \file smf_context.cpp
   \brief
   \author Lionel Gauthier
   \company Eurecom
@@ -28,9 +28,9 @@
 
 #include "itti.hpp"
 #include "logger.hpp"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 #include "smf_config.hpp"
-#include "pgw_context.hpp"
+#include "smf_context.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "smf_procedure.hpp"
 #include "ProblemDetails.h"
@@ -39,11 +39,11 @@
 #include "SmContextCreatedData.h"
 #include <algorithm>
 
-using namespace pgwc;
+using namespace smf;
 
 extern itti_mw *itti_inst;
-extern pgwc::pgw_app *pgw_app_inst;
-extern pgwc::smf_config smf_cfg;
+extern smf::smf_app *smf_app_inst;
+extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
 void pgw_eps_bearer::release_access_bearer()
@@ -74,9 +74,9 @@ std::string pgw_eps_bearer::toString() const
 //------------------------------------------------------------------------------
 void pgw_eps_bearer::deallocate_ressources()
 {
-  Logger::pgwc_app().info( "pgw_eps_bearer::deallocate_ressources(%d)", ebi.ebi);
+  Logger::smf_app().info( "pgw_eps_bearer::deallocate_ressources(%d)", ebi.ebi);
   //if (not is_fteid_zero(pgw_fteid_s5_s8_up))
-    //pgw_app_inst->free_s5s8_up_fteid(pgw_fteid_s5_s8_up);
+    //smf_app_inst->free_s5s8_up_fteid(pgw_fteid_s5_s8_up);
   clear();
 }
 //------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ void pgw_pdn_connection::set(const paa_t& paa)
     ipv6 = false;
     break;
   default:
-    Logger::pgwc_app().error( "pgw_pdn_connection::set(paa_t) Unknown PDN type %d", paa.pdn_type.pdn_type);
+    Logger::smf_app().error( "pgw_pdn_connection::set(paa_t) Unknown PDN type %d", paa.pdn_type.pdn_type);
   }
 }
 //------------------------------------------------------------------------------
@@ -113,9 +113,9 @@ void pgw_pdn_connection::add_eps_bearer(pgw_eps_bearer& bearer)
   if ((bearer.ebi.ebi >= EPS_BEARER_IDENTITY_FIRST) and (bearer.ebi.ebi <= EPS_BEARER_IDENTITY_LAST)) {
     eps_bearers.erase(bearer.ebi.ebi);
     eps_bearers.insert(std::pair<uint8_t,pgw_eps_bearer>(bearer.ebi.ebi, bearer));
-    Logger::pgwc_app().trace( "pgw_pdn_connection::add_eps_bearer(%d) success", bearer.ebi.ebi);
+    Logger::smf_app().trace( "pgw_pdn_connection::add_eps_bearer(%d) success", bearer.ebi.ebi);
   } else {
-    Logger::pgwc_app().error( "pgw_pdn_connection::add_eps_bearer(%d) failed, invalid EBI", bearer.ebi.ebi);
+    Logger::smf_app().error( "pgw_pdn_connection::add_eps_bearer(%d) failed, invalid EBI", bearer.ebi.ebi);
   }
 }
 
@@ -172,7 +172,7 @@ void pgw_pdn_connection::deallocate_ressources(const std::string& apn)
   if (ipv4) {
     paa_dynamic::get_instance().release_paa(apn, ipv4_address);
   }
-  //pgw_app_inst->free_s5s8_cp_fteid(pgw_fteid_s5_s8_cp);
+  //smf_app_inst->free_s5s8_cp_fteid(pgw_fteid_s5_s8_cp);
   clear();
 }
 //------------------------------------------------------------------------------
@@ -230,13 +230,13 @@ std::string pgw_pdn_connection::toString() const
 }
 
 //------------------------------------------------------------------------------
-void pgw_context::insert_procedure(std::shared_ptr<smf_procedure>& sproc)
+void smf_context::insert_procedure(std::shared_ptr<smf_procedure>& sproc)
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
   pending_procedures.push_back(sproc);
 }
 //------------------------------------------------------------------------------
-bool pgw_context::find_procedure(const uint64_t& trxn_id, std::shared_ptr<smf_procedure>& proc)
+bool smf_context::find_procedure(const uint64_t& trxn_id, std::shared_ptr<smf_procedure>& proc)
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
   auto found = std::find_if(pending_procedures.begin(), pending_procedures.end(),
@@ -248,7 +248,7 @@ bool pgw_context::find_procedure(const uint64_t& trxn_id, std::shared_ptr<smf_pr
   return false;
 }
 //------------------------------------------------------------------------------
-void pgw_context::remove_procedure(smf_procedure* proc)
+void smf_context::remove_procedure(smf_procedure* proc)
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
   auto found = std::find_if(pending_procedures.begin(), pending_procedures.end(), [proc](std::shared_ptr<smf_procedure> const& i) {
@@ -261,45 +261,45 @@ void pgw_context::remove_procedure(smf_procedure* proc)
 
 
 //------------------------------------------------------------------------------
-void pgw_context::handle_itti_msg (itti_n4_session_establishment_response& seresp)
+void smf_context::handle_itti_msg (itti_n4_session_establishment_response& seresp)
 {
   std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(seresp.trxn_id, proc)) {
-    Logger::pgwc_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", seresp.seid, seresp.trxn_id);
+    Logger::smf_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", seresp.seid, seresp.trxn_id);
     proc->handle_itti_msg(seresp);
     remove_procedure(proc.get());
   } else {
-    Logger::pgwc_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", seresp.seid, seresp.trxn_id);
+    Logger::smf_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", seresp.seid, seresp.trxn_id);
   }
 }
 //------------------------------------------------------------------------------
-void pgw_context::handle_itti_msg (itti_n4_session_modification_response& smresp)
+void smf_context::handle_itti_msg (itti_n4_session_modification_response& smresp)
 {
   std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(smresp.trxn_id, proc)) {
-    Logger::pgwc_app().debug("Received N4 SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", smresp.seid, smresp.trxn_id);
+    Logger::smf_app().debug("Received N4 SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", smresp.seid, smresp.trxn_id);
     proc->handle_itti_msg(smresp);
     remove_procedure(proc.get());
   } else {
-    Logger::pgwc_app().debug("Received N4 SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", smresp.seid, smresp.trxn_id);
+    Logger::smf_app().debug("Received N4 SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", smresp.seid, smresp.trxn_id);
   }
   std::cout << toString() << std::endl;
 }
 //------------------------------------------------------------------------------
-void pgw_context::handle_itti_msg (itti_n4_session_deletion_response& sdresp)
+void smf_context::handle_itti_msg (itti_n4_session_deletion_response& sdresp)
 {
   std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(sdresp.trxn_id, proc)) {
-    Logger::pgwc_app().debug("Received N4 SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", sdresp.seid, sdresp.trxn_id);
+    Logger::smf_app().debug("Received N4 SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", sdresp.seid, sdresp.trxn_id);
     proc->handle_itti_msg(sdresp);
     remove_procedure(proc.get());
   } else {
-    Logger::pgwc_app().debug("Received N4 SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", sdresp.seid, sdresp.trxn_id);
+    Logger::smf_app().debug("Received N4 SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", sdresp.seid, sdresp.trxn_id);
   }
   std::cout << toString() << std::endl;
 }
 //------------------------------------------------------------------------------
-void pgw_context::handle_itti_msg (std::shared_ptr<itti_n4_session_report_request>& req)
+void smf_context::handle_itti_msg (std::shared_ptr<itti_n4_session_report_request>& req)
 {/*
   pfcp::report_type_t report_type;
   if (req->pfcp_ies.get(report_type)) {
@@ -318,7 +318,7 @@ void pgw_context::handle_itti_msg (std::shared_ptr<itti_n4_session_report_reques
             insert_procedure(sproc);
             if (p->run(shared_from_this(), ppc, ebi)) {
               // TODO handle error code
-              Logger::pgwc_app().info( "S5S8 DOWNLINK_DATA_REPORT procedure failed");
+              Logger::smf_app().info( "S5S8 DOWNLINK_DATA_REPORT procedure failed");
               remove_procedure(p);
             } else {
             }
@@ -328,22 +328,22 @@ void pgw_context::handle_itti_msg (std::shared_ptr<itti_n4_session_report_reques
     }
     // Usage Report
     if (report_type.usar) {
-      Logger::pgwc_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/Usage Report");
+      Logger::smf_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/Usage Report");
     }
     // Error Indication Report
     if (report_type.erir) {
-      Logger::pgwc_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/Error Indication Report");
+      Logger::smf_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/Error Indication Report");
     }
     // User Plane Inactivity Report
     if (report_type.upir) {
-      Logger::pgwc_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/User Plane Inactivity Report");
+      Logger::smf_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/User Plane Inactivity Report");
     }
   }
   */
 }
 
 //------------------------------------------------------------------------------
-std::string pgw_context::toString() const
+std::string smf_context::toString() const
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
   std::string s = {};
@@ -364,14 +364,14 @@ std::string pgw_context::toString() const
 
 //TTN
 //------------------------------------------------------------------------------
-void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq)
+void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq)
 {
 
-	Logger::pgwc_app().info("Handle a PDU Session Create SM Context Request message from AMF");
+	Logger::smf_app().info("Handle a PDU Session Create SM Context Request message from AMF");
 	pdu_session_create_sm_context_request sm_context_req_msg = smreq->req;
 
-	oai::smf::model::SmContextCreateError smContextCreateError;
-	oai::smf::model::ProblemDetails problem_details;
+	oai::smf_server::model::SmContextCreateError smContextCreateError;
+	oai::smf_server::model::ProblemDetails problem_details;
 	bool request_accepted = true;
 
 	//Step 1. get necessary information
@@ -385,7 +385,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	//Step 2. check the validity of the UE request, if valid send PDU Session Accept, otherwise send PDU Session Reject to AMF
 	if (!verify_sm_context_request(smreq)){ //TODO: Need to implement this function
 		// Not a valid request...
-		Logger::pgwc_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST, the request is not valid!");
+		Logger::smf_app().warn("Received PDU_SESSION_CREATESMCONTEXT_REQUEST, the request is not valid!");
 
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]); //TODO: add causes to header file
 		smContextCreateError.setError(problem_details);
@@ -396,7 +396,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	}
 
 	//store HttpResponse and session-related information to be used when receiving the response from UPF
-	itti_n11_create_sm_context_response *sm_context_resp = new itti_n11_create_sm_context_response(TASK_PGWC_APP, TASK_SMF_N11, smreq->http_response);
+	itti_n11_create_sm_context_response *sm_context_resp = new itti_n11_create_sm_context_response(TASK_SMF_APP, TASK_SMF_N11, smreq->http_response);
 	std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
 	sm_context_resp->res.set_supi(supi);
 	sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
@@ -408,7 +408,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	//step 3.1. create dnn context if not exist
 	//At this step, this context should be existed
 	if (nullptr == sd.get()) {
-		Logger::pgwc_app().debug("DNN context (dnn_in_use %s) is not existed yet!", dnn.c_str());
+		Logger::smf_app().debug("DNN context (dnn_in_use %s) is not existed yet!", dnn.c_str());
 		dnn_context *d = new (dnn_context);
 
 		d->in_use = true;
@@ -418,7 +418,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 		insert_dnn(sd);
 	} else {
 		sd.get()->dnn_in_use = dnn;
-		Logger::pgwc_app().debug("DNN context (dnn_in_use %s) is already existed", dnn.c_str());
+		Logger::smf_app().debug("DNN context (dnn_in_use %s) is already existed", dnn.c_str());
 	}
 
 	//step 3.2. create pdn connection if not exist
@@ -426,7 +426,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	bool find_pdn = sd.get()->find_pdn_connection(pdu_session_id, sp);
 
 	if (nullptr == sp.get()){
-		Logger::pgwc_app().debug("Create a new PDN connection!");
+		Logger::smf_app().debug("Create a new PDN connection!");
 		//create a new pdn connection
 		pgw_pdn_connection *p = new (pgw_pdn_connection);
 		p->pdn_type.pdn_type = sm_context_req_msg.get_pdu_session_type();
@@ -436,7 +436,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 		sp = std::shared_ptr<pgw_pdn_connection>(p);
 		sd->insert_pdn_connection(sp);
 	} else{
-		Logger::pgwc_app().debug("PDN connection is already existed!");
+		Logger::smf_app().debug("PDN connection is already existed!");
 		//TODO:
 	}
 
@@ -464,7 +464,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 			.ci_ipv4_address_allocation_via_dhcpv4 = 0,
 			.ci_ipv4_link_mtu_request = 0};
 
-	//pgw_app_inst->process_pco_request(extended_protocol_options, pco_resp, pco_ids);
+	//smf_app_inst->process_pco_request(extended_protocol_options, pco_resp, pco_ids);
 
 	//Step 7. address allocation based on PDN type
 	switch (sp->pdn_type.pdn_type) {
@@ -498,7 +498,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 			} else if ((paa_res) && (paa.is_ip_assigned())) {
 				set_paa = true;
 			}
-			Logger::pgwc_app().info( "PAA, Ipv4 Address: %s", inet_ntoa (*((struct in_addr *)&paa.ipv4_address)));
+			Logger::smf_app().info( "PAA, Ipv4 Address: %s", inet_ntoa (*((struct in_addr *)&paa.ipv4_address)));
 		} else { //use DHCP
 			//TODO: DHCP
 		}
@@ -517,7 +517,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	break;
 
 	default:
-		Logger::pgwc_app().error( "Unknown PDN type %d", sp->pdn_type.pdn_type);
+		Logger::smf_app().error( "Unknown PDN type %d", sp->pdn_type.pdn_type);
 		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PDUTYPE_NOT_SUPPORTED]);
 		smContextCreateError.setError(problem_details);
 		//TODO: to be completed when finishing NAS implementation
@@ -546,9 +546,9 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 		//Send reply to AMF (PDUSession_CreateSMContextResponse including Cause, SMContextId)
 		//location header contains the URI of the created resource
-		Logger::pgwc_app().info("Sending response to AMF!");
+		Logger::smf_app().info("Sending response to AMF!");
 		nlohmann::json jsonData;
-		oai::smf::model::SmContextCreatedData smContextCreatedData;
+		oai::smf_server::model::SmContextCreatedData smContextCreatedData;
 		//include only SmfServiceInstanceId (See section 6.1.6.2.3, 3GPP TS 29.502 v16.0.0)
 
 		to_json(jsonData, smContextCreatedData);
@@ -561,7 +561,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 		insert_procedure(sproc);
 		if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
 			// error !
-			Logger::pgwc_app().info( "PDU SESSION CREATE SM CONTEXT REQUEST procedure failed");
+			Logger::smf_app().info( "PDU SESSION CREATE SM CONTEXT REQUEST procedure failed");
 			remove_procedure(proc);
 		}
 
@@ -606,11 +606,11 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 		//with N1SM container with a PDU Session Establishment Reject message
 		//TODO
 		//sm_context_resp_pending->res.set
-		Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_SMF_N11", sm_context_resp_pending->get_msg_name());
+		Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N11", sm_context_resp_pending->get_msg_name());
 
 		int ret = itti_inst->send_msg(sm_context_resp_pending);
 		if (RETURNok != ret) {
-			Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  sm_context_resp_pending->get_msg_name());
+			Logger::smf_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  sm_context_resp_pending->get_msg_name());
 		}
 
 	}
@@ -619,7 +619,7 @@ void pgw_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 }
 
 //------------------------------------------------------------------------------
-bool pgw_context::find_dnn_context(const std::string& dnn, std::shared_ptr<dnn_context>& dnn_context)
+bool smf_context::find_dnn_context(const std::string& dnn, std::shared_ptr<dnn_context>& dnn_context)
 {
 	std::unique_lock<std::recursive_mutex> lock(m_context);
 	for (auto it : dnns) {
@@ -632,14 +632,14 @@ bool pgw_context::find_dnn_context(const std::string& dnn, std::shared_ptr<dnn_c
 }
 
 //------------------------------------------------------------------------------
-void pgw_context::insert_dnn(std::shared_ptr<dnn_context>& sd)
+void smf_context::insert_dnn(std::shared_ptr<dnn_context>& sd)
 {
 	std::unique_lock<std::recursive_mutex> lock(m_context);
 	dnns.push_back(sd);
 }
 
 //------------------------------------------------------------------------------
-bool pgw_context::verify_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq)
+bool smf_context::verify_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq)
 {
 	//check the validity of the UE request according to the user subscription or local policies
 	//TODO:
@@ -647,7 +647,7 @@ bool pgw_context::verify_sm_context_request(std::shared_ptr<itti_n11_create_sm_c
 }
 
 //------------------------------------------------------------------------------
-void pgw_context::send_create_session_response_error(oai::smf::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse)
+void smf_context::send_create_session_response_error(oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse)
 {
 	//Send reply to AMF
 	nlohmann::json jsonData;
@@ -706,7 +706,7 @@ void session_management_subscription::find_dnn_configuration(std::string dnn, st
 }
 
 //------------------------------------------------------------------------------
-void pgw_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
+void smf_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
 {
 	std::unique_lock<std::recursive_mutex> lock(m_context);
 	dnn_subscriptions.insert (std::pair ((uint8_t)snssai.sST, ss));
@@ -714,7 +714,7 @@ void pgw_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<sessi
 }
 
 //------------------------------------------------------------------------------
-bool pgw_context::find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
+bool smf_context::find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
 {
 	std::unique_lock<std::recursive_mutex> lock(m_context);
 	if (dnn_subscriptions.count(snssai.sST) > 0 ){

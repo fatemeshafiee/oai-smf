@@ -42,9 +42,9 @@
 #include <mutex>
 #include <set>
 
-namespace pgwc {
+namespace smf {
 
-class pgw_context;
+class smf_context;
 class pgw_pdn_connection;
 
 //------------------------------------------------------------------------------
@@ -98,19 +98,19 @@ public:
 
   int run(std::shared_ptr<itti_n11_create_sm_context_request> req,
           std::shared_ptr<itti_n11_create_sm_context_response>resp,
-          std::shared_ptr<pgwc::pgw_context> pc);
+          std::shared_ptr<smf::smf_context> pc);
 
   void handle_itti_msg (itti_n4_session_establishment_response& resp);
 
   std::shared_ptr<itti_n4_session_establishment_request> sx_triggered;
   std::shared_ptr<pgw_pdn_connection>                      ppc;
-  std::shared_ptr<pgwc::pgw_context>                       pc;
+  std::shared_ptr<smf::smf_context>                       pc;
 
   std::shared_ptr<itti_n11_create_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_create_sm_context_response> n11_triggered_pending;
 };
 
 }
-#include "../pgwc/pgw_context.hpp"
+#include "../smf_app/smf_context.hpp"
 
 #endif

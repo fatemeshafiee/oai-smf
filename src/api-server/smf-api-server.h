@@ -24,12 +24,12 @@
 #include "IndividualSMContextApiImpl.h"
 #include "PDUSessionsCollectionApiImpl.h"
 #include "SMContextsCollectionApiImpl.h"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 
-using namespace oai::smf::api;
+using namespace oai::smf_server::api;
 class SMFApiServer {
 public:
-	SMFApiServer(Pistache::Address address, pgwc::pgw_app *smf_app_inst) : m_httpEndpoint(std::make_shared<Pistache::Http::Endpoint>(address))  {
+	SMFApiServer(Pistache::Address address, smf::smf_app *smf_app_inst) : m_httpEndpoint(std::make_shared<Pistache::Http::Endpoint>(address))  {
 		m_router = std::make_shared<Pistache::Rest::Router>();
 		m_individualPDUSessionHSMFApiImpl = std::make_shared<IndividualPDUSessionHSMFApiImpl> (m_router, smf_app_inst);
 		m_individualSMContextApiImpl = std::make_shared<IndividualSMContextApiImpl> (m_router, smf_app_inst);

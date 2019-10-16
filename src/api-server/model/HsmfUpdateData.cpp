@@ -14,7 +14,7 @@
 #include "HsmfUpdateData.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 HsmfUpdateData::HsmfUpdateData()

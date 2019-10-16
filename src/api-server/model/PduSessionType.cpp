@@ -14,7 +14,7 @@
 #include "PduSessionType.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 PduSessionType::PduSessionType()

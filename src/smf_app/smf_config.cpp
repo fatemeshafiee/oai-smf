@@ -31,7 +31,7 @@
 #include "epc.h"
 #include "if.hpp"
 #include "logger.hpp"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 #include "smf_config.hpp"
 #include "string.hpp"
 
@@ -45,7 +45,7 @@
 
 using namespace std;
 using namespace libconfig;
-using namespace pgwc;
+using namespace smf;
 
 // C includes
 #include <arpa/inet.h>
@@ -55,13 +55,13 @@ using namespace pgwc;
 #include <sys/types.h>
 #include <unistd.h>
 
-extern pgw_app *pgw_app_inst;
+extern smf_app *smf_app_inst;
 extern smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
 int smf_config::finalize ()
 {
-  Logger::pgwc_app().info("Finalize config...");
+  Logger::smf_app().info("Finalize config...");
 
   for (int i = 0; i < num_ue_pool; i++) {
     uint32_t range_low_hbo = ntohl(ue_pool_range_low[i].s_addr);
@@ -79,7 +79,7 @@ int smf_config::finalize ()
   }
   // "TODO"
   //pgw_pcef_emulation_init(config_pP);
-  Logger::pgwc_app().info("Finalized config");
+  Logger::smf_app().info("Finalized config");
   return 0;
 }
 
@@ -90,7 +90,7 @@ int smf_config::load_thread_sched_params(const Setting& thread_sched_params_cfg,
   try {
     thread_sched_params_cfg.lookupValue(SMF_CONFIG_STRING_THREAD_RD_CPU_ID, cfg.cpu_id);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
   try {
     std::string thread_rd_sched_policy;
@@ -107,21 +107,21 @@ int smf_config::load_thread_sched_params(const Setting& thread_sched_params_cfg,
     } else if (boost::iequals(thread_rd_sched_policy, "SCHED_RR")) {
       cfg.sched_policy = SCHED_RR;
     } else {
-      Logger::pgwc_app().error("thread_rd_sched_policy: %s, unknown in config file", thread_rd_sched_policy.c_str());
+      Logger::smf_app().error("thread_rd_sched_policy: %s, unknown in config file", thread_rd_sched_policy.c_str());
       return RETURNerror;
     }
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     thread_sched_params_cfg.lookupValue(SMF_CONFIG_STRING_THREAD_RD_SCHED_PRIORITY, cfg.sched_priority);
     if ((cfg.sched_priority > 99) || (cfg.sched_priority < 1)) {
-      Logger::pgwc_app().error("thread_rd_sched_priority: %d, must be in interval [1..99] in config file", cfg.sched_priority);
+      Logger::smf_app().error("thread_rd_sched_priority: %d, must be in interval [1..99] in config file", cfg.sched_priority);
       return RETURNerror;
     }
   } catch(const SettingNotFoundException &nfex) {
-    Logger::spgwu_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
   return RETURNok;
 }
@@ -132,35 +132,35 @@ int smf_config::load_itti(const Setting& itti_cfg, itti_cfg_t& cfg)
     const Setting& itti_timer_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_ITTI_TIMER_SCHED_PARAMS];
     load_thread_sched_params(itti_timer_sched_params_cfg, cfg.itti_timer_sched_params);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& s5s8_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_S5S8_SCHED_PARAMS];
     load_thread_sched_params(s5s8_sched_params_cfg, cfg.s5s8_sched_params);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& sx_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_SX_SCHED_PARAMS];
     load_thread_sched_params(sx_sched_params_cfg, cfg.sx_sched_params);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& pgw_app_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_PGW_APP_SCHED_PARAMS];
     load_thread_sched_params(pgw_app_sched_params_cfg, cfg.pgw_app_sched_params);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& async_cmd_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_ASYNC_CMD_SCHED_PARAMS];
     load_thread_sched_params(async_cmd_sched_params_cfg, cfg.async_cmd_sched_params);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   return RETURNok;
@@ -177,21 +177,21 @@ int smf_config::load_interface(const Setting& if_cfg, interface_cfg_t & cfg)
     util::trim(address);
     if (boost::iequals(address, "read")) {
       if (get_inet_addr_infos_from_iface(cfg.if_name, cfg.addr4, cfg.network4, cfg.mtu)) {
-        Logger::pgwc_app().error("Could not read %s network interface configuration", cfg.if_name);
+        Logger::smf_app().error("Could not read %s network interface configuration", cfg.if_name);
         return RETURNerror;
       }
     } else {
       std::vector<std::string> words;
       boost::split(words, address, boost::is_any_of("/"), boost::token_compress_on);
       if (words.size() != 2) {
-        Logger::pgwc_app().error("Bad value " SMF_CONFIG_STRING_IPV4_ADDRESS " = %s in config file", address.c_str());
+        Logger::smf_app().error("Bad value " SMF_CONFIG_STRING_IPV4_ADDRESS " = %s in config file", address.c_str());
         return RETURNerror;
       }
       unsigned char buf_in_addr[sizeof(struct in6_addr)]; // you never know...
       if (inet_pton (AF_INET, util::trim(words.at(0)).c_str(), buf_in_addr) == 1) {
         memcpy (&cfg.addr4, buf_in_addr, sizeof (struct in_addr));
       } else {
-        Logger::pgwc_app().error("In conversion: Bad value " SMF_CONFIG_STRING_IPV4_ADDRESS " = %s in config file", util::trim(words.at(0)).c_str());
+        Logger::smf_app().error("In conversion: Bad value " SMF_CONFIG_STRING_IPV4_ADDRESS " = %s in config file", util::trim(words.at(0)).c_str());
         return RETURNerror;
       }
       cfg.network4.s_addr = htons(ntohs(cfg.addr4.s_addr) & 0xFFFFFFFF << (32 - std::stoi (util::trim(words.at(1)))));
@@ -202,7 +202,7 @@ int smf_config::load_interface(const Setting& if_cfg, interface_cfg_t & cfg)
       const Setting& sched_params_cfg = if_cfg[SMF_CONFIG_STRING_SCHED_PARAMS];
       load_thread_sched_params(sched_params_cfg, cfg.thread_rd_sched_params);
     } catch(const SettingNotFoundException &nfex) {
-      Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+      Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
     }
   }
   return RETURNok;
@@ -221,12 +221,12 @@ int smf_config::load(const string& config_file)
   }
   catch(const FileIOException &fioex)
   {
-    Logger::pgwc_app().error("I/O error while reading file %s - %s", config_file.c_str(), fioex.what());
+    Logger::smf_app().error("I/O error while reading file %s - %s", config_file.c_str(), fioex.what());
     throw;
   }
   catch(const ParseException &pex)
   {
-    Logger::pgwc_app().error("Parse error at %s:%d - %s", pex.getFile(), pex.getLine(), pex.getError());
+    Logger::smf_app().error("Parse error at %s:%d - %s", pex.getFile(), pex.getLine(), pex.getError());
     throw;
   }
 
@@ -236,7 +236,7 @@ int smf_config::load(const string& config_file)
   {
     const Setting& smf_cfg = root[SMF_CONFIG_STRING_SMF_CONFIG];
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().error("%s : %s", nfex.what(), nfex.getPath());
+    Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }
 
@@ -245,32 +245,36 @@ int smf_config::load(const string& config_file)
   try {
     smf_cfg.lookupValue(SMF_CONFIG_STRING_INSTANCE, instance);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     smf_cfg.lookupValue(SMF_CONFIG_STRING_PID_DIRECTORY, pid_dir);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& itti_cfg = smf_cfg[SMF_CONFIG_STRING_ITTI_TASKS];
     load_itti(itti_cfg, itti);
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
+    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting &nw_if_cfg = smf_cfg[SMF_CONFIG_STRING_INTERFACES];
 
-    const Setting& s5s8_cp_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_S5_S8_CP];
-    load_interface(s5s8_cp_cfg, s5s8_cp);
-
     const Setting& sx_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_SX];
     load_interface(sx_cfg, sx);
+
+    const Setting& n4_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_N4];
+    load_interface(n4_cfg, n4);
+
+    const Setting& n11_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_N11];
+    load_interface(n11_cfg, n11);
+
   } catch(const SettingNotFoundException &nfex) {
-    Logger::pgwc_app().error("%s : %s", nfex.what(), nfex.getPath());
+    Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }
 
@@ -290,7 +294,7 @@ int smf_config::load(const string& config_file)
       std::vector<std::string> ips;
       boost::split(ips, ipv4_range, boost::is_any_of(SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER), boost::token_compress_on);
       if (ips.size() != 2) {
-        Logger::pgwc_app().error("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER, ipv4_range.c_str(), config_file.c_str());
+        Logger::smf_app().error("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER, ipv4_range.c_str(), config_file.c_str());
         throw ("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER, ipv4_range.c_str(), config_file.c_str());
       }
 
@@ -298,7 +302,7 @@ int smf_config::load(const string& config_file)
       if (inet_pton (AF_INET, util::trim(ips.at(0)).c_str(), buf_in_addr) == 1) {
         memcpy (&ue_pool_range_low[num_ue_pool], buf_in_addr, sizeof (struct in_addr));
       } else {
-        Logger::pgwc_app().error("CONFIG POOL ADDR IPV4: BAD LOWER ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d", i);
+        Logger::smf_app().error("CONFIG POOL ADDR IPV4: BAD LOWER ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d", i);
         throw ("CONFIG POOL ADDR IPV4: BAD ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
       }
 
@@ -306,11 +310,11 @@ int smf_config::load(const string& config_file)
       if (inet_pton (AF_INET, util::trim(ips.at(1)).c_str(), buf_in_addr) == 1) {
         memcpy (&ue_pool_range_high[num_ue_pool], buf_in_addr, sizeof (struct in_addr));
       } else {
-        Logger::pgwc_app().error("CONFIG POOL ADDR IPV4: BAD HIGHER ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d", i);
+        Logger::smf_app().error("CONFIG POOL ADDR IPV4: BAD HIGHER ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d", i);
         throw ("CONFIG POOL ADDR IPV4: BAD ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
       }
       if (htonl(ue_pool_range_low[num_ue_pool].s_addr) >=  htonl(ue_pool_range_high[num_ue_pool].s_addr)) {
-        Logger::pgwc_app().error("CONFIG POOL ADDR IPV4: BAD RANGE in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d", i);
+        Logger::smf_app().error("CONFIG POOL ADDR IPV4: BAD RANGE in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d", i);
         throw ("CONFIG POOL ADDR IPV4: BAD RANGE in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
       }
       num_ue_pool += 1;
@@ -325,7 +329,7 @@ int smf_config::load(const string& config_file)
       std::vector<std::string> ips6;
       boost::split(ips6, ipv6_prefix, boost::is_any_of(SMF_CONFIG_STRING_IPV6_ADDRESS_PREFIX_DELIMITER), boost::token_compress_on);
       if (ips6.size() != 2) {
-        Logger::pgwc_app().error("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_PREFIX, ipv6_prefix.c_str(), config_file.c_str());
+        Logger::smf_app().error("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_PREFIX, ipv6_prefix.c_str(), config_file.c_str());
         throw ("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_PREFIX, ipv6_prefix.c_str(), config_file.c_str());
       }
 
@@ -334,7 +338,7 @@ int smf_config::load(const string& config_file)
       if (inet_pton (AF_INET6, addr.c_str(), buf_in6_addr) == 1) {
         memcpy (&paa_pool6_prefix[num_paa6_pool], buf_in6_addr, sizeof (struct in6_addr));
       } else {
-        Logger::pgwc_app().error("CONFIG POOL ADDR IPV6: BAD ADDRESS in " SMF_CONFIG_STRING_IPV6_ADDRESS_LIST " pool %d", i);
+        Logger::smf_app().error("CONFIG POOL ADDR IPV6: BAD ADDRESS in " SMF_CONFIG_STRING_IPV6_ADDRESS_LIST " pool %d", i);
         throw ("CONFIG POOL ADDR IPV6: BAD ADDRESS in " SMF_CONFIG_STRING_IPV6_ADDRESS_LIST);
       }
 
@@ -364,18 +368,18 @@ int smf_config::load(const string& config_file)
       }  else if (boost::iequals(astring, "Non-IP") == 0) {
         apn[apn_idx].pdn_type.pdn_type = PDN_TYPE_E_NON_IP;
       } else {
-        Logger::pgwc_app().error(" " SMF_CONFIG_STRING_PDN_TYPE " in %d'th APN :%s" , i+1, astring.c_str());
+        Logger::smf_app().error(" " SMF_CONFIG_STRING_PDN_TYPE " in %d'th APN :%s" , i+1, astring.c_str());
         throw ("Error PDN_TYPE in config file");
       }
       apn_cfg.lookupValue(SMF_CONFIG_STRING_IPV4_POOL, apn[apn_idx].pool_id_iv4);
       apn_cfg.lookupValue(SMF_CONFIG_STRING_IPV6_POOL, apn[apn_idx].pool_id_iv6);
 
       if ((0 <= apn[apn_idx].pool_id_iv4) && (apn[apn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV6)) {
-        Logger::pgwc_app().error("PDN_TYPE versus pool identifier %d 'th APN in config file\n", i+1);
+        Logger::smf_app().error("PDN_TYPE versus pool identifier %d 'th APN in config file\n", i+1);
         throw ("PDN_TYPE versus pool identifier APN");
       }
       if ((0 <= apn[apn_idx].pool_id_iv6) && (apn[apn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV4)) {
-        Logger::pgwc_app().error("PDN_TYPE versus pool identifier %d 'th APN in config file\n", i+1);
+        Logger::smf_app().error("PDN_TYPE versus pool identifier %d 'th APN in config file\n", i+1);
         throw ("PDN_TYPE versus pool identifier APN");
       }
 
@@ -385,7 +389,7 @@ int smf_config::load(const string& config_file)
         for (int j = 0; j < apn_idx; j++) {
           if (boost::iequals(apn[j].apn, apn[apn_idx].apn)) {
             doublon = true;
-            Logger::pgwc_app().info("%d'th APN %s already found in config file (%d 'th APN %s), bypassing\n", i+1, apn[apn_idx].apn.c_str(), j+1, apn[j].apn.c_str());
+            Logger::smf_app().info("%d'th APN %s already found in config file (%d 'th APN %s), bypassing\n", i+1, apn[apn_idx].apn.c_str(), j+1, apn[j].apn.c_str());
           }
         }
         if (not doublon) {
@@ -393,7 +397,7 @@ int smf_config::load(const string& config_file)
           num_apn++;
         }
       } else {
-        Logger::pgwc_app().error("Bypass %d'th APN %s in config file\n", i+1, apn[apn_idx].apn.c_str());
+        Logger::smf_app().error("Bypass %d'th APN %s in config file\n", i+1, apn[apn_idx].apn.c_str());
       }
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_IPV4_ADDRESS, astring);
@@ -407,14 +411,14 @@ int smf_config::load(const string& config_file)
     if (inet_pton (AF_INET6, util::trim(astring).c_str(), buf_in6_addr) == 1) {
       memcpy (&default_dnsv6, buf_in6_addr, sizeof (struct in6_addr));
     } else {
-      Logger::pgwc_app().error("CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS " %s", astring.c_str());
+      Logger::smf_app().error("CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS " %s", astring.c_str());
       throw ("CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS " %s", astring.c_str());
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS, astring);
     if (inet_pton (AF_INET6, util::trim(astring).c_str(), buf_in6_addr) == 1) {
       memcpy (&default_dns_secv6, buf_in6_addr, sizeof (struct in6_addr));
     } else {
-      Logger::pgwc_app().error("CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS " %s", astring.c_str());
+      Logger::smf_app().error("CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS " %s", astring.c_str());
       throw ("CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS " %s", astring.c_str());
     }
 
@@ -429,19 +433,45 @@ int smf_config::load(const string& config_file)
     const Setting &pcef_cfg = smf_cfg[SMF_CONFIG_STRING_PCEF];
     unsigned int apn_ambr = 0;
     if (!(pcef_cfg.lookupValue(SMF_CONFIG_STRING_APN_AMBR_UL, apn_ambr))) {
-      Logger::pgwc_app().error(SMF_CONFIG_STRING_APN_AMBR_UL "failed");
+      Logger::smf_app().error(SMF_CONFIG_STRING_APN_AMBR_UL "failed");
       throw (SMF_CONFIG_STRING_APN_AMBR_UL "failed");
     }
     pcef.apn_ambr_ul = apn_ambr;
     if (!(pcef_cfg.lookupValue(SMF_CONFIG_STRING_APN_AMBR_DL, apn_ambr))) {
-      Logger::pgwc_app().error(SMF_CONFIG_STRING_APN_AMBR_DL "failed");
+      Logger::smf_app().error(SMF_CONFIG_STRING_APN_AMBR_DL "failed");
       //throw (SMF_CONFIG_STRING_APN_AMBR_DL "failed");
     }
     pcef.apn_ambr_dl = apn_ambr;
+
+    const Setting &amf_cfg = smf_cfg[SMF_CONFIG_STRING_AMF];
+    struct in_addr amf_ipv4_addr;
+    unsigned int amf_port = 0;
+    amf_cfg.lookupValue(SMF_CONFIG_STRING_AMF_IPV4_ADDRESS, astring);
+    IPV4_STR_ADDR_TO_INADDR (util::trim(astring).c_str(), amf_ipv4_addr, "BAD IPv4 ADDRESS FORMAT FOR AMF !");
+    amf_addr.ipv4_addr = amf_ipv4_addr;
+    if (!(amf_cfg.lookupValue(SMF_CONFIG_STRING_AMF_PORT, amf_port))) {
+          Logger::smf_app().error(SMF_CONFIG_STRING_AMF_PORT "failed");
+          throw (SMF_CONFIG_STRING_AMF_PORT "failed");
+    }
+    amf_addr.port = amf_port;
+
+    const Setting &udm_cfg = smf_cfg[SMF_CONFIG_STRING_UDM];
+    struct in_addr udm_ipv4_addr;
+    unsigned int udm_port = 0;
+    udm_cfg.lookupValue(SMF_CONFIG_STRING_UDM_IPV4_ADDRESS, astring);
+    IPV4_STR_ADDR_TO_INADDR (util::trim(astring).c_str(), udm_ipv4_addr, "BAD IPv4 ADDRESS FORMAT FOR UDM !");
+    udm_addr.ipv4_addr = udm_ipv4_addr;
+    if (!(udm_cfg.lookupValue(SMF_CONFIG_STRING_UDM_PORT, udm_port))) {
+          Logger::smf_app().error(SMF_CONFIG_STRING_UDM_PORT "failed");
+          throw (SMF_CONFIG_STRING_UDM_PORT "failed");
+    }
+    udm_addr.port = udm_port;
+
+
   }
   catch(const SettingNotFoundException &nfex)
   {
-    Logger::pgwc_app().error("%s : %s", nfex.what(), nfex.getPath());
+    Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }
   return finalize();
@@ -450,95 +480,105 @@ int smf_config::load(const string& config_file)
 //------------------------------------------------------------------------------
 void smf_config::display ()
 {
-  Logger::pgwc_app().info( "==== EURECOM %s v%s ====", PACKAGE_NAME, PACKAGE_VERSION);
-  Logger::pgwc_app().info( "Configuration PGW-C:");
-  Logger::pgwc_app().info( "- Instance ..............: %d\n", instance);
-  Logger::pgwc_app().info( "- PID dir ...............: %s\n", pid_dir.c_str());
+  Logger::smf_app().info( "==== EURECOM %s v%s ====", PACKAGE_NAME, PACKAGE_VERSION);
+  Logger::smf_app().info( "Configuration PGW-C:");
+  Logger::smf_app().info( "- Instance ..............: %d\n", instance);
+  Logger::smf_app().info( "- PID dir ...............: %s\n", pid_dir.c_str());
 
-  Logger::pgwc_app().info( "- S5S8-C Networking:");
-  Logger::pgwc_app().info( "    iface ............: %s", s5s8_cp.if_name.c_str());
-  Logger::pgwc_app().info( "    ipv4.addr ........: %s", inet_ntoa (s5s8_cp.addr4));
-  if (s5s8_cp.network4.s_addr) {
-    Logger::pgwc_app().info( "    ipv4.mask ........: %s", inet_ntoa (s5s8_cp.network4));
-  }
-  Logger::pgwc_app().info( "    port .............: %d", s5s8_cp.port);
-  if (s5s8_cp.mtu) {
-    Logger::pgwc_app().info( "    MTU ..............: %u", s5s8_cp.mtu);
-  }
-  Logger::pgwc_app().info( "- SX Networking:");
-  Logger::pgwc_app().info( "    iface ................: %s", sx.if_name.c_str());
-  Logger::pgwc_app().info( "    ip ...................: %s", inet_ntoa (sx.addr4));
-  Logger::pgwc_app().info( "    port .................: %d", sx.port);
-  Logger::pgwc_app().info( "- S5S8 Threading:");
-  Logger::pgwc_app().info( "    CPU id............: %d", s5s8_cp.thread_rd_sched_params.cpu_id);
-  Logger::pgwc_app().info( "    Scheduling policy : %d", s5s8_cp.thread_rd_sched_params.sched_policy);
-  Logger::pgwc_app().info( "    Scheduling prio  .: %d", s5s8_cp.thread_rd_sched_params.sched_priority);
-  Logger::pgwc_app().info( "- SX Threading:");
-  Logger::pgwc_app().info( "    CPU id............: %d", sx.thread_rd_sched_params.cpu_id);
-  Logger::pgwc_app().info( "    Scheduling policy : %d", sx.thread_rd_sched_params.sched_policy);
-  Logger::pgwc_app().info( "    Scheduling prio  .: %d", sx.thread_rd_sched_params.sched_priority);
-  Logger::pgwc_app().info( "- ITTI Timer Task Threading:");
-  Logger::pgwc_app().info( "    CPU id............: %d", itti.itti_timer_sched_params.cpu_id);
-  Logger::pgwc_app().info( "    Scheduling policy : %d", itti.itti_timer_sched_params.sched_policy);
-  Logger::pgwc_app().info( "    Scheduling prio  .: %d", itti.itti_timer_sched_params.sched_priority);
-  Logger::pgwc_app().info( "- ITTI S5S8 Task Threading:");
-  Logger::pgwc_app().info( "    CPU id............: %d", itti.s5s8_sched_params.cpu_id);
-  Logger::pgwc_app().info( "    Scheduling policy : %d", itti.s5s8_sched_params.sched_policy);
-  Logger::pgwc_app().info( "    Scheduling prio  .: %d", itti.s5s8_sched_params.sched_priority);
-  Logger::pgwc_app().info( "- ITTI Sx Task Threading:");
-  Logger::pgwc_app().info( "    CPU id............: %d", itti.sx_sched_params.cpu_id);
-  Logger::pgwc_app().info( "    Scheduling policy : %d", itti.sx_sched_params.sched_policy);
-  Logger::pgwc_app().info( "    Scheduling prio  .: %d", itti.sx_sched_params.sched_priority);
-  Logger::pgwc_app().info( "- ITTI PGW_APP task Threading:");
-  Logger::pgwc_app().info( "    CPU id............: %d", itti.pgw_app_sched_params.cpu_id);
-  Logger::pgwc_app().info( "    Scheduling policy : %d", itti.pgw_app_sched_params.sched_policy);
-  Logger::pgwc_app().info( "    Scheduling prio  .: %d", itti.pgw_app_sched_params.sched_priority);
-  Logger::pgwc_app().info( "- ITTI ASYNC_CMD task Threading:");
-  Logger::pgwc_app().info( "    CPU id............: %d", itti.async_cmd_sched_params.cpu_id);
-  Logger::pgwc_app().info( "    Scheduling policy : %d", itti.async_cmd_sched_params.sched_policy);
-  Logger::pgwc_app().info( "    Scheduling prio  .: %d", itti.async_cmd_sched_params.sched_priority);
-  Logger::pgwc_app().info( "- " SMF_CONFIG_STRING_IP_ADDRESS_POOL ":");
+  Logger::smf_app().info( "- SX Networking:");
+  Logger::smf_app().info( "    iface ................: %s", sx.if_name.c_str());
+  Logger::smf_app().info( "    ip ...................: %s", inet_ntoa (sx.addr4));
+  Logger::smf_app().info( "    port .................: %d", sx.port);
+
+  Logger::smf_app().info( "- N4 Networking:");
+  Logger::smf_app().info( "    iface ................: %s", n4.if_name.c_str());
+  Logger::smf_app().info( "    ip ...................: %s", inet_ntoa (n4.addr4));
+  Logger::smf_app().info( "    port .................: %d", n4.port);
+
+  Logger::smf_app().info( "- N11 Networking:");
+  Logger::smf_app().info( "    iface ................: %s", n11.if_name.c_str());
+  Logger::smf_app().info( "    ip ...................: %s", inet_ntoa (n11.addr4));
+  Logger::smf_app().info( "    port .................: %d", n11.port);
+
+
+  Logger::smf_app().info( "- SX Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", sx.thread_rd_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", sx.thread_rd_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", sx.thread_rd_sched_params.sched_priority);
+
+  Logger::smf_app().info( "- N4 Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", n4.thread_rd_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", n4.thread_rd_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", n4.thread_rd_sched_params.sched_priority);
+
+  Logger::smf_app().info( "- ITTI Timer Task Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", itti.itti_timer_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", itti.itti_timer_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.itti_timer_sched_params.sched_priority);
+  Logger::smf_app().info( "- ITTI S5S8 Task Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", itti.s5s8_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", itti.s5s8_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.s5s8_sched_params.sched_priority);
+  Logger::smf_app().info( "- ITTI Sx Task Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", itti.sx_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", itti.sx_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.sx_sched_params.sched_priority);
+  Logger::smf_app().info( "- ITTI PGW_APP task Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", itti.pgw_app_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", itti.pgw_app_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.pgw_app_sched_params.sched_priority);
+  Logger::smf_app().info( "- ITTI ASYNC_CMD task Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", itti.async_cmd_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", itti.async_cmd_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.async_cmd_sched_params.sched_priority);
+  Logger::smf_app().info( "- " SMF_CONFIG_STRING_IP_ADDRESS_POOL ":");
   for (int i = 0; i < num_ue_pool; i++) {
     std::string range_low(inet_ntoa (ue_pool_range_low[apn[i].pool_id_iv4]));
     std::string range_high(inet_ntoa (ue_pool_range_high[apn[i].pool_id_iv4]));
-    Logger::pgwc_app().info( "    IPv4 pool %d ..........: %s - %s", i, range_low.c_str(), range_high.c_str());
+    Logger::smf_app().info( "    IPv4 pool %d ..........: %s - %s", i, range_low.c_str(), range_high.c_str());
   }
   char str_addr6[INET6_ADDRSTRLEN];
   for (int i = 0; i < num_paa6_pool; i++) {
     if (inet_ntop(AF_INET6, &paa_pool6_prefix[i], str_addr6, sizeof(str_addr6))) {
-      Logger::pgwc_app().info( "    IPv6 pool %d ..........: %s / %d", i, str_addr6, paa_pool6_prefix_len[i]);
+      Logger::smf_app().info( "    IPv6 pool %d ..........: %s / %d", i, str_addr6, paa_pool6_prefix_len[i]);
     }
   }
-  Logger::pgwc_app().info( "- DEFAULT DNS:");
-  Logger::pgwc_app().info( "    Primary DNS ..........: %s", inet_ntoa (*((struct in_addr *)&default_dnsv4)));
-  Logger::pgwc_app().info( "    Secondary DNS ........: %s", inet_ntoa (*((struct in_addr *)&default_dns_secv4)));
+  Logger::smf_app().info( "- DEFAULT DNS:");
+  Logger::smf_app().info( "    Primary DNS ..........: %s", inet_ntoa (*((struct in_addr *)&default_dnsv4)));
+  Logger::smf_app().info( "    Secondary DNS ........: %s", inet_ntoa (*((struct in_addr *)&default_dns_secv4)));
   if (inet_ntop(AF_INET6, &default_dnsv6, str_addr6, sizeof(str_addr6))) {
-    Logger::pgwc_app().info( "    Primary DNS v6........: %s", str_addr6);
+    Logger::smf_app().info( "    Primary DNS v6........: %s", str_addr6);
   }
   if (inet_ntop(AF_INET6, &default_dns_secv6, str_addr6, sizeof(str_addr6))) {
-    Logger::pgwc_app().info( "    Secondary DNS v6 .....: %s", str_addr6);
+    Logger::smf_app().info( "    Secondary DNS v6 .....: %s", str_addr6);
   }
 
-  Logger::pgwc_app().info( "- " SMF_CONFIG_STRING_APN_LIST ":");
+  Logger::smf_app().info( "- " SMF_CONFIG_STRING_APN_LIST ":");
   for (int i = 0; i < num_apn; i++) {
-    Logger::pgwc_app().info( "    APN %d:", i);
-    Logger::pgwc_app().info( "        " SMF_CONFIG_STRING_APN_NI ":  %s", apn[i].apn.c_str());
-    Logger::pgwc_app().info( "        " SMF_CONFIG_STRING_PDN_TYPE ":  %s", apn[i].pdn_type.toString().c_str());
+    Logger::smf_app().info( "    APN %d:", i);
+    Logger::smf_app().info( "        " SMF_CONFIG_STRING_APN_NI ":  %s", apn[i].apn.c_str());
+    Logger::smf_app().info( "        " SMF_CONFIG_STRING_PDN_TYPE ":  %s", apn[i].pdn_type.toString().c_str());
     if (apn[i].pool_id_iv4 >= 0) {
       std::string range_low(inet_ntoa (ue_pool_range_low[apn[i].pool_id_iv4]));
       std::string range_high(inet_ntoa (ue_pool_range_high[apn[i].pool_id_iv4]));
-      Logger::pgwc_app().info( "        " SMF_CONFIG_STRING_IPV4_POOL ":  %d ( %s - %s)",
+      Logger::smf_app().info( "        " SMF_CONFIG_STRING_IPV4_POOL ":  %d ( %s - %s)",
                                apn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
     }
     if (apn[i].pool_id_iv6 >= 0) {
-      Logger::pgwc_app().info( "        " SMF_CONFIG_STRING_IPV6_POOL ":  %d", apn[i].pool_id_iv6);
+      Logger::smf_app().info( "        " SMF_CONFIG_STRING_IPV6_POOL ":  %d", apn[i].pool_id_iv6);
     }
   }
-  Logger::pgwc_app().info( "- PCEF support (in development)");
-  Logger::pgwc_app().info( "    APN AMBR UL ..........: %lu  (Kilo bits/s)", pcef.apn_ambr_ul);
-  Logger::pgwc_app().info( "    APN AMBR DL ..........: %lu  (Kilo bits/s)", pcef.apn_ambr_dl);
-  Logger::pgwc_app().info( "- Helpers:");
-  Logger::pgwc_app().info( "    Push PCO (DNS+MTU) ........: %s", force_push_pco == 0 ? "false" : "true");
+  Logger::smf_app().info( "- PCEF support (in development)");
+  Logger::smf_app().info( "    APN AMBR UL ..........: %lu  (Kilo bits/s)", pcef.apn_ambr_ul);
+  Logger::smf_app().info( "    APN AMBR DL ..........: %lu  (Kilo bits/s)", pcef.apn_ambr_dl);
+  Logger::smf_app().info( "- Helpers:");
+  Logger::smf_app().info( "    Push PCO (DNS+MTU) ........: %s", force_push_pco == 0 ? "false" : "true");
+
+  Logger::smf_app().info( "    AMF Address..........: %s", inet_ntoa (*((struct in_addr *)&amf_addr.ipv4_addr)));
+  Logger::smf_app().info( "    AMF Port  ..........: %lu  ", amf_addr.port);
+  Logger::smf_app().info( "    UDM ..........: %s", inet_ntoa (*((struct in_addr *)&udm_addr.ipv4_addr)));
+  Logger::smf_app().info( "    UDM Port  ..........: %lu  ", udm_addr.port);
+
 }
 
 //------------------------------------------------------------------------------
@@ -559,14 +599,14 @@ bool smf_config::is_dotted_apn_handled(const string& apn, const pdn_type_t& pdn_
 int smf_config::get_pfcp_node_id(pfcp::node_id_t& node_id)
 {
   node_id = {};
-  if (sx.addr4.s_addr) {
+  if (n4.addr4.s_addr) {
     node_id.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-    node_id.u1.ipv4_address = sx.addr4;
+    node_id.u1.ipv4_address = n4.addr4;
     return RETURNok;
   }
-  if (sx.addr6.s6_addr32[0] | sx.addr6.s6_addr32[1] | sx.addr6.s6_addr32[2] | sx.addr6.s6_addr32[3]) {
+  if (n4.addr6.s6_addr32[0] | n4.addr6.s6_addr32[1] | n4.addr6.s6_addr32[2] | n4.addr6.s6_addr32[3]) {
     node_id.node_id_type = pfcp::NODE_ID_TYPE_IPV6_ADDRESS;
-    node_id.u1.ipv6_address = sx.addr6;
+    node_id.u1.ipv6_address = n4.addr6;
     return RETURNok;
   }
   return RETURNerror;
@@ -576,14 +616,14 @@ int smf_config::get_pfcp_fseid(pfcp::fseid_t& fseid)
 {
   int rc = RETURNerror;
   fseid = {};
-  if (sx.addr4.s_addr) {
+  if (n4.addr4.s_addr) {
     fseid.v4 = 1;
-    fseid.ipv4_address = sx.addr4;
+    fseid.ipv4_address = n4.addr4;
     rc = RETURNok;
   }
-  if (sx.addr6.s6_addr32[0] | sx.addr6.s6_addr32[1] | sx.addr6.s6_addr32[2] | sx.addr6.s6_addr32[3]) {
+  if (n4.addr6.s6_addr32[0] | n4.addr6.s6_addr32[1] | n4.addr6.s6_addr32[2] | n4.addr6.s6_addr32[3]) {
     fseid.v6 = 1;
-    fseid.ipv6_address = sx.addr6;
+    fseid.ipv6_address = n4.addr6;
     rc = RETURNok;
   }
   return rc;
@@ -599,9 +639,9 @@ smf_config::~smf_config()
 //------------------------------------------------------------------------------
 bool smf_config::is_dotted_dnn_handled(const std::string& dnn, const pdu_session_type_t& pdn_session_type)
 {
-  Logger::pgwc_app().debug( "requested dnn: %s", dnn.c_str());
+  Logger::smf_app().debug( "requested dnn: %s", dnn.c_str());
   for (int i = 0; i < smf_cfg.num_apn; i++) {
-	  Logger::pgwc_app().debug( "apn_label: %s", smf_cfg.apn[i].apn_label.c_str());
+	  Logger::smf_app().debug( "apn_label: %s", smf_cfg.apn[i].apn_label.c_str());
     //if (0 == dnn.compare(smf_cfg.apn[i].apn_label)) {
 	  if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
       if (pdn_session_type.pdu_session_type == smf_cfg.apn[i].pdn_type.pdn_type) {

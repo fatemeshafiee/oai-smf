@@ -33,22 +33,22 @@
 #include "PduSessionCreateError.h"
 #include "PduSessionCreatedData.h"
 #include "ProblemDetails.h"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace api {
 
-using namespace oai::smf::model;
+using namespace oai::smf_server::model;
 
-class PDUSessionsCollectionApiImpl : public oai::smf::api::PDUSessionsCollectionApi {
+class PDUSessionsCollectionApiImpl : public oai::smf_server::api::PDUSessionsCollectionApi {
 public:
-    PDUSessionsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router>, pgwc::pgw_app *smf_app_inst);
+    PDUSessionsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst);
     ~PDUSessionsCollectionApiImpl() {}
 
     void post_pdu_sessions(const PduSessionCreateData &pduSessionCreateData, Pistache::Http::ResponseWriter &response);
 private:
-    pgwc::pgw_app *m_smf_app;
+    smf::smf_app *m_smf_app;
 };
 
 }

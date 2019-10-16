@@ -14,7 +14,7 @@
 #include "NotificationCause.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 NotificationCause::NotificationCause()

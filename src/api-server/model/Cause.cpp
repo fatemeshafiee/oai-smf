@@ -14,7 +14,7 @@
 #include "Cause.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 Cause::Cause()

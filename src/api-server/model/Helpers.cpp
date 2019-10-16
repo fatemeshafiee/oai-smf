@@ -11,9 +11,8 @@
 */
 #include "Helpers.h"
 
-namespace org {
-namespace openapitools {
-namespace server {
+namespace oai {
+namespace smf_server {
 namespace helpers {
 
 
@@ -92,7 +91,6 @@ bool fromStringValue(const std::string &inStr, double &value){
     return true;
 }
 
-}
 }
 }
 }

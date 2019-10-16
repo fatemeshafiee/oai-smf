@@ -58,7 +58,7 @@ public:
   itti_n11_create_sm_context_request(const itti_n11_create_sm_context_request& i, const task_id_t orig, const task_id_t dest) :
 	  itti_n11_msg(i, orig, dest), req(i.req), http_response(i.http_response) {}
   const char* get_msg_name() {return "N11_SESSION_CREATE_SM_CONTEXT_REQUEST";};
-  pgwc::pdu_session_create_sm_context_request req;
+  smf::pdu_session_create_sm_context_request req;
   Pistache::Http::ResponseWriter& http_response;
 
 
@@ -74,7 +74,7 @@ public:
 	itti_n11_create_sm_context_response(const itti_n11_create_sm_context_response& i, const task_id_t orig, const task_id_t dest) :
 	  itti_n11_msg(i, orig, dest), res(i.res), http_response(i.http_response.clone()) {}
   const char* get_msg_name() {return "N11_SESSION_CREATE_SM_CONTEXT_RESPONSE";};
-  pgwc::pdu_session_create_sm_context_response res;
+  smf::pdu_session_create_sm_context_response res;
   Pistache::Http::ResponseWriter http_response;
 
 };

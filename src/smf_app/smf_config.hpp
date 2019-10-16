@@ -46,15 +46,16 @@
 #include <vector>
 
 
-#define SMF_CONFIG_STRING_SMF_CONFIG                            "P-GW"
+#define SMF_CONFIG_STRING_SMF_CONFIG                            "SMF"
 #define SMF_CONFIG_STRING_PID_DIRECTORY                         "PID_DIRECTORY"
 #define SMF_CONFIG_STRING_INSTANCE                              "INSTANCE"
 #define SMF_CONFIG_STRING_INTERFACES                            "INTERFACES"
 #define SMF_CONFIG_STRING_INTERFACE_NAME                        "INTERFACE_NAME"
 #define SMF_CONFIG_STRING_IPV4_ADDRESS                          "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_PORT                                  "PORT"
-#define SMF_CONFIG_STRING_INTERFACE_S5_S8_CP                    "S5_S8_CP"
 #define SMF_CONFIG_STRING_INTERFACE_SX                          "SX"
+#define SMF_CONFIG_STRING_INTERFACE_N4                          "N4"
+#define SMF_CONFIG_STRING_INTERFACE_N11                          "N11"
 
 #define SMF_CONFIG_STRING_SMF_MASQUERADE_SGI                    "PGW_MASQUERADE_SGI"
 #define SMF_CONFIG_STRING_UE_TCP_MSS_CLAMPING                   "UE_TCP_MSS_CLAMPING"
@@ -124,9 +125,16 @@
 #define SMF_CONFIG_STRING_ASYNC_CMD_SCHED_PARAMS                "ASYNC_CMD_SCHED_PARAMS"
 
 
+#define SMF_CONFIG_STRING_AMF                                  "AMF"
+#define SMF_CONFIG_STRING_AMF_IPV4_ADDRESS                     "IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_AMF_PORT                             "PORT"
+#define SMF_CONFIG_STRING_UDM                                  "UDM"
+#define SMF_CONFIG_STRING_UDM_IPV4_ADDRESS                     "IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_UDM_PORT                             "PORT"
+
 #define PGW_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
-namespace pgwc {
+namespace smf {
 
 typedef struct interface_cfg_s {
   std::string     if_name;
@@ -158,8 +166,9 @@ public:
   std::string       pid_dir;
   unsigned int      instance = 0;
 
-  interface_cfg_t s5s8_cp;
   interface_cfg_t sx;
+  interface_cfg_t n4;
+  interface_cfg_t n11;
   itti_cfg_t      itti;
 
   struct in_addr default_dnsv4;
@@ -203,8 +212,17 @@ public:
     unsigned int  apn_ambr_dl;
   } pcef;
 
+  struct {
+	  struct in_addr ipv4_addr;
+	  unsigned int port;
+  } amf_addr;
 
-  smf_config() : m_rw_lock(), pcef(), num_apn(0), pid_dir(), instance(0), s5s8_cp(), sx(), itti() {
+  struct {
+	  struct in_addr ipv4_addr;
+	  unsigned int port;
+  } udm_addr;
+
+  smf_config() : m_rw_lock(), pcef(), num_apn(0), pid_dir(), instance(0), sx(), n4(), n11(), itti() {
     for (int i = 0; i < PGW_NUM_APN_MAX; i++) {
       apn[i] = {};
     }
@@ -233,11 +251,20 @@ public:
     itti.pgw_app_sched_params.sched_priority = 84;
     itti.async_cmd_sched_params.sched_priority = 84;
     
-    s5s8_cp.thread_rd_sched_params.sched_priority = 90;
-    s5s8_cp.port = gtpv2c::default_port;
-
     sx.thread_rd_sched_params.sched_priority = 90;
     sx.port = pfcp::default_port;
+
+    n4.thread_rd_sched_params.sched_priority = 90;
+    n4.port = pfcp::default_port;
+
+    n11.thread_rd_sched_params.sched_priority = 90;
+    n11.port = 8080;
+
+    amf_addr.ipv4_addr.s_addr = INADDR_ANY;
+    amf_addr.port = 8080;
+    amf_addr.ipv4_addr.s_addr = INADDR_ANY;
+    udm_addr.port = 8080;
+
   };
   ~smf_config();
   void lock() {m_rw_lock.lock();};

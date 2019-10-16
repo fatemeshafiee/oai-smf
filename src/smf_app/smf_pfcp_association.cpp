@@ -31,7 +31,7 @@
 #include "smf_procedure.hpp"
 #include "smf_n4.hpp"
 
-using namespace pgwc;
+using namespace smf;
 using namespace std;
 
 extern itti_mw    *itti_inst;
@@ -177,7 +177,7 @@ void pfcp_associations::initiate_heartbeat_request(timer_id_t timer_id, uint64_t
   if ( pit == associations.end() )
     return;
   else {
-    Logger::pgwc_sx().info( "PFCP HEARTBEAT PROCEDURE hash %u starting", hash_node_id);
+    Logger::smf_n4().info( "PFCP HEARTBEAT PROCEDURE hash %u starting", hash_node_id);
     pit->second->num_retries_timer_heartbeat = 0;
     smf_n4_inst->send_heartbeat_request(pit->second);
   }
@@ -191,11 +191,11 @@ void pfcp_associations::timeout_heartbeat_request(timer_id_t timer_id, uint64_t 
     return;
   else {
     if (pit->second->num_retries_timer_heartbeat < PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES) {
-      Logger::pgwc_sx().info( "PFCP HEARTBEAT PROCEDURE hash %u TIMED OUT (retrie %d)", hash_node_id, pit->second->num_retries_timer_heartbeat);
+      Logger::smf_n4().info( "PFCP HEARTBEAT PROCEDURE hash %u TIMED OUT (retrie %d)", hash_node_id, pit->second->num_retries_timer_heartbeat);
       pit->second->num_retries_timer_heartbeat++;
       smf_n4_inst->send_heartbeat_request(pit->second);
     } else {
-      Logger::pgwc_sx().warn( "PFCP HEARTBEAT PROCEDURE FAILED after %d retries! TODO", PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES);
+      Logger::smf_n4().warn( "PFCP HEARTBEAT PROCEDURE FAILED after %d retries! TODO", PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES);
     }
   }
 }

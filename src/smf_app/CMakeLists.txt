@@ -24,15 +24,15 @@ include_directories(${SRC_TOP_DIR}/common/utils)
 include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/gtpv2c)
 include_directories(${SRC_TOP_DIR}/pfcp)
-include_directories(${SRC_TOP_DIR}/pgwc)
+include_directories(${SRC_TOP_DIR}/smf)
 include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
 
-add_library (PGWC STATIC
-  pgw_app.cpp
+add_library (SMF STATIC
+  smf_app.cpp
   smf_config.cpp
-  pgw_context.cpp
+  smf_context.cpp
   smf_pfcp_association.cpp
   smf_pco.cpp
   smf_procedure.cpp
@@ -40,6 +40,5 @@ add_library (PGWC STATIC
   smf_n10.cpp
   smf_n11.cpp
   smf_msg.cpp
-  #pgw_pcef_emulation.cpp
 )
 

@@ -14,7 +14,7 @@
 #include "ProblemDetails.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 ProblemDetails::ProblemDetails()

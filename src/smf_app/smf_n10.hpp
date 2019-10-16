@@ -19,41 +19,39 @@
  *      contact@openairinterface.org
  */
 
-/*! \file smf_n11.hpp
+/*! \file smf_n10.hpp
    \author  
    \date 2019
    \email: 
- */
+*/
 
-#ifndef FILE_SMF_N11_HPP_SEEN
-#define FILE_SMF_N11_HPP_SEEN
+#ifndef FILE_SMF_N10_HPP_SEEN
+#define FILE_SMF_N10_HPP_SEEN
 
 #include "smf.h"
 #include "3gpp_29.503.h"
-#include "pgw_context.hpp"
+#include "smf_context.hpp"
 #include <thread>
 #include <map>
 
-namespace pgwc {
+namespace smf {
 
-class smf_n11 {
+class smf_n10 {
 private:
-	std::thread::id thread_id;
-	std::thread thread;
+  std::thread::id                      thread_id;
+  std::thread                          thread;
 
-	void handle_receive_sm_data_notification();
-
-	std::string amf_addr;
-	int amf_port;
+  void handle_receive_sm_data_notification();
 
 public:
-	smf_n11();
-	smf_n11(smf_n11 const&)    = delete;
-	void operator=(smf_n11 const&)     = delete;
-	void send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
+  smf_n10();
+  smf_n10(smf_n10 const&)    = delete;
+  void operator=(smf_n10 const&)     = delete;
+  bool get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, std::shared_ptr<session_management_subscription> subscription);
+  void subscribe_sm_data();
 
 };
 
 
 }
-#endif /* FILE_SMF_N11_HPP_SEEN */
+#endif /* FILE_SMF_N10_HPP_SEEN */

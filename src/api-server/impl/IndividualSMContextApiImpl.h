@@ -37,24 +37,24 @@
 #include "SmContextUpdateError.h"
 #include "SmContextUpdatedData.h"
 #include <string>
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace api {
 
-using namespace oai::smf::model;
+using namespace oai::smf_server::model;
 
-class IndividualSMContextApiImpl : public oai::smf::api::IndividualSMContextApi {
+class IndividualSMContextApiImpl : public oai::smf_server::api::IndividualSMContextApi {
 public:
-    IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router>, pgwc::pgw_app *smf_app_inst);
+    IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst);
     ~IndividualSMContextApiImpl() {}
 
     void release_sm_context(const std::string &smContextRef, const SmContextReleaseData &smContextReleaseData, Pistache::Http::ResponseWriter &response);
     void retrieve_sm_context(const std::string &smContextRef, const SmContextRetrieveData &smContextRetrieveData, Pistache::Http::ResponseWriter &response);
     void update_sm_context(const std::string &smContextRef, const SmContextUpdateData &smContextUpdateData, Pistache::Http::ResponseWriter &response);
 private:
-    pgwc::pgw_app *m_smf_app;
+    smf::smf_app *m_smf_app;
 };
 
 }

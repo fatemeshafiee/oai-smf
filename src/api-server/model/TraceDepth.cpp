@@ -14,7 +14,7 @@
 #include "TraceDepth.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 TraceDepth::TraceDepth()

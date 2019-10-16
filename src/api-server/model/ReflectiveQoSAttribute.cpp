@@ -14,7 +14,7 @@
 #include "ReflectiveQoSAttribute.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 ReflectiveQoSAttribute::ReflectiveQoSAttribute()

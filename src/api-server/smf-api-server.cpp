@@ -52,7 +52,7 @@ void setUpUnixSignals(std::vector<int> quitSignals) {
 }
 #endif
 
-using namespace oai::smf::api;
+using namespace oai::smf_server::api;
 
 void SMFApiServer::init(size_t thr) {
 	auto opts = Pistache::Http::Endpoint::options()

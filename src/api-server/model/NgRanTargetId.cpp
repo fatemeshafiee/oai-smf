@@ -14,7 +14,7 @@
 #include "NgRanTargetId.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 NgRanTargetId::NgRanTargetId()

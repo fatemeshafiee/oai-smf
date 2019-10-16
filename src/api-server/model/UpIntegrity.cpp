@@ -14,7 +14,7 @@
 #include "UpIntegrity.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 UpIntegrity::UpIntegrity()

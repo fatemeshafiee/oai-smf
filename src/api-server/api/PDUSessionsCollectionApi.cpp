@@ -14,11 +14,11 @@
 #include "Helpers.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace api {
 
-using namespace org::openapitools::server::helpers;
-using namespace oai::smf::model;
+using namespace oai::smf_server::helpers;
+using namespace oai::smf_server::model;
 
 PDUSessionsCollectionApi::PDUSessionsCollectionApi(std::shared_ptr<Pistache::Rest::Router> rtr) { 
     router = rtr;

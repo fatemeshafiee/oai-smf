@@ -13,12 +13,12 @@
 #include "IndividualPDUSessionHSMFApiImpl.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace api {
 
-using namespace oai::smf::model;
+using namespace oai::smf_server::model;
 
-IndividualPDUSessionHSMFApiImpl::IndividualPDUSessionHSMFApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr, pgwc::pgw_app *smf_app_inst)
+IndividualPDUSessionHSMFApiImpl::IndividualPDUSessionHSMFApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr, smf::smf_app *smf_app_inst)
     : IndividualPDUSessionHSMFApi(rtr), m_smf_app(smf_app_inst)
     { }
 

@@ -28,22 +28,22 @@
 #include "itti_msg_n4_restore.hpp"
 #include "logger.hpp"
 #include "msg_gtpv2c.hpp"
-#include "pgw_app.hpp"
+#include "smf_app.hpp"
 #include "smf_config.hpp"
 #include "smf_pfcp_association.hpp"
 #include "smf_procedure.hpp"
-#include "pgw_context.hpp"
+#include "smf_context.hpp"
 #include "SmContextCreatedData.h"
 
 #include <algorithm>    // std::search
 
 using namespace pfcp;
-using namespace pgwc;
+using namespace smf;
 using namespace std;
 
 extern itti_mw *itti_inst;
-extern pgwc::pgw_app *pgw_app_inst;
-extern pgwc::smf_config smf_cfg;
+extern smf::smf_app *smf_app_inst;
+extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
 int sx_session_restore_procedure::run()
@@ -52,14 +52,14 @@ int sx_session_restore_procedure::run()
 		itti_n4_restore *itti_msg = nullptr;
 		for (std::set<pfcp::fseid_t>::iterator it=pending_sessions.begin(); it!=pending_sessions.end();++it) {
 			if (!itti_msg) {
-				itti_msg = new itti_n4_restore(TASK_SMF_N4, TASK_PGWC_APP);
+				itti_msg = new itti_n4_restore(TASK_SMF_N4, TASK_SMF_APP);
 			}
 			itti_msg->sessions.insert(*it);
 			if (itti_msg->sessions.size() >= 64) {
 				std::shared_ptr<itti_n4_restore> i = std::shared_ptr<itti_n4_restore>(itti_msg);
 				int ret = itti_inst->send_msg(i);
 				if (RETURNok != ret) {
-					Logger::pgwc_sx().error( "Could not send ITTI message %s to task TASK_PGWC_APP", i->get_msg_name());
+					Logger::smf_n4().error( "Could not send ITTI message %s to task TASK_SMF_APP", i->get_msg_name());
 				}
 				itti_msg = nullptr;
 			}
@@ -68,7 +68,7 @@ int sx_session_restore_procedure::run()
 			std::shared_ptr<itti_n4_restore> i = std::shared_ptr<itti_n4_restore>(itti_msg);
 			int ret = itti_inst->send_msg(i);
 			if (RETURNok != ret) {
-				Logger::pgwc_sx().error( "Could not send ITTI message %s to task TASK_PGWC_APP", i->get_msg_name());
+				Logger::smf_n4().error( "Could not send ITTI message %s to task TASK_SMF_APP", i->get_msg_name());
 				return RETURNerror;
 			}
 		}
@@ -78,7 +78,7 @@ int sx_session_restore_procedure::run()
 
 
 //------------------------------------------------------------------------------
-int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_context_request> sm_context_req, std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp, std::shared_ptr<pgwc::pgw_context> pc)
+int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_context_request> sm_context_req, std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp, std::shared_ptr<smf::smf_context> pc)
 {
 
 	// TODO check if compatible with ongoing procedures if any
@@ -94,9 +94,9 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 	n11_trigger = sm_context_req;
 	n11_triggered_pending = sm_context_resp;
 	//ppc->generate_seid();
-	uint64_t seid = pgw_app_inst->generate_seid();
+	uint64_t seid = smf_app_inst->generate_seid();
 	ppc->set_seid(seid);
-	itti_n4_session_establishment_request *sx_ser = new itti_n4_session_establishment_request(TASK_PGWC_APP, TASK_SMF_N4);
+	itti_n4_session_establishment_request *sx_ser = new itti_n4_session_establishment_request(TASK_SMF_APP, TASK_SMF_N4);
 	sx_ser->seid = 0;
 	sx_ser->trxn_id = this->trxn_id;
 	sx_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
@@ -205,13 +205,13 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 
 
 	// for finding procedure when receiving response
-	pgw_app_inst->set_seid_2_pgw_context(cp_fseid.seid, pc);
+	smf_app_inst->set_seid_2_smf_context(cp_fseid.seid, pc);
 
 
-	Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_SMF_N4", sx_ser->get_msg_name());
+	Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N4", sx_ser->get_msg_name());
 	int ret = itti_inst->send_msg(sx_triggered);
 	if (RETURNok != ret) {
-		Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_SMF_N4", sx_ser->get_msg_name());
+		Logger::smf_app().error( "Could not send ITTI message %s to task TASK_SMF_N4", sx_ser->get_msg_name());
 		return RETURNerror;
 	}
 
@@ -221,7 +221,7 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 //------------------------------------------------------------------------------
 void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_establishment_response& resp)
 {
-	Logger::pgwc_app().info( "session_create_sm_context_procedure handle itti_n4_session_establishment_response: pdu-session-id %d", n11_trigger.get()->req.get_pdu_session_id());
+	Logger::smf_app().info( "session_create_sm_context_procedure handle itti_n4_session_establishment_response: pdu-session-id %d", n11_trigger.get()->req.get_pdu_session_id());
 
 	pfcp::cause_t cause = {};
 	resp.pfcp_ies.get(cause);
@@ -249,10 +249,10 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 				// uncomment if SPGW-C allocate up fteid
 				// ppc->add_eps_bearer(b);
 			} else {
-				Logger::pgwc_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
+				Logger::smf_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
 			}
 		} else {
-			Logger::pgwc_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
+			Logger::smf_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
 		}
 	}
 
@@ -288,11 +288,11 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 	//P-CSCF address(es), [Always-on PDU Session])))
 
     //send ITTI message to N11 interface to trigger N1N2MessageTransfer towards AMFs
-	Logger::pgwc_app().info( "Sending ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());
+	Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());
 
 	int ret = itti_inst->send_msg(n11_triggered_pending);
 	if (RETURNok != ret) {
-		Logger::pgwc_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  n11_triggered_pending->get_msg_name());
+		Logger::smf_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  n11_triggered_pending->get_msg_name());
 	}
 
 }

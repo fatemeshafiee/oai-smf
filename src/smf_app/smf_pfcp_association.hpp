@@ -36,7 +36,7 @@
 #include <mutex>
 #include <vector>
 
-namespace pgwc {
+namespace smf {
 
 #define PFCP_ASSOCIATION_HEARTBEAT_INTERVAL_SEC 10
 #define PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES 2

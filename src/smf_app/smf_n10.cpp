@@ -31,6 +31,7 @@
 #include "itti.hpp"
 #include "logger.hpp"
 #include "smf_n10.hpp"
+#include "smf_config.hpp"
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
@@ -40,12 +41,13 @@
 #define UDM_NUMBER_RETRIES 3
 #define HTTP_STATUS_OK 200
 
-using namespace pgwc;
+using namespace smf;
 using namespace std;
 using json = nlohmann::json;
 
 extern itti_mw *itti_inst;
 extern smf_n10   *smf_n10_inst;
+extern smf_config smf_cfg;
 void smf_n10_task (void*);
 
 /*
@@ -101,9 +103,6 @@ void smf_n10_task (void *args_p)
 //------------------------------------------------------------------------------
 smf_n10::smf_n10 ()
 {
-  udm_addr = "172.16.1.105";//TODO: hardcoded for the moment (should get from configuration file)
-  udm_port = 8181;//TODO: hardcoded for the moment (should get from configuration file)
-
   Logger::smf_n10().startup("Starting...");
   if (itti_inst->create_task(TASK_SMF_N10, smf_n10_task, nullptr) ) {
     Logger::smf_n10().error( "Cannot create task TASK_SMF_N10" );
@@ -131,7 +130,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 	headers = curl_slist_append(headers, "charsets: utf-8");
 
 	CURL *curl = curl_easy_init();
-	std::string url = udm_addr + ":" + std::to_string(udm_port) + "/nudm-sdm/v2/" + std::to_string(supi) +"/sm-data";
+	std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.udm_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.udm_addr.port) + "/nudm-sdm/v2/" + std::to_string(supi) +"/sm-data";
 	Logger::smf_n10().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
 
 	if(curl) {

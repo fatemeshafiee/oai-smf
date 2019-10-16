@@ -14,7 +14,7 @@
 #include "EpsPdnCnxInfo.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 EpsPdnCnxInfo::EpsPdnCnxInfo()

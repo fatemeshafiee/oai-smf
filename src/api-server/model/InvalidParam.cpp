@@ -14,7 +14,7 @@
 #include "InvalidParam.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 InvalidParam::InvalidParam()

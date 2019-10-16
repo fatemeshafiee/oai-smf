@@ -14,7 +14,7 @@
 #include "SmContextUpdatedData.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 SmContextUpdatedData::SmContextUpdatedData()

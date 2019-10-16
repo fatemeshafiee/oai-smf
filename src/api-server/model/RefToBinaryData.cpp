@@ -14,7 +14,7 @@
 #include "RefToBinaryData.h"
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace model {
 
 RefToBinaryData::RefToBinaryData()

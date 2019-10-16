@@ -16,19 +16,18 @@
 #include "itti_msg_n11.hpp"
 
 extern "C" {
-#include <ctype.h>
 #include "nas_message.h"
 #include "mmData.h"
-#include "nas_sm_encode_to_json.h"
+//#include "NasMain.h"
 }
 
 namespace oai {
-namespace smf {
+namespace smf_server {
 namespace api {
 
-using namespace oai::smf::model;
+using namespace oai::smf_server::model;
 
-SMContextsCollectionApiImpl::SMContextsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr, pgwc::pgw_app *smf_app_inst)
+SMContextsCollectionApiImpl::SMContextsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr, smf::smf_app *smf_app_inst)
 : SMContextsCollectionApi(rtr), m_smf_app(smf_app_inst)
 
 { }
@@ -37,7 +36,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
 	Logger::smf_api_server().info("post_sm_contexts...");
 
-	//decode NAS message and assign the necessary informations to pgwc::pdu_session_create_sm_context_request
+	//decode NAS message and assign the necessary informations to smf::pdu_session_create_sm_context_request
 	//and pass this message to SMF to handle this message
 
 	nas_message_t	decoded_nas_msg;
@@ -45,15 +44,19 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
 	SmContextCreateData smContextCreateData = smContextMessage.getJsonData();
 	std::string n1_sm_msg = smContextMessage.getBinaryDataN1SmMessage();
-	
-    //FOR DEBUG ONLY!!, GENERATE A PDU SESSION ESTABLISHMENT MESSAGE HERE!!
-	//sm_encode_establishment_request();
+        //FOR DEBUG ONLY!!, GENERATE A PDU SESSION ESTABLISHMENT MESSAGE HERE!!
 	//m_smf_app->create_n1_sm_container(PDU_SESSION_ESTABLISHMENT_REQUEST, n1_sm_msg);
 
 	Logger::smf_api_server().debug("smContextMessage, n1 sm msg %s",n1_sm_msg.c_str());
 
 	//Step1. Decode N1 SM container into decoded nas msg
 	int decoder_rc = m_smf_app->decode_nas_message_n1_sm_container(decoded_nas_msg, n1_sm_msg);
+
+	if (decoder_rc != RETURNok){
+	   //error, should send reply to AMF with error code!!
+
+
+	}
 
 	Logger::smf_api_server().debug("nas header  decode extended_protocol_discriminator %d, security_header_type:%d,sequence_number:%d,message_authentication_code:%d\n",
 			decoded_nas_msg.header.extended_protocol_discriminator,
@@ -62,7 +65,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 			decoded_nas_msg.header.message_authentication_code);
 
 	//Step 2. Create a pdu_session_create_sm_context_request message and store the necessary information
-	pgwc::pdu_session_create_sm_context_request sm_context_req_msg = {};
+	smf::pdu_session_create_sm_context_request sm_context_req_msg = {};
 
 	//supi
 	supi_t supi =  {.length = 0};
@@ -125,11 +128,13 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//Step 3. Handle the pdu_session_create_sm_context_request message in pwg_app
 	//m_smf_app->handle_amf_msg(sm_context_req_msg, response);
 
-    itti_n11_create_sm_context_request *itti_msg = new itti_n11_create_sm_context_request(TASK_SMF_N11, TASK_PGWC_APP, response);
+    //itti_n11_create_sm_context_request *itti_msg = new itti_n11_create_sm_context_request(TASK_SMF_N11, TASK_SMF_APP, response);
+    //itti_msg->req = sm_context_req_msg;
+   // std::shared_ptr<itti_n11_create_sm_context_request> i = std::shared_ptr<itti_n11_create_sm_context_request>(itti_msg);
+    std::shared_ptr<itti_n11_create_sm_context_request> itti_msg = std::make_shared<itti_n11_create_sm_context_request>(TASK_SMF_N11, TASK_SMF_APP, response);
     itti_msg->req = sm_context_req_msg;
-    std::shared_ptr<itti_n11_create_sm_context_request> i = std::shared_ptr<itti_n11_create_sm_context_request>(itti_msg);
 
-    m_smf_app->handle_amf_msg(i);
+    m_smf_app->handle_amf_msg(itti_msg);
 
 }
 
