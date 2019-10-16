@@ -362,7 +362,7 @@ add_executable(smf
   ${SRC_TOP_DIR}/oai_smf/options.cpp
   ${SRC_TOP_DIR}/itti/itti.cpp
   ${SRC_TOP_DIR}/itti/itti_msg.cpp
-  #  ${SRC_TOP_DIR}/oai_smf/nas_sm_encode_to_json.c
+#  ${SRC_TOP_DIR}/oai_smf/nas_sm_encode_to_json.c
   )
 
 IF(STATIC_LINKING)
