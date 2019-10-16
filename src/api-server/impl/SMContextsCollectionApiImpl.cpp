@@ -14,6 +14,7 @@
 #include "logger.hpp"
 #include "smf_msg.hpp"
 #include "itti_msg_n11.hpp"
+#include "3gpp_29.502.h"
 
 extern "C" {
 #include "nas_message.h"
@@ -44,19 +45,39 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
 	SmContextCreateData smContextCreateData = smContextMessage.getJsonData();
 	std::string n1_sm_msg = smContextMessage.getBinaryDataN1SmMessage();
-        //FOR DEBUG ONLY!!, GENERATE A PDU SESSION ESTABLISHMENT MESSAGE HERE!!
+    //FOR DEBUG ONLY!!, GENERATE A PDU SESSION ESTABLISHMENT MESSAGE HERE!!
 	//sm_encode_establishment_request();
-	//m_smf_app->create_n1_sm_container(PDU_SESSION_ESTABLISHMENT_REQUEST, n1_sm_msg);
-
+	m_smf_app->create_n1_sm_container(PDU_SESSION_ESTABLISHMENT_REQUEST, n1_sm_msg);
+	std::string n1_sm_msg_hex;
+	m_smf_app->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
 	Logger::smf_api_server().debug("smContextMessage, n1 sm msg %s",n1_sm_msg.c_str());
 
 	//Step1. Decode N1 SM container into decoded nas msg
-	int decoder_rc = m_smf_app->decode_nas_message_n1_sm_container(decoded_nas_msg, n1_sm_msg);
+	int decoder_rc = m_smf_app->decode_nas_message_n1_sm_container(decoded_nas_msg, n1_sm_msg_hex);
 
-	if (decoder_rc != RETURNok){
-	   //error, should send reply to AMF with error code!!
+	if (decoder_rc != RETURNok) {
+		//error, should send reply to AMF with error code!!
+		Logger::smf_api_server().warn("N1 SM container cannot be decoded correctly!\n");
+		SmContextCreateError smContextCreateError;
+		ProblemDetails problem_details;
+		RefToBinaryData binary_data;
+		std::string n1_container;
 
+		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
+		smContextCreateError.setError(problem_details);
 
+		//PDU Session Establishment Reject
+		//24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
+		m_smf_app->create_n1_sm_container(PDU_SESSION_ESTABLISHMENT_REJECT, n1_container, 95); //TODO: should define 5GSM cause in 24.501
+		binary_data.setContentId(n1_container);
+		smContextCreateError.setN1SmMsg(binary_data);
+		//Send response to AMF
+		nlohmann::json jsonData;
+		to_json(jsonData, smContextCreateError);
+		std::string resBody = jsonData.dump();
+		//httpResponse.headers().add<Pistache::Http::Header::Location>(url);
+		response.send(Pistache::Http::Code::Forbidden, resBody);
+		return;
 	}
 
 	Logger::smf_api_server().debug("nas header  decode extended_protocol_discriminator %d, security_header_type:%d,sequence_number:%d,message_authentication_code:%d\n",
@@ -108,7 +129,6 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
 	//Message type (Mandatory) (PDU SESSION ESTABLISHMENT REQUEST message identity)
 	sm_context_req_msg.set_message_type(decoded_nas_msg.plain.sm.header.message_type);
-	sm_context_req_msg.set_message_type (PDU_SESSION_ESTABLISHMENT_REQUEST); //Temporary - should be removed (get from NAS)
 
 	//Integrity protection maximum data rate (Mandatory)
 

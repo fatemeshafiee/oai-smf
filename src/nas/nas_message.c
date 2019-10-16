@@ -295,6 +295,7 @@ int nas_message_decode (
   }
   //return bytes;
   //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
+  return RETURNok;
 }
 
 

@@ -134,19 +134,23 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 	CURL *curl = curl_easy_init();
 	//hardcoded for the moment, should get from NRF/configuration file
 	std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v1/ue-contexts/" + std::to_string(supi64) +"/n1-n2-messages";
-	Logger::smf_n11().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
+	Logger::smf_n11().debug("[Send Communication_N1N2MessageTransfer to AMF] AMF's URL: %s ", url.c_str());
 
 	//N1 SM container
 	if (sm_context_res->res.get_cause() != REQUEST_ACCEPTED) { //PDU Session Establishment Reject
+		Logger::smf_n11().debug("[Send Communication_N1N2MessageTransfer to AMF] PDU Session Establishment Reject\n");
     	smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
 	} else { //PDU Session Establishment Accept
-		smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
-    	//smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_ACCPET, n1_message); //need cause?
+		Logger::smf_n11().debug("[Send Communication_N1N2MessageTransfer to AMF] PDU Session Establishment Accept \n");
+		smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_ACCPET, n1_message); //need cause?
 	}
 
+	std::string n1_msg_hex;
+	smf_app_inst->convert_string_2_hex(n1_message, n1_msg_hex);
+
 	jsonData["n1MessageContainer"]["n1MessageClass"] = "SM";
-	jsonData["n1MessageContainer"]["n1MessageContent"]["contentId"] = n1_message.c_str();
-	Logger::smf_n11().debug("n1MessageContent: %s\n ", n1_message.c_str());
+	jsonData["n1MessageContainer"]["n1MessageContent"]["contentId"] = n1_msg_hex;
+	Logger::smf_n11().debug("n1MessageContent: %s\n ", n1_msg_hex.c_str());
 
 	//TODO: fill the content of N1N2MessageTransferReqData
 	//jsonData["n2InfoContainer"]["n2InformationClass"] = "SM";

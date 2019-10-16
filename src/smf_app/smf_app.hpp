@@ -208,7 +208,15 @@ public:
      * @param [std::string&] n1_sm_msg N1 SM Container from AMF
      * @return status of the decode process
      */
-   uint8_t decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg);
+   int decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg);
+
+   /*
+     * Convert a string to hex representing this string
+     * @param [std::string&] input_str Input string
+     * @param [std::string&] output_str String represents string in hex format
+     * @return void
+     */
+   void convert_string_2_hex(std::string& input_str, std::string& output_str);
 
 };
 }
