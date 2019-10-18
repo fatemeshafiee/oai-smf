@@ -15,7 +15,7 @@ int encode_alwayson_pdu_session_indication ( AlwaysonPDUSessionIndication always
     
 
 	if(iei > 0){
-		bitStream |= (iei & 0xf0);
+		bitStream = iei & 0xf0;
 	}
 	
 	if(alwaysonpdusessionindication.apsi_indication)
@@ -33,12 +33,12 @@ int decode_alwayson_pdu_session_indication ( AlwaysonPDUSessionIndication * alwa
 	
 	DECODE_U8(buffer+decoded,bitStream,decoded);
 	
-	if(iei != bitStream&0xf0){
+	if(iei != (bitStream&0xf0)){
 	  return -1;
 	}
 	   
 	if(iei > 0){
-		bitStream = (bitStream & 0x01);
+		bitStream = bitStream & 0x01;
 	}
 
 	if(bitStream)

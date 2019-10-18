@@ -70,6 +70,8 @@ int decode_snssai ( SNSSAI * snssai, uint8_t iei, uint8_t * buffer, uint32_t len
     decoded++;
     CHECK_LENGTH_DECODER (len - decoded, ielen);
 
+	snssai->len = ielen;
+
 	DECODE_U8(buffer+decoded,bitStream,decoded);
 	snssai->sst = bitStream;
 

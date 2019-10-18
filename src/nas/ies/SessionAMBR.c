@@ -23,11 +23,15 @@ int encode_session_ambr ( SessionAMBR sessionambr, uint8_t iei, uint8_t * buffer
     encoded++;
 
 	ENCODE_U8(buffer+encoded,sessionambr.uint_for_session_ambr_for_downlink,encoded);
-	ENCODE_U8(buffer+encoded,(uint8_t)(sessionambr.session_ambr_for_downlink&0x00ff),encoded);
-	ENCODE_U8(buffer+encoded,(uint8_t)(sessionambr.session_ambr_for_downlink&0xff00),encoded);
+	*(buffer + encoded) = sessionambr.session_ambr_for_downlink/(1<<8);
+	encoded++;
+	*(buffer + encoded) = sessionambr.session_ambr_for_downlink%(1<<8);
+	encoded++;
 	ENCODE_U8(buffer+encoded,sessionambr.uint_for_session_ambr_for_uplink,encoded);
-	ENCODE_U8(buffer+encoded,(uint8_t)(sessionambr.session_ambr_for_uplink&0x00ff),encoded);
-	ENCODE_U8(buffer+encoded,(uint8_t)(sessionambr.session_ambr_for_uplink&0xff00),encoded);
+	*(buffer + encoded) = sessionambr.session_ambr_for_uplink/(1<<8);
+	encoded++;
+	*(buffer + encoded) = sessionambr.session_ambr_for_uplink%(1<<8);
+	encoded++;
 
     *lenPtr = encoded - 1 - ((iei > 0) ? 1 : 0);
 	
@@ -55,19 +59,19 @@ int decode_session_ambr ( SessionAMBR * sessionambr, uint8_t iei, uint8_t * buff
 	DECODE_U8(buffer+decoded,bit8Stream,decoded);
 	sessionambr->uint_for_session_ambr_for_downlink = bit8Stream;
 
-	DECODE_U8(buffer+decoded,bit8Stream,decoded);
-	bit16Stream = (uint16_t)bit8Stream & 0xff;
-	DECODE_U8(buffer+decoded,bit8Stream,decoded);
-	bit16Stream |= (uint16_t)(bit8Stream << 8);
+	bit16Stream = *(buffer + decoded);
+	decoded++;
+	bit16Stream = ( bit16Stream << 8)+*(buffer + decoded);
+	decoded++;
 	sessionambr->session_ambr_for_downlink = bit16Stream;
 
 	DECODE_U8(buffer+decoded,bit8Stream,decoded);
 	sessionambr->uint_for_session_ambr_for_uplink = bit8Stream;
 
-	DECODE_U8(buffer+decoded,bit8Stream,decoded);
-	bit16Stream = (uint16_t)bit8Stream & 0xff;
-	DECODE_U8(buffer+decoded,bit8Stream,decoded);
-	bit16Stream |= (uint16_t)(bit8Stream << 8);
+	bit16Stream = *(buffer + decoded);
+	decoded++;
+	bit16Stream = ( bit16Stream << 8)+*(buffer + decoded);
+	decoded++;
 	sessionambr->session_ambr_for_uplink = bit16Stream;
 
 	return decoded;

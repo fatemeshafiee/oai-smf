@@ -169,7 +169,7 @@ fivegsm_msg_encode (
   uint8_t * buffer,
   uint32_t len)
 {
-  printf("fivegsm_msg_encode , start ----------------------\n");
+  //printf("fivegsm_msg_encode , start ----------------------\n");
   //OAILOG_FUNC_IN (LOG_NAS);
   int                                     header_result = 0;
   int                                     encode_result = 0;

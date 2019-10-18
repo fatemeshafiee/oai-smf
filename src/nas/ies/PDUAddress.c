@@ -56,7 +56,7 @@ int decode_pdu_address ( PDUAddress * pduaddress, uint8_t iei, uint8_t * buffer,
 	DECODE_U8(buffer+decoded,bitStream,decoded);
 	pduaddress->pdu_session_type_value = bitStream&0x07;
 
-    if((decode_result = decode_bstring (pduaddress->pdu_address_information, ielen, buffer + decoded, len - decoded)) < 0)
+    if((decode_result = decode_bstring (&pduaddress->pdu_address_information, ielen-1, buffer + decoded, len - decoded)) < 0)
         return decode_result;
     else
         decoded += decode_result;

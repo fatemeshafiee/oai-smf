@@ -45,11 +45,11 @@ int decode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
     else
         decoded+=decoded_result;
 
-    /*if((decoded_result = decode_qos_rules (&pdu_session_establishment_accept->qosrules, 0, buffer+decoded,len-decoded))<0)
+    if((decoded_result = decode_qos_rules (&pdu_session_establishment_accept->qosrules, 0, buffer+decoded,len-decoded))<0)
         return decoded_result;
     else
         decoded+=decoded_result;
-*/
+
     if((decoded_result = decode_session_ambr (&pdu_session_establishment_accept->sessionambr, 0, buffer+decoded,len-decoded))<0)
         return decoded_result;
     else
@@ -134,7 +134,7 @@ int decode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
 					pdu_session_establishment_accept->presence |= PDU_SESSION_ESTABLISHMENT_ACCEPT_EAP_MESSAGE_PRESENCE;
 				}
 			break;
-			/*case PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_IEI:
+			case PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_IEI:
 				if((decoded_result = decode_qos_flow_descriptions (&pdu_session_establishment_accept->qosflowdescriptions, PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_IEI, buffer+decoded,len-decoded))<0)
 					return decoded_result;
 				else
@@ -142,7 +142,7 @@ int decode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
 					decoded+=decoded_result;
 					pdu_session_establishment_accept->presence |= PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_PRESENCE;
 				}
-			break;*/
+			break;
 			case PDU_SESSION_ESTABLISHMENT_ACCEPT_E_P_C_O_IEI:
 				if((decoded_result = decode_extended_protocol_configuration_options (&pdu_session_establishment_accept->extendedprotocolconfigurationoptions, PDU_SESSION_ESTABLISHMENT_ACCEPT_E_P_C_O_IEI, buffer+decoded,len-decoded))<0)
 					return decoded_result;
@@ -209,11 +209,11 @@ int encode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
     else
         encoded+=encoded_result;
 
-   /* if((encoded_result = encode_qos_rules (pdu_session_establishment_accept->qosrules, 0, buffer+encoded,len-encoded))<0)
+    if((encoded_result = encode_qos_rules (pdu_session_establishment_accept->qosrules, 0, buffer+encoded,len-encoded))<0)
         return encoded_result;
     else
         encoded+=encoded_result;
-*/
+
     if((encoded_result = encode_session_ambr (pdu_session_establishment_accept->sessionambr, 0, buffer+encoded,len-encoded))<0)
         return encoded_result;
     else
@@ -275,13 +275,13 @@ int encode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
 	        encoded+=encoded_result;
 	}
 
-	/*if((pdu_session_establishment_accept->presence & PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_PRESENCE) == PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_PRESENCE)
+	if((pdu_session_establishment_accept->presence & PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_PRESENCE) == PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_PRESENCE)
     {
 	    if((encoded_result = encode_qos_flow_descriptions (pdu_session_establishment_accept->qosflowdescriptions, PDU_SESSION_ESTABLISHMENT_ACCEPT_QOS_FLOW_DESCRIPTIONS_IEI, buffer+encoded,len-encoded))<0)
 	        return encoded_result;
 	    else
 	        encoded+=encoded_result;
-	}*/
+	}
 
 	if((pdu_session_establishment_accept->presence & PDU_SESSION_ESTABLISHMENT_ACCEPT_E_P_C_O_PRESENCE) == PDU_SESSION_ESTABLISHMENT_ACCEPT_E_P_C_O_PRESENCE)
     {

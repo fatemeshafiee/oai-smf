@@ -47,7 +47,8 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	std::string n1_sm_msg = smContextMessage.getBinaryDataN1SmMessage();
     //FOR DEBUG ONLY!!, GENERATE A PDU SESSION ESTABLISHMENT MESSAGE HERE!!
 	//sm_encode_establishment_request();
-	m_smf_app->create_n1_sm_container(PDU_SESSION_ESTABLISHMENT_REQUEST, n1_sm_msg);
+	//sm_encode_all();//Generate all required HEX files to "oai-cn5g-smf/build/smf/build/sm_encode_file/  *.txt"
+	m_smf_app->create_n1_sm_container(PDU_SESSION_ESTABLISHMENT_ACCPET, n1_sm_msg);
 	std::string n1_sm_msg_hex;
 	m_smf_app->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
 	Logger::smf_api_server().debug("smContextMessage, n1 sm msg %s",n1_sm_msg.c_str());
