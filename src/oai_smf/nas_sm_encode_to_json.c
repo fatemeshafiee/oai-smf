@@ -432,7 +432,7 @@ int sm_encode_establishment_accept(void)
 	size += MESSAGE_TYPE_MAXIMUM_LENGTH;
 
 	//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
-	printf("nas_msg.security_protected.plain.sm = %d\n",sizeof(nas_msg.security_protected.plain.sm));
+	
 	nas_msg.plain.sm = *sm_msg;
 
 	//complete sm msg content
@@ -1422,7 +1422,6 @@ int sm_encode_modification_request(void)
 	size += MESSAGE_TYPE_MAXIMUM_LENGTH;
 
 	//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
-	printf("nas_msg.security_protected.plain.sm = %d\n",sizeof(nas_msg.security_protected.plain.sm));
 	nas_msg.plain.sm = *sm_msg;
 
 	//complete sm msg content
@@ -1927,7 +1926,6 @@ int sm_encode_modification_command(void)
 	size += MESSAGE_TYPE_MAXIMUM_LENGTH;
 
 	//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
-	printf("nas_msg.security_protected.plain.sm = %d\n",sizeof(nas_msg.security_protected.plain.sm));
 	nas_msg.plain.sm = *sm_msg;
 
 	//complete sm msg content
