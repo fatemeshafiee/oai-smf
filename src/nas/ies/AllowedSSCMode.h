@@ -1,3 +1,6 @@
+#ifndef _ALLOWEDSSCMODE_H_
+#define _ALLOWEDSSCMODE_H_
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "bstrlib.h"
@@ -23,3 +26,4 @@ typedef struct{
 int encode_allowed_ssc_mode ( AllowedSSCMode allowedsscmode, uint8_t iei, uint8_t * buffer, uint32_t len  ) ;
 int decode_allowed_ssc_mode ( AllowedSSCMode * allowedsscmode, uint8_t iei, uint8_t * buffer, uint32_t len  ) ;
 
+#endif
