@@ -52,14 +52,11 @@ typedef struct ssc_modes_s {
 	std::vector<ssc_mode_t> allowed_ssc_modes;
 } ssc_modes_t;
 
-
-
 typedef struct dnn_configuration_s {
 	pdu_session_types_t pdu_session_types;
 	ssc_modes_t ssc_modes;
 	session_ambr_t session_ambr;
-	//5gQoSProfile (subscribedDefaultQoS)
-	//5qi
+	subscribed_default_qos_t _5g_qos_profile;
 	//staticIpAddresses
 } dnn_configuration_t;
 

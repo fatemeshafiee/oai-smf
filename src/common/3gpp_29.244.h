@@ -1312,6 +1312,11 @@ namespace pfcp {
   typedef struct qfi_s {
     uint8_t  spare:2;
     uint8_t  qfi:6;
+    qfi_s() : qfi(0), spare(0){}
+    qfi_s(const uint8_t& q) : qfi(q), spare(0) {}
+    qfi_s(const struct qfi_s& q) : qfi(q.qfi), spare(q.spare) {}
+    inline bool operator==(const struct qfi_s& rhs) const { return ((qfi == rhs.qfi) && (spare == rhs.spare)); }
+    inline bool operator!=(const struct qfi_s& rhs) const { return !((qfi == rhs.qfi) &&  (spare == rhs.spare)); }
   } qfi_t;
 
   //-------------------------------------

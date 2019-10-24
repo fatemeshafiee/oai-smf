@@ -31,16 +31,29 @@
 #include "smf.h"
 #include "pistache/http.h"
 #include "3gpp_29.274.h"
+#include "3gpp_29.244.h"
 #include "3gpp_24.007.h"
 #include "3gpp_24.501.h"
 
 namespace smf {
 
-class pdu_session_create_sm_context_request {
-
+class qos_flow_context_created {
 public:
-	//pdu_session_create_sm_context_request(): nas_msg(), m_Supi(), m_UnauthenticatedSupi(true), m_PduSessionId(), m_Dnn(), m_SNssai() {}
-	pdu_session_create_sm_context_request(): m_supi(), m_unauthenticated_supi(true), m_pdu_session_id(), m_dnn(), m_snssai() {}
+	void set_cause(const uint8_t cause);
+	void set_qfi(const pfcp::qfi_t& q);
+	void set_ul_fteid(const fteid_t& teid);
+
+private:
+	uint8_t  cause_value;
+	pfcp::qfi_t qfi;
+	fteid_t       ul_fteid;
+};
+
+class pdu_session_msg {
+public:
+	pdu_session_msg(){};
+	pdu_session_msg(supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai):  m_supi(supi), m_pdu_session_id(pdi), m_dnn(dnn), m_snssai(snssai) { }
+	virtual ~pdu_session_msg() = default;
 	supi_t get_supi() const;
 	void set_supi(supi_t const& value);
 
@@ -53,14 +66,25 @@ public:
 	snssai_t get_snssai() const;
 	void set_snssai(snssai_t const& value);
 
+private:
+	supi_t m_supi;
+	pdu_session_id_t m_pdu_session_id;
+	std::string m_dnn;
+	snssai_t m_snssai;
+};
+class pdu_session_create_sm_context_request: public pdu_session_msg {
+
+public:
+	pdu_session_create_sm_context_request(): pdu_session_msg(){ }
+	pdu_session_create_sm_context_request(supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai): pdu_session_msg(supi, pdi, dnn, snssai), m_unauthenticated_supi(true) {
+		m_epd = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
+	}
+
 	std::string get_serving_nf_id() const;
 	void set_serving_nf_id(std::string const& value);
 
 	request_type_t get_request_type() const;
 	void set_request_type(request_type_t const& value);
-
-	//	pdu_session_establishment_request_msg get_nas_msg() const;
-	//	void set_nas_msg(pdu_session_establishment_request_msg const& value);
 
 	void set_dnn_selection_mode(std::string const& value);
 	std::string get_dnn_selection_mode() const;
@@ -82,13 +106,9 @@ public:
 
 private:
 	//pdu_session_establishment_request_msg nas_msg;
-	supi_t m_supi;
 	bool m_unauthenticated_supi;
 	//std::string m_Pei;
 	//std::string m_Gpsi;
-	pdu_session_id_t m_pdu_session_id;
-	std::string m_dnn;
-	snssai_t m_snssai;
 	//Snssai m_HplmnSnssai;
 	std::string m_serving_nf_id; //AMF Id
 	//Guami m_Guami;
@@ -154,28 +174,25 @@ private:
 };
 
 
-class pdu_session_create_sm_context_response {
+class pdu_session_create_sm_context_response : public pdu_session_msg {
 
 public:
-	pdu_session_create_sm_context_response(){ }
+	pdu_session_create_sm_context_response(): pdu_session_msg(){ }
+	pdu_session_create_sm_context_response(supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai): pdu_session_msg(supi, pdi, dnn, snssai) {}
 
-	supi_t get_supi() const;
-	void set_supi(supi_t const& value);
-	pdu_session_id_t get_pdu_session_id() const;
-	void set_pdu_session_id(pdu_session_id_t const value);
 	void set_cause(uint8_t cause);
 	uint8_t get_cause();
 	void set_paa(paa_t paa);
 	paa_t get_paa();
 	void set_http_code(Pistache::Http::Code code);
 	Pistache::Http::Code get_http_code();
+	void set_qos_flow_context(const qos_flow_context_created qos_flow);
 
 private:
-	supi_t m_supi;
-	pdu_session_id_t m_pdu_session_id;
 	uint8_t m_cause;
 	paa_t m_paa;
 	Pistache::Http::Code m_code;
+	qos_flow_context_created qos_flow_context;
 };
 
 }

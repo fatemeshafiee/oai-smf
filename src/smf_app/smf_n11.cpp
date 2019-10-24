@@ -142,7 +142,7 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
     	smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
 	} else { //PDU Session Establishment Accept
 		Logger::smf_n11().debug("[Send Communication_N1N2MessageTransfer to AMF] PDU Session Establishment Accept \n");
-		smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_ACCPET, n1_message); //need cause?
+		smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_ACCEPT, n1_message); //need cause?
 	}
 
 	std::string n1_msg_hex;

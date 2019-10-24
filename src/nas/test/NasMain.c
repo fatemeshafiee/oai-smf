@@ -2841,7 +2841,7 @@ int  establishment_request(unsigned char * encode_data)
 #if 0
 int establishment_accept(void)
 {
-	printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ start\n");
+	printf("PDU_SESSION_ESTABLISHMENT_ACCEPT------------ start\n");
 	int size = NAS_MESSAGE_SECURITY_HEADER_SIZE;
 	int bytes = 0;
 
@@ -2864,7 +2864,7 @@ int establishment_accept(void)
 	sm_msg->header.extended_protocol_discriminator = FIVEGS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
 	sm_msg->header.procedure_transaction_identity = 1;
-	sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCPET;
+	sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCEPT;
 
 	/*********************sm_msg->specific_msg.pdu_session_establishment_accept statr******************************/
 
@@ -3105,7 +3105,7 @@ int establishment_accept(void)
 	printf("sm_pdu_dn buffer:0x%x 0x%x 0x%x\n",(unsigned char)((decoded_sm_msg->specific_msg.pdu_session_establishment_request.smpdudnrequestcontainer)->data[0]),(unsigned char)((decoded_sm_msg->specific_msg.pdu_session_establishment_request.smpdudnrequestcontainer)->data[1]),(unsigned char)((decoded_sm_msg->specific_msg.pdu_session_establishment_request.smpdudnrequestcontainer)->data[2]));
 	printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((decoded_sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((decoded_sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((decoded_sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((decoded_sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[3]));
 
-	printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ end\n");
+	printf("PDU_SESSION_ESTABLISHMENT_ACCEPT------------ end\n");
 	return  0;
 }
 #endif

@@ -47,6 +47,23 @@ typedef uint8_t pdu_session_id_t;
 #define PDU_SESSION_IDENTITY_FIRST        (uint8_t)1
 #define PDU_SESSION_IDENTITY_LAST         (uint8_t)15
 
+/* QFI */
+// type: integer,  minimum: 0, maximum: 63
+#define QOS_FLOW_IDENTIFIER_FIRST        (uint8_t)0
+#define QOS_FLOW_IDENTIFIER_LAST         (uint8_t)63
+
+/*
+//TODO: QFI defined in 3gpp_29.274.h
+typedef struct smf_qfi_s {
+  uint8_t qfi;
+  smf_qfi_s() : qfi(QOS_FLOW_IDENTIFIER_FIRST) {}
+  smf_qfi_s(const uint8_t& q) : qfi(q) {}
+  smf_qfi_s(const struct smf_qfi_s& q) : qfi(q.qfi) {}
+
+  inline bool operator==(const struct smf_qfi_s& rhs) const { return qfi == rhs.qfi; }
+  inline bool operator!=(const struct smf_qfi_s& rhs) const { return !(qfi == rhs.qfi); }
+} smf_qfi_t;
+*/
 
 // Integrity protection maximum data rate
 typedef struct ipmdr_s {

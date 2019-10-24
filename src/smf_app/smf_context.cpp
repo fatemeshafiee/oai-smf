@@ -46,41 +46,7 @@ extern smf::smf_app *smf_app_inst;
 extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
-void pgw_eps_bearer::release_access_bearer()
-{
-  released = true;
-}
-//------------------------------------------------------------------------------
-std::string pgw_eps_bearer::toString() const
-{
-  std::string s = {};
-  s.append("EPS BEARER:\n");
-  s.append("\tEBI:\t\t\t\t").append(std::to_string(ebi.ebi)).append("\n");
-  s.append("\tTFT:\t\t\t\tTODO tft").append("\n");
-  s.append("\tSGW FTEID S5S8 UP:\t\t").append(sgw_fteid_s5_s8_up.toString()).append("\n");
-  s.append("\tPGW FTEID S5S8 UP:\t\t").append(pgw_fteid_s5_s8_up.toString()).append("\n");
-  s.append("\tBearer QOS:\t\t\t").append(eps_bearer_qos.toString()).append("\n");
-  s.append("\tPDR ID UL:\t\t\t").append(std::to_string(pdr_id_ul.rule_id)).append("\n");
-  s.append("\tPDR ID DL:\t\t\t").append(std::to_string(pdr_id_dl.rule_id)).append("\n");
-  s.append("\tPRECEDENCE:\t\t\t").append(std::to_string(precedence.precedence)).append("\n");
-  if (far_id_ul.first) {
-    s.append("\tFAR ID UL:\t\t\t").append(std::to_string(far_id_ul.second.far_id)).append("\n");
-  }
-  if (far_id_dl.first) {
-    s.append("\tFAR ID DL:\t\t\t").append(std::to_string(far_id_dl.second.far_id)).append("\n");
-  }
-  return s;
-}
-//------------------------------------------------------------------------------
-void pgw_eps_bearer::deallocate_ressources()
-{
-  Logger::smf_app().info( "pgw_eps_bearer::deallocate_ressources(%d)", ebi.ebi);
-  //if (not is_fteid_zero(pgw_fteid_s5_s8_up))
-    //smf_app_inst->free_s5s8_up_fteid(pgw_fteid_s5_s8_up);
-  clear();
-}
-//------------------------------------------------------------------------------
-void pgw_pdn_connection::set(const paa_t& paa)
+void smf_pdu_session::set(const paa_t& paa)
 {
   switch (paa.pdn_type.pdn_type) {
   case PDN_TYPE_E_IPV4:
@@ -104,71 +70,77 @@ void pgw_pdn_connection::set(const paa_t& paa)
     ipv6 = false;
     break;
   default:
-    Logger::smf_app().error( "pgw_pdn_connection::set(paa_t) Unknown PDN type %d", paa.pdn_type.pdn_type);
+    Logger::smf_app().error( "smf_pdu_session::set(paa_t) Unknown PDN type %d", paa.pdn_type.pdn_type);
   }
 }
+
+
 //------------------------------------------------------------------------------
-void pgw_pdn_connection::add_eps_bearer(pgw_eps_bearer& bearer)
+void smf_pdu_session::add_qos_flow(smf_qos_flow& flow)
 {
-  if ((bearer.ebi.ebi >= EPS_BEARER_IDENTITY_FIRST) and (bearer.ebi.ebi <= EPS_BEARER_IDENTITY_LAST)) {
-    eps_bearers.erase(bearer.ebi.ebi);
-    eps_bearers.insert(std::pair<uint8_t,pgw_eps_bearer>(bearer.ebi.ebi, bearer));
-    Logger::smf_app().trace( "pgw_pdn_connection::add_eps_bearer(%d) success", bearer.ebi.ebi);
+  if ((flow.qfi.qfi >= QOS_FLOW_IDENTIFIER_FIRST) and (flow.qfi.qfi <= QOS_FLOW_IDENTIFIER_LAST)) {
+	qos_flows.erase(flow.qfi.qfi);
+	qos_flows.insert(std::pair<uint8_t,smf_qos_flow>((uint8_t)flow.qfi.qfi, flow));
+    Logger::smf_app().trace( "smf_pdu_session::add_qos_flow(%d) success", flow.qfi.qfi);
   } else {
-    Logger::smf_app().error( "pgw_pdn_connection::add_eps_bearer(%d) failed, invalid EBI", bearer.ebi.ebi);
+    Logger::smf_app().error( "smf_pdu_session::add_qos_flow(%d) failed, invalid QFI", flow.qfi.qfi);
   }
 }
 
+
 //------------------------------------------------------------------------------
-pgw_eps_bearer& pgw_pdn_connection::get_eps_bearer(const ebi_t& ebi)
+smf_qos_flow& smf_pdu_session::get_qos_flow(const pfcp::qfi_t& qfi)
 {
-  return eps_bearers[ebi.ebi];
+  return qos_flows[qfi.qfi];
 }
 
 //------------------------------------------------------------------------------
-bool pgw_pdn_connection::find_eps_bearer(const pfcp::pdr_id_t& pdr_id, pgw_eps_bearer& bearer)
+bool smf_pdu_session::find_qos_flow(const pfcp::pdr_id_t& pdr_id, smf_qos_flow& flow)
 {
-  for (std::map<uint8_t,pgw_eps_bearer>::iterator it=eps_bearers.begin(); it!=eps_bearers.end(); ++it) {
+  for (std::map<uint8_t,smf_qos_flow>::iterator it=qos_flows.begin(); it!=qos_flows.end(); ++it) {
     if ((it->second.pdr_id_ul == pdr_id) || (it->second.pdr_id_dl == pdr_id)) {
-      bearer = it->second;
+    	flow = it->second;
       return true;
     }
   }
   return false;
 }
 //------------------------------------------------------------------------------
-bool pgw_pdn_connection::has_eps_bearer(const pfcp::pdr_id_t& pdr_id, ebi_t& ebi)
+bool smf_pdu_session::has_qos_flow(const pfcp::pdr_id_t& pdr_id, pfcp::qfi_t& qfi)
 {
-  for (std::map<uint8_t,pgw_eps_bearer>::iterator it=eps_bearers.begin(); it!=eps_bearers.end(); ++it) {
+  for (std::map<uint8_t,smf_qos_flow>::iterator it=qos_flows.begin(); it!=qos_flows.end(); ++it) {
     if ((it->second.pdr_id_ul == pdr_id) || (it->second.pdr_id_dl == pdr_id)) {
-      ebi = it->second.ebi;
+      qfi = it->second.qfi;
       return true;
     }
   }
   return false;
 }
 //------------------------------------------------------------------------------
-void pgw_pdn_connection::remove_eps_bearer(const ebi_t& ebi)
+void smf_pdu_session::remove_qos_flow(const pfcp::qfi_t& qfi)
 {
-  pgw_eps_bearer& bearer = eps_bearers[ebi.ebi];
-  bearer.deallocate_ressources();
-  eps_bearers.erase(ebi.ebi);
+	smf_qos_flow& flow = qos_flows[qfi.qfi];
+	flow.deallocate_ressources();
+	qos_flows.erase(qfi.qfi);
 }
 //------------------------------------------------------------------------------
-void pgw_pdn_connection::remove_eps_bearer(pgw_eps_bearer& bearer)
+void smf_pdu_session::remove_qos_flow(smf_qos_flow& flow)
 {
-  ebi_t ebi = {.ebi = bearer.ebi.ebi};
-  bearer.deallocate_ressources();
-  eps_bearers.erase(ebi.ebi);
+  pfcp::qfi_t qfi = {.qfi = flow.qfi.qfi};
+  flow.deallocate_ressources();
+  qos_flows.erase(qfi.qfi);
 }
 
+
+
 //------------------------------------------------------------------------------
-void pgw_pdn_connection::deallocate_ressources(const std::string& apn)
+void smf_pdu_session::deallocate_ressources(const std::string& apn)
 {
-  for (std::map<uint8_t,pgw_eps_bearer>::iterator it=eps_bearers.begin(); it!=eps_bearers.end(); ++it) {
+
+  for (std::map<uint8_t,smf_qos_flow>::iterator it=qos_flows.begin(); it!=qos_flows.end(); ++it) {
     it->second.deallocate_ressources();
   }
-  eps_bearers.clear();
+  qos_flows.clear();
   if (ipv4) {
     paa_dynamic::get_instance().release_paa(apn, ipv4_address);
   }
@@ -176,43 +148,43 @@ void pgw_pdn_connection::deallocate_ressources(const std::string& apn)
   clear();
 }
 //------------------------------------------------------------------------------
-void pgw_pdn_connection::generate_seid()
+void smf_pdu_session::generate_seid()
 {
   // DO it simple now:
  // seid = pgw_fteid_s5_s8_cp.teid_gre_key | (((uint64_t)smf_cfg.instance) << 32);
 }
 
-void pgw_pdn_connection::set_seid(const uint64_t& s){
+void smf_pdu_session::set_seid(const uint64_t& s){
 	seid = s;
 }
 
 //------------------------------------------------------------------------------
 // TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
-void pgw_pdn_connection::generate_far_id(pfcp::far_id_t& far_id)
+void smf_pdu_session::generate_far_id(pfcp::far_id_t& far_id)
 {
   far_id.far_id = far_id_generator.get_uid();
 }
 //------------------------------------------------------------------------------
 // TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
-void pgw_pdn_connection::release_far_id(const pfcp::far_id_t& far_id)
+void smf_pdu_session::release_far_id(const pfcp::far_id_t& far_id)
 {
   far_id_generator.free_uid(far_id.far_id);
 }
 //------------------------------------------------------------------------------
 // TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
-void pgw_pdn_connection::generate_pdr_id(pfcp::pdr_id_t& pdr_id)
+void smf_pdu_session::generate_pdr_id(pfcp::pdr_id_t& pdr_id)
 {
   pdr_id.rule_id = pdr_id_generator.get_uid();
 }
 //------------------------------------------------------------------------------
 // TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
-void pgw_pdn_connection::release_pdr_id(const pfcp::pdr_id_t& pdr_id)
+void smf_pdu_session::release_pdr_id(const pfcp::pdr_id_t& pdr_id)
 {
   pdr_id_generator.free_uid(pdr_id.rule_id);
 }
 
 //------------------------------------------------------------------------------
-std::string pgw_pdn_connection::toString() const
+std::string smf_pdu_session::toString() const
 {
   std::string s = {};
   s.append("PDN CONNECTION:\n");
@@ -223,9 +195,7 @@ std::string pgw_pdn_connection::toString() const
     s.append("\tPAA IPv6:\t\t\t").append(conv::toString(ipv6_address)).append("\n");
   s.append("\tDefault EBI:\t\t\t").append(std::to_string(default_bearer.ebi)).append("\n");
   s.append("\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
-  for (auto it : eps_bearers) {
-      s.append(it.second.toString());
-  }
+
   return s;
 }
 
@@ -266,7 +236,7 @@ void smf_context::handle_itti_msg (itti_n4_session_establishment_response& seres
   std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(seresp.trxn_id, proc)) {
     Logger::smf_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", seresp.seid, seresp.trxn_id);
-    proc->handle_itti_msg(seresp);
+    proc->handle_itti_msg(seresp, shared_from_this());
     remove_procedure(proc.get());
   } else {
     Logger::smf_app().debug("Received N4 SESSION ESTABLISHMENT RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", seresp.seid, seresp.trxn_id);
@@ -278,7 +248,7 @@ void smf_context::handle_itti_msg (itti_n4_session_modification_response& smresp
   std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(smresp.trxn_id, proc)) {
     Logger::smf_app().debug("Received N4 SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", smresp.seid, smresp.trxn_id);
-    proc->handle_itti_msg(smresp);
+    proc->handle_itti_msg(smresp, shared_from_this());
     remove_procedure(proc.get());
   } else {
     Logger::smf_app().debug("Received N4 SESSION MODIFICATION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", smresp.seid, smresp.trxn_id);
@@ -291,7 +261,7 @@ void smf_context::handle_itti_msg (itti_n4_session_deletion_response& sdresp)
   std::shared_ptr<smf_procedure> proc = {};
   if (find_procedure(sdresp.trxn_id, proc)) {
     Logger::smf_app().debug("Received N4 SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64"\n", sdresp.seid, sdresp.trxn_id);
-    proc->handle_itti_msg(sdresp);
+    proc->handle_itti_msg(sdresp, shared_from_this());
     remove_procedure(proc.get());
   } else {
     Logger::smf_app().debug("Received N4 SESSION DELETION RESPONSE sender teid " TEID_FMT "  pfcp_tx_id %" PRIX64", smf_procedure not found, discarded!", sdresp.seid, sdresp.trxn_id);
@@ -310,9 +280,9 @@ void smf_context::handle_itti_msg (std::shared_ptr<itti_n4_session_report_reques
       if (req->pfcp_ies.get(data_report)) {
         pfcp::pdr_id_t pdr_id;
         if (data_report.get(pdr_id)) {
-          std::shared_ptr<pgw_pdn_connection> ppc = {};
+          std::shared_ptr<smf_pdu_session> ppc = {};
           ebi_t ebi;
-          if (find_pdn_connection(pdr_id, ppc, ebi)) {
+          if (find_pdu_session(pdr_id, ppc, ebi)) {
             downlink_data_report_procedure* p = new downlink_data_report_procedure(req);
             std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(p);
             insert_procedure(sproc);
@@ -360,9 +330,24 @@ std::string smf_context::toString() const
 }
 
 
+//------------------------------------------------------------------------------
+void smf_context::get_default_qos(const snssai_t& snssai, const std::string& dnn, subscribed_default_qos_t &default_qos)
+{
+	Logger::smf_app().info( "get_default_qos, key %d", (uint8_t)snssai.sST);
+	//get the default QoS profile
+	std::shared_ptr<session_management_subscription> ss = {};
+	std::shared_ptr<dnn_configuration_t> sdc = {};
+	find_dnn_subscription(snssai, ss);
 
+	if (nullptr != ss.get()){
+		ss.get()->find_dnn_configuration(dnn, sdc);
+		if (nullptr != sdc.get()){
+			default_qos =  sdc.get()->_5g_qos_profile;
+		}
+	}
 
-//TTN
+}
+
 //------------------------------------------------------------------------------
 void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq)
 {
@@ -400,8 +385,11 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
 	sm_context_resp->res.set_supi(supi);
 	sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
+	sm_context_resp->res.set_pdu_session_id(pdu_session_id);
+	sm_context_resp->res.set_snssai(snssai);
+	sm_context_resp->res.set_dnn(dnn);
 
-	//Step 3. find pdn_connection
+	//Step 3. find pdu_session
 	std::shared_ptr<dnn_context> sd;
 	bool find_dnn = find_dnn_context (dnn, sd);
 
@@ -422,19 +410,19 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	}
 
 	//step 3.2. create pdn connection if not exist
-	std::shared_ptr<pgw_pdn_connection> sp;
-	bool find_pdn = sd.get()->find_pdn_connection(pdu_session_id, sp);
+	std::shared_ptr<smf_pdu_session> sp;
+	bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
 
 	if (nullptr == sp.get()){
 		Logger::smf_app().debug("Create a new PDN connection!");
 		//create a new pdn connection
-		pgw_pdn_connection *p = new (pgw_pdn_connection);
+		smf_pdu_session *p = new (smf_pdu_session);
 		p->pdn_type.pdn_type = sm_context_req_msg.get_pdu_session_type();
 		p->pdu_session_id = pdu_session_id; //should check also nas_msg.pdusessionidentity ??
 		//amf id
 		p->amf_id = sm_context_req_msg.get_serving_nf_id();
-		sp = std::shared_ptr<pgw_pdn_connection>(p);
-		sd->insert_pdn_connection(sp);
+		sp = std::shared_ptr<smf_pdu_session>(p);
+		sd->insert_pdu_session(sp);
 	} else{
 		Logger::smf_app().debug("PDN connection is already existed!");
 		//TODO:
@@ -618,6 +606,39 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 }
 
+
+//------------------------------------------------------------------------------
+void smf_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
+{
+	Logger::smf_app().info( "Insert dnn subscription, key: %d", (uint8_t)snssai.sST);
+	//std::unique_lock<std::recursive_mutex> lock(m_context);
+	//dnn_subscriptions.insert (std::make_pair <const uint8_t, std::shared_ptr<session_management_subscription> >((uint8_t)snssai.sST, ss));
+	dnn_subscriptions[(uint8_t)snssai.sST] = ss;
+
+}
+
+//------------------------------------------------------------------------------
+bool smf_context::find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
+{
+	Logger::smf_app().info( "find_dnn_subscription: %d, map size %d", (uint8_t)snssai.sST, dnn_subscriptions.size());
+	//std::unique_lock<std::recursive_mutex> lock(m_context);
+
+	/*	std::map<uint8_t,std::shared_ptr<session_management_subscription>>::const_iterator it = dnn_subscriptions.find((uint8_t)snssai.sST);
+	  if (it != dnn_subscriptions.end()){
+		  ss = it->second;
+		  return true;
+	  }
+
+	 */
+	if (dnn_subscriptions.count((uint8_t)snssai.sST) > 0 ){
+		ss = dnn_subscriptions.at((uint8_t)snssai.sST);
+		return true;
+	}
+
+	Logger::smf_app().info( "find_dnn_subscription: cannot find DNN subscription for SNSSAI %d", (uint8_t)snssai.sST);
+	return false;
+}
+
 //------------------------------------------------------------------------------
 bool smf_context::find_dnn_context(const std::string& dnn, std::shared_ptr<dnn_context>& dnn_context)
 {
@@ -657,12 +678,12 @@ void smf_context::send_create_session_response_error(oai::smf_server::model::SmC
 }
 
 //------------------------------------------------------------------------------
-bool dnn_context::find_pdn_connection(const uint32_t pdu_session_id , std::shared_ptr<pgw_pdn_connection>& pdn)
+bool dnn_context::find_pdu_session(const uint32_t pdu_session_id , std::shared_ptr<smf_pdu_session>& pdn)
 {
 	pdn = {};
 
 	std::unique_lock<std::recursive_mutex> lock(m_context);
-	for (auto it : pdn_connections) {
+	for (auto it : pdu_sessions) {
 		if (pdu_session_id == it->pdu_session_id) {
 			pdn = it;
 			return true;
@@ -672,10 +693,10 @@ bool dnn_context::find_pdn_connection(const uint32_t pdu_session_id , std::share
 }
 
 //------------------------------------------------------------------------------
-void dnn_context::insert_pdn_connection(std::shared_ptr<pgw_pdn_connection>& sp)
+void dnn_context::insert_pdu_session(std::shared_ptr<smf_pdu_session>& sp)
 {
 	std::unique_lock<std::recursive_mutex> lock(m_context);
-	pdn_connections.push_back(sp);
+	pdu_sessions.push_back(sp);
 }
 
 //------------------------------------------------------------------------------
@@ -687,7 +708,7 @@ std::string dnn_context::toString() const
   s.append("\tDNN:\t\t\t\t").append(dnn_in_use).append("\n");
   //s.append("\tAPN AMBR Bitrate Uplink:\t").append(std::to_string(apn_ambr.br_ul)).append("\n");
   //s.append("\tAPN AMBR Bitrate Downlink:\t").append(std::to_string(apn_ambr.br_dl)).append("\n");
-  for (auto it : pdn_connections) {
+  for (auto it : pdu_sessions) {
     s.append(it->toString());
   }
   return s;
@@ -705,21 +726,34 @@ void session_management_subscription::find_dnn_configuration(std::string dnn, st
 	}
 }
 
-//------------------------------------------------------------------------------
-void smf_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
-{
-	std::unique_lock<std::recursive_mutex> lock(m_context);
-	dnn_subscriptions.insert (std::pair ((uint8_t)snssai.sST, ss));
 
+//------------------------------------------------------------------------------
+void smf_qos_flow::release_qos_flow()
+{
+  released = true;
 }
 
 //------------------------------------------------------------------------------
-bool smf_context::find_dnn_subscription(const snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
+std::string smf_qos_flow::toString() const
 {
-	std::unique_lock<std::recursive_mutex> lock(m_context);
-	if (dnn_subscriptions.count(snssai.sST) > 0 ){
-		ss = dnn_subscriptions.at(snssai.sST);
-		return true;
-	}
-	return false;
+  std::string s = {};
+  s.append("QoS Flow:\n");
+  s.append("\tFQI:\t\t\t\t").append(std::to_string((uint8_t)qfi.qfi)).append("\n");
+  s.append("\tUL FTEID:\t\t").append(ul_fteid.toString()).append("\n");
+  s.append("\tPDR ID UL:\t\t\t").append(std::to_string(pdr_id_ul.rule_id)).append("\n");
+  s.append("\tPDR ID DL:\t\t\t").append(std::to_string(pdr_id_dl.rule_id)).append("\n");
+  s.append("\tPRECEDENCE:\t\t\t").append(std::to_string(precedence.precedence)).append("\n");
+  if (far_id_ul.first) {
+    s.append("\tFAR ID UL:\t\t\t").append(std::to_string(far_id_ul.second.far_id)).append("\n");
+  }
+  if (far_id_dl.first) {
+    s.append("\tFAR ID DL:\t\t\t").append(std::to_string(far_id_dl.second.far_id)).append("\n");
+  }
+  return s;
+}
+//------------------------------------------------------------------------------
+void smf_qos_flow::deallocate_ressources()
+{
+  Logger::smf_app().info( "smf_qos_flow::deallocate_ressources(%d)", (uint8_t)qfi.qfi);
+  clear();
 }

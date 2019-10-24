@@ -226,7 +226,7 @@ int  sm_encode_establishment_request(void)
 
 int sm_encode_establishment_accept(void)
 {
-	printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ encode start\n");
+	printf("PDU_SESSION_ESTABLISHMENT_ACCEPT------------ encode start\n");
 	int size = NAS_MESSAGE_SECURITY_HEADER_SIZE;
 	int bytes = 0;
 
@@ -249,7 +249,7 @@ int sm_encode_establishment_accept(void)
 	sm_msg->header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
 	sm_msg->header.pdu_session_identity = 1;
 	sm_msg->header.procedure_transaction_identity = 1;
-	sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCPET;
+	sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCEPT;
 
 	/*********************sm_msg->specific_msg.pdu_session_establishment_accept statr******************************/
 
@@ -618,7 +618,7 @@ int sm_encode_establishment_accept(void)
 	fclose(fp);
 	/*****************  end  ************************/
 
-	printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ encode end\n");
+	printf("PDU_SESSION_ESTABLISHMENT_ACCEPT------------ encode end\n");
 	return  0;
 }
 

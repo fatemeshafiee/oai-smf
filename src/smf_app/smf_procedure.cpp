@@ -194,19 +194,23 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 	sx_ser->pfcp_ies.set(create_far);
 
 	// Have to backup far id and pdr id
-	pgw_eps_bearer b = {};
-	b.far_id_ul.first = true;
-	b.far_id_ul.second = far_id;
-	b.pdr_id_ul = pdr_id;
-	//b.ebi = it.eps_bearer_id;
-	b.ebi = sm_context_req->req.get_pdu_session_id();
-	pgw_eps_bearer b2 = b;
-	ppc->add_eps_bearer(b2);
+	smf_qos_flow q = {};
+	q.far_id_ul.first = true;
+	q.far_id_ul.second = far_id;
+	q.pdr_id_ul = pdr_id;
+	q.pdu_session_id = sm_context_req->req.get_pdu_session_id();
 
+	//get the default QoS profile
+	subscribed_default_qos_t default_qos = {};
+	std::shared_ptr<session_management_subscription> ss = {};
+	pc.get()->get_default_qos(sm_context_req->req.get_snssai(), sm_context_req->req.get_dnn(), default_qos);
+	q.qfi = default_qos._5qi;
+
+	smf_qos_flow q2 = q;
+	ppc->add_qos_flow(q2);
 
 	// for finding procedure when receiving response
 	smf_app_inst->set_seid_2_smf_context(cp_fseid.seid, pc);
-
 
 	Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N4", sx_ser->get_msg_name());
 	int ret = itti_inst->send_msg(sx_triggered);
@@ -219,7 +223,7 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 }
 
 //------------------------------------------------------------------------------
-void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_establishment_response& resp)
+void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_establishment_response& resp, std::shared_ptr<smf::smf_context> sc)
 {
 	Logger::smf_app().info( "session_create_sm_context_procedure handle itti_n4_session_establishment_response: pdu-session-id %d", n11_trigger.get()->req.get_pdu_session_id());
 
@@ -233,21 +237,23 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 		pfcp::pdr_id_t pdr_id = {};
 		pfcp::far_id_t far_id = {};
 		if (it.get(pdr_id)) {
-			pgw_eps_bearer b = {};
-			if (ppc->get_eps_bearer(pdr_id, b)) {
+			smf_qos_flow q = {};
+			if (ppc->get_qos_flow(pdr_id, q)) {
 				pfcp::fteid_t local_up_fteid = {};
 				if (it.get(local_up_fteid)) {
-					xgpp_conv::pfcp_to_core_fteid(local_up_fteid, b.pgw_fteid_s5_s8_up);
-					b.pgw_fteid_s5_s8_up.interface_type = S5_S8_PGW_GTP_U;
+					//xgpp_conv::pfcp_to_core_fteid(local_up_fteid, b.pgw_fteid_s5_s8_up);
+					//b.pgw_fteid_s5_s8_up.interface_type = S5_S8_PGW_GTP_U;
                     //set tunnel id
-					xgpp_conv::pfcp_to_core_fteid(local_up_fteid, b.ul_fteid);
-					b.ul_fteid.interface_type = S1_U_SGW_GTP_U;
+					xgpp_conv::pfcp_to_core_fteid(local_up_fteid, q.ul_fteid);
+					q.ul_fteid.interface_type = S1_U_SGW_GTP_U;
 					// comment if SPGW-C allocate up fteid
-					pgw_eps_bearer b2 = b;
-					ppc->add_eps_bearer(b2);
+					//Update Qos Flow
+					smf_qos_flow q2 = q;
+				    ppc->add_qos_flow(q2);
 				}
 				// uncomment if SPGW-C allocate up fteid
 				// ppc->add_eps_bearer(b);
+				// ppc->add_qos_flow(b);
 			} else {
 				Logger::smf_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
 			}
@@ -256,22 +262,45 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 		}
 	}
 
-	ebi_t ebi = {};
-	ebi.ebi = n11_trigger.get()->req.get_pdu_session_id();
-	pgw_eps_bearer b = {};
+	//get the default QoS profile
+	pfcp::qfi_t qfi = {};
+	subscribed_default_qos_t default_qos = {};
+	sc.get()->get_default_qos(n11_triggered_pending->res.get_snssai(), n11_triggered_pending->res.get_dnn(), default_qos);
+	qfi.qfi = default_qos._5qi;
+
+
+    //TODO:	how about pdu_session_id??
+	smf_qos_flow q = {};
 	gtpv2c::bearer_context_created_within_create_session_response bcc = {};
 	::cause_t bcc_cause = {.cause_value = REQUEST_ACCEPTED, .pce = 0, .bce = 0, .cs = 0};
-	if (not ppc->get_eps_bearer(ebi, b)) {
+	if (not ppc->get_qos_flow(qfi, q)) {
 		bcc_cause.cause_value = SYSTEM_FAILURE;
 	} else {
-		if (b.ul_fteid.is_zero()) {
+		if (q.ul_fteid.is_zero()) {
 			bcc_cause.cause_value = SYSTEM_FAILURE;
 		} else {
-			bcc.set_s1_u_sgw_fteid(b.ul_fteid);
+			bcc.set_s1_u_sgw_fteid(q.ul_fteid); //tunnel info
 		}
 	}
-	bcc.set(b.ebi);
+
+	//bcc.set(q.ebi);//set ebi
 	bcc.set(bcc_cause);
+
+	qos_flow_context_created qos_flow;
+	qos_flow.set_cause(REQUEST_ACCEPTED);
+	if (not ppc->get_qos_flow(qfi, q)) {
+		qos_flow.set_cause(SYSTEM_FAILURE);
+	} else {
+		if (q.ul_fteid.is_zero()) {
+			qos_flow.set_cause(SYSTEM_FAILURE);
+		} else {
+			qos_flow.set_ul_fteid(q.ul_fteid); //tunnel info
+		}
+	}
+	qos_flow.set_qfi(qfi);
+	n11_triggered_pending->res.set_qos_flow_context(qos_flow);
+
+
 	//TODO: for qos bearer bearer_qos_t bearer_qos = {}; if(b.get(bearer_qos)){bcc.set(bearer_level_qos)};
 
     //TODO

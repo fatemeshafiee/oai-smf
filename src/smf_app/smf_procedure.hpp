@@ -45,7 +45,7 @@
 namespace smf {
 
 class smf_context;
-class pgw_pdn_connection;
+class smf_pdu_session;
 
 //------------------------------------------------------------------------------
 class smf_procedure {
@@ -62,15 +62,16 @@ public:
   explicit smf_procedure(uint64_t tx){trxn_id = tx;}
   virtual ~smf_procedure(){}
   virtual itti_msg_type_t get_procedure_type(){return ITTI_MSG_TYPE_NONE;}
-  virtual void handle_itti_msg (itti_n4_session_establishment_response& resp) {}
-  virtual void handle_itti_msg (itti_n4_session_modification_response& resp) {}
-  virtual void handle_itti_msg (itti_n4_session_deletion_response& resp) {}
+  //virtual void handle_itti_msg (itti_n4_session_establishment_response& resp) {}
+  virtual void handle_itti_msg (itti_n4_session_establishment_response& resp, std::shared_ptr<smf::smf_context> pc) {}
+  virtual void handle_itti_msg (itti_n4_session_modification_response& resp, std::shared_ptr<smf::smf_context> pc) {}
+  virtual void handle_itti_msg (itti_n4_session_deletion_response& resp, std::shared_ptr<smf::smf_context> pc) {}
   //tual void handle_itti_msg (itti_s5s8_downlink_data_notification_acknowledge& resp) {}
 };
 
 
-class sgw_eps_bearer_context;
-class sgw_pdn_connection;
+class smf_qos_flow;
+class smf_pdu_session;
 
 //------------------------------------------------------------------------------
 class sx_session_restore_procedure : public smf_procedure {
@@ -93,17 +94,17 @@ public:
 //------------------------------------------------------------------------------
 class session_create_sm_context_procedure : public smf_procedure {
 public:
-  explicit session_create_sm_context_procedure(std::shared_ptr<pgw_pdn_connection>& sppc) : smf_procedure(), ppc(sppc),
+  explicit session_create_sm_context_procedure(std::shared_ptr<smf_pdu_session>& sppc) : smf_procedure(), ppc(sppc),
       sx_triggered(), n11_triggered_pending(), n11_trigger() {}
 
   int run(std::shared_ptr<itti_n11_create_sm_context_request> req,
           std::shared_ptr<itti_n11_create_sm_context_response>resp,
           std::shared_ptr<smf::smf_context> pc);
 
-  void handle_itti_msg (itti_n4_session_establishment_response& resp);
+  void handle_itti_msg (itti_n4_session_establishment_response& resp, std::shared_ptr<smf::smf_context> pc);
 
   std::shared_ptr<itti_n4_session_establishment_request> sx_triggered;
-  std::shared_ptr<pgw_pdn_connection>                      ppc;
+  std::shared_ptr<smf_pdu_session>                      ppc;
   std::shared_ptr<smf::smf_context>                       pc;
 
   std::shared_ptr<itti_n11_create_sm_context_request> n11_trigger;

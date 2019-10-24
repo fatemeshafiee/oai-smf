@@ -186,11 +186,12 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 		for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin(); it != jsonData["dnnConfigurations"].end(); ++it ){
 			Logger::smf_n10().debug("[get_sm_data] DNN %s", it.key().c_str());
 
-			dnn_configuration_t *dnn_configuration = new (dnn_configuration_t);
-			std::shared_ptr<dnn_configuration_t> sdc;
+			//dnn_configuration_t *dnn_configuration = new (dnn_configuration_t);
+			//std::shared_ptr<dnn_configuration_t> sdc;
 			//subscription->find_dnn_configuration(it.key(), sdc);
 
 			try {
+		                std::shared_ptr<dnn_configuration_t> dnn_configuration = std::make_shared<dnn_configuration_t>();
 				//PDU Session Type
 				pdu_session_type_t pdu_session_type (pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
 				std::string default_session_type = it.value()["pduSessionTypes"]["defaultSessionType"];
@@ -216,13 +217,19 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 					dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_3);
 				}
 
+				//5gQosProfile
+				dnn_configuration->_5g_qos_profile._5qi = it.value()["5gQosProfile"]["5qi"];
+				dnn_configuration->_5g_qos_profile.arp.priority_level = it.value()["5gQosProfile"]["arp"]["priorityLevel"];
+				dnn_configuration->_5g_qos_profile.arp.preempt_cap = it.value()["5gQosProfile"]["arp"]["preemptCap"];
+				dnn_configuration->_5g_qos_profile.arp.preempt_vuln = it.value()["5gQosProfile"]["arp"]["preemptVuln"];
+
 				//session_ambr
 				dnn_configuration->session_ambr.uplink = it.value()["sessionAmbr"]["uplink"];
 				dnn_configuration->session_ambr.downlink = it.value()["sessionAmbr"]["downlink"];
 				Logger::smf_n10().debug("[get_sm_data] sessionAmbr uplink %s, downlink %s", dnn_configuration->session_ambr.uplink.c_str(), dnn_configuration->session_ambr.downlink.c_str());
 
-				sdc = std::shared_ptr<dnn_configuration_t> (dnn_configuration);
-				subscription->insert_dnn_configuration(it.key(), sdc);
+				//sdc = std::shared_ptr<dnn_configuration_t> (dnn_configuration);
+				subscription->insert_dnn_configuration(it.key(), dnn_configuration);
 			} catch (nlohmann::json::exception& e){
 				Logger::smf_n10().warn("[get_sm_data] exception message %s, exception id %d ", e.what(), e.id);
 				return false;

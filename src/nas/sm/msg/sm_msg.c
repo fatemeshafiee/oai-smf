@@ -77,7 +77,7 @@ sm_msg_decode (
 	  case PDU_SESSION_ESTABLISHMENT_REQUEST:
 	  	   decode_result = decode_pdu_session_establishment_request(&msg->specific_msg.pdu_session_establishment_request, buffer, len);
 	  break;
-      case PDU_SESSION_ESTABLISHMENT_ACCPET:
+      case PDU_SESSION_ESTABLISHMENT_ACCEPT:
 	  	   decode_result = decode_pdu_session_establishment_accept(&msg->specific_msg.pdu_session_establishment_accept, buffer, len);
 	  break;
       case PDU_SESSION_ESTABLISHMENT_REJECT:
@@ -193,7 +193,7 @@ fivegsm_msg_encode (
       case PDU_SESSION_ESTABLISHMENT_REQUEST:
 	  	   encode_result = encode_pdu_session_establishment_request(&msg->specific_msg.pdu_session_establishment_request, buffer, len);
 	  break;
-      case PDU_SESSION_ESTABLISHMENT_ACCPET:
+      case PDU_SESSION_ESTABLISHMENT_ACCEPT:
 	  	   encode_result = encode_pdu_session_establishment_accept(&msg->specific_msg.pdu_session_establishment_accept, buffer, len);
 	  break;
       case PDU_SESSION_ESTABLISHMENT_REJECT:
