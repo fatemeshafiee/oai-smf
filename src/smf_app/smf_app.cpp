@@ -725,27 +725,44 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 {
 	Logger::smf_app().info("Create N1 SM Container, message type %d \n", msg_type);
 	//To be updated according to NAS implementation
-	int size = NAS_MESSAGE_SECURITY_HEADER_SIZE;
 	int bytes = 0;
 	int length = BUF_LEN;
 	unsigned char data[BUF_LEN] = {'\0'};
 	memset(data,0,sizeof(data));
 
+	//construct encode security context
+	static uint8_t fivegmm_security_context_flag = 0;
+	static fivegmm_security_context_t securityencode;
+	if(!fivegmm_security_context_flag)
+	{
+		securityencode.selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		securityencode.dl_count.overflow = 0xffff;
+		securityencode.dl_count.seq_num =  0x23;
+		securityencode.ul_count.overflow = 0xffff;
+		securityencode.ul_count.seq_num =  0x23;
+		securityencode.knas_enc[0] = 0x14;
+		securityencode.selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		securityencode.knas_int[0] = 0x41;
+		fivegmm_security_context_flag ++;
+	}
 
 	nas_message_t nas_msg;
 	memset(&nas_msg, 0, sizeof(nas_message_t));
 	nas_msg.header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
 	nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
-	uint8_t sequencenumber = 0xfe;
-	//uint32_t mac = 0xffffeeee;
 	uint32_t mac = 0xffee;
-	nas_msg.header.sequence_number = sequencenumber;
+	
+	//test mac and encrypt, please modify here!
+	#if DIRECTION__
+		nas_msg.header.sequence_number = securityencode.dl_count.seq_num;
+	#else
+		nas_msg.header.sequence_number = securityencode.ul_count.seq_num;
+	#endif
+	
 	nas_msg.header.message_authentication_code= mac;
 	nas_msg.security_protected.header = nas_msg.header;
 
 
-	//nas_msg.header.sequence_number = 0xfe;
-	//nas_msg.security_protected.header = nas_msg.header;
 	SM_msg *sm_msg;
 	sm_msg = &nas_msg.security_protected.plain.sm;
 	sm_msg->header.extended_protocol_discriminator  = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
@@ -758,22 +775,6 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		//TODO:
 		printf("\n\nPDU_SESSION_ESTABLISHMENT_REQUEST------------ encode start\n");
 		sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_REQUEST;
-		sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocoldiscriminator = 0X2E;
-
-		bstring pdusessionidentity_tmp = bfromcstralloc(10, "\0");
-		uint8_t bitStream_pdusessionidentity = 0X01;
-		pdusessionidentity_tmp->data = (unsigned char *)(&bitStream_pdusessionidentity);
-		pdusessionidentity_tmp->slen = 1;
-		sm_msg->specific_msg.pdu_session_establishment_request.pdusessionidentity = pdusessionidentity_tmp;
-
-		bstring proceduretransactionidentity_tmp = bfromcstralloc(10, "\0");
-		uint8_t bitStream_proceduretransactionidentity = 0X01;
-		proceduretransactionidentity_tmp->data = (unsigned char *)(&bitStream_proceduretransactionidentity);
-		proceduretransactionidentity_tmp->slen = 1;
-		sm_msg->specific_msg.pdu_session_establishment_request.proceduretransactionidentity = proceduretransactionidentity_tmp;
-
-		sm_msg->specific_msg.pdu_session_establishment_request.messagetype = 0XC1;
-
 
 		unsigned char bitStream_intergrityprotectionmaximumdatarate[2] = {0x01,0x02};
 		bstring intergrityprotectionmaximumdatarate_tmp = bfromcstralloc(2, "\0");
@@ -821,34 +822,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 		/*********************sm_msg->specific_msg.pdu_session_establishment_request end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
-
 		nas_msg.plain.sm = *sm_msg;
-
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-#endif
 
 
 		printf("[NAS header] extended_protocol_discriminator:0x%x, security_header_type:0x%x,sequence_number:0x%x,message_authentication_code:0x%x\n",
@@ -863,10 +837,6 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 				sm_msg->header.procedure_transaction_identity,
 				sm_msg->header.message_type);
 
-		//printf("message type:0x%x\n",sm_msg->specific_msg.pdu_session_establishment_request.messagetype);
-		//printf("extendedprotocoldiscriminator:0x%x\n",sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocoldiscriminator);
-		//printf("pdu identity buffer:0x%x\n",*(unsigned char *)((sm_msg->specific_msg.pdu_session_establishment_request.pdusessionidentity)->data));
-		//printf("PTI buffer:0x%x\n",*(unsigned char *)((sm_msg->specific_msg.pdu_session_establishment_request.proceduretransactionidentity)->data));
 
 		printf("intergrity buffer:0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_request.intergrityprotectionmaximumdatarate)->data[0]),(unsigned char )((sm_msg->specific_msg.pdu_session_establishment_request.intergrityprotectionmaximumdatarate)->data[1]));
 		printf("_pdusessiontype bits_3:0x%x\n",sm_msg->specific_msg.pdu_session_establishment_request._pdusessiontype.pdu_session_type_value);
@@ -878,18 +848,17 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_request.extendedprotocolconfigurationoptions)->data[3]));
 
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
 			printf("%02x ",data[i]);
 		printf("\n");
-
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::smf_app().debug("n1MessageContent (%d bytes), %s\n ", bytes, nas_msg_str.c_str());
-
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_ESTABLISHMENT_REQUEST------------ encode end\n\n");
 	}
 	break;
@@ -900,7 +869,6 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("\n\nPDU_SESSION_ESTABLISHMENT_ACCPET------------ encode start\n");
 		sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCPET;
 
-		sm_msg->specific_msg.pdu_session_establishment_accept.presence = 0xffff;
 
 		sm_msg->specific_msg.pdu_session_establishment_accept._pdusessiontype.pdu_session_type_value = 0x01;
 
@@ -969,6 +937,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_downlink = (AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_4KBPS << 8) + (AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_16KBPS);
 		sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_64KBPS;
 		sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_uplink = (AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_256KBPS << 8) + (AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS);
+
+		sm_msg->specific_msg.pdu_session_establishment_accept.presence = 0xffff;
 
 		sm_msg->specific_msg.pdu_session_establishment_accept._5gsmcause = 0b00001000;
 
@@ -1062,34 +1032,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 		/*********************sm_msg->specific_msg.pdu_session_establishment_accept end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
-
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 		nas_msg.header.extended_protocol_discriminator,
@@ -1219,17 +1163,17 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 				(unsigned char)(sm_msg->specific_msg.pdu_session_establishment_accept.dnn->data[2]));
 
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
 			printf("%02x ",data[i]);
 		printf("\n");
-
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
-		Logger::smf_app().debug("n1MessageContent (%d bytes), %s\n ", bytes, nas_msg_str.c_str());
+		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_ESTABLISHMENT_ACCPET------------ encode end\n\n");
 	}
 	break;
@@ -1267,34 +1211,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 		sm_msg->specific_msg.pdu_session_establishment_reject._5gsmcongestionreattemptindicator.abo = THE_BACKOFF_TIMER_IS_APPLIED_IN_ALL_PLMNS;
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-			//return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -1318,19 +1236,18 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_establishment_reject.extendedprotocolconfigurationoptions)->data[3]));
 	    printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",sm_msg->specific_msg.pdu_session_establishment_reject._5gsmcongestionreattemptindicator.abo);
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
-
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_ESTABLISHMENT_REJECT------------ encode end\n\n");
 	}
 	break;
@@ -1359,33 +1276,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_authentication_command end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -1407,16 +1299,17 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+
 		printf("PDU_SESSION_AUTHENTICATION_COMMAND------------ encode end\n\n");
 	}
 	break;
@@ -1446,34 +1339,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_authentication_complete end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -1493,22 +1360,24 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(sm_msg->specific_msg.pdu_session_authentication_complete.eapmessage->data[0]),(unsigned char )(sm_msg->specific_msg.pdu_session_authentication_complete.eapmessage->data[1]));
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_complete.extendedprotocolconfigurationoptions)->data[3]));
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
+		printf("PDU_SESSION_AUTHENTICATION_COMPLETE------------ encode end\n");
 	}
 	break;
 
 	case PDU_SESSION_AUTHENTICATION_RESULT:{
+		printf("\n\nPDU_SESSION_AUTHENTICATION_RESULT------------ encode start\n");
 		sm_msg->header.message_type = PDU_SESSION_AUTHENTICATION_RESULT;
 
 		sm_msg->specific_msg.pdu_session_authentication_result.presence = 0x03;
@@ -1532,34 +1401,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_authentication_result end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -1579,19 +1422,19 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("eapmessage buffer:0x%x 0x%x\n",(unsigned char)(sm_msg->specific_msg.pdu_session_authentication_result.eapmessage->data[0]),(unsigned char )(sm_msg->specific_msg.pdu_session_authentication_result.eapmessage->data[1]));
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_authentication_result.extendedprotocolconfigurationoptions)->data[3]));
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
-		printf("PDU_SESSION_AUTHENTICATION_COMPLETE------------ encode end\n\n");
+		
+		printf("PDU_SESSION_AUTHENTICATION_RESULT------------ encode end\n\n");
 	}
 	break;
 
@@ -1737,34 +1580,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 		/*********************sm_msg->specific_msg.pdu_session_modification_request end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
-
 		nas_msg.plain.sm = *sm_msg;
-
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 		nas_msg.header.extended_protocol_discriminator,
@@ -1875,16 +1691,17 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 				(unsigned char)(sm_msg->specific_msg.pdu_session_modification_request.extendedprotocolconfigurationoptions->data[3]));
 
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_MODIFICATION_REQUEST------------ encode end\n\n");
 	}
 	break;
@@ -1915,33 +1732,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_modification_reject end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -1963,18 +1755,18 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_reject.extendedprotocolconfigurationoptions)->data[3]));
 	    printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",sm_msg->specific_msg.pdu_session_modification_reject._5gsmcongestionreattemptindicator.abo);
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_MODIFICATION_REJECT------------ encode end\n\n");
 	}
 	break;
@@ -2112,34 +1904,9 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 		/*********************sm_msg->specific_msg.pdu_session_modification_command end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 		nas_msg.header.extended_protocol_discriminator,
@@ -2247,16 +2014,17 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 				(unsigned char)(sm_msg->specific_msg.pdu_session_modification_command.extendedprotocolconfigurationoptions->data[3]));
 
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_MODIFICATION_COMMAND------------ encode end\n\n");
 	}
 	break;
@@ -2281,33 +2049,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_modification_complete end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -2326,18 +2069,18 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_complete.extendedprotocolconfigurationoptions)->data[3]));
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+
 		printf("PDU_SESSION_MODIFICATION_COMPLETE------------ encode end\n\n");
 	}
 	break;
@@ -2363,34 +2106,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_modification_command_reject end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -2410,18 +2127,18 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_modification_command_reject._5gsmcause);
 	    printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_modification_command_reject.extendedprotocolconfigurationoptions)->data[3]));
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_MODIFICATION_COMMANDREJECT------------ encode end\n\n");
 	}
 	break;
@@ -2447,34 +2164,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_release_request end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
-
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -2494,18 +2184,18 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_release_request._5gsmcause);
 	    printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_request.extendedprotocolconfigurationoptions)->data[3]));
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_RELEASE_REQUEST------------ encode end\n\n");
 	}
 	break;
@@ -2531,33 +2221,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_release_reject end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
-
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -2577,18 +2241,18 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_release_reject._5gsmcause);
 	    printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_reject.extendedprotocolconfigurationoptions)->data[3]));
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_RELEASE_REJECT------------ encode end\n\n");
 	}
 	break;
@@ -2627,34 +2291,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_release_command end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -2677,18 +2315,18 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("_5gsmcongestionreattemptindicator bits_1 --- abo:0x%x\n",sm_msg->specific_msg.pdu_session_release_command._5gsmcongestionreattemptindicator.abo);
 		printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_command.extendedprotocolconfigurationoptions)->data[3]));
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+		
 		printf("PDU_SESSION_RELEASE_COMMAND------------ encode end\n");
 	}
 	break;
@@ -2716,34 +2354,8 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 	/*********************sm_msg->specific_msg.pdu_session_release_complete end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
 
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -2763,18 +2375,18 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg.pdu_session_release_complete._5gsmcause);
 	    printf("extend_options buffer:0x%x 0x%x 0x%x 0x%x\n",(unsigned char)((sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[0]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[1]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[2]),(unsigned char)((sm_msg->specific_msg.pdu_session_release_complete.extendedprotocolconfigurationoptions)->data[3]));
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+
 		printf("PDU_SESSION_RELEASE_COMPLETE------------ encode end\n\n");
 	}
 	break;
@@ -2788,34 +2400,7 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 /*********************sm_msg->specific_msg._5gsm_status end******************************/
 
-		size += MESSAGE_TYPE_MAXIMUM_LENGTH;
-
-		//memcpy(&nas_msg.plain.sm,&nas_msg.security_protected.plain.sm,sizeof(nas_msg.security_protected.plain.sm));
 		nas_msg.plain.sm = *sm_msg;
-
-		//complete sm msg content
-		if(size <= 0){
-		//	return -1;
-		}
-
-		//construct security context
-		fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-		security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-		security->dl_count.overflow = 0xffff;
-		security->dl_count.seq_num =  0x23;
-		security->knas_enc[0] = 0x14;
-		security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-		security->knas_int[0] = 0x41;
-		//complete sercurity context
-
-
-		bstring  info = bfromcstralloc(length, "\0");//info the nas_message_encode result
-
-		#if 0
-		printf("1 start nas_message_encode \n");
-		printf("security %p\n",security);
-		printf("info %p\n",info);
-		#endif
 
 		printf("nas header encode extended_protocol_discriminator:0x%x\n, security_header_type:0x%x\n,sequence_number:0x%x\n,message_authentication_code:0x%x\n",
 				nas_msg.header.extended_protocol_discriminator,
@@ -2834,19 +2419,20 @@ void smf_app::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str,
 
 		printf("_5gsmcause: 0x%x\n",sm_msg->specific_msg._5gsm_status._5gsmcause);
 
-
 		//bytes = nas_message_encode (data, &nas_msg, 60/*don't know the size*/, security);
-		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+		bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, &securityencode);
 
 		//nas_msg_str = reinterpret_cast<char*> (data);
 		printf("Data = ");
 		for(int i = 0;i<bytes;i++)
-			printf("Data = %02x ",data[i]);
+			printf("%02x ",data[i]);
 		printf("\n");
 		std::string n1Message ((char*) data,  bytes);
 		nas_msg_str = n1Message;
 		Logger::smf_app().debug("n1MessageContent: %d, %s\n ", bytes, nas_msg_str.c_str());
+
 		printf("5GSM_STATUS------------ encode end\n\n");
+
 	}
 	break;
 
@@ -2891,9 +2477,9 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 
 	printf("Data (%d bytes) = %s \n",n1SmMsgLen, data);
 
-	for(int i = 0;i<n1SmMsgLen;i++)
-		printf(" %02x ",data[i]);
-	printf("\n");
+	//for(int i = 0;i<n1SmMsgLen;i++)
+	//	printf(" %02x ",data[i]);
+	//printf("\n");
 
 	printf("Data value = ");
 	for(int i=0;i<n1SmMsgLen;i++)
@@ -2928,25 +2514,34 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 	memcpy ((void *)datavalue, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
 #endif
 	//use a temporary security mechanism
-	fivegmm_security_context_t * security = ( fivegmm_security_context_t *) std::calloc(1, sizeof(fivegmm_security_context_t));
-	security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-	security->dl_count.overflow = 0xffff;
-	security->dl_count.seq_num =  0x23;
-	security->knas_enc[0] = 0x14;
-	security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-	security->knas_int[0] = 0x41;
+	//construct decode security context
+	static uint8_t fivegmm_security_context_flag = 0;
+	static fivegmm_security_context_t securitydecode;
+	if(!fivegmm_security_context_flag)
+	{
+		securitydecode.selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
+		securitydecode.dl_count.overflow = 0xffff;
+		securitydecode.dl_count.seq_num =  0x23;
+		securitydecode.ul_count.overflow = 0xffff;
+		securitydecode.ul_count.seq_num =  0x23;
+		securitydecode.knas_enc[0] = 0x14;
+		securitydecode.selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
+		securitydecode.knas_int[0] = 0x41;
+		
+		fivegmm_security_context_flag ++;
+	}
 
 	//decode the NAS message (using NAS lib)
-	decoder_rc = nas_message_decode (datavalue, &nas_msg, sizeof(datavalue), security, &decode_status);
-	Logger::smf_app().debug("NAS msg type %d ", nas_msg.plain.sm.header.message_type);
+	decoder_rc = nas_message_decode (datavalue, &nas_msg, n1SmMsgLen/2, &securitydecode, &decode_status);
+	Logger::smf_app().debug("NAS msg type 0x%x ", nas_msg.plain.sm.header.message_type);
 
-	Logger::smf_app().debug("NAS header decode, extended_protocol_discriminator %d, security_header_type:%d,sequence_number:%d,message_authentication_code:%d\n",
+	Logger::smf_app().debug("NAS header decode, extended_protocol_discriminator 0x%x, security_header_type:0x%x,sequence_number:0x%x,message_authentication_code:0x%x\n",
 			nas_msg.header.extended_protocol_discriminator,
 			nas_msg.header.security_header_type,
 			nas_msg.header.sequence_number,
 			nas_msg.header.message_authentication_code);
 
-	Logger::smf_app().debug("NAS msg type %d ", nas_msg.plain.sm.header.message_type);
+	Logger::smf_app().debug("NAS msg type 0x%x ", nas_msg.plain.sm.header.message_type);
 
 	//nas_message_decode test
 	switch(nas_msg.plain.sm.header.message_type)

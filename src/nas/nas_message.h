@@ -6,6 +6,12 @@
 #include "sm_msg.h"
 #include "common_types.h"
 
+/***********************************/
+/********test mac and encrypt/decrypt********/
+/***********************************/
+#define DIRECTION__ 1//SECU_DIRECTION_DOWNLINK
+#define TEST_MAC_ENCRYPT_DECRYPT__	0
+
 
 #define NAS_MESSAGE_SECURITY_HEADER_SIZE    7  //7*8bits
 

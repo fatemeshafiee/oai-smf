@@ -97,6 +97,7 @@ int decode_pdu_session_modification_command( pdu_session_modification_command_ms
 					pdu_session_modification_command->presence |= PDU_SESSION_MODIFICATION_COMMAND_QOS_RULES_PRESENCE;
 				}
 			break;
+			/*
 			case PDU_SESSION_MODIFICATION_COMMAND_MAPPED_EPS_BEARER_CONTEXTS_IEI:
 				if((decoded_result = decode_mapped_eps_bearer_contexts (&pdu_session_modification_command->mappedepsbearercontexts, PDU_SESSION_MODIFICATION_COMMAND_MAPPED_EPS_BEARER_CONTEXTS_IEI, buffer+decoded,len-decoded))<0)
 					return decoded_result;
@@ -106,6 +107,7 @@ int decode_pdu_session_modification_command( pdu_session_modification_command_ms
 					pdu_session_modification_command->presence |= PDU_SESSION_MODIFICATION_COMMAND_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE;
 				}
 			break;
+			*/
 			case PDU_SESSION_MODIFICATION_COMMAND_QOS_FLOW_DESCRIPTIONS_IEI:
 				if((decoded_result = decode_qos_flow_descriptions (&pdu_session_modification_command->qosflowdescriptions, PDU_SESSION_MODIFICATION_COMMAND_QOS_FLOW_DESCRIPTIONS_IEI, buffer+decoded,len-decoded))<0)
 					return decoded_result;
@@ -200,7 +202,7 @@ int encode_pdu_session_modification_command( pdu_session_modification_command_ms
 	    else
 	        encoded+=encoded_result;
 	}
-
+/*
 	if((pdu_session_modification_command->presence & PDU_SESSION_MODIFICATION_COMMAND_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE) == PDU_SESSION_MODIFICATION_COMMAND_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE)
     {
 	    if((encoded_result = encode_mapped_eps_bearer_contexts (pdu_session_modification_command->mappedepsbearercontexts, PDU_SESSION_MODIFICATION_COMMAND_MAPPED_EPS_BEARER_CONTEXTS_IEI, buffer+encoded,len-encoded))<0)
@@ -208,7 +210,7 @@ int encode_pdu_session_modification_command( pdu_session_modification_command_ms
 	    else
 	        encoded+=encoded_result;
 	}
-
+*/
 	if((pdu_session_modification_command->presence & PDU_SESSION_MODIFICATION_COMMAND_QOS_FLOW_DESCRIPTIONS_PRESENCE) == PDU_SESSION_MODIFICATION_COMMAND_QOS_FLOW_DESCRIPTIONS_PRESENCE)
     {
 	    if((encoded_result = encode_qos_flow_descriptions (pdu_session_modification_command->qosflowdescriptions, PDU_SESSION_MODIFICATION_COMMAND_QOS_FLOW_DESCRIPTIONS_IEI, buffer+encoded,len-encoded))<0)

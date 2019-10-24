@@ -118,6 +118,7 @@ int decode_pdu_session_modification_request( pdu_session_modification_request_ms
 					pdu_session_modification_request->presence |= PDU_SESSION_MODIFICATION_REQUEST_QOS_FLOW_DESCRIPTIONS_PRESENCE;
 				}
 			break;
+			/*
 			case PDU_SESSION_MODIFICATION_REQUEST_MAPPED_EPS_BEARER_CONTEXTS_IEI:
 				if((decoded_result = decode_mapped_eps_bearer_contexts (&pdu_session_modification_request->mappedepsbearercontexts, PDU_SESSION_MODIFICATION_REQUEST_MAPPED_EPS_BEARER_CONTEXTS_IEI, buffer+decoded,len-decoded))<0)
 					return decoded_result;
@@ -127,6 +128,7 @@ int decode_pdu_session_modification_request( pdu_session_modification_request_ms
 					pdu_session_modification_request->presence |= PDU_SESSION_MODIFICATION_REQUEST_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE;
 				}
 			break;
+			*/
 			case PDU_SESSION_MODIFICATION_REQUEST_E_P_C_O_IEI:
 				if((decoded_result = decode_extended_protocol_configuration_options (&pdu_session_modification_request->extendedprotocolconfigurationoptions, PDU_SESSION_MODIFICATION_REQUEST_E_P_C_O_IEI, buffer+decoded,len-decoded))<0)
 					return decoded_result;
@@ -228,7 +230,7 @@ int encode_pdu_session_modification_request( pdu_session_modification_request_ms
 	    else
 	        encoded+=encoded_result;
 	}
-
+/*
 	if((pdu_session_modification_request->presence & PDU_SESSION_MODIFICATION_REQUEST_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE) == PDU_SESSION_MODIFICATION_REQUEST_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE)
 	{
 	    if((encoded_result = encode_mapped_eps_bearer_contexts (pdu_session_modification_request->mappedepsbearercontexts, PDU_SESSION_MODIFICATION_REQUEST_MAPPED_EPS_BEARER_CONTEXTS_IEI, buffer+encoded,len-encoded))<0)
@@ -236,7 +238,7 @@ int encode_pdu_session_modification_request( pdu_session_modification_request_ms
 	    else
 	        encoded+=encoded_result;
 	}
-
+*/
 	if((pdu_session_modification_request->presence & PDU_SESSION_MODIFICATION_REQUEST_E_P_C_O_PRESENCE) == PDU_SESSION_MODIFICATION_REQUEST_E_P_C_O_PRESENCE)
 	{
 	    if((encoded_result = encode_extended_protocol_configuration_options (pdu_session_modification_request->extendedprotocolconfigurationoptions, PDU_SESSION_MODIFICATION_REQUEST_E_P_C_O_IEI, buffer+encoded,len-encoded))<0)
