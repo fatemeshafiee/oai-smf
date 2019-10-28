@@ -617,9 +617,11 @@ static int _nas_message_encrypt (
         /*
          * length in bits
          */
-        //stream_cipher.blength = length << 3;
+        stream_cipher.blength = length << 3;
+		//If the test or use encrypt opens the next line,otherwise close
         //nas_stream_encrypt_nea1 (&stream_cipher, (uint8_t*)dest);
         //OAILOG_FUNC_RETURN (LOG_NAS, length);
+        //Open the next line without testing or using encryption,otherwise close
         memcpy (dest, src, length);
         return length;
           }
@@ -960,14 +962,31 @@ static int _nas_message_decrypt (
           stream_cipher.count = count;
           stream_cipher.bearer = 0x00;    
           stream_cipher.direction = direction;
-          stream_cipher.message = (uint8_t*)src;
+          //stream_cipher.message = (uint8_t*)src;
+          //modification
+		  uint8_t *src_encrypt = NULL;
+		  src_encrypt = (uint8_t *)calloc(1,length + 3);
+		  memset(src_encrypt,0,sizeof(src_encrypt));
+		  memcpy (src_encrypt, src, length);
+          stream_cipher.message = (uint8_t*)src_encrypt;
           /*
            * length in bits
            */
           stream_cipher.blength = length << 3;
+		  #if 1
           memcpy (dest, src, length);
           //printf("nas_stream_encrypt_nea1 length = %d\n",length);
           //nas_stream_encrypt_nea1 (&stream_cipher, (uint8_t*)dest);
+          //modification
+          #else
+          uint8_t *dest_decrypt = NULL;
+		  dest_decrypt = (uint8_t *)calloc(1,length + 3);
+		  memset(dest_decrypt,0,sizeof(dest_decrypt));
+          nas_stream_encrypt_nea1 (&stream_cipher, (uint8_t*)dest_decrypt);
+          memcpy (dest, dest_decrypt, length);
+		  free(dest_decrypt);
+		  #endif
+		  free(src_encrypt);
           /*
            * Decode the first octet (security header type or EPS bearer identity,
            * * * * and protocol discriminator)
