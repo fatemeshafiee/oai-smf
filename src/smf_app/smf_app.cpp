@@ -46,6 +46,7 @@
 extern "C"{
 #include "nas_message.h"
 #include "mmData.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_setup_request.h"
 }
 
 #include <stdexcept>
@@ -2361,41 +2362,13 @@ void smf_app::create_n1_sm_container(std::shared_ptr<itti_n11_create_sm_context_
 	//TODO: should work with BUPT to finish this function
 }
 
-#include  "Ngap_ProtocolIE-Field.h"
-#include  "Ngap_NGAP-PDU.h"
-#include  "Ngap_ProcedureCode.h"
-//#include  "Ngap_InitiatingMessage.h"
-#include  "Ngap_Criticality.h"
-#include  "Ngap_PDUSessionResourceSetupRequest.h"
-
-
-#include "Ngap_ProtocolIE-Field.h"
-#include "Ngap_NGAP-PDU.h"
-//#include "Ngap_InitiatingMessage.h"
-
-#include  "INTEGER.h"
-#include  "asn_SEQUENCE_OF.h"
-
-void add_pdu_session_resource_setup_request_ie(Ngap_PDUSessionResourceSetupRequest_t *ngapPDUSessionResourceSetupRequest, Ngap_PDUSessionResourceSetupRequestIEs_t *ie) 
-{
-   int ret;
-   ret = ASN_SEQUENCE_ADD(&ngapPDUSessionResourceSetupRequest->protocolIEs.list, ie);
-   if ( ret != 0 ) {
-	   fprintf(stderr, "Failed to add ie\n");
-	   return ;
-   }
-   return ;
-}
-
 //------------------------------------------------------------------------------
 void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str)
 {
 	//TODO: should work with BUPT to finish this function
 	Logger::smf_app().info("Create N2 SM Information, ngap message type %d, ie type %d\n", ngap_msg_type, ngap_ie_type);
 
-    Ngap_PDUSessionResourceSetupRequest_t *ngapPDUSessionResourceSetupRequest =  NULL;;
-	Ngap_PDUSessionResourceSetupRequestIEs_t *ie  = NULL;
-	add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
+    make_NGAP_pdu_session_resource_setup_request();
    
 }
 

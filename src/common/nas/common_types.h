@@ -43,6 +43,8 @@ typedef uint32_t                 sctp_assoc_id_t;
 #define AMF_UE_NGAP_ID_FMT         "0x%08"PRIX32
 #define INVALID_AMF_UE_NGAP_ID  0x0
 
+#define AMF_UE_NGAP_ID_MASK_       0x0000FFFFFFFFFF
+
 
 typedef uint8_t       ksi_t;
 #define KSI_NO_KEY_AVAILABLE     0x07

@@ -25,11 +25,15 @@ include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/gtpv2c)
 include_directories(${SRC_TOP_DIR}/pfcp)
 include_directories(${SRC_TOP_DIR}/smf)
+include_directories(${SRC_TOP_DIR}/ngap)
+include_directories(${SRC_TOP_DIR}/NgapSmfLayer)
 include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
 
 add_library (SMF STATIC
+  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_setup_request.c
+  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_setup_response.c
   smf_app.cpp
   smf_config.cpp
   smf_context.cpp
