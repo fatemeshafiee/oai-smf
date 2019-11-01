@@ -4,6 +4,14 @@
 #include "common_types.h"
 #include "conversions.h"
 
+#include "Ngap_ProcedureCode.h"
+#include "Ngap_TriggeringMessage.h"
+#include "Ngap_Criticality.h"
+#include "Ngap_CriticalityDiagnostics-IE-Item.h"
+
+
+
+
 #if  0
 #include "Ngap_AdditionalQosFlowInformation.h"
 #include "Ngap_AllocationAndRetentionPriority.h"

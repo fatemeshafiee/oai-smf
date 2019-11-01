@@ -21,7 +21,7 @@
 #include  "OCTET_STRING.h"
 
 #define BUF_LEN   1024
-Ngap_PDUSessionResourceSetupRequestIEs_t  *make_RAN_UE_NGAP_ID(uint32_t rAN_UE_NGAP_ID)
+Ngap_PDUSessionResourceSetupRequestIEs_t  *make_req_RAN_UE_NGAP_ID(uint32_t rAN_UE_NGAP_ID)
 {
 	Ngap_PDUSessionResourceSetupRequestIEs_t *ie;
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestIEs_t));
@@ -35,7 +35,7 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_RAN_UE_NGAP_ID(uint32_t rAN_UE_N
 	return ie;
 }
 
-Ngap_PDUSessionResourceSetupRequestIEs_t  *make_AMF_UE_NGAP_ID(uint64_t amf_UE_NGAP_ID)
+Ngap_PDUSessionResourceSetupRequestIEs_t  *make_req_AMF_UE_NGAP_ID(uint64_t amf_UE_NGAP_ID)
 {
     Ngap_PDUSessionResourceSetupRequestIEs_t *ie = NULL;
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestIEs_t));
@@ -153,7 +153,7 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_request()
 	pdu->choice.initiatingMessage = calloc(1, sizeof(Ngap_InitiatingMessage_t));
 	pdu->choice.initiatingMessage->procedureCode = Ngap_ProcedureCode_id_PDUSessionResourceSetup;
 	pdu->choice.initiatingMessage->criticality = Ngap_Criticality_reject;
-	pdu->choice.initiatingMessage->value.present = Ngap_InitiatingMessage__value_PR_NGSetupRequest;
+	pdu->choice.initiatingMessage->value.present = Ngap_InitiatingMessage__value_PR_PDUSessionResourceSetupRequest;
 
     Ngap_PDUSessionResourceSetupRequest_t *ngapPDUSessionResourceSetupRequest = NULL;
 	ngapPDUSessionResourceSetupRequest = &pdu->choice.initiatingMessage->value.choice.PDUSessionResourceSetupRequest;
@@ -161,26 +161,25 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_request()
 	Ngap_PDUSessionResourceSetupRequestIEs_t  *ie;
 
     //Ngap_AMF_UE_NGAP_ID_t
-
 	uint64_t  amf_ue_ngap_id = 0x80;
-	ie  = make_AMF_UE_NGAP_ID(amf_ue_ngap_id);
+	ie  = make_req_AMF_UE_NGAP_ID(amf_ue_ngap_id);
     add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
 
 	//Ngap_AMF_UE_NGAP_ID_t
     uint32_t  ran_ue_ngap_id = 0x81;
-	ie  = make_RAN_UE_NGAP_ID(ran_ue_ngap_id);
-	//add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
+	ie  = make_req_RAN_UE_NGAP_ID(ran_ue_ngap_id);
+	add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
 
      
 	//Ngap_RANPagingPriority_t
 	long ranPagingPriority  = 0x82;
     ie  = make_RANPagingPriority(ranPagingPriority);
-	//add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
+	add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
 	
 	//Ngap_NAS_PDU_t
 	const char  *nas_pdu  =  "nas_pdu";
     ie  = make_NAS_PDU(nas_pdu);
-    //add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
+    add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
      
 	//Ngap_PDUSessionResourceSetupListSUReq_t
 	ie  = make_PDUSessionResourceSetupListSUReq();
@@ -196,16 +195,13 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_request()
 		slice,
 		pDUSessionResourceSetupRequestTransfer);
 	
-    //ASN_SEQUENCE_ADD(&ie->value.choice.SupportedTAList.list, item);
-
+    ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceSetupListSUReq.list, item);
+    add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
 	
   
 	printf("0000000000000, make_NGAP_pdu_session_resource_setup_request\n");
     return pdu;
 }
-
-
-
 
 int
 ngap_amf_handle_ng_pdu_session_resource_setup_request(
@@ -266,8 +262,8 @@ ngap_amf_handle_ng_pdu_session_resource_setup_request(
     NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceSetupRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_AMF_UE_NGAP_ID, false);
     if (ie) 
 	{  
-	   //asn_INTEGER2ulong(&ie->value.choice.AMF_UE_NGAP_ID, &amf_ue_ngap_id);
-	   //printf("amf_ue_ngap_id, 0x%x\n", amf_ue_ngap_id);
+	   asn_INTEGER2ulong(&ie->value.choice.AMF_UE_NGAP_ID, &amf_ue_ngap_id);
+	   printf("amf_ue_ngap_id, 0x%x\n", amf_ue_ngap_id);
     }
 
     //Ngap_AMF_UE_NGAP_ID_t
@@ -275,7 +271,7 @@ ngap_amf_handle_ng_pdu_session_resource_setup_request(
     if (ie) 
 	{  
 	   ran_ue_ngap_id = ie->value.choice.RAN_UE_NGAP_ID;
-	   //printf("ran_ue_ngap_id, 0x%x\n", ran_ue_ngap_id);
+	   printf("ran_ue_ngap_id, 0x%x\n", ran_ue_ngap_id);
     }
 
 	//RANPagingPriority
@@ -283,7 +279,7 @@ ngap_amf_handle_ng_pdu_session_resource_setup_request(
     if (ie) 
 	{  
 	   ranPagingPriority = ie->value.choice.RANPagingPriority;
-	   //printf("ranPagingPriority, 0x%x\n", ranPagingPriority);
+	   printf("ranPagingPriority, 0x%x\n", ranPagingPriority);
     }
 
     //NAS_PDU
@@ -293,7 +289,7 @@ ngap_amf_handle_ng_pdu_session_resource_setup_request(
 	   nas_pdu      = (char *) ie->value.choice.NAS_PDU.buf;
        nas_pdu_size = (int) ie->value.choice.NAS_PDU.size;
 	  
-	   //printf("RANNodeName, nas_pdu_size:%d, nas_pdu:%s,\n", nas_pdu_size, nas_pdu);
+	   printf("RANNodeName, nas_pdu_size:%d, nas_pdu:%s,\n", nas_pdu_size, nas_pdu);
 	}
 	
 
