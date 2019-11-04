@@ -155,6 +155,7 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_release_command()
 	ie          =  make_PDUSessionResourceToReleaseListRelCmd();
 	relCmdItem  =  make_PDUSessionResourceToReleaseItemRelCmd(0x80, "test_relcmd_setup");
 	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceToReleaseListRelCmd.list, relCmdItem);
+	add_pdu_session_resource_release_command_ie(ngapPDUSessionResourceReleaseCommand, ie);
 	 
 
 	printf("0000000000000, make_NGAP_pdu_session_resource_release_command\n");
