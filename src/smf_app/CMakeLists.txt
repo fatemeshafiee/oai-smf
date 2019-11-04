@@ -38,6 +38,7 @@ add_library (SMF STATIC
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_release_response.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_modify_request.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_modify_response.c
+  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_notify.c
   smf_app.cpp
   smf_config.cpp
   smf_context.cpp
