@@ -2385,8 +2385,11 @@ void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_contex
 			 printf("don't know ngap_ie_type:%d\n", ngap_ie_type);
 	}
     #endif
-    make_NGAP_pdu_session_resource_setup_request();
-	make_NGAP_pdu_session_resource_setup_response();
+
+	make_NGAP_PduSessionResourceSetupRequest("", "");
+	
+    //make_NGAP_pdu_session_resource_setup_request();
+	//make_NGAP_pdu_session_resource_setup_response();
 	
        
    
