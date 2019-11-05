@@ -2,8 +2,8 @@
 #include  "Ngap_TAI.h"
 #include  "Ngap_NR-CGI.h"
 
-//#include  "asn1_conversions.h"
-//#include  "conversions.h"
+#include  "asn1_conversions.h"
+#include  "conversions.h"
 
 
 #include  "ng_pdu_session_resource_release_response.h"
@@ -47,8 +47,8 @@ Ngap_PDUSessionResourceReleaseResponseIEs_t  * make_release_resp_CriticalityDiag
 	Ngap_PDUSessionResourceReleaseResponseIEs_t *ie;
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceReleaseResponseIEs_t));
 	
-	ie->id = Ngap_ProtocolIE_ID_id_CriticalityDiagnostics;
-	ie->criticality = Ngap_Criticality_ignore;
+	ie->id            = Ngap_ProtocolIE_ID_id_CriticalityDiagnostics;
+	ie->criticality   = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceReleaseResponseIEs__value_PR_CriticalityDiagnostics;
 	
     return ie;
@@ -60,7 +60,7 @@ Ngap_PDUSessionResourceReleaseResponseIEs_t  *make_release_resp_RAN_UE_NGAP_ID(u
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceReleaseResponseIEs_t));
 
 	ie->id = Ngap_ProtocolIE_ID_id_RAN_UE_NGAP_ID;
-	ie->criticality = Ngap_Criticality_reject;
+	ie->criticality = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceReleaseResponseIEs__value_PR_RAN_UE_NGAP_ID;
 	ie->value.choice.RAN_UE_NGAP_ID = rAN_UE_NGAP_ID ;
 
@@ -96,6 +96,9 @@ Ngap_PDUSessionResourceReleasedItemRelRes_t  *make_release_resp_PDUSessionResour
 
 	item->pDUSessionID =  pDUSessionID;
 	OCTET_STRING_fromBuf (&item->pDUSessionResourceReleaseResponseTransfer, pDUSessionResourceReleaseResponseTransfer, strlen(pDUSessionResourceReleaseResponseTransfer));
+
+	printf("ReleaseResponse,pDUSessionID:0x%x,Transfer:%s\n",pDUSessionID , pDUSessionResourceReleaseResponseTransfer);
+
 	return item;
 }
 Ngap_PDUSessionResourceReleaseResponseIEs_t  * make_release_resp_PDUSessionResourceReleasedListRelRes()
@@ -141,7 +144,7 @@ void add_pdu_session_resource_release_response_ie(Ngap_PDUSessionResourceRelease
     }
 	return ;
 }
-Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_release_response()
+Ngap_NGAP_PDU_t *  ngap_generate_ng_release_response(const char *inputBuf)
 {
     Ngap_NGAP_PDU_t * pdu = NULL;
 	pdu = calloc(1, sizeof(Ngap_NGAP_PDU_t));
@@ -174,7 +177,7 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_release_response()
     releaseItem  =  make_release_resp_PDUSessionResourceReleasedItemRelRes(0x79, "test_release_item");
 	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceReleasedListRelRes.list, releaseItem);
 	add_pdu_session_resource_release_response_ie(ngapPDUSessionResourceReleaseResponse, ie);
-
+    
 
     //UserLocationInformation
 	ie = make_release_resp_UserLocationInformation();
@@ -189,28 +192,48 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_release_response()
     //pLMNIdentity;
     char plmn[3] = {0x01,0x02,0x03};
 	OCTET_STRING_fromBuf(&nr->nR_CGI.pLMNIdentity, (const char*)plmn, sizeof(plmn));
+	
+	printf("nr->nR_CGI.pLMNIdentity:0x%x,0x%x,0x%x\n",
+	nr->nR_CGI.pLMNIdentity.buf[0],nr->nR_CGI.pLMNIdentity.buf[1], nr->nR_CGI.pLMNIdentity.buf[2]);
+	
     
 	//CellIdentity;
-	int cellIden =  0x79;
-	uint32_t cellIdentity = htonl(cellIden);
-	nr->nR_CGI.nRCellIdentity.buf = calloc(4, sizeof(uint8_t));
-	nr->nR_CGI.nRCellIdentity.size = 4;
-	memcpy(nr->nR_CGI.nRCellIdentity.buf, &cellIdentity, 4);
+	char  cellIdentity[5] = {0x00,0x01,0x02,0x03,0x04};   //36bits
+	nr->nR_CGI.nRCellIdentity.buf = calloc(5, sizeof(uint8_t));
+	nr->nR_CGI.nRCellIdentity.size = 5;
+	memcpy(nr->nR_CGI.nRCellIdentity.buf, &cellIdentity, 5);
 	nr->nR_CGI.nRCellIdentity.bits_unused = 0x04;
-	
-	
+
+
+    printf("nR_CGI->nRCellIdentity:0x%x,0x%x,0x%x,0x%x,0x%x\n", 
+	nr->nR_CGI.nRCellIdentity.buf[0],nr->nR_CGI.nRCellIdentity.buf[1],nr->nR_CGI.nRCellIdentity.buf[2],
+	nr->nR_CGI.nRCellIdentity.buf[3],nr->nR_CGI.nRCellIdentity.buf[4]);
+
+   
 	//Ngap_TAI_t	 tAI;
     //pLMNIdentity;
     char tai_pLMNIdentity[3] = {0x00,0x01,0x02};
 	OCTET_STRING_fromBuf(&nr->tAI.pLMNIdentity, (const char*)tai_pLMNIdentity, sizeof(tai_pLMNIdentity));
+    printf("tAI.pLMNIdentity:0x%x,0x%x,0x%x,\n",
+	nr->tAI.pLMNIdentity.buf[0],nr->tAI.pLMNIdentity.buf[1],nr->tAI.pLMNIdentity.buf[2]);
+  
 	//tAC;
 	char tai_tAC[3] = {0x00,0x01,0x02};
 	OCTET_STRING_fromBuf(&nr->tAI.tAC, (const char*)tai_tAC, sizeof(tai_tAC));
 	
+	printf("tAI.tAC:0x%x,0x%x,0x%x,\n",
+	nr->tAI.tAC.buf[0],nr->tAI.tAC.buf[1],nr->tAI.tAC.buf[2]);
+	
+	
 	//Ngap_TimeStamp_t	*timeStamp;	/* OPTIONAL */
 
+    Ngap_TimeStamp_t	*ptimeStamp = calloc(1, sizeof(Ngap_TimeStamp_t));
+	nr->timeStamp = ptimeStamp;
+	
     uint8_t timeStamp[4] = { 0x02, 0xF8, 0x29, 0x06 };
-	OCTET_STRING_fromBuf(nr->timeStamp, (const char*)timeStamp, 4);	
+	OCTET_STRING_fromBuf(ptimeStamp, (const char*)timeStamp, 4);
+	printf("timestamp:0x%x,0x%x,0x%x,0x%x\n", 
+	ptimeStamp->buf[0],ptimeStamp->buf[1],ptimeStamp->buf[2],ptimeStamp->buf[3]);
 	
 	//userLocationInformationN3IWF;
 
@@ -218,31 +241,41 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_release_response()
 	
     
 	//CriticalityDiagnostics
-	Ngap_CriticalityDiagnostics_t	 CriticalityDiagnostics;
     ie = make_release_resp_CriticalityDiagnostics();
 
-    Ngap_ProcedureCode_t  *procedureCode = calloc(1, sizeof(Ngap_ProcedureCode_t));
+	Ngap_ProcedureCode_t  *procedureCode = calloc(1, sizeof(Ngap_ProcedureCode_t));
 	*procedureCode = 0x81;
     ie ->value.choice.CriticalityDiagnostics.procedureCode  = procedureCode;
 
 	Ngap_TriggeringMessage_t  *triggeringMessage = calloc(1, sizeof(Ngap_TriggeringMessage_t));
-	*triggeringMessage = 0x82;
+	*triggeringMessage = 0x01;
     ie ->value.choice.CriticalityDiagnostics.triggeringMessage = triggeringMessage;
 
 	Ngap_Criticality_t  *procedureCriticality = calloc(1, sizeof(Ngap_Criticality_t));
-	*procedureCriticality = 0x83;
+	*procedureCriticality = 0x01;
 	ie ->value.choice.CriticalityDiagnostics.procedureCriticality = procedureCriticality;
 
+    printf("procedureCode:0x%x,triggeringMessage:0x%x,procedureCriticality:0x%x\n", *procedureCode, *triggeringMessage,*procedureCriticality);	
 
-    Ngap_CriticalityDiagnostics_IE_Item_t  *criticalityDiagnosticsIEsItem = calloc(1, sizeof(Ngap_CriticalityDiagnostics_IE_Item_t));
-	criticalityDiagnosticsIEsItem->iECriticality = 0x85;
-	criticalityDiagnosticsIEsItem->iE_ID = 0x86;
-	criticalityDiagnosticsIEsItem->typeOfError = 0x87;
 
-    ASN_SEQUENCE_ADD(&ie->value.choice.CriticalityDiagnostics.iEsCriticalityDiagnostics->list, &criticalityDiagnosticsIEsItem);
+    Ngap_CriticalityDiagnostics_IE_List_t   *pCriticalityDiagnostics_IE_List  = calloc(1, sizeof(Ngap_CriticalityDiagnostics_IE_List_t));
+    Ngap_CriticalityDiagnostics_IE_Item_t   *critiDiagIEsItem = calloc(1, sizeof(Ngap_CriticalityDiagnostics_IE_Item_t));
+	critiDiagIEsItem->iECriticality = 0x01;
+	critiDiagIEsItem->iE_ID = 0x01;
+	critiDiagIEsItem->typeOfError = 0x00;
+
+
+    printf("iECriticality:0x%x,iE_ID:0x%x,typeOfError:0x%x\n", 
+	critiDiagIEsItem->iECriticality,
+	critiDiagIEsItem->iE_ID,
+	critiDiagIEsItem->typeOfError);
+
+
+	ie->value.choice.CriticalityDiagnostics.iEsCriticalityDiagnostics = pCriticalityDiagnostics_IE_List;
+    
+    ASN_SEQUENCE_ADD(&pCriticalityDiagnostics_IE_List->list, critiDiagIEsItem);
 	add_pdu_session_resource_release_response_ie(ngapPDUSessionResourceReleaseResponse, ie);
   
-	printf("0000000000000, make_NGAP_pdu_session_resource_release_response\n");
     return pdu;
 }
 
@@ -331,8 +364,9 @@ ngap_amf_handle_ng_pdu_session_resource_release_response(
 		    pDUSessionID                                    = releaseRespIes_p->pDUSessionID;
 	 	    pDUSessionResourceReleaseResponseTransfer       = releaseRespIes_p->pDUSessionResourceReleaseResponseTransfer.buf;
 	        pDUSessionResourceReleaseResponseTransfer_size  = releaseRespIes_p->pDUSessionResourceReleaseResponseTransfer.size;
+
+			printf("ReleaseResponse,pDUSessionID:0x%x,Transfer:%s\n",pDUSessionID , pDUSessionResourceReleaseResponseTransfer);
 		}
-	   
     }
 
 	//UserLocationInformation
@@ -351,6 +385,27 @@ ngap_amf_handle_ng_pdu_session_resource_release_response(
 					Ngap_UserLocationInformationNR_t  *pUserLocationInformationNR = ie->value.choice.UserLocationInformation.choice.userLocationInformationNR;
 
 					DevAssert(pUserLocationInformationNR != NULL);
+
+
+                     //CGI mandator
+		            const Ngap_NR_CGI_t * const nR_CGI = &pUserLocationInformationNR->nR_CGI;
+                    //pLMNIdentity
+		            DevAssert(nR_CGI != NULL);
+		            DevAssert(nR_CGI->pLMNIdentity.size == 3);
+		            TBCD_TO_PLMN_T(&nR_CGI->pLMNIdentity, &nr_cgi.plmn);
+					
+					printf("nnR_CGI->pLMNIdentity:0x%x,0x%x,0x%x\n", 
+					nR_CGI->pLMNIdentity.buf[0],nR_CGI->pLMNIdentity.buf[1],nR_CGI->pLMNIdentity.buf[2]);
+
+		            //nRCellIdentity
+		            //DevAssert(nR_CGI->nRCellIdentity.size == 36);
+		            BIT_STRING_TO_CELL_IDENTITY (&nR_CGI->nRCellIdentity, nr_cgi.cell_identity);
+					
+                    printf("nR_CGI->nRCellIdentity:0x%x,0x%x,0x%x,0x%x,0x%x\n", 
+					nR_CGI->nRCellIdentity.buf[0],nR_CGI->nRCellIdentity.buf[1],nR_CGI->nRCellIdentity.buf[2],
+					nR_CGI->nRCellIdentity.buf[3],nR_CGI->nRCellIdentity.buf[4]);
+
+                    //Tai
 		            const Ngap_TAI_t	  * const  tAI = &pUserLocationInformationNR->tAI;
 				     
 		            //TAC
@@ -358,23 +413,27 @@ ngap_amf_handle_ng_pdu_session_resource_release_response(
 		            DevAssert(tAI->tAC.size == 3);
               
 		            nr_tai.tac = asn1str_to_u24(&tAI->tAC);
+					
+					printf("tAI->tAC:0x%x,0x%x,0x%x\n", 
+					tAI->tAC.buf[0],tAI->tAC.buf[1],tAI->tAC.buf[2]);
 				  
 		             //pLMNIdentity
 		            DevAssert (tAI->pLMNIdentity.size == 3);
 		            TBCD_TO_PLMN_T(&tAI->pLMNIdentity, &nr_tai.plmn);
-	       				
-		            //CGI mandator
-		            const Ngap_NR_CGI_t * const nR_CGI = &pUserLocationInformationNR->nR_CGI;
-                    //pLMNIdentity
-		            DevAssert(nR_CGI != NULL);
-		            DevAssert(nR_CGI->pLMNIdentity.size == 3);
-		            TBCD_TO_PLMN_T(&nR_CGI->pLMNIdentity, &nr_cgi.plmn);
-						 
-		            //nRCellIdentity
-		            //DevAssert(nR_CGI->nRCellIdentity.size == 36);
-		            BIT_STRING_TO_CELL_IDENTITY (&nR_CGI->nRCellIdentity, nr_cgi.cell_identity);
-   
-					
+
+					printf("tAI->pLMNIdentity:0x%x,0x%x,0x%x\n", 
+					tAI->pLMNIdentity.buf[0],tAI->pLMNIdentity.buf[1],tAI->pLMNIdentity.buf[2]);
+		           
+                    
+					//timeStamp
+					if(pUserLocationInformationNR->timeStamp)
+					{
+					     char *timeStamp   = pUserLocationInformationNR->timeStamp->buf;
+					     int   size        = pUserLocationInformationNR->timeStamp->size;
+
+						 for(int i = 0; i < size; i++)
+					         printf("timeStamp:0x%x\n", timeStamp[i]);
+					}
 				}
 				break;
 				case Ngap_UserLocationInformation_PR_userLocationInformationN3IWF:
@@ -394,6 +453,7 @@ ngap_amf_handle_ng_pdu_session_resource_release_response(
 	   triggeringMessage     = *ie->value.choice.CriticalityDiagnostics.triggeringMessage;	
 	   procedureCriticality  = *ie->value.choice.CriticalityDiagnostics.procedureCriticality;
 
+	   printf("procedureCode:0x%x,triggeringMessage:0x%x,procedureCriticality:0x%x\n", procedureCode, triggeringMessage,procedureCriticality);  
 
 	   Ngap_CriticalityDiagnostics_IE_List_t   *criticality_container  = ie->value.choice.CriticalityDiagnostics.iEsCriticalityDiagnostics; 
        for (i  = 0;i < criticality_container->list.count; i++)
@@ -405,11 +465,80 @@ ngap_amf_handle_ng_pdu_session_resource_release_response(
 		    iECriticality         = criticalityIes_p->iECriticality;
 	        iE_ID                 = criticalityIes_p->iE_ID;
 	        typeOfError           = criticalityIes_p->typeOfError;
+
+			printf("iECriticality:0x%x,iE_ID:0x%x,typeOfError:0x%x\n", iECriticality, iE_ID, typeOfError);
 	   }
-	   
-	   
 	}
 	
 	return rc;
+}
+
+
+int  make_NGAP_PduSessionResourceReleaseResponse(const char *inputBuf, const char *OutputBuf)
+{
+
+    printf("pdu session  resource release response, start--------------------\n\n");
+
+    int ret = 0;
+	int rc  = RETURNok;
+	const sctp_assoc_id_t assoc_id  = 0;
+    const sctp_stream_id_t stream   = 0;
+	Ngap_NGAP_PDU_t  message = {0};
+
+	//wys:  1024 ?
+	size_t buffer_size = 1024;  
+	void *buffer = calloc(1,buffer_size);
+	asn_enc_rval_t er;	
+	
+	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_release_response(inputBuf);
+	if(!pdu)
+		goto ERROR;
+
+    asn_fprint(stderr, &asn_DEF_Ngap_NGAP_PDU, pdu);
+
+    ret  =  check_NGAP_pdu_constraints(pdu);
+    if(ret < 0) 
+	{
+		printf("ng setup response Constraint validation  failed\n");
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+
+	//encode
+	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
+	if(er.encoded < 0)
+	{
+		printf("ng setup response encode failed,er.encoded:%d\n",er.encoded);
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+  		 
+	bstring msgBuf = blk2bstr(buffer, er.encoded);
+
+    //decode
+    ngap_amf_decode_pdu(&message, msgBuf);
+	ngap_amf_handle_ng_pdu_session_resource_release_response(0,0, &message);
+
+
+    //Free pdu
+    ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+	printf("pdu session  resource release response, finish--------------------\n\n");
+    return rc;
+
+ERROR:
+	//Free pdu
+	if(pdu)
+        ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+ 	return rc;  
 }
 

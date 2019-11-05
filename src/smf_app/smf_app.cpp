@@ -49,6 +49,8 @@ extern "C"{
 #include "../NgapSmfLayer/ng_pdu_session_resource_setup_request.h"
 #include "../NgapSmfLayer/ng_pdu_session_resource_setup_response.h"
 #include "../NgapSmfLayer/ng_pdu_session_resource_release_command.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_release_response.h"
+
 }
 
 #include <stdexcept>
@@ -2387,6 +2389,8 @@ void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_contex
 	make_NGAP_PduSessionResourceSetupRequest("", "");
 	make_NGAP_PduSessionResourceSetupResponse("", "");
 	make_NGAP_PduSessionResourceReleaseCommand("", "");
+	make_NGAP_PduSessionResourceReleaseResponse("", "");
+	
 	//make_NGAP_PduSessionResourceReleaseCommand("", "");
 	
     //make_NGAP_pdu_session_resource_setup_request();

@@ -205,8 +205,7 @@ Ngap_NGAP_PDU_t *ngap_generate_ng_setup_response(const char *inputBuf)
 
 	ie->value.choice.CriticalityDiagnostics.iEsCriticalityDiagnostics = pCriticalityDiagnostics_IE_List;
     
-    int tret = ASN_SEQUENCE_ADD(&pCriticalityDiagnostics_IE_List->list, critiDiagIEsItem);
-    printf("ret:%d\n", tret);
+    ASN_SEQUENCE_ADD(&pCriticalityDiagnostics_IE_List->list, critiDiagIEsItem);
 	add_pdu_session_resource_setup_response_ie(ngapPDUSessionResourceSetupResponse, ie);
   
     return pdu;
