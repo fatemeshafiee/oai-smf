@@ -151,7 +151,7 @@ void add_pdu_session_resource_setup_request_ie(Ngap_PDUSessionResourceSetupReque
 	return ;
 }
 
-Ngap_NGAP_PDU_t *  ngap_generate_ng_setup_response(const char *inputBuf)
+Ngap_NGAP_PDU_t *  ngap_generate_ng_setup_request(const char *inputBuf)
 {
     //inputBuf: pdu_session_resource_setup_request data;
 
@@ -344,6 +344,9 @@ ngap_amf_handle_ng_pdu_session_resource_setup_request(
 
 int  make_NGAP_PduSessionResourceSetupRequest(const char *inputBuf, const char *OutputBuf)
 {
+
+    printf("pdu session  resource setup request, start--------------------\n\n");
+
     int ret = 0;
 	int rc  = RETURNok;
 	const sctp_assoc_id_t assoc_id  = 0;
@@ -355,7 +358,7 @@ int  make_NGAP_PduSessionResourceSetupRequest(const char *inputBuf, const char *
 	void *buffer = calloc(1,buffer_size);
 	asn_enc_rval_t er;	
 	
-	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_setup_response(inputBuf);
+	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_setup_request(inputBuf);
 	if(!pdu)
 		goto ERROR;
 
@@ -392,7 +395,7 @@ int  make_NGAP_PduSessionResourceSetupRequest(const char *inputBuf, const char *
 		free(buffer);
 		buffer = NULL;
 	}
-	
+	printf("pdu session  resource setup request, finish--------------------\n\n");
     return rc;
 
 ERROR:

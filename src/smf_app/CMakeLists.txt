@@ -21,6 +21,7 @@
 include_directories(${SRC_TOP_DIR}/common)
 include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/utils)
+include_directories(${SRC_TOP_DIR}/common/ngap)
 include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/gtpv2c)
 include_directories(${SRC_TOP_DIR}/pfcp)
@@ -32,6 +33,7 @@ include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
 
 add_library (SMF STATIC
+  ${SRC_TOP_DIR}/common/ngap/ngap_common.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_setup_request.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_setup_response.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_release_command.c

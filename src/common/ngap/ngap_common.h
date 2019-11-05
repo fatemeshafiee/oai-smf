@@ -6,9 +6,7 @@
 #include  "conversions.h"
 #include  "bstrlib.h"
 
-
-
-
+#include  "Ngap_NGAP-PDU.h"
 #include  "Ngap_ProcedureCode.h"
 #include  "Ngap_TriggeringMessage.h"
 #include  "Ngap_Criticality.h"
@@ -293,48 +291,8 @@ typedef int (*ngap_message_decoded_callback)(
 
 
 
-int  check_NGAP_pdu_constraints(Ngap_NGAP_PDU_t *pdu)
-{
-	int ret =  -1;
-	char errbuf[512];
-	size_t errlen =sizeof(errbuf);
-	ret = asn_check_constraints(&asn_DEF_Ngap_NGAP_PDU, pdu, errbuf, &errlen);
-	if(ret != 0) 
-	{
-		printf("Constraint validation  failed:%s\n", errbuf);
-	}
-	return ret;
-}
+int  check_NGAP_pdu_constraints(Ngap_NGAP_PDU_t *pdu);
 
-
-int ngap_amf_decode_pdu(Ngap_NGAP_PDU_t *pdu, const_bstring const raw)
-{
-	Ngap_NGAP_PDU_t                     *decoded_pdu = pdu;
-    asn_dec_rval_t                       dec_ret = {(RC_OK)};
-   
-    asn_dec_rval_t rc = asn_decode(NULL,ATS_ALIGNED_CANONICAL_PER,&asn_DEF_Ngap_NGAP_PDU,(void**)&decoded_pdu,bdata(raw),blength(raw));
-    if(rc.code != RC_OK)
-    {
-          printf("asn_decode failed(%d)\n",rc.code);
-    	  return rc.code; 
-    }
-	return rc.code;
-}
-
-int ngap_amf_encode_pdu(Ngap_NGAP_PDU_t * pdu, void *buffer, size_t buffer_size)
-{
-    int rc  = RETURNok;
-    asn_enc_rval_t er;	
-	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
-	if(er.encoded < 0)
-	{
-			printf("ng setup response encode failed,er.encoded:%d\n",er.encoded);
-			rc = RETURNerror;
-			//goto ERROR; 
-	}
-	return rc;	
-}
-
-
+int  ngap_amf_decode_pdu(Ngap_NGAP_PDU_t *pdu, const_bstring const raw);
 
 #endif
