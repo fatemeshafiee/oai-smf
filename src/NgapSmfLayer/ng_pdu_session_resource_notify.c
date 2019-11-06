@@ -2,8 +2,8 @@
 #include  "Ngap_TAI.h"
 #include  "Ngap_NR-CGI.h"
 
-//#include  "asn1_conversions.h"
-//#include  "conversions.h"
+#include  "asn1_conversions.h"
+#include  "conversions.h"
 
 
 #include  "ng_pdu_session_resource_notify.h"
@@ -17,8 +17,8 @@
 
 
 #include  "Ngap_PDUSessionResourceNotifyItem.h"
-#include "Ngap_PDUSessionResourceReleasedListNot.h"
-#include "Ngap_PDUSessionResourceReleasedItemNot.h"
+#include  "Ngap_PDUSessionResourceReleasedListNot.h"
+#include  "Ngap_PDUSessionResourceReleasedItemNot.h"
 
 
 #include  "Ngap_UserLocationInformationNR.h"
@@ -77,6 +77,9 @@ Ngap_PDUSessionResourceNotifyItem_t  *make_notify_PDUSessionResourceNotifyItem (
 
 	item->pDUSessionID =  pDUSessionID;
 	OCTET_STRING_fromBuf (&item->pDUSessionResourceNotifyTransfer, pDUSRModifyNotifyTransfer, strlen(pDUSRModifyNotifyTransfer));
+
+	printf("notifyItem, pDUSessionID:0x%x,transfer:%s\n", pDUSessionID, pDUSRModifyNotifyTransfer);
+
 	return item;
 }
 
@@ -102,7 +105,8 @@ Ngap_PDUSessionResourceReleasedItemNot_t *make_notify_PDUSessionResourceReleased
 	
     item->pDUSessionID = pDUSessionID;
 	OCTET_STRING_fromBuf(&item->pDUSessionResourceNotifyReleasedTransfer, pDUSessionResourceNotify, strlen(pDUSessionResourceNotify));
-	
+
+	printf("ItemNot_t, pDUSessionID:0x%x,transfer:%s\n", pDUSessionID, pDUSessionResourceNotify);
     return item;
 }
 
@@ -112,7 +116,7 @@ Ngap_PDUSessionResourceNotifyIEs_t  * make_notify_PDUSessionResourceReleasedList
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceNotifyIEs_t));
 	
 	ie->id = Ngap_ProtocolIE_ID_id_PDUSessionResourceReleasedListNot;
-	ie->criticality = Ngap_Criticality_reject;
+	ie->criticality = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceNotifyIEs__value_PR_PDUSessionResourceReleasedListNot;
 	
     return ie;
@@ -135,7 +139,7 @@ Ngap_UserLocationInformationNR_t * make_notify_UserLocationInformationNR()
 {
 	Ngap_UserLocationInformationNR_t * nr = NULL;
 	nr =  calloc(1, sizeof(Ngap_UserLocationInformationNR_t));
-	
+	return nr;
 }
 
 void add_pdu_session_resource_notify_ie(Ngap_PDUSessionResourceNotify_t *ngapPDUSessionResourceNotify, Ngap_PDUSessionResourceNotifyIEs_t *ie) {
@@ -147,7 +151,8 @@ void add_pdu_session_resource_notify_ie(Ngap_PDUSessionResourceNotify_t *ngapPDU
     }
 	return ;
 }
-Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_notify()
+Ngap_NGAP_PDU_t *  ngap_generate_ng_notify(const char *inputBuf)
+
 {
     Ngap_NGAP_PDU_t * pdu = NULL;
 	pdu = calloc(1, sizeof(Ngap_NGAP_PDU_t));
@@ -190,7 +195,7 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_notify()
 	add_pdu_session_resource_notify_ie(ngapPDUSessionResourceNotify, ie);
 	
 
-    //UserLocationInformation
+	//UserLocationInformation
 	ie = make_notify_UserLocationInformation();
     //userLocationInformationEUTRA;
 	//userLocationInformationNR;
@@ -203,41 +208,52 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_notify()
     //pLMNIdentity;
     char plmn[3] = {0x01,0x02,0x03};
 	OCTET_STRING_fromBuf(&nr->nR_CGI.pLMNIdentity, (const char*)plmn, sizeof(plmn));
+	
+	printf("nr->nR_CGI.pLMNIdentity:0x%x,0x%x,0x%x\n",
+	nr->nR_CGI.pLMNIdentity.buf[0],nr->nR_CGI.pLMNIdentity.buf[1], nr->nR_CGI.pLMNIdentity.buf[2]);
+	
     
 	//CellIdentity;
-	int cellIden =  0x79;
-	uint32_t cellIdentity = htonl(cellIden);
-	nr->nR_CGI.nRCellIdentity.buf = calloc(4, sizeof(uint8_t));
-	nr->nR_CGI.nRCellIdentity.size = 4;
-	memcpy(nr->nR_CGI.nRCellIdentity.buf, &cellIdentity, 4);
+	char  cellIdentity[5] = {0x00,0x01,0x02,0x03,0x04};   //36bits
+	nr->nR_CGI.nRCellIdentity.buf = calloc(5, sizeof(uint8_t));
+	nr->nR_CGI.nRCellIdentity.size = 5;
+	memcpy(nr->nR_CGI.nRCellIdentity.buf, &cellIdentity, 5);
 	nr->nR_CGI.nRCellIdentity.bits_unused = 0x04;
-	
-	
+
+
+    printf("nR_CGI->nRCellIdentity:0x%x,0x%x,0x%x,0x%x,0x%x\n", 
+	nr->nR_CGI.nRCellIdentity.buf[0],nr->nR_CGI.nRCellIdentity.buf[1],nr->nR_CGI.nRCellIdentity.buf[2],
+	nr->nR_CGI.nRCellIdentity.buf[3],nr->nR_CGI.nRCellIdentity.buf[4]);
+
+   
 	//Ngap_TAI_t	 tAI;
     //pLMNIdentity;
     char tai_pLMNIdentity[3] = {0x00,0x01,0x02};
 	OCTET_STRING_fromBuf(&nr->tAI.pLMNIdentity, (const char*)tai_pLMNIdentity, sizeof(tai_pLMNIdentity));
+    printf("tAI.pLMNIdentity:0x%x,0x%x,0x%x,\n",
+	nr->tAI.pLMNIdentity.buf[0],nr->tAI.pLMNIdentity.buf[1],nr->tAI.pLMNIdentity.buf[2]);
+  
 	//tAC;
 	char tai_tAC[3] = {0x00,0x01,0x02};
 	OCTET_STRING_fromBuf(&nr->tAI.tAC, (const char*)tai_tAC, sizeof(tai_tAC));
 	
+	printf("tAI.tAC:0x%x,0x%x,0x%x,\n",
+	nr->tAI.tAC.buf[0],nr->tAI.tAC.buf[1],nr->tAI.tAC.buf[2]);
+	
 	//Ngap_TimeStamp_t	*timeStamp;	/* OPTIONAL */
-
+    Ngap_TimeStamp_t	*ptimeStamp = calloc(1, sizeof(Ngap_TimeStamp_t));
+	nr->timeStamp = ptimeStamp;
+	
     uint8_t timeStamp[4] = { 0x02, 0xF8, 0x29, 0x06 };
-	OCTET_STRING_fromBuf(nr->timeStamp, (const char*)timeStamp, 4);	
+	OCTET_STRING_fromBuf(ptimeStamp, (const char*)timeStamp, 4);
+	printf("timestamp:0x%x,0x%x,0x%x,0x%x\n", 
+	ptimeStamp->buf[0],ptimeStamp->buf[1],ptimeStamp->buf[2],ptimeStamp->buf[3]);
 	
 	//userLocationInformationN3IWF;
-
 	add_pdu_session_resource_notify_ie(ngapPDUSessionResourceNotify, ie);
 	
-    
-
-	printf("0000000000000, make_NGAP_pdu_session_resource_notify\n");
     return pdu;
 }
-
-
-
 
 int
 ngap_amf_handle_ng_pdu_session_resource_notify(
@@ -275,14 +291,6 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
     long	  pDUReleaseSessionID = 0;
 	char 	  *pDUSessionResourceNotifyReleasedTransfer = NULL;
 	int       pDUSessionResourceNotifyReleasedTransfer_size  =  0;
-
-
-	long	  procedureCode         = 0;	
-	long	  triggeringMessage     = 0;	
-	long	  procedureCriticality  = 0;
-	long	  iECriticality         = 0;
-	long	  iE_ID                 = 0;
-	long 	  typeOfError           = 0;
 
     DevAssert (pdu != NULL);
     //OAILOG_INFO(LOG_NGAP,"----------------------- DECODED NG SETUP RESPONSE NGAP MSG --------------------------\n");
@@ -326,10 +334,12 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
 		    pDUSessionID                               = notifyIes_p->pDUSessionID;
 	 	    pDUSessionResourceNotifyTransfer           = notifyIes_p->pDUSessionResourceNotifyTransfer.buf;
 	        pDUSessionResourceNotifyTransfer_size      = notifyIes_p->pDUSessionResourceNotifyTransfer.size;
+
+		    printf("NotifyItem, pDUSessionID:0x%x,transfer:%s\n", pDUSessionID, pDUSessionResourceNotifyTransfer);
+
 		}
     }
 
-	
 	//PDUSessionResourceReleasedListNot
     NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_PDUSessionResourceReleasedListNot, false);
     if (ie) 
@@ -341,19 +351,19 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
             source_releaseIes_p = source_release_container->list.array[i];
 			
 			if(!source_releaseIes_p)
-			{
-				  continue;
-        	}
+		         continue;
+        	
         	
 		    pDUReleaseSessionID                            = source_releaseIes_p->pDUSessionID;
 	 	    pDUSessionResourceNotifyReleasedTransfer       = source_releaseIes_p->pDUSessionResourceNotifyReleasedTransfer.buf;
 	        pDUSessionResourceNotifyReleasedTransfer_size  = source_releaseIes_p->pDUSessionResourceNotifyReleasedTransfer.size;
+
+	        printf("ItemNot_t, pDUSessionID:0x%x,transfer:%s\n", pDUSessionID, pDUSessionResourceNotifyReleasedTransfer);
 		}
     }
 	
-
 	//UserLocationInformation
-	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceNotifyIEs_t, ie, container, Ngap_PDUSessionResourceNotifyIEs__value_PR_UserLocationInformation, false);
+	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_UserLocationInformation, false);
     if (ie) 
 	{
 		switch(ie->value.choice.UserLocationInformation.present)
@@ -366,8 +376,27 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
 					nr_cgi_t         nr_cgi = {.plmn = {0}, .cell_identity = {0}};
 
 					Ngap_UserLocationInformationNR_t  *pUserLocationInformationNR = ie->value.choice.UserLocationInformation.choice.userLocationInformationNR;
-
 					DevAssert(pUserLocationInformationNR != NULL);
+
+                    //CGI mandator
+		            const Ngap_NR_CGI_t * const nR_CGI = &pUserLocationInformationNR->nR_CGI;
+                    //pLMNIdentity
+		            DevAssert(nR_CGI != NULL);
+		            DevAssert(nR_CGI->pLMNIdentity.size == 3);
+		            TBCD_TO_PLMN_T(&nR_CGI->pLMNIdentity, &nr_cgi.plmn);
+					
+					printf("nnR_CGI->pLMNIdentity:0x%x,0x%x,0x%x\n", 
+					nR_CGI->pLMNIdentity.buf[0],nR_CGI->pLMNIdentity.buf[1],nR_CGI->pLMNIdentity.buf[2]);
+
+		            //nRCellIdentity
+		            //DevAssert(nR_CGI->nRCellIdentity.size == 36);
+		            BIT_STRING_TO_CELL_IDENTITY (&nR_CGI->nRCellIdentity, nr_cgi.cell_identity);
+					
+                    printf("nR_CGI->nRCellIdentity:0x%x,0x%x,0x%x,0x%x,0x%x\n", 
+					nR_CGI->nRCellIdentity.buf[0],nR_CGI->nRCellIdentity.buf[1],nR_CGI->nRCellIdentity.buf[2],
+					nR_CGI->nRCellIdentity.buf[3],nR_CGI->nRCellIdentity.buf[4]);
+
+                    //Tai
 		            const Ngap_TAI_t	  * const  tAI = &pUserLocationInformationNR->tAI;
 				     
 		            //TAC
@@ -375,22 +404,26 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
 		            DevAssert(tAI->tAC.size == 3);
               
 		            nr_tai.tac = asn1str_to_u24(&tAI->tAC);
+					
+					printf("tAI->tAC:0x%x,0x%x,0x%x\n", 
+					tAI->tAC.buf[0],tAI->tAC.buf[1],tAI->tAC.buf[2]);
 				  
 		             //pLMNIdentity
 		            DevAssert (tAI->pLMNIdentity.size == 3);
 		            TBCD_TO_PLMN_T(&tAI->pLMNIdentity, &nr_tai.plmn);
-	       				
-		            //CGI mandator
-		            const Ngap_NR_CGI_t * const nR_CGI = &pUserLocationInformationNR->nR_CGI;
-                    //pLMNIdentity
-		            DevAssert(nR_CGI != NULL);
-		            DevAssert(nR_CGI->pLMNIdentity.size == 3);
-		            TBCD_TO_PLMN_T(&nR_CGI->pLMNIdentity, &nr_cgi.plmn);
-						 
-		            //nRCellIdentity
-		            //DevAssert(nR_CGI->nRCellIdentity.size == 36);
-		            BIT_STRING_TO_CELL_IDENTITY (&nR_CGI->nRCellIdentity, nr_cgi.cell_identity);
-   
+
+					printf("tAI->pLMNIdentity:0x%x,0x%x,0x%x\n", 
+					tAI->pLMNIdentity.buf[0],tAI->pLMNIdentity.buf[1],tAI->pLMNIdentity.buf[2]);
+		           
+					//timeStamp
+					if(pUserLocationInformationNR->timeStamp)
+					{
+					     char *timeStamp   = pUserLocationInformationNR->timeStamp->buf;
+					     int   size        = pUserLocationInformationNR->timeStamp->size;
+
+						 for(int i = 0; i < size; i++)
+					         printf("timeStamp:0x%x\n", timeStamp[i]);
+					}
 					
 				}
 				break;
@@ -403,6 +436,74 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
     }
 	
 	return rc;
+}
+
+int  make_NGAP_PduSessionResourceNotify(const char *inputBuf, const char *OutputBuf)
+{
+
+    printf("pdu session  resource notify, start--------------------\n\n");
+
+    int ret = 0;
+	int rc  = RETURNok;
+	const sctp_assoc_id_t assoc_id  = 0;
+    const sctp_stream_id_t stream   = 0;
+	Ngap_NGAP_PDU_t  message = {0};
+
+	//wys:  1024 ?
+	size_t buffer_size = 1024;  
+	void *buffer = calloc(1,buffer_size);
+	asn_enc_rval_t er;	
+	
+	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_notify(inputBuf);
+	if(!pdu)
+		goto ERROR;
+
+    asn_fprint(stderr, &asn_DEF_Ngap_NGAP_PDU, pdu);
+
+    ret  =  check_NGAP_pdu_constraints(pdu);
+    if(ret < 0) 
+	{
+		printf("ng notify Constraint validation  failed\n");
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+
+	//encode
+	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
+	if(er.encoded < 0)
+	{
+		printf("ng notify encode failed,er.encoded:%d\n",er.encoded);
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+  		 
+	bstring msgBuf = blk2bstr(buffer, er.encoded);
+
+    //decode
+    ngap_amf_decode_pdu(&message, msgBuf);
+	ngap_amf_handle_ng_pdu_session_resource_notify(0,0, &message);
+
+
+    //Free pdu
+    ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+	printf("pdu session  resource notify, finish--------------------\n\n");
+    return rc;
+
+ERROR:
+	//Free pdu
+	if(pdu)
+        ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+ 	return rc;  
 }
 
 
