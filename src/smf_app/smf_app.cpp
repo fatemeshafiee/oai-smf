@@ -54,6 +54,8 @@ extern "C"{
 #include "../NgapSmfLayer/ng_pdu_session_resource_modify_response.h"
 #include "../NgapSmfLayer/ng_pdu_session_resource_notify.h"
 #include "../NgapSmfLayer/ng_pdu_session_resource_modify_indication.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_modify_confirm.h"
+
 }
 
 #include <stdexcept>
@@ -2397,6 +2399,7 @@ void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_contex
 	make_NGAP_PduSessionResourceModifyResponse("","");
 	make_NGAP_PduSessionResourceNotify("",  "");
 	make_NGAP_PduSessionResourceModifyIndication("", "");
+	make_NGAP_PduSessionResourceModifyConfirm("", "");
 	
 	//make_NGAP_PduSessionResourceReleaseCommand("", "");
 	
