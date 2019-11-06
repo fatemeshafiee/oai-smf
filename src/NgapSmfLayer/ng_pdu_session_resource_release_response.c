@@ -131,9 +131,9 @@ Ngap_UserLocationInformationNR_t * make_UserLocationInformationNR()
 {
 	Ngap_UserLocationInformationNR_t * nr = NULL;
 	nr =  calloc(1, sizeof(Ngap_UserLocationInformationNR_t));
-	
-}
 
+	return nr;
+}
 
 void add_pdu_session_resource_release_response_ie(Ngap_PDUSessionResourceReleaseResponse_t *ngapPDUSessionResourceReleaseResponse, Ngap_PDUSessionResourceReleaseResponseIEs_t *ie) {
     int ret;
