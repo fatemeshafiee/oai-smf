@@ -142,7 +142,7 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_modify_confirm(const char *inputBuf)
     
 	pdu->present = Ngap_NGAP_PDU_PR_successfulOutcome;
 	pdu->choice.successfulOutcome = calloc(1, sizeof(Ngap_SuccessfulOutcome_t));
-	pdu->choice.successfulOutcome->procedureCode = Ngap_ProcedureCode_id_PDUSessionResourceModify;
+	pdu->choice.successfulOutcome->procedureCode = Ngap_ProcedureCode_id_PDUSessionResourceModifyIndication;
 	pdu->choice.successfulOutcome->criticality   = Ngap_Criticality_reject;
 	pdu->choice.successfulOutcome->value.present = Ngap_SuccessfulOutcome__value_PR_PDUSessionResourceModifyConfirm;
 
