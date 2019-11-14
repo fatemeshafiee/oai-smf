@@ -2379,7 +2379,7 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 	int decoder_rc = RETURNok;
 
 	unsigned int n1SmMsgLen = n1_sm_msg.length();//strlen(n1_sm_msg.c_str());
-	unsigned char datavalue = (unsigned char *)malloc(n1SmMsgLen);
+	unsigned char *datavalue = (unsigned char *)malloc(n1SmMsgLen);
 #if 1
 
 	unsigned char *data = (unsigned char *)malloc(n1SmMsgLen + 1);//hardcoded for the moment
