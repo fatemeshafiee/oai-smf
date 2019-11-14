@@ -2379,7 +2379,7 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 	int decoder_rc = RETURNok;
 
 	unsigned int n1SmMsgLen = n1_sm_msg.length();//strlen(n1_sm_msg.c_str());
-	unsigned char datavalue[512]  = {'\0'}; // = (unsigned char *)malloc(n1SmMsgLen/2 + 1);
+	unsigned char datavalue = (unsigned char *)malloc(n1SmMsgLen);
 #if 1
 
 	unsigned char *data = (unsigned char *)malloc(n1SmMsgLen + 1);//hardcoded for the moment
@@ -2447,6 +2447,9 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 
 	//decode the NAS message (using NAS lib)
 	decoder_rc = nas_message_decode (datavalue, &nas_msg, n1SmMsgLen/2, &securitydecode, &decode_status);
+	free(datavalue);
+	datavalue = NULL;
+	
 	Logger::smf_app().debug("NAS msg type 0x%x ", nas_msg.plain.sm.header.message_type);
 
 	Logger::smf_app().debug("NAS header decode, extended_protocol_discriminator 0x%x, security_header_type:0x%x,sequence_number:0x%x,message_authentication_code:0x%x\n",
@@ -2507,6 +2510,7 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 				nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].segregation,
 				nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosflowidentifer
 				);
+		//free_decode_qos_rules(&nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.qosrules);
 
 		printf("sessionambr: %x %x %x %x\n",nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink,
 											nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_downlink,
@@ -2572,6 +2576,7 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 				nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[2].parametercontents.averagingwindow.downlinkinmilliseconds,
 				nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[3].parameteridentifier,
 				nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[3].parametercontents.epsbeareridentity);
+		//free_decode_qos_flow_descriptions(&nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.qosflowdescriptions);
 
 		printf("extend_options buffer:%x %x %x %x\n",
 				(unsigned char)(nas_msg.plain.sm.specific_msg.pdu_session_establishment_accept.extendedprotocolconfigurationoptions->data[0]),
@@ -2665,6 +2670,7 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosrules.qosrulesie[1].qosruleprecedence,
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosrules.qosrulesie[1].segregation,
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosrules.qosrulesie[1].qosflowidentifer);
+		//free_decode_qos_rules(&nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosrules);
 
 		printf("qosflowdescriptions: %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n",
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosflowdescriptions.qosflowdescriptionsnumber,
@@ -2699,6 +2705,7 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[2].parametercontents.averagingwindow.downlinkinmilliseconds,
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[3].parameteridentifier,
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[3].parametercontents.epsbeareridentity);
+		//free_decode_qos_flow_descriptions(&nas_msg.plain.sm.specific_msg.pdu_session_modification_request.qosflowdescriptions);
 
 		//printf("mappedepsbearercontexts");
 
@@ -2764,6 +2771,7 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_command.qosrules.qosrulesie[1].qosruleprecedence,
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_command.qosrules.qosrulesie[1].segregation,
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_command.qosrules.qosrulesie[1].qosflowidentifer);
+		//free_decode_qos_rules(&nas_msg.plain.sm.specific_msg.pdu_session_modification_command.qosrules);
 
 		//printf("mappedepsbearercontexts");
 
@@ -2800,6 +2808,7 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[2].parametercontents.averagingwindow.downlinkinmilliseconds,
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[3].parameteridentifier,
 				nas_msg.plain.sm.specific_msg.pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[3].parametercontents.epsbeareridentity);
+		//free_decode_qos_flow_descriptions(&nas_msg.plain.sm.specific_msg.pdu_session_modification_command.qosflowdescriptions);
 
 		printf("extend_options buffer:%x %x %x %x\n",
 				(unsigned char)(nas_msg.plain.sm.specific_msg.pdu_session_modification_command.extendedprotocolconfigurationoptions->data[0]),

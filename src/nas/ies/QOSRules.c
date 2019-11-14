@@ -185,3 +185,26 @@ int decode_qos_rules ( QOSRules * qosrules, uint8_t iei, uint8_t * buffer, uint3
 	return decoded;
 }
 
+void free_decode_qos_rules(QOSRules * qosrules)
+{
+	int i;
+
+	for(i=0;i<qosrules->lengthofqosrulesie;i++)
+	{
+		if(qosrules->qosrulesie[i].ruleoperationcode == MODIFY_EXISTING_QOS_RULE_AND_DELETE_PACKET_FILTERS)
+		{
+			free(qosrules->qosrulesie[i].packetfilterlist.modifyanddelete);
+			qosrules->qosrulesie[i].packetfilterlist.modifyanddelete = NULL;
+		}
+		else if((qosrules->qosrulesie[i].ruleoperationcode == CREATE_NEW_QOS_RULE) || (qosrules->qosrulesie[i].ruleoperationcode == MODIFY_EXISTING_QOS_RULE_AND_ADD_PACKET_FILTERS) || (qosrules->qosrulesie[i].ruleoperationcode == MODIFY_EXISTING_QOS_RULE_AND_REPLACE_ALL_PACKET_FILTERS))
+		{
+			free(qosrules->qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace);
+			qosrules->qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace = NULL;
+		}
+	}
+	free(qosrules->qosrulesie);
+	qosrules->qosrulesie = NULL;
+}
+
+
+

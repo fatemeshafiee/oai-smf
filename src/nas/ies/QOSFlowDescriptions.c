@@ -197,3 +197,15 @@ int decode_qos_flow_descriptions ( QOSFlowDescriptions * qosflowdescriptions, ui
 	return decoded;
 }
 
+void free_decode_qos_flow_descriptions(QOSFlowDescriptions * qosflowdescriptions)
+{
+	for(int i=0;i<qosflowdescriptions->qosflowdescriptionsnumber;i++)
+	{
+		free(qosflowdescriptions->qosflowdescriptionscontents[i].parameterslist);
+		qosflowdescriptions->qosflowdescriptionscontents[i].parameterslist = NULL;
+	}
+	free(qosflowdescriptions->qosflowdescriptionscontents);
+	qosflowdescriptions->qosflowdescriptionscontents = NULL;
+}
+
+
