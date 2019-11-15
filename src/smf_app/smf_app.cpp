@@ -56,8 +56,7 @@ extern "C"{
 #include "../NgapSmfLayer/ng_pdu_session_resource_modify_indication.h"
 #include "../NgapSmfLayer/ng_pdu_session_resource_modify_confirm.h"
 #include "../NgapSmfLayer/ng_pdu_handover_required.h"
-
-
+#include "../NgapSmfLayer/ng_pdu_handover_command.h"
 }
 
 #include <stdexcept>
@@ -2405,6 +2404,7 @@ void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_contex
 
 	
 	make_NGAP_PduHandOverRequired("", "");
+	make_NGAP_PduHandOverCommand("", "");
 	
 	//make_NGAP_PduSessionResourceReleaseCommand("", "");
 	

@@ -44,6 +44,7 @@ add_library (SMF STATIC
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_modify_indication.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_modify_confirm.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_handover_required.c
+  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_handover_command.c
   smf_app.cpp
   smf_config.cpp
   smf_context.cpp
