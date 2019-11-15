@@ -17,17 +17,19 @@
 #include  "Ngap_PDUSessionResourceItemHORqd.h"
 
 
-#include "Ngap_TargetID.h"
+#include  "Ngap_TargetID.h"
 
-#include "Ngap_TargetRANNodeID.h"
-#include "Ngap_TargeteNB-ID.h"
-#include "Ngap_ProtocolIE-SingleContainer.h"
+#include  "Ngap_TargetRANNodeID.h"
+#include  "Ngap_TargeteNB-ID.h"
+#include  "Ngap_ProtocolIE-SingleContainer.h"
+#include  "Ngap_TAI.h"
 
 
 
 #include  "common_defs.h"
 #include  "common_types.h"
 #include  "../common/ngap/ngap_common.h"
+
 
 
 #include  "INTEGER.h"
@@ -302,6 +304,10 @@ ngap_amf_handle_ng_pdu_handover_required(
 	uint32_t    pDUSessionid   = 0;
 	char       *pDUSessionTransfer  = NULL;
 	
+	uint16_t                                mcc = 0;
+    uint16_t                                mnc = 0;
+    uint16_t                                mnc_len = 0;
+	
 
     DevAssert (pdu != NULL);
     //OAILOG_INFO(LOG_NGAP,"----------------------- DECODED NG SETUP REQUEST NGAP MSG --------------------------\n");
@@ -367,6 +373,89 @@ ngap_amf_handle_ng_pdu_handover_required(
 	    }
 	}
 
+     //target_ID
+	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverRequiredIEs_t, ie, container, Ngap_ProtocolIE_ID_id_TargetID, false);
+	if (ie) 
+	{ 
+		Ngap_TargetID_t	 *pTargetID = &ie->value.choice.TargetID;
+		if(pTargetID)
+		{
+        	switch(pTargetID->present)
+        	{
+            	case Ngap_TargetID_PR_targetRANNodeID:
+				{
+					Ngap_TargetRANNodeID_t  *pTargetRANNodeID = pTargetID->choice.targetRANNodeID;
+					if(pTargetRANNodeID)
+					{
+                        switch(pTargetRANNodeID->globalRANNodeID.present)
+                        {
+	                        case Ngap_GlobalRANNodeID_PR_globalGNB_ID:
+							{
+								Ngap_GlobalGNB_ID_t  *pGlobalGNB_ID  = pTargetRANNodeID->globalRANNodeID.choice.globalGNB_ID;
+								if(pGlobalGNB_ID)
+								{
+									 const Ngap_PLMNIdentity_t * const plmn = &pGlobalGNB_ID->pLMNIdentity;
+                                     DevAssert (plmn != NULL);
+                                     TBCD_TO_MCC_MNC (plmn, mcc, mnc, mnc_len);
+			   
+                                     printf("pLMNIdentity, mcc:0x%x,mnc:0x%x,mnc_len:0x%x\n",  mcc, mnc, mnc_len);
+			   
+									
+	                                 uint32_t gNB_ID = 0;
+									 gNB_ID  = BIT_STRING_to_uint32(&pGlobalGNB_ID->gNB_ID.choice.gNB_ID);  
+									 printf("gnt_id:0x%x\n", gNB_ID);
+								}
+
+                                
+							    //Tai
+		                        const Ngap_TAI_t * const  tAI = &pTargetRANNodeID->selectedTAI;
+								if(tAI)
+								{
+	                                nr_tai_t         nr_tai = {.plmn = {0}, .tac = INVALID_TAC};
+						            //TAC
+						            DevAssert(tAI->tAC.size == 3);
+						            nr_tai.tac = asn1str_to_u24(&tAI->tAC);
+									
+									printf("tAI->tAC:0x%x,0x%x,0x%x\n", 
+									tAI->tAC.buf[0],tAI->tAC.buf[1],tAI->tAC.buf[2]);
+								  
+						             //pLMNIdentity
+						            DevAssert (tAI->pLMNIdentity.size == 3);
+						            TBCD_TO_PLMN_T(&tAI->pLMNIdentity, &nr_tai.plmn);
+
+									printf("tAI->pLMNIdentity:0x%x,0x%x,0x%x\n", 
+									tAI->pLMNIdentity.buf[0],tAI->pLMNIdentity.buf[1],tAI->pLMNIdentity.buf[2]);
+								}
+								
+							}
+							break;
+		                    case Ngap_GlobalRANNodeID_PR_globalNgENB_ID:
+		                    {
+							}
+							break;
+		                    case Ngap_GlobalRANNodeID_PR_globalN3IWF_ID:
+							{
+							}
+							break;
+							default:
+					        	printf("dont't know GlobalRANNodeID present:%d\n",pTargetID->present);
+				            break;
+						}
+					}
+				}
+				break;
+				case Ngap_TargetID_PR_targeteNB_ID:
+				{
+				}
+				break;
+				default:
+					printf("dont't know TargetID present:%d\n",pTargetID->present);
+				break;
+				
+			}
+		}
+	               
+	}
 
     NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverRequiredIEs_t, ie, container, Ngap_ProtocolIE_ID_id_DirectForwardingPathAvailability, false);
 	if (ie) 
