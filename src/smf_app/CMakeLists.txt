@@ -46,6 +46,7 @@ add_library (SMF STATIC
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_handover_required.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_handover_command.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_handover_preparation_failure.c
+  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_handover_request_acknowledge.c
   smf_app.cpp
   smf_config.cpp
   smf_context.cpp
