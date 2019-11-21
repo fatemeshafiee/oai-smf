@@ -64,6 +64,8 @@ extern "C"{
 #include "../NgapSmfLayer/ng_pdu_path_switch_request.h"
 #include "../NgapSmfLayer/ng_pdu_path_switch_request_failure.h"
 #include "../NgapSmfLayer/ng_pdu_handover_cancel.h"
+#include "../NgapSmfLayer/ng_pdu_handover_cancel_acknowledge.h"
+
 }
 
 #include <stdexcept>
@@ -2422,6 +2424,7 @@ void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_contex
 	make_NGAP_PduPathSwitchRequest("","");
 	make_NGAP_PduPathSwitchRequestFailure("","");
 	make_NGAP_PduHandOverCancel("","");
+	make_NGAP_PduHandOverCancelAck("","");
 	
 	//make_NGAP_PduSessionResourceReleaseCommand("", "");
 	

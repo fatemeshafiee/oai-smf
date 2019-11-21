@@ -52,6 +52,7 @@ add_library (SMF STATIC
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_path_switch_request.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_path_switch_request_failure.c
   ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_handover_cancel.c
+  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_handover_cancel_acknowledge.c
   smf_app.cpp
   smf_config.cpp
   smf_context.cpp
