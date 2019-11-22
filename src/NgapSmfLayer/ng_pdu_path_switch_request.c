@@ -50,12 +50,12 @@ Ngap_PathSwitchRequestIEs_t  *make_path_sw_req_RAN_UE_NGAP_ID(uint32_t rAN_UE_NG
 }
 
 //AMF_UE_NGAP_ID
-Ngap_PathSwitchRequestIEs_t  *make_path_sw_req_AMF_UE_NGAP_ID(uint64_t amf_UE_NGAP_ID)
+Ngap_PathSwitchRequestIEs_t  *make_path_sw_req_SourceAMF_UE_NGAP_ID(uint64_t amf_UE_NGAP_ID)
 {
     Ngap_PathSwitchRequestIEs_t *ie = NULL;
 	ie                = calloc(1, sizeof(Ngap_PathSwitchRequestIEs_t));
 	
-	ie->id            = Ngap_ProtocolIE_ID_id_AMF_UE_NGAP_ID;
+	ie->id            = Ngap_ProtocolIE_ID_id_SourceAMF_UE_NGAP_ID;
 	ie->criticality   = Ngap_Criticality_reject;
 	ie->value.present = Ngap_PathSwitchRequestIEs__value_PR_AMF_UE_NGAP_ID;
 
@@ -181,19 +181,16 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_path_sw_req(const char *inputBuf)
 	
 	Ngap_PathSwitchRequestIEs_t  *ie = NULL;
 
-
 	//RAN_UE_NGAP_ID
     uint32_t  ran_ue_ngap_id = 0x76;
 	ie  = make_path_sw_req_RAN_UE_NGAP_ID(ran_ue_ngap_id);
 	add_pdu_path_sw_req_ie(ngapPathSwitchRequest, ie);
-
-    #if 0
-	//problem: decode failed;
+   
 	//AMF_UE_NGAP_ID
 	uint64_t  amf_ue_ngap_id = 0x80;
-	ie  = make_path_sw_req_AMF_UE_NGAP_ID(amf_ue_ngap_id);
+	ie  = make_path_sw_req_SourceAMF_UE_NGAP_ID(amf_ue_ngap_id);
     add_pdu_path_sw_req_ie(ngapPathSwitchRequest, ie);
-    #endif
+   
 
 	//UserLocationInformation
 	ie = make_path_sw_req_UserLocationInformation();
@@ -212,14 +209,12 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_path_sw_req(const char *inputBuf)
 	printf("nr->nR_CGI.pLMNIdentity:0x%x,0x%x,0x%x\n",
 	nr->nR_CGI.pLMNIdentity.buf[0],nr->nR_CGI.pLMNIdentity.buf[1], nr->nR_CGI.pLMNIdentity.buf[2]);
 	
-    
 	//CellIdentity;
 	char  cellIdentity[5] = {0x00,0x01,0x02,0x03,0x04};   //36bits
 	nr->nR_CGI.nRCellIdentity.buf = calloc(5, sizeof(uint8_t));
 	nr->nR_CGI.nRCellIdentity.size = 5;
 	memcpy(nr->nR_CGI.nRCellIdentity.buf, &cellIdentity, 5);
 	nr->nR_CGI.nRCellIdentity.bits_unused = 0x04;
-
 
     printf("nR_CGI->nRCellIdentity:0x%x,0x%x,0x%x,0x%x,0x%x\n", 
 	nr->nR_CGI.nRCellIdentity.buf[0],nr->nR_CGI.nRCellIdentity.buf[1],nr->nR_CGI.nRCellIdentity.buf[2],
@@ -312,8 +307,6 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_path_sw_req(const char *inputBuf)
 	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceFailedToSetupListPSReq.list, failedItem);
 	add_pdu_path_sw_req_ie(ngapPathSwitchRequest, ie);
 	
-	
-	
     return pdu;
 }
 
@@ -355,7 +348,7 @@ ngap_amf_handle_ng_pdu_path_sw_req(
 	container = &pdu->choice.initiatingMessage->value.choice.PathSwitchRequest;
     
     //AMF_UE_NGAP_ID
-    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PathSwitchRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_AMF_UE_NGAP_ID, false);
+    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PathSwitchRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_SourceAMF_UE_NGAP_ID, false);
     if (ie) 
 	{  
 	    asn_INTEGER2ulong(&ie->value.choice.AMF_UE_NGAP_ID, &amf_ue_ngap_id);
