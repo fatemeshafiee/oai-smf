@@ -258,6 +258,7 @@ ngap_amf_handle_ng_pdu_uplink_ran(
     }
 	#endif
 
+    return rc;
 }
 
 int  make_NGAP_PduUplinkRanStatusTransfer(const char *inputBuf, const char *OutputBuf)
