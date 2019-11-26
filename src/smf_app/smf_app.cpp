@@ -2421,7 +2421,7 @@ void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_contex
 	make_NGAP_PduHandOverPreFailure("","");
 
 	make_NGAP_PduHandOverRequest("","");
-	return ;
+	
 	make_NGAP_PduHandOver_Req_Ack("","");
 	make_NGAP_PduHandOver_Failure("","");
 	make_NGAP_PduHandOver_Notify("","");

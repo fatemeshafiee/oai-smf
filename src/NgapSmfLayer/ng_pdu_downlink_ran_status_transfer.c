@@ -66,13 +66,12 @@ Ngap_DownlinkRANStatusTransferIEs_t  *make_downlink_ran_AMF_UE_NGAP_ID(uint64_t 
 	return ie;
 }
 
-Ngap_DownlinkRANStatusTransferIEs_t  *make_downlink_ran_RANStatusTransfer_TransparentContainer()
+Ngap_DownlinkRANStatusTransferIEs_t  *make_downlink_RANStatusTransfer_TransparentContainer()
 {
 	Ngap_DownlinkRANStatusTransferIEs_t *ie = NULL;
 	ie				  = calloc(1, sizeof(Ngap_DownlinkRANStatusTransferIEs_t));
-		
-	//ie->id			  = Ngap_ProtocolIE_ID_id_RANStatusTransfer_TransparentContainer;
-	ie->id			  = Ngap_ProtocolIE_ID_id_TargetToSource_TransparentContainer;
+	
+	ie->id			  = Ngap_ProtocolIE_ID_id_RANStatusTransfer_TransparentContainer;
 	ie->criticality   = Ngap_Criticality_reject;
 	ie->value.present = Ngap_DownlinkRANStatusTransferIEs__value_PR_RANStatusTransfer_TransparentContainer;
 	
@@ -117,33 +116,26 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_downlink_ran(const char *inputBuf)
 	ie  = make_downlink_ran_RAN_UE_NGAP_ID(ran_ue_ngap_id);
 	add_pdu_downlink_ran_ie(ngapDownlinkRANStatusTransfer, ie);
     
-    
-	#if 0
-	//failed print 
-	//RANStatusTransfer_TransparentContainer
-	Ngap_DRBsSubjectToStatusTransferItem_t  *pTransferItem = NULL;
-	ie =  make_downlink_ran_RANStatusTransfer_TransparentContainer();
-	pTransferItem = calloc(1, sizeof(Ngap_DRBsSubjectToStatusTransferItem_t));
 	
-    //dRB_ID
-    uint32_t  dRB_ID       =  1;
+	//RANStatusTransfer_TransparentContainer
+	//Ngap_RANStatusTransfer_TransparentContainer_t	 RANStatusTransfer_TransparentContainer;
+	ie =  make_downlink_RANStatusTransfer_TransparentContainer();
+	Ngap_DRBsSubjectToStatusTransferItem_t  *pTransferItem = calloc(1, sizeof(Ngap_DRBsSubjectToStatusTransferItem_t));
+	
+	
+        //dRB_ID
+    uint8_t  dRB_ID       =  1;
     pTransferItem->dRB_ID  =  dRB_ID;
 
-	//dRBStatusUL
-    //Ngap_DRBStatusUL_t	 dRBStatusUL;
-    uint16_t pDCP_SN12     = 0x01;
-	uint32_t hFN_PDCP_SN12 = 0x02;
-    char recvStatus[11] = {0x011,0x012,0x011,0x012,0x011,0x012,0x011,0x012,0x011,0x012,0x011}; /*1-2048 BITS*/
+	   //dRBStatusUL
+       //Ngap_DRBStatusUL_t	 dRBStatusUL
+    uint8_t  recvStatus[1] = {0x011}; /*1-2048 BITS*/
 	
     pTransferItem->dRBStatusUL.present  =  Ngap_DRBStatusUL_PR_dRBStatusUL12;
-
 	Ngap_DRBStatusUL12_t *dRBStatusUL12 =  calloc(1, sizeof(Ngap_DRBStatusUL12_t));
     pTransferItem->dRBStatusUL.choice.dRBStatusUL12  = dRBStatusUL12;
 	
    
-	//dRBStatusUL12->uL_COUNTValue.pDCP_SN12      = pDCP_SN12     & 0x0FFF; //12BITS
-    //dRBStatusUL12->uL_COUNTValue.hFN_PDCP_SN12  = hFN_PDCP_SN12 & 0x000FFFFF;//20BITS
-
 	dRBStatusUL12->uL_COUNTValue.pDCP_SN12      = 1 ;   
     dRBStatusUL12->uL_COUNTValue.hFN_PDCP_SN12  = 2;
 
@@ -157,36 +149,29 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_downlink_ran(const char *inputBuf)
 	
     dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->buf     = calloc(1, sizeof(uint8_t));
 	dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->size    = 1;
-	memcpy(dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->buf, recvStatus, 1);
+	memcpy(dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->buf, &recvStatus, 1);
 	dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->bits_unused = 0;
     
    
-	//dRBStatusDL
-	//Ngap_DRBStatusDL_t	 dRBStatusDL;
+	    //dRBStatusDL
+	    //Ngap_DRBStatusDL_t	 dRBStatusDL;
     pTransferItem->dRBStatusDL.present  =  Ngap_DRBStatusDL_PR_dRBStatusDL12;
-	
 	Ngap_DRBStatusDL12_t *dRBStatusDL12 =  calloc(1, sizeof(Ngap_DRBStatusDL12_t));
-	//dRBStatusDL12->dL_COUNTValue.pDCP_SN12      = pDCP_SN12     & 0x0FFF;  //12BITS
-    //dRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12  = hFN_PDCP_SN12 & 0x000FFFFF;//18BITS
+	pTransferItem->dRBStatusDL.choice.dRBStatusDL12  = dRBStatusDL12;
 
 	dRBStatusDL12->dL_COUNTValue.pDCP_SN12      = 3;  //12BITS
     dRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12  = 4;//18BITS
 
-    pTransferItem->dRBStatusDL.choice.dRBStatusDL12  = dRBStatusDL12;
+    
 	
     printf("dRBStatusDL12,pDCP_SN12:0x%x,hFN_PDCP_SN12:0x%x\n",
 	dRBStatusDL12->dL_COUNTValue.pDCP_SN12,
 	dRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12);
-
-
-    //Ngap_RANStatusTransfer_TransparentContainer_t	 RANStatusTransfer_TransparentContainer;
-    //Ngap_DRBsSubjectToStatusTransferList_t   *pStatusTransferList = calloc(1, sizeof(Ngap_DRBsSubjectToStatusTransferList_t));
-	//ASN_SEQUENCE_ADD(&pStatusTransferList->list, pTransferItem);
-	//ie->value.choice.RANStatusTransfer_TransparentContainer.dRBsSubjectToStatusTransferList = *pStatusTransferList;
 	
 	ASN_SEQUENCE_ADD(&ie->value.choice.RANStatusTransfer_TransparentContainer.dRBsSubjectToStatusTransferList.list, pTransferItem);
+	
 	add_pdu_downlink_ran_ie(ngapDownlinkRANStatusTransfer, ie);
-	#endif
+	
 	
     return pdu;
 }
@@ -305,10 +290,9 @@ int  make_NGAP_PduDownlinkRanStatusTransfer(const char *inputBuf, const char *Ou
 	ngap_amf_handle_ng_pdu_downlink_ran(0,0, &message);
 
     //Free pdu
-    #if 0
     if(pdu)
     	ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
-	#endif
+	
 	if(buffer)
 	{
 		free(buffer);
