@@ -99,7 +99,7 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_downlink_ran(const char *inputBuf)
 	pdu->choice.initiatingMessage = calloc(1, sizeof(Ngap_InitiatingMessage_t));
 	pdu->choice.initiatingMessage->procedureCode = Ngap_ProcedureCode_id_DownlinkRANStatusTransfer;                 
 	pdu->choice.initiatingMessage->criticality   = Ngap_Criticality_ignore;
-	pdu->choice.initiatingMessage->value.present = Ngap_InitiatingMessage__value_PR_DownlinkNASTransport;
+	pdu->choice.initiatingMessage->value.present = Ngap_InitiatingMessage__value_PR_DownlinkRANStatusTransfer;
 
     Ngap_DownlinkRANStatusTransfer_t *ngapDownlinkRANStatusTransfer = NULL;
 	ngapDownlinkRANStatusTransfer = &pdu->choice.initiatingMessage->value.choice.DownlinkRANStatusTransfer;
@@ -231,14 +231,89 @@ ngap_amf_handle_ng_pdu_downlink_ran(
 	   printf("ran_ue_ngap_id, 0x%x\n", ran_ue_ngap_id);
     }
 
-    #if 0
+    
 	//RANStatusTransfer_TransparentContainer
     NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_DownlinkRANStatusTransferIEs_t, ie, container, Ngap_ProtocolIE_ID_id_RANStatusTransfer_TransparentContainer, false);
     if (ie) 
 	{  
-	  
+	   Ngap_DRBsSubjectToStatusTransferList_t	 *dRBsSubject_containter =  &ie->value.choice.RANStatusTransfer_TransparentContainer.dRBsSubjectToStatusTransferList;
+	   for(i = 0; i< dRBsSubject_containter->list.count; i++)
+	   {
+          Ngap_DRBsSubjectToStatusTransferItem_t  *pItem = dRBsSubject_containter->list.array[i];
+		  if(!pItem)
+		  	 continue;
+		  printf("dRB_ID:0x%x\n", pItem->dRB_ID);
+
+		  Ngap_DRBStatusUL_t	 *pdRBStatusUL = &pItem->dRBStatusUL;
+		  if(pdRBStatusUL)
+		  {
+		      switch(pdRBStatusUL->present)
+		      {
+	              case Ngap_DRBStatusUL_PR_NOTHING:	/* No components present */
+				  {
+				  }
+				  break;
+	 	          case Ngap_DRBStatusUL_PR_dRBStatusUL12:
+				  {
+				  	  Ngap_DRBStatusUL12_t	*dRBStatusUL12 = pdRBStatusUL->choice.dRBStatusUL12;
+					  if(dRBStatusUL12)
+					  {
+                          printf("pDCP_SN12:0x%x,hFN_PDCP_SN12:0x%x\n", 
+						  dRBStatusUL12->uL_COUNTValue.pDCP_SN12, dRBStatusUL12->uL_COUNTValue.hFN_PDCP_SN12);
+
+                          int j  = 0;
+						  for( ;j< dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->size; j++)
+						  {
+                             printf("PDCP_SDUs:0x%x\n", dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->buf[0]);
+						  }
+						  
+					  }
+				  }
+				  break;
+	 	          case Ngap_DRBStatusUL_PR_dRBStatusUL18:
+				  {
+				  }
+				  break;
+	 	          case Ngap_DRBStatusUL_PR_choice_Extensions:
+				  {
+				  }
+			  	  break;
+		      }
+		  }
+		  
+	      Ngap_DRBStatusDL_t	 *pdRBStatusDL = &pItem->dRBStatusDL;
+		  if(pdRBStatusDL)
+		  {
+		      switch(pdRBStatusDL->present)
+		      {
+	              case Ngap_DRBStatusDL_PR_NOTHING:	/* No components present */
+				  {
+				  }
+				  break;
+	 	          case Ngap_DRBStatusDL_PR_dRBStatusDL12:
+				  {
+				  	  Ngap_DRBStatusDL12_t	*pdRBStatusDL12 = pdRBStatusDL->choice.dRBStatusDL12;
+					  if(pdRBStatusDL12)
+					  {
+                          printf("pDCP_SN12:0x%x,hFN_PDCP_SN12:0x%x\n", 
+						  pdRBStatusDL12->dL_COUNTValue.pDCP_SN12, pdRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12);  
+					  }
+				  }
+				  break;
+	 	          case Ngap_DRBStatusDL_PR_dRBStatusDL18:
+				  {
+				  }
+				  break;
+	 	          case Ngap_DRBStatusDL_PR_choice_Extensions:
+				  {
+				  }
+			  	  break;
+		      }
+		  }
+		  
+	   }
     }
-	#endif
+	
 	
 	return rc;
 

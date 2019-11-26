@@ -41,7 +41,7 @@
 Ngap_UplinkRANStatusTransferIEs_t  *make_uplink_ran_RAN_UE_NGAP_ID(uint32_t rAN_UE_NGAP_ID)
 {
 	Ngap_UplinkRANStatusTransferIEs_t *ie;
-	ie                              = calloc(1, sizeof(Ngap_HandoverCancelIEs_t));
+	ie                              = calloc(1, sizeof(Ngap_UplinkRANStatusTransferIEs_t));
 
 	ie->id                          = Ngap_ProtocolIE_ID_id_RAN_UE_NGAP_ID;
 	ie->criticality                 = Ngap_Criticality_reject;
@@ -66,15 +66,15 @@ Ngap_UplinkRANStatusTransferIEs_t  *make_uplink_ran_AMF_UE_NGAP_ID(uint64_t amf_
 	return ie;
 }
 
-Ngap_UplinkRANStatusTransferIEs_t  *make_uplink_ran_RANStatusTransfer_TransparentContainer()
+Ngap_UplinkRANStatusTransferIEs_t  *make_uplink_RANStatusTransfer_TransparentContainer()
 {
 	Ngap_UplinkRANStatusTransferIEs_t *ie = NULL;
 	ie				  = calloc(1, sizeof(Ngap_UplinkRANStatusTransferIEs_t));
-		
+	
 	ie->id			  = Ngap_ProtocolIE_ID_id_RANStatusTransfer_TransparentContainer;
 	ie->criticality   = Ngap_Criticality_reject;
 	ie->value.present = Ngap_UplinkRANStatusTransferIEs__value_PR_RANStatusTransfer_TransparentContainer;
-	                    
+	
 	return ie;
 }
 
@@ -98,10 +98,11 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_uplink_ran(const char *inputBuf)
 	pdu->choice.initiatingMessage = calloc(1, sizeof(Ngap_InitiatingMessage_t));
 	pdu->choice.initiatingMessage->procedureCode = Ngap_ProcedureCode_id_UplinkRANStatusTransfer;                 
 	pdu->choice.initiatingMessage->criticality   = Ngap_Criticality_ignore;
-	pdu->choice.initiatingMessage->value.present = Ngap_InitiatingMessage__value_PR_UplinkNASTransport;
+	pdu->choice.initiatingMessage->value.present = Ngap_InitiatingMessage__value_PR_UplinkRANStatusTransfer;
 
     Ngap_UplinkRANStatusTransfer_t *ngapUplinkRANStatusTransfer = NULL;
 	ngapUplinkRANStatusTransfer = &pdu->choice.initiatingMessage->value.choice.UplinkRANStatusTransfer;
+	
 	Ngap_UplinkRANStatusTransferIEs_t *ie = NULL;
 
     
@@ -115,37 +116,26 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_uplink_ran(const char *inputBuf)
 	ie  = make_uplink_ran_RAN_UE_NGAP_ID(ran_ue_ngap_id);
 	add_pdu_uplink_ran_ie(ngapUplinkRANStatusTransfer, ie);
     
-
-	#if 0
-	//failed print 
 	//RANStatusTransfer_TransparentContainer
+	ie =  make_uplink_RANStatusTransfer_TransparentContainer();
 	Ngap_DRBsSubjectToStatusTransferItem_t  *pTransferItem = calloc(1, sizeof(Ngap_DRBsSubjectToStatusTransferItem_t));
-    ie =  NULL;
-	ie =  make_uplink_ran_RANStatusTransfer_TransparentContainer();
-	//memset(ie, 0 , sizeof(Ngap_UplinkRANStatusTransferIEs_t));
 	
-    //dRB_ID
-    uint32_t  dRB_ID       =  1;
+	
+	    //dRB_ID
+    uint8_t  dRB_ID       =  1;
     pTransferItem->dRB_ID  =  dRB_ID;
 
-	//dRBStatusUL
-    //Ngap_DRBStatusUL_t	 dRBStatusUL;
-    uint16_t pDCP_SN12     = 0x01;
-	uint32_t hFN_PDCP_SN12 = 0x02;
-	
-    char recvStatus[256] = {0x00,0x02}; /*1-2048 BITS*/
+	   //dRBStatusUL
+       //Ngap_DRBStatusUL_t	 dRBStatusUL
+    uint8_t  recvStatus[1] = {0x011}; /*1-2048 BITS*/
 	
     pTransferItem->dRBStatusUL.present  =  Ngap_DRBStatusUL_PR_dRBStatusUL12;
-
 	Ngap_DRBStatusUL12_t *dRBStatusUL12 =  calloc(1, sizeof(Ngap_DRBStatusUL12_t));
-	memset(dRBStatusUL12, 0, sizeof(Ngap_DRBStatusUL12_t));
     pTransferItem->dRBStatusUL.choice.dRBStatusUL12  = dRBStatusUL12;
 	
-	//dRBStatusUL12->uL_COUNTValue.pDCP_SN12      = pDCP_SN12     & 0x0FFF; //12BITS
-    //dRBStatusUL12->uL_COUNTValue.hFN_PDCP_SN12  = hFN_PDCP_SN12 & 0x000FFFFF;//20BITS
-
-	dRBStatusUL12->uL_COUNTValue.pDCP_SN12      = 0x80;   
-    dRBStatusUL12->uL_COUNTValue.hFN_PDCP_SN12  = 0x81;
+   
+	dRBStatusUL12->uL_COUNTValue.pDCP_SN12      = 1 ;   
+    dRBStatusUL12->uL_COUNTValue.hFN_PDCP_SN12  = 2;
 
 	printf("dRBStatusUL12,pDCP_SN12:0x%x,hFN_PDCP_SN12:0x%x\n",
 	dRBStatusUL12->uL_COUNTValue.pDCP_SN12,
@@ -154,42 +144,32 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_uplink_ran(const char *inputBuf)
 	
 	//BIT_STRING_t	*receiveStatusOfUL_PDCP_SDUs
 	dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs  = calloc(1, sizeof(BIT_STRING_t));
+	
     dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->buf     = calloc(1, sizeof(uint8_t));
 	dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->size    = 1;
-	memcpy(dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->buf, recvStatus, 1);
+	memcpy(dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->buf, &recvStatus, 1);
 	dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->bits_unused = 0;
-  
+    
    
-	//dRBStatusDL
-	//Ngap_DRBStatusDL_t	 dRBStatusDL;
+	    //dRBStatusDL
+	    //Ngap_DRBStatusDL_t	 dRBStatusDL;
     pTransferItem->dRBStatusDL.present  =  Ngap_DRBStatusDL_PR_dRBStatusDL12;
-	
 	Ngap_DRBStatusDL12_t *dRBStatusDL12 =  calloc(1, sizeof(Ngap_DRBStatusDL12_t));
-	memset(dRBStatusDL12, 0, sizeof(Ngap_DRBStatusDL12_t));
 	pTransferItem->dRBStatusDL.choice.dRBStatusDL12  = dRBStatusDL12;
-	 
-	
-	//dRBStatusDL12->dL_COUNTValue.pDCP_SN12      = pDCP_SN12     & 0x0FFF;  //12BITS
-    //dRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12  = hFN_PDCP_SN12 & 0x000FFFFF;//18BITS
 
-	dRBStatusDL12->dL_COUNTValue.pDCP_SN12      = 0x83; //12BITS
-    dRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12  = 0x84; //18BITS
+	dRBStatusDL12->dL_COUNTValue.pDCP_SN12      = 3;  //12BITS
+    dRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12  = 4;//18BITS
 
-   
+    
 	
     printf("dRBStatusDL12,pDCP_SN12:0x%x,hFN_PDCP_SN12:0x%x\n",
 	dRBStatusDL12->dL_COUNTValue.pDCP_SN12,
 	dRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12);
-
-
-    //Ngap_RANStatusTransfer_TransparentContainer_t	 RANStatusTransfer_TransparentContainer;
-    //Ngap_DRBsSubjectToStatusTransferList_t   *pStatusTransferList = calloc(1, sizeof(Ngap_DRBsSubjectToStatusTransferList_t));
-	//ASN_SEQUENCE_ADD(&pStatusTransferList->list, pTransferItem);
-	//ie->value.choice.RANStatusTransfer_TransparentContainer.dRBsSubjectToStatusTransferList = *pStatusTransferList;
 	
-	ASN_SEQUENCE_ADD(&ie->value.choice.RANStatusTransfer_TransparentContainer.dRBsSubjectToStatusTransferList.list, &pTransferItem);
+	ASN_SEQUENCE_ADD(&ie->value.choice.RANStatusTransfer_TransparentContainer.dRBsSubjectToStatusTransferList.list, pTransferItem);
+	
 	add_pdu_uplink_ran_ie(ngapUplinkRANStatusTransfer, ie);
-    #endif
+    
 	
     return pdu;
 }
@@ -249,21 +229,93 @@ ngap_amf_handle_ng_pdu_uplink_ran(
 	   printf("ran_ue_ngap_id, 0x%x\n", ran_ue_ngap_id);
     }
 
-    #if 0
-	//RANStatusTransfer_TransparentContainer
+    //RANStatusTransfer_TransparentContainer
     NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_UplinkRANStatusTransferIEs_t, ie, container, Ngap_ProtocolIE_ID_id_RANStatusTransfer_TransparentContainer, false);
     if (ie) 
 	{  
-	   
+	   Ngap_DRBsSubjectToStatusTransferList_t	 *dRBsSubject_containter =  &ie->value.choice.RANStatusTransfer_TransparentContainer.dRBsSubjectToStatusTransferList;
+	   for(i = 0; i< dRBsSubject_containter->list.count; i++)
+	   {
+          Ngap_DRBsSubjectToStatusTransferItem_t  *pItem = dRBsSubject_containter->list.array[i];
+		  if(!pItem)
+		  	 continue;
+		  printf("dRB_ID:0x%x\n", pItem->dRB_ID);
+
+		  Ngap_DRBStatusUL_t	 *pdRBStatusUL = &pItem->dRBStatusUL;
+		  if(pdRBStatusUL)
+		  {
+		      switch(pdRBStatusUL->present)
+		      {
+	              case Ngap_DRBStatusUL_PR_NOTHING:	/* No components present */
+				  {
+				  }
+				  break;
+	 	          case Ngap_DRBStatusUL_PR_dRBStatusUL12:
+				  {
+				  	  Ngap_DRBStatusUL12_t	*dRBStatusUL12 = pdRBStatusUL->choice.dRBStatusUL12;
+					  if(dRBStatusUL12)
+					  {
+                          printf("pDCP_SN12:0x%x,hFN_PDCP_SN12:0x%x\n", 
+						  dRBStatusUL12->uL_COUNTValue.pDCP_SN12, dRBStatusUL12->uL_COUNTValue.hFN_PDCP_SN12);
+
+                          int j  = 0;
+						  for( ;j< dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->size; j++)
+						  {
+                             printf("PDCP_SDUs:0x%x\n", dRBStatusUL12->receiveStatusOfUL_PDCP_SDUs->buf[0]);
+						  }
+						  
+					  }
+				  }
+				  break;
+	 	          case Ngap_DRBStatusUL_PR_dRBStatusUL18:
+				  {
+				  }
+				  break;
+	 	          case Ngap_DRBStatusUL_PR_choice_Extensions:
+				  {
+				  }
+			  	  break;
+		      }
+		  }
+		  
+	      Ngap_DRBStatusDL_t	 *pdRBStatusDL = &pItem->dRBStatusDL;
+		  if(pdRBStatusDL)
+		  {
+		      switch(pdRBStatusDL->present)
+		      {
+	              case Ngap_DRBStatusDL_PR_NOTHING:	/* No components present */
+				  {
+				  }
+				  break;
+	 	          case Ngap_DRBStatusDL_PR_dRBStatusDL12:
+				  {
+				  	  Ngap_DRBStatusDL12_t	*pdRBStatusDL12 = pdRBStatusDL->choice.dRBStatusDL12;
+					  if(pdRBStatusDL12)
+					  {
+                          printf("pDCP_SN12:0x%x,hFN_PDCP_SN12:0x%x\n", 
+						  pdRBStatusDL12->dL_COUNTValue.pDCP_SN12, pdRBStatusDL12->dL_COUNTValue.hFN_PDCP_SN12);  
+					  }
+				  }
+				  break;
+	 	          case Ngap_DRBStatusDL_PR_dRBStatusDL18:
+				  {
+				  }
+				  break;
+	 	          case Ngap_DRBStatusDL_PR_choice_Extensions:
+				  {
+				  }
+			  	  break;
+		      }
+		  }
+		  
+	   }
     }
-	#endif
 
     return rc;
 }
 
 int  make_NGAP_PduUplinkRanStatusTransfer(const char *inputBuf, const char *OutputBuf)
 {
-
     printf("pdu session uplink ran status transfer, start--------------------\n\n");
 
     int ret = 0;
@@ -295,7 +347,7 @@ int  make_NGAP_PduUplinkRanStatusTransfer(const char *inputBuf, const char *Outp
 	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
 	if(er.encoded < 0)
 	{
-		printf("ng uplink ran status transfer encode failed,er.encoded:%d\n",er.encoded);
+		printf("ng downlink ran status transfer encode failed,er.encoded:%d\n",er.encoded);
 		rc = RETURNerror;
 		goto ERROR; 
 	}
@@ -304,10 +356,12 @@ int  make_NGAP_PduUplinkRanStatusTransfer(const char *inputBuf, const char *Outp
 
     //decode
     ngap_amf_decode_pdu(&message, msgBuf);
-	ngap_amf_handle_ng_pdu_uplink_ran(0,0, &message);
+	ngap_amf_handle_ng_pdu_uplink_ran(0, 0, &message);
 
     //Free pdu
-    ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+    if(pdu)
+    	ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	
 	if(buffer)
 	{
 		free(buffer);
@@ -325,7 +379,7 @@ ERROR:
 		free(buffer);
 		buffer = NULL;
 	}
- 	return rc;  
+ 	return rc;   
 }
 
 
