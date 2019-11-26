@@ -49,12 +49,56 @@
 #include  "Ngap_InterfacesToTrace.h"
 #include  "Ngap_TraceDepth.h"
 #include  "Ngap_TransportLayerAddress.h"
+#include  "Ngap_MaskedIMEISV.h"
+#include  "Ngap_SourceToTarget-TransparentContainer.h"
+#include  "Ngap_MobilityRestrictionList.h"
 
+#include  "Ngap_EquivalentPLMNs.h"
+#include  "Ngap_RATRestrictions.h"
+#include  "Ngap_ForbiddenAreaInformation.h"
+#include  "Ngap_ServiceAreaInformation.h"
+#include  "Ngap_PLMNIdentity.h"
+#include  "Ngap_RATRestrictions-Item.h"
+#include  "Ngap_RATRestrictionInformation.h"
+#include  "Ngap_ForbiddenAreaInformation-Item.h"
+#include  "Ngap_ForbiddenTACs.h"
+#include  "Ngap_TAC.h"
+#include  "Ngap_AllowedTACs.h"
+#include  "Ngap_NotAllowedTACs.h"
+#include  "Ngap_ServiceAreaInformation-Item.h"
+#include  "Ngap_LocationReportingRequestType.h"
+#include  "Ngap_AreaOfInterestList.h"
+#include  "Ngap_EventType.h"
+#include  "Ngap_ReportArea.h"
+#include  "Ngap_LocationReportingReferenceID.h"
+#include  "Ngap_AreaOfInterestList.h"
+#include  "Ngap_AreaOfInterestItem.h"
+#include  "Ngap_AreaOfInterest.h"
+#include  "Ngap_LocationReportingReferenceID.h"
+#include  "Ngap_AreaOfInterestTAIList.h"
+#include  "Ngap_AreaOfInterestCellList.h"
+#include  "Ngap_AreaOfInterestRANNodeList.h"
+#include  "Ngap_TAI.h"
+#include  "Ngap_AreaOfInterestCellList.h"
+#include  "Ngap_AreaOfInterestCellItem.h"
+#include  "Ngap_NGRAN-CGI.h"
+#include  "Ngap_NR-CGI.h"
+#include  "Ngap_EUTRA-CGI.h"
+#include  "Ngap_AreaOfInterest.h"
+#include  "Ngap_LocationReportingReferenceID.h"
+#include  "Ngap_AreaOfInterestTAIItem.h"
+#include  "Ngap_AreaOfInterestCellList.h"
+#include  "Ngap_AreaOfInterestCellItem.h"
+#include  "Ngap_GlobalRANNodeID.h"
+#include  "Ngap_GlobalGNB-ID.h"
+#include  "Ngap_GlobalNgENB-ID.h"
+#include  "Ngap_GlobalN3IWF-ID.h"
+#include  "Ngap_NGRAN-CGI.h"
+#include  "Ngap_NR-CGI.h"
+#include  "Ngap_EUTRA-CGI.h"
 
 #include  "Ngap_Criticality.h"
-
 #include  "Ngap_HandoverType.h"
-
 #include  "Ngap_CauseRadioNetwork.h"
 
 #include  "Ngap_TargetRANNodeID.h"
@@ -244,6 +288,63 @@ Ngap_HandoverRequestIEs_t *  make_handover_request_TraceActivation()
 	ie->value.present = Ngap_HandoverRequestIEs__value_PR_TraceActivation;
 	return ie;
 }
+
+Ngap_HandoverRequestIEs_t *  make_handover_request_MaskedIMEISV()
+{
+	Ngap_HandoverRequestIEs_t *ie = NULL;
+	ie	= calloc(1, sizeof(Ngap_HandoverRequestIEs_t));
+	memset(ie, 0, sizeof(Ngap_HandoverRequestIEs_t));
+			
+	ie->id            = Ngap_ProtocolIE_ID_id_MaskedIMEISV; 
+	ie->criticality   = Ngap_Criticality_reject;
+	ie->value.present = Ngap_HandoverRequestIEs__value_PR_MaskedIMEISV;
+	return ie;
+}
+
+
+Ngap_HandoverRequestIEs_t  *make_handover_request_SourceToTarget_TransparentContainer(const char *container)
+{
+	Ngap_HandoverRequestIEs_t *ie = NULL;
+	ie	= calloc(1, sizeof(Ngap_HandoverRequestIEs_t));
+	memset(ie, 0, sizeof(Ngap_HandoverRequestIEs_t));
+			
+	ie->id            = Ngap_ProtocolIE_ID_id_SourceToTarget_TransparentContainer; 
+	ie->criticality   = Ngap_Criticality_reject;
+	ie->value.present = Ngap_HandoverRequestIEs__value_PR_SourceToTarget_TransparentContainer;
+
+	OCTET_STRING_fromBuf(&ie->value.choice.SourceToTarget_TransparentContainer, container, strlen(container));
+	
+	return ie;
+}
+
+
+Ngap_HandoverRequestIEs_t  * make_handover_request_MobilityRestrictionList()
+{
+	Ngap_HandoverRequestIEs_t *ie = NULL;
+	ie	= calloc(1, sizeof(Ngap_HandoverRequestIEs_t));
+	memset(ie, 0, sizeof(Ngap_HandoverRequestIEs_t));
+			
+	ie->id            = Ngap_ProtocolIE_ID_id_MobilityRestrictionList; 
+	ie->criticality   = Ngap_Criticality_reject;
+	ie->value.present = Ngap_HandoverRequestIEs__value_PR_MobilityRestrictionList;
+	
+	return ie;
+}
+
+Ngap_HandoverRequestIEs_t  *make_handover_request_LocationReportingRequestType()
+{
+	Ngap_HandoverRequestIEs_t *ie = NULL;
+	ie	= calloc(1, sizeof(Ngap_HandoverRequestIEs_t));
+	memset(ie, 0, sizeof(Ngap_HandoverRequestIEs_t));
+			
+	ie->id            = Ngap_ProtocolIE_ID_id_LocationReportingRequestType; 
+	ie->criticality   = Ngap_Criticality_reject;
+	ie->value.present = Ngap_HandoverRequestIEs__value_PR_LocationReportingRequestType;
+	
+	return ie;
+}
+
+
 
 void add_pdu_handover_request_ie(Ngap_HandoverRequest_t *ngapPDUHandoverRequest, Ngap_HandoverRequestIEs_t *ie) {
     int ret;
@@ -493,9 +594,6 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_handover_request(const char *inputBuf)
     ie  = make_handover_request_NAS_PDU(nas_pdu);
     add_pdu_handover_request_ie(ngapPDUHandoverRequest, ie);
 
-
-	
-
     //PDUSessionResourceSetupListHOReq
 	Ngap_PDUSessionResourceSetupItemHOReq_t  *pSetupItemHOReq  = calloc(1, sizeof(Ngap_PDUSessionResourceSetupItemHOReq_t));
 	ie = make_handover_request_PDUSessionResourceSetupListHOReq();
@@ -574,6 +672,180 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_handover_request(const char *inputBuf)
     printf("traceCollectionEntityIPAddress:0x%x\n", traceCollectionEntityIPAddress[0]);
 	
 	add_pdu_handover_request_ie(ngapPDUHandoverRequest, ie);
+
+
+    //MaskedIMEISV;
+ 
+	ie = make_handover_request_MaskedIMEISV();
+	uint64_t MaskedIMEISV[1] = {0x01};
+    ie->value.choice.MaskedIMEISV.buf = calloc(8, sizeof(uint8_t));
+	memcpy(ie->value.choice.MaskedIMEISV.buf, &MaskedIMEISV, 1);
+	ie->value.choice.MaskedIMEISV.size = 8;
+	ie->value.choice.MaskedIMEISV.bits_unused = 0;
+	
+	add_pdu_handover_request_ie(ngapPDUHandoverRequest, ie);
+
+    //SourceToTarget_TransparentContainer
+    ie = make_handover_request_SourceToTarget_TransparentContainer("containe");
+    add_pdu_handover_request_ie(ngapPDUHandoverRequest, ie);
+	printf("SourceToTarget_TransparentContainer: containe\n");
+
+
+    
+	//Ngap_MobilityRestrictionList_t	MobilityRestrictionList;
+	ie = make_handover_request_MobilityRestrictionList();
+	
+	      //Ngap_PLMNIdentity_t	servingPLMN;
+	uint8_t server_plmn[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(&ie->value.choice.MobilityRestrictionList.servingPLMN, (const char*)server_plmn, 3);
+	
+	     //equivalentPLMNs
+	Ngap_EquivalentPLMNs_t *equivalentPLMNs  = NULL;   /* OPTIONAL */
+	equivalentPLMNs  = calloc(1, sizeof(Ngap_EquivalentPLMNs_t));
+    Ngap_PLMNIdentity_t  *equiaPlmn = calloc(1, sizeof(Ngap_PLMNIdentity_t));
+	
+	uint8_t equai_plmn[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(equiaPlmn, (const char*)equai_plmn, 3);
+	ASN_SEQUENCE_ADD(&equivalentPLMNs->list, equiaPlmn);
+	ie->value.choice.MobilityRestrictionList.equivalentPLMNs  = equivalentPLMNs;
+	
+	   
+	     //rATRestrictions
+    Ngap_RATRestrictions_t *rATRestrictions  = calloc(1, sizeof(Ngap_RATRestrictions_t))  ;   /* OPTIONAL */
+    Ngap_RATRestrictions_Item_t   *pRestrictions_Item  = calloc(1, sizeof(Ngap_RATRestrictions_Item_t));
+	
+	OCTET_STRING_fromBuf(&pRestrictions_Item->pLMNIdentity, (const char*)equai_plmn, 3);
+    
+   
+    uint64_t rATRestrictionInformation[1] = {0x01};
+    pRestrictions_Item->rATRestrictionInformation.buf = calloc(8, sizeof(uint8_t));
+	memcpy(pRestrictions_Item->rATRestrictionInformation.buf, &rATRestrictionInformation, 1);
+	pRestrictions_Item->rATRestrictionInformation.size = 8;
+	pRestrictions_Item->rATRestrictionInformation.bits_unused = 0;
+	
+    ASN_SEQUENCE_ADD(&rATRestrictions->list, pRestrictions_Item);
+    ie->value.choice.MobilityRestrictionList.rATRestrictions   = rATRestrictions;
+		 
+	   
+	     //forbiddenAreaInformation
+    Ngap_ForbiddenAreaInformation_t    *forbiddenAreaInformation = calloc(1, sizeof(Ngap_ForbiddenAreaInformation_t));  /* OPTIONAL */
+    Ngap_ForbiddenAreaInformation_Item_t  *infItem =  calloc(1, sizeof(Ngap_ForbiddenAreaInformation_Item_t));
+
+    uint8_t info_plmn[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(&infItem->pLMNIdentity, (const char*)info_plmn, 3);
+
+    Ngap_TAC_t  *pTac = calloc(1, sizeof(Ngap_TAC_t));
+	uint8_t info_TAC[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(pTac, (const char*)info_TAC, 3);
+	ASN_SEQUENCE_ADD(&infItem->forbiddenTACs.list, pTac);
+	
+    ASN_SEQUENCE_ADD(&forbiddenAreaInformation->list, infItem);
+	ie->value.choice.MobilityRestrictionList.forbiddenAreaInformation   = forbiddenAreaInformation;
+	 
+	     //serviceAreaInformation
+    Ngap_ServiceAreaInformation_t  *serviceAreaInformation  = calloc(1, sizeof(Ngap_ServiceAreaInformation_t));    /* OPTIONAL */
+    Ngap_ServiceAreaInformation_Item_t   *pSerInfoItem = calloc(1, sizeof(Ngap_ServiceAreaInformation_Item_t));
+
+             //pLMNIdentity
+    Ngap_PLMNIdentity_t	 pLMNIdentity;
+	uint8_t ser_plmn[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(&pSerInfoItem->pLMNIdentity, (const char*)ser_plmn, 3);
+			 
+	         //allowedTACs
+	Ngap_AllowedTACs_t	*allowedTACs  = calloc(1, sizeof(Ngap_AllowedTACs_t));	/* OPTIONAL */
+    Ngap_TAC_t  *pallowTac = calloc(1, sizeof(Ngap_TAC_t));
+	uint8_t allow_TAC[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(pallowTac, (const char*)allow_TAC, 3);
+	ASN_SEQUENCE_ADD(&allowedTACs->list, pallowTac);
+	pSerInfoItem->allowedTACs  = allowedTACs;
+	
+			 //notAllowedTACs
+	Ngap_NotAllowedTACs_t	*notAllowedTACs  = calloc(1, sizeof(Ngap_NotAllowedTACs_t)); ;	/* OPTIONAL */
+    Ngap_TAC_t  *pnotallow_TAC = calloc(1, sizeof(Ngap_TAC_t));
+	uint8_t notallow_TAC[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(pnotallow_TAC, (const char*)notallow_TAC, 3);
+	ASN_SEQUENCE_ADD(&notAllowedTACs->list, pnotallow_TAC);
+	pSerInfoItem->notAllowedTACs  =  notAllowedTACs;
+
+	ASN_SEQUENCE_ADD(&serviceAreaInformation->list, pSerInfoItem);
+
+	ie->value.choice.MobilityRestrictionList.serviceAreaInformation   = serviceAreaInformation;
+	add_pdu_handover_request_ie(ngapPDUHandoverRequest, ie);
+
+
+    //LocationReportingRequestType
+	//Ngap_LocationReportingRequestType_t	 LocationReportingRequestType;
+	ie =  make_handover_request_LocationReportingRequestType();
+
+     //eventType
+    //Ngap_EventType_t	 eventType;
+    ie->value.choice.LocationReportingRequestType.eventType  =  Ngap_EventType_direct;
+	//Ngap_ReportArea_t	 reportArea;
+	ie->value.choice.LocationReportingRequestType.reportArea =  Ngap_ReportArea_cell;
+
+	
+	//areaOfInterestList
+	Ngap_AreaOfInterestList_t	*areaOfInterestList  = calloc(1, sizeof(Ngap_AreaOfInterestList_t));	/* OPTIONAL */
+	ie->value.choice.LocationReportingRequestType.areaOfInterestList  = areaOfInterestList;
+	
+    Ngap_AreaOfInterestItem_t    *pInterestItem  = calloc(1, sizeof(Ngap_AreaOfInterestItem_t));
+
+    //Ngap_AreaOfInterest_t	 areaOfInterest;
+    Ngap_AreaOfInterestTAIList_t  *areaOfInterestTAIList  = calloc(1, sizeof(Ngap_AreaOfInterestTAIList_t));	/* OPTIONAL */
+    Ngap_AreaOfInterestTAIItem_t         *interestTAIItem = calloc(1, sizeof(Ngap_AreaOfInterestTAIItem_t));
+
+    //pLMNIdentity
+	uint8_t interestTAIItem_pLMNIdentity[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(&interestTAIItem->tAI.pLMNIdentity, (const char*)interestTAIItem_pLMNIdentity, 3);
+
+	uint8_t interestTAIItem_tAC[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(&interestTAIItem->tAI.tAC, (const char*)interestTAIItem_tAC, 3);
+	
+	ASN_SEQUENCE_ADD(&areaOfInterestTAIList->list, interestTAIItem);
+	pInterestItem->areaOfInterest.areaOfInterestTAIList  = areaOfInterestTAIList;
+
+	
+	Ngap_AreaOfInterestCellList_t *areaOfInterestCellList = calloc(1, sizeof(Ngap_AreaOfInterestCellList_t));	/* OPTIONAL */
+	pInterestItem->areaOfInterest.areaOfInterestCellList  = areaOfInterestCellList;
+    Ngap_AreaOfInterestCellItem_t  pInterestCellItem =  calloc(1, sizeof(Ngap_AreaOfInterestCellItem_t));
+
+   
+	//pInterestCellItem->nGRAN_CGI.present = Ngap_NGRAN_CGI_PR_nR_CGI;
+	
+	#if 0 
+	Ngap_NR_CGI_t  *pnR_cell_CGI = calloc(1, sizeof(Ngap_NR_CGI_t));
+
+	
+	uint8_t ng_cgi_cell_plmn[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(&pnR_cell_CGI->pLMNIdentity, (const char*)ng_cgi_cell_plmn, 3);
+    
+	int cell_index = 0x02;
+	uint32_t ei = htonl(cell_index);
+	pnR_CGI_area->nRCellIdentity->buf = calloc(4, sizeof(uint8_t));
+	pnR_CGI_area->nRCellIdentity->size = 4;
+	memcpy(pnR_CGI_area->nRCellIdentity->buf, &ei, 4);
+	pnR_CGI_area->nRCellIdentity->bits_unused = 0x04;
+   
+	pInterestCellItem->nGRAN_CGI.choice.nR_CGI  = pnR_CGI_area;
+	ASN_SEQUENCE_ADD(&areaOfInterestCellList->list, pInterestCellItem);
+	pInterestItem->areaOfInterest.areaOfInterestCellList  = areaOfInterestCellList;
+    #endif
+
+	Ngap_AreaOfInterestRANNodeList_t	*areaOfInterestRANNodeList = calloc(1, sizeof(Ngap_AreaOfInterestRANNodeList_t));;	/* OPTIONAL */
+	pInterestItem->areaOfInterest.areaOfInterestRANNodeList  = areaOfInterestRANNodeList;
+
+
+	//locationReportingReferenceID
+	pInterestItem->locationReportingReferenceID = 0x01;
+
+	ASN_SEQUENCE_ADD(&areaOfInterestList->list, pInterestItem);
+    
+	
+
+	//locationReportingReferenceIDToBeCancelled
+	Ngap_LocationReportingReferenceID_t	*locationReportingReferenceIDToBeCancelled  = calloc(1, sizeof(Ngap_LocationReportingReferenceID_t));	/* OPTIONAL */
+	*locationReportingReferenceIDToBeCancelled  = 0x02;
+	ie->value.choice.LocationReportingRequestType.locationReportingReferenceIDToBeCancelled  = locationReportingReferenceIDToBeCancelled;
 
 	
     return pdu;
@@ -912,8 +1184,138 @@ ngap_amf_handle_ng_pdu_handover_request(
 		printf("traceDepth:0x%x\n", ie->value.choice.TraceActivation.traceDepth);
 	    printf("traceCollectionEntityIPAddress:0x%x\n", ie->value.choice.TraceActivation.traceCollectionEntityIPAddress.buf[0]);
 	}
-    
-	
+
+    //MaskedIMEISV
+	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_MaskedIMEISV, false);
+	if (ie) 
+	{ 
+		uint64_t  MaskedIMEISV  = BIT_STRING_to_uint64(&ie->value.choice.MaskedIMEISV);
+		printf("MaskedIMEISV:0x%x\n", MaskedIMEISV);
+	}
+
+
+	//SourceToTarget_TransparentContainer
+	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_SourceToTarget_TransparentContainer, false);
+	if (ie) 
+	{ 
+		const char   *container  = (const char *)ie->value.choice.SourceToTarget_TransparentContainer.buf;
+		printf("SourceToTarget_TransparentContainer:%s\n", container);
+	}
+
+    //MobilityRestrictionList
+    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_MobilityRestrictionList, false);
+	if (ie) 
+	{ 
+        Ngap_MobilityRestrictionList_t	 *pMobilityRestrictionList   =  &ie->value.choice.MobilityRestrictionList;
+		if(pMobilityRestrictionList)
+		{
+
+			//servingPLMN
+			nr_cgi_t    nr_cgi = {.plmn = {0}, .cell_identity = {0}};	
+			TBCD_TO_PLMN_T(&pMobilityRestrictionList->servingPLMN, &nr_cgi.plmn);
+
+			
+			//equivalentPLMNs
+		    Ngap_EquivalentPLMNs_t	*equivalen_container  = pMobilityRestrictionList->equivalentPLMNs; ;	/* OPTIONAL */
+			
+			for(i = 0; i< equivalen_container->list.count; i++)
+			{
+	            Ngap_PLMNIdentity_t  *plmnItem = equivalen_container->list.array[i];
+			    if(!plmnItem)
+				    continue;
+				nr_cgi_t    nr_cgi = {.plmn = {0}, .cell_identity = {0}};	
+				
+			    TBCD_TO_PLMN_T(plmnItem, &nr_cgi.plmn);
+			}
+			
+			//rATRestrictions
+		    Ngap_RATRestrictions_t	*restrictions_container = pMobilityRestrictionList->rATRestrictions;	/* OPTIONAL */
+			if(restrictions_container)
+			{
+                for(i = 0; i< restrictions_container->list.count; i++)
+                {
+                    Ngap_RATRestrictions_Item_t  *pItem = restrictions_container->list.array[i];
+					nr_cgi_t    nr_cgi = {.plmn = {0}, .cell_identity = {0}};	
+					
+				    TBCD_TO_PLMN_T(&pItem->pLMNIdentity, &nr_cgi.plmn);
+					
+		            uint64_t  rATRestrictionInformation = BIT_STRING_to_uint64(&pItem->rATRestrictionInformation);
+                }
+
+			}
+			//forbiddenAreaInformation
+		    Ngap_ForbiddenAreaInformation_t	*forbidden_container = pMobilityRestrictionList->forbiddenAreaInformation;	/* OPTIONAL */
+		    if(forbidden_container)
+			{
+            	for(i = 0; i< forbidden_container->list.count; i++)
+                {
+                    Ngap_ForbiddenAreaInformation_Item_t  *infoItem  = forbidden_container->list.array[i];
+					if(!infoItem)
+						 continue;
+
+					nr_cgi_t    nr_cgi = {.plmn = {0}, .cell_identity = {0}};	
+				    TBCD_TO_PLMN_T(&infoItem->pLMNIdentity, &nr_cgi.plmn);
+                	
+	                Ngap_ForbiddenTACs_t	 *forbiddenTACs_container = &infoItem->forbiddenTACs;
+					int j = 0;
+					for(; j< forbiddenTACs_container->list.count; j++ )
+					{
+                       Ngap_TAC_t  *ptacItem = forbiddenTACs_container->list.array[j];
+					   if(ptacItem)
+					   	  continue;
+					   
+					   nr_tai_t         nr_tai = {.plmn = {0}, .tac = INVALID_TAC};
+					   nr_tai.tac = asn1str_to_u24(ptacItem);
+					}
+            	} 
+			}
+
+			//serviceAreaInformation
+		    Ngap_ServiceAreaInformation_t	*service_container = pMobilityRestrictionList->serviceAreaInformation;	/* OPTIONAL */
+			if(service_container)
+			{
+
+			    for(i = 0; i< service_container->list.count; i++)
+                {
+                    Ngap_ServiceAreaInformation_Item_t  *serviceItem  = service_container->list.array[i];
+					if(!serviceItem)
+						 continue;
+			
+					nr_cgi_t    nr_cgi = {.plmn = {0}, .cell_identity = {0}};	
+				    TBCD_TO_PLMN_T(&serviceItem->pLMNIdentity, &nr_cgi.plmn);
+					
+		            Ngap_AllowedTACs_t	*allowedTACs  = serviceItem->allowedTACs;	/* OPTIONAL */
+					
+					int j  = 0;
+					for(; j < allowedTACs->list.count; j++)
+					{
+						Ngap_TAC_t  *ptacItem = allowedTACs->list.array[j];
+					    if(ptacItem)
+					   	  continue;
+					   
+					    nr_tai_t         nr_tai = {.plmn = {0}, .tac = INVALID_TAC};
+					    nr_tai.tac = asn1str_to_u24(ptacItem);
+                       
+					}
+					
+		            Ngap_NotAllowedTACs_t	*notAllowedTACs = serviceItem->notAllowedTACs;	/* OPTIONAL */
+					for( j = 0; j < notAllowedTACs->list.count; j++)
+					{
+						Ngap_TAC_t  *ptacItem = notAllowedTACs->list.array[j];
+					    if(ptacItem)
+					   	    continue;
+					   
+					    nr_tai_t         nr_tai = {.plmn = {0}, .tac = INVALID_TAC};
+					    nr_tai.tac = asn1str_to_u24(ptacItem);
+					}
+					
+				}
+
+			}
+		}
+		
+	}
+
 	return rc;
 }
 
