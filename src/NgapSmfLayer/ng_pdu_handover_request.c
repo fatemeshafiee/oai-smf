@@ -96,6 +96,11 @@
 #include  "Ngap_NGRAN-CGI.h"
 #include  "Ngap_NR-CGI.h"
 #include  "Ngap_EUTRA-CGI.h"
+#include  "Ngap_PLMNIdentity.h"
+#include  "Ngap_GNB-ID.h"
+#include  "Ngap_RRCInactiveTransitionReportRequest.h"
+#include  "Ngap_GUAMI.h"
+
 
 #include  "Ngap_Criticality.h"
 #include  "Ngap_HandoverType.h"
@@ -105,6 +110,9 @@
 #include  "Ngap_TargeteNB-ID.h"
 #include  "Ngap_ProtocolIE-SingleContainer.h"
 #include  "Ngap_TAI.h"
+#include  "Ngap_AreaOfInterestRANNodeList.h"
+#include  "Ngap_AreaOfInterestRANNodeItem.h"
+
 
 #include  "common_defs.h"
 #include  "common_types.h"
@@ -338,13 +346,38 @@ Ngap_HandoverRequestIEs_t  *make_handover_request_LocationReportingRequestType()
 	memset(ie, 0, sizeof(Ngap_HandoverRequestIEs_t));
 			
 	ie->id            = Ngap_ProtocolIE_ID_id_LocationReportingRequestType; 
-	ie->criticality   = Ngap_Criticality_reject;
+	ie->criticality   = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_HandoverRequestIEs__value_PR_LocationReportingRequestType;
 	
 	return ie;
 }
 
 
+Ngap_HandoverRequestIEs_t  *make_handover_request_RRCInactiveTransitionReportRequest(const long rrcReq)
+{
+	Ngap_HandoverRequestIEs_t *ie = NULL;
+	ie	= calloc(1, sizeof(Ngap_HandoverRequestIEs_t));
+	memset(ie, 0, sizeof(Ngap_HandoverRequestIEs_t));
+			
+	ie->id            = Ngap_ProtocolIE_ID_id_RRCInactiveTransitionReportRequest; 
+	ie->criticality   = Ngap_Criticality_ignore;
+	ie->value.present = Ngap_HandoverRequestIEs__value_PR_RRCInactiveTransitionReportRequest;
+	ie->value.choice.RRCInactiveTransitionReportRequest = rrcReq;
+	return ie;
+}
+
+Ngap_HandoverRequestIEs_t  *make_handover_request_GUAMI()
+{
+	Ngap_HandoverRequestIEs_t *ie = NULL;
+	ie	= calloc(1, sizeof(Ngap_HandoverRequestIEs_t));
+	memset(ie, 0, sizeof(Ngap_HandoverRequestIEs_t));
+			
+	ie->id            = Ngap_ProtocolIE_ID_id_GUAMI; 
+	ie->criticality   = Ngap_Criticality_reject;
+	ie->value.present = Ngap_HandoverRequestIEs__value_PR_GUAMI;
+	
+	return ie;
+}
 
 void add_pdu_handover_request_ie(Ngap_HandoverRequest_t *ngapPDUHandoverRequest, Ngap_HandoverRequestIEs_t *ie) {
     int ret;
@@ -774,79 +807,129 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_handover_request(const char *inputBuf)
 
 
     //LocationReportingRequestType
-	//Ngap_LocationReportingRequestType_t	 LocationReportingRequestType;
 	ie =  make_handover_request_LocationReportingRequestType();
-
+   
      //eventType
-    //Ngap_EventType_t	 eventType;
     ie->value.choice.LocationReportingRequestType.eventType  =  Ngap_EventType_direct;
-	//Ngap_ReportArea_t	 reportArea;
+	//reportArea;
 	ie->value.choice.LocationReportingRequestType.reportArea =  Ngap_ReportArea_cell;
+
 
-	
-	//areaOfInterestList
+    
+	 //areaOfInterestList
 	Ngap_AreaOfInterestList_t	*areaOfInterestList  = calloc(1, sizeof(Ngap_AreaOfInterestList_t));	/* OPTIONAL */
 	ie->value.choice.LocationReportingRequestType.areaOfInterestList  = areaOfInterestList;
 	
     Ngap_AreaOfInterestItem_t    *pInterestItem  = calloc(1, sizeof(Ngap_AreaOfInterestItem_t));
-
-    //Ngap_AreaOfInterest_t	 areaOfInterest;
+    ASN_SEQUENCE_ADD(&areaOfInterestList->list, pInterestItem);
+   
+          //areaOfInterest;
+             //areaOfInterestTAIList
     Ngap_AreaOfInterestTAIList_t  *areaOfInterestTAIList  = calloc(1, sizeof(Ngap_AreaOfInterestTAIList_t));	/* OPTIONAL */
-    Ngap_AreaOfInterestTAIItem_t         *interestTAIItem = calloc(1, sizeof(Ngap_AreaOfInterestTAIItem_t));
+    pInterestItem->areaOfInterest.areaOfInterestTAIList  = areaOfInterestTAIList;
 
-    //pLMNIdentity
+	Ngap_AreaOfInterestTAIItem_t         *interestTAIItem = calloc(1, sizeof(Ngap_AreaOfInterestTAIItem_t));
+    ASN_SEQUENCE_ADD(&areaOfInterestTAIList->list, interestTAIItem);
+               //pLMNIdentity
 	uint8_t interestTAIItem_pLMNIdentity[3] = { 0x02, 0xF8, 0x29 };
 	OCTET_STRING_fromBuf(&interestTAIItem->tAI.pLMNIdentity, (const char*)interestTAIItem_pLMNIdentity, 3);
-
+               //tAC
 	uint8_t interestTAIItem_tAC[3] = { 0x02, 0xF8, 0x29 };
 	OCTET_STRING_fromBuf(&interestTAIItem->tAI.tAC, (const char*)interestTAIItem_tAC, 3);
 	
-	ASN_SEQUENCE_ADD(&areaOfInterestTAIList->list, interestTAIItem);
-	pInterestItem->areaOfInterest.areaOfInterestTAIList  = areaOfInterestTAIList;
-
-	
+  
+          //areaOfInterestCellList
 	Ngap_AreaOfInterestCellList_t *areaOfInterestCellList = calloc(1, sizeof(Ngap_AreaOfInterestCellList_t));	/* OPTIONAL */
 	pInterestItem->areaOfInterest.areaOfInterestCellList  = areaOfInterestCellList;
-    Ngap_AreaOfInterestCellItem_t  pInterestCellItem =  calloc(1, sizeof(Ngap_AreaOfInterestCellItem_t));
-
-   
-	//pInterestCellItem->nGRAN_CGI.present = Ngap_NGRAN_CGI_PR_nR_CGI;
-	
-	#if 0 
+    Ngap_AreaOfInterestCellItem_t  *pInterestCellItem =  calloc(1, sizeof(Ngap_AreaOfInterestCellItem_t));
+    
+    pInterestCellItem->nGRAN_CGI.present = Ngap_NGRAN_CGI_PR_nR_CGI;
 	Ngap_NR_CGI_t  *pnR_cell_CGI = calloc(1, sizeof(Ngap_NR_CGI_t));
-
 	
+	         //nGRAN_CGI
+	                 //pLMNIdentity
 	uint8_t ng_cgi_cell_plmn[3] = { 0x02, 0xF8, 0x29 };
 	OCTET_STRING_fromBuf(&pnR_cell_CGI->pLMNIdentity, (const char*)ng_cgi_cell_plmn, 3);
-    
-	int cell_index = 0x02;
-	uint32_t ei = htonl(cell_index);
-	pnR_CGI_area->nRCellIdentity->buf = calloc(4, sizeof(uint8_t));
-	pnR_CGI_area->nRCellIdentity->size = 4;
-	memcpy(pnR_CGI_area->nRCellIdentity->buf, &ei, 4);
-	pnR_CGI_area->nRCellIdentity->bits_unused = 0x04;
-   
-	pInterestCellItem->nGRAN_CGI.choice.nR_CGI  = pnR_CGI_area;
-	ASN_SEQUENCE_ADD(&areaOfInterestCellList->list, pInterestCellItem);
-	pInterestItem->areaOfInterest.areaOfInterestCellList  = areaOfInterestCellList;
-    #endif
 
-	Ngap_AreaOfInterestRANNodeList_t	*areaOfInterestRANNodeList = calloc(1, sizeof(Ngap_AreaOfInterestRANNodeList_t));;	/* OPTIONAL */
-	pInterestItem->areaOfInterest.areaOfInterestRANNodeList  = areaOfInterestRANNodeList;
-
-
-	//locationReportingReferenceID
-	pInterestItem->locationReportingReferenceID = 0x01;
-
-	ASN_SEQUENCE_ADD(&areaOfInterestList->list, pInterestItem);
-    
+	                //nRCellIdentity
+	uint8_t cell_cgi[5] = {0x00,0x01,0x02,0x03,0x04};
+	pnR_cell_CGI->nRCellIdentity.buf = calloc(5, sizeof(uint8_t));
+	pnR_cell_CGI->nRCellIdentity.size = 5;
+	memcpy(pnR_cell_CGI->nRCellIdentity.buf, &cell_cgi, 5);
+	pnR_cell_CGI->nRCellIdentity.bits_unused = 0x04;
 	
+	pInterestCellItem->nGRAN_CGI.choice.nR_CGI  = pnR_cell_CGI;
+	ASN_SEQUENCE_ADD(&areaOfInterestCellList->list, pInterestCellItem);
+  
 
+          //areaOfInterestRANNodeList
+	Ngap_AreaOfInterestRANNodeList_t	*areaOfInterestRANNodeList = calloc(1, sizeof(Ngap_AreaOfInterestRANNodeList_t));	/* OPTIONAL */
+    pInterestItem->areaOfInterest.areaOfInterestRANNodeList  = areaOfInterestRANNodeList;
+	Ngap_AreaOfInterestRANNodeItem_t    *areaOfInterestRANNodeItem = calloc(1, sizeof(Ngap_AreaOfInterestRANNodeItem_t));
+	ASN_SEQUENCE_ADD(&areaOfInterestRANNodeList->list, areaOfInterestRANNodeItem);
+	 
+    areaOfInterestRANNodeItem->globalRANNodeID.present  = Ngap_GlobalRANNodeID_PR_globalGNB_ID;
+	Ngap_GlobalGNB_ID_t  *globalGNB_ID = calloc(1, sizeof(Ngap_GlobalGNB_ID_t));
+    areaOfInterestRANNodeItem->globalRANNodeID.choice.globalGNB_ID   = globalGNB_ID;
+
+	
+    uint8_t nr_glocal_plmn[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(&globalGNB_ID->pLMNIdentity, (const char*)nr_glocal_plmn, 3);
+	globalGNB_ID->gNB_ID.present  = Ngap_GNB_ID_PR_gNB_ID;
+
+	uint32_t  gnd_id  = 0x01;
+	globalGNB_ID->gNB_ID.choice.gNB_ID.buf   =  calloc(4, sizeof(uint8_t));
+	globalGNB_ID->gNB_ID.choice.gNB_ID.size = 4;
+	memcpy(globalGNB_ID->gNB_ID.choice.gNB_ID.buf, &gnd_id, 4);
+	globalGNB_ID->gNB_ID.choice.gNB_ID.bits_unused = 0;
+
+	    //locationReportingReferenceID
+	pInterestItem->locationReportingReferenceID = 0x01;
+	
+	
 	//locationReportingReferenceIDToBeCancelled
 	Ngap_LocationReportingReferenceID_t	*locationReportingReferenceIDToBeCancelled  = calloc(1, sizeof(Ngap_LocationReportingReferenceID_t));	/* OPTIONAL */
 	*locationReportingReferenceIDToBeCancelled  = 0x02;
 	ie->value.choice.LocationReportingRequestType.locationReportingReferenceIDToBeCancelled  = locationReportingReferenceIDToBeCancelled;
+    
+	add_pdu_handover_request_ie(ngapPDUHandoverRequest, ie);
 
+    //RRCInactiveTransitionReportRequest
+    ie = make_handover_request_RRCInactiveTransitionReportRequest(Ngap_RRCInactiveTransitionReportRequest_subsequent_state_transition_report);
+	add_pdu_handover_request_ie(ngapPDUHandoverRequest, ie);
+	printf("RRCInactiveTransitionReportRequest:0x%x\n",Ngap_RRCInactiveTransitionReportRequest_subsequent_state_transition_report);
+
+    //GUAMI
+    //Ngap_GUAMI_t	 GUAMI;
+    ie = make_handover_request_GUAMI();
+    //Ngap_PLMNIdentity_t	 pLMNIdentity;
+    uint8_t nr_gua_plmn[3] = { 0x02, 0xF8, 0x29 };
+	OCTET_STRING_fromBuf(&ie->value.choice.GUAMI.pLMNIdentity, (const char*)nr_gua_plmn, 3);
+    
+	
+	//Ngap_AMFRegionID_t	 aMFRegionID;  8bits
+	uint8_t  region_id[1]  = {0x01};
+	ie->value.choice.GUAMI.aMFRegionID.buf   =  calloc(1, sizeof(uint8_t));
+	ie->value.choice.GUAMI.aMFRegionID.size = 1;
+	memcpy(ie->value.choice.GUAMI.aMFRegionID.buf, &region_id, 1);
+	ie->value.choice.GUAMI.aMFRegionID.bits_unused = 0x00;
+	
+	//Ngap_AMFSetID_t	 aMFSetID;  10bits
+	uint8_t  set_id[2]  = {0x01,0x02};
+	ie->value.choice.GUAMI.aMFSetID.buf   =  calloc(2, sizeof(uint8_t));
+	ie->value.choice.GUAMI.aMFSetID.size = 2;
+	memcpy(ie->value.choice.GUAMI.aMFSetID.buf, &set_id, 2);
+	ie->value.choice.GUAMI.aMFSetID.bits_unused = 0x06;
+	
+	
+	//Ngap_AMFPointer_t	 aMFPointer;  //6bits
+	uint8_t  aMFPointer[1]  = {0x01};
+	ie->value.choice.GUAMI.aMFPointer.buf   =  calloc(1, sizeof(uint8_t));
+	ie->value.choice.GUAMI.aMFPointer.size = 1;
+	memcpy(ie->value.choice.GUAMI.aMFPointer.buf, &aMFPointer, 1);
+	ie->value.choice.GUAMI.aMFPointer.bits_unused = 0x02;
+	
+	add_pdu_handover_request_ie(ngapPDUHandoverRequest, ie);
 	
     return pdu;
 }
@@ -1316,6 +1399,187 @@ ngap_amf_handle_ng_pdu_handover_request(
 		
 	}
 
+	//LocationReportingRequestType
+	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_LocationReportingRequestType, false);
+	if (ie) 
+	{ 
+		Ngap_LocationReportingRequestType_t	 *pLocationReportingRequestType = &ie->value.choice.LocationReportingRequestType;
+		if(pLocationReportingRequestType)
+		{
+		    //eventType;
+		    printf("eventType:0x%x\n", pLocationReportingRequestType->eventType);
+			
+			Ngap_ReportArea_t	 reportArea;
+			printf("reportArea:0x%x\n", pLocationReportingRequestType->reportArea);
+
+			//areaOfInterestList
+			Ngap_AreaOfInterestList_t	*areaOfInterestList_container   = pLocationReportingRequestType->areaOfInterestList;	/* OPTIONAL */
+            for(i = 0; i <areaOfInterestList_container->list.count; i++)
+            {
+                Ngap_AreaOfInterestItem_t     *pInterestItem  =  areaOfInterestList_container->list.array[i];
+				if(pInterestItem)
+					 continue;
+            	//Ngap_AreaOfInterest_t	 areaOfInterest;
+
+                      //areaOfInterestTAIList
+				Ngap_AreaOfInterestTAIList_t	 *areaOfInterestTAIList_container     = pInterestItem->areaOfInterest.areaOfInterestTAIList;	/* OPTIONAL */
+                for(i = 0; i <areaOfInterestTAIList_container->list.count; i++)
+                {
+	                Ngap_AreaOfInterestTAIItem_t     *pTAIItem  =  areaOfInterestTAIList_container->list.array[i];
+					if(pTAIItem)
+						 continue;
+                     nr_tai_t   nr_tai = {.plmn = {0}, .tac = INVALID_TAC};
+					 
+					 nr_tai.tac = asn1str_to_u24(&pTAIItem->tAI.tAC);
+				  
+					 TBCD_TO_PLMN_T(&pTAIItem->tAI.pLMNIdentity, &nr_tai.plmn);
+                }
+
+				Ngap_AreaOfInterestCellList_t	 *areaOfInterestCellList_container    = pInterestItem->areaOfInterest.areaOfInterestCellList;	/* OPTIONAL */
+                for(i = 0; i <areaOfInterestCellList_container->list.count; i++)
+                {
+	                Ngap_AreaOfInterestCellItem_t     *pCellItem  =  areaOfInterestCellList_container->list.array[i];
+					if(pCellItem)
+						 continue;
+					switch(pCellItem->nGRAN_CGI.present)
+					{
+	                    case Ngap_NGRAN_CGI_PR_NOTHING:	/* No components present */
+						{
+						}
+						break;
+						case  Ngap_NGRAN_CGI_PR_nR_CGI:
+						{
+							Ngap_NR_CGI_t	*nR_CGI = 	pCellItem->nGRAN_CGI.choice.nR_CGI;
+							if(nR_CGI)
+							{
+							    nr_cgi_t         nr_cgi = {.plmn = {0}, .cell_identity = {0}};
+                            	TBCD_TO_PLMN_T(&nR_CGI->pLMNIdentity, &nr_cgi.plmn);
+												 
+								//nRCellIdentity
+								//DevAssert(nR_CGI->nRCellIdentity.size == 36);
+								BIT_STRING_TO_CELL_IDENTITY (&nR_CGI->nRCellIdentity, nr_cgi.cell_identity);
+							}
+							
+						}
+						break;
+						case Ngap_NGRAN_CGI_PR_eUTRA_CGI:
+						{
+						}
+						break;
+						case Ngap_NGRAN_CGI_PR_choice_Extensions:
+						{
+						}
+						break;
+						default:
+							printf("dont't konw type:0x%x\n", pCellItem->nGRAN_CGI.present);
+					}
+					
+                }
+
+				Ngap_AreaOfInterestRANNodeList_t *pRANNodeList_container = pInterestItem->areaOfInterest.areaOfInterestRANNodeList;	/* OPTIONAL */
+                for(i = 0; i <pRANNodeList_container->list.count; i++)
+                {
+	                Ngap_AreaOfInterestRANNodeItem_t  *pRANNodeItem =  pRANNodeList_container->list.array[i];
+					if(pRANNodeItem)
+						 continue;	
+					
+						switch(pRANNodeItem->globalRANNodeID.present)
+						{
+	                        case Ngap_GlobalRANNodeID_PR_NOTHING:	/* No components present */
+							{
+							}
+							break;
+							case Ngap_GlobalRANNodeID_PR_globalGNB_ID:
+							{
+								Ngap_GlobalGNB_ID_t	*globalGNB_ID = pRANNodeItem->globalRANNodeID.choice.globalGNB_ID;
+								if(globalGNB_ID)
+								{
+                                   nr_cgi_t         nr_cgi = {.plmn = {0}, .cell_identity = {0}};
+                            	   TBCD_TO_PLMN_T(&globalGNB_ID->pLMNIdentity, &nr_cgi.plmn);
+
+								   switch(globalGNB_ID->gNB_ID.present)
+								   {
+                                      case Ngap_GNB_ID_PR_NOTHING:	/* No components present */
+									  {
+									  }
+									  break;
+ 									  case Ngap_GNB_ID_PR_gNB_ID:
+									  {
+										 uint32_t gnb_id  = BIT_STRING_to_uint32(&globalGNB_ID->gNB_ID.choice.gNB_ID); 
+									  }
+									  break;
+ 									  case Ngap_GNB_ID_PR_choice_Extensions:
+									  {
+									  }
+									  break;
+									  default:
+								          printf("dont't konw type:0x%x\n", globalGNB_ID->gNB_ID.present);
+							          break;
+								   }
+								}
+							}
+							break;
+							case Ngap_GlobalRANNodeID_PR_globalNgENB_ID:
+							{
+							}
+							break;
+							case Ngap_GlobalRANNodeID_PR_globalN3IWF_ID:
+							{
+							}
+							break;	
+							case Ngap_GlobalRANNodeID_PR_choice_Extensions:
+							{
+							}
+							break;
+							default:
+								printf("dont't konw type:0x%x\n", pRANNodeItem->globalRANNodeID.present);
+							break;
+						}
+						
+				}
+                
+				//locationReportingReferenceID
+	            printf("locationReportingReferenceID:0x%x\n", pInterestItem->locationReportingReferenceID);
+			}
+  
+			Ngap_LocationReportingReferenceID_t	*locationReportingReferenceIDToBeCancelled =  pLocationReportingRequestType->locationReportingReferenceIDToBeCancelled;	/* OPTIONAL */
+			if(locationReportingReferenceIDToBeCancelled)
+				 printf("locationReportingReferenceIDToBeCancelled: 0x%x\n", *locationReportingReferenceIDToBeCancelled);
+		}
+	}
+
+
+    //RRCInactiveTransitionReportRequest
+    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_RRCInactiveTransitionReportRequest, false);
+	if (ie) 
+	{
+		printf("RRCInactiveTransitionReportRequest:0x%x\n", ie->value.choice.RRCInactiveTransitionReportRequest);
+	}
+
+	//GUAMI
+	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverRequestIEs_t, ie, container, Ngap_ProtocolIE_ID_id_GUAMI, false);
+	if (ie) 
+	{
+
+	    Ngap_GUAMI_t  *pGUAMI  = &ie->value.choice.GUAMI;
+		if(pGUAMI)
+		{
+	         fiveG_s_gua_t   fiveG_s_gua = {.region_id = 0, .amf_set_id = 0, .amf_pointer = 0, .plmn = {0}};
+		     //pLMNIdentity
+		     TBCD_TO_PLMN_T(&pGUAMI->pLMNIdentity, &fiveG_s_gua.plmn);
+		   
+		    //Ngap_AMFRegionID_t	 aMFRegionID;  8bits
+		    fiveG_s_gua.region_id  =  (uint8_t) (*(uint8_t *)pGUAMI->aMFRegionID.buf);  //8	BITS
+
+		    //aMFSetID  10B
+			//DevAssert(pFiveG_S_TMSI->aMFSetID.size == 10);
+			fiveG_s_gua.amf_set_id  = (uint16_t)((*(uint16_t *)pGUAMI->aMFSetID.buf)& 0x3FF);  //10 BITS
+			   
+			//aMFPointer 6B;
+			//DevAssert(pFiveG_S_TMSI->aMFPointer.size == 6);
+			fiveG_s_gua.amf_pointer =  (uint8_t) ((*(uint8_t *)pGUAMI->aMFPointer.buf)& 0x3F);  //6	BITS
+	   }
+	}
 	return rc;
 }
 
@@ -1332,7 +1596,7 @@ int  make_NGAP_PduHandOverRequest(const char *inputBuf, const char *OutputBuf)
 	Ngap_NGAP_PDU_t  message = {0};
 
 	//wys:  1024 ?
-	size_t buffer_size = 4096;  
+	size_t buffer_size = 10240;  
 	void *buffer = calloc(1, buffer_size);
 	asn_enc_rval_t er;	
 	
