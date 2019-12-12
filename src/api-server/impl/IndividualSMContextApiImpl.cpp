@@ -29,10 +29,16 @@ void IndividualSMContextApiImpl::retrieve_sm_context(const std::string &smContex
     response.send(Pistache::Http::Code::Ok, "Do some magic\n");
 }
 void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextRef, const SmContextUpdateData &smContextUpdateData, Pistache::Http::ResponseWriter &response) {
-    //handle Nsmf_PDUSession_UpdateSMContext Request
-	//Handle the pdu_session_create_sm_context_request message in pwg_app
-	//m_smf_app->handle_amf_msg(sm_context_req_msg, response);
-	response.send(Pistache::Http::Code::Ok, "Do some magic\n");
+	//handle Nsmf_PDUSession_UpdateSMContext Request
+	Logger::smf_api_server().info("update_sm_contexts...");
+    //Get the SmContextUpdateData from this message and process in smf_app
+	smf::pdu_session_update_sm_context_request sm_context_req_msg = {};
+	//TODO: initialize necessary values for sm context req from smContextUpdateData
+
+	 std::shared_ptr<itti_n11_update_sm_context_request> itti_msg = std::make_shared<itti_n11_update_sm_context_request>(TASK_SMF_N11, TASK_SMF_APP, response);
+    itti_msg->req = sm_context_req_msg;
+    m_smf_app->handle_amf_msg(itti_msg);
+
 }
 
 }

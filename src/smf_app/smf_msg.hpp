@@ -72,6 +72,106 @@ private:
 	std::string m_dnn;
 	snssai_t m_snssai;
 };
+
+//for PDU session update
+class pdu_session_update_sm_context_request: public pdu_session_msg {
+public:
+	pdu_session_update_sm_context_request(): pdu_session_msg(){ }
+
+private:
+   //std::string m_Ppei;
+	std::string m_NfInstanceId;
+	Guami m_Guami;
+	PlmnId servingNetwork;
+    //BackupAmfInfo
+	AcessType anType;
+
+/*    SmContextUpdateData:
+        servingNetwork:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PlmnId'
+        backupAmfInfo:
+          type: array
+          items:
+            $ref: '../TS29571_CommonData.yaml#/components/schemas/BackupAmfInfo'
+          minItems: 1
+          nullable: true
+        anType:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
+        secondAnType:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
+        ratType:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType'
+        presenceInLadn:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/PresenceState'
+        ueLocation:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
+        ueTimeZone:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
+        addUeLocation:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
+        upCnxState:
+          $ref: '#/components/schemas/UpCnxState'
+        hoState:
+          $ref: '#/components/schemas/HoState'
+        toBeSwitched:
+          type: boolean
+          default: false
+        failedToBeSwitched:
+          type: boolean
+        n1SmMsg:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+        n2SmInfo:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+        n2SmInfoType:
+          $ref: '#/components/schemas/N2SmInfoType'
+        targetId:
+          $ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
+        targetServingNfId:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+        smContextStatusUri:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
+        dataForwarding:
+          type: boolean
+          default: false
+        epsBearerSetup:
+          type: array
+          items:
+            $ref: '#/components/schemas/EpsBearerContainer'
+          minItems: 0
+        revokeEbiList:
+          type: array
+          items:
+            $ref: '#/components/schemas/EpsBearerId'
+          minItems: 1
+        release:
+          type: boolean
+          default: false
+        cause:
+          $ref: '#/components/schemas/Cause'
+        ngApCause:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause'
+        5gMmCauseValue:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+        sNssai:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
+        traceData:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/TraceData'
+        epsInterworkingInd:
+          $ref: '#/components/schemas/EpsInterworkingIndication'
+        anTypeCanBeChanged:
+          type: boolean
+          default: false
+        n2SmInfoExt1:
+          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+        n2SmInfoTypeExt1:
+          $ref: '#/components/schemas/N2SmInfoType'
+        maReleaseInd:
+          $ref: '#/components/schemas/MaReleaseIndication'
+        exemptionInd:
+          $ref: '#/components/schemas/ExemptionInd'
+*/
+
+};
 class pdu_session_create_sm_context_request: public pdu_session_msg {
 
 public:

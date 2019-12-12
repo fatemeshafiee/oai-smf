@@ -303,7 +303,17 @@ public:
 	 * @param [std::shared_ptr<itti_n11_create_sm_context_request] smreq Request message
 	 * @return void
 	 */
-		void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+	void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+
+
+	/*
+	 * Handle messages from AMF (e.g., PDU_SESSION_UPDATESMContextRequest)
+	 * @param [std::shared_ptr<itti_n11_update_sm_context_request] smreq Request message
+	 * @return void
+	 */
+	void handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+
+
 
 	/*
 	 * Find DNN context with name

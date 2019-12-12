@@ -222,6 +222,8 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 	return RETURNok;
 }
 
+
+
 //------------------------------------------------------------------------------
 void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_establishment_response& resp, std::shared_ptr<smf::smf_context> sc)
 {
@@ -325,4 +327,16 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 	}
 
 }
+
+//------------------------------------------------------------------------------
+int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_context_request> sm_context_req, std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp, std::shared_ptr<smf::smf_context> pc)
+{
+	//Handle SM update sm context request
+	//The SMF initiates an N4 Session Modification procedure with the UPF. The SMF provides AN Tunnel Info
+	//to the UPF as well as the corresponding forwarding rules
+	//TODO:
+
+
+}
+
 

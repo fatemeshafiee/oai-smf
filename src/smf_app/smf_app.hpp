@@ -118,6 +118,14 @@ public:
    * @return void
    */
    void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+
+   /*
+    * Handle PDUSession_UpdateSMContextRequest from AMF
+    * @param [std::shared_ptr<itti_n11_update_sm_context_request>&] Request message
+    * @return void
+    */
+    void handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+
   /*
    * Verify if SM Context is existed for this Supi
    * @param [supi_t] supi

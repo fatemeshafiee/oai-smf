@@ -412,11 +412,30 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 			send_create_session_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden);
 			return;
 		}
-	}
+	}container with a PDU Session Establishment Reject message (see clause 8.3.3 of TS 24.501 [25]) in the
 
 	//Step 5. let the context handle the message
 	//in this step, SMF will send N4 Session Establishment/Modification to UPF (step 10a, section 4.3.2 3GPP 23.502)
 	//SMF, then, sends response to AMF
+	sc.get()->handle_amf_msg(smreq);
+
+}
+
+
+//------------------------------------------------------------------------------
+void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq)
+{
+	//handle PDU Session Update SM Context Request as specified in section 4.3.2 3GPP TS 23.502
+
+	//SM Context ID, N2 SM information, Request Type
+	//Step 1. get necessary information (N2 SM information)
+	//Step 2. find the smf context
+	std::shared_ptr<smf_context> sc;
+	//TODO: based on AMF ID > get the fteid -> get the SMF context (we should also verify AMF_ID)
+	//TODO: Step 2.1. if not exist -> send reply to AMF (reject)
+	//TODO: create N1 container and send reject message to AMF
+
+	//Step 2.2. if existed -> handle the message in smf_context
 	sc.get()->handle_amf_msg(smreq);
 
 }

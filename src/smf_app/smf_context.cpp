@@ -608,6 +608,38 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 
 //------------------------------------------------------------------------------
+void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq)
+{
+
+	Logger::smf_app().info("Handle a PDU Session Update SM Context Request message from AMF");
+	pdu_session_update_sm_context_request sm_context_req_msg = smreq->req;
+	//TODO:
+	//get dnn context
+	//get SMF PDU Session context
+	std::shared_ptr<smf_pdu_session> sp;
+	//TODO:
+
+	//we need to store HttpResponse and session-related information to be used when receiving the response from UPF
+	itti_n11_update_sm_context_response *sm_context_resp = new itti_n11_update_sm_context_response(TASK_SMF_APP, TASK_SMF_N11, smreq->http_response);
+	std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_update_sm_context_response>(sm_context_resp);
+
+
+	// if these contexts existed > create a procedure for update sm context and let the procedure handle the request
+	//TODO:
+	session_update_sm_context_procedure* proc = new session_update_sm_context_procedure(sp);
+	std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
+
+	insert_procedure(sproc);
+	if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
+		// error !
+		Logger::smf_app().info( "PDU SESSION CREATE SM CONTEXT REQUEST procedure failed");
+		remove_procedure(proc);
+	}
+
+
+}
+
+//------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(snssai_t snssai, std::shared_ptr<session_management_subscription>& ss)
 {
 	Logger::smf_app().info( "Insert dnn subscription, key: %d", (uint8_t)snssai.sST);
