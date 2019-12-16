@@ -35,6 +35,7 @@ public:
 		m_individualSMContextApiImpl = std::make_shared<IndividualSMContextApiImpl> (m_router, smf_app_inst);
 		m_pduSessionsCollectionApiImpl = std::make_shared<PDUSessionsCollectionApiImpl> (m_router, smf_app_inst);
 		m_smContextsCollectionApiImpl = std::make_shared<SMContextsCollectionApiImpl> (m_router, smf_app_inst);
+		m_address = address.host() + ":"+ (address.port()).toString();
 
 	}
 	void init(size_t thr = 1);
@@ -48,6 +49,7 @@ private:
 	std::shared_ptr <IndividualSMContextApiImpl> m_individualSMContextApiImpl;
 	std::shared_ptr <PDUSessionsCollectionApiImpl> m_pduSessionsCollectionApiImpl;
 	std::shared_ptr <SMContextsCollectionApiImpl> m_smContextsCollectionApiImpl;
+	std::string m_address;
 
 };
 

@@ -695,7 +695,7 @@ components:
       anyOf:
         - type: string
           enum:
-            - oIPV4
+            - IPV4
             - IPV6
             - IPV4V6
             - UNSTRUCTURED

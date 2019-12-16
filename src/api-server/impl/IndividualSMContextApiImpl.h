@@ -47,7 +47,7 @@ using namespace oai::smf_server::model;
 
 class IndividualSMContextApiImpl : public oai::smf_server::api::IndividualSMContextApi {
 public:
-    IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst);
+    IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst, std::string address);
     ~IndividualSMContextApiImpl() {}
 
     void release_sm_context(const std::string &smContextRef, const SmContextReleaseData &smContextReleaseData, Pistache::Http::ResponseWriter &response);
@@ -55,6 +55,7 @@ public:
     void update_sm_context(const std::string &smContextRef, const SmContextUpdateData &smContextUpdateData, Pistache::Http::ResponseWriter &response);
 private:
     smf::smf_app *m_smf_app;
+    std::string m_address;
 };
 
 }

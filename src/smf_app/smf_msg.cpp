@@ -92,6 +92,17 @@ void pdu_session_msg::set_snssai(snssai_t const& snssai)
 }
 
 //-----------------------------------------------------------------------------
+void pdu_session_msg::set_api_root(std::string const& value)
+{
+    m_api_root = value;
+}
+
+std::string pdu_session_msg::get_api_root() const
+{
+	return m_api_root;
+}
+
+//-----------------------------------------------------------------------------
 std::string pdu_session_create_sm_context_request::get_serving_nf_id() const
 {
 	return m_serving_nf_id;
@@ -224,5 +235,15 @@ Pistache::Http::Code pdu_session_create_sm_context_response::get_http_code()
 void pdu_session_create_sm_context_response::set_qos_flow_context(const qos_flow_context_created qos_flow)
 {
 	qos_flow_context = qos_flow;
+}
+
+void pdu_session_update_sm_context_request::set_sm_context_ref(std::string const& value)
+{
+	m_smContextRef = value;
+}
+
+std::string pdu_session_update_sm_context_request::get_sm_context_ref() const
+{
+	return m_smContextRef;
 }
 

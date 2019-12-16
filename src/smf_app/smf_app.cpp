@@ -412,7 +412,7 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 			send_create_session_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden);
 			return;
 		}
-	}container with a PDU Session Establishment Reject message (see clause 8.3.3 of TS 24.501 [25]) in the
+	}
 
 	//Step 5. let the context handle the message
 	//in this step, SMF will send N4 Session Establishment/Modification to UPF (step 10a, section 4.3.2 3GPP 23.502)

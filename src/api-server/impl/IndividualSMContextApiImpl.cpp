@@ -18,26 +18,32 @@ namespace api {
 
 using namespace oai::smf_server::model;
 
-IndividualSMContextApiImpl::IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr,  smf::smf_app *smf_app_inst)
-    : IndividualSMContextApi(rtr), m_smf_app(smf_app_inst)
+IndividualSMContextApiImpl::IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr,  smf::smf_app *smf_app_inst, std::string address)
+    : IndividualSMContextApi(rtr), m_smf_app(smf_app_inst), m_address(address)
     { }
 
 void IndividualSMContextApiImpl::release_sm_context(const std::string &smContextRef, const SmContextReleaseData &smContextReleaseData, Pistache::Http::ResponseWriter &response) {
-    response.send(Pistache::Http::Code::Ok, "Do some magic\n");
+	Logger::smf_api_server().info("release_sm_context...");
+	response.send(Pistache::Http::Code::Ok, "This API has not been implemented yet!\n");
 }
+
 void IndividualSMContextApiImpl::retrieve_sm_context(const std::string &smContextRef, const SmContextRetrieveData &smContextRetrieveData, Pistache::Http::ResponseWriter &response) {
-    response.send(Pistache::Http::Code::Ok, "Do some magic\n");
+	Logger::smf_api_server().info("retrieve_sm_context...");
+	response.send(Pistache::Http::Code::Ok, "This API has not been implemented yet!\n");
 }
+
 void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextRef, const SmContextUpdateData &smContextUpdateData, Pistache::Http::ResponseWriter &response) {
 	//handle Nsmf_PDUSession_UpdateSMContext Request
 	Logger::smf_api_server().info("update_sm_contexts...");
-    //Get the SmContextUpdateData from this message and process in smf_app
+	//Get the SmContextUpdateData from this message and process in smf_app
 	smf::pdu_session_update_sm_context_request sm_context_req_msg = {};
-	//TODO: initialize necessary values for sm context req from smContextUpdateData
+	//set smContextRef
+	sm_context_req_msg.set_sm_context_ref(smContextRef);
+	//TODO: initialize necessary values for sm context req from smContextUpdateData and smContextRef
 
-	 std::shared_ptr<itti_n11_update_sm_context_request> itti_msg = std::make_shared<itti_n11_update_sm_context_request>(TASK_SMF_N11, TASK_SMF_APP, response);
-    itti_msg->req = sm_context_req_msg;
-    m_smf_app->handle_amf_msg(itti_msg);
+	std::shared_ptr<itti_n11_update_sm_context_request> itti_msg = std::make_shared<itti_n11_update_sm_context_request>(TASK_SMF_N11, TASK_SMF_APP, response);
+	itti_msg->req = sm_context_req_msg;
+	m_smf_app->handle_amf_msg(itti_msg);
 
 }
 

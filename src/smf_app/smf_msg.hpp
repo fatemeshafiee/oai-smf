@@ -66,7 +66,11 @@ public:
 	snssai_t get_snssai() const;
 	void set_snssai(snssai_t const& value);
 
+	void set_api_root(std::string const& value);
+	std::string get_api_root() const;
+
 private:
+	std::string m_api_root;
 	supi_t m_supi;
 	pdu_session_id_t m_pdu_session_id;
 	std::string m_dnn;
@@ -76,99 +80,117 @@ private:
 //for PDU session update
 class pdu_session_update_sm_context_request: public pdu_session_msg {
 public:
-	pdu_session_update_sm_context_request(): pdu_session_msg(){ }
+	pdu_session_update_sm_context_request(): pdu_session_msg(){ };
+	void set_sm_context_ref(std::string const& value);
+	std::string get_sm_context_ref() const;
 
 private:
-   //std::string m_Ppei;
-	std::string m_NfInstanceId;
-	Guami m_Guami;
-	PlmnId servingNetwork;
-    //BackupAmfInfo
-	AcessType anType;
+	std::string m_sm_context_ref;
+	//std::string m_Ppei;
+	std::string m_nf_instanceId;
+	Guami m_guami;
+	PlmnId m_serving_network;
+	//BackupAmfInfo
+	/*
+    backupAmfInfo:
+      type: array
+      items:
+        $ref: '../TS29571_CommonData.yaml#/components/schemas/BackupAmfInfo'
+      minItems: 1
+      nullable: true
+	 */
+	AcessType m_an_type;
+	/*
+	 *
+     secondAnType:
+     $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
+	 */
 
-/*    SmContextUpdateData:
-        servingNetwork:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/PlmnId'
-        backupAmfInfo:
-          type: array
-          items:
-            $ref: '../TS29571_CommonData.yaml#/components/schemas/BackupAmfInfo'
-          minItems: 1
-          nullable: true
-        anType:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
-        secondAnType:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
-        ratType:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType'
-        presenceInLadn:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/PresenceState'
-        ueLocation:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
-        ueTimeZone:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
-        addUeLocation:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
-        upCnxState:
-          $ref: '#/components/schemas/UpCnxState'
-        hoState:
-          $ref: '#/components/schemas/HoState'
-        toBeSwitched:
-          type: boolean
-          default: false
-        failedToBeSwitched:
-          type: boolean
-        n1SmMsg:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
-        n2SmInfo:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
-        n2SmInfoType:
-          $ref: '#/components/schemas/N2SmInfoType'
-        targetId:
-          $ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
-        targetServingNfId:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
-        smContextStatusUri:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
-        dataForwarding:
-          type: boolean
-          default: false
-        epsBearerSetup:
-          type: array
-          items:
-            $ref: '#/components/schemas/EpsBearerContainer'
-          minItems: 0
-        revokeEbiList:
-          type: array
-          items:
-            $ref: '#/components/schemas/EpsBearerId'
-          minItems: 1
-        release:
-          type: boolean
-          default: false
-        cause:
-          $ref: '#/components/schemas/Cause'
-        ngApCause:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause'
-        5gMmCauseValue:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
-        sNssai:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
-        traceData:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/TraceData'
-        epsInterworkingInd:
-          $ref: '#/components/schemas/EpsInterworkingIndication'
-        anTypeCanBeChanged:
-          type: boolean
-          default: false
-        n2SmInfoExt1:
-          $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
-        n2SmInfoTypeExt1:
-          $ref: '#/components/schemas/N2SmInfoType'
-        maReleaseInd:
-          $ref: '#/components/schemas/MaReleaseIndication'
-        exemptionInd:
-          $ref: '#/components/schemas/ExemptionInd'
+	std::string m_rat_type; //ratType: $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType
+
+	/*    SmContextUpdateData:
+    presenceInLadn:
+      $ref: '../TS29571_CommonData.yaml#/components/schemas/PresenceState'
+    ueLocation:
+      $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
+    ueTimeZone:
+      $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
+    addUeLocation:
+      $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
+    upCnxState:
+      $ref: '#/components/schemas/UpCnxState'
+    hoState:
+      $ref: '#/components/schemas/HoState'
+    toBeSwitched:
+      type: boolean
+      default: false
+    failedToBeSwitched:
+      type: boolean
+	 */
+
+	RefToBinaryData m_n1_sm_msg; //n1SmMsg
+	RefToBinaryData m_n2_sm_info; //n2SmInfo
+	std::string m_n2_sm_info_type; //$ref: '#/components/schemas/N2SmInfoType'
+	NgRanTargetId m_target_id; //$ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
+	std::string m_target_serving_nfId  // $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+	std::string m_sm_context_status_uri;  //smContextStatusUri $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
+	/*
+    dataForwarding:
+      type: boolean
+      default: false
+	*/
+	bool m_data_forwarding;
+	/*
+	epsBearerSetup:
+      type: array
+      items:
+        $ref: '#/components/schemas/EpsBearerContainer'
+        minItems: 0
+	 */
+	std::vector<std::string> m_eps_bearer_setup;
+
+	/*
+    revokeEbiList:
+      type: array
+      items:
+        $ref: '#/components/schemas/EpsBearerId'
+        minItems: 1
+
+    EpsBearerId:
+      type: integer
+      minimum: 0
+      maximum: 15
+
+	 */
+	std::vector<int> m_revoke_ebi_list;
+
+	/*
+     release:
+       type: boolean
+       default: false
+     cause:
+       $ref: '#/components/schemas/Cause'
+	 */
+	NgApCause m_ngAp_cause; //  $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause
+	unsigned int m_5gMm_cause_value; // 5GMmCause, $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+/*
+	sNssai:
+       $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
+    traceData:
+      $ref: '../TS29571_CommonData.yaml#/components/schemas/TraceData'
+    epsInterworkingInd:
+      $ref: '#/components/schemas/EpsInterworkingIndication'
+    anTypeCanBeChanged:
+      type: boolean
+      default: false
+    n2SmInfoExt1:
+      $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
+    n2SmInfoTypeExt1:
+      $ref: '#/components/schemas/N2SmInfoType'
+    maReleaseInd:
+      $ref: '#/components/schemas/MaReleaseIndication'
+    exemptionInd:
+     $ref: '#/components/schemas/ExemptionInd'
 */
 
 };

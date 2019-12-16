@@ -541,6 +541,12 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 		to_json(jsonData, smContextCreatedData);
 		std::string resBody = jsonData.dump();
+
+		//headers: Location:
+        //Contains the URI of the newly created resource, according to the structure: {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
+		std::string uri = sm_context_req_msg.get_api_root() + std::to_string(supi64); //smContextRef
+		sm_context_resp->http_response.headers().add<Pistache::Http::Header::Location>(uri);
+
 		sm_context_resp->http_response.send(Pistache::Http::Code::Created, resBody);
 
 		session_create_sm_context_procedure* proc = new session_create_sm_context_procedure(sp);
@@ -625,6 +631,7 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_req
 
 
 	// if these contexts existed > create a procedure for update sm context and let the procedure handle the request
+	//else
 	//TODO:
 	session_update_sm_context_procedure* proc = new session_update_sm_context_procedure(sp);
 	std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
