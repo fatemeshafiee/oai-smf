@@ -81,11 +81,7 @@ private:
 class pdu_session_update_sm_context_request: public pdu_session_msg {
 public:
 	pdu_session_update_sm_context_request(): pdu_session_msg(){ };
-	void set_sm_context_ref(std::string const& value);
-	std::string get_sm_context_ref() const;
-
 private:
-	std::string m_sm_context_ref;
 	//std::string m_Ppei;
 	std::string m_nf_instanceId;
 	Guami m_guami;

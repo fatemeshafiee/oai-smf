@@ -237,13 +237,3 @@ void pdu_session_create_sm_context_response::set_qos_flow_context(const qos_flow
 	qos_flow_context = qos_flow;
 }
 
-void pdu_session_update_sm_context_request::set_sm_context_ref(std::string const& value)
-{
-	m_smContextRef = value;
-}
-
-std::string pdu_session_update_sm_context_request::get_sm_context_ref() const
-{
-	return m_smContextRef;
-}
-

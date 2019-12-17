@@ -23,7 +23,9 @@ PDUSessionsCollectionApiImpl::PDUSessionsCollectionApiImpl(std::shared_ptr<Pista
     { }
 
 void PDUSessionsCollectionApiImpl::post_pdu_sessions(const PduSessionCreateData &pduSessionCreateData, Pistache::Http::ResponseWriter &response) {
-    response.send(Pistache::Http::Code::Ok, "Do some magic\n");
+	Logger::smf_api_server().info("post_pdu_sessions...");
+	response.send(Pistache::Http::Code::Ok, "Post_pdu_sessions API has not been implemented yet!\n");
+
 }
 
 }

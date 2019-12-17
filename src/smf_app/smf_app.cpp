@@ -36,12 +36,13 @@
 #include "smf_n10.hpp"
 #include "smf_n11.hpp"
 #include "string.hpp"
-#include "SmContextCreateError.h"
 #include "3gpp_29.502.h"
 #include "3gpp_24.007.h"
 #include "smf.h"
 #include "3gpp_24.501.h"
 #include "RefToBinaryData.h"
+#include "SmContextCreateError.h"
+#include "SmContextUpdateError.h"
 
 extern "C"{
 #include "nas_message.h"
@@ -426,16 +427,45 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq)
 {
 	//handle PDU Session Update SM Context Request as specified in section 4.3.2 3GPP TS 23.502
+	oai::smf_server::model::SmContextUpdateError smContextUpdateError;
+	oai::smf_server::model::ProblemDetails problem_details;
+	oai::smf_server::model::RefToBinaryData binary_data;
+	std::string n1_container; //N1 SM container
 
 	//SM Context ID, N2 SM information, Request Type
 	//Step 1. get necessary information (N2 SM information)
+	supi_t supi =  smreq->req.get_supi();
+	supi64_t supi64 = smf_supi_to_u64(supi);
+
 	//Step 2. find the smf context
 	std::shared_ptr<smf_context> sc;
+
+	if (is_supi_2_smf_context(supi64)) {
+		sc = supi_2_smf_context(supi64);
+		Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
+	} else {
+		Logger::smf_app().debug("SMF context with SUPI " SUPI_64_FMT "does not existed!", supi64);
+		//TODO: send PDU Session EStablishment Reject to AMF
+		Logger::smf_app().warn("Received PDU_SESSION_UPDATESMCONTEXT_REQUEST, couldn't retrieve the corresponding SMF context, ignore message!");
+		problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
+		smContextUpdateError.setError(problem_details);
+		//PDU Session Update Reject
+		//Create N1 container
+		smf_app_inst->create_n1_sm_container(smreq, PDU_SESSION_ESTABLISHMENT_REJECT, n1_container, 29); //TODO: 29 -> should update 5GSM cause in 24.501
+		binary_data.setContentId(n1_container);
+		smContextUpdateError.setN1SmMsg(binary_data);
+		//Send response to AMF
+		send_create_session_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden);
+		return;
+	}
+
+
+    //Step 3. Verify AMF??
 	//TODO: based on AMF ID > get the fteid -> get the SMF context (we should also verify AMF_ID)
 	//TODO: Step 2.1. if not exist -> send reply to AMF (reject)
 	//TODO: create N1 container and send reject message to AMF
 
-	//Step 2.2. if existed -> handle the message in smf_context
+	//Step 4. handle the message in smf_context
 	sc.get()->handle_amf_msg(smreq);
 
 }

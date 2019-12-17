@@ -545,6 +545,8 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 		//headers: Location:
         //Contains the URI of the newly created resource, according to the structure: {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
 		std::string uri = sm_context_req_msg.get_api_root() + std::to_string(supi64); //smContextRef
+
+
 		sm_context_resp->http_response.headers().add<Pistache::Http::Header::Location>(uri);
 
 		sm_context_resp->http_response.send(Pistache::Http::Code::Created, resBody);
