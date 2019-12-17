@@ -321,7 +321,7 @@ file(GLOB NAS_src_files
     ${SRC_TOP_DIR}/utils/bstr/*.c
     ${SRC_TOP_DIR}/nas/security/*.c
     ${SRC_TOP_DIR}/common/*.c
-    ${SRC_TOP_DIR}/ngap/*.c
+    ${SRC_TOP_DIR}/ngap/messages/*.c
 )   
 
 set(NAS_include_files
@@ -335,7 +335,7 @@ set(NAS_include_files
   ${NAS_DIR}/security
   ${SRC_TOP_DIR}/utils
   ${SRC_TOP_DIR}/utils/bstr
-  ${SRC_TOP_DIR}/ngap
+  ${SRC_TOP_DIR}/ngap/messages
   ${SRC_TOP_DIR}/common
   )
 
