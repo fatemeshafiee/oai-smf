@@ -37,6 +37,10 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 
 	Logger::smf_api_server().info("post_sm_contexts...");
 
+    std::string ngap_msg_str = "hello world";
+    m_smf_app->create_n2_sm_information(NULL, 0, 0, ngap_msg_str);
+    return ;
+
 	//decode NAS message and assign the necessary informations to smf::pdu_session_create_sm_context_request
 	//and pass this message to SMF to handle this message
 

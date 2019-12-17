@@ -47,6 +47,11 @@
 extern "C"{
 #include "nas_message.h"
 #include "mmData.h"
+//#include "Ngap_InitiatingMessage.h"
+//#include "Ngap_SuccessfulOutcome.h"
+
+#include "../NgapSmfLayer/ng_pdu_session_resource_setup_request.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_setup_response.h"
 }
 
 #include <stdexcept>
@@ -2415,6 +2420,25 @@ void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_contex
 {
 	//TODO: should work with BUPT to finish this function
 	Logger::smf_app().info("Create N2 SM Information, ngap message type %d, ie type %d\n", ngap_msg_type, ngap_ie_type);
+
+    #if 0
+    switch(ngap_ie_type)
+    {
+        case Ngap_InitiatingMessage__value_PR_PDUSessionResourceSetupRequest:
+			 make_NGAP_pdu_session_resource_setup_request();
+		break;
+		case Ngap_InitiatingMessage__value_PR_PDUSessionResourceSetupRequest:
+			 make_NGAP_pdu_session_resource_setup_response();
+		break;
+        default:
+			 printf("don't know ngap_ie_type:%d\n", ngap_ie_type);
+	}
+    #endif
+    make_NGAP_pdu_session_resource_setup_request();
+	make_NGAP_pdu_session_resource_setup_response();
+	
+       
+   
 }
 
 //------------------------------------------------------------------------------

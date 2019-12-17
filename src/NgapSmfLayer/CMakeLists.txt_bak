@@ -18,36 +18,13 @@
 # For more information about the OpenAirInterface (OAI) Software Alliance:
 #      contact@openairinterface.org
 ################################################################################
-include_directories(${SRC_TOP_DIR}/common)
-include_directories(${SRC_TOP_DIR}/common/msg)
-include_directories(${SRC_TOP_DIR}/common/utils)
-include_directories(${SRC_TOP_DIR}/itti)
-include_directories(${SRC_TOP_DIR}/gtpv2c)
-include_directories(${SRC_TOP_DIR}/pfcp)
-include_directories(${SRC_TOP_DIR}/smf)
-include_directories(${SRC_TOP_DIR}/ngap)
+#for NGAP_SMF_LAYTER
+set(NGAP_SMF_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
 include_directories(${SRC_TOP_DIR}/NgapSmfLayer)
-include_directories(${SRC_TOP_DIR}/udp)
-include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
+file(GLOB NGAP_SMF_src_files
+       ${SRC_TOP_DIR}/NgapSmfLayer/*.c
+)   
 
-add_library (SMF STATIC
-  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_setup_request.c
-  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_setup_response.c
-  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_release_command.c
-  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_release_response.c
-  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_modify_request.c
-  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_modify_response.c
-  ${SRC_TOP_DIR}/NgapSmfLayer/ng_pdu_session_resource_notify.c
-  smf_app.cpp
-  smf_config.cpp
-  smf_context.cpp
-  smf_pfcp_association.cpp
-  smf_pco.cpp
-  smf_procedure.cpp
-  smf_n4.cpp
-  smf_n10.cpp
-  smf_n11.cpp
-  smf_msg.cpp
-)
-
+add_library(NGAP_SMF_LAYER ${NGAP_SMF_DIR}/ng_pdu_session_resource_setup_request.c  ${NGAP_SMF_src_files} ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES})
