@@ -11,14 +11,15 @@
 #include  "Ngap_PDUSessionResourceSetupListSUReq.h"
 #include  "Ngap_PDUSessionResourceSetupItemSUReq.h"
 
-#include  "common_defs.h"
-#include  "common_types.h"
+
 #include  "../common/ngap/ngap_common.h"
 
 
 #include  "INTEGER.h"
 #include  "asn_SEQUENCE_OF.h"
 #include  "OCTET_STRING.h"
+
+
 
 #define BUF_LEN   1024
 Ngap_PDUSessionResourceSetupRequestIEs_t  *make_req_RAN_UE_NGAP_ID(uint32_t rAN_UE_NGAP_ID)
@@ -31,7 +32,7 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_req_RAN_UE_NGAP_ID(uint32_t rAN_
 	ie->value.present = Ngap_PDUSessionResourceSetupRequestIEs__value_PR_RAN_UE_NGAP_ID;
 	ie->value.choice.RAN_UE_NGAP_ID = rAN_UE_NGAP_ID ;
 
-	printf("RAN_UE_NGAP_ID:0x%x",ie->value.choice.RAN_UE_NGAP_ID);
+	printf("RAN_UE_NGAP_ID: 0x%x\n",ie->value.choice.RAN_UE_NGAP_ID);
 	return ie;
 }
 
@@ -46,11 +47,9 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_req_AMF_UE_NGAP_ID(uint64_t amf_
 
 	asn_ulong2INTEGER(&ie->value.choice.AMF_UE_NGAP_ID, amf_UE_NGAP_ID & AMF_UE_NGAP_ID_MASK_);
 	
-	size_t i  = 0;
-	for(i ; i<ie->value.choice.AMF_UE_NGAP_ID.size;i++)
-	{
-	    printf("0x%x",ie->value.choice.AMF_UE_NGAP_ID.buf[i]);
-	}
+	
+	printf("AMF_UE_NGAP_ID: 0x%x\n",amf_UE_NGAP_ID);
+	
 	return ie;
 }
 Ngap_PDUSessionResourceSetupRequestIEs_t  *make_RANPagingPriority(const long  ranPagingPriority)
@@ -63,7 +62,7 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_RANPagingPriority(const long  ra
 	ie->value.present = Ngap_PDUSessionResourceSetupRequestIEs__value_PR_RANPagingPriority;
     ie->value.choice.RANPagingPriority  = ranPagingPriority;
 
-    printf("RANPagingPriority:0x%x",ie->value.choice.RANPagingPriority);
+    printf("RANPagingPriority: 0x%x\n",ie->value.choice.RANPagingPriority);
 	return ie;
 }
 
@@ -76,6 +75,8 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_NAS_PDU(const char *nas_pdu)
 	ie->criticality = Ngap_Criticality_reject;
 	ie->value.present = Ngap_PDUSessionResourceSetupRequestIEs__value_PR_NAS_PDU;
 	OCTET_STRING_fromBuf (&ie->value.choice.NAS_PDU, nas_pdu, strlen(nas_pdu));
+
+    printf("nas_pdu, nas_pdu_size:%d, nas_pdu:%s,\n", strlen(nas_pdu), nas_pdu);
 
 	return ie;
 }
@@ -126,12 +127,17 @@ Ngap_PDUSessionResourceSetupItemSUReq_t * make_PDUSessionResourceSetupItemSUReq(
         Ngap_SD_t *sD = calloc(1, sizeof(Ngap_SD_t));
         item->s_NSSAI.sD = sD;
 		
-        //OCTET_STRING_fromBuf(sD, sd_ptr, 3);
+        OCTET_STRING_fromBuf(sD, sd_ptr, 3);
 		//OAILOG_DEBUG (LOG_NGAP,"s_NSSAI.sD:0x%x,0x%x,0x%x",item->s_NSSAI.sD->buf[0],item->s_NSSAI.sD->buf[1],item->s_NSSAI.sD->buf[2]);
     }
 	
-    //OCTET_STRING_fromBuf(item->pDUSessionResourceSetupRequestTransfer, pDUSessionResourceSetupRequestTransfer, strlen(pDUSessionResourceSetupRequestTransfer));
-    return item;
+    OCTET_STRING_fromBuf(&item->pDUSessionResourceSetupRequestTransfer, pDUSessionResourceSetupRequestTransfer, strlen(pDUSessionResourceSetupRequestTransfer));
+
+    printf("pDUSessionID:0x%x,pDUSessionNAS_PDU:%s,sst:0x%x,sd:0x%x,pDUSessionResourceSetupRequestTransfer:%s\n",
+	pDUSessionID,pDUSessionNAS_PDU, slice.sst, slice.sd, pDUSessionResourceSetupRequestTransfer);
+
+
+	return item;
 }
 
 
@@ -144,8 +150,22 @@ void add_pdu_session_resource_setup_request_ie(Ngap_PDUSessionResourceSetupReque
     }
 	return ;
 }
-Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_request()
+
+Ngap_NGAP_PDU_t *  ngap_generate_ng_setup_request(const char *inputBuf)
 {
+    //inputBuf: pdu_session_resource_setup_request data;
+
+    uint64_t         amf_ue_ngap_id                             =  0x80;
+	uint32_t         ran_ue_ngap_id                             =  0x81;
+	long             ranPagingPriority                          =  0x82;
+	const char *     nas_pdu                                    =  "nas_pdu";
+	
+    long             pDUSessionID                               =  0x83;
+	const char	*     pDUSessionNAS_PDU                         =  "pDUSessionNAS_PDU";	/* OPTIONAL */
+	const snssai_t   slice                                      =  {.sst = 0x01,.sd = 0x02};
+	const char *     pDUSessionResourceSetupRequestTransfer     =  "pDUSessionResourceSetupRequestTransfer";
+	
+
     Ngap_NGAP_PDU_t * pdu = NULL;
 	pdu = calloc(1, sizeof(Ngap_NGAP_PDU_t));
     
@@ -161,34 +181,24 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_request()
 	Ngap_PDUSessionResourceSetupRequestIEs_t  *ie;
 
     //Ngap_AMF_UE_NGAP_ID_t
-	uint64_t  amf_ue_ngap_id = 0x80;
 	ie  = make_req_AMF_UE_NGAP_ID(amf_ue_ngap_id);
     add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
 
 	//Ngap_AMF_UE_NGAP_ID_t
-    uint32_t  ran_ue_ngap_id = 0x81;
 	ie  = make_req_RAN_UE_NGAP_ID(ran_ue_ngap_id);
 	add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
 
      
 	//Ngap_RANPagingPriority_t
-	long ranPagingPriority  = 0x82;
     ie  = make_RANPagingPriority(ranPagingPriority);
 	add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
 	
 	//Ngap_NAS_PDU_t
-	const char  *nas_pdu  =  "nas_pdu";
     ie  = make_NAS_PDU(nas_pdu);
     add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
      
 	//Ngap_PDUSessionResourceSetupListSUReq_t
 	ie  = make_PDUSessionResourceSetupListSUReq();
-
-    long               pDUSessionID                      = 0x83;
-	const char	*pDUSessionNAS_PDU                       =  "pDUSessionNAS_PDU";	/* OPTIONAL */
-	const snssai_t  slice  = {.sst = 0x01,.sd = 0x02};
-	const char 	 *pDUSessionResourceSetupRequestTransfer =  "pDUSessionResourceSetupRequestTransfer";
-	
     Ngap_PDUSessionResourceSetupItemSUReq_t *item = make_PDUSessionResourceSetupItemSUReq(
 		pDUSessionID,
 		pDUSessionNAS_PDU,
@@ -198,8 +208,6 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_request()
     ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceSetupListSUReq.list, item);
     add_pdu_session_resource_setup_request_ie(ngapPDUSessionResourceSetupRequest, ie);
 	
-  
-	printf("0000000000000, make_NGAP_pdu_session_resource_setup_request\n");
     return pdu;
 }
 
@@ -323,6 +331,10 @@ ngap_amf_handle_ng_pdu_session_resource_setup_request(
 				
 	        pDUSessionResourceSetupRequestTransfer      =  setupRequestIes_p->pDUSessionResourceSetupRequestTransfer.buf;
 	        pDUSessionResourceSetupRequestTransfer_SIZE =  setupRequestIes_p->pDUSessionResourceSetupRequestTransfer.size;
+
+
+            printf("pDUSessionID:0x%x,pDUSessionNAS_PDU:%s,sst:0x%x,sd:0x%x,pDUSessionResourceSetupRequestTransfer:%s\n",
+	        pDUSessionID,pDUSessionNAS_PDU, slice.sst, slice.sd, pDUSessionResourceSetupRequestTransfer);
 			
         }
 	}
@@ -330,5 +342,72 @@ ngap_amf_handle_ng_pdu_session_resource_setup_request(
 	return rc;
 }
 
+int  make_NGAP_PduSessionResourceSetupRequest(const char *inputBuf, const char *OutputBuf)
+{
+
+    printf("pdu session  resource setup request, start--------------------\n\n");
+
+    int ret = 0;
+	int rc  = RETURNok;
+	const sctp_assoc_id_t assoc_id  = 0;
+    const sctp_stream_id_t stream   = 0;
+	Ngap_NGAP_PDU_t  message = {0};
+
+	//wys:  1024 ?
+	size_t buffer_size = 1024;  
+	void *buffer = calloc(1,buffer_size);
+	asn_enc_rval_t er;	
+	
+	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_setup_request(inputBuf);
+	if(!pdu)
+		goto ERROR;
+
+    asn_fprint(stderr, &asn_DEF_Ngap_NGAP_PDU, pdu);
+
+    ret  =  check_NGAP_pdu_constraints(pdu);
+    if(ret < 0) 
+	{
+		printf("ng setup response Constraint validation  failed\n");
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+
+	//encode
+	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
+	if(er.encoded < 0)
+	{
+		printf("ng setup response encode failed,er.encoded:%d\n",er.encoded);
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+  		 
+	bstring msgBuf = blk2bstr(buffer, er.encoded);
+
+    //decode
+    ngap_amf_decode_pdu(&message, msgBuf);
+	ngap_amf_handle_ng_pdu_session_resource_setup_request(0,0, &message);
+
+
+    //Free pdu
+    ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+	printf("pdu session  resource setup request, finish--------------------\n\n");
+    return rc;
+
+ERROR:
+	//Free pdu
+	if(pdu)
+        ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+ 	return rc;  
+}
 
 

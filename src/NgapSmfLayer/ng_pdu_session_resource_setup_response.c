@@ -14,7 +14,6 @@
 #include  "Ngap_CriticalityDiagnostics-IE-List.h"
 #include  "Ngap_CriticalityDiagnostics-IE-Item.h"
 
-
 #include  "common_defs.h"
 #include  "common_types.h"
 #include  "../common/ngap/ngap_common.h"
@@ -29,8 +28,8 @@ Ngap_PDUSessionResourceSetupResponseIEs_t  * make_CriticalityDiagnostics()
 	Ngap_PDUSessionResourceSetupResponseIEs_t *ie;
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceSetupResponseIEs_t));
 	
-	ie->id = Ngap_ProtocolIE_ID_id_CriticalityDiagnostics;
-	ie->criticality = Ngap_Criticality_ignore;
+	ie->id            = Ngap_ProtocolIE_ID_id_CriticalityDiagnostics;
+	ie->criticality   = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceSetupResponseIEs__value_PR_CriticalityDiagnostics;
 	
     return ie;
@@ -43,7 +42,8 @@ Ngap_PDUSessionResourceFailedToSetupItemSURes_t *make_PDUSessionResourceFailedTo
     item =  calloc(1, sizeof(Ngap_PDUSessionResourceFailedToSetupItemSURes_t));
     item->pDUSessionID = pDUSessionID;
 	OCTET_STRING_fromBuf(&item->pDUSessionResourceSetupUnsuccessfulTransfer,pDUSessionResourceSetup,strlen(pDUSessionResourceSetup));
-	
+
+	printf("ResourceFailed, pDUSessionID:0x%x, tranfer:%s\n",pDUSessionID, pDUSessionResourceSetup);
     return item;
 }
 
@@ -53,7 +53,7 @@ Ngap_PDUSessionResourceSetupResponseIEs_t  * make_PDUSessionResourceFailedToSetu
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceSetupResponseIEs_t));
 	
 	ie->id = Ngap_ProtocolIE_ID_id_PDUSessionResourceFailedToSetupListSURes;
-	ie->criticality = Ngap_Criticality_reject;
+	ie->criticality = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceSetupResponseIEs__value_PR_PDUSessionResourceFailedToSetupListSURes;
 	
     return ie;
@@ -65,8 +65,11 @@ Ngap_PDUSessionResourceSetupItemSURes_t  *make_PDUSessionResourceSetupItemSURes(
 	Ngap_PDUSessionResourceSetupItemSURes_t  *item = NULL;
 	item  = calloc(1, sizeof(Ngap_PDUSessionResourceSetupItemSURes_t));
 
-	item->pDUSessionID =  pDUSessionID;
+	item->pDUSessionID = pDUSessionID ;
 	OCTET_STRING_fromBuf (&item->pDUSessionResourceSetupResponseTransfer, pDUSessionResourceSetupResponseTransfer, strlen(pDUSessionResourceSetupResponseTransfer));
+
+	printf("ResourceSetupItem, pDUSessionID:0x%x, tranfer:%s\n",pDUSessionID, pDUSessionResourceSetupResponseTransfer);
+
 	return item;
 }
 Ngap_PDUSessionResourceSetupResponseIEs_t  * make_PDUSessionResourceSetupListSURes()
@@ -75,7 +78,7 @@ Ngap_PDUSessionResourceSetupResponseIEs_t  * make_PDUSessionResourceSetupListSUR
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceSetupResponseIEs_t));
 	
 	ie->id = Ngap_ProtocolIE_ID_id_PDUSessionResourceSetupListSURes;
-	ie->criticality = Ngap_Criticality_reject;
+	ie->criticality = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceSetupResponseIEs__value_PR_PDUSessionResourceSetupListSURes;
 	
     return ie;
@@ -87,7 +90,7 @@ Ngap_PDUSessionResourceSetupResponseIEs_t  *make_resp_RAN_UE_NGAP_ID(uint32_t rA
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceSetupResponseIEs_t));
 
 	ie->id = Ngap_ProtocolIE_ID_id_RAN_UE_NGAP_ID;
-	ie->criticality = Ngap_Criticality_reject;
+	ie->criticality = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceSetupResponseIEs__value_PR_RAN_UE_NGAP_ID;
 	ie->value.choice.RAN_UE_NGAP_ID = rAN_UE_NGAP_ID ;
 
@@ -95,22 +98,18 @@ Ngap_PDUSessionResourceSetupResponseIEs_t  *make_resp_RAN_UE_NGAP_ID(uint32_t rA
 	return ie;
 }
 
-Ngap_PDUSessionResourceSetupRequestIEs_t  *make_resp_AMF_UE_NGAP_ID(uint64_t amf_UE_NGAP_ID)
+Ngap_PDUSessionResourceSetupResponseIEs_t  *make_resp_AMF_UE_NGAP_ID(uint64_t amf_UE_NGAP_ID)
 {
     Ngap_PDUSessionResourceSetupResponseIEs_t *ie = NULL;
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceSetupResponseIEs_t));
 	
 	ie->id = Ngap_ProtocolIE_ID_id_AMF_UE_NGAP_ID;
-	ie->criticality = Ngap_Criticality_reject;
+	ie->criticality = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceSetupResponseIEs__value_PR_AMF_UE_NGAP_ID;
 
 	asn_ulong2INTEGER(&ie->value.choice.AMF_UE_NGAP_ID, amf_UE_NGAP_ID & AMF_UE_NGAP_ID_MASK_);
 	
-	size_t i  = 0;
-	for(i ; i<ie->value.choice.AMF_UE_NGAP_ID.size;i++)
-	{
-	    printf("0x%x",ie->value.choice.AMF_UE_NGAP_ID.buf[i]);
-	}
+	printf("AMF_UE_NGAP_ID: 0x%x\n",amf_UE_NGAP_ID);
 	return ie;
 }
 
@@ -124,7 +123,7 @@ void add_pdu_session_resource_setup_response_ie(Ngap_PDUSessionResourceSetupResp
     }
 	return ;
 }
-Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_response()
+Ngap_NGAP_PDU_t *ngap_generate_ng_setup_response(const char *inputBuf)
 {
     Ngap_NGAP_PDU_t * pdu = NULL;
 	pdu = calloc(1, sizeof(Ngap_NGAP_PDU_t));
@@ -149,7 +148,8 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_response()
     uint32_t  ran_ue_ngap_id = 0x78;
 	ie  = make_resp_RAN_UE_NGAP_ID(ran_ue_ngap_id);
 	add_pdu_session_resource_setup_response_ie(ngapPDUSessionResourceSetupResponse, ie);
-    
+
+	
     //PDUSessionResourceSetupListSURes;
     Ngap_PDUSessionResourceSetupItemSURes_t  *setupItem  = NULL;
 	
@@ -157,6 +157,8 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_response()
     setupItem  =  make_PDUSessionResourceSetupItemSURes(0x79, "test_setup_item");
 	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceSetupListSURes.list, setupItem);
 	add_pdu_session_resource_setup_response_ie(ngapPDUSessionResourceSetupResponse, ie);
+
+    
 	
     //PDUSessionResourceFailedToSetupListSURes
 	Ngap_PDUSessionResourceFailedToSetupItemSURes_t	 *failedItem = NULL;
@@ -164,9 +166,9 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_response()
 	failedItem  =  make_PDUSessionResourceFailedToSetupItemSURes(0x80, "test_failed_setup");
 	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceFailedToSetupListSURes.list, failedItem);
     add_pdu_session_resource_setup_response_ie(ngapPDUSessionResourceSetupResponse, ie);
-    
+
+	
 	//CriticalityDiagnostics
-	Ngap_CriticalityDiagnostics_t	 CriticalityDiagnostics;
     ie = make_CriticalityDiagnostics();
 
     Ngap_ProcedureCode_t  *procedureCode = calloc(1, sizeof(Ngap_ProcedureCode_t));
@@ -174,27 +176,40 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_setup_response()
     ie ->value.choice.CriticalityDiagnostics.procedureCode  = procedureCode;
 
 	Ngap_TriggeringMessage_t  *triggeringMessage = calloc(1, sizeof(Ngap_TriggeringMessage_t));
-	*triggeringMessage = 0x82;
+	*triggeringMessage = 0x01;
     ie ->value.choice.CriticalityDiagnostics.triggeringMessage = triggeringMessage;
 
 	Ngap_Criticality_t  *procedureCriticality = calloc(1, sizeof(Ngap_Criticality_t));
-	*procedureCriticality = 0x83;
+	*procedureCriticality = 0x01;
 	ie ->value.choice.CriticalityDiagnostics.procedureCriticality = procedureCriticality;
 
 
-    Ngap_CriticalityDiagnostics_IE_Item_t  *criticalityDiagnosticsIEsItem = calloc(1, sizeof(Ngap_CriticalityDiagnostics_IE_Item_t));
-	criticalityDiagnosticsIEsItem->iECriticality = 0x85;
-	criticalityDiagnosticsIEsItem->iE_ID = 0x86;
-	criticalityDiagnosticsIEsItem->typeOfError = 0x87;
 
-    ASN_SEQUENCE_ADD(&ie->value.choice.CriticalityDiagnostics.iEsCriticalityDiagnostics->list, &criticalityDiagnosticsIEsItem);
+    
+
+    printf("procedureCode:0x%x,triggeringMessage:0x%x,procedureCriticality:0x%x\n", *procedureCode, *triggeringMessage,*procedureCriticality);	
+
+
+    Ngap_CriticalityDiagnostics_IE_List_t   *pCriticalityDiagnostics_IE_List  = calloc(1, sizeof(Ngap_CriticalityDiagnostics_IE_List_t));
+    Ngap_CriticalityDiagnostics_IE_Item_t   *critiDiagIEsItem = calloc(1, sizeof(Ngap_CriticalityDiagnostics_IE_Item_t));
+	critiDiagIEsItem->iECriticality = 0x01;
+	critiDiagIEsItem->iE_ID = 0x01;
+	critiDiagIEsItem->typeOfError = 0x00;
+
+
+    printf("iECriticality:0x%x,iE_ID:0x%x,typeOfError:0x%x\n", 
+	critiDiagIEsItem->iECriticality,
+	critiDiagIEsItem->iE_ID,
+	critiDiagIEsItem->typeOfError);
+
+
+	ie->value.choice.CriticalityDiagnostics.iEsCriticalityDiagnostics = pCriticalityDiagnostics_IE_List;
+    
+    ASN_SEQUENCE_ADD(&pCriticalityDiagnostics_IE_List->list, critiDiagIEsItem);
 	add_pdu_session_resource_setup_response_ie(ngapPDUSessionResourceSetupResponse, ie);
   
-	printf("0000000000000, make_NGAP_pdu_session_resource_setup_response\n");
     return pdu;
 }
-
-
 
 
 int
@@ -279,6 +294,8 @@ ngap_amf_handle_ng_pdu_session_resource_setup_response(
 		    pDUSessionID                                      = setupResponseIes_p->pDUSessionID;
 	 	    pDUSessionResourceSetupUnsuccessfulTransfer       = setupResponseIes_p->pDUSessionResourceSetupResponseTransfer.buf;
 	        pDUSessionResourceSetupUnsuccessfulTransfer_size  = setupResponseIes_p->pDUSessionResourceSetupResponseTransfer.size;
+
+            printf("ResourceSetupItem, pDUSessionID:0x%x, tranfer:%s\n",pDUSessionID, pDUSessionResourceSetupUnsuccessfulTransfer);
 		}
 	   
     }
@@ -301,9 +318,11 @@ ngap_amf_handle_ng_pdu_session_resource_setup_response(
 		    pDUSessionID                                      = setupFailedIes_p->pDUSessionID;
 	 	    pDUSessionResourceSetupUnsuccessfulTransfer       = setupFailedIes_p->pDUSessionResourceSetupUnsuccessfulTransfer.buf;
 	        pDUSessionResourceSetupUnsuccessfulTransfer_size  = setupFailedIes_p->pDUSessionResourceSetupUnsuccessfulTransfer.size;
+
+            printf("ResourceFailed, pDUSessionID:0x%x, tranfer:%s\n",pDUSessionID, pDUSessionResourceSetupUnsuccessfulTransfer);
 		}
 	}
-	
+	ie = NULL;
 	//CriticalityDiagnostics
     NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceSetupResponseIEs_t, ie, container, Ngap_ProtocolIE_ID_id_CriticalityDiagnostics, false);
 	if (ie) 
@@ -313,23 +332,94 @@ ngap_amf_handle_ng_pdu_session_resource_setup_response(
 	   triggeringMessage     = *ie->value.choice.CriticalityDiagnostics.triggeringMessage;	
 	   procedureCriticality  = *ie->value.choice.CriticalityDiagnostics.procedureCriticality;
 
-
-	   Ngap_CriticalityDiagnostics_IE_List_t   *criticality_container  = ie->value.choice.CriticalityDiagnostics.iEsCriticalityDiagnostics; 
+       printf("procedureCode:0x%x,triggeringMessage:0x%x,procedureCriticality:0x%x\n", procedureCode, triggeringMessage,procedureCriticality);
+       
+	   Ngap_CriticalityDiagnostics_IE_List_t  *criticality_container  = ie->value.choice.CriticalityDiagnostics.iEsCriticalityDiagnostics; 
        for (i  = 0;i < criticality_container->list.count; i++)
 	   {
            Ngap_CriticalityDiagnostics_IE_Item_t  *criticalityIes_p = criticality_container->list.array[i];
 		   if(!criticalityIes_p)
-		      continue;
+		        continue;
 		   
 		    iECriticality         = criticalityIes_p->iECriticality;
 	        iE_ID                 = criticalityIes_p->iE_ID;
 	        typeOfError           = criticalityIes_p->typeOfError;
+
+
+			printf("iECriticality:0x%x,iE_ID:0x%x,typeOfError:0x%x\n", iECriticality, iE_ID,typeOfError);
 	   }
 	   
 	   
 	}
 	
 	return rc;
+}
+
+int  make_NGAP_PduSessionResourceSetupResponse(const char *inputBuf, const char *OutputBuf)
+{
+
+    printf("pdu session  resource setup response, start--------------------\n\n");
+
+    int ret = 0;
+	int rc  = RETURNok;
+	const sctp_assoc_id_t assoc_id  = 0;
+    const sctp_stream_id_t stream   = 0;
+	Ngap_NGAP_PDU_t  message = {0};
+
+	//wys:  1024 ?
+	size_t buffer_size = 1024;  
+	void *buffer = calloc(1,buffer_size);
+	asn_enc_rval_t er;	
+	
+	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_setup_response(inputBuf);
+	if(!pdu)
+		goto ERROR;
+
+    asn_fprint(stderr, &asn_DEF_Ngap_NGAP_PDU, pdu);
+
+    ret  =  check_NGAP_pdu_constraints(pdu);
+    if(ret < 0) 
+	{
+		printf("ng setup response Constraint validation  failed\n");
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+
+	//encode
+	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
+	if(er.encoded < 0)
+	{
+		printf("ng setup response encode failed,er.encoded:%d\n",er.encoded);
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+  		 
+	bstring msgBuf = blk2bstr(buffer, er.encoded);
+
+    //decode
+    ngap_amf_decode_pdu(&message, msgBuf);
+	ngap_amf_handle_ng_pdu_session_resource_setup_response(0,0, &message);
+
+    //Free pdu
+    ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+	printf("pdu session  resource setup response, finish--------------------\n\n");
+    return rc;
+
+ERROR:
+	//Free pdu
+	if(pdu)
+        ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+ 	return rc;  
 }
 
 

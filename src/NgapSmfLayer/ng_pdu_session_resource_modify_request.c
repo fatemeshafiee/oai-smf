@@ -49,11 +49,7 @@ Ngap_PDUSessionResourceModifyRequestIEs_t  *make_modify_request_AMF_UE_NGAP_ID(u
 
 	asn_ulong2INTEGER(&ie->value.choice.AMF_UE_NGAP_ID, amf_UE_NGAP_ID & AMF_UE_NGAP_ID_MASK_);
 	
-	size_t i  = 0;
-	for(i ; i<ie->value.choice.AMF_UE_NGAP_ID.size;i++)
-	{
-	    printf("0x%x",ie->value.choice.AMF_UE_NGAP_ID.buf[i]);
-	}
+	printf("AMF_UE_NGAP_ID:0x%x",ie->value.choice.AMF_UE_NGAP_ID);
 	return ie;
 }
 Ngap_PDUSessionResourceModifyRequestIEs_t  *make_modify_request_RANPagingPriority(const long  ranPagingPriority)
@@ -82,10 +78,12 @@ const char *pDUSessionResourceModifyRequestTransfer)
     item->pDUSessionID = pDUSessionID;
 
 	Ngap_NAS_PDU_t  *nas_pdu =  calloc(1, sizeof(Ngap_NAS_PDU_t));
-	item->nAS_PDU  =  nas_pdu;
+	item->nAS_PDU = nas_pdu;
 	OCTET_STRING_fromBuf(nas_pdu, pDUSessionNAS_PDU, strlen(pDUSessionNAS_PDU));
-	
-	OCTET_STRING_fromBuf(&item->pDUSessionResourceModifyRequestTransfer,pDUSessionResourceModifyRequestTransfer,strlen(pDUSessionResourceModifyRequestTransfer));
+	OCTET_STRING_fromBuf(&item->pDUSessionResourceModifyRequestTransfer,pDUSessionResourceModifyRequestTransfer,strlen(pDUSessionResourceModifyRequestTransfer));
+		
+	printf("pDUSessionID:0x%x,nas_pdu:%s,Transfer:%s\n", item->pDUSessionID,item->nAS_PDU->buf,
+	item->pDUSessionResourceModifyRequestTransfer.buf);
 	
     return item;
 }
@@ -111,7 +109,8 @@ void add_pdu_session_resource_modify_request_ie(Ngap_PDUSessionResourceModifyReq
     }
 	return ;
 }
-Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_modify_request()
+Ngap_NGAP_PDU_t *  ngap_generate_ng_modify_request(const char *inputBuf)
+
 {
     Ngap_NGAP_PDU_t * pdu = NULL;
 	pdu = calloc(1, sizeof(Ngap_NGAP_PDU_t));
@@ -151,8 +150,6 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_modify_request()
 	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceModifyListModReq.list, modReqItem);
 	add_pdu_session_resource_release_command_ie(ngapPDUSessionResourceModifyRequest, ie);
 	 
-
-	printf("0000000000000, make_NGAP_pdu_session_resource_modify_request\n");
     return pdu;
 }
 
@@ -257,7 +254,7 @@ ngap_amf_handle_ng_pdu_session_resource_modify_request(
 
 		    pDUSessionID  = modreqIes_p->pDUSessionID;
 
-			if(nAS_PDU)
+			if(modreqIes_p->nAS_PDU)
 			{
 		 	    nAS_PDU       = modreqIes_p->nAS_PDU->buf;
 		        nAS_PDU_size  = modreqIes_p->nAS_PDU->size;
@@ -265,11 +262,83 @@ ngap_amf_handle_ng_pdu_session_resource_modify_request(
 
 			pDUSessionResourceModifyRequestTransfer      = modreqIes_p->pDUSessionResourceModifyRequestTransfer.buf;
 			pDUSessionResourceModifyRequestTransfer_size = modreqIes_p->pDUSessionResourceModifyRequestTransfer.size;
+
+
+           	printf("pDUSessionID:0x%x,nas_pdu:%s,Transfer:%s\n", pDUSessionID,nAS_PDU, pDUSessionResourceModifyRequestTransfer);
 				
 		}
 	}
 	
 	return rc;
+}
+
+
+int  make_NGAP_PduSessionResourceModifyRequest(const char *inputBuf, const char *OutputBuf)
+{
+
+    printf("pdu session  resource modify request, start--------------------\n\n");
+
+    int ret = 0;
+	int rc  = RETURNok;
+	const sctp_assoc_id_t assoc_id  = 0;
+    const sctp_stream_id_t stream   = 0;
+	Ngap_NGAP_PDU_t  message = {0};
+
+	//wys:  1024 ?
+	size_t buffer_size = 1024;  
+	void *buffer = calloc(1,buffer_size);
+	asn_enc_rval_t er;	
+	
+	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_modify_request(inputBuf);
+	if(!pdu)
+		goto ERROR;
+
+    asn_fprint(stderr, &asn_DEF_Ngap_NGAP_PDU, pdu);
+
+    ret  =  check_NGAP_pdu_constraints(pdu);
+    if(ret < 0) 
+	{
+		printf("ng modify requestConstraint validation  failed\n");
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+
+	//encode
+	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
+	if(er.encoded < 0)
+	{
+		printf("ng modify request encode failed,er.encoded:%d\n",er.encoded);
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+  		 
+	bstring msgBuf = blk2bstr(buffer, er.encoded);
+
+    //decode
+    ngap_amf_decode_pdu(&message, msgBuf);
+	ngap_amf_handle_ng_pdu_session_resource_modify_request(0,0, &message);
+
+
+    //Free pdu
+    ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+	printf("pdu session  resource modify request, finish--------------------\n\n");
+    return rc;
+
+ERROR:
+	//Free pdu
+	if(pdu)
+        ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+ 	return rc;  
 }
 
 

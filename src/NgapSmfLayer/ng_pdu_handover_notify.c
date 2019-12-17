@@ -5,21 +5,14 @@
 #include  "asn1_conversions.h"
 #include  "conversions.h"
 
-
-#include  "ng_pdu_session_resource_notify.h"
+#include  "ng_pdu_handover_notify.h"
+#include  "Ngap_HandoverNotify.h"
 
 #include  "Ngap_InitiatingMessage.h"
 #include  "Ngap_NGAP-PDU.h"
 #include  "Ngap_ProtocolIE-Field.h"
 #include  "Ngap_ProcedureCode.h"
 #include  "Ngap_Criticality.h"
-#include  "Ngap_PDUSessionResourceNotify.h"
-
-
-#include  "Ngap_PDUSessionResourceNotifyItem.h"
-#include  "Ngap_PDUSessionResourceReleasedListNot.h"
-#include  "Ngap_PDUSessionResourceReleasedItemNot.h"
-
 
 #include  "Ngap_UserLocationInformationNR.h"
 #include  "Ngap_UserLocationInformation.h"
@@ -34,28 +27,28 @@
 #include  "OCTET_STRING.h"
 
 #define BUF_LEN   1024
-Ngap_PDUSessionResourceNotifyIEs_t  *make_notify_RAN_UE_NGAP_ID(uint32_t rAN_UE_NGAP_ID)
+Ngap_HandoverNotifyIEs_t  *make_handover_notify_RAN_UE_NGAP_ID(uint32_t rAN_UE_NGAP_ID)
 {
-	Ngap_PDUSessionResourceNotifyIEs_t *ie;
-	ie = calloc(1, sizeof(Ngap_PDUSessionResourceNotifyIEs_t));
+	Ngap_HandoverNotifyIEs_t *ie;
+	ie = calloc(1, sizeof(Ngap_HandoverNotifyIEs_t));
 
 	ie->id = Ngap_ProtocolIE_ID_id_RAN_UE_NGAP_ID;
-	ie->criticality = Ngap_Criticality_reject;
-	ie->value.present = Ngap_PDUSessionResourceNotifyIEs__value_PR_RAN_UE_NGAP_ID;
+	ie->criticality                 = Ngap_Criticality_ignore;
+	ie->value.present               = Ngap_HandoverNotifyIEs__value_PR_RAN_UE_NGAP_ID;
 	ie->value.choice.RAN_UE_NGAP_ID = rAN_UE_NGAP_ID ;
 
 	printf("RAN_UE_NGAP_ID:0x%x",ie->value.choice.RAN_UE_NGAP_ID);
 	return ie;
 }
 
-Ngap_PDUSessionResourceNotifyIEs_t  *make_notify_AMF_UE_NGAP_ID(uint64_t amf_UE_NGAP_ID)
+Ngap_HandoverNotifyIEs_t  *make_handover_notify_AMF_UE_NGAP_ID(uint64_t amf_UE_NGAP_ID)
 {
-    Ngap_PDUSessionResourceNotifyIEs_t *ie = NULL;
-	ie = calloc(1, sizeof(Ngap_PDUSessionResourceNotifyIEs_t));
+    Ngap_HandoverNotifyIEs_t *ie = NULL;
+	ie = calloc(1, sizeof(Ngap_HandoverNotifyIEs_t));
 	
 	ie->id = Ngap_ProtocolIE_ID_id_AMF_UE_NGAP_ID;
-	ie->criticality = Ngap_Criticality_reject;
-	ie->value.present = Ngap_PDUSessionResourceNotifyIEs__value_PR_AMF_UE_NGAP_ID;
+	ie->criticality = Ngap_Criticality_ignore;
+	ie->value.present = Ngap_HandoverNotifyIEs__value_PR_AMF_UE_NGAP_ID;
 
 	asn_ulong2INTEGER(&ie->value.choice.AMF_UE_NGAP_ID, amf_UE_NGAP_ID & AMF_UE_NGAP_ID_MASK_);
 	
@@ -67,91 +60,36 @@ Ngap_PDUSessionResourceNotifyIEs_t  *make_notify_AMF_UE_NGAP_ID(uint64_t amf_UE_
 	return ie;
 }
 
-//Ngap_PDUSessionResourceNotifyItem_t
-Ngap_PDUSessionResourceNotifyItem_t  *make_notify_PDUSessionResourceNotifyItem (
-	long	         pDUSessionID,
-	const char *	 pDUSRModifyNotifyTransfer)
-{  
-	Ngap_PDUSessionResourceNotifyItem_t  *item = NULL;
-	item  = calloc(1, sizeof(Ngap_PDUSessionResourceNotifyItem_t));
-
-	item->pDUSessionID =  pDUSessionID;
-	OCTET_STRING_fromBuf (&item->pDUSessionResourceNotifyTransfer, pDUSRModifyNotifyTransfer, strlen(pDUSRModifyNotifyTransfer));
-
-	printf("notifyItem, pDUSessionID:0x%x,transfer:%s\n", pDUSessionID, pDUSRModifyNotifyTransfer);
-
-	return item;
-}
-
-//PDUSessionResourceNotifyList
-Ngap_PDUSessionResourceNotifyIEs_t  * make_notify_PDUSessionResourceNotifyList()
-{
-	Ngap_PDUSessionResourceNotifyIEs_t *ie;
-	ie = calloc(1, sizeof(Ngap_PDUSessionResourceNotifyIEs_t));
-	
-	ie->id            = Ngap_ProtocolIE_ID_id_PDUSessionResourceNotifyList;
-	ie->criticality   = Ngap_Criticality_reject;
-	ie->value.present = Ngap_PDUSessionResourceNotifyIEs__value_PR_PDUSessionResourceNotifyList;
-	
-    return ie;
-}
-
-//PDUSessionResourceFailedToModifyListModRes
-Ngap_PDUSessionResourceReleasedItemNot_t *make_notify_PDUSessionResourceReleasedItemNot(
-	const long  pDUSessionID, const char *pDUSessionResourceNotify)
-{
-    Ngap_PDUSessionResourceReleasedItemNot_t  *item = NULL;
-    item =  calloc(1, sizeof(Ngap_PDUSessionResourceReleasedItemNot_t));
-	
-    item->pDUSessionID = pDUSessionID;
-	OCTET_STRING_fromBuf(&item->pDUSessionResourceNotifyReleasedTransfer, pDUSessionResourceNotify, strlen(pDUSessionResourceNotify));
-
-	printf("ItemNot_t, pDUSessionID:0x%x,transfer:%s\n", pDUSessionID, pDUSessionResourceNotify);
-    return item;
-}
-
-Ngap_PDUSessionResourceNotifyIEs_t  * make_notify_PDUSessionResourceReleasedListNot()
-{
-	Ngap_PDUSessionResourceNotifyIEs_t *ie;
-	ie = calloc(1, sizeof(Ngap_PDUSessionResourceNotifyIEs_t));
-	
-	ie->id = Ngap_ProtocolIE_ID_id_PDUSessionResourceReleasedListNot;
-	ie->criticality = Ngap_Criticality_ignore;
-	ie->value.present = Ngap_PDUSessionResourceNotifyIEs__value_PR_PDUSessionResourceReleasedListNot;
-	
-    return ie;
-}
-
 //UserLocationInformation
-Ngap_PDUSessionResourceNotifyIEs_t *make_notify_UserLocationInformation()
+Ngap_HandoverNotifyIEs_t *make_handover_notify_UserLocationInformation()
 {
-	Ngap_PDUSessionResourceNotifyIEs_t *ie = NULL;
-    ie  = calloc(1, sizeof(Ngap_PDUSessionResourceNotifyIEs_t));
+	Ngap_HandoverNotifyIEs_t *ie = NULL;
+    ie  = calloc(1, sizeof(Ngap_HandoverNotifyIEs_t));
 	
 	ie->id            = Ngap_ProtocolIE_ID_id_UserLocationInformation; 
 	ie->criticality   = Ngap_Criticality_ignore;
-	ie->value.present = Ngap_PDUSessionResourceNotifyIEs__value_PR_UserLocationInformation;
+	ie->value.present = Ngap_HandoverNotifyIEs__value_PR_UserLocationInformation;
 
     return ie;
 }
 
-Ngap_UserLocationInformationNR_t * make_notify_UserLocationInformationNR()
+Ngap_UserLocationInformationNR_t * make_handover_notify_UserLocationInformationNR()
 {
 	Ngap_UserLocationInformationNR_t * nr = NULL;
 	nr =  calloc(1, sizeof(Ngap_UserLocationInformationNR_t));
 	return nr;
 }
 
-void add_pdu_session_resource_notify_ie(Ngap_PDUSessionResourceNotify_t *ngapPDUSessionResourceNotify, Ngap_PDUSessionResourceNotifyIEs_t *ie) {
+void add_pdu_handover_notify_ie(Ngap_HandoverNotify_t *ngapHandoverNotify, Ngap_HandoverNotifyIEs_t *ie) {
     int ret;
-	ret = ASN_SEQUENCE_ADD(&ngapPDUSessionResourceNotify->protocolIEs.list, ie);
+	ret = ASN_SEQUENCE_ADD(&ngapHandoverNotify->protocolIEs.list, ie);
     if ( ret != 0 ) {
         fprintf(stderr, "Failed to add ie\n");
 		return ;
     }
 	return ;
 }
-Ngap_NGAP_PDU_t *  ngap_generate_ng_notify(const char *inputBuf)
+Ngap_NGAP_PDU_t *  ngap_generate_ng_haneover_notify(const char *inputBuf)
 
 {
     Ngap_NGAP_PDU_t * pdu = NULL;
@@ -159,49 +97,33 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_notify(const char *inputBuf)
     
 	pdu->present = Ngap_NGAP_PDU_PR_initiatingMessage;
 	pdu->choice.initiatingMessage = calloc(1, sizeof(Ngap_InitiatingMessage_t));
-	pdu->choice.initiatingMessage->procedureCode = Ngap_ProcedureCode_id_PDUSessionResourceNotify;
+	pdu->choice.initiatingMessage->procedureCode = Ngap_ProcedureCode_id_HandoverNotification;
 	pdu->choice.initiatingMessage->criticality   = Ngap_Criticality_ignore;
-	pdu->choice.initiatingMessage->value.present = Ngap_InitiatingMessage__value_PR_PDUSessionResourceNotify;
+	pdu->choice.initiatingMessage->value.present = Ngap_InitiatingMessage__value_PR_HandoverNotify;
 
-    Ngap_PDUSessionResourceNotify_t *ngapPDUSessionResourceNotify = NULL;
-	ngapPDUSessionResourceNotify  = &pdu->choice.initiatingMessage->value.choice.PDUSessionResourceNotify;
+    Ngap_HandoverNotify_t *ngapHandoverNotify = NULL;
+	ngapHandoverNotify  = &pdu->choice.initiatingMessage->value.choice.HandoverNotify;
 	
-	Ngap_PDUSessionResourceNotifyIEs_t  *ie = NULL;
+	Ngap_HandoverNotifyIEs_t  *ie = NULL;
 
     //Ngap_AMF_UE_NGAP_ID_t
 	uint64_t  amf_ue_ngap_id = 0x77;
-	ie  = make_notify_AMF_UE_NGAP_ID(amf_ue_ngap_id);
-    add_pdu_session_resource_notify_ie(ngapPDUSessionResourceNotify, ie);
+	ie  = make_handover_notify_AMF_UE_NGAP_ID(amf_ue_ngap_id);
+    add_pdu_handover_notify_ie(ngapHandoverNotify, ie);
 
 	//Ngap_AMF_UE_NGAP_ID_t
     uint32_t  ran_ue_ngap_id = 0x78;
-	ie  = make_notify_RAN_UE_NGAP_ID(ran_ue_ngap_id);
-	add_pdu_session_resource_notify_ie(ngapPDUSessionResourceNotify, ie);
+	ie  = make_handover_notify_RAN_UE_NGAP_ID(ran_ue_ngap_id);
+	add_pdu_handover_notify_ie(ngapHandoverNotify, ie);
     
-    //PDUSessionResourceNotifyList;
-    Ngap_PDUSessionResourceNotifyItem_t  *notifyItem  = NULL;
-	
-    ie           =  make_notify_PDUSessionResourceNotifyList();
-    notifyItem   =  make_notify_PDUSessionResourceNotifyItem(0x79, "test_notify_item");
-	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceNotifyList.list, notifyItem);
-	add_pdu_session_resource_notify_ie(ngapPDUSessionResourceNotify, ie);
-
    
-    //PDUSessionResourceReleasedListNot;
-    Ngap_PDUSessionResourceReleasedItemNot_t  *source_Release_Item = NULL;
-    ie                  = make_notify_PDUSessionResourceReleasedListNot();
-    source_Release_Item = make_notify_PDUSessionResourceReleasedItemNot(0x80, "test_source_release_item");
-	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceReleasedListNot.list, source_Release_Item);
-	add_pdu_session_resource_notify_ie(ngapPDUSessionResourceNotify, ie);
-	
-
 	//UserLocationInformation
-	ie = make_notify_UserLocationInformation();
+	ie = make_handover_notify_UserLocationInformation();
     //userLocationInformationEUTRA;
 	//userLocationInformationNR;
 	ie->value.choice.UserLocationInformation.present =  Ngap_UserLocationInformation_PR_userLocationInformationNR;
 
-	Ngap_UserLocationInformationNR_t * nr = make_notify_UserLocationInformationNR();
+	Ngap_UserLocationInformationNR_t * nr = make_handover_notify_UserLocationInformationNR();
     ie->value.choice.UserLocationInformation.choice.userLocationInformationNR =  nr;
 	
     //nR_CGI;
@@ -250,13 +172,13 @@ Ngap_NGAP_PDU_t *  ngap_generate_ng_notify(const char *inputBuf)
 	ptimeStamp->buf[0],ptimeStamp->buf[1],ptimeStamp->buf[2],ptimeStamp->buf[3]);
 	
 	//userLocationInformationN3IWF;
-	add_pdu_session_resource_notify_ie(ngapPDUSessionResourceNotify, ie);
+	add_pdu_handover_notify_ie(ngapHandoverNotify, ie);
 	
     return pdu;
 }
 
 int
-ngap_amf_handle_ng_pdu_session_resource_notify(
+ngap_amf_handle_ng_pdu_handover_notify(
     const sctp_assoc_id_t assoc_id,
     const sctp_stream_id_t stream,
 	Ngap_NGAP_PDU_t *pdu){
@@ -276,31 +198,24 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
 	#endif
 
 	int i  = 0;
-    Ngap_PDUSessionResourceNotify_t             *container = NULL;
-    Ngap_PDUSessionResourceNotifyIEs_t          *ie = NULL;
-    Ngap_PDUSessionResourceNotifyIEs_t          *ie_gnb_name = NULL;
+    Ngap_HandoverNotify_t             *container = NULL;
+    Ngap_HandoverNotifyIEs_t          *ie = NULL;
+    Ngap_HandoverNotifyIEs_t          *ie_gnb_name = NULL;
 
     unsigned  long    amf_ue_ngap_id        = 0;
 	uint32_t          ran_ue_ngap_id        = 0;
 
-	long	  pDUSessionID = 0;
-	char 	  *pDUSessionResourceNotifyTransfer = NULL;
-	int       pDUSessionResourceNotifyTransfer_size  =  0;
 
-
-    long	  pDUReleaseSessionID = 0;
-	char 	  *pDUSessionResourceNotifyReleasedTransfer = NULL;
-	int       pDUSessionResourceNotifyReleasedTransfer_size  =  0;
 
     DevAssert (pdu != NULL);
     //OAILOG_INFO(LOG_NGAP,"----------------------- DECODED NG SETUP RESPONSE NGAP MSG --------------------------\n");
     //asn_fprint(stdout, &asn_DEF_Ngap_NGAP_PDU, pdu);
     //OAILOG_INFO(LOG_NGAP,"----------------------- DECODED NG SETUP RESPONSE NGAP MSG --------------------------\n");
 
-	container = &pdu->choice.initiatingMessage->value.choice.PDUSessionResourceNotify;
+	container = &pdu->choice.initiatingMessage->value.choice.HandoverNotify;
     
     //AMF_UE_NGAP_ID
-    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_AMF_UE_NGAP_ID, false);
+    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_AMF_UE_NGAP_ID, false);
     if (ie) 
 	{  
 	    asn_INTEGER2ulong(&ie->value.choice.AMF_UE_NGAP_ID, &amf_ue_ngap_id);
@@ -308,62 +223,15 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
     }
 
     //Ngap_AMF_UE_NGAP_ID_t
-    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_RAN_UE_NGAP_ID, false);
+    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_RAN_UE_NGAP_ID, false);
     if (ie) 
 	{  
 	    ran_ue_ngap_id = ie->value.choice.RAN_UE_NGAP_ID;
 	    printf("ran_ue_ngap_id, 0x%x\n", ran_ue_ngap_id);
     }
 
-	
-	//PDUSessionResourceNotifyList
-	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_PDUSessionResourceNotifyList, false);
-    if (ie) 
-	{ 
-	    Ngap_PDUSessionResourceNotifyList_t	 *notify_container  =  &ie->value.choice.PDUSessionResourceNotifyList;
-        for (i  = 0;i < notify_container->list.count; i++)
-	    {
-            Ngap_PDUSessionResourceNotifyItem_t *notifyIes_p = NULL;
-            notifyIes_p = notify_container->list.array[i];
-			
-			if(!notifyIes_p)
-			{
-				  continue;
-        	}
-
-		    pDUSessionID                               = notifyIes_p->pDUSessionID;
-	 	    pDUSessionResourceNotifyTransfer           = notifyIes_p->pDUSessionResourceNotifyTransfer.buf;
-	        pDUSessionResourceNotifyTransfer_size      = notifyIes_p->pDUSessionResourceNotifyTransfer.size;
-
-		    printf("NotifyItem, pDUSessionID:0x%x,transfer:%s\n", pDUSessionID, pDUSessionResourceNotifyTransfer);
-
-		}
-    }
-
-	//PDUSessionResourceReleasedListNot
-    NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_PDUSessionResourceReleasedListNot, false);
-    if (ie) 
-	{ 
-	    Ngap_PDUSessionResourceReleasedListNot_t	 *source_release_container  =  &ie->value.choice.PDUSessionResourceReleasedListNot;
-        for (i  = 0;i < source_release_container->list.count; i++)
-	    {
-            Ngap_PDUSessionResourceReleasedItemNot_t *source_releaseIes_p = NULL;
-            source_releaseIes_p = source_release_container->list.array[i];
-			
-			if(!source_releaseIes_p)
-		         continue;
-        	
-        	
-		    pDUReleaseSessionID                            = source_releaseIes_p->pDUSessionID;
-	 	    pDUSessionResourceNotifyReleasedTransfer       = source_releaseIes_p->pDUSessionResourceNotifyReleasedTransfer.buf;
-	        pDUSessionResourceNotifyReleasedTransfer_size  = source_releaseIes_p->pDUSessionResourceNotifyReleasedTransfer.size;
-
-	        printf("ItemNot_t, pDUSessionID:0x%x,transfer:%s\n", pDUSessionID, pDUSessionResourceNotifyReleasedTransfer);
-		}
-    }
-	
 	//UserLocationInformation
-	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_PDUSessionResourceNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_UserLocationInformation, false);
+	NGAP_FIND_PROTOCOLIE_BY_ID(Ngap_HandoverNotifyIEs_t, ie, container, Ngap_ProtocolIE_ID_id_UserLocationInformation, false);
     if (ie) 
 	{
 		switch(ie->value.choice.UserLocationInformation.present)
@@ -438,10 +306,10 @@ ngap_amf_handle_ng_pdu_session_resource_notify(
 	return rc;
 }
 
-int  make_NGAP_PduSessionResourceNotify(const char *inputBuf, const char *OutputBuf)
+int  make_NGAP_PduHandOver_Notify(const char *inputBuf, const char *OutputBuf)
 {
 
-    printf("pdu session  resource notify, start--------------------\n\n");
+    printf("pdu session  hand over notify, start--------------------\n\n");
 
     int ret = 0;
 	int rc  = RETURNok;
@@ -454,7 +322,7 @@ int  make_NGAP_PduSessionResourceNotify(const char *inputBuf, const char *Output
 	void *buffer = calloc(1,buffer_size);
 	asn_enc_rval_t er;	
 	
-	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_notify(inputBuf);
+	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_haneover_notify(inputBuf);
 	if(!pdu)
 		goto ERROR;
 
@@ -463,7 +331,7 @@ int  make_NGAP_PduSessionResourceNotify(const char *inputBuf, const char *Output
     ret  =  check_NGAP_pdu_constraints(pdu);
     if(ret < 0) 
 	{
-		printf("ng notify Constraint validation  failed\n");
+		printf("ng hand over notify Constraint validation  failed\n");
 		rc = RETURNerror;
 		goto ERROR; 
 	}
@@ -472,7 +340,7 @@ int  make_NGAP_PduSessionResourceNotify(const char *inputBuf, const char *Output
 	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
 	if(er.encoded < 0)
 	{
-		printf("ng notify encode failed,er.encoded:%d\n",er.encoded);
+		printf("ng hand over notify encode failed,er.encoded:%d\n",er.encoded);
 		rc = RETURNerror;
 		goto ERROR; 
 	}
@@ -481,7 +349,7 @@ int  make_NGAP_PduSessionResourceNotify(const char *inputBuf, const char *Output
 
     //decode
     ngap_amf_decode_pdu(&message, msgBuf);
-	ngap_amf_handle_ng_pdu_session_resource_notify(0,0, &message);
+	ngap_amf_handle_ng_pdu_handover_notify(0, 0, &message);
 
 
     //Free pdu
@@ -491,7 +359,7 @@ int  make_NGAP_PduSessionResourceNotify(const char *inputBuf, const char *Output
 		free(buffer);
 		buffer = NULL;
 	}
-	printf("pdu session  resource notify, finish--------------------\n\n");
+	printf("pdu hand over notify, finish--------------------\n\n");
     return rc;
 
 ERROR:

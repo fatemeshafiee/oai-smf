@@ -1,13 +1,16 @@
 #ifndef FILE_NGAP_COMMON_SEEN
 #define FILE_NGAP_COMMON_SEEN
 
-#include "common_types.h"
-#include "conversions.h"
+#include  "common_defs.h"
+#include  "common_types.h"
+#include  "conversions.h"
+#include  "bstrlib.h"
 
-#include "Ngap_ProcedureCode.h"
-#include "Ngap_TriggeringMessage.h"
-#include "Ngap_Criticality.h"
-#include "Ngap_CriticalityDiagnostics-IE-Item.h"
+#include  "Ngap_NGAP-PDU.h"
+#include  "Ngap_ProcedureCode.h"
+#include  "Ngap_TriggeringMessage.h"
+#include  "Ngap_Criticality.h"
+#include  "Ngap_CriticalityDiagnostics-IE-Item.h"
 
 
 
@@ -285,5 +288,11 @@ typedef int (*ngap_message_decoded_callback)(
     const sctp_stream_id_t            stream,
     struct Ngap_NGAP_PDU *message_p
 );
+
+
+
+int  check_NGAP_pdu_constraints(Ngap_NGAP_PDU_t *pdu);
+
+int  ngap_amf_decode_pdu(Ngap_NGAP_PDU_t *pdu, const_bstring const raw);
 
 #endif

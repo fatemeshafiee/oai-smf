@@ -46,11 +46,8 @@ Ngap_PDUSessionResourceReleaseCommandIEs_t  *make_release_command_AMF_UE_NGAP_ID
 
 	asn_ulong2INTEGER(&ie->value.choice.AMF_UE_NGAP_ID, amf_UE_NGAP_ID & AMF_UE_NGAP_ID_MASK_);
 	
-	size_t i  = 0;
-	for(i ; i<ie->value.choice.AMF_UE_NGAP_ID.size;i++)
-	{
-	    printf("0x%x",ie->value.choice.AMF_UE_NGAP_ID.buf[i]);
-	}
+	printf("AMF_UE_NGAP_ID: 0x%x\n",amf_UE_NGAP_ID);
+	
 	return ie;
 }
 Ngap_PDUSessionResourceReleaseCommandIEs_t  *make_release_command_RANPagingPriority(const long  ranPagingPriority)
@@ -58,8 +55,8 @@ Ngap_PDUSessionResourceReleaseCommandIEs_t  *make_release_command_RANPagingPrior
     Ngap_PDUSessionResourceReleaseCommandIEs_t *ie = NULL;
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceReleaseCommandIEs_t));
 	
-	ie->id = Ngap_ProtocolIE_ID_id_RANPagingPriority;
-	ie->criticality = Ngap_Criticality_ignore;
+	ie->id            = Ngap_ProtocolIE_ID_id_RANPagingPriority;
+	ie->criticality   = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceReleaseCommandIEs__value_PR_RANPagingPriority;
     ie->value.choice.RANPagingPriority  = ranPagingPriority;
 
@@ -72,11 +69,11 @@ Ngap_PDUSessionResourceReleaseCommandIEs_t  *make_release_command_NAS_PDU(const 
     Ngap_PDUSessionResourceReleaseCommandIEs_t *ie = NULL;
 	ie = calloc(1, sizeof(Ngap_PDUSessionResourceReleaseCommandIEs_t));
 	
-	ie->id = Ngap_ProtocolIE_ID_id_NAS_PDU;
-	ie->criticality = Ngap_Criticality_reject;
+	ie->id            = Ngap_ProtocolIE_ID_id_NAS_PDU;
+	ie->criticality   = Ngap_Criticality_ignore;
 	ie->value.present = Ngap_PDUSessionResourceReleaseCommandIEs__value_PR_NAS_PDU;
 	OCTET_STRING_fromBuf (&ie->value.choice.NAS_PDU, nas_pdu, strlen(nas_pdu));
-
+    printf("nas_pdu:%s\n", nas_pdu);
 	return ie;
 }
 
@@ -87,7 +84,7 @@ Ngap_PDUSessionResourceReleaseCommandIEs_t *make_PDUSessionResourceToReleaseItem
     item =  calloc(1, sizeof(Ngap_PDUSessionResourceToReleaseItemRelCmd_t));
     item->pDUSessionID = pDUSessionID;
 	OCTET_STRING_fromBuf(&item->pDUSessionResourceReleaseCommandTransfer,pDUSessionResourceSetup,strlen(pDUSessionResourceSetup));
-	
+	printf("ReleaseCommand,pDUSessionID:0x%x, Transfer:%s\n", pDUSessionID, pDUSessionResourceSetup);
     return item;
 }
 
@@ -102,7 +99,6 @@ Ngap_PDUSessionResourceReleaseCommandIEs_t  * make_PDUSessionResourceToReleaseLi
 	
     return ie;
 }
-
 void add_pdu_session_resource_release_command_ie(Ngap_PDUSessionResourceReleaseCommand_t *ngapPDUSessionResourceReleaseCommand, Ngap_PDUSessionResourceReleaseCommandIEs_t *ie) {
     int ret;
 	ret = ASN_SEQUENCE_ADD(&ngapPDUSessionResourceReleaseCommand->protocolIEs.list, ie);
@@ -112,7 +108,8 @@ void add_pdu_session_resource_release_command_ie(Ngap_PDUSessionResourceReleaseC
     }
 	return ;
 }
-Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_release_command()
+
+Ngap_NGAP_PDU_t *  ngap_generate_ng_release_command(const char *inputBuf)
 {
     Ngap_NGAP_PDU_t * pdu = NULL;
 	pdu = calloc(1, sizeof(Ngap_NGAP_PDU_t));
@@ -156,9 +153,7 @@ Ngap_NGAP_PDU_t *make_NGAP_pdu_session_resource_release_command()
 	relCmdItem  =  make_PDUSessionResourceToReleaseItemRelCmd(0x80, "test_relcmd_setup");
 	ASN_SEQUENCE_ADD(&ie->value.choice.PDUSessionResourceToReleaseListRelCmd.list, relCmdItem);
 	add_pdu_session_resource_release_command_ie(ngapPDUSessionResourceReleaseCommand, ie);
-	 
-
-	printf("0000000000000, make_NGAP_pdu_session_resource_release_command\n");
+	
     return pdu;
 }
 
@@ -271,6 +266,8 @@ ngap_amf_handle_ng_pdu_session_resource_release_command(
 		    pDUSessionID                                   = relcmdIes_p->pDUSessionID;
 	 	    pDUSessionResourceReleaseCommandTransfer       = relcmdIes_p->pDUSessionResourceReleaseCommandTransfer.buf;
 	        pDUSessionResourceReleaseCommandTransfer_size  = relcmdIes_p->pDUSessionResourceReleaseCommandTransfer.size;
+
+			printf("ReleaseCommand,pDUSessionID:0x%x, Transfer:%s\n", pDUSessionID, pDUSessionResourceReleaseCommandTransfer);
 		}
 	}
 	
@@ -278,4 +275,70 @@ ngap_amf_handle_ng_pdu_session_resource_release_command(
 }
 
 
+int  make_NGAP_PduSessionResourceReleaseCommand(const char *inputBuf, const char *OutputBuf)
+{
 
+    printf("pdu session  resource release command, start--------------------\n\n");
+
+    int ret = 0;
+	int rc  = RETURNok;
+	const sctp_assoc_id_t assoc_id  = 0;
+    const sctp_stream_id_t stream   = 0;
+	Ngap_NGAP_PDU_t  message = {0};
+
+	//wys:  1024 ?
+	size_t buffer_size = 1024;  
+	void *buffer = calloc(1,buffer_size);
+	asn_enc_rval_t er;	
+	
+	Ngap_NGAP_PDU_t * pdu =  ngap_generate_ng_release_command(inputBuf);
+	if(!pdu)
+		goto ERROR;
+
+    asn_fprint(stderr, &asn_DEF_Ngap_NGAP_PDU, pdu);
+
+    ret  =  check_NGAP_pdu_constraints(pdu);
+    if(ret < 0) 
+	{
+		printf("ng setup response Constraint validation  failed\n");
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+
+	//encode
+	er = aper_encode_to_buffer(&asn_DEF_Ngap_NGAP_PDU, NULL, pdu, buffer, buffer_size);
+	if(er.encoded < 0)
+	{
+		printf("ng setup response encode failed,er.encoded:%d\n",er.encoded);
+		rc = RETURNerror;
+		goto ERROR; 
+	}
+  		 
+	bstring msgBuf = blk2bstr(buffer, er.encoded);
+
+    //decode
+    ngap_amf_decode_pdu(&message, msgBuf);
+	ngap_amf_handle_ng_pdu_session_resource_release_command(0,0, &message);
+
+
+    //Free pdu
+    ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+	printf("pdu session  resource release command, finish--------------------\n\n");
+    return rc;
+
+ERROR:
+	//Free pdu
+	if(pdu)
+        ASN_STRUCT_FREE(asn_DEF_Ngap_NGAP_PDU, pdu);
+	if(buffer)
+	{
+		free(buffer);
+		buffer = NULL;
+	}
+ 	return rc;  
+}

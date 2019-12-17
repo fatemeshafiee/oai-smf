@@ -47,11 +47,30 @@
 extern "C"{
 #include "nas_message.h"
 #include "mmData.h"
-//#include "Ngap_InitiatingMessage.h"
-//#include "Ngap_SuccessfulOutcome.h"
-
 #include "../NgapSmfLayer/ng_pdu_session_resource_setup_request.h"
 #include "../NgapSmfLayer/ng_pdu_session_resource_setup_response.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_release_command.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_release_response.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_modify_request.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_modify_response.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_notify.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_modify_indication.h"
+#include "../NgapSmfLayer/ng_pdu_session_resource_modify_confirm.h"
+#include "../NgapSmfLayer/ng_pdu_handover_required.h"
+#include "../NgapSmfLayer/ng_pdu_handover_command.h"
+#include "../NgapSmfLayer/ng_pdu_handover_preparation_failure.h"
+#include "../NgapSmfLayer/ng_pdu_handover_request.h"
+#include "../NgapSmfLayer/ng_pdu_handover_request_acknowledge.h"
+#include "../NgapSmfLayer/ng_pdu_handover_failure.h"
+#include "../NgapSmfLayer/ng_pdu_handover_notify.h"
+#include "../NgapSmfLayer/ng_pdu_path_switch_request.h"
+#include "../NgapSmfLayer/ng_pdu_path_switch_request_acknowledge.h"
+#include "../NgapSmfLayer/ng_pdu_path_switch_request_failure.h"
+#include "../NgapSmfLayer/ng_pdu_handover_cancel.h"
+#include "../NgapSmfLayer/ng_pdu_handover_cancel_acknowledge.h"
+#include "../NgapSmfLayer/ng_pdu_uplink_ran_status_transfer.h"
+#include "../NgapSmfLayer/ng_pdu_downlink_ran_status_transfer.h"
+
 }
 
 #include <stdexcept>
@@ -2434,8 +2453,40 @@ void smf_app::create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_contex
 			 printf("don't know ngap_ie_type:%d\n", ngap_ie_type);
 	}
     #endif
-    make_NGAP_pdu_session_resource_setup_request();
-	make_NGAP_pdu_session_resource_setup_response();
+
+	make_NGAP_PduSessionResourceSetupRequest("", "");
+	make_NGAP_PduSessionResourceSetupResponse("", "");
+	make_NGAP_PduSessionResourceReleaseCommand("", "");
+	make_NGAP_PduSessionResourceReleaseResponse("", "");
+	make_NGAP_PduSessionResourceModifyRequest("", "");
+	make_NGAP_PduSessionResourceModifyResponse("","");
+	make_NGAP_PduSessionResourceNotify("",  "");
+	make_NGAP_PduSessionResourceModifyIndication("", "");
+	make_NGAP_PduSessionResourceModifyConfirm("", "");
+
+	
+	make_NGAP_PduHandOverRequired("", "");
+	make_NGAP_PduHandOverCommand("", "");
+	make_NGAP_PduHandOverPreFailure("","");
+
+	make_NGAP_PduHandOverRequest("","");
+	
+	make_NGAP_PduHandOver_Req_Ack("","");
+	make_NGAP_PduHandOver_Failure("","");
+	make_NGAP_PduHandOver_Notify("","");
+	
+	make_NGAP_PduPathSwitchRequest("","");
+	make_NGAP_PduPathSwitchRequestAck("","");
+	make_NGAP_PduPathSwitchRequestFailure("","");
+	make_NGAP_PduHandOverCancel("","");
+	make_NGAP_PduHandOverCancelAck("","");
+	make_NGAP_PduUplinkRanStatusTransfer("","");
+	make_NGAP_PduDownlinkRanStatusTransfer("","");
+	
+	//make_NGAP_PduSessionResourceReleaseCommand("", "");
+	
+    //make_NGAP_pdu_session_resource_setup_request();
+	//make_NGAP_pdu_session_resource_setup_response();
 	
        
    
