@@ -21,10 +21,10 @@
 #for NGAP_SMF_LAYTER
 set(NGAP_SMF_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-include_directories(${SRC_TOP_DIR}/NgapSmfLayer)
+include_directories(${SRC_TOP_DIR}/ngap)
 
 file(GLOB NGAP_SMF_src_files
-       ${SRC_TOP_DIR}/NgapSmfLayer/*.c
+       ${SRC_TOP_DIR}/ngap/*.c
 )   
 
 add_library(NGAP_SMF_LAYER ${NGAP_SMF_DIR}/ng_pdu_session_resource_setup_request.c  ${NGAP_SMF_src_files} ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES})
