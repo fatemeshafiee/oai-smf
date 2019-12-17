@@ -34,6 +34,9 @@
 #include "3gpp_29.244.h"
 #include "3gpp_24.007.h"
 #include "3gpp_24.501.h"
+#include "Guami.h"
+#include "RefToBinaryData.h"
+#include "NgRanTargetId.h"
 
 namespace smf {
 
@@ -77,6 +80,7 @@ private:
 	snssai_t m_snssai;
 };
 
+//---------------------------------------------------------------------------------------
 //for PDU session update
 class pdu_session_update_sm_context_request: public pdu_session_msg {
 public:
@@ -84,8 +88,8 @@ public:
 private:
 	//std::string m_Ppei;
 	std::string m_nf_instanceId;
-	Guami m_guami;
-	PlmnId m_serving_network;
+	oai::smf_server::model::Guami m_guami;
+	oai::smf_server::model::PlmnId m_serving_network;
 	//BackupAmfInfo
 	/*
     backupAmfInfo:
@@ -95,7 +99,7 @@ private:
       minItems: 1
       nullable: true
 	 */
-	AcessType m_an_type;
+	std::string m_an_type;
 	/*
 	 *
      secondAnType:
@@ -124,11 +128,11 @@ private:
       type: boolean
 	 */
 
-	RefToBinaryData m_n1_sm_msg; //n1SmMsg
-	RefToBinaryData m_n2_sm_info; //n2SmInfo
+	oai::smf_server::model::RefToBinaryData m_n1_sm_msg; //n1SmMsg
+	oai::smf_server::model::RefToBinaryData m_n2_sm_info; //n2SmInfo
 	std::string m_n2_sm_info_type; //$ref: '#/components/schemas/N2SmInfoType'
-	NgRanTargetId m_target_id; //$ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
-	std::string m_target_serving_nfId  // $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+	oai::smf_server::model::NgRanTargetId m_target_id; //$ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
+	std::string m_target_serving_nfId;  // $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
 	std::string m_sm_context_status_uri;  //smContextStatusUri $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
 	/*
     dataForwarding:
@@ -167,7 +171,7 @@ private:
      cause:
        $ref: '#/components/schemas/Cause'
 	 */
-	NgApCause m_ngAp_cause; //  $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause
+	//NgApCause m_ngAp_cause; //  $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause
 	unsigned int m_5gMm_cause_value; // 5GMmCause, $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
 /*
 	sNssai:
@@ -190,6 +194,15 @@ private:
 */
 
 };
+
+//---------------------------------------------------------------------------------------
+//for PDU session update response
+class pdu_session_update_sm_context_response: public pdu_session_msg {
+public:
+	pdu_session_update_sm_context_response(): pdu_session_msg(){ };
+};
+
+//---------------------------------------------------------------------------------------
 class pdu_session_create_sm_context_request: public pdu_session_msg {
 
 public:
@@ -291,7 +304,7 @@ private:
 
 };
 
-
+//---------------------------------------------------------------------------------------
 class pdu_session_create_sm_context_response : public pdu_session_msg {
 
 public:

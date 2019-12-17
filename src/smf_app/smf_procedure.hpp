@@ -138,8 +138,8 @@ public:
   std::shared_ptr<smf_pdu_session>                        ppc;
   std::shared_ptr<smf::smf_context>                       pc;
 
-  std::shared_ptr<itti_n11_create_sm_context_request> n11_trigger;
-  std::shared_ptr<itti_n11_create_sm_context_response> n11_triggered_pending;
+  std::shared_ptr<itti_n11_update_sm_context_request> n11_trigger;
+  std::shared_ptr<itti_n11_update_sm_context_response> n11_triggered_pending;
 };
 
 

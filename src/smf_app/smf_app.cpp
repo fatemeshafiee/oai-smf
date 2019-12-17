@@ -451,11 +451,11 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request
 		smContextUpdateError.setError(problem_details);
 		//PDU Session Update Reject
 		//Create N1 container
-		smf_app_inst->create_n1_sm_container(smreq, PDU_SESSION_ESTABLISHMENT_REJECT, n1_container, 29); //TODO: 29 -> should update 5GSM cause in 24.501
+		//smf_app_inst->create_n1_sm_container(smreq, PDU_SESSION_ESTABLISHMENT_REJECT, n1_container, 29); //TODO: 29 -> should update 5GSM cause in 24.501
 		binary_data.setContentId(n1_container);
 		smContextUpdateError.setN1SmMsg(binary_data);
 		//Send response to AMF
-		send_create_session_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden);
+		//send_create_session_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden);
 		return;
 	}
 

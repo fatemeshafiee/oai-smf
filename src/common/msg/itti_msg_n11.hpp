@@ -94,6 +94,19 @@ public:
 
 };
 
+//-----------------------------------------------------------------------------
+class itti_n11_update_sm_context_response : public itti_n11_msg {
+public:
+	itti_n11_update_sm_context_response(const task_id_t orig, const task_id_t dest, Pistache::Http::ResponseWriter& response):
+		itti_n11_msg(N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE, orig, dest), http_response(response.clone()) {}
+	itti_n11_update_sm_context_response(const itti_n11_update_sm_context_response& i) : itti_n11_msg(i), res(i.res), http_response(i.http_response.clone())  {}
+	itti_n11_update_sm_context_response(const itti_n11_update_sm_context_response& i, const task_id_t orig, const task_id_t dest) :
+	  itti_n11_msg(i, orig, dest), res(i.res), http_response(i.http_response.clone()) {}
+  const char* get_msg_name() {return "N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE";};
+  smf::pdu_session_update_sm_context_response res;
+  Pistache::Http::ResponseWriter http_response;
 
+
+};
 
 #endif /* ITTI_MSG_N11_HPP_INCLUDED_ */
