@@ -72,6 +72,12 @@ private:
   std::map<supi64_t, std::shared_ptr<smf_context>>  supi2smf_context;
   mutable std::shared_mutex           m_supi2smf_context;
 
+  util::uint_generator<uint32_t>   sm_context_ref_generator;
+
+  std::map<scid_t, std::tuple<supi_t, std::string, pdu_session_id_t>>    scid2smf_context;
+  mutable std::shared_mutex  m_scid2smf_context;
+
+
   int apply_config(const smf_config& cfg);
 
   int pco_push_protocol_or_container_id(protocol_configuration_options_t& pco, pco_protocol_or_container_id_t * const poc_id /* STOLEN_REF poc_id->contents*/);
@@ -111,6 +117,12 @@ public:
   uint64_t generate_seid();
   bool is_seid_n4_exist(const uint64_t& s) const;
   void free_seid_n4(const uint64_t& seid);
+
+
+  void generate_smf_context_ref(std::string& smf_ref);
+  scid_t generate_smf_context_ref();
+  void set_scid_2_smf_context(const scid_t& id, supi_t supi, std::string dnn, pdu_session_id_t pdu_session_id);
+  std::tuple<supi_t, std::string, pdu_session_id_t>  scid_2_smf_context(const scid_t& scid) const;
 
   /*
    * Handle PDUSession_CreateSMContextRequest from AMF

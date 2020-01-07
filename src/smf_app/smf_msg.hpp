@@ -86,6 +86,7 @@ class pdu_session_update_sm_context_request: public pdu_session_msg {
 public:
 	pdu_session_update_sm_context_request(): pdu_session_msg(){ };
 private:
+	//
 	//std::string m_Ppei;
 	std::string m_nf_instanceId;
 	oai::smf_server::model::Guami m_guami;

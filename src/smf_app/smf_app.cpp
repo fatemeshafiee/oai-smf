@@ -129,6 +129,19 @@ uint64_t smf_app::generate_seid() {
 }
 
 //------------------------------------------------------------------------------
+void smf_app::generate_smf_context_ref(std::string& smf_ref)
+{
+  smf_ref = std::to_string(sm_context_ref_generator.get_uid());
+}
+
+//------------------------------------------------------------------------------
+scid_t smf_app::generate_smf_context_ref()
+{
+  return sm_context_ref_generator.get_uid();
+}
+
+
+//------------------------------------------------------------------------------
 bool smf_app::is_seid_n4_exist(const uint64_t& seid) const
 {
   return bool{set_seid_n4.count(seid) > 0};
@@ -438,6 +451,10 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request
 			return;
 		}
 	}
+    // generate a SMF context Id and store the corresponding information in a map (SM_Context_ID, (supi, dnn, pdu_session_id))
+    scid_t scid = generate_smf_context_ref();
+    set_scid_2_smf_context(scid, supi, dnn, pdu_session_id);
+    smreq->set_scid(scid);
 
 	//Step 5. let the context handle the message
 	//in this step, SMF will send N4 Session Establishment/Modification to UPF (step 10a, section 4.3.2 3GPP 23.502)
@@ -457,6 +474,20 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request
 	std::string n1_container; //N1 SM container
 
 	//SM Context ID, N2 SM information, Request Type
+	//SM Context ID - uint32_t in our case
+	scid_t scid;
+	try {
+		scid = std::stoi(smreq->scid);
+	}
+	/*catch (const std::out_of_range& err){
+
+    } catch (const std::invalid_argument& err){
+
+    }*/
+	catch (const std::exception& err) {
+     //TODO: reject with invalid context
+	}
+
 	//Step 1. get necessary information (N2 SM information)
 	supi_t supi =  smreq->req.get_supi();
 	supi64_t supi64 = smf_supi_to_u64(supi);
@@ -514,6 +545,20 @@ void smf_app::set_supi_2_smf_context(const supi64_t& supi, std::shared_ptr<smf_c
 {
     std::shared_lock lock(m_supi2smf_context);
     supi2smf_context[supi] = sc;
+}
+
+//------------------------------------------------------------------------------
+void smf_app::set_scid_2_smf_context(const scid_t& id, supi_t supi, std::string dnn, pdu_session_id_t pdu_session_id)
+{
+    std::shared_lock lock(m_scid2smf_context);
+    scid2smf_context[id] = std::make_tuple(supi, dnn, pdu_session_id);
+}
+
+//------------------------------------------------------------------------------
+std::tuple<supi_t, std::string, pdu_session_id_t>  smf_app::scid_2_smf_context(const scid_t& scid) const
+{
+	std::shared_lock lock(m_scid2smf_context);
+	return scid2smf_context.at(scid);
 }
 
 //------------------------------------------------------------------------------

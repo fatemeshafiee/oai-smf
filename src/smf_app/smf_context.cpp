@@ -532,7 +532,7 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 			//}
 		}
 
-		//Send reply to AMF (PDUSession_CreateSMContextResponse including Cause, SMContextId)
+		//(step 5 (4.3.2.2.1 TS 23.502)) Send reply to AMF (PDUSession_CreateSMContextResponse including Cause, SMContextId)
 		//location header contains the URI of the created resource
 		Logger::smf_app().info("Sending response to AMF!");
 		nlohmann::json jsonData;
@@ -544,8 +544,7 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 		//headers: Location:
         //Contains the URI of the newly created resource, according to the structure: {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
-		std::string uri = sm_context_req_msg.get_api_root() + std::to_string(supi64); //smContextRef
-
+		std::string uri = sm_context_req_msg.get_api_root() + std::to_string(smreq->scid); //smContextRef
 
 		sm_context_resp->http_response.headers().add<Pistache::Http::Header::Location>(uri);
 
@@ -615,7 +614,7 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 }
 
 
-//------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------
 void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq)
 {
 
