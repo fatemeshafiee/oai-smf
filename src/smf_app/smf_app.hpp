@@ -44,6 +44,7 @@
 extern "C"{
 #include "nas_message.h"
 #include "mmData.h"
+#include "Ngap_NGAP-PDU.h"
 }
 
 #include <map>
@@ -237,6 +238,14 @@ public:
      * @return void
      */
    void convert_string_2_hex(std::string& input_str, std::string& output_str);
+
+   /*
+     * Decode N2 SM Information (using NGAP lib)
+     * @param [Ngap_NGAP_PDU_t&] ngap_msg Store decoded NGAP message
+     * @param [std::string&] n2_sm_info N2 SM Information from AMF
+     * @return status of the decode process
+     */
+   int decode_ngap_message(Ngap_NGAP_PDU_t& ngap_msg, std::string& n2_sm_info);
 
 };
 }

@@ -11,7 +11,9 @@
 */
 
 #include "IndividualSMContextApiImpl.h"
-
+extern "C" {
+#include "Ngap_NGAP-PDU.h"
+}
 namespace oai {
 namespace smf_server {
 namespace api {
@@ -38,12 +40,34 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
 	//Get the SmContextUpdateData from this message and process in smf_app
 	smf::pdu_session_update_sm_context_request sm_context_req_msg = {};
 
-	//TODO: initialize necessary values for sm context req from smContextUpdateData and smContextRef
+	//decode NGAP message and assign the necessary informations to pdu_session_update_sm_context_request
+	//and pass this message to SMF to handle this message
 
+	Ngap_NGAP_PDU_t decoded_ngap_msg = {};
+
+
+	std::string n2_sm_information = (smContextUpdateData.getN2SmInfo()).getContentId();
+
+	std::string n2_sm_msg_hex;
+	m_smf_app->convert_string_2_hex(n2_sm_information, n2_sm_msg_hex);
+	Logger::smf_api_server().debug("smContextMessage, n2 sm information %s",n2_sm_information.c_str());
+
+	//Step1. Decode N2 SM information into decoded ngap msg
+	int decoder_rc = m_smf_app->decode_ngap_message(decoded_ngap_msg, n2_sm_msg_hex);
+
+	if (decoder_rc != RETURNok) {
+		//TODO: error, should send reply to AMF with error code!!
+	}
+
+	//Step 2. TODO: initialize necessary values for sm context req from smContextUpdateData
+
+	//Step 3. Handle the itti_n11_update_sm_context_request message in smf_app
 	std::shared_ptr<itti_n11_update_sm_context_request> itti_msg = std::make_shared<itti_n11_update_sm_context_request>(TASK_SMF_N11, TASK_SMF_APP, response, smContextRef);
 	itti_msg->req = sm_context_req_msg;
 	itti_msg->scid = smContextRef;
 	m_smf_app->handle_amf_msg(itti_msg);
+
+
 
 }
 

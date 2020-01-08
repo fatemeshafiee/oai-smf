@@ -473,7 +473,7 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request
 	oai::smf_server::model::RefToBinaryData binary_data;
 	std::string n1_container; //N1 SM container
 
-	//SM Context ID, N2 SM information, Request Type
+	//Step 0. get supi, dnn, pdu_session id from sm_context
 	//SM Context ID - uint32_t in our case
 	scid_t scid;
 	try {
@@ -485,12 +485,17 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request
 
     }*/
 	catch (const std::exception& err) {
-     //TODO: reject with invalid context
+     //TODO: send reject with invalid context
 	}
 
-	//Step 1. get necessary information (N2 SM information)
-	supi_t supi =  smreq->req.get_supi();
+	auto sm_context = scid_2_smf_context(scid);
+	supi_t supi =  std::get<0>(sm_context);
+	std::string dnn = std::get<1>(sm_context);
+	pdu_session_id_t pdu_session_id = std::get<2>(sm_context);
+
 	supi64_t supi64 = smf_supi_to_u64(supi);
+
+	//Step 1. get necessary information (N2 SM information)
 
 	//Step 2. find the smf context
 	std::shared_ptr<smf_context> sc;
@@ -3033,7 +3038,18 @@ int smf_app::decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::str
 	return decoder_rc;
 }
 
+//---------------------------------------------------------------------------------------------
+int smf_app::decode_ngap_message(Ngap_NGAP_PDU_t& ngap_msg, std::string& n2_sm_info){
+	//TODO: should work with BUPT to finish this function
+	Logger::smf_app().info("Decode NGAP message from N2 SM Information\n");
 
+	//step 1. Decode NGAP  message (for instance, ... only served as an example)
+	int decoder_rc = RETURNok;
+
+	return decoder_rc;
+}
+
+//---------------------------------------------------------------------------------------------
 void smf_app::convert_string_2_hex(std::string& input_str, std::string& output_str){
 
 	unsigned char *data = (unsigned char *) malloc (input_str.length() + 1);

@@ -155,8 +155,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	//SM PDU DN request container (Optional)
 	//Extended protocol configuration options (Optional) e.g, FOR DHCP
 
-	//Step 3. Handle the pdu_session_create_sm_context_request message in pwg_app
-	//m_smf_app->handle_amf_msg(sm_context_req_msg, response);
+	//Step 3. Handle the pdu_session_create_sm_context_request message in smf_app
 
     //itti_n11_create_sm_context_request *itti_msg = new itti_n11_create_sm_context_request(TASK_SMF_N11, TASK_SMF_APP, response);
     //itti_msg->req = sm_context_req_msg;
