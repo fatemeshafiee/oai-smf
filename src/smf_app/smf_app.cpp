@@ -494,6 +494,10 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request
 	pdu_session_id_t pdu_session_id = std::get<2>(sm_context);
 
 	supi64_t supi64 = smf_supi_to_u64(supi);
+	//store in itti_n11_update_sm_context_request to be processed later on
+	smreq->set_supi(supi);
+	smreq->set_dnn(dnn);
+	smreq->set_pdu_session_id(pdu_session_id);
 
 	//Step 1. get necessary information (N2 SM information)
 
@@ -517,6 +521,15 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request
 		//Send response to AMF
 		//send_create_session_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden);
 		return;
+	}
+
+	//get dnn context
+	std::shared_ptr<dnn_context> sd;
+
+	if (!sc.get()->find_dnn_context(dnn, sd)) {
+		if (nullptr == sd.get()){
+			//TODO: Error, DNN context doesn't exist
+		}
 	}
 
 
@@ -3045,6 +3058,13 @@ int smf_app::decode_ngap_message(Ngap_NGAP_PDU_t& ngap_msg, std::string& n2_sm_i
 
 	//step 1. Decode NGAP  message (for instance, ... only served as an example)
 	int decoder_rc = RETURNok;
+
+	//Ngap_PDUSessionResourceSetupRequestTransfer_t
+	//  Ngap_PDUSessionResourceSetupRequestTransfer_t   *decoded_msg = null;
+	// std::string n2_sm_info_hex; //store the n2_sm_info from AMF
+	//Decode N2 SM info into decoded nas msg
+	// asn_dec_rval_t rc  = asn_decode(NULL,&asn_DEF_Ngap_PDUSessionResourceSetupRequestTransfer, (void **)&decoded_msg, n2_sm_info_hex, n2_sm_info_hex.length());
+
 
 	return decoder_rc;
 }

@@ -52,13 +52,25 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
 	m_smf_app->convert_string_2_hex(n2_sm_information, n2_sm_msg_hex);
 	Logger::smf_api_server().debug("smContextMessage, n2 sm information %s",n2_sm_information.c_str());
 
-	//Step1. Decode N2 SM information into decoded ngap msg
+	std::string n2_sm_info_type = smContextUpdateData.getN2SmInfoType();
+
+	if (n2_sm_info_type.compare("PDU_RES_SETUP_REQ") == 0){
+		Ngap_PDUSessionResourceSetupRequestTransfer_t   *decoded_msg = null;
+		//Decode N2 SM info into decoded nas msg
+		asn_dec_rval_t rc  = asn_decode(NULL,&asn_DEF_Ngap_PDUSessionResourceSetupRequestTransfer, (void **)&decoded_msg, n2_sm_msg_hex, n2_sm_msg_hex.length());
+		if(rc.code != RC_OK)
+		{
+			Logger::smf_api_server().warn("asn_decode failed %d...\n",rc.code );
+		}
+	}
+
+/*
 	int decoder_rc = m_smf_app->decode_ngap_message(decoded_ngap_msg, n2_sm_msg_hex);
 
 	if (decoder_rc != RETURNok) {
 		//TODO: error, should send reply to AMF with error code!!
 	}
-
+*/
 	//Step 2. TODO: initialize necessary values for sm context req from smContextUpdateData
 
 	//Step 3. Handle the itti_n11_update_sm_context_request message in smf_app

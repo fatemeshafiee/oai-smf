@@ -82,11 +82,11 @@ private:
 
 //---------------------------------------------------------------------------------------
 //for PDU session update
+//see SmContextUpdateData (TS29502_Nsmf_PDUSession.yaml)
 class pdu_session_update_sm_context_request: public pdu_session_msg {
 public:
 	pdu_session_update_sm_context_request(): pdu_session_msg(){ };
 private:
-	//
 	//std::string m_Ppei;
 	std::string m_nf_instanceId;
 	oai::smf_server::model::Guami m_guami;
@@ -118,8 +118,7 @@ private:
       $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
     addUeLocation:
       $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
-    upCnxState:
-      $ref: '#/components/schemas/UpCnxState'
+
     hoState:
       $ref: '#/components/schemas/HoState'
     toBeSwitched:
@@ -128,6 +127,7 @@ private:
     failedToBeSwitched:
       type: boolean
 	 */
+    std::string m_upCnx_state; //'#/components/schemas/UpCnxState'
 
 	oai::smf_server::model::RefToBinaryData m_n1_sm_msg; //n1SmMsg
 	oai::smf_server::model::RefToBinaryData m_n2_sm_info; //n2SmInfo

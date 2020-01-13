@@ -188,8 +188,11 @@ public:
     /// <summary>
     /// 
     /// </summary>
-    N2SmInfoType getN2SmInfoType() const;
-    void setN2SmInfoType(N2SmInfoType const& value);
+    //N2SmInfoType getN2SmInfoType() const;
+    //void setN2SmInfoType(N2SmInfoType const& value);
+    std::string getN2SmInfoType() const;
+    void setN2SmInfoType(std::string const& value);
+
     bool n2SmInfoTypeIsSet() const;
     void unsetN2SmInfoType();
     /// <summary>
@@ -356,7 +359,8 @@ protected:
     bool m_N1SmMsgIsSet;
     RefToBinaryData m_N2SmInfo;
     bool m_N2SmInfoIsSet;
-    N2SmInfoType m_N2SmInfoType;
+    //N2SmInfoType m_N2SmInfoType;
+    std::string m_N2SmInfoType;
     bool m_N2SmInfoTypeIsSet;
     NgRanTargetId m_TargetId;
     bool m_TargetIdIsSet;
