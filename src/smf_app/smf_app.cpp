@@ -495,9 +495,9 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request
 
 	supi64_t supi64 = smf_supi_to_u64(supi);
 	//store in itti_n11_update_sm_context_request to be processed later on
-	smreq->set_supi(supi);
-	smreq->set_dnn(dnn);
-	smreq->set_pdu_session_id(pdu_session_id);
+	smreq->req.set_supi(supi);
+	smreq->req.set_dnn(dnn);
+	smreq->req.set_pdu_session_id(pdu_session_id);
 
 	//Step 1. get necessary information (N2 SM information)
 
