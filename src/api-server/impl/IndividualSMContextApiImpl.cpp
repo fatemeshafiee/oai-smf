@@ -13,7 +13,6 @@
 #include "IndividualSMContextApiImpl.h"
 extern "C" {
 #include "Ngap_NGAP-PDU.h"
-#include "Ngap_PDUSessionResourceSetupRequestTransfer.h"
 }
 namespace oai {
 namespace smf_server {
@@ -55,27 +54,19 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
 
 	std::string n2_sm_info_type = smContextUpdateData.getN2SmInfoType();
 
-	//Temps: decode Ngap_PDUSessionResourceSetupRequestTransfer
-	if (n2_sm_info_type.compare(n2_sm_info_type_e2str[PDU_RES_SETUP_REQ]) == 0){
-		Ngap_PDUSessionResourceSetupRequestTransfer_t   *decoded_msg = NULL;
-		//Decode N2 SM info into decoded nas msg
-		asn_dec_rval_t rc  = asn_decode(NULL,ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceSetupRequestTransfer, (void **)&decoded_msg, (void *)n2_sm_msg_hex.c_str(), n2_sm_msg_hex.length());
-		if(rc.code != RC_OK)
-		{
-			Logger::smf_api_server().warn("asn_decode failed %d...\n",rc.code );
-			//TODO: send error to AMF??
-		}
+	sm_context_req_msg.set_n2_sm_information(n2_sm_msg_hex);
+	sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
 
 
-	}
 
-/*
+	/*
+    // do it from SMF_APP
 	int decoder_rc = m_smf_app->decode_ngap_message(decoded_ngap_msg, n2_sm_msg_hex);
 
 	if (decoder_rc != RETURNok) {
 		//TODO: error, should send reply to AMF with error code!!
 	}
-*/
+	 */
 	//Step 2. TODO: initialize necessary values for sm context req from smContextUpdateData
 
 	//Step 3. Handle the itti_n11_update_sm_context_request message in smf_app

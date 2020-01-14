@@ -237,3 +237,23 @@ void pdu_session_create_sm_context_response::set_qos_flow_context(const qos_flow
 	qos_flow_context = qos_flow;
 }
 
+/* pdu_session_update_sm_context_request */
+std::string pdu_session_update_sm_context_request::get_n2_sm_information() const{
+	return 	n2_sm_information;
+}
+
+void pdu_session_update_sm_context_request::set_n2_sm_information(std::string const& value){
+	n2_sm_information = value;
+}
+
+std::string pdu_session_update_sm_context_request::get_n2_sm_info_type() const{
+	return n2_sm_info_type;
+}
+
+void pdu_session_update_sm_context_request::set_n2_sm_info_type(std::string const& value){
+	n2_sm_info_type = value;
+}
+
+
+
+

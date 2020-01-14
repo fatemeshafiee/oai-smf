@@ -38,7 +38,9 @@
 #include "3gpp_24.501.h"
 #include "SmContextCreatedData.h"
 #include <algorithm>
-
+extern "C"{
+#include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
+}
 using namespace smf;
 
 extern itti_mw *itti_inst;
@@ -620,6 +622,31 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_req
 
 	Logger::smf_app().info("Handle a PDU Session Update SM Context Request message from AMF");
 	pdu_session_update_sm_context_request sm_context_req_msg = smreq->req;
+
+	//Step 1. get necessary information (N2 SM information)
+	std::string n2_sm_info_type = smreq->req.get_n2_sm_info_type();
+	std::string n2_sm_infomation = smreq->req.get_n2_sm_information();
+
+	//decode Ngap_PDUSessionResourceSetupResponseTransfer
+	if (n2_sm_info_type.compare(n2_sm_info_type_e2str[PDU_RES_SETUP_RSP]) == 0){
+		Ngap_PDUSessionResourceSetupResponseTransfer_t   *decoded_msg = NULL;
+		//Decode N2 SM info into decoded nas msg
+		asn_dec_rval_t rc  = asn_decode(NULL,ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, (void **)&decoded_msg, (void *)n2_sm_infomation.c_str(), n2_sm_infomation.length());
+		if(rc.code != RC_OK)
+		{
+			Logger::smf_api_server().warn("asn_decode failed %d...\n",rc.code );
+			//TODO: send error to AMF??
+		}
+
+		//	Ngap_QosFlowPerTNLInformation_t	 qosFlowPerTNLInformation;
+		//	struct Ngap_QosFlowPerTNLInformation	*additionalQosFlowPerTNLInformation;	/* OPTIONAL */
+		//	struct Ngap_SecurityResult	*securityResult;	/* OPTIONAL */
+		//	struct Ngap_QosFlowList	*qosFlowFailedToSetupList;	/* OPTIONAL */
+		//	struct Ngap_ProtocolExtensionContainer	*iE_Extensions;	/* OPTIONAL */
+
+	}
+
+
 	//TODO:
 	//get dnn context
 	//get SMF PDU Session context

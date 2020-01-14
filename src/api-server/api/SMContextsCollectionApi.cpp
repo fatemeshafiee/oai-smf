@@ -41,7 +41,7 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
 
     // Getting the body param
    
-	std::cout <<"received a SM context create request"<<std::endl;	
+	std::cout <<"received a SM context create request" << request.body() <<std::endl;
 	SmContextMessage smContextMessage;
     
     try {

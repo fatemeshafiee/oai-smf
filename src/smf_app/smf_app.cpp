@@ -499,7 +499,6 @@ void smf_app::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request
 	smreq->req.set_dnn(dnn);
 	smreq->req.set_pdu_session_id(pdu_session_id);
 
-	//Step 1. get necessary information (N2 SM information)
 
 	//Step 2. find the smf context
 	std::shared_ptr<smf_context> sc;
