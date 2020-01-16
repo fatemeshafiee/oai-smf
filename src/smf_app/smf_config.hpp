@@ -132,6 +132,12 @@
 #define SMF_CONFIG_STRING_UDM_IPV4_ADDRESS                     "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_UDM_PORT                             "PORT"
 
+//test_upf
+#define SMF_CONFIG_STRING_TEST_UPF                             "TEST_UPF"
+#define SMF_CONFIG_STRING_TEST_UPF_IS_TEST                     "IS_TEST"
+#define SMF_CONFIG_STRING_TEST_UPF_GNB_IPV4_ADDRESS            "GNB_IPV4_ADDRESS"
+
+
 #define PGW_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
 namespace smf {
@@ -146,6 +152,11 @@ typedef struct interface_cfg_s {
   util::thread_sched_params thread_rd_sched_params;
 } interface_cfg_t;
 
+typedef struct test_upf_cfg_s {
+  uint8_t         is_test;
+  struct in_addr  gnb_addr4;
+} test_upf_cfg_t;
+
 typedef struct itti_cfg_s {
   util::thread_sched_params itti_timer_sched_params;
   util::thread_sched_params sx_sched_params;
@@ -157,6 +168,7 @@ typedef struct itti_cfg_s {
 class smf_config {
 private:
   int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
+  int load_upf_config(const libconfig::Setting& if_cfg, test_upf_cfg_t & cfg);
   int load_interface(const libconfig::Setting& if_cfg, interface_cfg_t& cfg);
   int load_thread_sched_params(const libconfig::Setting& thread_sched_params_cfg, util::thread_sched_params& cfg);
 
@@ -170,6 +182,7 @@ public:
   interface_cfg_t n4;
   interface_cfg_t n11;
   itti_cfg_t      itti;
+  test_upf_cfg_t  test_upf_cfg;
 
   struct in_addr default_dnsv4;
   struct in_addr default_dns_secv4;

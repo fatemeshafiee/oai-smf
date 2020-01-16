@@ -135,8 +135,29 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 	ppc->generate_far_id(far_id);
 	apply_action.forw = 1;
 
-	destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE; // ACCESS is for downlink, CORE for uplink
-	forwarding_parameters.set(destination_interface);
+	//wys-test-add
+	pfcp::outer_header_creation_t     outer_header_creation = {};
+
+    if(smf_cfg.test_upf_cfg.is_test)
+	{
+		//wys-test-add
+		destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS; // ACCESS is for downlink, CORE for uplink
+		outer_header_creation.teid  =  1;
+		//inet_aton("192.168.20.136", &outer_header_creation.ipv4_address);
+		outer_header_creation.ipv4_address = smf_cfg.test_upf_cfg.gnb_addr4 ;
+		//uint16_t port = 4;
+		//outer_header_creation.port_number  = port;
+		outer_header_creation.outer_header_creation_description  = pfcp::OUTER_HEADER_CREATION_GTPU_UDP_IPV4;	
+
+
+		forwarding_parameters.set(outer_header_creation);
+		forwarding_parameters.set(destination_interface);
+	}
+    else
+    {
+		destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE; // ACCESS is for downlink, CORE for uplink
+		forwarding_parameters.set(destination_interface);
+    }
 
 	create_far.set(far_id);
 	create_far.set(apply_action);
@@ -158,7 +179,17 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 	pfcp::application_id_t           application_id = {};
 	pfcp::qfi_t                      qfi = {};
 
-	source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
+
+   //wys-test-aadd
+
+	if(smf_cfg.test_upf_cfg.is_test)
+	{
+		source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
+	}
+	else
+	{
+	    source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
+	}
 	local_fteid.ch   = 1;
 	//local_fteid.chid = 1;
 
@@ -182,7 +213,12 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 	create_pdr.set(pdr_id);
 	create_pdr.set(precedence);
 	create_pdr.set(pdi);
-	create_pdr.set(outer_header_removal);
+
+    //wys-add-test
+	if(smf_cfg.test_upf_cfg.is_test)  
+	   create_pdr.set(outer_header_removal);
+
+	//create_pdr.set(outer_header_removal);
 	create_pdr.set(far_id);
 	//TODO: list of Usage reporting Rule IDs
 	//TODO: list of QoS Enforcement Rule IDs
