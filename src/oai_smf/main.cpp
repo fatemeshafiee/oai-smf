@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 
+
 #include "async_shell_cmd.hpp"
 #include "common_defs.h"
 #include "itti.hpp"
@@ -26,7 +27,6 @@
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
-
 
 #include <iostream>
 #include <thread>
@@ -123,12 +123,9 @@ int main(int argc, char **argv)
 
 
   //SMF API server
-  //Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(8080));
   Pistache::Address addr(std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.n11.addr4))) , Pistache::Port(smf_cfg.n11.port));
   SMFApiServer smfApiServer(addr, smf_app_inst);
   smfApiServer.init(2);
-  //smfApiServer.start();
-  //smfApiServer.shutdown();
   std::thread smf_api_manager(&SMFApiServer::start, smfApiServer);
 
   FILE *fp = NULL;

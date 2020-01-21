@@ -105,7 +105,7 @@ extern "C" {
 
 
 // 9.11.3.47 Request type
-typedef uint8_t request_type_t;
+//typedef std::string request_type_t;
 
 enum request_type_e {
 	INITIAL_REQUEST = 1,

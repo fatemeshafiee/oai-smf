@@ -329,7 +329,7 @@ int nas_message_decode (
   }
 
   if (bytes < 0)  {
-    return bytes;
+    //TODO: commented for testing purpose  return bytes;
     //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
   }
 

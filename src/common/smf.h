@@ -23,9 +23,7 @@
 #ifndef FILE_SMF_SEEN
 #define FILE_SMF_SEEN
 
-
 #include"3gpp_29.274.h"
-
 
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT     "%" SCNu64
@@ -38,10 +36,8 @@ typedef struct {
   char data[SUPI_DIGITS_MAX + 1];
 } supi_t;
 
-
 static void
-smf_string_to_supi (supi_t * const supi,
-                       char const * const supi_str)
+smf_string_to_supi (supi_t * const supi, char const * const supi_str)
 {
     //strncpy(supi->data, supi_str, SUPI_DIGITS_MAX + 1);
     memcpy((void *) supi->data, (void *) supi_str, SUPI_DIGITS_MAX + 1);
@@ -49,6 +45,13 @@ smf_string_to_supi (supi_t * const supi,
     return;
 }
 
+static std::string
+smf_supi_to_string (supi_t const supi)
+{
+      std::string supi_str;
+      supi_str.assign(supi.data, SUPI_DIGITS_MAX+1);
+      return supi_str;
+}
 
 static uint64_t
 smf_supi_to_u64 (supi_t supi)
@@ -61,17 +64,16 @@ smf_supi_to_u64 (supi_t supi)
 typedef struct s_nssai // section 28.4, TS23.003
 {
    uint8_t  sST;
-   uint32_t sD:24;
-
-   s_nssai(const uint8_t& sst,  const uint32_t sd) : sST(sst), sD(sd) {}
+   //uint32_t sD:24;
+   std::string sD;
+   //s_nssai(const uint8_t& sst,  const uint32_t sd) : sST(sst), sD(sd) {}
+   s_nssai(const uint8_t& sst,  const std::string sd) : sST(sst), sD(sd) {}
    s_nssai(): sST(),sD() {}
    s_nssai(const s_nssai& p) : sST(p.sST), sD(p.sD) {}
 
 } snssai_t;
 
 typedef uint8_t pdu_session_id;
-
-
 
 //should move to 24.501
 

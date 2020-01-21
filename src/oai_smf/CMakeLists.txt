@@ -319,6 +319,7 @@ file(GLOB NAS_src_files
     ${SRC_TOP_DIR}/utils/dynamic_memory_check.c
     ${SRC_TOP_DIR}/utils/backtrace.c
     ${SRC_TOP_DIR}/utils/bstr/*.c
+    ${SRC_TOP_DIR}/utils/multipartparser.c
     ${SRC_TOP_DIR}/nas/security/*.c
     ${SRC_TOP_DIR}/common/*.c
     ${SRC_TOP_DIR}/ngap/messages/*.c
