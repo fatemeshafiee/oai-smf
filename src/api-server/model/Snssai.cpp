@@ -20,7 +20,7 @@ namespace model {
 Snssai::Snssai()
 {
     m_Sst = 0;
-    m_Sd = 0;
+    m_Sd = "";
     m_SdIsSet = false;
     
 }
@@ -47,11 +47,11 @@ void from_json(const nlohmann::json& j, Snssai& o)
     j.at("sst").get_to(o.m_Sst);
     if(j.find("sd") != j.end())
     {
-	uint32_t sd;
-//        j.at("sd").get_to(o.m_Sd);
-        j.at("sd").get_to(sd);
-	o.m_Sd = sd;
-        o.m_SdIsSet = true;
+    	//	uint32_t sd;
+    	j.at("sd").get_to(o.m_Sd);
+    	//      j.at("sd").get_to(sd);
+    	//	o.m_Sd = sd;
+    	o.m_SdIsSet = true;
     } 
 }
 
@@ -64,11 +64,11 @@ void Snssai::setSst(uint8_t const value)
     m_Sst = value;
     
 }
-uint32_t Snssai::getSd() const
+std::string Snssai::getSd() const
 {
     return m_Sd;
 }
-void Snssai::setSd(uint32_t const& value)
+void Snssai::setSd(std::string const& value)
 {
     m_Sd = value;
     m_SdIsSet = true;

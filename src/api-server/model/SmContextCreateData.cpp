@@ -589,11 +589,11 @@ void SmContextCreateData::setServingNetwork(PlmnId const& value)
     m_ServingNetwork = value;
     
 }
-uint8_t SmContextCreateData::getRequestType() const
+std::string SmContextCreateData::getRequestType() const
 {
     return m_RequestType;
 }
-void SmContextCreateData::setRequestType(uint8_t const& value)
+void SmContextCreateData::setRequestType(std::string const& value)
 {
     m_RequestType = value;
     m_RequestTypeIsSet = true;

@@ -140,8 +140,8 @@ public:
         /// <summary>
     /// 
     /// </summary>
-    uint8_t getRequestType() const;
-    void setRequestType(uint8_t const& value);
+    std::string getRequestType() const;
+    void setRequestType(std::string const& value);
     bool requestTypeIsSet() const;
     void unsetRequestType();
     /// <summary>
@@ -389,7 +389,7 @@ protected:
     bool m_ServiceNameIsSet;
     PlmnId m_ServingNetwork;
 
-    uint8_t m_RequestType;
+    std::string m_RequestType;
     bool m_RequestTypeIsSet;
     RefToBinaryData m_N1SmMsg;
     bool m_N1SmMsgIsSet;

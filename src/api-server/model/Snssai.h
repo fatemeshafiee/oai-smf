@@ -33,7 +33,7 @@ class  Snssai
 {
 public:
     Snssai();
-    Snssai(uint8_t sst,  uint32_t sd): m_Sst(sst), m_Sd(sd) {
+    Snssai(uint8_t sst,  std::string sd): m_Sst(sst), m_Sd(sd) {
     	m_SdIsSet = true;
     };
     virtual ~Snssai();
@@ -51,8 +51,10 @@ public:
         /// <summary>
     /// 
     /// </summary>
-    uint32_t getSd() const;
-    void setSd(uint32_t const& value);
+    //uint32_t getSd() const;
+    //void setSd(uint32_t const& value);
+    std::string getSd() const;
+    void setSd(std::string const& value);
     bool sdIsSet() const;
     void unsetSd();
 
@@ -61,8 +63,8 @@ public:
 protected:
     uint8_t m_Sst;
 
-    //std::string m_Sd;
-    uint32_t m_Sd:24;
+    std::string m_Sd;
+    //uint32_t m_Sd:24;
     bool m_SdIsSet;
 };
 
