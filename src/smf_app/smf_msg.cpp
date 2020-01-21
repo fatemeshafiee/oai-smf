@@ -19,11 +19,12 @@
  *      contact@openairinterface.org
  */
 
-/*! \file smf_msg.hpp
+/*! \file smf_msg.cpp
   \brief
-  \author
+  \author  Tien-Thinh NGUYEN
   \company Eurecom
-  \email:
+  \date 2019
+  \email: tien-thinh.nguyen@eurecom.fr
  */
 #include "smf_msg.hpp"
 
@@ -54,6 +55,20 @@ void pdu_session_msg::set_supi(supi_t const& supi)
 {
 	m_supi = supi;
 }
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_msg::get_supi_prefix() const
+{
+	return m_supi_prefix;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_msg::set_supi_prefix(std::string const& prefix)
+{
+	m_supi_prefix = prefix;
+}
+
+
 
 //-----------------------------------------------------------------------------
 pdu_session_id_t pdu_session_msg::get_pdu_session_id() const
@@ -115,13 +130,13 @@ void pdu_session_create_sm_context_request::set_serving_nf_id(std::string const&
 }
 
 //-----------------------------------------------------------------------------
-request_type_t pdu_session_create_sm_context_request::get_request_type() const
+std::string pdu_session_create_sm_context_request::get_request_type() const
 {
 	return m_request_type;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_request::set_request_type(request_type_t const& request_type)
+void pdu_session_create_sm_context_request::set_request_type(std::string const& request_type)
 {
 	m_request_type = request_type;
 }

@@ -20,9 +20,10 @@
  */
 
 /*! \file smf_n11.hpp
-   \author  
-   \date 2019
-   \email: 
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
+  \company Eurecom
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
 
 #ifndef FILE_SMF_N11_HPP_SEEN

@@ -20,9 +20,10 @@
  */
 
 /*! \file smf_n10.hpp
-   \author  
-   \date 2019
-   \email: 
+  \author  Tien-Thinh NGUYEN
+  \company Eurecom
+  \date 2019
+  \email: tien-thinh.nguyen@eurecom.fr
 */
 
 #ifndef FILE_SMF_N10_HPP_SEEN

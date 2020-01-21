@@ -18,15 +18,16 @@
  * For more information about the OpenAirInterface (OAI) Software Alliance:
  *      contact@openairinterface.org
  */
-#ifndef FILE_SMF_PROCEDURE_HPP_SEEN
-#define FILE_SMF_PROCEDURE_HPP_SEEN
 
 /*! \file smf_procedure.hpp
-  \brief
-  \author Lionel Gauthier
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
   \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
 */
+
+#ifndef FILE_SMF_PROCEDURE_HPP_SEEN
+#define FILE_SMF_PROCEDURE_HPP_SEEN
 
 #include "3gpp_29.244.hpp"
 #include "3gpp_29.274.hpp"

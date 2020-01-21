@@ -19,6 +19,14 @@
  *      contact@openairinterface.org
  */
 
+/*! \file smf_procedure.cpp
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
+  \company Eurecom
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
+*/
+
+
 #include "3gpp_29.244.h"
 #include "3gpp_29.274.h"
 #include "common_defs.h"
@@ -81,6 +89,7 @@ int sx_session_restore_procedure::run()
 int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_context_request> sm_context_req, std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp, std::shared_ptr<smf::smf_context> pc)
 {
 
+	Logger::smf_app().info("[SMF Procedure] Create SM Context Request");
 	// TODO check if compatible with ongoing procedures if any
 	pfcp::node_id_t up_node_id = {};
 	if (not pfcp_associations::get_instance().select_up_node(up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {

@@ -21,9 +21,10 @@
 
 /*! \file smf_config.hpp
 * \brief
-* \author Lionel Gauthier
-* \company Eurecom
-* \email: lionel.gauthier@eurecom.fr
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
+  \company Eurecom
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
 */
 
 #ifndef FILE_SMF_CONFIG_HPP_SEEN
@@ -258,12 +259,12 @@ public:
     n4.port = pfcp::default_port;
 
     n11.thread_rd_sched_params.sched_priority = 90;
-    n11.port = 8080;
+    n11.port = 80;
 
     amf_addr.ipv4_addr.s_addr = INADDR_ANY;
-    amf_addr.port = 8080;
+    amf_addr.port = 80;
     amf_addr.ipv4_addr.s_addr = INADDR_ANY;
-    udm_addr.port = 8080;
+    udm_addr.port = 80;
 
   };
   ~smf_config();

@@ -21,9 +21,10 @@
 
 /*! \file smf_n10.cpp
   \brief
-  \author 
+  \author  Tien-Thinh NGUYEN
   \company Eurecom
-  \email: 
+  \date 2019
+  \email: tien-thinh.nguyen@eurecom.fr
 */
 
 #include "smf.h"

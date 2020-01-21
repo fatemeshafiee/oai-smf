@@ -21,9 +21,10 @@
 
 /*! \file smf_n11.cpp
   \brief
-  \author 
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
   \company Eurecom
-  \email: 
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
 
 #include "smf.h"
@@ -112,100 +113,147 @@ smf_n11::smf_n11 ()
 	Logger::smf_n11().startup( "Started" );
 }
 
-
-
-
+//------------------------------------------------------------------------------
 void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res)
 {
 	//Transfer N1/N2 message via AMF by using N_amf_Communication_N1N2MessageTransfer (see TS29518_Namf_Communication.yaml)
 	//use curl to send data for the moment
 
-	nlohmann::json jsonData;
+	nlohmann::json message_transfer_req_data;
 	std::string n1_message;
 
-	curl_global_init(CURL_GLOBAL_DEFAULT);
-	struct curl_slist *headers = NULL;
-	headers = curl_slist_append(headers, "Accept: application/json");
-	headers = curl_slist_append(headers, "Content-Type: application/json");
-	headers = curl_slist_append(headers, "charsets: utf-8");
-
-	supi64_t supi64 = smf_supi_to_u64(sm_context_res->res.get_supi());
-
+	//Curl multipart
 	CURL *curl = curl_easy_init();
-	//hardcoded for the moment, should get from NRF/configuration file
-	std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v1/ue-contexts/" + std::to_string(supi64) +"/n1-n2-messages";
-	Logger::smf_n11().debug("[Send Communication_N1N2MessageTransfer to AMF] AMF's URL: %s ", url.c_str());
 
-	//N1 SM container
-	if (sm_context_res->res.get_cause() != REQUEST_ACCEPTED) { //PDU Session Establishment Reject
-		Logger::smf_n11().debug("[Send Communication_N1N2MessageTransfer to AMF] PDU Session Establishment Reject\n");
-    	smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
-	} else { //PDU Session Establishment Accept
-		Logger::smf_n11().debug("[Send Communication_N1N2MessageTransfer to AMF] PDU Session Establishment Accept \n");
+	//get supi and put into URL
+	std::string supi_str;
+	supi_t supi = sm_context_res->res.get_supi();
+	supi_str = sm_context_res->res.get_supi_prefix() + "-" + smf_supi_to_string (supi);
+
+	std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v1/ue-contexts/" + supi_str.c_str() +"/n1-n2-messages";
+	Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Sending Communication_N1N2MessageTransfer to AMF, AMF's URL: %s", url.c_str());
+
+	std::string ngap_msg_str;
+
+	//N1 SM container & N2 SM Information
+	//TODO: should uncomment these lines when including UPF in the test
+//	if (sm_context_res->res.get_cause() != REQUEST_ACCEPTED) { //PDU Session Establishment Reject
+//		Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] PDU Session Establishment Reject\n");
+//		smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message); //need cause?
+//	} else { //PDU Session Establishment Accept
+		Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] PDU Session Establishment Accept \n");
 		smf_app_inst->create_n1_sm_container(sm_context_res, PDU_SESSION_ESTABLISHMENT_ACCEPT, n1_message); //need cause?
-	}
 
+		//TODO: N2 SM Information (Step 11, section 4.3.2.2.1 @ 3GPP TS 23.502)
+		smf_app_inst->create_n2_sm_information(sm_context_res, 1, 1, ngap_msg_str);
+//	}
+	
+	//fill the content
 	std::string n1_msg_hex;
 	smf_app_inst->convert_string_2_hex(n1_message, n1_msg_hex);
+	Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] n1MessageContent: %s\n ", n1_msg_hex.c_str());
 
-	jsonData["n1MessageContainer"]["n1MessageClass"] = "SM";
-	jsonData["n1MessageContainer"]["n1MessageContent"]["contentId"] = n1_msg_hex;
-	Logger::smf_n11().debug("n1MessageContent: %s\n ", n1_msg_hex.c_str());
+	std::string n2_msg_hex;
+        smf_app_inst->convert_string_2_hex(ngap_msg_str, n2_msg_hex);
+        Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] n2SMInformation %s\n ", n2_msg_hex.c_str());
+
+	message_transfer_req_data["n1MessageContainer"]["n1MessageClass"] = "SM";
+	message_transfer_req_data["n1MessageContainer"]["n1MessageContent"]["contentId"] = "n1SmMsg"; //part 2
 
 	//TODO: fill the content of N1N2MessageTransferReqData
-	//jsonData["n2InfoContainer"]["n2InformationClass"] = "SM";
-	//jsonData["n2InfoContainer"]["smInfo"]["PduSessionId"] = 123;
-	//jsonData["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapMessageType"] = 123; //NGAP message
-	//jsonData["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_SETUP_REQ"; //NGAP message
-	//jsonData["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "NGAP DATA"; //NGAP message
-	//jsonData["n2InfoContainer"]["ranInfo"] = "SM";
-	jsonData["ppi"] = 1;
-	jsonData["pduSessionId"] = sm_context_res->res.get_pdu_session_id();
-	//jsonData["arp"]["priorityLevel"] = 1;
-	//jsonData["arp"]["preemptCap"] = "NOT_PREEMPT";
-	//jsonData["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";
-	std::string body = jsonData.dump();
+	message_transfer_req_data["n2InfoContainer"]["n2InformationClass"] = "SM";
+	message_transfer_req_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = 1;
+	//N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
+	//message_transfer_req_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapMessageType"] = 123; //NGAP message -to be verified: doesn't exist in tester
+	message_transfer_req_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_SETUP_REQ"; //NGAP message
+	message_transfer_req_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg"; //part 3
+	//message_transfer_req_data["n2InfoContainer"]["smInfo"]["nasPdu"] = ;
+	//message_transfer_req_data["n2InfoContainer"]["smInfo"]["sNssai"] = ;
+	message_transfer_req_data["n2InfoContainer"]["ranInfo"] = "SM";
+	message_transfer_req_data["ppi"] = 1;
+	message_transfer_req_data["pduSessionId"] = sm_context_res->res.get_pdu_session_id();
+	//message_transfer_req_data["arp"]["priorityLevel"] = 1;
+	//message_transfer_req_data["arp"]["preemptCap"] = "NOT_PREEMPT";
+	//message_transfer_req_data["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";
+	std::string json_part = message_transfer_req_data.dump();
 
-
+	Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Sending message to AMF....\n ");
 	if(curl) {
-		CURLcode res;
 
+		CURLcode res;
+		struct curl_slist *headers = NULL;
+		struct curl_slist *slist = NULL;
+		curl_mime *mime;
+		curl_mime *alt;
+		curl_mimepart *part;
+
+		headers = curl_slist_append(headers, "charsets: utf-8");
+		headers = curl_slist_append(headers, "content-type: multipart/related");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
 		curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
 		curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
 
+		mime = curl_mime_init(curl);
+		alt = curl_mime_init(curl);
+
+		//part with N1N2MessageTransferReqData (JsonData)
+		part = curl_mime_addpart(mime);
+		curl_mime_data(part, json_part.c_str(), CURL_ZERO_TERMINATED);
+		curl_mime_type(part, "application/json");
+
+		//N1 SM Container
+		part = curl_mime_addpart(mime);
+		curl_mime_data(part, n1_msg_hex.c_str(), CURL_ZERO_TERMINATED);
+		curl_mime_type(part, "application/vnd.3gpp.5gnas");
+		curl_mime_name (part, "n1SmMsg");
+
+		//N2 SM Information
+		part = curl_mime_addpart(mime);
+		curl_mime_data(part, n2_msg_hex.c_str(), CURL_ZERO_TERMINATED);
+		curl_mime_type(part, "application/vnd.3gpp.ngap");
+		curl_mime_name (part, "n2SmMsg");
+
+		curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+		res = curl_easy_perform(curl);
+
 		// Response information.
 		long httpCode(0);
-		std::unique_ptr<std::string> httpData(new std::string());
 
+		std::unique_ptr<std::string> httpData(new std::string());
+		/*
 		// Hook up data handling function.
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)body.length());
-
+		 */
 		int numRetries = 0;
 		while (numRetries < AMF_NUMBER_RETRIES){
 			res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-			Logger::smf_n11().debug("[send_msg_to_amf] Response from AMF, Http Code: %d ", httpCode);
+			Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Response from AMF, Http Code: %d ", httpCode);
 
 			if (httpCode == HTTP_STATUS_OK)
 			{
-				Logger::smf_n11().debug("[send_msg_to_amf] Got successful response from AMF, URL: %s ", url.c_str());
+				Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Got successful response from AMF, URL: %s ", url.c_str());
 				break;
 			}
 			else
 			{
-				Logger::smf_n10().warn("[send_msg_to_amf] Couldn't GET response from AMF, URL %s, retry ...", url.c_str());
+				Logger::smf_n10().warn("[SMF N11: N1N2MessageTransfer] Couldn't GET response from AMF, URL %s, retry ...", url.c_str());
 				//retry
 				numRetries++;
 			}
 		}
+
+		curl_slist_free_all(headers);
 		curl_easy_cleanup(curl);
+		curl_mime_free(mime);
 	}
 	//TODO: process the response if necessary
+
 
 }
 

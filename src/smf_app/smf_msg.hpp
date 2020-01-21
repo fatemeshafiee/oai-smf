@@ -21,9 +21,10 @@
 
 /*! \file smf_msg.hpp
   \brief
-  \author
+  \author  Tien-Thinh NGUYEN
   \company Eurecom
-  \email:
+  \date 2019
+  \email: tien-thinh.nguyen@eurecom.fr
  */
 #ifndef FILE_SMF_MSG_HPP_SEEN
 #define FILE_SMF_MSG_HPP_SEEN
@@ -60,6 +61,9 @@ public:
 	supi_t get_supi() const;
 	void set_supi(supi_t const& value);
 
+	std::string get_supi_prefix() const;
+	void set_supi_prefix(std::string const& value);
+
 	pdu_session_id_t get_pdu_session_id() const;
 	void set_pdu_session_id(pdu_session_id_t const value);
 
@@ -75,6 +79,7 @@ public:
 private:
 	std::string m_api_root;
 	supi_t m_supi;
+	std::string m_supi_prefix;
 	pdu_session_id_t m_pdu_session_id;
 	std::string m_dnn;
 	snssai_t m_snssai;
@@ -221,8 +226,8 @@ public:
 	std::string get_serving_nf_id() const;
 	void set_serving_nf_id(std::string const& value);
 
-	request_type_t get_request_type() const;
-	void set_request_type(request_type_t const& value);
+	std::string get_request_type() const;
+	void set_request_type(std::string const& value);
 
 	void set_dnn_selection_mode(std::string const& value);
 	std::string get_dnn_selection_mode() const;
@@ -252,7 +257,7 @@ private:
 	//Guami m_Guami;
 	//std::string m_ServiceName;
 	//PlmnId m_ServingNetwork;
-	request_type_t m_request_type;
+	std::string m_request_type;
 	//RefToBinaryData m_N1SmMsg;
 	std::string m_an_type;
 	//std::string m_SecondAnType;

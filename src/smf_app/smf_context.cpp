@@ -21,9 +21,10 @@
 
 /*! \file smf_context.cpp
   \brief
-  \author Lionel Gauthier
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
   \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
 */
 
 #include "itti.hpp"
@@ -272,46 +273,7 @@ void smf_context::handle_itti_msg (itti_n4_session_deletion_response& sdresp)
 }
 //------------------------------------------------------------------------------
 void smf_context::handle_itti_msg (std::shared_ptr<itti_n4_session_report_request>& req)
-{/*
-  pfcp::report_type_t report_type;
-  if (req->pfcp_ies.get(report_type)) {
-    pfcp::pdr_id_t pdr_id;
-    // Downlink Data Report
-    if (report_type.dldr) {
-      pfcp::downlink_data_report data_report;
-      if (req->pfcp_ies.get(data_report)) {
-        pfcp::pdr_id_t pdr_id;
-        if (data_report.get(pdr_id)) {
-          std::shared_ptr<smf_pdu_session> ppc = {};
-          ebi_t ebi;
-          if (find_pdu_session(pdr_id, ppc, ebi)) {
-            downlink_data_report_procedure* p = new downlink_data_report_procedure(req);
-            std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(p);
-            insert_procedure(sproc);
-            if (p->run(shared_from_this(), ppc, ebi)) {
-              // TODO handle error code
-              Logger::smf_app().info( "S5S8 DOWNLINK_DATA_REPORT procedure failed");
-              remove_procedure(p);
-            } else {
-            }
-          }
-        }
-      }
-    }
-    // Usage Report
-    if (report_type.usar) {
-      Logger::smf_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/Usage Report");
-    }
-    // Error Indication Report
-    if (report_type.erir) {
-      Logger::smf_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/Error Indication Report");
-    }
-    // User Plane Inactivity Report
-    if (report_type.upir) {
-      Logger::smf_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/User Plane Inactivity Report");
-    }
-  }
-  */
+{
 }
 
 //------------------------------------------------------------------------------
@@ -364,7 +326,7 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	//Step 1. get necessary information
 	std::string dnn = sm_context_req_msg.get_dnn();
 	snssai_t snssai  =  sm_context_req_msg.get_snssai();
-	request_type_t request_type = sm_context_req_msg.get_request_type();
+	std::string request_type = sm_context_req_msg.get_request_type();
 	supi_t supi =  sm_context_req_msg.get_supi();
 	supi64_t supi64 = smf_supi_to_u64(supi);
 	uint32_t pdu_session_id = sm_context_req_msg.get_pdu_session_id();
@@ -386,6 +348,7 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	itti_n11_create_sm_context_response *sm_context_resp = new itti_n11_create_sm_context_response(TASK_SMF_APP, TASK_SMF_N11, smreq->http_response);
 	std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
 	sm_context_resp->res.set_supi(supi);
+	sm_context_resp->res.set_supi_prefix(sm_context_req_msg.get_supi_prefix());
 	sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
 	sm_context_resp->res.set_pdu_session_id(pdu_session_id);
 	sm_context_resp->res.set_snssai(snssai);
@@ -543,15 +506,16 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 
 		to_json(jsonData, smContextCreatedData);
 		std::string resBody = jsonData.dump();
-
+		std::string smContextRef = sm_context_req_msg.get_supi_prefix() + "-" + smf_supi_to_string(sm_context_req_msg.get_supi());
 		//headers: Location:
         //Contains the URI of the newly created resource, according to the structure: {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
-		std::string uri = sm_context_req_msg.get_api_root() + std::to_string(smreq->scid); //smContextRef
-
+		//std::string uri = sm_context_req_msg.get_api_root() + "/" + std::to_string(smreq->scid); //smContextRef
+		std::string uri = sm_context_req_msg.get_api_root() + "/" + smContextRef.c_str(); //smContextRef
 		sm_context_resp->http_response.headers().add<Pistache::Http::Header::Location>(uri);
-
 		sm_context_resp->http_response.send(Pistache::Http::Code::Created, resBody);
 
+
+		Logger::smf_app().info( "Create a procedure to process this message!");
 		session_create_sm_context_procedure* proc = new session_create_sm_context_procedure(sp);
 		std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
 
@@ -560,6 +524,8 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 			// error !
 			Logger::smf_app().info( "PDU SESSION CREATE SM CONTEXT REQUEST procedure failed");
 			remove_procedure(proc);
+			//TODO: [Verify] To send PDU Session Establishment Reject to AMF
+
 		}
 
 	}else{ //if request is rejected

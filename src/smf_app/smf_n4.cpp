@@ -21,9 +21,10 @@
 
 /*! \file smf_n4.cpp
   \brief
-  \author Lionel Gauthier
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
   \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
 */
 
 #include "common_defs.h"

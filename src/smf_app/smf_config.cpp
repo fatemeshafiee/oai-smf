@@ -21,10 +21,11 @@
 
 /*! \file smf_config.cpp
   \brief
-  \author Lionel Gauthier
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
   \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
+ */
 
 #include "3gpp_29.274.hpp"
 #include "common_defs.h"
@@ -641,9 +642,11 @@ bool smf_config::is_dotted_dnn_handled(const std::string& dnn, const pdu_session
 {
   Logger::smf_app().debug( "requested dnn: %s", dnn.c_str());
   for (int i = 0; i < smf_cfg.num_apn; i++) {
-	  Logger::smf_app().debug( "apn_label: %s", smf_cfg.apn[i].apn_label.c_str());
+	  Logger::smf_app().debug( "apn_label: %s, apn: %s", smf_cfg.apn[i].apn_label.c_str(),smf_cfg.apn[i].apn.c_str() );
     //if (0 == dnn.compare(smf_cfg.apn[i].apn_label)) {
 	  if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
+          Logger::smf_app().debug( "DNN matched! \n");
+          Logger::smf_app().debug( "pdu session type %d, pdn_type %d \n", pdn_session_type.pdu_session_type, smf_cfg.apn[i].pdn_type.pdn_type);
       if (pdn_session_type.pdu_session_type == smf_cfg.apn[i].pdn_type.pdn_type) {
         return true;
       }
