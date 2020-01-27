@@ -122,7 +122,7 @@
 #define SMF_CONFIG_STRING_S11_SCHED_PARAMS                      "S11_SCHED_PARAMS"
 #define SMF_CONFIG_STRING_S5S8_SCHED_PARAMS                     "S5S8_SCHED_PARAMS"
 #define SMF_CONFIG_STRING_SX_SCHED_PARAMS                       "SX_SCHED_PARAMS"
-#define SMF_CONFIG_STRING_PGW_APP_SCHED_PARAMS                  "PGW_APP_SCHED_PARAMS"
+#define SMF_CONFIG_STRING_SMF_APP_SCHED_PARAMS                  "SMF_APP_SCHED_PARAMS"
 #define SMF_CONFIG_STRING_ASYNC_CMD_SCHED_PARAMS                "ASYNC_CMD_SCHED_PARAMS"
 
 
@@ -162,7 +162,7 @@ typedef struct itti_cfg_s {
   util::thread_sched_params itti_timer_sched_params;
   util::thread_sched_params sx_sched_params;
   util::thread_sched_params s5s8_sched_params;
-  util::thread_sched_params pgw_app_sched_params;
+  util::thread_sched_params smf_app_sched_params;
   util::thread_sched_params async_cmd_sched_params;
 } itti_cfg_t;
 
@@ -262,7 +262,7 @@ public:
     itti.itti_timer_sched_params.sched_priority = 85;
     itti.sx_sched_params.sched_priority = 84;
     itti.s5s8_sched_params.sched_priority = 84;
-    itti.pgw_app_sched_params.sched_priority = 84;
+    itti.smf_app_sched_params.sched_priority = 84;
     itti.async_cmd_sched_params.sched_priority = 84;
     
     sx.thread_rd_sched_params.sched_priority = 90;
@@ -292,7 +292,7 @@ public:
   bool is_dotted_dnn_handled(const std::string& apn, const pdu_session_type_t& pdn_session_type);
 };
 
-} // namespace pgw
+} // namespace smf
 
 
 #endif /* FILE_SMF_CONFIG_HPP_SEEN */

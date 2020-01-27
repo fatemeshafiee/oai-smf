@@ -81,6 +81,8 @@ extern "C" {
 //0b11******
 //5GS Session Management Messages
 
+//TODO should be updated with enum
+#define PDU_SESSION_MESSAGE_TYPE_UNKNOWN        0b00000000
 #define PDU_SESSION_ESTABLISHMENT_REQUEST       0b11000001
 #define PDU_SESSION_ESTABLISHMENT_ACCEPT        0b11000010
 #define PDU_SESSION_ESTABLISHMENT_REJECT        0b11000011

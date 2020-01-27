@@ -10,10 +10,29 @@
 * Do not edit the class manually.
 */
 
+/*
+ * Licensed to the OpenAirInterface (OAI) Software Alliance under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The OpenAirInterface Software Alliance licenses this file to You under
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this file
+ * except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.openairinterface.org/?page_id=698
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *-------------------------------------------------------------------------------
+ * For more information about the OpenAirInterface (OAI) Software Alliance:
+ *      contact@openairinterface.org
+ */
+
+
 #include "IndividualSMContextApiImpl.h"
-extern "C" {
-#include "Ngap_NGAP-PDU.h"
-}
 namespace oai {
 namespace smf_server {
 namespace api {
@@ -36,37 +55,19 @@ void IndividualSMContextApiImpl::retrieve_sm_context(const std::string &smContex
 
 void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextRef, const SmContextUpdateData &smContextUpdateData, Pistache::Http::ResponseWriter &response) {
 	//handle Nsmf_PDUSession_UpdateSMContext Request
-	Logger::smf_api_server().info("update_sm_contexts...");
+	Logger::smf_api_server().info("Received a PDUSession_UpdateSMContext Request from AMF.");
 	//Get the SmContextUpdateData from this message and process in smf_app
 	smf::pdu_session_update_sm_context_request sm_context_req_msg = {};
 
-	//decode NGAP message and assign the necessary informations to pdu_session_update_sm_context_request
-	//and pass this message to SMF to handle this message
-
-	Ngap_NGAP_PDU_t decoded_ngap_msg = {};
-
-
 	std::string n2_sm_information = (smContextUpdateData.getN2SmInfo()).getContentId();
-
 	std::string n2_sm_msg_hex;
 	m_smf_app->convert_string_2_hex(n2_sm_information, n2_sm_msg_hex);
 	Logger::smf_api_server().debug("smContextMessage, n2 sm information %s",n2_sm_information.c_str());
 
 	std::string n2_sm_info_type = smContextUpdateData.getN2SmInfoType();
-
 	sm_context_req_msg.set_n2_sm_information(n2_sm_msg_hex);
 	sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
 
-
-
-	/*
-    // do it from SMF_APP
-	int decoder_rc = m_smf_app->decode_ngap_message(decoded_ngap_msg, n2_sm_msg_hex);
-
-	if (decoder_rc != RETURNok) {
-		//TODO: error, should send reply to AMF with error code!!
-	}
-	 */
 	//Step 2. TODO: initialize necessary values for sm context req from smContextUpdateData
 
 	//Step 3. Handle the itti_n11_update_sm_context_request message in smf_app
@@ -74,7 +75,6 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
 	itti_msg->req = sm_context_req_msg;
 	itti_msg->scid = smContextRef;
 	m_smf_app->handle_amf_msg(itti_msg);
-
 
 
 }

@@ -10,6 +10,27 @@
  * Do not edit the class manually.
  */
 
+/*
+ * Licensed to the OpenAirInterface (OAI) Software Alliance under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The OpenAirInterface Software Alliance licenses this file to You under
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this file
+ * except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.openairinterface.org/?page_id=698
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *-------------------------------------------------------------------------------
+ * For more information about the OpenAirInterface (OAI) Software Alliance:
+ *      contact@openairinterface.org
+ */
+
 #include "SMContextsCollectionApi.h"
 #include "logger.hpp"
 #include "Helpers.h"
@@ -133,9 +154,8 @@ void SMContextsCollectionApi::setupRoutes() {
 
 void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
 
-	// Getting the body param
-
-	Logger::smf_api_server().debug("[SMF API] Received a SM context create request %s",request.body().c_str());
+	Logger::smf_api_server().info("Received a SM context create request from AMF");
+	Logger::smf_api_server().debug("Request body: %s\n",request.body().c_str());
 	SmContextMessage smContextMessage;
 	SmContextCreateData smContextCreateData;
 
@@ -151,15 +171,18 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
 	g_callbacks.on_body_end = &on_body_end;
 
 	multipartparser parser;
-
 	init_globals();
 	multipartparser_init(&parser, BOUNDARY);
+	if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
+		response.send(Pistache::Http::Code::Bad_Request, "");
+		return;
+	}
 
-	assert(multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) == strlen(request.body().c_str()));
-	assert(g_body_begin_called);
-
-	//at least 2 parts for Json data and N1  (+ N2)
-	assert(g_parts.size() >= 2);
+	//at least 2 parts for Json data and N1 (+ N2)
+	if (g_parts.size() < 2){
+		response.send(Pistache::Http::Code::Bad_Request, "");
+		return;
+	}
 	part p0 = g_parts.front(); g_parts.pop_front();
 	Logger::smf_api_server().debug("Request body, part 1: \n%s", p0.body.c_str());
 	part p1 = g_parts.front(); g_parts.pop_front();
@@ -171,7 +194,6 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
 
 	//step 2. process the request
 	try {
-		//nlohmann::json::parse(p0.body.c_str()).get_to(smContextMessage);
 		nlohmann::json::parse(p0.body.c_str()).get_to(smContextCreateData);
 		smContextMessage.setJsonData(smContextCreateData);
 		smContextMessage.setBinaryDataN1SmMessage(p1.body.c_str());

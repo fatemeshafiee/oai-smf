@@ -151,8 +151,8 @@ int smf_config::load_itti(const Setting& itti_cfg, itti_cfg_t& cfg)
   }
 
   try {
-    const Setting& pgw_app_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_PGW_APP_SCHED_PARAMS];
-    load_thread_sched_params(pgw_app_sched_params_cfg, cfg.pgw_app_sched_params);
+    const Setting& smf_app_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_SMF_APP_SCHED_PARAMS];
+    load_thread_sched_params(smf_app_sched_params_cfg, cfg.smf_app_sched_params);
   } catch(const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
@@ -500,7 +500,7 @@ int smf_config::load(const string& config_file)
 void smf_config::display ()
 {
   Logger::smf_app().info( "==== EURECOM %s v%s ====", PACKAGE_NAME, PACKAGE_VERSION);
-  Logger::smf_app().info( "Configuration PGW-C:");
+  Logger::smf_app().info( "Configuration SMF:");
   Logger::smf_app().info( "- Instance ..............: %d\n", instance);
   Logger::smf_app().info( "- PID dir ...............: %s\n", pid_dir.c_str());
 
@@ -542,10 +542,10 @@ void smf_config::display ()
   Logger::smf_app().info( "    CPU id............: %d", itti.sx_sched_params.cpu_id);
   Logger::smf_app().info( "    Scheduling policy : %d", itti.sx_sched_params.sched_policy);
   Logger::smf_app().info( "    Scheduling prio  .: %d", itti.sx_sched_params.sched_priority);
-  Logger::smf_app().info( "- ITTI PGW_APP task Threading:");
-  Logger::smf_app().info( "    CPU id............: %d", itti.pgw_app_sched_params.cpu_id);
-  Logger::smf_app().info( "    Scheduling policy : %d", itti.pgw_app_sched_params.sched_policy);
-  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.pgw_app_sched_params.sched_priority);
+  Logger::smf_app().info( "- ITTI SMF_APP task Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", itti.smf_app_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", itti.smf_app_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.smf_app_sched_params.sched_priority);
   Logger::smf_app().info( "- ITTI ASYNC_CMD task Threading:");
   Logger::smf_app().info( "    CPU id............: %d", itti.async_cmd_sched_params.cpu_id);
   Logger::smf_app().info( "    Scheduling policy : %d", itti.async_cmd_sched_params.sched_policy);

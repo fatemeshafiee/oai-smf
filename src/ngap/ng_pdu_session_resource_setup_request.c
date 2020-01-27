@@ -32,7 +32,7 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_req_RAN_UE_NGAP_ID(uint32_t rAN_
 	ie->value.present = Ngap_PDUSessionResourceSetupRequestIEs__value_PR_RAN_UE_NGAP_ID;
 	ie->value.choice.RAN_UE_NGAP_ID = rAN_UE_NGAP_ID ;
 
-	printf("RAN_UE_NGAP_ID: 0x%x\n",ie->value.choice.RAN_UE_NGAP_ID);
+	printf("RAN_UE_NGAP_ID: %lu\n",ie->value.choice.RAN_UE_NGAP_ID);
 	return ie;
 }
 
@@ -48,7 +48,7 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_req_AMF_UE_NGAP_ID(uint64_t amf_
 	asn_ulong2INTEGER(&ie->value.choice.AMF_UE_NGAP_ID, amf_UE_NGAP_ID & AMF_UE_NGAP_ID_MASK_);
 	
 	
-	printf("AMF_UE_NGAP_ID: 0x%x\n",amf_UE_NGAP_ID);
+	printf("AMF_UE_NGAP_ID: %lu\n",amf_UE_NGAP_ID);
 	
 	return ie;
 }
@@ -62,7 +62,7 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_RANPagingPriority(const long  ra
 	ie->value.present = Ngap_PDUSessionResourceSetupRequestIEs__value_PR_RANPagingPriority;
     ie->value.choice.RANPagingPriority  = ranPagingPriority;
 
-    printf("RANPagingPriority: 0x%x\n",ie->value.choice.RANPagingPriority);
+    printf("RANPagingPriority: %ld",ie->value.choice.RANPagingPriority);
 	return ie;
 }
 
@@ -76,7 +76,7 @@ Ngap_PDUSessionResourceSetupRequestIEs_t  *make_NAS_PDU(const char *nas_pdu)
 	ie->value.present = Ngap_PDUSessionResourceSetupRequestIEs__value_PR_NAS_PDU;
 	OCTET_STRING_fromBuf (&ie->value.choice.NAS_PDU, nas_pdu, strlen(nas_pdu));
 
-    printf("nas_pdu, nas_pdu_size:%d, nas_pdu:%s,\n", strlen(nas_pdu), nas_pdu);
+    printf("nas_pdu, nas_pdu_size:%ld, nas_pdu:%s,\n", strlen(nas_pdu), nas_pdu);
 
 	return ie;
 }

@@ -43,12 +43,6 @@
 #include "pistache/router.h"
 #include "smf_msg.hpp"
 
-extern "C"{
-#include "nas_message.h"
-#include "mmData.h"
-#include "Ngap_NGAP-PDU.h"
-}
-
 #include <map>
 #include <set>
 #include <shared_mutex>
@@ -195,59 +189,12 @@ public:
   void send_create_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
 
   /*
-   * Create N1 SM Container to send to AMF (using NAS lib)
-   * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res
-   * @param [uint8_t] msg_type Type of N1 message
-   * @param [std::string&] nas_msg_str store NAS message in form of string
-   *
+   * Convert a string to hex representing this string
+   * @param [std::string&] input_str Input string
+   * @param [std::string&] output_str String represents string in hex format
+   * @return void
    */
-  void create_n1_sm_container(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res, uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause = 0);
-
-  //for testing purpose!!
-  void create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause = 0);
-
-
-  /*
-    * Create N1 SM Container to send to AMF (using NAS lib)
-    * @param [std::shared_ptr<itti_n11_create_sm_context_request>] sm_context_req
-    * @param [uint8_t] msg_type Type of N1 message
-    * @param [std::string&] nas_msg_str store NAS message in form of string
-    *
-    */
-   void create_n1_sm_container(std::shared_ptr<itti_n11_create_sm_context_request> sm_context_req, uint8_t msg_type, std::string& nas_msg_str,  uint8_t sm_cause = 0);
-
-  /*
-    * Create N2 SM Information to send to AMF (using NAS lib)
-    * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res
-    * @param [uint8_t] msg_type Type of N2 message
-    * @param [std::string&] ngap_msg_str store NGAP message in form of string
-    *
-    */
-   void create_n2_sm_information(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str);
-
-   /*
-     * Decode N1 SM Container into the NAS mesasge (using NAS lib)
-     * @param [nas_message_t&] nas_msg Store NAS message after decoded
-     * @param [std::string&] n1_sm_msg N1 SM Container from AMF
-     * @return status of the decode process
-     */
-   int decode_nas_message_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg);
-
-   /*
-     * Convert a string to hex representing this string
-     * @param [std::string&] input_str Input string
-     * @param [std::string&] output_str String represents string in hex format
-     * @return void
-     */
-   void convert_string_2_hex(std::string& input_str, std::string& output_str);
-
-   /*
-     * Decode N2 SM Information (using NGAP lib)
-     * @param [Ngap_NGAP_PDU_t&] ngap_msg Store decoded NGAP message
-     * @param [std::string&] n2_sm_info N2 SM Information from AMF
-     * @return status of the decode process
-     */
-   int decode_ngap_message(Ngap_NGAP_PDU_t& ngap_msg, std::string& n2_sm_info);
+  void convert_string_2_hex(std::string& input_str, std::string& output_str);
 
 };
 }

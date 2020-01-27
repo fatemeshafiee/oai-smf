@@ -19,7 +19,7 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pgw_pco.cpp
+/*! \file smf_pco.cpp
   \brief
   \author Lionel Gauthier
   \company Eurecom
