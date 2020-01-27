@@ -89,7 +89,7 @@ int main(int argc, char **argv)
   }
 
   // Logger
-  Logger::init( "spgwc" , Options::getlogStdout() , Options::getlogRotFilelog());
+  Logger::init( "smf" , Options::getlogStdout() , Options::getlogRotFilelog());
 
   Logger::smf_app().startup( "Options parsed" );
 

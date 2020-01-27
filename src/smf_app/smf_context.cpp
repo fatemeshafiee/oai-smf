@@ -32,6 +32,7 @@
 #include "smf_app.hpp"
 #include "smf_config.hpp"
 #include "smf_context.hpp"
+#include "smf_ngap.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "smf_procedure.hpp"
 #include "ProblemDetails.h"
@@ -162,25 +163,25 @@ void smf_pdu_session::set_seid(const uint64_t& s){
 }
 
 //------------------------------------------------------------------------------
-// TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
+// TODO check if prd_id should be uniq in the UPF or in the context of a pdn connection
 void smf_pdu_session::generate_far_id(pfcp::far_id_t& far_id)
 {
   far_id.far_id = far_id_generator.get_uid();
 }
 //------------------------------------------------------------------------------
-// TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
+// TODO check if prd_id should be uniq in the UPF or in the context of a pdn connection
 void smf_pdu_session::release_far_id(const pfcp::far_id_t& far_id)
 {
   far_id_generator.free_uid(far_id.far_id);
 }
 //------------------------------------------------------------------------------
-// TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
+// TODO check if prd_id should be uniq in the UPF or in the context of a pdn connection
 void smf_pdu_session::generate_pdr_id(pfcp::pdr_id_t& pdr_id)
 {
   pdr_id.rule_id = pdr_id_generator.get_uid();
 }
 //------------------------------------------------------------------------------
-// TODO check if prd_id should be uniq in the (S)PGW-U or in the context of a pdn connection
+// TODO check if prd_id should be uniq in the UPF or in the context of a pdn connection
 void smf_pdu_session::release_pdr_id(const pfcp::pdr_id_t& pdr_id)
 {
   pdr_id_generator.free_uid(pdr_id.rule_id);
@@ -281,7 +282,7 @@ std::string smf_context::toString() const
 {
   std::unique_lock<std::recursive_mutex> lock(m_context);
   std::string s = {};
-  s.append("PGW CONTEXT:\n");
+  s.append("SMF CONTEXT:\n");
   s.append("\tIMSI:\t\t\t\t").append(imsi.toString()).append("\n");
   s.append("\tIMSI UNAUTHENTICATED:\t\t").append(std::to_string(imsi_unauthenticated_indicator)).append("\n");
   for (auto it : dnns) {
@@ -353,6 +354,7 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_req
 	sm_context_resp->res.set_pdu_session_id(pdu_session_id);
 	sm_context_resp->res.set_snssai(snssai);
 	sm_context_resp->res.set_dnn(dnn);
+
 
 	//Step 3. find pdu_session
 	std::shared_ptr<dnn_context> sd;
@@ -595,7 +597,7 @@ void smf_context::handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_req
 
 	//decode Ngap_PDUSessionResourceSetupResponseTransfer
 	if (n2_sm_info_type.compare(n2_sm_info_type_e2str[PDU_RES_SETUP_RSP]) == 0){
-		Ngap_PDUSessionResourceSetupResponseTransfer_t   *decoded_msg = NULL;
+		std::unique_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>  decoded_msg = std::unique_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>();
 		//Decode N2 SM info into decoded nas msg
 		asn_dec_rval_t rc  = asn_decode(NULL,ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, (void **)&decoded_msg, (void *)n2_sm_infomation.c_str(), n2_sm_infomation.length());
 		if(rc.code != RC_OK)

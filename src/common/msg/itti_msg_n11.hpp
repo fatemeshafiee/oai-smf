@@ -65,7 +65,6 @@ public:
 
 };
 
-
 //-----------------------------------------------------------------------------
 class itti_n11_create_sm_context_response : public itti_n11_msg {
 public:
@@ -107,7 +106,6 @@ public:
   const char* get_msg_name() {return "N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE";};
   smf::pdu_session_update_sm_context_response res;
   Pistache::Http::ResponseWriter http_response;
-
 
 };
 

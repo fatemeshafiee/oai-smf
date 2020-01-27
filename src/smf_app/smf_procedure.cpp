@@ -38,6 +38,7 @@
 #include "msg_gtpv2c.hpp"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
+#include "smf_ngap.hpp"
 #include "smf_pfcp_association.hpp"
 #include "smf_procedure.hpp"
 #include "smf_context.hpp"
@@ -231,8 +232,6 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 	return RETURNok;
 }
 
-
-
 //------------------------------------------------------------------------------
 void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_establishment_response& resp, std::shared_ptr<smf::smf_context> sc)
 {
@@ -279,7 +278,6 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 	sc.get()->get_default_qos(n11_triggered_pending->res.get_snssai(), n11_triggered_pending->res.get_dnn(), default_qos);
 	qfi.qfi = default_qos._5qi;
 
-
     //TODO:	how about pdu_session_id??
 	smf_qos_flow q = {};
 	gtpv2c::bearer_context_created_within_create_session_response bcc = {};
@@ -311,21 +309,12 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 	qos_flow.set_qfi(qfi);
 	n11_triggered_pending->res.set_qos_flow_context(qos_flow);
 
-
 	//TODO: for qos bearer bearer_qos_t bearer_qos = {}; if(b.get(bearer_qos)){bcc.set(bearer_level_qos)};
 
     //TODO
-	//should send information of created bearer to AMF
+	// set the necessary information to be sent to AMF (N1N2MessageTransfer)
 	//n11_triggered_pending->add_bearer_context_created(bcc);
 	//N1N2MessageTransferReqData
-	//Step 11, section 4.3.2.2.1@TS 23.502
-	//Namf_Communication_N1N2MessageTransfer (PDU Session ID,
-	// N2 SM information (PDU Session ID, QFI(s), QoS Profile(s), CN Tunnel Info, S-NSSAI from the Allowed NSSAI, Session-AMBR, PDU
-	//Session Type, User Plane Security Enforcement information, UE Integrity Protection Maximum Data Rate),
-	//N1 SM container (PDU Session Establishment Accept (QoS Rule(s) and QoS Flow level QoS parameters if needed
-	//for the QoS Flow(s) associated with the QoS rule(s), selected SSC mode, S-NSSAI(s), DNN, allocated IPv4
-	//address, interface identifier, Session-AMBR, selected PDU Session Type, Reflective QoS Timer (if available),
-	//P-CSCF address(es), [Always-on PDU Session])))
 
     //send ITTI message to N11 interface to trigger N1N2MessageTransfer towards AMFs
 	Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());

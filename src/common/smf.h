@@ -78,6 +78,7 @@ typedef uint8_t pdu_session_id;
 //should move to 24.501
 
 enum pdu_session_type_e {
+  PDU_SESSION_TYPE_E_UNKNOWN = 0,
   PDU_SESSION_TYPE_E_IPV4 = 1,
   PDU_SESSION_TYPE_E_IPV6 = 2,
   PDU_SESSION_TYPE_E_IPV4V6 = 3,
