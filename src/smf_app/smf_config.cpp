@@ -451,8 +451,8 @@ int smf_config::load(const string& config_file)
     IPV4_STR_ADDR_TO_INADDR (util::trim(astring).c_str(), amf_ipv4_addr, "BAD IPv4 ADDRESS FORMAT FOR AMF !");
     amf_addr.ipv4_addr = amf_ipv4_addr;
     if (!(amf_cfg.lookupValue(SMF_CONFIG_STRING_AMF_PORT, amf_port))) {
-          Logger::smf_app().error(SMF_CONFIG_STRING_AMF_PORT "failed");
-          throw (SMF_CONFIG_STRING_AMF_PORT "failed");
+      Logger::smf_app().error(SMF_CONFIG_STRING_AMF_PORT "failed");
+      throw (SMF_CONFIG_STRING_AMF_PORT "failed");
     }
     amf_addr.port = amf_port;
 
@@ -463,8 +463,8 @@ int smf_config::load(const string& config_file)
     IPV4_STR_ADDR_TO_INADDR (util::trim(astring).c_str(), udm_ipv4_addr, "BAD IPv4 ADDRESS FORMAT FOR UDM !");
     udm_addr.ipv4_addr = udm_ipv4_addr;
     if (!(udm_cfg.lookupValue(SMF_CONFIG_STRING_UDM_PORT, udm_port))) {
-          Logger::smf_app().error(SMF_CONFIG_STRING_UDM_PORT "failed");
-          throw (SMF_CONFIG_STRING_UDM_PORT "failed");
+      Logger::smf_app().error(SMF_CONFIG_STRING_UDM_PORT "failed");
+      throw (SMF_CONFIG_STRING_UDM_PORT "failed");
     }
     udm_addr.port = udm_port;
 
@@ -563,7 +563,7 @@ void smf_config::display ()
       std::string range_low(inet_ntoa (ue_pool_range_low[apn[i].pool_id_iv4]));
       std::string range_high(inet_ntoa (ue_pool_range_high[apn[i].pool_id_iv4]));
       Logger::smf_app().info( "        " SMF_CONFIG_STRING_IPV4_POOL ":  %d ( %s - %s)",
-                               apn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
+          apn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
     }
     if (apn[i].pool_id_iv6 >= 0) {
       Logger::smf_app().info( "        " SMF_CONFIG_STRING_IPV6_POOL ":  %d", apn[i].pool_id_iv6);
@@ -642,17 +642,24 @@ bool smf_config::is_dotted_dnn_handled(const std::string& dnn, const pdu_session
 {
   Logger::smf_app().debug( "requested dnn: %s", dnn.c_str());
   for (int i = 0; i < smf_cfg.num_apn; i++) {
-	  Logger::smf_app().debug( "apn_label: %s, apn: %s", smf_cfg.apn[i].apn_label.c_str(),smf_cfg.apn[i].apn.c_str() );
+    Logger::smf_app().debug( "apn_label: %s, apn: %s", smf_cfg.apn[i].apn_label.c_str(),smf_cfg.apn[i].apn.c_str() );
     //if (0 == dnn.compare(smf_cfg.apn[i].apn_label)) {
-	  if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
-          Logger::smf_app().debug( "DNN matched! \n");
-          Logger::smf_app().debug( "pdu session type %d, pdn_type %d \n", pdn_session_type.pdu_session_type, smf_cfg.apn[i].pdn_type.pdn_type);
+    if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
+      Logger::smf_app().debug( "DNN matched! \n");
+      Logger::smf_app().debug( "pdu session type %d, pdn_type %d \n", pdn_session_type.pdu_session_type, smf_cfg.apn[i].pdn_type.pdn_type);
       if (pdn_session_type.pdu_session_type == smf_cfg.apn[i].pdn_type.pdn_type) {
         return true;
       }
     }
   }
   return false;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_config::get_default_dnn()
+{
+  Logger::smf_app().debug( "Default DNN: %s", smf_cfg.apn[0].apn.c_str());
+  return smf_cfg.apn[0].apn;
 }
 
 
