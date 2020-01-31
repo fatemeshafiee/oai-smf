@@ -64,47 +64,47 @@ class smf_n1_n2 {
 private:
 
 public:
-	smf_n1_n2(){};
-	smf_n1_n2(smf_n1_n2 const&)    = delete;
-	void operator=(smf_n1_n2 const&)     = delete;
+  smf_n1_n2(){};
+  smf_n1_n2(smf_n1_n2 const&)    = delete;
+  void operator=(smf_n1_n2 const&)     = delete;
 
-	/*
-	 * Create N1 SM Container to send to AMF (using NAS lib)
-	 * @param [pdu_session_msg&] msg
-	 * @param [uint8_t] msg_type Type of N1 message
-	 * @param [std::string&] nas_msg_str store NAS message in form of string
-	 * @param [uint8_t] sm_cause store NAS Cause
-	 *
-	 */
-	void create_n1_sm_container(pdu_session_msg& msg, uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause);
+  /*
+   * Create N1 SM Container to send to AMF (using NAS lib)
+   * @param [pdu_session_msg&] msg
+   * @param [uint8_t] msg_type Type of N1 message
+   * @param [std::string&] nas_msg_str store NAS message in form of string
+   * @param [uint8_t] sm_cause store NAS Cause
+   *
+   */
+  void create_n1_sm_container(pdu_session_msg& msg, uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause);
 
-	//for testing purpose!!
-	void create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause = 0);
+  //for testing purpose!!
+  void create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause = 0);
 
-	/*
-	 * Create N2 SM Information to send to AMF (using NAS lib)
-	 * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res
-	 * @param [uint8_t] msg_type Type of N2 message
-	 * @param [std::string&] ngap_msg_str store NGAP message in form of string
-	 *
-	 */
-	void create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str);
+  /*
+   * Create N2 SM Information to send to AMF (using NAS lib)
+   * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res
+   * @param [uint8_t] msg_type Type of N2 message
+   * @param [std::string&] ngap_msg_str store NGAP message in form of string
+   *
+   */
+  void create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str);
 
-	/*
-	 * Decode N1 SM Container into the NAS mesasge (using NAS lib)
-	 * @param [nas_message_t&] nas_msg Store NAS message after decoded
-	 * @param [std::string&] n1_sm_msg N1 SM Container from AMF
-	 * @return status of the decode process
-	 */
-	int decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg);
+  /*
+   * Decode N1 SM Container into the NAS mesasge (using NAS lib)
+   * @param [nas_message_t&] nas_msg Store NAS message after decoded
+   * @param [std::string&] n1_sm_msg N1 SM Container from AMF
+   * @return status of the decode process
+   */
+  int decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg);
 
-	/*
-	 * Decode N2 SM Information (using NGAP lib)
-	 * @param [Ngap_NGAP_PDU_t&] ngap_msg Store decoded NGAP message
-	 * @param [std::string&] n2_sm_info N2 SM Information from AMF
-	 * @return status of the decode process
-	 */
-	int decode_n2_sm_information(std::unique_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE, std::string& n2_sm_info, std::string& n2_sm_info_type);
+  /*
+   * Decode N2 SM Information (using NGAP lib)
+   * @param [Ngap_NGAP_PDU_t&] ngap_msg Store decoded NGAP message
+   * @param [std::string&] n2_sm_info N2 SM Information from AMF
+   * @return status of the decode process
+   */
+  int decode_n2_sm_information(std::unique_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE, std::string& n2_sm_info, std::string& n2_sm_info_type);
 
 
 };

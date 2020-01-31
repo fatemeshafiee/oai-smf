@@ -39,16 +39,18 @@ namespace smf {
 
 class smf_n11 {
 private:
-	std::thread::id thread_id;
-	std::thread thread;
+  std::thread::id thread_id;
+  std::thread thread;
 
-	void handle_receive_sm_data_notification();
+  void handle_receive_sm_data_notification();
 
 public:
-	smf_n11();
-	smf_n11(smf_n11 const&)    = delete;
-	void operator=(smf_n11 const&)     = delete;
-	void send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
+  smf_n11();
+  smf_n11(smf_n11 const&)    = delete;
+  void operator=(smf_n11 const&)     = delete;
+  void send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
+  void send_msg_to_amf(std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res);
+
 
 };
 

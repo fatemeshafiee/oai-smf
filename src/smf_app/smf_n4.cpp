@@ -25,7 +25,7 @@
   \company Eurecom
   \date 2019
   \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
-*/
+ */
 
 #include "common_defs.h"
 #include "itti.hpp"

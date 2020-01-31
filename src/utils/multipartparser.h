@@ -1,3 +1,6 @@
+/*
+ * https://github.com/iafonov/multipart-parser-c
+ */
 #ifndef MULTIPARTPARSER_H
 #define MULTIPARTPARSER_H
 #ifdef __cplusplus

@@ -24,7 +24,7 @@
   \company Eurecom
   \date 2019
   \email: tien-thinh.nguyen@eurecom.fr
-*/
+ */
 
 #ifndef FILE_SMF_N10_HPP_SEEN
 #define FILE_SMF_N10_HPP_SEEN

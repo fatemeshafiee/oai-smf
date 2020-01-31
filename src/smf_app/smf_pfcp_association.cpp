@@ -24,7 +24,7 @@
    \author  Lionel GAUTHIER
    \date 2019
    \email: lionel.gauthier@eurecom.fr
-*/
+ */
 #include "common_defs.h"
 #include "logger.hpp"
 #include "smf_pfcp_association.hpp"

@@ -24,7 +24,7 @@
   \company Eurecom
   \date 2019
   \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
-*/
+ */
 
 #ifndef FILE_SMF_PROCEDURE_HPP_SEEN
 #define FILE_SMF_PROCEDURE_HPP_SEEN
@@ -96,14 +96,14 @@ public:
 class session_create_sm_context_procedure : public smf_procedure {
 public:
   explicit session_create_sm_context_procedure(std::shared_ptr<smf_pdu_session>& sppc) : smf_procedure(), ppc(sppc),
-      sx_triggered(), n11_triggered_pending(), n11_trigger() {}
+  sx_triggered(), n11_triggered_pending(), n11_trigger() {}
 
   /*
    *
    */
   int run(std::shared_ptr<itti_n11_create_sm_context_request> req,
-          std::shared_ptr<itti_n11_create_sm_context_response>resp,
-          std::shared_ptr<smf::smf_context> pc);
+      std::shared_ptr<itti_n11_create_sm_context_response>resp,
+      std::shared_ptr<smf::smf_context> pc);
 
   void handle_itti_msg (itti_n4_session_establishment_response& resp, std::shared_ptr<smf::smf_context> pc);
 
@@ -119,14 +119,14 @@ public:
 class session_update_sm_context_procedure : public smf_procedure {
 public:
   explicit session_update_sm_context_procedure(std::shared_ptr<smf_pdu_session>& sppc) : smf_procedure(), ppc(sppc),
-      sx_triggered(), n11_triggered_pending(), n11_trigger() {}
+  sx_triggered(), n11_triggered_pending(), n11_trigger() {}
 
   /*
    *
    */
   int run(std::shared_ptr<itti_n11_update_sm_context_request> req,
-		  std::shared_ptr<itti_n11_update_sm_context_response>resp,
-		  std::shared_ptr<smf::smf_context> sc);
+      std::shared_ptr<itti_n11_update_sm_context_response>resp,
+      std::shared_ptr<smf::smf_context> sc);
   /*
    * Handle N4 modification response from UPF
    * @param [itti_n4_session_modification_response] resp
@@ -135,7 +135,7 @@ public:
    */
   void handle_itti_msg (itti_n4_session_modification_response& resp, std::shared_ptr<smf::smf_context> sc);
 
-  std::shared_ptr<itti_n4_session_establishment_request>  sx_triggered;
+  std::shared_ptr<itti_n4_session_modification_request>  sx_triggered;
   std::shared_ptr<smf_pdu_session>                        ppc;
   std::shared_ptr<smf::smf_context>                       pc;
 
