@@ -42,7 +42,7 @@ public:
     virtual ~SMContextsCollectionApi() {}
     void init();
 
-    const std::string base = "/nsmf-pdusession/v1";
+    const std::string base = "/nsmf-pdusession/v2";
 
 private:
     void setupRoutes();

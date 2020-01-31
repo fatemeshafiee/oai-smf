@@ -95,7 +95,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	Logger::smf_api_server().debug("SmContextCreateData, PDU SessionID %d \n", smContextCreateData.getPduSessionId());
 	sm_context_req_msg.set_pdu_session_id(smContextCreateData.getPduSessionId());
 
-	//AMF ID
+	//AMF ID (ServingNFId)
 	Logger::smf_api_server().debug("SmContextCreateDatea, ServingNfId %s\n", smContextCreateData.getServingNfId().c_str());
 	sm_context_req_msg.set_serving_nf_id(smContextCreateData.getServingNfId().c_str()); //TODO: should be verified that AMF ID is stored in GUAMI or ServingNfId
 
@@ -109,6 +109,12 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
 	// PEI
 	// GPSI
 	// UE presence in LADN service area
+	//Guami
+	//servingNetwork
+	//anType
+	//UETimeZone
+	//SMContextStatusUri
+	//PCFId
 
 	// DNN Selection Mode
 	Logger::smf_api_server().debug("SmContextCreateData, SelMode %s\n", smContextCreateData.getSelMode().c_str());
