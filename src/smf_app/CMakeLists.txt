@@ -59,7 +59,7 @@ add_library (SMF STATIC
   smf_app.cpp
   smf_config.cpp
   smf_context.cpp
-  smf_ngap.cpp
+  smf_n1_n2.cpp
   smf_pfcp_association.cpp
   smf_pco.cpp
   smf_procedure.cpp

@@ -19,7 +19,7 @@
  *      contact@openairinterface.org
  */
 
-/*! \file smf_ngap.cpp
+/*! \file smf_n1_n2.cpp
   \brief
   \author  Tien-Thinh NGUYEN
   \company Eurecom
@@ -27,7 +27,7 @@
   \email:  tien-thinh.nguyen@eurecom.fr
  */
 
-#include "../smf_app/smf_ngap.hpp"
+#include "smf_n1_n2.hpp"
 
 extern "C" {
 #include "nas_message.h"
@@ -72,7 +72,7 @@ using namespace smf;
 extern smf_app *smf_app_inst;
 
 //-----------------------------------------------------------------------------------------------------
-void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type, std::string& nas_msg_str, uint8_t sm_cause)
+void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type, std::string& nas_msg_str, uint8_t sm_cause)
 {
 	//TODO: should work with BUPT to finish this function
 	Logger::smf_app().info("Create N1 SM Container, n1 message type %d", n1_msg_type);
@@ -88,6 +88,7 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 	memset(&nas_msg, 0, sizeof(nas_message_t));
 	nas_msg.header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
 	nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED;
+	//TODO: Should be updated
 	uint8_t sequencenumber = 0xfe;
 	uint32_t mac = 0xffee;
 	nas_msg.header.sequence_number = sequencenumber;
@@ -100,7 +101,8 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 
 	sm_msg->header.pdu_session_identity = msg.get_pdu_session_id();
 
-	//construct security context
+	//TODO: should be updated
+	// construct security context
 	fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
 	security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
 	security->dl_count.overflow = 0xffff;
@@ -118,13 +120,12 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 		switch (n1_msg_type){
 
 		case PDU_SESSION_ESTABLISHMENT_ACCEPT: {
+			//
 			//TODO: to be completed
 			//get the default QoS profile and assign to the NAS message
 
 			Logger::smf_app().info("PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE, NAS: PDU_SESSION_ESTABLISHMENT_ACCEPT");
-			sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCEPT;
 
-			//TODO:
 			Logger::smf_app().info("PDU_SESSION_ESTABLISHMENT_ACCEPT, encode starting...");
 			sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCEPT;
 
@@ -136,7 +137,13 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 			//SSC Mode
 			//TODO: should get from sm_context_res
 			sm_msg->specific_msg.pdu_session_establishment_accept.sscmode.ssc_mode_value = SSC_MODE_1;
-			//QOSRules
+
+
+
+			//authorized QoS rules of the PDU session: QOSRules
+			//(Section 6.4.1.3@3GPP TS 24.501 V16.1.0) Make sure that the number of the packet filters used in the authorized QoS rules of the PDU Session does not
+			// exceed the maximum number of packet filters supported by the UE for the PDU session
+			//TODO: remove hardcoded varlues
 			QOSRulesIE qosrulesie[2];
 			qosrulesie[0].qosruleidentifer=0x01;
 			qosrulesie[0].ruleoperationcode = CREATE_NEW_QOS_RULE;
@@ -179,14 +186,68 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 			sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie = qosrulesie;
 
 			//SessionAMBR
+			//TODO: get from subscription DB
+			supi_t supi =  sm_context_res.get_supi();
+			supi64_t supi64 = smf_supi_to_u64(supi);
+			std::shared_ptr<smf_context> sc;
+			if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+				Logger::smf_app().debug("Update SMF context with SUPI " SUPI_64_FMT "", supi64);
+				sc = smf_app_inst->supi_2_smf_context(supi64);
+				std::shared_ptr<session_management_subscription> ss;
+				snssai_t snssai  =  sm_context_res.get_snssai();
+				std::shared_ptr<dnn_configuration_t> sdc;
+				sc.get()->find_dnn_subscription(snssai, ss);
+				if (nullptr != ss.get()){
+					ss.get()->find_dnn_configuration(sm_context_res.get_dnn(), sdc);
+					if (nullptr != sdc.get()){
+						//Downlink
+						size_t leng_of_session_ambr_dl = (sdc.get()->session_ambr).downlink.length();
+						std::string session_ambr_dl_unit = (sdc.get()->session_ambr).downlink.substr(leng_of_session_ambr_dl-4);
+						if (session_ambr_dl_unit.compare("Kbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
+						if (session_ambr_dl_unit.compare("Mbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+						if (session_ambr_dl_unit.compare("Gbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1GBPS;
+						if (session_ambr_dl_unit.compare("Tbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1TBPS;
+						if (session_ambr_dl_unit.compare("Pbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1PBPS;
+						sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_downlink  = std::stoi((sdc.get()->session_ambr).downlink.substr(0, leng_of_session_ambr_dl-4));
+						//Uplink
+						size_t leng_of_session_ambr_ul = (sdc.get()->session_ambr).uplink.length();
+						std::string session_ambr_ul_unit = (sdc.get()->session_ambr).uplink.substr(leng_of_session_ambr_ul-4);
+						if (session_ambr_ul_unit.compare("Kbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
+						if (session_ambr_ul_unit.compare("Mbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+						if (session_ambr_ul_unit.compare("Gbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1GBPS;
+						if (session_ambr_ul_unit.compare("Tbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1TBPS;
+						if (session_ambr_ul_unit.compare("Pbps"))
+							sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1PBPS;
+						sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_uplink  = std::stoi((sdc.get()->session_ambr).uplink.substr(0, leng_of_session_ambr_ul-4));
+					}
+				}
+
+
+			} else {
+				Logger::smf_app().warn(" SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
+				//TODO:
+			}
+
+/*
+
 			sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
 			sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_downlink = (AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_4KBPS << 8) + (AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_16KBPS);
 			sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_64KBPS;
 			sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_uplink = (AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_256KBPS << 8) + (AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS);
+*/
 
 			sm_msg->specific_msg.pdu_session_establishment_accept.presence = 0xffff;
-			sm_msg->specific_msg.pdu_session_establishment_accept._5gsmcause = 0b00001000;
-			sm_msg->specific_msg.pdu_session_establishment_accept.pduaddress.pdu_session_type_value = PDU_ADDRESS_IPV4;
+			sm_msg->specific_msg.pdu_session_establishment_accept._5gsmcause = sm_cause;
+			sm_msg->specific_msg.pdu_session_establishment_accept.pduaddress.pdu_session_type_value = sm_context_res.get_pdu_session_type();
 
 			//Presence
 			//_5GSMCause _5gsmcause;
@@ -216,7 +277,7 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 			//AlwaysonPDUSessionIndication
 			sm_msg->specific_msg.pdu_session_establishment_accept.alwaysonpdusessionindication.apsi_indication = ALWAYSON_PDU_SESSION_REQUIRED;
 
-    		//MappedEPSBearerContexts mappedepsbearercontexts;
+			//MappedEPSBearerContexts mappedepsbearercontexts;
 			//EAPMessage
 			unsigned char bitStream_eapmessage[2] = {0x01,0x02};
 			bstring eapmessage_tmp = bfromcstralloc(2, "\0");
@@ -224,7 +285,7 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 			memcpy(eapmessage_tmp->data,bitStream_eapmessage,sizeof(bitStream_eapmessage));
 			sm_msg->specific_msg.pdu_session_establishment_accept.eapmessage = eapmessage_tmp;
 
-			//QoSFlowDescritions
+			//authorized QoS flow descriptions IE: QoSFlowDescritions
 			QOSFlowDescriptionsContents qosflowdescriptionscontents[3];
 			qosflowdescriptionscontents[0].qfi = 1;
 			qosflowdescriptionscontents[0].operationcode = CREATE_NEW_QOS_FLOW_DESCRIPTION;
@@ -418,6 +479,154 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 			Logger::smf_app().debug("n1MessageContent (%d bytes), %s\n ", bytes, nas_msg_str.c_str());
 			Logger::smf_app().info("PDU_SESSION_ESTABLISHMENT_ACCEPT, encode finished");
 
+			//For testing purpose!!!
+			Logger::smf_app().info("PDU_SESSION_ESTABLISHMENT_ACCEPT, start decoding ...");
+
+			bstring  info = bfromcstralloc(length, "\0");
+			info->data = data;
+			info->slen = bytes;
+			bstring plain_msg = bstrcpy(info);
+			nas_message_security_header_t header = {};
+			nas_message_decode_status_t   decode_status = {};
+			nas_message_t	decoded_nas_msg;
+			memset (&decoded_nas_msg,		 0, sizeof (nas_message_t));
+
+			int decoder_rc = RETURNok;
+			decoder_rc = nas_message_decode (data, &decoded_nas_msg, sizeof(data), security, &decode_status);
+			Logger::smf_app().debug("[Decoded NAS message] header, extended_protocol_discriminator:0x%x, security_header_type:0x%x, sequence_number:0x%x, message_authentication_code:0x%x",
+					decoded_nas_msg.header.extended_protocol_discriminator,
+					decoded_nas_msg.header.security_header_type,
+					decoded_nas_msg.header.sequence_number,
+					decoded_nas_msg.header.message_authentication_code);
+
+			SM_msg * decoded_sm_msg = &decoded_nas_msg.plain.sm;
+			//SM_msg * decoded_sm_msg = &decoded_nas_msg.security_protected.plain.sm;
+
+			Logger::smf_app().debug("[Decoded NAS message] SM header, extended_protocol_discriminator:0x%x, pdu_session_identity: 0x%x, procedure_transaction_identity: 0x%x, message type:0x%x\n", decoded_sm_msg->header.extended_protocol_discriminator,
+					decoded_sm_msg->header.pdu_session_identity,
+					decoded_sm_msg->header.procedure_transaction_identity,
+					decoded_sm_msg->header.message_type);
+
+			Logger::smf_app().debug("[Decoded NAS message] size of security_protected.plain.sm = %d",sizeof(decoded_nas_msg.security_protected.plain.sm));
+
+			Logger::smf_app().debug("[Decoded NAS message] message type: 0x%x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.messagetype);
+			Logger::smf_app().debug("[Decoded NAS message] extended protocol discriminator: 0x%x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.extendedprotocoldiscriminator);
+			Logger::smf_app().debug("[Decoded NAS message] pdu identity buffer: 0x%x",*(unsigned char *)((decoded_sm_msg->specific_msg.pdu_session_establishment_accept.pdusessionidentity)->data));
+			Logger::smf_app().debug("[Decoded NAS message] PTI buffer:0x%x",*(unsigned char *)((decoded_sm_msg->specific_msg.pdu_session_establishment_accept.proceduretransactionidentity)->data));
+
+			Logger::smf_app().debug("[Decoded NAS message] pdusessiontype: 0x%x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept._pdusessiontype.pdu_session_type_value);
+			Logger::smf_app().debug("[Decoded NAS message] sscmode :0x%x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sscmode.ssc_mode_value);
+			Logger::smf_app().debug("[Decoded NAS message] Always-on bit --- %B",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.alwaysonpdusessionindication.apsi_indication);
+
+			Logger::smf_app().debug("[Decoded NAS message] PDUSessionType: %#0x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept._pdusessiontype.pdu_session_type_value);
+			Logger::smf_app().debug("[Decoded NAS message] SSC Mode bits_3: %#0x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sscmode.ssc_mode_value);
+			Logger::smf_app().debug("[Decoded NAS message] QoSRules: %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x",
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.lengthofqosrulesie,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosruleidentifer,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].ruleoperationcode,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].dqrbit,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].numberofpacketfilters,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfilterdirection,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfilteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_type,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfilterdirection,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfilteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfiltercontents.component_type,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfilterdirection,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfilteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfiltercontents.component_type,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosruleprecedence,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].segregation,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosflowidentifer,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosruleidentifer,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].ruleoperationcode,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].dqrbit,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].numberofpacketfilters,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[0].packetfilteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[1].packetfilteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[2].packetfilteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosruleprecedence,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].segregation,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosflowidentifer);
+
+			Logger::smf_app().debug("[Decoded NAS message] SessionAMBR: %x %x %x %x",
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_downlink,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_uplink);
+
+			Logger::smf_app().debug("[Decoded NAS message] 5GSMCause: %#0x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept._5gsmcause);
+
+			Logger::smf_app().debug("[Decoded NAS message] PDUAddress: %x %x %x %x %x",
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.pduaddress.pdu_session_type_value,
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.pduaddress.pdu_address_information->data[0]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.pduaddress.pdu_address_information->data[1]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.pduaddress.pdu_address_information->data[2]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.pduaddress.pdu_address_information->data[3]));
+
+			Logger::smf_app().debug("[Decoded NAS message] GPRSTimer, unit: %#0x, timeValue: %#0x",
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.gprstimer.unit,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.gprstimer.timeValue);
+
+			Logger::smf_app().debug("[Decoded NAS message] SNSSAI, len: %#0x, sst: %#0x, sd: %#0x",
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.snssai.len,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.snssai.sst,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.snssai.sd);
+
+			Logger::smf_app().debug("[Decoded NAS message] AlwaysOnPDUSessionIndication: %#0x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.alwaysonpdusessionindication.apsi_indication);
+
+			Logger::smf_app().debug("[Decoded NAS message] EAPMessage buffer:%x %x",
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.eapmessage->data[0]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.eapmessage->data[1]));
+
+			Logger::smf_app().debug("[Decoded NAS message] QosFlowDescriptions: %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n",
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionsnumber,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].qfi,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].operationcode,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].e,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].numberofparameters,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[0].parameteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[0].parametercontents._5qi,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[1].parameteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.uint,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.value,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[2].parameteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[2].parametercontents.gfbrormfbr_uplinkordownlink.uint,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[2].parametercontents.gfbrormfbr_uplinkordownlink.value,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[1].qfi,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[1].operationcode,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[1].e,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[1].numberofparameters,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].qfi,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].operationcode,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].e,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].numberofparameters,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[0].parameteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[0].parametercontents.gfbrormfbr_uplinkordownlink.uint,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[0].parametercontents.gfbrormfbr_uplinkordownlink.value,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[1].parameteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.uint,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.value,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[2].parameteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[2].parametercontents.averagingwindow.uplinkinmilliseconds,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[2].parametercontents.averagingwindow.downlinkinmilliseconds,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[3].parameteridentifier,
+					decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents[2].parameterslist[3].parametercontents.epsbeareridentity);
+
+			Logger::smf_app().debug("[Decoded NAS message] Extend_options buffer:%x %x %x %x\n",
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.extendedprotocolconfigurationoptions->data[0]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.extendedprotocolconfigurationoptions->data[1]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.extendedprotocolconfigurationoptions->data[2]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.extendedprotocolconfigurationoptions->data[3]));
+
+			Logger::smf_app().debug("[Decoded NAS message] DNN buffer:%x %x %x\n",
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.dnn->data[0]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.dnn->data[1]),
+					(unsigned char)(decoded_sm_msg->specific_msg.pdu_session_establishment_accept.dnn->data[2]));
+
+			Logger::smf_app().debug("PDU_SESSION_ESTABLISHMENT_ACCEPT, decode finished");
+
+
 		}
 		break;
 
@@ -586,7 +795,7 @@ void smf_ngap::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type,
 
 //-----------------------------------------------------------------------------------------------------
 // This is a function is an example for encoding all the NAS messages
-void smf_ngap::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause)
+void smf_n1_n2::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause)
 {
 	//TODO: clean the code!!
 	Logger::smf_app().info("Create N1 SM Container, message type %d \n", msg_type);
@@ -2300,7 +2509,7 @@ void smf_ngap::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str
 }
 
 //------------------------------------------------------------------------------
-void smf_ngap::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str)
+void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str)
 {
 	//TODO: should work with BUPT to finish this function
 	Logger::smf_app().info("Create N2 SM Information, ngap message type %d, ie type %d\n", ngap_msg_type, ngap_ie_type);
@@ -2436,7 +2645,7 @@ void smf_ngap::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_t
 
 //------------------------------------------------------------------------------
 //TODO: should be polished
-int smf_ngap::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg)
+int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg)
 {
 	//TODO: should work with BUPT to finish this function
 	Logger::smf_app().info("Decode NAS message from N1 SM Container\n");
@@ -2937,7 +3146,7 @@ int smf_ngap::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_
 }
 
 //---------------------------------------------------------------------------------------------
-int smf_ngap::decode_n2_sm_information(std::unique_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE, std::string& n2_sm_info, std::string& n2_sm_info_type){
+int smf_n1_n2::decode_n2_sm_information(std::unique_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE, std::string& n2_sm_info, std::string& n2_sm_info_type){
 	//TODO: should work with BUPT to finish this function
 	Logger::smf_app().info("Decode NGAP message from N2 SM Information\n");
 

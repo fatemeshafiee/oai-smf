@@ -214,6 +214,64 @@ static const std::vector<std::string> request_type_e2str = {
 		"RESERVED"
 };
 
+enum cause_value_5gs_session_management_e {
+	CAUSE_8_OPERATOR_DETERMINED_BARRING = 8,
+	CAUSE_26_INSUFFICIENT_RESOURCES = 26,
+	CAUSE_27_MISSING_OR_UNKNOWN_DNN = 27,
+	CAUSE_28_UNKNOWN_PDU_SESSION_TYPE = 28,
+	CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED	= 29,
+	CAUSE_54_PDU_SESSION_DOES_NOT_EXIST
+	/*
+  Cause #8 – Operator Determined Barring
+  Cause #26 – Insufficient resources
+  Cause #27 – Missing or unknown DNN
+  Cause #28 – Unknown PDU session type
+  Cause #29 – User authentication or authorization failed
+  Cause #31 – Request rejected, unspecified
+  Cause #32 – Service option not supported
+  Cause #33 – Requested service option not subscribed
+  Cause #35 – PTI already in use
+  Cause #36 – Regular deactivation
+  Cause #38 – Network failure
+  Cause #39 – Reactivation requested
+  Cause #41 – Semantic error in the TFT operation
+  Cause #42 – Syntactical error in the TFT operation
+  Cause #43 –Invalid PDU session identity
+  Cause #44 – Semantic errors in packet filter(s)
+	Cause #45 – Syntactical error in packet filter(s)
+	Cause #46 –Out of LADN service area
+	Cause #47 –PTI mismatch
+	Cause #50 – PDU session type IPv4 only allowed
+	Cause #51 – PDU session type IPv6 only allowed
+	Cause #54 –PDU session does not exist
+	Cause #67 – Insufficient resources for specific slice and DNN
+	Cause #68 – Not supported SSC mode
+	Cause #69 –Insufficient resources for specific slice
+	Cause #70 – Missing or unknown DNN in a slice
+	Cause #81 – Invalid PTI value
+	Cause #82 – Maximum data rate per UE for user-plane integrity protection is too low
+	Cause #83 – Semantic error in the QoS operation
+	Cause #84 – Syntactical error in the QoS operation
+	Cause #85 – Invalid mapped EPS bearer identity
+	 */
+
+};
+
+
+enum cause_value_protocol_errors_e {
+	CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE = 95
+	/*
+Cause #95 – Semantically incorrect message
+Cause #96 – Invalid mandatory information
+Cause #97 – Message type non-existent or not implemented
+Cause #98 – Message type not compatible with protocol state
+Cause #99 – Information element non-existent or not implemented
+Cause #100 – Conditional IE error
+Cause #101 – Message not compatible with protocol state
+Cause #111 – Protocol error, unspecified
+	 */
+
+};
 #endif
 
 #endif

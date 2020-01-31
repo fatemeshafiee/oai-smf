@@ -19,7 +19,7 @@
  *      contact@openairinterface.org
  */
 
-/*! \file smf_ngap.hpp
+/*! \file smf_n1_n2.hpp
  * \brief
   \author  Tien-Thinh NGUYEN
   \company Eurecom
@@ -27,8 +27,8 @@
   \email: tien-thinh.nguyen@eurecom.fr
  */
 
-#ifndef FILE_SMF_NGAP_HPP_SEEN
-#define FILE_SMF_NGAP_HPP_SEEN
+#ifndef FILE_SMF_N1_N2_HPP_SEEN
+#define FILE_SMF_N1_N2_HPP_SEEN
 
 #include "smf.h"
 #include "3gpp_29.274.h"
@@ -60,13 +60,13 @@ extern "C"{
 
 namespace smf {
 
-class smf_ngap {
+class smf_n1_n2 {
 private:
 
 public:
-	smf_ngap(){};
-	smf_ngap(smf_ngap const&)    = delete;
-	void operator=(smf_ngap const&)     = delete;
+	smf_n1_n2(){};
+	smf_n1_n2(smf_n1_n2 const&)    = delete;
+	void operator=(smf_n1_n2 const&)     = delete;
 
 	/*
 	 * Create N1 SM Container to send to AMF (using NAS lib)
@@ -112,4 +112,4 @@ public:
 } // namespace smf
 
 
-#endif /* FILE_SMF_NGAP_HPP_SEEN */
+#endif /* FILE_SMF_N1_N2_HPP_SEEN */
