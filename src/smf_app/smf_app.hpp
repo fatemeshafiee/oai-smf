@@ -25,7 +25,7 @@
    \company Eurecom
    \date 2019
    \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
-*/
+ */
 
 #ifndef FILE_SMF_APP_HPP_SEEN
 #define FILE_SMF_APP_HPP_SEEN
@@ -37,7 +37,9 @@
 #include "smf_context.hpp"
 #include "smf_pco.hpp"
 #include "SmContextCreateData.h"
+#include "SmContextUpdateData.h"
 #include "SmContextCreateError.h"
+#include "SmContextUpdateError.h"
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
@@ -52,6 +54,28 @@
 namespace smf {
 
 class   smf_config; // same namespace
+
+class smf_context_ref {
+public:
+  smf_context_ref() {
+    clear();
+  }
+
+  void clear() {
+    supi = {};
+    nssai = {};
+    dnn = "";
+    pdu_session_id = 0;
+  }
+
+  //	std::string toString() const;
+
+  supi_t supi;
+  std::string dnn;
+  pdu_session_id_t pdu_session_id;
+  snssai_t nssai;
+
+};
 
 class smf_app {
 private:
@@ -71,7 +95,7 @@ private:
 
   util::uint_generator<uint32_t>   sm_context_ref_generator;
 
-  std::map<scid_t, std::tuple<supi_t, std::string, pdu_session_id_t>>    scid2smf_context;
+  std::map<scid_t, std::shared_ptr<smf_context_ref>>    scid2smf_context;
   mutable std::shared_mutex  m_scid2smf_context;
 
 
@@ -99,9 +123,9 @@ public:
   int static_paa_get_pool_id(const struct in_addr& ue_addr);
 
   int process_pco_request(
-    const protocol_configuration_options_t& pco_req,
-    protocol_configuration_options_t& pco_resp,
-    protocol_configuration_options_ids_t & pco_ids);
+      const protocol_configuration_options_t& pco_req,
+      protocol_configuration_options_t& pco_resp,
+      protocol_configuration_options_ids_t & pco_ids);
 
   void handle_itti_msg (itti_n4_session_establishment_response& m);
   void handle_itti_msg (itti_n4_session_modification_response& m);
@@ -118,22 +142,24 @@ public:
 
   void generate_smf_context_ref(std::string& smf_ref);
   scid_t generate_smf_context_ref();
-  void set_scid_2_smf_context(const scid_t& id, supi_t supi, std::string dnn, pdu_session_id_t pdu_session_id);
-  std::tuple<supi_t, std::string, pdu_session_id_t>  scid_2_smf_context(const scid_t& scid) const;
+
+  void set_scid_2_smf_context(const scid_t& id, std::shared_ptr<smf_context_ref> scf);
+  std::shared_ptr<smf_context_ref> scid_2_smf_context(const scid_t& scid) const;
+  bool is_scid_2_smf_context(const scid_t& scid) const;
 
   /*
    * Handle PDUSession_CreateSMContextRequest from AMF
    * @param [std::shared_ptr<itti_n11_create_sm_context_request>&] Request message
    * @return void
    */
-   void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+  void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
-   /*
-    * Handle PDUSession_UpdateSMContextRequest from AMF
-    * @param [std::shared_ptr<itti_n11_update_sm_context_request>&] Request message
-    * @return void
-    */
-    void handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+  /*
+   * Handle PDUSession_UpdateSMContextRequest from AMF
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&] Request message
+   * @return void
+   */
+  void handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq);
 
   /*
    * Verify if SM Context is existed for this Supi
@@ -184,9 +210,19 @@ public:
    * Send create session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
    * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
+   * @param [Pistache::Http::Code] code, response code
    *
    */
   void send_create_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
+
+  /*
+   * Send update session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [ oai::smf_server::model::SmContextUpdateError] smContextUpdateError
+   * @param [Pistache::Http::Code] code, response code
+   *
+   */
+  void send_update_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code);
 
   /*
    * Convert a string to hex representing this string
