@@ -35,6 +35,7 @@
 #include "3gpp_29.244.h"
 #include "3gpp_24.007.h"
 #include "3gpp_24.501.h"
+#include "3gpp_29.571.h"
 #include "Guami.h"
 #include "RefToBinaryData.h"
 #include "NgRanTargetId.h"
@@ -57,12 +58,29 @@ public:
   void set_cause(const uint8_t cause);
   void set_qfi(const pfcp::qfi_t& q);
   void set_ul_fteid(const fteid_t& teid);
+  void set_arp(const arp_5gc_t& a);
+  void set_priority_level (uint8_t p);
 
-private:
   uint8_t  cause_value;
   pfcp::qfi_t qfi;
   fteid_t       ul_fteid;
+  arp_5gc_t arp;
+  uint8_t priority_level;//1-127
+
 };
+
+class qos_flow_context_modified {
+public:
+  void set_cause(const uint8_t cause);
+  void set_qfi(const pfcp::qfi_t& q);
+  void set_ul_fteid(const fteid_t& teid);
+
+  uint8_t  cause_value;
+  pfcp::qfi_t qfi;
+  fteid_t       ul_fteid;
+
+};
+
 
 class pdu_session_msg {
 public:
@@ -249,8 +267,26 @@ public:
   paa_t get_paa();
   void set_http_code(Pistache::Http::Code code);
   Pistache::Http::Code get_http_code();
-  void set_qos_flow_context(const qos_flow_context_created qos_flow);
+  void set_qos_flow_context(const qos_flow_context_created& qos_flow);
+  qos_flow_context_created get_qos_flow_context() const;
 
+  nlohmann::json n1n2_message_transfer_data; //N1N2MessageTransferReqData from oai::amf::model
+
+  std::string get_n2_sm_information() const;
+  void set_n2_sm_information(std::string const& value);
+
+  std::string get_n1_sm_message() const;
+  void set_n1_sm_message(std::string const& value);
+
+  bool n1_sm_msg_is_set() const;
+  bool n2_sm_info_is_set() const;
+
+  std::string n1_sm_message; //N1 SM message
+  bool m_n1_sm_msg_is_set;
+  std::string n2_sm_information; //N2 SM info
+  bool m_n2_sm_info_is_set;
+  void set_amf_url(std::string const& value);
+  std::string get_amf_url() const;
 private:
   uint8_t m_cause;
   paa_t m_paa;
@@ -258,6 +294,7 @@ private:
   qos_flow_context_created qos_flow_context;
   supi_t m_supi;
   std::string m_supi_prefix;
+  std::string amf_url;
 
   /* PDU Session establishment accept
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
@@ -298,17 +335,42 @@ private:
 
 };
 
-
 //see SmContextUpdateData (TS29502_Nsmf_PDUSession.yaml)
 class pdu_session_update_sm_context_request: public pdu_session_msg {
 public:
-  pdu_session_update_sm_context_request(): pdu_session_msg(PDU_SESSION_UPDATE_SM_CONTEXT_REQUEST){ };
+  pdu_session_update_sm_context_request(): pdu_session_msg(PDU_SESSION_UPDATE_SM_CONTEXT_REQUEST){
+    m_n1_sm_msg_is_set = false;
+    m_n2_sm_info_is_set = false;
+    m_5gMm_cause_value = 0;
+    m_data_forwarding = false;
+  };
   std::string get_n2_sm_information() const;
   void set_n2_sm_information(std::string const& value);
   std::string get_n2_sm_info_type() const;
   void set_n2_sm_info_type(std::string const& value);
+
+  std::string get_n1_sm_message() const;
+  void set_n1_sm_message(std::string const& value);
+
+  bool n1_sm_msg_is_set() const;
+  bool n2_sm_info_is_set() const;
+  void add_qfi(pfcp::qfi_t const& qfi);
+  void get_qfis(std::vector<pfcp::qfi_t>& q);
+  void set_dl_fteid(fteid_t const& t);
+  void get_dl_fteid(fteid_t& t);
+  void set_upCnx_state(std::string const& value);
+  bool upCnx_state_is_set() const;
+  void set_rat_type(std::string const& value);
+  void set_an_type(std::string const& value);
+
 private:
-  std::string n2_sm_information;
+  std::vector<pfcp::qfi_t> qfis;
+  fteid_t       dl_fteid; //AN Tunnel Info
+
+  std::string n1_sm_message; //N1 SM message before decoding
+  bool m_n1_sm_msg_is_set;
+  std::string n2_sm_information; //N2 SM before decoding
+  bool m_n2_sm_info_is_set;
   std::string n2_sm_info_type;
   //std::string m_Ppei;
   std::string m_nf_instanceId;
@@ -351,6 +413,7 @@ private:
       type: boolean
    */
   std::string m_upCnx_state; //'#/components/schemas/UpCnxState'
+  bool m_upCnx_state_is_set; //'#/components/schemas/UpCnxState'
 
   oai::smf_server::model::RefToBinaryData m_n1_sm_msg; //n1SmMsg
   oai::smf_server::model::RefToBinaryData m_n2_sm_info; //n2SmInfo
@@ -396,7 +459,7 @@ private:
        $ref: '#/components/schemas/Cause'
    */
   //NgApCause m_ngAp_cause; //  $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause
-  unsigned int m_5gMm_cause_value; // 5GMmCause, $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+ uint8_t m_5gMm_cause_value; // 5GMmCause, $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
   /*
 	sNssai:
        $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
@@ -426,8 +489,37 @@ public:
   pdu_session_update_sm_context_response(): pdu_session_msg(PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE){ };
   void set_cause(uint8_t cause);
   uint8_t get_cause();
+
+  std::string get_n2_sm_information() const;
+  void set_n2_sm_information(std::string const& value);
+
+  std::string get_n2_sm_info_type() const;
+  void set_n2_sm_info_type(std::string const& value);
+
+  std::string get_n1_sm_message() const;
+  void set_n1_sm_message(std::string const& value);
+
+  std::string get_n1_sm_msg_type() const;
+  void set_n1_sm_msg_type(std::string const& value);
+
+  bool n1_sm_msg_is_set() const;
+  bool n2_sm_info_is_set() const;
+
+  void add_qos_flow_context_modified(const qos_flow_context_modified& qos_flow);
+  bool get_qos_flow_context_modified (const pfcp::qfi_t& qfi, qos_flow_context_modified& qos_flow);
+  void get_all_qos_flow_context_modifieds (std::map<uint8_t, qos_flow_context_modified>& all_flows);
+
 private:
   uint8_t m_cause;
+  std::string n1_sm_message; //N1 SM after decoding
+  bool m_n1_sm_msg_is_set;
+  std::string n1_sm_msg_type;
+  std::string n2_sm_information; //N2 SM after decoding
+  bool m_n2_sm_info_is_set;
+  std::string n2_sm_info_type;
+  std::map<uint8_t, qos_flow_context_modified> qos_flow_context_modifieds;
+
+
 };
 
 }

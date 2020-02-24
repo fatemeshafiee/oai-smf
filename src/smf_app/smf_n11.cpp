@@ -39,10 +39,10 @@
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 
+//TODO: move to a common file
 #define AMF_CURL_TIMEOUT_MS 100L
 #define AMF_NUMBER_RETRIES 3
-#define HTTP_STATUS_OK 200
-#define DEBUG 1
+
 
 using namespace smf;
 using namespace std;
@@ -81,11 +81,16 @@ void smf_n11_task (void *args_p)
     switch (msg->msg_type) {
 
     case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE:
-      smf_n11_inst->send_msg_to_amf(std::static_pointer_cast<itti_n11_create_sm_context_response>(shared_msg));
+      smf_n11_inst->send_n1n2_message_transfer_request(std::static_pointer_cast<itti_n11_create_sm_context_response>(shared_msg));
       break;
 
     case N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE:
-      smf_n11_inst->send_msg_to_amf(std::static_pointer_cast<itti_n11_update_sm_context_response>(shared_msg));
+      smf_n11_inst->send_pdu_session_update_sm_context_response(std::static_pointer_cast<itti_n11_update_sm_context_response>(shared_msg));
+      break;
+
+    case N11_SESSION_MODIFICATION_REQUEST_SMF_REQUESTED:
+      //TODO
+      smf_n11_inst->send_n1n2_message_transfer_request(std::static_pointer_cast<itti_n11_modify_session_request_smf_requested> (shared_msg));
       break;
 
     case TERMINATE:
@@ -116,8 +121,9 @@ smf_n11::smf_n11 ()
 }
 
 //------------------------------------------------------------------------------
-void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res)
+void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res)
 {
+  //TODO: should create N1 SM, N2 SM from Procedure to make sure that in this class we simply do send the message to AMF
   //Transfer N1/N2 message via AMF by using N_amf_Communication_N1N2MessageTransfer (see TS29518_Namf_Communication.yaml)
   //use curl to send data for the moment
   Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Send Communication_N1N2MessageTransfer to AMF");
@@ -128,85 +134,25 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
   smf_n1_n2 smf_n1_n2_inst;
 
   pdu_session_create_sm_context_response context_res_msg = sm_context_res->res;
-  //Curl multipart
   CURL *curl = curl_easy_init();
 
-  //get supi and put into URL
-  std::string supi_str;
-  supi_t supi = context_res_msg.get_supi();
-  supi_str = context_res_msg.get_supi_prefix() + "-" + smf_supi_to_string (supi);
-  std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v2/ue-contexts/" + supi_str.c_str() +"/n1-n2-messages";
-  Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Sending Communication_N1N2MessageTransfer to AMF, AMF's URL: %s", url.c_str());
-
-  //Create N1 SM container & N2 SM Information
-  //TODO: should uncomment these lines when including UPF in the test
-  //for the moment, can only test with PDU Session Establishment Reject!!
-  context_res_msg.set_cause(REQUEST_ACCEPTED);//for testing purpose
-
-  if (context_res_msg.get_cause() != REQUEST_ACCEPTED) { //PDU Session Establishment Reject
-    Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] PDU Session Establishment Reject\n");
-    //pdu_session_msg& msg = context_res_msg;
-    smf_n1_n2_inst.create_n1_sm_container(context_res_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_message, 0); //TODO: need cause?
-  } else { //PDU Session Establishment Accept
-    Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] PDU Session Establishment Accept \n");
-    smf_n1_n2_inst.create_n1_sm_container(context_res_msg, PDU_SESSION_ESTABLISHMENT_ACCEPT, n1_message, 0); //TODO: need cause?
-    //TODO: N2 SM Information (Step 11, section 4.3.2.2.1 @ 3GPP TS 23.502)
-    smf_n1_n2_inst.create_n2_sm_information(context_res_msg, 1, 1, n2_message);
-  }
-
-  //Fill the json part
-  //N1SM
-  message_transfer_req_data["n1MessageContainer"]["n1MessageClass"] = "SM";
-  message_transfer_req_data["n1MessageContainer"]["n1MessageContent"]["contentId"] = "n1SmMsg"; //part 2
-
-  //N2SM
-  if (context_res_msg.get_cause() == REQUEST_ACCEPTED){
-    //TODO: fill the content of N1N2MessageTransferReqData
-    message_transfer_req_data["n2InfoContainer"]["n2InformationClass"] = "SM";
-    message_transfer_req_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = 1;
-    //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
-    //message_transfer_req_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapMessageType"] = 123; //NGAP message -to be verified: doesn't exist in tester (not required!!)
-    message_transfer_req_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_SETUP_REQ"; //NGAP message
-    message_transfer_req_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg"; //part 3
-    //message_transfer_req_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] = 222;
-    //message_transfer_req_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] = "0000D4";
-    //message_transfer_req_data["n2InfoContainer"]["smInfo"]["nasPDU"] = ;//TODO: Doesn't exist in the spec (maybe N1MessageContainer in Spec!!), but exist in the tester!!
-    message_transfer_req_data["n2InfoContainer"]["ranInfo"] = "SM";
-  }
-  //Others information
-  message_transfer_req_data["ppi"] = 1; //Don't need this info for the moment
-  message_transfer_req_data["pduSessionId"] = context_res_msg.get_pdu_session_id();
-  //message_transfer_req_data["arp"]["priorityLevel"] = 1;
-  //message_transfer_req_data["arp"]["preemptCap"] = "NOT_PREEMPT";
-  //message_transfer_req_data["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";
-  //message_transfer_req_data["5qi"] = ;
-  std::string json_part = message_transfer_req_data.dump();
-
-  //fill the N1SmMsg, N2SmMsg content
-  std::string n1_msg_hex;
-  smf_app_inst->convert_string_2_hex(n1_message, n1_msg_hex);
-  Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] n1MessageContent: %s\n ", n1_msg_hex.c_str());
-
-  std::string n2_msg_hex;
-  if (context_res_msg.get_cause() == REQUEST_ACCEPTED){
-    smf_app_inst->convert_string_2_hex(n2_message, n2_msg_hex);
-    Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] n2SMInformation %s\n ", n2_msg_hex.c_str());
-  }
+  //N1N2MessageTransfer Notification URI??
+  std::string json_part = context_res_msg.n1n2_message_transfer_data.dump();
 
   Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Sending message to AMF....\n ");
   if(curl) {
 
     CURLcode res;
-    struct curl_slist *headers = NULL;
-    struct curl_slist *slist = NULL;
+    struct curl_slist *headers = nullptr;
+    struct curl_slist *slist = nullptr;
     curl_mime *mime;
     curl_mime *alt;
     curl_mimepart *part;
 
-    //		headers = curl_slist_append(headers, "charsets: utf-8");
+    //headers = curl_slist_append(headers, "charsets: utf-8");
     headers = curl_slist_append(headers, "content-type: multipart/related");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
+    curl_easy_setopt(curl, CURLOPT_URL, context_res_msg.get_amf_url().c_str() );
     curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
 
@@ -220,17 +166,18 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
 
     //N1 SM Container
     part = curl_mime_addpart(mime);
-    curl_mime_data(part, n1_msg_hex.c_str(), CURL_ZERO_TERMINATED);
+    curl_mime_data(part, context_res_msg.get_n1_sm_message().c_str(), CURL_ZERO_TERMINATED);
     curl_mime_type(part, "application/vnd.3gpp.5gnas");
-    curl_mime_name (part, "n1SmMsg");
+    curl_mime_name (part, context_res_msg.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageContent"]["contentId"].dump().c_str());
 
-    if (sm_context_res->res.get_cause() == REQUEST_ACCEPTED) {
+    if (context_res_msg.get_cause() == REQUEST_ACCEPTED) {
+      Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] add NGAP into the message....\n ");
       //N2 SM Information
       part = curl_mime_addpart(mime);
       //TODO:
-      curl_mime_data(part, n2_msg_hex.substr(0,86).c_str(), CURL_ZERO_TERMINATED); //TODO: need to be solved
+      curl_mime_data(part, context_res_msg.get_n2_sm_information().substr(0,86).c_str(), CURL_ZERO_TERMINATED); //TODO: ISSUE need to be solved
       curl_mime_type(part, "application/vnd.3gpp.ngap");
-      curl_mime_name (part, "n2SmMsg");
+      curl_mime_name (part, context_res_msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"].dump().c_str());
     }
 
     curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
@@ -239,42 +186,45 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_respons
     // Response information.
     long httpCode(0);
     std::unique_ptr<std::string> httpData(new std::string());
-    /*
-		// Hook up data handling function.
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)body.length());
-     */
-    int numRetries = 0;
-    while (numRetries < AMF_NUMBER_RETRIES){
-      res = curl_easy_perform(curl);
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-      Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Response from AMF, Http Code: %d ", httpCode);
 
-      if (httpCode == HTTP_STATUS_OK)
-      {
-        Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Got successful response from AMF, URL: %s ", url.c_str());
-        break;
-      }
-      else
-      {
-        Logger::smf_n10().warn("[SMF N11: N1N2MessageTransfer] Couldn't GET response from AMF, URL %s, retry ...", url.c_str());
-        //retry
-        numRetries++;
-      }
+    // Hook up data handling function.
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+
+    res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    //get cause from the response
+    json response_data;
+    try{
+      response_data = json::parse(*httpData.get());
+    } catch (json::exception& e){
+      Logger::smf_n11().error( "Could not get the cause from the response");
+      //Set the default Cause
+      response_data["cause"] = "504 Gateway Timeout";
+    }
+    Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] Response from AMF, Http Code: %d, cause %s", httpCode, response_data["cause"]);
+
+    //send response to APP to process
+    itti_n11_n1n2_message_transfer_response_status *itti_msg = new itti_n11_n1n2_message_transfer_response_status(TASK_SMF_N11, TASK_SMF_APP);
+    itti_msg->set_response_code(httpCode);
+    itti_msg->set_scid(sm_context_res->scid);
+    itti_msg->set_cause(response_data["cause"]);
+    std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> i = std::shared_ptr<itti_n11_n1n2_message_transfer_response_status>(itti_msg);
+    int ret = itti_inst->send_msg(i);
+    if (RETURNok != ret) {
+      Logger::smf_n11().error( "Could not send ITTI message %s to task TASK_SMF_APP", i->get_msg_name());
     }
 
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
     curl_mime_free(mime);
   }
-  //TODO: process the response if necessary
 
 }
 
 //------------------------------------------------------------------------------
-void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res)
+void smf_n11::send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res)
 {
   Logger::smf_n11().debug("[SMF N11] Send PDUSessionUpdateContextResponse to AMF ");
   //TODO: to be completed
@@ -287,3 +237,54 @@ void smf_n11::send_msg_to_amf(std::shared_ptr<itti_n11_update_sm_context_respons
    */
 
 }
+
+//------------------------------------------------------------------------------
+void smf_n11::send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code)
+{
+
+  //TODO: Send multipart message
+  nlohmann::json jsonData;
+  to_json(jsonData, smContextCreateError);
+  std::string resBody = jsonData.dump();
+
+  //httpResponse.headers().add<Pistache::Http::Header::Location>(url);
+  httpResponse.send(code, resBody);
+
+
+}
+
+void smf_n11::send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, std::string& n1_sm_msg )
+{
+  Logger::smf_n11().debug("[SMF N11] Send PDUSessionCreateContextResponse to AMF!");
+  //TODO: Send multipart message
+  nlohmann::json jsonData;
+  to_json(jsonData, smContextCreateError);
+  jsonData["n1SmMsg"]["contentId"] =  "n1SmMsg"; //multipart
+  std::string resBody = jsonData.dump();
+
+  //httpResponse.headers().add<Pistache::Http::Header::Location>(url);
+  httpResponse.send(code, resBody);
+
+
+}
+//------------------------------------------------------------------------------
+void smf_n11::send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreatedData& smContextCreatedData, Pistache::Http::Code code)
+{
+  Logger::smf_n11().debug("[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
+
+  //TODO: Send multipart message
+  nlohmann::json jsonData;
+  to_json(jsonData, smContextCreatedData);
+  std::string resBody = jsonData.dump();
+  //http_response.headers().add<Pistache::Http::Header::Location>(uri);
+  httpResponse.send(code, resBody);
+
+
+}
+
+//------------------------------------------------------------------------------
+void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_modify_session_request_smf_requested> sm_context_mod)
+{
+
+}
+

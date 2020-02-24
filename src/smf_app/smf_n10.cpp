@@ -40,7 +40,6 @@
 
 #define UDM_CURL_TIMEOUT_MS 100L
 #define UDM_NUMBER_RETRIES 3
-#define HTTP_STATUS_OK 200
 
 using namespace smf;
 using namespace std;
@@ -125,7 +124,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 
   nlohmann::json jsonData;
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  struct curl_slist *headers = NULL;
+  struct curl_slist *headers = nullptr;
   headers = curl_slist_append(headers, "Accept: application/json");
   headers = curl_slist_append(headers, "Content-Type: application/json");
   headers = curl_slist_append(headers, "charsets: utf-8");
@@ -156,7 +155,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
       Logger::smf_n10().debug("[get_sm_data] Response from UDM, Http Code: %d ", httpCode);
 
-      if (httpCode == HTTP_STATUS_OK)
+      if (static_cast<http_response_codes_e> (httpCode) == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
       {
         Logger::smf_n10().debug("[get_sm_data] Got successful response from UDM, URL: %s ", url.c_str());
         //Logger::smf_n10().debug("[get_sm_data] Http Data from UDM: %s ", *httpData.get());
