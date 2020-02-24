@@ -75,9 +75,9 @@ class smf_qos_flow;
 class smf_pdu_session;
 
 //------------------------------------------------------------------------------
-class sx_session_restore_procedure : public smf_procedure {
+class n4_session_restore_procedure : public smf_procedure {
 public:
-  explicit sx_session_restore_procedure(std::set<pfcp::fseid_t>& sessions2restore) : smf_procedure(), pending_sessions(sessions2restore),
+  explicit n4_session_restore_procedure(std::set<pfcp::fseid_t>& sessions2restore) : smf_procedure(), pending_sessions(sessions2restore),
   restored_sessions()
   {
     sessions2restore.clear();
@@ -86,7 +86,7 @@ public:
   int run();
   //void handle_itti_msg (itti_n4_session_establishment_response& resp);
 
-  //~sx_session_restore_procedure() {}
+  //~n4_session_restore_procedure() {}
 
   std::set<pfcp::fseid_t> pending_sessions;
   std::set<pfcp::fseid_t> restored_sessions;
@@ -96,7 +96,7 @@ public:
 class session_create_sm_context_procedure : public smf_procedure {
 public:
   explicit session_create_sm_context_procedure(std::shared_ptr<smf_pdu_session>& sppc) : smf_procedure(), ppc(sppc),
-  sx_triggered(), n11_triggered_pending(), n11_trigger() {}
+  n4_triggered(), n11_triggered_pending(), n11_trigger() {}
 
   /*
    *
@@ -107,7 +107,7 @@ public:
 
   void handle_itti_msg (itti_n4_session_establishment_response& resp, std::shared_ptr<smf::smf_context> pc);
 
-  std::shared_ptr<itti_n4_session_establishment_request> sx_triggered;
+  std::shared_ptr<itti_n4_session_establishment_request> n4_triggered;
   std::shared_ptr<smf_pdu_session>                      ppc;
   std::shared_ptr<smf::smf_context>                       pc;
 
@@ -119,7 +119,7 @@ public:
 class session_update_sm_context_procedure : public smf_procedure {
 public:
   explicit session_update_sm_context_procedure(std::shared_ptr<smf_pdu_session>& sppc) : smf_procedure(), ppc(sppc),
-  sx_triggered(), n11_triggered_pending(), n11_trigger() {}
+  n4_triggered(), n11_triggered_pending(), n11_trigger() {}
 
   /*
    *
@@ -135,7 +135,7 @@ public:
    */
   void handle_itti_msg (itti_n4_session_modification_response& resp, std::shared_ptr<smf::smf_context> sc);
 
-  std::shared_ptr<itti_n4_session_modification_request>  sx_triggered;
+  std::shared_ptr<itti_n4_session_modification_request>  n4_triggered;
   std::shared_ptr<smf_pdu_session>                        ppc;
   std::shared_ptr<smf::smf_context>                       pc;
 
