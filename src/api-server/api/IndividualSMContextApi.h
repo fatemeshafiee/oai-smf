@@ -32,6 +32,8 @@
 #include "SmContextUpdateData.h"
 #include "SmContextUpdateError.h"
 #include "SmContextUpdatedData.h"
+#include "SmContextUpdateMessage.h"
+#include "SmContextReleaseMessage.h"
 #include <string>
 
 namespace oai {
@@ -66,7 +68,7 @@ private:
     /// </remarks>
     /// <param name="smContextRef">SM context reference</param>
     /// <param name="smContextReleaseData">representation of the data to be sent to the SMF when releasing the SM context (optional)</param>
-    virtual void release_sm_context(const std::string &smContextRef, const SmContextReleaseData &smContextReleaseData, Pistache::Http::ResponseWriter &response) = 0;
+    virtual void release_sm_context(const std::string &smContextRef, const SmContextReleaseMessage &smContextReleaseMessage, Pistache::Http::ResponseWriter &response) = 0;
 
     /// <summary>
     /// Retrieve SM Context
@@ -86,7 +88,7 @@ private:
     /// </remarks>
     /// <param name="smContextRef">SM context reference</param>
     /// <param name="smContextUpdateData">representation of the updates to apply to the SM context</param>
-    virtual void update_sm_context(const std::string &smContextRef, const SmContextUpdateData &smContextUpdateData, Pistache::Http::ResponseWriter &response) = 0;
+    virtual void update_sm_context(const std::string &smContextRef, const SmContextUpdateMessage &smContextUpdateMessage, Pistache::Http::ResponseWriter &response) = 0;
 
 };
 

@@ -36,6 +36,8 @@
 #include "SmContextUpdateData.h"
 #include "SmContextUpdateError.h"
 #include "SmContextUpdatedData.h"
+#include "SmContextUpdateMessage.h"
+#include "SmContextReleaseMessage.h"
 #include <string>
 #include "smf_app.hpp"
 
@@ -50,9 +52,9 @@ public:
     IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst, std::string address);
     ~IndividualSMContextApiImpl() {}
 
-    void release_sm_context(const std::string &smContextRef, const SmContextReleaseData &smContextReleaseData, Pistache::Http::ResponseWriter &response);
+    void release_sm_context(const std::string &smContextRef, const SmContextReleaseMessage &smContextReleaseMessage, Pistache::Http::ResponseWriter &response);
     void retrieve_sm_context(const std::string &smContextRef, const SmContextRetrieveData &smContextRetrieveData, Pistache::Http::ResponseWriter &response);
-    void update_sm_context(const std::string &smContextRef, const SmContextUpdateData &smContextUpdateData, Pistache::Http::ResponseWriter &response);
+    void update_sm_context(const std::string &smContextRef, const SmContextUpdateMessage &smContextUpdateMessage, Pistache::Http::ResponseWriter &response);
 private:
     smf::smf_app *m_smf_app;
     std::string m_address;

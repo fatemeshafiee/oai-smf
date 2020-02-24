@@ -104,8 +104,8 @@ public:
     /// <summary>
     /// 
     /// </summary>
-    N2SmInfoType getN2SmInfoType() const;
-    void setN2SmInfoType(N2SmInfoType const& value);
+    std::string getN2SmInfoType() const;
+    void setN2SmInfoType(std::string const& value);
     bool n2SmInfoTypeIsSet() const;
     void unsetN2SmInfoType();
     /// <summary>
@@ -135,7 +135,7 @@ protected:
     bool m_VsmfReleaseOnlyIsSet;
     RefToBinaryData m_N2SmInfo;
     bool m_N2SmInfoIsSet;
-    N2SmInfoType m_N2SmInfoType;
+    std::string m_N2SmInfoType;
     bool m_N2SmInfoTypeIsSet;
     bool m_IsmfReleaseOnly;
     bool m_IsmfReleaseOnlyIsSet;

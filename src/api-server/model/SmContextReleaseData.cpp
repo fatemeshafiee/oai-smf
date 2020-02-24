@@ -260,11 +260,11 @@ void SmContextReleaseData::unsetN2SmInfo()
 {
     m_N2SmInfoIsSet = false;
 }
-N2SmInfoType SmContextReleaseData::getN2SmInfoType() const
+std::string SmContextReleaseData::getN2SmInfoType() const
 {
     return m_N2SmInfoType;
 }
-void SmContextReleaseData::setN2SmInfoType(N2SmInfoType const& value)
+void SmContextReleaseData::setN2SmInfoType(std::string const& value)
 {
     m_N2SmInfoType = value;
     m_N2SmInfoTypeIsSet = true;
