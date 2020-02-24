@@ -298,10 +298,10 @@ int smf_app::process_pco_request(
   if (smf_cfg.force_push_pco) {
     pco_ids.ci_ip_address_allocation_via_nas_signalling = true;
     if (!pco_ids.ci_dns_server_ipv4_address_request) {
-      process_pco_dns_server_request(pco_resp, NULL);
+      process_pco_dns_server_request(pco_resp, nullptr);
     }
     if (!pco_ids.ci_ipv4_link_mtu_request) {
-      process_pco_link_mtu_request(pco_resp, NULL);
+      process_pco_link_mtu_request(pco_resp, nullptr);
     }
   }
   return RETURNok;

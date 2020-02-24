@@ -100,7 +100,7 @@ public:
   bool has_session(const pfcp::fseid_t& cp_fseid);
   void notify_del_session(const pfcp::fseid_t& cp_fseid);
   //void del_sessions();
-  void restore_sx_sessions();
+  void restore_n4_sessions();
   void set(const pfcp::up_function_features_s& ff) {function_features.first = true; function_features.second = ff;};
 };
 
@@ -132,21 +132,22 @@ public:
   pfcp_associations(pfcp_associations const&) = delete;
   void operator=(pfcp_associations const&) = delete;
 
-  bool add_association(pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp, bool& restore_sx_sessions);
-  bool add_association(pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp, pfcp::up_function_features_s& function_features, bool& restore_sx_sessions);
+  bool add_association(pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp, bool& restore_n4_sessions);
+  bool add_association(pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp, pfcp::up_function_features_s& function_features, bool& restore_n4_sessions);
   bool get_association(const pfcp::node_id_t& node_id, std::shared_ptr<pfcp_association>&  sa) const;
   bool get_association(const pfcp::fseid_t& cp_fseid, std::shared_ptr<pfcp_association>&  sa) const;
 
   void notify_add_session(const pfcp::node_id_t& node_id, const pfcp::fseid_t& cp_fseid);
   void notify_del_session(const pfcp::fseid_t& cp_fseid);
 
-  void restore_sx_sessions(const pfcp::node_id_t& node_id);
+  void restore_n4_sessions(const pfcp::node_id_t& node_id);
 
   void initiate_heartbeat_request(timer_id_t timer_id, uint64_t arg2_user);
   void timeout_heartbeat_request(timer_id_t timer_id, uint64_t arg2_user);
   void handle_receive_heartbeat_response(const uint64_t trxn_id);
 
   bool select_up_node(pfcp::node_id_t& node_id, const int node_selection_criteria);
+  bool add_peer_candidate_node(const pfcp::node_id_t& node_id);
 
 };
 }
