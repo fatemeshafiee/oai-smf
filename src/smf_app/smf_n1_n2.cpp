@@ -28,6 +28,7 @@
  */
 
 #include "smf_n1_n2.hpp"
+#include "string.hpp"
 
 extern "C" {
 #include "nas_message.h"
@@ -63,6 +64,7 @@ extern "C" {
 #include "Ngap_PDUSessionResourceSetupRequestTransfer.h"
 #include "Ngap_QosFlowSetupRequestItem.h"
 #include "Ngap_GTPTunnel.h"
+#include "Ngap_NonDynamic5QIDescriptor.h"
 #include "Ngap_Dynamic5QIDescriptor.h"
 }
 
@@ -116,14 +118,16 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
     Logger::smf_app().info("PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE");
     pdu_session_create_sm_context_response& sm_context_res = static_cast<pdu_session_create_sm_context_response&>(msg);
 
+    //get default QoS value
+    qos_flow_context_created qos_flow = {};
+    qos_flow = sm_context_res.get_qos_flow_context();
+
     //N1 message
     switch (n1_msg_type){
 
     case PDU_SESSION_ESTABLISHMENT_ACCEPT: {
-      //
       //TODO: to be completed
       //get the default QoS profile and assign to the NAS message
-
       Logger::smf_app().info("PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE, NAS: PDU_SESSION_ESTABLISHMENT_ACCEPT");
 
       Logger::smf_app().info("PDU_SESSION_ESTABLISHMENT_ACCEPT, encode starting...");
@@ -138,34 +142,35 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
       //TODO: should get from sm_context_res
       sm_msg->specific_msg.pdu_session_establishment_accept.sscmode.ssc_mode_value = SSC_MODE_1;
 
-
-
       //authorized QoS rules of the PDU session: QOSRules
+      //Section 6.2.5@3GPP TS 24.501
       //(Section 6.4.1.3@3GPP TS 24.501 V16.1.0) Make sure that the number of the packet filters used in the authorized QoS rules of the PDU Session does not
       // exceed the maximum number of packet filters supported by the UE for the PDU session
       //TODO: remove hardcoded varlues
-      QOSRulesIE qosrulesie[2];
+      QOSRulesIE qosrulesie[1];
       qosrulesie[0].qosruleidentifer=0x01;
       qosrulesie[0].ruleoperationcode = CREATE_NEW_QOS_RULE;
       qosrulesie[0].dqrbit = THE_QOS_RULE_IS_DEFAULT_QOS_RULE;
-      qosrulesie[0].numberofpacketfilters = 3;
+      qosrulesie[0].numberofpacketfilters = 1;
 
-      Create_ModifyAndAdd_ModifyAndReplace create_modifyandadd_modifyandreplace[3];
+      Create_ModifyAndAdd_ModifyAndReplace create_modifyandadd_modifyandreplace[1];
       create_modifyandadd_modifyandreplace[0].packetfilterdirection = 0b01;
       create_modifyandadd_modifyandreplace[0].packetfilteridentifier = 1;
       create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
-      create_modifyandadd_modifyandreplace[1].packetfilterdirection = 0b10;
+      /*      create_modifyandadd_modifyandreplace[1].packetfilterdirection = 0b10;
       create_modifyandadd_modifyandreplace[1].packetfilteridentifier = 2;
       create_modifyandadd_modifyandreplace[1].packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
       create_modifyandadd_modifyandreplace[2].packetfilterdirection = 0b11;
       create_modifyandadd_modifyandreplace[2].packetfilteridentifier = 3;
       create_modifyandadd_modifyandreplace[2].packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
-
+       */
       //1st rule
       qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace = create_modifyandadd_modifyandreplace;
       qosrulesie[0].qosruleprecedence = 1;
       qosrulesie[0].segregation = SEGREGATION_NOT_REQUESTED;
-      qosrulesie[0].qosflowidentifer = 0x07;
+      qosrulesie[0].qosflowidentifer = qos_flow.qfi.qfi;
+
+      /*
       //2nd rule
       qosrulesie[1].qosruleidentifer=0x02;
       qosrulesie[1].ruleoperationcode = MODIFY_EXISTING_QOS_RULE_AND_DELETE_PACKET_FILTERS;
@@ -181,8 +186,9 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
       qosrulesie[1].qosruleprecedence = 1;
       qosrulesie[1].segregation = SEGREGATION_REQUESTED;
       qosrulesie[1].qosflowidentifer = 0x08;
-
-      sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.lengthofqosrulesie = 2;
+       */
+      sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.lengthofqosrulesie = 1;
+      sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie = (QOSRulesIE *)calloc (1, sizeof (QOSRulesIE));
       sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie = qosrulesie;
 
       //SessionAMBR
@@ -191,7 +197,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
       supi64_t supi64 = smf_supi_to_u64(supi);
       std::shared_ptr<smf_context> sc;
       if (smf_app_inst->is_supi_2_smf_context(supi64)) {
-        Logger::smf_app().debug("Update SMF context with SUPI " SUPI_64_FMT "", supi64);
+        Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "", supi64);
         sc = smf_app_inst->supi_2_smf_context(supi64);
         std::shared_ptr<session_management_subscription> ss;
         snssai_t snssai  =  sm_context_res.get_snssai();
@@ -202,7 +208,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
           if (nullptr != sdc.get()){
             //Downlink
             size_t leng_of_session_ambr_dl = (sdc.get()->session_ambr).downlink.length();
-            std::string session_ambr_dl_unit = (sdc.get()->session_ambr).downlink.substr(leng_of_session_ambr_dl-4);
+            std::string session_ambr_dl_unit = (sdc.get()->session_ambr).downlink.substr(leng_of_session_ambr_dl-4); //4 last characters stand for mbps, kbps, ..
             if (session_ambr_dl_unit.compare("Kbps"))
               sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
             if (session_ambr_dl_unit.compare("Mbps"))
@@ -216,7 +222,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
             sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_downlink  = std::stoi((sdc.get()->session_ambr).downlink.substr(0, leng_of_session_ambr_dl-4));
             //Uplink
             size_t leng_of_session_ambr_ul = (sdc.get()->session_ambr).uplink.length();
-            std::string session_ambr_ul_unit = (sdc.get()->session_ambr).uplink.substr(leng_of_session_ambr_ul-4);
+            std::string session_ambr_ul_unit = (sdc.get()->session_ambr).uplink.substr(leng_of_session_ambr_ul-4); //4 last characters stand for mbps, kbps, ..
             if (session_ambr_ul_unit.compare("Kbps"))
               sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
             if (session_ambr_ul_unit.compare("Mbps"))
@@ -272,7 +278,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
       //SNSSAI
       sm_msg->specific_msg.pdu_session_establishment_accept.snssai.len = SST_AND_SD_LENGHT;
       sm_msg->specific_msg.pdu_session_establishment_accept.snssai.sst = sm_context_res.get_snssai().sST;
-      sm_msg->specific_msg.pdu_session_establishment_accept.snssai.sd = 0x123456; //sm_context_res.get_snssai().sD;
+      sm_msg->specific_msg.pdu_session_establishment_accept.snssai.sd = 0x123456; //TODO: sm_context_res.get_snssai().sD;
 
       //AlwaysonPDUSessionIndication
       sm_msg->specific_msg.pdu_session_establishment_accept.alwaysonpdusessionindication.apsi_indication = ALWAYSON_PDU_SESSION_REQUIRED;
@@ -306,7 +312,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
       qosflowdescriptionscontents[1].operationcode = DELETE_EXISTING_QOS_FLOW_DESCRIPTION;
       qosflowdescriptionscontents[1].e = PARAMETERS_LIST_IS_NOT_INCLUDED;
       qosflowdescriptionscontents[1].numberofparameters = 0;
-      qosflowdescriptionscontents[1].parameterslist = NULL;
+      qosflowdescriptionscontents[1].parameterslist = nullptr;
 
       qosflowdescriptionscontents[2].qfi = 1;
       qosflowdescriptionscontents[2].operationcode = MODIFY_EXISTING_QOS_FLOW_DESCRIPTION;
@@ -364,7 +370,12 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
 
       Logger::smf_app().debug("PDUSessionType bits_3: %#0x",sm_msg->specific_msg.pdu_session_establishment_accept._pdusessiontype.pdu_session_type_value);
       Logger::smf_app().debug("SSC Mode bits_3: %#0x",sm_msg->specific_msg.pdu_session_establishment_accept.sscmode.ssc_mode_value);
-      Logger::smf_app().debug("QoSRules: %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x",
+
+      sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.lengthofqosrulesie = 1;
+      sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie = qosrulesie;
+
+
+      Logger::smf_app().debug("QoSRules: %x %x %x %x %x %x %x %x %x %x %x ",
           sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.lengthofqosrulesie,
           sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosruleidentifer,
           sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].ruleoperationcode,
@@ -373,25 +384,9 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
           sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfilterdirection,
           sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfilteridentifier,
           sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_type,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfilterdirection,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfilteridentifier,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfiltercontents.component_type,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfilterdirection,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfilteridentifier,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfiltercontents.component_type,
           sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosruleprecedence,
           sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].segregation,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosflowidentifer,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosruleidentifer,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].ruleoperationcode,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].dqrbit,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].numberofpacketfilters,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[0].packetfilteridentifier,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[1].packetfilteridentifier,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[2].packetfilteridentifier,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosruleprecedence,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].segregation,
-          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosflowidentifer);
+          sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosflowidentifer);
 
       Logger::smf_app().debug("SessionAMBR: %x %x %x %x",
           sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink,
@@ -511,8 +506,8 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
 
       Logger::smf_app().debug("[Decoded NAS message] message type: 0x%x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.messagetype);
       Logger::smf_app().debug("[Decoded NAS message] extended protocol discriminator: 0x%x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.extendedprotocoldiscriminator);
-      Logger::smf_app().debug("[Decoded NAS message] pdu identity buffer: 0x%x",*(unsigned char *)((decoded_sm_msg->specific_msg.pdu_session_establishment_accept.pdusessionidentity)->data));
-      Logger::smf_app().debug("[Decoded NAS message] PTI buffer:0x%x",*(unsigned char *)((decoded_sm_msg->specific_msg.pdu_session_establishment_accept.proceduretransactionidentity)->data));
+      //   Logger::smf_app().debug("[Decoded NAS message] pdu identity buffer: 0x%x",*(unsigned char *)((decoded_sm_msg->specific_msg.pdu_session_establishment_accept.pdusessionidentity)->data));
+      //   Logger::smf_app().debug("[Decoded NAS message] PTI buffer:0x%x",*(unsigned char *)((decoded_sm_msg->specific_msg.pdu_session_establishment_accept.proceduretransactionidentity)->data));
 
       Logger::smf_app().debug("[Decoded NAS message] pdusessiontype: 0x%x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept._pdusessiontype.pdu_session_type_value);
       Logger::smf_app().debug("[Decoded NAS message] sscmode :0x%x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sscmode.ssc_mode_value);
@@ -520,7 +515,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
 
       Logger::smf_app().debug("[Decoded NAS message] PDUSessionType: %#0x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept._pdusessiontype.pdu_session_type_value);
       Logger::smf_app().debug("[Decoded NAS message] SSC Mode bits_3: %#0x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sscmode.ssc_mode_value);
-      Logger::smf_app().debug("[Decoded NAS message] QoSRules: %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x",
+      Logger::smf_app().debug("[Decoded NAS message] QoSRules: %x %x %x %x %x %x %x %x %x %x %x ",
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.lengthofqosrulesie,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosruleidentifer,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].ruleoperationcode,
@@ -529,32 +524,16 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfilterdirection,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfilteridentifier,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_type,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfilterdirection,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfilteridentifier,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[1].packetfiltercontents.component_type,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfilterdirection,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfilteridentifier,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].packetfilterlist.create_modifyandadd_modifyandreplace[2].packetfiltercontents.component_type,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosruleprecedence,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].segregation,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosflowidentifer,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosruleidentifer,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].ruleoperationcode,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].dqrbit,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].numberofpacketfilters,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[0].packetfilteridentifier,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[1].packetfilteridentifier,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].packetfilterlist.modifyanddelete[2].packetfilteridentifier,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosruleprecedence,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].segregation,
-          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[1].qosflowidentifer);
+          decoded_sm_msg->specific_msg.pdu_session_establishment_accept.qosrules.qosrulesie[0].qosflowidentifer);
 
-      Logger::smf_app().debug("[Decoded NAS message] SessionAMBR: %x %x %x %x",
+      /*     Logger::smf_app().debug("[Decoded NAS message] SessionAMBR: %x %x %x %x",
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_downlink,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_downlink,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.uint_for_session_ambr_for_uplink,
           decoded_sm_msg->specific_msg.pdu_session_establishment_accept.sessionambr.session_ambr_for_uplink);
-
+       */
       Logger::smf_app().debug("[Decoded NAS message] 5GSMCause: %#0x",decoded_sm_msg->specific_msg.pdu_session_establishment_accept._5gsmcause);
 
       Logger::smf_app().debug("[Decoded NAS message] PDUAddress: %x %x %x %x %x",
@@ -697,7 +676,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
         printf("%02x ",data[i]);
       std::string n1Message ((char*) data,  bytes);
       nas_msg_str = n1Message;
-      Logger::smf_app().debug("n1MessageContent: %s (%d bytes)", nas_msg_str.c_str(), bytes);
+      Logger::smf_app().debug("\n n1MessageContent: %s (%d bytes)", nas_msg_str.c_str(), bytes);
     }
 
     break;
@@ -1082,7 +1061,7 @@ void smf_n1_n2::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_st
     qosflowdescriptionscontents[1].operationcode = DELETE_EXISTING_QOS_FLOW_DESCRIPTION;
     qosflowdescriptionscontents[1].e = PARAMETERS_LIST_IS_NOT_INCLUDED;
     qosflowdescriptionscontents[1].numberofparameters = 0;
-    qosflowdescriptionscontents[1].parameterslist = NULL;
+    qosflowdescriptionscontents[1].parameterslist = nullptr;
 
     qosflowdescriptionscontents[2].qfi = 1;
     qosflowdescriptionscontents[2].operationcode = MODIFY_EXISTING_QOS_FLOW_DESCRIPTION;
@@ -1622,7 +1601,7 @@ void smf_n1_n2::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_st
     qosflowdescriptionscontents[1].operationcode = DELETE_EXISTING_QOS_FLOW_DESCRIPTION;
     qosflowdescriptionscontents[1].e = PARAMETERS_LIST_IS_NOT_INCLUDED;
     qosflowdescriptionscontents[1].numberofparameters = 0;
-    qosflowdescriptionscontents[1].parameterslist = NULL;
+    qosflowdescriptionscontents[1].parameterslist = nullptr;
 
     qosflowdescriptionscontents[2].qfi = 1;
     qosflowdescriptionscontents[2].operationcode = MODIFY_EXISTING_QOS_FLOW_DESCRIPTION;
@@ -1944,7 +1923,7 @@ void smf_n1_n2::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_st
     qosflowdescriptionscontents[1].operationcode = DELETE_EXISTING_QOS_FLOW_DESCRIPTION;
     qosflowdescriptionscontents[1].e = PARAMETERS_LIST_IS_NOT_INCLUDED;
     qosflowdescriptionscontents[1].numberofparameters = 0;
-    qosflowdescriptionscontents[1].parameterslist = NULL;
+    qosflowdescriptionscontents[1].parameterslist = nullptr;
 
     qosflowdescriptionscontents[2].qfi = 1;
     qosflowdescriptionscontents[2].operationcode = MODIFY_EXISTING_QOS_FLOW_DESCRIPTION;
@@ -2509,136 +2488,186 @@ void smf_n1_n2::create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_st
 }
 
 //------------------------------------------------------------------------------
-void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str)
+void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, n2_sm_info_type_e ngap_ie_type, std::string& ngap_msg_str)
 {
-  //TODO: should work with BUPT to finish this function
+  //TODO: To be filled with the correct parameters
   Logger::smf_app().info("Create N2 SM Information, ngap message type %d, ie type %d\n", ngap_msg_type, ngap_ie_type);
 
-  switch (msg.get_msg_type()) {
-  case PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE: {
-    Logger::smf_app().info("PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE");
-    pdu_session_create_sm_context_response& sm_context_res = static_cast<pdu_session_create_sm_context_response&>(msg);
+  switch (ngap_ie_type){
+  //PDU Session Resource Setup Request Transfer
+  case n2_sm_info_type_e::PDU_RES_SETUP_REQ: {
+    Ngap_PDUSessionResourceSetupRequestTransfer_t *ngap_IEs = nullptr;
+    ngap_IEs = (Ngap_PDUSessionResourceSetupRequestTransfer_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransfer_t));
+    /* Ngap_PDUSessionAggregateMaximumBitRate_t  PDUSessionAggregateMaximumBitRate;
+        Ngap_UPTransportLayerInformation_t   UPTransportLayerInformation;
+        Ngap_DataForwardingNotPossible_t   DataForwardingNotPossible;
+        Ngap_PDUSessionType_t  PDUSessionType;
+        Ngap_SecurityIndication_t  SecurityIndication;
+        Ngap_NetworkInstance_t   NetworkInstance;
+        Ngap_QosFlowSetupRequestList_t   QosFlowSetupRequestList;
+     */
 
+    switch (msg.get_msg_type()) {
+    case PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE: {
+      Logger::smf_app().info("PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE");
+      pdu_session_create_sm_context_response& sm_context_res = static_cast<pdu_session_create_sm_context_response&>(msg);
+
+      qos_flow_context_created qos_flow = {};
+      qos_flow = sm_context_res.get_qos_flow_context();
+
+      //TODO: for testing purpose - should be removed
+      std::string ipv4_addr_str = "127.0.0.1";
+      uint32_t key = 0x01020304;
+      struct in_addr ipv4_addr;
+      IPV4_STR_ADDR_TO_INADDR (util::trim(ipv4_addr_str).c_str(), ipv4_addr, "BAD IPv4 ADDRESS FORMAT !");
+      memcpy (&qos_flow.ul_fteid.ipv4_address,&ipv4_addr, sizeof (struct in_addr));
+      memcpy (&qos_flow.ul_fteid.teid_gre_key,&key, sizeof (uint32_t));
+      pfcp::qfi_t qfi(60);
+      arp_5gc_t arp;
+      arp.priority_level = 1;
+      qos_flow.set_qfi(qfi);
+      qos_flow.set_priority_level(1);
+      qos_flow.set_arp(arp);
+      Logger::smf_app().info("QoS parameters: qfi %d, priority_level %d, arp_priority_level %d", qos_flow.qfi.qfi, qos_flow.priority_level, qos_flow.arp.priority_level);
+
+
+      //PDUSessionAggregateMaximumBitRate
+      Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *pduSessionAggregateMaximumBitRate =  nullptr;
+      pduSessionAggregateMaximumBitRate = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
+      pduSessionAggregateMaximumBitRate->id = Ngap_ProtocolIE_ID_id_PDUSessionAggregateMaximumBitRate;
+      pduSessionAggregateMaximumBitRate->criticality = Ngap_Criticality_reject;
+      pduSessionAggregateMaximumBitRate->value.present = Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_PDUSessionAggregateMaximumBitRate;
+      pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateDL.size = 1;
+      pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateDL.buf = (uint8_t *) calloc(1, sizeof (uint8_t));
+      pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateDL.buf[0] = 0x01;
+      pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateUL.size = 1;
+      pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateUL.buf = (uint8_t *) calloc(1, sizeof (uint8_t));
+      pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateUL.buf[0] = 0x02;
+      ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, pduSessionAggregateMaximumBitRate);
+
+      //UPTransportLayerInformation
+      unsigned char          buf_in_addr[sizeof (struct in_addr)+1];
+      memcpy (buf_in_addr, &qos_flow.ul_fteid.ipv4_address, sizeof (struct in_addr));
+
+      Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *upTransportLayerInformation =  nullptr;
+      upTransportLayerInformation = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
+      upTransportLayerInformation->id = Ngap_ProtocolIE_ID_id_UL_NGU_UP_TNLInformation;
+      upTransportLayerInformation->criticality = Ngap_Criticality_reject;
+      upTransportLayerInformation->value.present = Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_UPTransportLayerInformation;
+      upTransportLayerInformation->value.choice.UPTransportLayerInformation.present = Ngap_UPTransportLayerInformation_PR_gTPTunnel;
+      //TODO: To be completed
+      upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel = (Ngap_GTPTunnel_t  *) calloc (1, sizeof(Ngap_GTPTunnel_t));
+      upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.size = 4;
+      upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf = (uint8_t *)calloc (4, sizeof (uint8_t));
+      //upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf[0] = 0x0a;
+      //upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf[1] = 0x0b;
+      //upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf[2] = 0x0c;
+      //upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf[3] = 0x0d;
+      memcpy (upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf, &qos_flow.ul_fteid.teid_gre_key, 4);
+      upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.bits_unused = 0;
+
+      upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.size = sizeof (struct in_addr);
+      upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf = (uint8_t *) calloc (sizeof (struct in_addr), sizeof(uint8_t));
+      //upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[0] = 0x0e;
+      //upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[1] = 0x0f;
+      //upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[2] = 0x10;
+      //upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[3] = 0x11;
+      memcpy (upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf, buf_in_addr, sizeof (struct in_addr));
+
+      ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, upTransportLayerInformation);
+
+      //DataForwardingNotPossible
+
+      //PDUSessionType
+      Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *pduSessionType =  nullptr;
+      pduSessionType = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
+      pduSessionType->id = Ngap_ProtocolIE_ID_id_PDUSessionType;
+      pduSessionType->criticality = Ngap_Criticality_reject;
+      pduSessionType->value.present = Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_PDUSessionType;
+      pduSessionType->value.choice.PDUSessionType = 1; //PDUSessionType
+      ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, pduSessionType);
+
+      //SecurityIndication
+      //TODO: should get from UDM
+      //    Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *securityIndication =  nullptr;
+      //   securityIndication = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
+      //   securityIndication->value.choice.SecurityIndication.integrityProtectionIndication = Ngap_IntegrityProtectionIndication_not_needed;
+      //   securityIndication->value.choice.SecurityIndication.confidentialityProtectionIndication = Ngap_ConfidentialityProtectionIndication_not_needed;
+
+      //NetworkInstance
+
+      //QosFlowSetupRequestList
+      Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *qosFlowSetupRequestList =  nullptr;
+      qosFlowSetupRequestList = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
+      qosFlowSetupRequestList->id = Ngap_ProtocolIE_ID_id_QosFlowSetupRequestList;
+      qosFlowSetupRequestList->criticality = Ngap_Criticality_reject;
+      qosFlowSetupRequestList->value.present = Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_QosFlowSetupRequestList;
+
+      Ngap_QosFlowSetupRequestItem_t *ngap_QosFlowSetupRequestItem = nullptr;
+      ngap_QosFlowSetupRequestItem = (Ngap_QosFlowSetupRequestItem_t *) calloc (1, sizeof(Ngap_QosFlowSetupRequestItem_t));
+      ngap_QosFlowSetupRequestItem->qosFlowIdentifier = (uint8_t) qos_flow.qfi.qfi;
+      /*
+        ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.present = Ngap_QosCharacteristics_PR_dynamic5QI;
+        //TODO: to be completed
+        ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI = (Ngap_Dynamic5QIDescriptor_t *)(calloc (1, sizeof(Ngap_Dynamic5QIDescriptor_t)));
+        ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI->priorityLevelQos = 6;
+        ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI->packetDelayBudget = 7;
+        ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI->packetErrorRate.pERScalar = 8;
+        ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI->packetErrorRate.pERExponent = 9;
+       */
+      ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.present = Ngap_QosCharacteristics_PR_nonDynamic5QI;
+      //TODO: to be completed
+      ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.nonDynamic5QI = (Ngap_NonDynamic5QIDescriptor_t *)(calloc (1, sizeof(Ngap_NonDynamic5QIDescriptor_t)));
+      ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.nonDynamic5QI->fiveQI = (uint8_t) qos_flow.qfi.qfi;
+
+      //TODO: To be completed
+
+
+
+      ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.priorityLevelARP = qos_flow.arp.priority_level;
+      ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.pre_emptionCapability = Ngap_Pre_emptionCapability_shall_not_trigger_pre_emption;//0, to be updated
+      ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.pre_emptionVulnerability = Ngap_Pre_emptionVulnerability_not_pre_emptable ;//0, to be updated
+
+      ASN_SEQUENCE_ADD(&qosFlowSetupRequestList->value.choice.QosFlowSetupRequestList.list, ngap_QosFlowSetupRequestItem);
+      ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, qosFlowSetupRequestList);
+
+    }
+    break;
+    case PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE: {
+      Logger::smf_app().info("PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE");
+      pdu_session_update_sm_context_response& sm_context_res = static_cast<pdu_session_update_sm_context_response&>(msg);
+    }
+    break;
+
+    default:
+      Logger::smf_app().debug("Unknown message type: %d \n",msg.get_msg_type());
+    }
+
+    //encode
+    size_t buffer_size = 1024;
+    char *buffer = (char *)calloc(1,buffer_size);
+
+    asn_enc_rval_t er = aper_encode_to_buffer(&asn_DEF_Ngap_PDUSessionResourceSetupRequestTransfer, nullptr, ngap_IEs, (void *)buffer, buffer_size);
+    if(er.encoded < 0)
+    {
+      Logger::smf_app().warn("[Create N2 SM Information] NGAP PDU Session Resource Setup Request Transfer encode failed, er.encoded: %d", er.encoded);
+      return;
+    }
+
+    Logger::smf_app().debug("N2 SM buffer data: ");
+    for(int i = 0; i < er.encoded; i++)
+      printf("%02x ", (char)buffer[i]);
+    std::string ngap_message ((char*) buffer,  er.encoded);
+    ngap_msg_str = ngap_message;
+    Logger::smf_app().debug("N2 SM Information: %s (%d bytes)\n ", ngap_msg_str.c_str(), er.encoded);
   }
   break;
-  case PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE: {
-    Logger::smf_app().info("PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE");
-    pdu_session_update_sm_context_response& sm_context_res = static_cast<pdu_session_update_sm_context_response&>(msg);
-  }
-  break;
-
   default:
-    Logger::smf_app().debug("Unknown message type: %d \n",msg.get_msg_type());
+    Logger::smf_app().debug("Unknown NGAP IE type: %s \n", n2_sm_info_type_e2str[(uint8_t)ngap_ie_type]);
   }
 
-  Ngap_PDUSessionResourceSetupRequestTransfer_t *ngap_IEs = NULL;
-  ngap_IEs = (Ngap_PDUSessionResourceSetupRequestTransfer_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransfer_t));
-  /* Ngap_PDUSessionAggregateMaximumBitRate_t	 PDUSessionAggregateMaximumBitRate;
-	Ngap_UPTransportLayerInformation_t	 UPTransportLayerInformation;
-	Ngap_DataForwardingNotPossible_t	 DataForwardingNotPossible;
-	Ngap_PDUSessionType_t	 PDUSessionType;
-	Ngap_SecurityIndication_t	 SecurityIndication;
-	Ngap_NetworkInstance_t	 NetworkInstance;
-	Ngap_QosFlowSetupRequestList_t	 QosFlowSetupRequestList;
-   */
 
-  Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *pduSessionAggregateMaximumBitRate =  NULL;
-  pduSessionAggregateMaximumBitRate = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
 
-  //PDUSessionAggregateMaximumBitRate
-  pduSessionAggregateMaximumBitRate->id = Ngap_ProtocolIE_ID_id_PDUSessionAggregateMaximumBitRate;
-  pduSessionAggregateMaximumBitRate->criticality = Ngap_Criticality_reject;
-  pduSessionAggregateMaximumBitRate->value.present = Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_PDUSessionAggregateMaximumBitRate;
-  pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateDL.size = 1;
-  pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateDL.buf = (uint8_t *) calloc(1, sizeof (uint8_t));
-  pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateDL.buf[0] = 0x01;
-  pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateUL.size = 1;
-  pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateUL.buf = (uint8_t *) calloc(1, sizeof (uint8_t));
-  pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateUL.buf[0] = 0x02;
-  ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, pduSessionAggregateMaximumBitRate);
-
-  //UPTransportLayerInformation
-  Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *upTransportLayerInformation =  NULL;
-  upTransportLayerInformation = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
-  upTransportLayerInformation->id = Ngap_ProtocolIE_ID_id_UL_NGU_UP_TNLInformation;
-  upTransportLayerInformation->criticality = Ngap_Criticality_reject;
-  upTransportLayerInformation->value.present = Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_UPTransportLayerInformation;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.present = Ngap_UPTransportLayerInformation_PR_gTPTunnel;
-  //TODO: To be completed
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel = (Ngap_GTPTunnel_t	*) calloc (1, sizeof(Ngap_GTPTunnel_t));
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.size = 4;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf = (uint8_t *)calloc (4, sizeof (uint8_t));
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf[0] = 0x0a;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf[1] = 0x0b;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf[2] = 0x0c;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf[3] = 0x0d;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.bits_unused = 0;
-
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.size = 4;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf = (uint8_t *) calloc (4, sizeof(uint8_t));
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[0] = 0x0e;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[1] = 0x0f;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[2] = 0x10;
-  upTransportLayerInformation->value.choice.UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[3] = 0x11;
-
-  ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, upTransportLayerInformation);
-
-  //DataForwardingNotPossible
-
-  //PDUSessionType
-  Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *pduSessionType =  NULL;
-  pduSessionType = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
-  pduSessionType->id = Ngap_ProtocolIE_ID_id_PDUSessionType;
-  pduSessionType->criticality = Ngap_Criticality_reject;
-  pduSessionType->value.present = Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_PDUSessionType;
-  pduSessionType->value.choice.PDUSessionType = 1; //PDUSessionType
-  ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, pduSessionType);
-
-  //SecurityIndication
-  //NetworkInstance
-
-  //QosFlowSetupRequestList
-  Ngap_PDUSessionResourceSetupRequestTransferIEs_t  *qosFlowSetupRequestList =  NULL;
-  qosFlowSetupRequestList = (Ngap_PDUSessionResourceSetupRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceSetupRequestTransferIEs_t));
-  qosFlowSetupRequestList->id = Ngap_ProtocolIE_ID_id_QosFlowSetupRequestList;
-  qosFlowSetupRequestList->criticality = Ngap_Criticality_reject;
-  qosFlowSetupRequestList->value.present = Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_QosFlowSetupRequestList;
-
-  Ngap_QosFlowSetupRequestItem_t *ngap_QosFlowSetupRequestItem = NULL;
-  ngap_QosFlowSetupRequestItem = (Ngap_QosFlowSetupRequestItem_t *) calloc (1, sizeof(Ngap_QosFlowSetupRequestItem_t));
-  ngap_QosFlowSetupRequestItem->qosFlowIdentifier = 1;
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.present = Ngap_QosCharacteristics_PR_dynamic5QI;
-  //TODO: to be completed
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI = (Ngap_Dynamic5QIDescriptor_t	*)(calloc (1, sizeof(Ngap_Dynamic5QIDescriptor_t)));
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI->priorityLevelQos = 6;
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI->packetDelayBudget = 7;
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI->packetErrorRate.pERScalar = 8;
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.dynamic5QI->packetErrorRate.pERExponent = 9;
-  //TODO: To be completed
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.priorityLevelARP = 1;
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.pre_emptionCapability = Ngap_Pre_emptionCapability_shall_not_trigger_pre_emption;//0
-  ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.pre_emptionVulnerability = Ngap_Pre_emptionVulnerability_not_pre_emptable ;//0
-
-  ASN_SEQUENCE_ADD(&qosFlowSetupRequestList->value.choice.QosFlowSetupRequestList.list, ngap_QosFlowSetupRequestItem);
-  ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, qosFlowSetupRequestList);
-
-  //encode
-  size_t buffer_size = 1024;
-  char *buffer = (char *)calloc(1,buffer_size);
-
-  asn_enc_rval_t er = aper_encode_to_buffer(&asn_DEF_Ngap_PDUSessionResourceSetupRequestTransfer, NULL, ngap_IEs, (void *)buffer, buffer_size);
-  if(er.encoded < 0)
-  {
-    Logger::smf_app().warn("[Create N2 SM Information] NGAP PDU Session Resource Setup Request Transfer encode failed, er.encoded: %d", er.encoded);
-    return;
-  }
-
-  Logger::smf_app().debug("N2 SM buffer data: ");
-  for(int i = 0; i < er.encoded; i++)
-    printf("%02x ", (char)buffer[i]);
-  std::string ngap_message ((char*) buffer,  er.encoded);
-  ngap_msg_str = ngap_message;
-  Logger::smf_app().debug("N2 SM Information: %s (%d bytes)\n ", ngap_msg_str.c_str(), er.encoded);
 
 
 }
@@ -2696,7 +2725,7 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm
   printf("\n");
 
   free(data);
-  data = NULL;
+  data = nullptr;
 #else
   memcpy ((void *)datavalue, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
 #endif
@@ -3154,10 +3183,10 @@ int smf_n1_n2::decode_n2_sm_information(std::unique_ptr<Ngap_PDUSessionResourceS
   int decoder_rc = RETURNok;
 
   //decode Ngap_PDUSessionResourceSetupResponseTransfer
-  if (n2_sm_info_type.compare(n2_sm_info_type_e2str[PDU_RES_SETUP_RSP]) == 0){
-    // Ngap_PDUSessionResourceSetupResponseTransfer_t   *decoded_msg = null;
+  if (n2_sm_info_type.compare(n2_sm_info_type_e2str[(uint8_t)n2_sm_info_type_e::PDU_RES_SETUP_RSP]) == 0){
+    // Ngap_PDUSessionResourceSetupResponseTransfer_t   *decoded_msg = nullptr;
     //Decode N2 SM info into decoded nas msg
-    asn_dec_rval_t rc  = asn_decode(NULL,ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, (void **)&ngap_IE, (void *)n2_sm_info.c_str(), n2_sm_info.length());
+    asn_dec_rval_t rc  = asn_decode(nullptr,ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, (void **)&ngap_IE, (void *)n2_sm_info.c_str(), n2_sm_info.length());
     if(rc.code == RC_OK){
       Logger::smf_api_server().debug("asn_decode successful %d...\n",rc.code );
       return RETURNok;

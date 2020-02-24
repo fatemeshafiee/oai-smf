@@ -88,7 +88,7 @@ public:
    * @param [std::string&] ngap_msg_str store NGAP message in form of string
    *
    */
-  void create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, uint8_t ngap_ie_type, std::string& ngap_msg_str);
+  void create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, n2_sm_info_type_e ngap_ie_type, std::string& ngap_msg_str);
 
   /*
    * Decode N1 SM Container into the NAS mesasge (using NAS lib)
