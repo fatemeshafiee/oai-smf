@@ -116,7 +116,16 @@ static int on_headers_complete(multipartparser* /*parser*/)
 
 static int on_data(multipartparser* /*parser*/, const char* data, size_t size)
 {
-  g_parts.back().body.append(data, size);
+
+  std::string str;
+  //g_parts.back().body.append(data, size);
+  for(int i = 0;i < size; i++)
+  {
+    //printf("%02x ",data[i]);
+    str.push_back(data[i]);
+  }
+  g_parts.back().body.append(str);
+
   return 0;
 }
 
