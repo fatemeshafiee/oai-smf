@@ -63,7 +63,7 @@ public:
 
   uint8_t  cause_value;
   pfcp::qfi_t qfi;
-  fteid_t       ul_fteid;
+  fteid_t  ul_fteid;
   arp_5gc_t arp;
   uint8_t priority_level;//1-127
 
@@ -77,7 +77,7 @@ public:
 
   uint8_t  cause_value;
   pfcp::qfi_t qfi;
-  fteid_t       ul_fteid;
+  fteid_t  ul_fteid;
 
 };
 
@@ -377,108 +377,46 @@ private:
   oai::smf_server::model::Guami m_guami;
   oai::smf_server::model::PlmnId m_serving_network;
   //BackupAmfInfo
-  /*
-    backupAmfInfo:
-      type: array
-      items:
-        $ref: '../TS29571_CommonData.yaml#/components/schemas/BackupAmfInfo'
-      minItems: 1
-      nullable: true
-   */
   std::string m_an_type;
-  /*
-   *
-     secondAnType:
-     $ref: '../TS29571_CommonData.yaml#/components/schemas/AccessType'
+  std::string m_rat_type;
+
+ /* SmContextUpdateData:
+      presenceInLadn:
+      ueLocation:
+      ueTimeZone:
+      addUeLocation:
+      hoState:
+      toBeSwitched:
+      failedToBeSwitched:
    */
+  std::string m_upCnx_state;
+  bool m_upCnx_state_is_set;
 
-  std::string m_rat_type; //ratType: $ref: '../TS29571_CommonData.yaml#/components/schemas/RatType
-
-  /*    SmContextUpdateData:
-    presenceInLadn:
-      $ref: '../TS29571_CommonData.yaml#/components/schemas/PresenceState'
-    ueLocation:
-      $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
-    ueTimeZone:
-      $ref: '../TS29571_CommonData.yaml#/components/schemas/TimeZone'
-    addUeLocation:
-      $ref: '../TS29571_CommonData.yaml#/components/schemas/UserLocation'
-
-    hoState:
-      $ref: '#/components/schemas/HoState'
-    toBeSwitched:
-      type: boolean
-      default: false
-    failedToBeSwitched:
-      type: boolean
-   */
-  std::string m_upCnx_state; //'#/components/schemas/UpCnxState'
-  bool m_upCnx_state_is_set; //'#/components/schemas/UpCnxState'
-
-  oai::smf_server::model::RefToBinaryData m_n1_sm_msg; //n1SmMsg
-  oai::smf_server::model::RefToBinaryData m_n2_sm_info; //n2SmInfo
-  std::string m_n2_sm_info_type; //$ref: '#/components/schemas/N2SmInfoType'
+  oai::smf_server::model::RefToBinaryData m_n1_sm_msg;
+  oai::smf_server::model::RefToBinaryData m_n2_sm_info;
+  std::string m_n2_sm_info_type;
   oai::smf_server::model::NgRanTargetId m_target_id; //$ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
   std::string m_target_serving_nfId;  // $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
-  std::string m_sm_context_status_uri;  //smContextStatusUri $ref: '../TS29571_CommonData.yaml#/components/schemas/Uri'
-  /*
-    dataForwarding:
-      type: boolean
-      default: false
-   */
+  std::string m_sm_context_status_uri;
   bool m_data_forwarding;
-  /*
-	epsBearerSetup:
-      type: array
-      items:
-        $ref: '#/components/schemas/EpsBearerContainer'
-        minItems: 0
-   */
   std::vector<std::string> m_eps_bearer_setup;
-
-  /*
-    revokeEbiList:
-      type: array
-      items:
-        $ref: '#/components/schemas/EpsBearerId'
-        minItems: 1
-
-    EpsBearerId:
-      type: integer
-      minimum: 0
-      maximum: 15
-
-   */
   std::vector<int> m_revoke_ebi_list;
 
-  /*
-     release:
-       type: boolean
-       default: false
-     cause:
-       $ref: '#/components/schemas/Cause'
-   */
-  //NgApCause m_ngAp_cause; //  $ref: '../TS29571_CommonData.yaml#/components/schemas/NgApCause
- uint8_t m_5gMm_cause_value; // 5GMmCause, $ref: '../TS29571_CommonData.yaml#/components/schemas/5GMmCause'
+  //NgApCause m_ngAp_cause;
+  uint8_t m_5gMm_cause_value;
   /*
 	sNssai:
-       $ref: '../TS29571_CommonData.yaml#/components/schemas/Snssai'
-    traceData:
-      $ref: '../TS29571_CommonData.yaml#/components/schemas/TraceData'
-    epsInterworkingInd:
-      $ref: '#/components/schemas/EpsInterworkingIndication'
-    anTypeCanBeChanged:
-      type: boolean
-      default: false
-    n2SmInfoExt1:
-      $ref: '../TS29571_CommonData.yaml#/components/schemas/RefToBinaryData'
-    n2SmInfoTypeExt1:
-      $ref: '#/components/schemas/N2SmInfoType'
-    maReleaseInd:
-      $ref: '#/components/schemas/MaReleaseIndication'
-    exemptionInd:
-     $ref: '#/components/schemas/ExemptionInd'
-   */
+	EpsBearerId:
+  release:
+  cause:
+  traceData:
+  epsInterworkingInd:
+  anTypeCanBeChanged:
+  n2SmInfoExt1:
+  n2SmInfoTypeExt1:
+  maReleaseInd:
+  exemptionInd:
+  */
 
 };
 

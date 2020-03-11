@@ -41,6 +41,7 @@
 #include "3gpp_29.274.h"
 #include "3gpp_29.244.h"
 #include "3gpp_29.503.h"
+#include "3gpp_29.502.h"
 #include "common_root_types.h"
 #include "smf_procedure.hpp"
 #include "uint_generator.hpp"
@@ -50,6 +51,7 @@
 #include "pistache/router.h"
 #include "SmContextCreateError.h"
 #include "smf_msg.hpp"
+#include "itti.hpp"
 
 
 namespace smf {
@@ -62,6 +64,7 @@ public:
 
   void clear() {
     ul_fteid = {};
+    dl_fteid = {};
     eps_bearer_qos = {};
     pdr_id_ul = {};
     pdr_id_dl = {};
@@ -77,7 +80,8 @@ public:
 
   pfcp::qfi_t qfi; //QoS Flow Identifier
 
-  fteid_t                 ul_fteid; //Uplink fteid of UPF
+  fteid_t                 ul_fteid; //fteid of UPF
+  fteid_t                 dl_fteid; //fteid of AN
 
   bearer_qos_t            eps_bearer_qos;           // EPS Bearer QoS: ARP, GBR, MBR, QCI.
 
@@ -113,48 +117,18 @@ public:
     up_fseid = {};
     qos_flows.clear();
     released = false;
+    pdu_session_status = pdu_session_status_e::PDU_SESSION_INACTIVE;
+    timer_T3590 = ITTI_INVALID_TIMER_ID;
+    timer_T3591 = ITTI_INVALID_TIMER_ID;
   }
 
   smf_pdu_session(smf_pdu_session& b) = delete;
 
   void set(const paa_t& paa);
 
-  bool get_qos_flow(const pfcp::pdr_id_t& pdr_id, smf_qos_flow& q) {
-    for (auto it : qos_flows) {
-      if (it.second.pdr_id_ul.rule_id == pdr_id.rule_id) {
-        q = it.second;
-        return true;
-      }
-      if (it.second.pdr_id_dl.rule_id == pdr_id.rule_id) {
-        q = it.second;
-        return true;
-      }
-    }
-    return false;
-  }
-  bool get_qos_flow(const pfcp::far_id_t& far_id, smf_qos_flow& q) {
-    for (auto it : qos_flows) {
-      if ((it.second.far_id_ul.first) && (it.second.far_id_ul.second.far_id == far_id.far_id)) {
-        q = it.second;
-        return true;
-      }
-      if ((it.second.far_id_dl.first) && (it.second.far_id_dl.second.far_id == far_id.far_id)) {
-        q = it.second;
-        return true;
-      }
-    }
-    return false;
-  }
-  bool get_qos_flow(const pfcp::qfi_t& qfi, smf_qos_flow& q) {
-    for (auto it : qos_flows) {
-      if (it.second.qfi == qfi) {
-        q = it.second;
-        return true;
-      }
-    }
-    return false;
-  }
-
+  bool get_qos_flow(const pfcp::pdr_id_t& pdr_id, smf_qos_flow& q);
+  bool get_qos_flow(const pfcp::far_id_t& far_id, smf_qos_flow& q);
+  bool get_qos_flow(const pfcp::qfi_t& qfi, smf_qos_flow& q);
   void add_qos_flow(smf_qos_flow& flow);
   smf_qos_flow& get_qos_flow(const pfcp::qfi_t& qfi);
 
@@ -162,6 +136,23 @@ public:
   bool has_qos_flow(const pfcp::pdr_id_t& pdr_id, pfcp::qfi_t& qfi);
   void remove_qos_flow(const pfcp::qfi_t& qfi);
   void remove_qos_flow(smf_qos_flow& flow);
+
+  void set_pdu_session_status (const pdu_session_status_e& status);
+  pdu_session_status_e get_pdu_session_status () const;
+
+  /*
+   * Set upCnxState for a N3 Tunnel
+   * @param [upCnx_state_e&] state: new state of the N3 tunnel
+   * @return void
+   */
+  void set_upCnx_state (const upCnx_state_e& state);
+
+  /*
+   * Get upCnxState of a N3 Tunnel
+   * @param void
+   * @return upCnx_state_e: current state of this N3 tunnel
+   */
+  upCnx_state_e get_upCnx_state () const;
 
 
   // Called by GTPV2-C DELETE_SESSION_REQUEST
@@ -223,6 +214,15 @@ public:
   std::string amf_id;
   // QFI
   std::map<uint8_t,smf_qos_flow> qos_flows;
+
+  //pdu session status
+  pdu_session_status_e pdu_session_status;
+
+  timer_id_t                    timer_T3590;
+  timer_id_t                    timer_T3591;
+
+  //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
+  upCnx_state_e upCnx_state;
 };
 
 
@@ -299,14 +299,15 @@ public:
    * @param [std::shared_ptr<itti_n11_create_sm_context_request] smreq Request message
    * @return void
    */
-  void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+  void handle_pdu_session_create_sm_context_request (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
   /*
    * Handle messages from AMF (e.g., PDU_SESSION_UPDATESMContextRequest)
    * @param [std::shared_ptr<itti_n11_update_sm_context_request] smreq Request message
+   * @param [pdu_session_procedure_t procedure] pdu session procedure: session establishment/modification/release
    * @return void
    */
-  void handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+  void handle_pdu_session_update_sm_context_request (std::shared_ptr<itti_n11_update_sm_context_request> smreq);
 
   /*
    * Find DNN context with name
@@ -322,15 +323,6 @@ public:
    * @return void
    */
   void insert_dnn(std::shared_ptr<dnn_context>& sd);
-
-  /*
-   * Send a response error to AMF (PDU Session Establishment Reject)
-   * @param [oai::smf_server::model::SmContextCreateError&] smContextCreateError
-   * @param [Pistache::Http::Code] code response code
-   * @param [Pistache::Http::ResponseWriter] httpResponse to reply to AMF
-   * @return void
-   */
-  void send_create_session_response_error(oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, Pistache::Http::ResponseWriter& httpResponse);
 
   /*
    * Check the validity of the request according to user subscription and local policies
@@ -391,6 +383,8 @@ public:
    * @return std::size_t: the number of contexts
    */
   std::size_t get_number_dnn_contexts();
+  void set_scid(scid_t const& id);
+  scid_t get_scid() const;
 
 private:
 
@@ -417,6 +411,7 @@ private:
   std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
 
   supi_t         supi;
+  scid_t scid;
 };
 }
 

@@ -72,8 +72,8 @@ void smf_n4_task (void *args_p)
 
     case N4_ASSOCIATION_SETUP_REQUEST:
       if (itti_n4_association_setup_request* m = dynamic_cast<itti_n4_association_setup_request*>(msg)) {
-    	 // m->trxn_id = smf_n4_inst->generate_trxn_id();
-    	  smf_n4_inst->send_association_setup_request(ref(*m));
+        // m->trxn_id = smf_n4_inst->generate_trxn_id();
+        smf_n4_inst->send_association_setup_request(ref(*m));
         //smf_n4_inst->handle_itti_msg(ref(*m));
       }
       break;
@@ -358,7 +358,7 @@ void smf_n4::handle_receive_association_setup_request(pfcp::pfcp_msg& msg, const
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_association_setup_response(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint)
 {
- //TODO: To be completed
+  //TODO: To be completed
   Logger::smf_n4().info("Received N4 ASSOCIATION SETUP RESPONSE from an UPF");
   bool error = true;
   uint64_t trxn_id = 0;
@@ -561,7 +561,7 @@ void smf_n4::time_out_itti_event(const uint32_t timer_id)
 //------------------------------------------------------------------------------
 void smf_n4::send_association_setup_request(itti_n4_association_setup_request& i)
 {
-	i.trxn_id = generate_trxn_id();
-	send_request(i.r_endpoint, i.pfcp_ies, TASK_SMF_N4, i.trxn_id);
+  i.trxn_id = generate_trxn_id();
+  send_request(i.r_endpoint, i.pfcp_ies, TASK_SMF_N4, i.trxn_id);
 }
 

@@ -76,10 +76,7 @@ public:
    * @param [uint8_t] sm_cause store NAS Cause
    *
    */
-  void create_n1_sm_container(pdu_session_msg& msg, uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause);
-
-  //for testing purpose!!
-  void create_n1_sm_container(uint8_t msg_type, std::string& nas_msg_str, uint8_t sm_cause = 0);
+  void create_n1_sm_container(pdu_session_msg& msg, uint8_t msg_type, std::string& nas_msg_str, cause_value_5gsm_e sm_cause);
 
   /*
    * Create N2 SM Information to send to AMF (using NAS lib)

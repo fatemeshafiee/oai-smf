@@ -98,7 +98,6 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
     return RETURNerror;
   }
 
-
   //-------------------
   n11_trigger = sm_context_req;
   n11_triggered_pending = sm_context_resp;
@@ -125,7 +124,6 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   smf_cfg.get_pfcp_fseid(cp_fseid);
   cp_fseid.seid = ppc->seid;
   n4_ser->pfcp_ies.set(cp_fseid);
-
 
   //*******************
   // UPLINK
@@ -265,7 +263,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
           //set tunnel id
           xgpp_conv::pfcp_to_core_fteid(local_up_fteid, q.ul_fteid);
           //TODO: should be updated to 5G N3/N9 interface
-          q.ul_fteid.interface_type = S1_U_SGW_GTP_U;
+          q.ul_fteid.interface_type = S1_U_SGW_GTP_U; //UPF's N3 interface
           // comment if SPGW-C allocate up fteid
           //Update Qos Flow
           smf_qos_flow q2 = q;
@@ -308,27 +306,32 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 
   n11_triggered_pending->res.set_qos_flow_context(qos_flow);
 
-  //fill content for N1N2MessageTransfer (inlcuding N1, N2 SM)
+  //fill content for N1N2MessageTransfer (including N1, N2 SM)
 
   // Create N1 SM container & N2 SM Information
   smf_n1_n2 smf_n1_n2_inst;
   std::string n1_sm_msg,n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
+
+
   //TODO: should uncomment this line when including UPF in the test
-  //n11_triggered_pending->res.set_cause(REQUEST_ACCEPTED);//for testing purpose
+  n11_triggered_pending->res.set_cause(REQUEST_ACCEPTED);//for testing purpose
 
   if (n11_triggered_pending->res.get_cause() != REQUEST_ACCEPTED) { //PDU Session Establishment Reject
-    Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] PDU Session Establishment Reject\n");
-    smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg, 0); //TODO: need cause?
+    Logger::smf_app().debug("PDU Session Establishment Reject");
+    smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN); //TODO: need cause?
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
   } else { //PDU Session Establishment Accept
-    Logger::smf_n11().debug("[SMF N11: N1N2MessageTransfer] PDU Session Establishment Accept \n");
-    smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res, PDU_SESSION_ESTABLISHMENT_ACCEPT, n1_sm_msg, 0); //TODO: need cause?
+    Logger::smf_app().debug("PDU Session Establishment Accept");
+    smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res, PDU_SESSION_ESTABLISHMENT_ACCEPT, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN); //TODO: need cause?
+    smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+    n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
     //TODO: N2 SM Information (Step 11, section 4.3.2.2.1 @ 3GPP TS 23.502)
     smf_n1_n2_inst.create_n2_sm_information(n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ, n2_sm_info);
     smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
     n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
+
   }
 
   //Fill N1N2MesasgeTransferRequestData
@@ -392,6 +395,7 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
   if (not pfcp_associations::get_instance().select_up_node(up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
     // TODO
     sm_context_resp->res.set_cause(REMOTE_PEER_NOT_RESPONDING); //verify for 5G??
+    Logger::smf_app().info("[SMF Procedure] REMOTE_PEER_NOT_RESPONDING");
     return RETURNerror;
   }
 
@@ -413,8 +417,12 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
   std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified;
   sm_context_req_msg.get_qfis(list_of_qfis_to_be_modified);
 
+  for (auto i:list_of_qfis_to_be_modified){
+    Logger::smf_app().debug( "qfi to be modified: %d", i.qfi);
+  }
+
   ::fteid_t dl_fteid = {};
-  sm_context_req_msg.get_dl_fteid(dl_fteid);
+  sm_context_req_msg.get_dl_fteid(dl_fteid); //eNB's fteid
 
   for (auto qfi: list_of_qfis_to_be_modified){
     smf_qos_flow qos_flow;
@@ -593,11 +601,12 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
       return RETURNerror;
     }
   } else {
-    // send N11
-    Logger::smf_app().info( "Sending ITTI message %s to task TASK_PGWC_S5S8", n11_triggered_pending->get_msg_name());
+    // send to AMF, update response
+	//TODO: to be completed
+    Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());
     int ret = itti_inst->send_msg(n11_triggered_pending);
     if (RETURNok != ret) {
-      Logger::smf_app().error( "Could not send ITTI message %s to task TASK_PGWC_S5S8", n11_triggered_pending->get_msg_name());
+      Logger::smf_app().error( "Could not send ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());
     }
     return RETURNclear;
   }
@@ -626,20 +635,48 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   ::fteid_t dl_fteid = {};
   n11_trigger->req.get_dl_fteid(dl_fteid);
 
-  bool bearer_context_found = false;
+
+  std::map<uint8_t, qos_flow_context_modified> qos_flow_context_to_be_modifieds;
+  n11_triggered_pending->res.get_all_qos_flow_context_modifieds(qos_flow_context_to_be_modifieds);
+
 
   for (auto it_created_pdr : resp.pfcp_ies.created_pdrs) {
-    bearer_context_found = false;
     pfcp::pdr_id_t pdr_id = {};
     if (it_created_pdr.get(pdr_id)) {
       smf_qos_flow flow = {};
       if (ppc->get_qos_flow(pdr_id, flow)) {
-        std::map<uint8_t, qos_flow_context_modified> qos_flow_context_to_be_modifieds;
-        n11_triggered_pending->res.get_all_qos_flow_context_modifieds(qos_flow_context_to_be_modifieds);
 
+        for (auto it: qos_flow_context_to_be_modifieds){
+          flow.dl_fteid = dl_fteid;
+          flow.dl_fteid.interface_type = S1_U_ENODEB_GTP_U; //eNB's N3 interface
+
+         // flow.ul_fteid = it.second.ul_fteid;
+
+          pfcp::fteid_t local_up_fteid = {};
+          if (it_created_pdr.get(local_up_fteid)) {
+            xgpp_conv::pfcp_to_core_fteid(local_up_fteid, flow.ul_fteid);
+            flow.ul_fteid.interface_type = S1_U_SGW_GTP_U; //UPF's N3 interface, TODO: should be modified
+
+            Logger::smf_app().warn( "got local_up_fteid from created_pdr %s", flow.ul_fteid.toString().c_str());
+          } else {
+            Logger::smf_app().warn( "Could not get local_up_fteid from created_pdr");
+          }
+
+          flow.released = false;
+          smf_qos_flow flow2 = flow;
+          ppc->add_qos_flow(flow2);
+
+          qos_flow_context_modified qcm = {};
+          qcm.set_cause(REQUEST_ACCEPTED);
+          qcm.set_qfi(pfcp::qfi_t(it.first));
+          qcm.set_ul_fteid(flow.ul_fteid);
+          n11_triggered_pending->res.add_qos_flow_context_modified(qcm);
+          //TODO: remove this QFI from the list (as well as in n11_trigger->req)
+          break;
+
+        }
+/*
         for (auto qfi: list_of_qfis_to_be_modified){
-          bearer_context_found = true;
-
           pfcp::fteid_t local_up_fteid = {};
           if (it_created_pdr.get(local_up_fteid)) {
             xgpp_conv::pfcp_to_core_fteid(local_up_fteid, flow.ul_fteid);
@@ -663,6 +700,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
           break;
 
         }
+        */
       }
     } else {
       Logger::smf_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
@@ -677,22 +715,23 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
       if (it_update_far.get(far_id)) {
         smf_qos_flow flow = {};
         if (ppc->get_qos_flow(far_id, flow)) {
-          for (auto qfi: list_of_qfis_to_be_modified){
-            if (qfi.qfi == flow.qfi.qfi){
+          //for (auto qfi: list_of_qfis_to_be_modified){
+          for (auto it: qos_flow_context_to_be_modifieds){
+            if (it.first == flow.qfi.qfi){
               flow.dl_fteid = dl_fteid;
               smf_qos_flow flow2 = flow;
               ppc->add_qos_flow(flow2);
 
               qos_flow_context_modified qcm = {};
               qcm.set_cause(REQUEST_ACCEPTED);
-              qcm.set_qfi(qfi);
+              qcm.set_qfi(pfcp::qfi_t(it.first));
               qcm.set_ul_fteid(flow.ul_fteid);
               n11_triggered_pending->res.add_qos_flow_context_modified(qcm);
               break;
             }
           }
         } else {
-          Logger::smf_app().error( "Could not get eps bearer for far_id for update_far in %s", resp.pfcp_ies.get_msg_name());
+          Logger::smf_app().error( "Could not get qos flow for far_id for update_far in %s", resp.pfcp_ies.get_msg_name());
         }
       } else {
         Logger::smf_app().error( "Could not get far_id for update_far in %s", resp.pfcp_ies.get_msg_name());
@@ -700,12 +739,14 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
     }
   }
 
+
   n11_triggered_pending->res.set_cause(cause_gtp.cause_value);
+
 
   // TODO
   // check we got all responses vs n11_triggered_pending->res.flow_context_modified
 
-  //Optional: send ITTI message to N10 to trigger UDM registration (Nudm_UECM_Registration)
+  //TODO: Optional: send ITTI message to N10 to trigger UDM registration (Nudm_UECM_Registration)
   //see TS29503_Nudm_UECM.yaml ( /{ueId}/registrations/smf-registrations/{pduSessionId}:)
   /* std::shared_ptr<itti_n10_create_smf_registration_request> itti_msg = std::make_shared<itti_n10_create_smf_registration_request>(TASK_SMF_APP, TASK_SMF_N10, response);
 	int ret = itti_inst->send_msg(itti_msg);
@@ -717,6 +758,23 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   if (RETURNok != ret) {
     Logger::smf_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  n11_triggered_pending->get_msg_name());
   }
+
+  //The SMF may subscribe to the UE mobility event notification from the AMF (e.g. location reporting, UE
+  //moving into or out of Area Of Interest), by invoking Namf_EventExposure_Subscribe service operation
+  // For LADN, the SMF subscribes to the UE moving into or out of   LADN service area event notification by providing the LADN DNN as an indicator for the Area Of Interest
+  //see step 17@section 4.3.2.2.1@3GPP TS 23.502
+
+  if (cause.cause_value != CAUSE_VALUE_REQUEST_ACCEPTED)
+  {
+    //TODO: Nsmf_PDUSession_SMContextStatusNotify
+    /*  If the PDU Session establishment is not successful, the SMF informs the AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The SMF also releases any N4
+    session(s) created, any PDU Session address if allocated (e.g. IP address) and releases the association with PCF,
+    if any. In this case, step 19 is skipped.
+    see step 18, section 4.3.2.2.1@3GPP TS 23.502)
+     */
+  }
+
+
 }
 
 

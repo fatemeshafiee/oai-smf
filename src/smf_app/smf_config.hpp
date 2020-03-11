@@ -54,7 +54,6 @@
 #define SMF_CONFIG_STRING_INTERFACE_NAME                        "INTERFACE_NAME"
 #define SMF_CONFIG_STRING_IPV4_ADDRESS                          "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_PORT                                  "PORT"
-#define SMF_CONFIG_STRING_INTERFACE_SX                          "SX"
 #define SMF_CONFIG_STRING_INTERFACE_N4                          "N4"
 #define SMF_CONFIG_STRING_INTERFACE_N11                          "N11"
 
@@ -120,8 +119,7 @@
 #define SMF_CONFIG_STRING_ITTI_TASKS                            "ITTI_TASKS"
 #define SMF_CONFIG_STRING_ITTI_TIMER_SCHED_PARAMS               "ITTI_TIMER_SCHED_PARAMS"
 #define SMF_CONFIG_STRING_S11_SCHED_PARAMS                      "S11_SCHED_PARAMS"
-#define SMF_CONFIG_STRING_S5S8_SCHED_PARAMS                     "S5S8_SCHED_PARAMS"
-#define SMF_CONFIG_STRING_SX_SCHED_PARAMS                       "SX_SCHED_PARAMS"
+#define SMF_CONFIG_STRING_N4_SCHED_PARAMS                       "N4_SCHED_PARAMS"
 #define SMF_CONFIG_STRING_SMF_APP_SCHED_PARAMS                  "SMF_APP_SCHED_PARAMS"
 #define SMF_CONFIG_STRING_ASYNC_CMD_SCHED_PARAMS                "ASYNC_CMD_SCHED_PARAMS"
 
@@ -132,6 +130,9 @@
 #define SMF_CONFIG_STRING_UDM                                  "UDM"
 #define SMF_CONFIG_STRING_UDM_IPV4_ADDRESS                     "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_UDM_PORT                             "PORT"
+
+#define SMF_CONFIG_STRING_UPF_LIST                            "UPF_LIST"
+#define SMF_CONFIG_STRING_UPF_IPV4_ADDRESS                    "IPV4_ADDRESS"
 
 #define PGW_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -149,8 +150,7 @@ typedef struct interface_cfg_s {
 
 typedef struct itti_cfg_s {
   util::thread_sched_params itti_timer_sched_params;
-  util::thread_sched_params sx_sched_params;
-  util::thread_sched_params s5s8_sched_params;
+  util::thread_sched_params n4_sched_params;
   util::thread_sched_params smf_app_sched_params;
   util::thread_sched_params async_cmd_sched_params;
 } itti_cfg_t;
@@ -167,7 +167,6 @@ public:
   std::string       pid_dir;
   unsigned int      instance = 0;
 
-  interface_cfg_t sx;
   interface_cfg_t n4;
   interface_cfg_t n11;
   itti_cfg_t      itti;
@@ -223,7 +222,9 @@ public:
     unsigned int port;
   } udm_addr;
 
-  smf_config() : m_rw_lock(), pcef(), num_apn(0), pid_dir(), instance(0), sx(), n4(), n11(), itti() {
+  std::vector<pfcp::node_id_t> upfs;
+
+  smf_config() : m_rw_lock(), pcef(), num_apn(0), pid_dir(), instance(0), n4(), n11(), itti(), upfs() {
     for (int i = 0; i < PGW_NUM_APN_MAX; i++) {
       apn[i] = {};
     }
@@ -247,13 +248,9 @@ public:
     ue_mtu = 1500;
 
     itti.itti_timer_sched_params.sched_priority = 85;
-    itti.sx_sched_params.sched_priority = 84;
-    itti.s5s8_sched_params.sched_priority = 84;
+    itti.n4_sched_params.sched_priority = 84;
     itti.smf_app_sched_params.sched_priority = 84;
     itti.async_cmd_sched_params.sched_priority = 84;
-
-    sx.thread_rd_sched_params.sched_priority = 90;
-    sx.port = pfcp::default_port;
 
     n4.thread_rd_sched_params.sched_priority = 90;
     n4.port = pfcp::default_port;

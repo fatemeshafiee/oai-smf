@@ -141,6 +141,8 @@ public:
 
   std::shared_ptr<itti_n11_update_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_update_sm_context_response> n11_triggered_pending;
+  session_management_procedures_type_e session_procedure_type;
+
 };
 
 

@@ -407,7 +407,7 @@ bool pdu_session_update_sm_context_request::n2_sm_info_is_set() const
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::add_qfi(pfcp::qfi_t const& qfi)
 {
-   qfis.push_back(qfi);
+  qfis.push_back(qfi);
 }
 
 //-----------------------------------------------------------------------------
