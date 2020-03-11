@@ -495,6 +495,7 @@ typedef struct imsi_s imsi_t;
 // 8.4 Cause
 enum cause_value_e {
   /* Request / Initial message */
+  UNKNOWN_ERROR                   = -1,
   LOCAL_DETACH                    = 2,
   COMPLETE_DETACH                 = 3,
   RAT_CHANGE_3GPP_TO_NON_3GPP     = 4,  ///< RAT changed from 3GPP to Non-3GPP

@@ -36,7 +36,7 @@
 class itti_n4_restore : public itti_msg {
 public:
 	itti_n4_restore(const task_id_t origin, const task_id_t destination):
-    itti_msg(RESTORE_SX_SESSIONS, origin, destination), sessions() {}
+    itti_msg(RESTORE_N4_SESSIONS, origin, destination), sessions() {}
 	itti_n4_restore(const itti_n4_restore& i) : itti_msg(i), sessions(i.sessions)  {}
 	itti_n4_restore(const itti_n4_restore& i, const task_id_t orig, const task_id_t dest) : itti_n4_restore(i)  {
     origin = orig;
