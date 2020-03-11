@@ -45,6 +45,8 @@ IndividualSMContextApiImpl::IndividualSMContextApiImpl(std::shared_ptr<Pistache:
 { }
 
 void IndividualSMContextApiImpl::release_sm_context(const std::string &smContextRef, const SmContextReleaseMessage &smContextReleaseMessage, Pistache::Http::ResponseWriter &response) {
+
+  //TODO: to be updated as update_sm_context_handler
   Logger::smf_api_server().info("release_sm_context...");
 
   //handle Nsmf_PDUSession_UpdateSMContext Request
@@ -92,21 +94,16 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
   if (smContextUpdateData.n2SmInfoIsSet()){
     //N2 SM (for Session establishment)
     std::string n2_sm_information = smContextUpdateMessage.getBinaryDataN2SmInformation();
-    //std::string n2_sm_information = (smContextUpdateData.getN2SmInfo()).getContentId();
-    std::string n2_sm_msg_hex;
-    m_smf_app->convert_string_2_hex(n2_sm_information, n2_sm_msg_hex);
     Logger::smf_api_server().debug("smContextMessage, n2 sm information %s", n2_sm_information.c_str());
     std::string n2_sm_info_type = smContextUpdateData.getN2SmInfoType();
-    sm_context_req_msg.set_n2_sm_information(n2_sm_msg_hex);
+    sm_context_req_msg.set_n2_sm_information(n2_sm_information);
     sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
 
   } else if (smContextUpdateData.n1SmMsgIsSet()){
     //N1 SM (for session modification)
     std::string n1_sm_message = smContextUpdateMessage.getBinaryDataN1SmMessage();
-    std::string n1_sm_msg_hex;
-    m_smf_app->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
     Logger::smf_api_server().debug("smContextMessage, n1 sm message %s", n1_sm_message.c_str());
-    sm_context_req_msg.set_n1_sm_message(n1_sm_msg_hex);
+    sm_context_req_msg.set_n1_sm_message(n1_sm_message);
   }
   //Step 2. TODO: initialize necessary values for sm context req from smContextUpdateData
 
