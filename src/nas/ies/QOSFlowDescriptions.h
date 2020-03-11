@@ -118,5 +118,6 @@ typedef struct{
 
 int encode_qos_flow_descriptions ( QOSFlowDescriptions qosflowdescriptions, uint8_t iei, uint8_t * buffer, uint32_t len  ) ;
 int decode_qos_flow_descriptions ( QOSFlowDescriptions * qosflowdescriptions, uint8_t iei, uint8_t * buffer, uint32_t len  ) ;
+void free_decode_qos_flow_descriptions(QOSFlowDescriptions * qosflowdescriptions);
 
 #endif

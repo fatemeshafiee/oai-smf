@@ -1,24 +1,43 @@
+/*
+ * Licensed to the OpenAirInterface (OAI) Software Alliance under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The OpenAirInterface Software Alliance licenses this file to You under
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this file
+ * except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.openairinterface.org/?page_id=698
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *-------------------------------------------------------------------------------
+ * For more information about the OpenAirInterface (OAI) Software Alliance:
+ *      contact@openairinterface.org
+ */
+
+
 #include "common_types.h"
 #include "mm_msg.h"
-//#include "log.h"
 #include "TLVDecoder.h"
 #include "TLVEncoder.h"
-//#include "log.h"
-//#include "nas_itti_messaging.h"
 
 /****************************************************************************/
 /*******************  L O C A L    D E F I N I T I O N S  *******************/
 /****************************************************************************/
 
-static int                              _fivegmm_msg_decode_header (
+static int _fivegmm_msg_decode_header (
   mm_msg_header_t * header,
   const uint8_t * buffer,
   uint32_t len);
-static int                              _fivegmm_msg_encode_header (
+
+static int _fivegmm_msg_encode_header (
   const mm_msg_header_t * header,
   uint8_t * buffer,
   uint32_t len);
-
 
 /****************************************************************************
  **                                                                        **
@@ -67,46 +86,46 @@ fivegmm_msg_encode (
       //encode_result = encode_authentication_request(&msg->authentication_request,buffer,len);/* msg define in openair5g-cn/src/amf/nas/mm/msg  */
       //break;
       case AUTHENTICATION_REQUEST:
-	  	   encode_result = encode_authentication_request(&msg->specific_msg.authentication_request, buffer, len);
+	  	   encode_result = encode_authentication_request(&msg->authentication_request, buffer, len);
 	  break;	
       case AUTHENTICATION_RESPONSE:
-	       encode_result = encode_authentication_response(&msg->specific_msg.authentication_response, buffer, len);	  
+	       encode_result = encode_authentication_response(&msg->authentication_response, buffer, len);
 	  break;	  
 	  case AUTHENTICATION_RESULT:
-	       encode_result = encode_authentication_result(&msg->specific_msg.authentication_result, buffer, len);
+	       encode_result = encode_authentication_result(&msg->authentication_result, buffer, len);
 	  break;
 	  case AUTHENTICATION_REJECT:
-	       encode_result = encode_authentication_reject(&msg->specific_msg.authentication_reject, buffer, len);
+	       encode_result = encode_authentication_reject(&msg->authentication_reject, buffer, len);
 	  break;
 	  case AUTHENTICATION_FAILURE:
-	       encode_result = encode_authentication_failure(&msg->specific_msg.authentication_failure, buffer, len);
+	       encode_result = encode_authentication_failure(&msg->authentication_failure, buffer, len);
 	  break;
       case REGISTRATION_REQUEST:
-	  	   encode_result = encode_registration_request(&msg->specific_msg.registration_request, buffer, len);
+	  	   encode_result = encode_registration_request(&msg->registration_request, buffer, len);
 	  break;
 	  case REGISTRATION_ACCEPT:
-	  	   encode_result = encode_registration_accept(&msg->specific_msg.registration_accept, buffer, len);
+	  	   encode_result = encode_registration_accept(&msg->registration_accept, buffer, len);
 	  break;
 	  case REGISTRATION_COMPLETE:
-	  	   encode_result = encode_registration_complete(&msg->specific_msg.registration_complete, buffer, len);
+	  	   encode_result = encode_registration_complete(&msg->registration_complete, buffer, len);
 	  break;
 	  case REGISTRATION_REJECT:
-	  	   encode_result = encode_registration_reject(&msg->specific_msg.registration_reject, buffer, len);
+	  	   encode_result = encode_registration_reject(&msg->registration_reject, buffer, len);
 	  break;
       case IDENTITY_REQUEST:
-	  	  encode_result = encode_identity_request(&msg->specific_msg.identity_request, buffer, len);
+	  	  encode_result = encode_identity_request(&msg->identity_request, buffer, len);
 	  break;
 	  case IDENTITY_RESPONSE:
-	  	  encode_result = encode_identity_response(&msg->specific_msg.identity_response, buffer, len);
+	  	  encode_result = encode_identity_response(&msg->identity_response, buffer, len);
 	  break;
 	  case SECURITY_MODE_COMMAND:
-	  	  encode_result = encode_security_mode_command(&msg->specific_msg.security_mode_command, buffer, len);
+	  	  encode_result = encode_security_mode_command(&msg->security_mode_command, buffer, len);
 	  break;
 	  case SECURITY_MODE_COMPLETE:
-	  	  encode_result = encode_security_mode_complete(&msg->specific_msg.security_mode_complete, buffer, len);
+	  	  encode_result = encode_security_mode_complete(&msg->security_mode_complete, buffer, len);
 	  break;
 	  case SECURITY_MODE_REJECT:
-	  	  encode_result = encode_security_mode_reject(&msg->specific_msg.security_mode_reject, buffer, len);
+	  	  encode_result = encode_security_mode_reject(&msg->security_mode_reject, buffer, len);
 	  break;
 	  
   }
@@ -206,46 +225,46 @@ mm_msg_decode (
   //OAILOG_INFO (LOG_NAS_EMM, "EMM-MSG   - Message Type 0x%02x\n", msg->header.message_type);
   switch (msg->header.message_type) {//plain nas message e.g. registrationrequest message
       case AUTHENTICATION_REQUEST:
-	      decode_result = decode_authentication_request(&msg->specific_msg.authentication_request, buffer, len);
+	      decode_result = decode_authentication_request(&msg->authentication_request, buffer, len);
 	  break;
 	  case AUTHENTICATION_RESPONSE:
-	      decode_result = decode_authentication_response(&msg->specific_msg.authentication_response, buffer, len);
+	      decode_result = decode_authentication_response(&msg->authentication_response, buffer, len);
 	  break;
 	  case AUTHENTICATION_RESULT:
-	      decode_result = decode_authentication_result(&msg->specific_msg.authentication_result, buffer, len);
+	      decode_result = decode_authentication_result(&msg->authentication_result, buffer, len);
 	  break;
 	  case AUTHENTICATION_REJECT:
-	  	  decode_result = decode_authentication_reject(&msg->specific_msg.authentication_reject, buffer, len);
+	  	  decode_result = decode_authentication_reject(&msg->authentication_reject, buffer, len);
 	  break;
 	  case AUTHENTICATION_FAILURE:
-	      decode_result = decode_authentication_failure(&msg->specific_msg.authentication_failure, buffer, len);
+	      decode_result = decode_authentication_failure(&msg->authentication_failure, buffer, len);
 	  break;
       case REGISTRATION_REQUEST:
-	  	  decode_result = decode_registration_request(&msg->specific_msg.registration_request, buffer, len);
+	  	  decode_result = decode_registration_request(&msg->registration_request, buffer, len);
 	  break;
 	  case REGISTRATION_ACCEPT:
-	  	  decode_result = decode_registration_accept(&msg->specific_msg.registration_accept, buffer, len);
+	  	  decode_result = decode_registration_accept(&msg->registration_accept, buffer, len);
 	  break;
 	  case REGISTRATION_COMPLETE:
-	  	  decode_result = decode_registration_complete(&msg->specific_msg.registration_complete, buffer, len);
+	  	  decode_result = decode_registration_complete(&msg->registration_complete, buffer, len);
 	  break;
 	  case REGISTRATION_REJECT:
-	  	  decode_result = decode_registration_reject(&msg->specific_msg.registration_reject, buffer, len);
+	  	  decode_result = decode_registration_reject(&msg->registration_reject, buffer, len);
 	  break;
 	  case IDENTITY_REQUEST:
-	  	  decode_result = decode_identity_request(&msg->specific_msg.identity_request, buffer, len);
+	  	  decode_result = decode_identity_request(&msg->identity_request, buffer, len);
 	  break;
 	  case IDENTITY_RESPONSE:
-	  	  decode_result = decode_identity_response(&msg->specific_msg.identity_response, buffer, len);
+	  	  decode_result = decode_identity_response(&msg->identity_response, buffer, len);
 	  break;
 	  case SECURITY_MODE_COMMAND:
-	  	  decode_result = decode_security_mode_command(&msg->specific_msg.security_mode_command, buffer, len);
+	  	  decode_result = decode_security_mode_command(&msg->security_mode_command, buffer, len);
 	  break;
 	  case SECURITY_MODE_COMPLETE:
-	  	  decode_result = decode_security_mode_complete(&msg->specific_msg.security_mode_complete, buffer, len);
+	  	  decode_result = decode_security_mode_complete(&msg->security_mode_complete, buffer, len);
 	  break;
 	  case SECURITY_MODE_REJECT:
-	  	  decode_result = decode_security_mode_reject(&msg->specific_msg.security_mode_reject, buffer, len);
+	  	  decode_result = decode_security_mode_reject(&msg->security_mode_reject, buffer, len);
 	  break;
   }
   if (decode_result < 0) {

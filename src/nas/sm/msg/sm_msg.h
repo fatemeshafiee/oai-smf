@@ -1,3 +1,27 @@
+/*
+ * Licensed to the OpenAirInterface (OAI) Software Alliance under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The OpenAirInterface Software Alliance licenses this file to You under
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this file
+ * except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.openairinterface.org/?page_id=698
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *-------------------------------------------------------------------------------
+ * For more information about the OpenAirInterface (OAI) Software Alliance:
+ *      contact@openairinterface.org
+ */
+
+#ifndef SM_MSG_H_
+#define SM_MSG_H_
+
 #include "smMsgDef.h"
 #include "PDUSessionEstablishmentRequest.h"
 #include "PDUSessionEstablishmentAccept.h"
@@ -20,9 +44,8 @@
 
 #include "_5GSMStatus.h"
 
-typedef struct {
+typedef union {
   sm_msg_header_t header;
-  union {
   pdu_session_establishment_request_msg pdu_session_establishment_request;
   pdu_session_establishment_accept_msg pdu_session_establishment_accept;
   pdu_session_establishment_reject_msg pdu_session_establishment_reject;
@@ -43,5 +66,15 @@ typedef struct {
   pdu_session_release_complete_msg pdu_session_release_complete;
 
   _5gsm_status_msg _5gsm_status;
-  } specific_msg;
 }SM_msg;
+
+int sm_msg_decode (
+  SM_msg * msg,
+  uint8_t * buffer,
+  uint32_t len);
+
+int fivegsm_msg_encode (
+  SM_msg * msg,
+  uint8_t * buffer,
+  uint32_t len);
+#endif
