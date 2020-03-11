@@ -25,7 +25,7 @@
   \company Eurecom
   \date 2019
   \email: tien-thinh.nguyen@eurecom.fr
-*/
+ */
 
 #include "smf.h"
 #include "common_defs.h"
@@ -40,7 +40,6 @@
 
 #define UDM_CURL_TIMEOUT_MS 100L
 #define UDM_NUMBER_RETRIES 3
-#define HTTP_STATUS_OK 200
 
 using namespace smf;
 using namespace std;
@@ -55,14 +54,14 @@ void smf_n10_task (void*);
  * To read content of the response from UDM
  */
 static std::size_t callback(
-		const char* in,
-		std::size_t size,
-		std::size_t num,
-		std::string* out)
+    const char* in,
+    std::size_t size,
+    std::size_t num,
+    std::string* out)
 {
-	const std::size_t totalBytes(size * num);
-	out->append(in, totalBytes);
-	return totalBytes;
+  const std::size_t totalBytes(size * num);
+  out->append(in, totalBytes);
+  return totalBytes;
 }
 
 
@@ -78,7 +77,7 @@ void smf_n10_task (void *args_p)
     auto *msg = shared_msg.get();
     switch (msg->msg_type) {
 
-    case N10_GET_SESSION_MANAGEMENT_SUBSCRIPTION:
+    case N10_SESSION_GET_SESSION_MANAGEMENT_SUBSCRIPTION:
       //if (itti_n10_get_session_management_subscription* m = dynamic_cast<itti_n10_get_session_management_subscription*>(msg)) {
       //  smf_n10_inst->send_sm_data_get_msg(ref(*m));
       //}
@@ -120,126 +119,126 @@ void smf_n10::handle_receive_sm_data_notification()
 
 bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, std::shared_ptr<session_management_subscription> subscription)
 {
-	//retrieve a UE's Session Management Subscription Data (TS29503_Nudm_SDM.yaml: /{supi}/sm-data)
-	//use curl to send data for the moment
+  //retrieve a UE's Session Management Subscription Data (TS29503_Nudm_SDM.yaml: /{supi}/sm-data)
+  //use curl to send data for the moment
 
-	nlohmann::json jsonData;
-	curl_global_init(CURL_GLOBAL_DEFAULT);
-	struct curl_slist *headers = NULL;
-	headers = curl_slist_append(headers, "Accept: application/json");
-	headers = curl_slist_append(headers, "Content-Type: application/json");
-	headers = curl_slist_append(headers, "charsets: utf-8");
+  nlohmann::json jsonData;
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+  struct curl_slist *headers = nullptr;
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+  headers = curl_slist_append(headers, "charsets: utf-8");
 
-	CURL *curl = curl_easy_init();
-	std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.udm_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.udm_addr.port) + "/nudm-sdm/v2/" + std::to_string(supi) +"/sm-data";
-	Logger::smf_n10().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
+  CURL *curl = curl_easy_init();
+  std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.udm_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.udm_addr.port) + "/nudm-sdm/v2/" + std::to_string(supi) +"/sm-data";
+  Logger::smf_n10().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
 
-	if(curl) {
-		CURLcode res;
+  if(curl) {
+    CURLcode res;
 
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
-		curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
-		curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, UDM_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
+    curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, UDM_CURL_TIMEOUT_MS);
 
-		// Response information.
-		long httpCode(0);
-		std::unique_ptr<std::string> httpData(new std::string());
+    // Response information.
+    long httpCode(0);
+    std::unique_ptr<std::string> httpData(new std::string());
 
-		// Hook up data handling function.
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
-		//curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData);
-		int numRetries = 0;
-		while (numRetries < UDM_NUMBER_RETRIES){
-			res = curl_easy_perform(curl);
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-			Logger::smf_n10().debug("[get_sm_data] Response from UDM, Http Code: %d ", httpCode);
+    // Hook up data handling function.
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+    //curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData);
+    int numRetries = 0;
+    while (numRetries < UDM_NUMBER_RETRIES){
+      res = curl_easy_perform(curl);
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+      Logger::smf_n10().debug("[get_sm_data] Response from UDM, Http Code: %d ", httpCode);
 
-			if (httpCode == HTTP_STATUS_OK)
-			{
-				Logger::smf_n10().debug("[get_sm_data] Got successful response from UDM, URL: %s ", url.c_str());
-				//Logger::smf_n10().debug("[get_sm_data] Http Data from UDM: %s ", *httpData.get());
-				try{
-					jsonData = nlohmann::json::parse(*httpData.get());
-					//curl_easy_cleanup(curl);
-					break;
-				} catch (json::exception& e){
-					Logger::smf_n10().warn("[get_sm_data] Couldn't Parse json data from UDM");
-				}
-				numRetries++;
-			}
-			else
-			{
-				Logger::smf_n10().warn("[get_sm_data] Couldn't GET response from UDM, URL %s, retry ...", url.c_str());
-				//retry
-				numRetries++;
-			}
-		}
-		curl_easy_cleanup(curl);
-	}
+      if (static_cast<http_response_codes_e> (httpCode) == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
+      {
+        Logger::smf_n10().debug("[get_sm_data] Got successful response from UDM, URL: %s ", url.c_str());
+        //Logger::smf_n10().debug("[get_sm_data] Http Data from UDM: %s ", *httpData.get());
+        try{
+          jsonData = nlohmann::json::parse(*httpData.get());
+          //curl_easy_cleanup(curl);
+          break;
+        } catch (json::exception& e){
+          Logger::smf_n10().warn("[get_sm_data] Couldn't Parse json data from UDM");
+        }
+        numRetries++;
+      }
+      else
+      {
+        Logger::smf_n10().warn("[get_sm_data] Couldn't GET response from UDM, URL %s, retry ...", url.c_str());
+        //retry
+        numRetries++;
+      }
+    }
+    curl_easy_cleanup(curl);
+  }
 
-	//process the response
-	if (!jsonData.empty()){
-		Logger::smf_n10().debug("[get_sm_data] GET response from UDM %s", jsonData.dump().c_str());
+  //process the response
+  if (!jsonData.empty()){
+    Logger::smf_n10().debug("[get_sm_data] GET response from UDM %s", jsonData.dump().c_str());
 
-		//retrieve SessionManagementSubscription and store in the context
-		for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin(); it != jsonData["dnnConfigurations"].end(); ++it ){
-			Logger::smf_n10().debug("[get_sm_data] DNN %s", it.key().c_str());
+    //retrieve SessionManagementSubscription and store in the context
+    for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin(); it != jsonData["dnnConfigurations"].end(); ++it ){
+      Logger::smf_n10().debug("[get_sm_data] DNN %s", it.key().c_str());
 
-			//dnn_configuration_t *dnn_configuration = new (dnn_configuration_t);
-			//std::shared_ptr<dnn_configuration_t> sdc;
-			//subscription->find_dnn_configuration(it.key(), sdc);
+      //dnn_configuration_t *dnn_configuration = new (dnn_configuration_t);
+      //std::shared_ptr<dnn_configuration_t> sdc;
+      //subscription->find_dnn_configuration(it.key(), sdc);
 
-			try {
-		                std::shared_ptr<dnn_configuration_t> dnn_configuration = std::make_shared<dnn_configuration_t>();
-				//PDU Session Type
-				pdu_session_type_t pdu_session_type (pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
-				std::string default_session_type = it.value()["pduSessionTypes"]["defaultSessionType"];
-				Logger::smf_n10().debug("[get_sm_data] default_session_type %s", default_session_type.c_str());
-				if (default_session_type.compare("IPV4") == 0) {
-					pdu_session_type.pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
-				} else if (default_session_type.compare("IPV6") == 0) {
-					pdu_session_type.pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV6;
-				} else if (default_session_type.compare("IPV4V6") == 0) {
-					pdu_session_type.pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
-				}
-				dnn_configuration->pdu_session_types.default_session_type = pdu_session_type;
+      try {
+        std::shared_ptr<dnn_configuration_t> dnn_configuration = std::make_shared<dnn_configuration_t>();
+        //PDU Session Type
+        pdu_session_type_t pdu_session_type (pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
+        std::string default_session_type = it.value()["pduSessionTypes"]["defaultSessionType"];
+        Logger::smf_n10().debug("[get_sm_data] default_session_type %s", default_session_type.c_str());
+        if (default_session_type.compare("IPV4") == 0) {
+          pdu_session_type.pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
+        } else if (default_session_type.compare("IPV6") == 0) {
+          pdu_session_type.pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV6;
+        } else if (default_session_type.compare("IPV4V6") == 0) {
+          pdu_session_type.pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
+        }
+        dnn_configuration->pdu_session_types.default_session_type = pdu_session_type;
 
-				//Ssc_Mode
-				ssc_mode_t ssc_mode(ssc_mode_e::SSC_MODE_1);
-				std::string default_ssc_mode = it.value()["sscModes"]["defaultSscMode"];
-				Logger::smf_n10().debug("[get_sm_data] defaultSscMode %s", default_ssc_mode.c_str());
-				if (default_ssc_mode.compare("SSC_MODE_1") == 0) {
-					dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_1);
-				} else if (default_ssc_mode.compare("SSC_MODE_2") == 0) {
-					dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_2);
-				} else if (default_ssc_mode.compare("SSC_MODE_3") == 0) {
-					dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_3);
-				}
+        //Ssc_Mode
+        ssc_mode_t ssc_mode(ssc_mode_e::SSC_MODE_1);
+        std::string default_ssc_mode = it.value()["sscModes"]["defaultSscMode"];
+        Logger::smf_n10().debug("[get_sm_data] defaultSscMode %s", default_ssc_mode.c_str());
+        if (default_ssc_mode.compare("SSC_MODE_1") == 0) {
+          dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_1);
+        } else if (default_ssc_mode.compare("SSC_MODE_2") == 0) {
+          dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_2);
+        } else if (default_ssc_mode.compare("SSC_MODE_3") == 0) {
+          dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode_t(ssc_mode_e::SSC_MODE_3);
+        }
 
-				//5gQosProfile
-				dnn_configuration->_5g_qos_profile._5qi = it.value()["5gQosProfile"]["5qi"];
-				dnn_configuration->_5g_qos_profile.arp.priority_level = it.value()["5gQosProfile"]["arp"]["priorityLevel"];
-				dnn_configuration->_5g_qos_profile.arp.preempt_cap = it.value()["5gQosProfile"]["arp"]["preemptCap"];
-				dnn_configuration->_5g_qos_profile.arp.preempt_vuln = it.value()["5gQosProfile"]["arp"]["preemptVuln"];
+        //5gQosProfile
+        dnn_configuration->_5g_qos_profile._5qi = it.value()["5gQosProfile"]["5qi"];
+        dnn_configuration->_5g_qos_profile.arp.priority_level = it.value()["5gQosProfile"]["arp"]["priorityLevel"];
+        dnn_configuration->_5g_qos_profile.arp.preempt_cap = it.value()["5gQosProfile"]["arp"]["preemptCap"];
+        dnn_configuration->_5g_qos_profile.arp.preempt_vuln = it.value()["5gQosProfile"]["arp"]["preemptVuln"];
 
-				//session_ambr
-				dnn_configuration->session_ambr.uplink = it.value()["sessionAmbr"]["uplink"];
-				dnn_configuration->session_ambr.downlink = it.value()["sessionAmbr"]["downlink"];
-				Logger::smf_n10().debug("[get_sm_data] sessionAmbr uplink %s, downlink %s", dnn_configuration->session_ambr.uplink.c_str(), dnn_configuration->session_ambr.downlink.c_str());
+        //session_ambr
+        dnn_configuration->session_ambr.uplink = it.value()["sessionAmbr"]["uplink"];
+        dnn_configuration->session_ambr.downlink = it.value()["sessionAmbr"]["downlink"];
+        Logger::smf_n10().debug("[get_sm_data] sessionAmbr uplink %s, downlink %s", dnn_configuration->session_ambr.uplink.c_str(), dnn_configuration->session_ambr.downlink.c_str());
 
-				//sdc = std::shared_ptr<dnn_configuration_t> (dnn_configuration);
-				subscription->insert_dnn_configuration(it.key(), dnn_configuration);
-			} catch (nlohmann::json::exception& e){
-				Logger::smf_n10().warn("[get_sm_data] exception message %s, exception id %d ", e.what(), e.id);
-				return false;
-			}
-		}
-		return true;
-	} else{
-		return false;
-	}
+        //sdc = std::shared_ptr<dnn_configuration_t> (dnn_configuration);
+        subscription->insert_dnn_configuration(it.key(), dnn_configuration);
+      } catch (nlohmann::json::exception& e){
+        Logger::smf_n10().warn("[get_sm_data] exception message %s, exception id %d ", e.what(), e.id);
+        return false;
+      }
+    }
+    return true;
+  } else{
+    return false;
+  }
 
 }
 

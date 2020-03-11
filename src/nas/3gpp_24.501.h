@@ -1,3 +1,25 @@
+/*
+ * Licensed to the OpenAirInterface (OAI) Software Alliance under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The OpenAirInterface Software Alliance licenses this file to You under
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this file
+ * except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.openairinterface.org/?page_id=698
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *-------------------------------------------------------------------------------
+ * For more information about the OpenAirInterface (OAI) Software Alliance:
+ *      contact@openairinterface.org
+ */
+
+
 #ifndef FILE_3GPP_24_501_H_SEEN
 #define FILE_3GPP_24_501_H_SEEN
 #ifdef __cplusplus
@@ -213,6 +235,126 @@ static const std::vector<std::string> request_type_e2str = {
 		"MA_PDU_REQUEST",
 		"RESERVED"
 };
+
+enum class cause_value_5gsm_e {
+  CAUSE_0_UNKNOWN = 0,
+	CAUSE_8_OPERATOR_DETERMINED_BARRING = 8,
+	CAUSE_26_INSUFFICIENT_RESOURCES = 26,
+	CAUSE_27_MISSING_OR_UNKNOWN_DNN = 27,
+	CAUSE_28_UNKNOWN_PDU_SESSION_TYPE = 28,
+	CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED	= 29,
+	CAUSE_31_REQUEST_REJECTED_UNSPECIFIED = 31,
+	CAUSE_32_SERVICE_OPTION_NOT_SUPPORTED = 32,
+	CAUSE_33_REQUESTED_SERVICE_OPTION_NOT_SUBSCRIBED = 33,
+	CAUSE_35_PTI_ALREADY_IN_USE = 35,
+	CAUSE_36_REGULAR_DEACTIVATION = 36,
+	CAUSE_38_NETWORK_FAILURE = 38,
+	CAUSE_39_REACTIVATION_REQUESTED = 39,
+	CAUSE_41_SEMATIC_ERROR_IN_THE_TFT_OPERATION = 41,
+	CAUSE_42_SYNTACTICAL_ERROR_IN_THE_TFT_OPERATIOIN = 42,
+	CAUSE_43_INVALID_PDU_SESSION_IDENTITY = 43,
+	CAUSE_44_SEMANTIC_ERRORS_IN_PACKET_FILTERS = 44,
+	CAUSE_45_SYNTACTICAL_ERROR_IN_PACKET_FILTERS = 45,
+	CAUSE_46_OUT_OF_LAND_SERVICE_AREA = 46,
+	CAUSE_47_PTI_MISMATCH = 47,
+	CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED = 50,
+	CAUSE_51_PDU_SESSION_TYPE_IPV6_ONLY_ALLOWED = 50,
+	CAUSE_54_PDU_SESSION_DOES_NOT_EXIST = 54,
+	CAUSE_67_INSUFFICIENT_RESOURCES_FOR_SPECIFIC_SLICE_AND_DNN =67,
+	CAUSE_68_NOT_SUPPORTED_SSC_MODE = 68,
+	CAUSE_69_INSUFFICIENT_RESOURCES_FOR_SPECIFIC_SLICE = 69,
+	CAUSE_70_MISSING_OR_UNKNOWN_DNN_IN_A_SLICE = 70,
+	CAUSE_81_INVALID_PTI_VALUE = 81,
+	CAUSE_82_MAXIMUM_DATA_RATE_PER_UE_FOR_USER_PLANE_INTEGRITY_PROTECTION_IS_TOO_LOW = 82,
+	CAUSE_83_SEMANTIC_ERROR_IN_THE_QOS_OPERATION =83,
+	CAUSE_84_SYNTACTICAL_ERROR_IN_THE_QOS_OPERATION = 84,
+	CAUSE_85_INVALID_MAPPED_EPS_BEARER_IDENTITY = 85,
+	//Protocol errors
+	CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE = 95,
+    CAUSE_96_INVALID_MANDATORY_INFORMATION = 96,
+    CAUSE_97_MESSAGE_TYPE_NON_EXISTENT_OR_NOTIMPLEMENTED = 97,
+    CAUSE_98_MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 98,
+    CAUSE_99_INFORMATION_ELEMENT_NON_EXISTENT_OR_NOT_IMPLEMENTED = 99,
+    CAUSE_100_CONDITIONAL_IE_ERROR = 100,
+    CAUSE_101_MESSAGE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 101,
+    CAUSE_111_PROTOCOL_ERROR_UNSPECIFIED = 111
+	/*
+  Cause #8 – Operator Determined Barring
+  Cause #26 – Insufficient resources
+  Cause #27 – Missing or unknown DNN
+  Cause #28 – Unknown PDU session type
+  Cause #29 – User authentication or authorization failed
+  Cause #31 – Request rejected, unspecified
+  Cause #32 – Service option not supported
+  Cause #33 – Requested service option not subscribed
+  Cause #35 – PTI already in use
+  Cause #36 – Regular deactivation
+  Cause #38 – Network failure
+  Cause #39 – Reactivation requested
+  Cause #41 – Semantic error in the TFT operation
+  Cause #42 – Syntactical error in the TFT operation
+  Cause #43 –Invalid PDU session identity
+  Cause #44 – Semantic errors in packet filter(s)
+	Cause #45 – Syntactical error in packet filter(s)
+	Cause #46 –Out of LADN service area
+	Cause #47 –PTI mismatch
+	Cause #50 – PDU session type IPv4 only allowed
+	Cause #51 – PDU session type IPv6 only allowed
+	Cause #54 –PDU session does not exist
+	Cause #67 – Insufficient resources for specific slice and DNN
+	Cause #68 – Not supported SSC mode
+	Cause #69 –Insufficient resources for specific slice
+	Cause #70 – Missing or unknown DNN in a slice
+	Cause #81 – Invalid PTI value
+	Cause #82 – Maximum data rate per UE for user-plane integrity protection is too low
+	Cause #83 – Semantic error in the QoS operation
+	Cause #84 – Syntactical error in the QoS operation
+	Cause #85 – Invalid mapped EPS bearer identity
+	//Protocol errors
+	Cause #95 – Semantically incorrect message
+  Cause #96 – Invalid mandatory information
+  Cause #97 – Message type non-existent or not implemented
+  Cause #98 – Message type not compatible with protocol state
+  Cause #99 – Information element non-existent or not implemented
+  Cause #100 – Conditional IE error
+  Cause #101 – Message not compatible with protocol state
+  Cause #111 – Protocol error, unspecified
+	 */
+
+};
+
+
+enum cause_value_protocol_errors_e {
+	CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE = 95
+	/*
+Cause #95 – Semantically incorrect message
+Cause #96 – Invalid mandatory information
+Cause #97 – Message type non-existent or not implemented
+Cause #98 – Message type not compatible with protocol state
+Cause #99 – Information element non-existent or not implemented
+Cause #100 – Conditional IE error
+Cause #101 – Message not compatible with protocol state
+Cause #111 – Protocol error, unspecified
+	 */
+
+};
+
+//The 5GSM sublayer states for PDU session handling in the network
+//Section 6.1.3.3 @3GPP TS 24.501 V16.1.0
+enum class pdu_session_status_e {
+  PDU_SESSION_INACTIVE = 0,
+  PDU_SESSION_INACTIVE_PENDING  = 1,
+  PDU_SESSION_MODIFICATION_PENDING =2,
+  PDU_SESSION_ACTIVE = 3
+};
+
+static const std::vector<std::string> pdu_session_status_e2str = {
+    "PDU_SESSION_INACTIVE",
+    "PDU_SESSION_INACTIVE_PENDING",
+    "PDU_SESSION_MODIFICATION_PENDING",
+    "PDU_SESSION_ACTIVE"
+};
+
 
 #endif
 

@@ -26,7 +26,7 @@ int encode_pdu_address ( PDUAddress pduaddress, uint8_t iei, uint8_t * buffer, u
 
 	ENCODE_U8(buffer+encoded,(uint8_t)(pduaddress.pdu_session_type_value&0x07),encoded);
 
-    if ((encode_result = encode_bstring (pduaddress.pdu_address_information, buffer + encoded, len - encoded)) < 0)//加密,实体,首地址,长度
+    if ((encode_result = encode_bstring (pduaddress.pdu_address_information, buffer + encoded, len - encoded)) < 0)
         return encode_result;
     else
         encoded += encode_result;

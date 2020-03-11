@@ -24,7 +24,7 @@
    \author  Lionel GAUTHIER
    \date 2019
    \email: lionel.gauthier@eurecom.fr
-*/
+ */
 #include "common_defs.h"
 #include "logger.hpp"
 #include "smf_pfcp_association.hpp"
@@ -69,30 +69,30 @@ void pfcp_association::notify_del_session(const pfcp::fseid_t& cp_fseid)
 //   }
 // }
 //------------------------------------------------------------------------------
-void pfcp_association::restore_sx_sessions()
+void pfcp_association::restore_n4_sessions()
 {
   std::unique_lock<std::mutex> l(m_sessions);
   if (sessions.size()) {
     is_restore_sessions_pending = true;
-    sx_session_restore_procedure * restore_proc = new sx_session_restore_procedure(sessions);
+    n4_session_restore_procedure * restore_proc = new n4_session_restore_procedure(sessions);
     restore_proc->run();
   }
 }
 //------------------------------------------------------------------------------
-bool pfcp_associations::add_association(pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp, bool& restore_sx_sessions)
+bool pfcp_associations::add_association(pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp, bool& restore_n4_sessions)
 {
   std::shared_ptr<pfcp_association> sa = std::shared_ptr<pfcp_association>(nullptr);
   if (get_association(node_id, sa)) {
     itti_inst->timer_remove(sa->timer_heartbeat);
     if (sa->recovery_time_stamp == recovery_time_stamp) {
-      restore_sx_sessions = false;
+      restore_n4_sessions = false;
     } else {
-      restore_sx_sessions = true;
+      restore_n4_sessions = true;
     }
     sa->recovery_time_stamp = recovery_time_stamp;
     sa->function_features = {};
   } else {
-    restore_sx_sessions = false;
+    restore_n4_sessions = false;
     pfcp_association* association = new pfcp_association(node_id, recovery_time_stamp);
     sa = std::shared_ptr<pfcp_association>(association);
     sa->recovery_time_stamp = recovery_time_stamp;
@@ -103,21 +103,21 @@ bool pfcp_associations::add_association(pfcp::node_id_t& node_id, pfcp::recovery
   return true;
 }
 //------------------------------------------------------------------------------
-bool pfcp_associations::add_association(pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp, pfcp::up_function_features_s& function_features, bool& restore_sx_sessions)
+bool pfcp_associations::add_association(pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp, pfcp::up_function_features_s& function_features, bool& restore_n4_sessions)
 {
   std::shared_ptr<pfcp_association> sa = std::shared_ptr<pfcp_association>(nullptr);
   if (get_association(node_id, sa)) {
     itti_inst->timer_remove(sa->timer_heartbeat);
     if (sa->recovery_time_stamp == recovery_time_stamp) {
-      restore_sx_sessions = false;
+      restore_n4_sessions = false;
     } else {
-      restore_sx_sessions = true;
+      restore_n4_sessions = true;
     }
     sa->recovery_time_stamp = recovery_time_stamp;
     sa->function_features.first = true;
     sa->function_features.second = function_features;
   } else {
-    restore_sx_sessions = false;
+    restore_n4_sessions = false;
     pfcp_association* association = new pfcp_association(node_id, recovery_time_stamp, function_features);
     sa = std::shared_ptr<pfcp_association>(association);
     sa->recovery_time_stamp = recovery_time_stamp;
@@ -157,11 +157,11 @@ bool pfcp_associations::get_association(const pfcp::fseid_t& cp_fseid, std::shar
 }
 
 //------------------------------------------------------------------------------
-void pfcp_associations::restore_sx_sessions(const pfcp::node_id_t& node_id)
+void pfcp_associations::restore_n4_sessions(const pfcp::node_id_t& node_id)
 {
   std::shared_ptr<pfcp_association> sa = {};
   if (get_association(node_id, sa)) {
-    sa->restore_sx_sessions();
+    sa->restore_n4_sessions();
   }
 }
 //------------------------------------------------------------------------------
@@ -256,3 +256,19 @@ void pfcp_associations::notify_del_session(const pfcp::fseid_t& cp_fseid)
   }
 }
 
+//------------------------------------------------------------------------------
+bool pfcp_associations::add_peer_candidate_node(const pfcp::node_id_t& node_id)
+{
+  for (std::vector<std::shared_ptr<pfcp_association>>::iterator it=pending_associations.begin(); it < pending_associations.end(); ++it) {
+    if ((*it)->node_id == node_id) {
+      // TODO purge sessions of this node
+      Logger::smf_app().info( "TODO purge sessions of this node");
+      pending_associations.erase(it);
+      break;
+    }
+  }
+  pfcp_association* association = new pfcp_association(node_id);
+  std::shared_ptr<pfcp_association> s = std::shared_ptr<pfcp_association>(association);
+  pending_associations.push_back(s);
+  return true;
+}

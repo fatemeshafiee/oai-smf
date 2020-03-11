@@ -25,19 +25,22 @@
    \company Eurecom
    \date 2019
    \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
-*/
+ */
 
 #ifndef FILE_SMF_APP_HPP_SEEN
 #define FILE_SMF_APP_HPP_SEEN
 
 #include "smf.h"
 #include "3gpp_29.274.h"
+#include "3gpp_29.502.h"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_n11.hpp"
 #include "smf_context.hpp"
 #include "smf_pco.hpp"
 #include "SmContextCreateData.h"
+#include "SmContextUpdateData.h"
 #include "SmContextCreateError.h"
+#include "SmContextUpdateError.h"
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
@@ -51,7 +54,42 @@
 
 namespace smf {
 
+#define TASK_SMF_APP_TRIGGER_T3591     (0)
+#define TASK_SMF_APP_TIMEOUT_T3591     (1)
+
+//Table 10.3.2 @3GPP TS 24.501 V16.1.0 (2019-06)
+#define T3591_TIMER_VALUE_SEC 16
+#define T3591_TIMER_MAX_RETRIES 4
+
+typedef enum {
+  PDU_SESSION_ESTABLISHMENT = 1,
+  PDU_SESSION_MODIFICATION = 2,
+  PDU_SESSION_RELEASE = 3
+} pdu_session_procedure_t;
+
 class   smf_config; // same namespace
+
+class smf_context_ref {
+public:
+  smf_context_ref() {
+    clear();
+  }
+
+  void clear() {
+    supi = {};
+    nssai = {};
+    dnn = "";
+    pdu_session_id = 0;
+  }
+
+  //	std::string toString() const;
+
+  supi_t supi;
+  std::string dnn;
+  pdu_session_id_t pdu_session_id;
+  snssai_t nssai;
+
+};
 
 class smf_app {
 private:
@@ -71,7 +109,7 @@ private:
 
   util::uint_generator<uint32_t>   sm_context_ref_generator;
 
-  std::map<scid_t, std::tuple<supi_t, std::string, pdu_session_id_t>>    scid2smf_context;
+  std::map<scid_t, std::shared_ptr<smf_context_ref>>    scid2smf_context;
   mutable std::shared_mutex  m_scid2smf_context;
 
 
@@ -99,9 +137,9 @@ public:
   int static_paa_get_pool_id(const struct in_addr& ue_addr);
 
   int process_pco_request(
-    const protocol_configuration_options_t& pco_req,
-    protocol_configuration_options_t& pco_resp,
-    protocol_configuration_options_ids_t & pco_ids);
+      const protocol_configuration_options_t& pco_req,
+      protocol_configuration_options_t& pco_resp,
+      protocol_configuration_options_ids_t & pco_ids);
 
   void handle_itti_msg (itti_n4_session_establishment_response& m);
   void handle_itti_msg (itti_n4_session_modification_response& m);
@@ -109,7 +147,22 @@ public:
   void handle_itti_msg (std::shared_ptr<itti_n4_session_report_request> snr);
   void handle_itti_msg (itti_n4_association_setup_request& m);
 
-  void restore_sx_sessions(const seid_t& seid) const;
+  /*
+   * Handle ITTI message from N11 to update PDU session status
+   * @param [itti_n11_update_pdu_session_status&] itti_n11_update_pdu_session_status
+   * @return void
+   */
+  void handle_itti_msg (itti_n11_update_pdu_session_status& m);
+
+  /*
+   * Handle ITTI message from N11 (N1N2MessageTransfer Response)
+   * @param [itti_n11_n1n2_message_transfer_response_status&] itti_n11_n1n2_message_transfer_response_status
+   * @return void
+   */
+  void handle_itti_msg (itti_n11_n1n2_message_transfer_response_status& m);
+
+
+  void restore_n4_sessions(const seid_t& seid) const;
 
   uint64_t generate_seid();
   bool is_seid_n4_exist(const uint64_t& s) const;
@@ -118,22 +171,31 @@ public:
 
   void generate_smf_context_ref(std::string& smf_ref);
   scid_t generate_smf_context_ref();
-  void set_scid_2_smf_context(const scid_t& id, supi_t supi, std::string dnn, pdu_session_id_t pdu_session_id);
-  std::tuple<supi_t, std::string, pdu_session_id_t>  scid_2_smf_context(const scid_t& scid) const;
+
+  void set_scid_2_smf_context(const scid_t& id, std::shared_ptr<smf_context_ref> scf);
+  std::shared_ptr<smf_context_ref> scid_2_smf_context(const scid_t& scid) const;
+  bool is_scid_2_smf_context(const scid_t& scid) const;
 
   /*
    * Handle PDUSession_CreateSMContextRequest from AMF
    * @param [std::shared_ptr<itti_n11_create_sm_context_request>&] Request message
    * @return void
    */
-   void handle_amf_msg (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+  void handle_pdu_session_create_sm_context_request (std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
-   /*
-    * Handle PDUSession_UpdateSMContextRequest from AMF
-    * @param [std::shared_ptr<itti_n11_update_sm_context_request>&] Request message
-    * @return void
-    */
-    void handle_amf_msg (std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+  /*
+   * Handle PDUSession_UpdateSMContextRequest from AMF
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&] Request message
+   * @return void
+   */
+  void handle_pdu_session_update_sm_context_request (std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+
+  /*
+   * Handle network-requested pdu session modification
+   * @param should be updated
+   * @return void
+   */
+  void handle_network_requested_pdu_session_modification();
 
   /*
    * Verify if SM Context is existed for this Supi
@@ -180,13 +242,6 @@ public:
    */
   bool is_create_sm_context_request_valid();
 
-  /*
-   * Send create session response to AMF
-   * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
-   *
-   */
-  void send_create_session_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
 
   /*
    * Convert a string to hex representing this string
@@ -195,6 +250,23 @@ public:
    * @return void
    */
   void convert_string_2_hex(std::string& input_str, std::string& output_str);
+
+  unsigned char * format_string_as_hex(std::string str);
+
+  void print_string_as_hex(std::string str);
+
+  void start_upf_association(const pfcp::node_id_t& node_id);
+
+  /*
+   * Update PDU session status
+   * @param [const scid_t] id SM Context ID
+   * @param [const pdu_session_status_e] status PDU Session Status
+   * @return void
+   */
+  void update_pdu_session_status(const scid_t id, const pdu_session_status_e status);
+
+  void timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user);
+  n2_sm_info_type_e n2_sm_info_type_str2e(std::string n2_info_type);
 
 };
 }

@@ -427,11 +427,11 @@ void SmContextUpdateData::unsetBackupAmfInfo()
 {
     m_BackupAmfInfoIsSet = false;
 }
-AccessType SmContextUpdateData::getAnType() const
+std::string SmContextUpdateData::getAnType() const
 {
     return m_AnType;
 }
-void SmContextUpdateData::setAnType(AccessType const& value)
+void SmContextUpdateData::setAnType(std::string const& value)
 {
     m_AnType = value;
     m_AnTypeIsSet = true;
@@ -461,11 +461,11 @@ void SmContextUpdateData::unsetSecondAnType()
 {
     m_SecondAnTypeIsSet = false;
 }
-RatType SmContextUpdateData::getRatType() const
+std::string SmContextUpdateData::getRatType() const
 {
     return m_RatType;
 }
-void SmContextUpdateData::setRatType(RatType const& value)
+void SmContextUpdateData::setRatType(std::string const& value)
 {
     m_RatType = value;
     m_RatTypeIsSet = true;
@@ -546,11 +546,11 @@ void SmContextUpdateData::unsetAddUeLocation()
 {
     m_AddUeLocationIsSet = false;
 }
-UpCnxState SmContextUpdateData::getUpCnxState() const
+std::string SmContextUpdateData::getUpCnxState() const
 {
     return m_UpCnxState;
 }
-void SmContextUpdateData::setUpCnxState(UpCnxState const& value)
+void SmContextUpdateData::setUpCnxState(std::string const& value)
 {
     m_UpCnxState = value;
     m_UpCnxStateIsSet = true;

@@ -1,3 +1,7 @@
+/*
+ * https://github.com/iafonov/multipart-parser-c
+ */
+
 #include "../../utils/multipartparser.h"
 
 #include <string.h>
@@ -116,7 +120,6 @@ size_t multipartparser_execute(multipartparser* parser,
 
     for (p = data; p < data + size; ++p) {
         c = *p;
-
 reexecute:
         switch (parser->state) {
 

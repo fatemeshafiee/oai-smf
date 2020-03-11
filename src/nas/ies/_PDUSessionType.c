@@ -31,7 +31,7 @@ int decode__pdu_session_type ( _PDUSessionType * _pdusessiontype, uint8_t iei, u
 		
 	DECODE_U8(buffer+decoded,bitStream,decoded);
 
-	if(iei != bitStream&0xf0){
+	if(iei != (bitStream&0xf0)){
       return -1;
     }
 	   

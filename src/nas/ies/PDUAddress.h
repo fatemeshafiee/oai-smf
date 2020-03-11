@@ -12,6 +12,7 @@
 #define PDU_ADDRESS_IPV4V6	0x03
 
 typedef struct{
+  uint8_t spare:5;
 	uint8_t pdu_session_type_value:3;
 	bstring pdu_address_information;
 }PDUAddress;

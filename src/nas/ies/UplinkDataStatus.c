@@ -8,43 +8,41 @@
 
 int encode_uplink_data_status ( UplinkDataStatus uplinkdatastatus, uint8_t iei, uint8_t * buffer, uint32_t len  ) 
 {
-    uint8_t *lenPtr;
-    uint32_t encoded = 0;
-    int encode_result;
-    CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer,UPLINK_DATA_STATUS_MINIMUM_LENGTH , len);
-    
-    if( iei >0  ){
-      *buffer=iei;
-      encoded++;
-    }
+  uint8_t *lenPtr;
+  uint32_t encoded = 0;
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer,UPLINK_DATA_STATUS_MINIMUM_LENGTH , len);
 
-    lenPtr = (buffer + encoded);
+  if( iei >0  ){
+    *buffer=iei;
     encoded++;
+  }
 
-    ENCODE_U16(buffer+encoded, uplinkdatastatus, encoded);
+  lenPtr = (buffer + encoded);
+  encoded++;
 
-    *lenPtr = encoded - 1 - ((iei > 0) ? 1 : 0);    
-    return encoded;
+  ENCODE_U16(buffer+encoded, uplinkdatastatus, encoded);
+
+  *lenPtr = encoded - 1 - ((iei > 0) ? 1 : 0);
+  return encoded;
 }
 
 int decode_uplink_data_status ( UplinkDataStatus * uplinkdatastatus, uint8_t iei, uint8_t * buffer, uint32_t len  ) 
 {
-    int decoded=0;
-    uint8_t ielen=0;
-    int decode_result;
+  int decoded=0;
+  uint8_t ielen=0;
 
-    if (iei > 0)
-    {
-        CHECK_IEI_DECODER (iei, *buffer);
-        decoded++;
-    }
-
-    ielen = *(buffer + decoded);
+  if (iei > 0)
+  {
+    CHECK_IEI_DECODER (iei, *buffer);
     decoded++;
-    CHECK_LENGTH_DECODER (len - decoded, ielen);
+  }
 
-    DECODE_U16(buffer+decoded, *uplinkdatastatus,decoded);
+  ielen = *(buffer + decoded);
+  decoded++;
+  CHECK_LENGTH_DECODER (len - decoded, ielen);
 
-    return decoded;
+  DECODE_U16(buffer+decoded, *uplinkdatastatus,decoded);
+
+  return decoded;
 }
 

@@ -32,6 +32,8 @@
 #include "smf.h"
 #include "3gpp_29.503.h"
 #include "smf_context.hpp"
+#include "SmContextCreatedData.h"
+#include "SmContextUpdateError.h"
 #include <thread>
 #include <map>
 
@@ -39,16 +41,62 @@ namespace smf {
 
 class smf_n11 {
 private:
-	std::thread::id thread_id;
-	std::thread thread;
+  std::thread::id thread_id;
+  std::thread thread;
 
-	void handle_receive_sm_data_notification();
+  void handle_receive_sm_data_notification();
 
 public:
-	smf_n11();
-	smf_n11(smf_n11 const&)    = delete;
-	void operator=(smf_n11 const&)     = delete;
-	void send_msg_to_amf(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
+  smf_n11();
+  smf_n11(smf_n11 const&)    = delete;
+  void operator=(smf_n11 const&)     = delete;
+  void send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
+  void send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res);
+  void send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_modify_session_request_smf_requested> sm_context_mod);
+  void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code);
+  //void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code, std::string& n1_sm_msg );
+
+
+  /*
+   * Send create session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
+   * @param [Pistache::Http::Code] code, response code
+   *
+   */
+  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
+
+  /*
+   * Send create session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
+   * @param [Pistache::Http::Code] code, response code
+   * @param [std::string] n1_sm_msg, N1 SM message content
+   *
+   */
+  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, std::string& n1_sm_msg );
+
+  /*
+    * Send update session response to AMF
+    * @param [Pistache::Http::ResponseWriter] httpResponse
+    * @param [ oai::smf_server::model::SmContextUpdateError] smContextUpdateError
+    * @param [Pistache::Http::Code] code, response code
+    * @param [std::string] n1_sm_msg, N1 SM message content
+    *
+    */
+   void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code, std::string& n1_sm_msg );
+
+
+
+  /*
+   * Send create session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [ oai::smf_server::model::SmContextCreatedData] smContextCreatedData
+   * @param [Pistache::Http::Code] code, response code
+   *
+   */
+  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreatedData& smContextCreatedData, Pistache::Http::Code code);
+
 
 };
 

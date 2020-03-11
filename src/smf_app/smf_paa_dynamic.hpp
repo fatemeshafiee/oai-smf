@@ -20,11 +20,11 @@
  */
 
 /*! \file smf_paa_dynamic.hpp
-* \brief
-* \author Lionel Gauthier
-* \company Eurecom
-* \email: lionel.gauthier@eurecom.fr
-*/
+ * \brief
+ * \author Lionel Gauthier
+ * \company Eurecom
+ * \email: lionel.gauthier@eurecom.fr
+ */
 
 #ifndef FILE_SMF_PAA_DYNAMIC_HPP_SEEN
 #define FILE_SMF_PAA_DYNAMIC_HPP_SEEN

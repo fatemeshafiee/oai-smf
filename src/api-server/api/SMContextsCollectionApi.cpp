@@ -46,88 +46,6 @@ extern "C" {
 #include <map>
 #include <string>
 
-#define BOUNDARY "----Boundary"
-
-typedef struct part {
-	std::map<std::string,std::string> headers;
-	std::string body;
-} part;
-
-static multipartparser_callbacks g_callbacks;
-
-static bool             g_body_begin_called;
-static std::string      g_header_name;
-static std::string      g_header_value;
-static std::list<part>  g_parts;
-static bool             g_body_end_called;
-
-static void init_globals()
-{
-	g_body_begin_called = false;
-	g_header_name.clear();
-	g_header_value.clear();
-	g_parts.clear();
-	g_body_end_called = false;
-}
-
-static int on_body_begin(multipartparser* /*parser*/)
-{
-	g_body_begin_called = true;
-	return 0;
-}
-
-static int on_part_begin(multipartparser* /*parser*/)
-{
-	g_parts.push_back(part());
-	return 0;
-}
-
-static void on_header_done()
-{
-	g_parts.back().headers[g_header_name] = g_header_value;
-	g_header_name.clear();
-	g_header_value.clear();
-}
-
-static int on_header_field(multipartparser* /*parser*/, const char* data, size_t size)
-{
-	if (g_header_value.size() > 0)
-		on_header_done();
-	g_header_name.append(data, size);
-	return 0;
-}
-
-static int on_header_value(multipartparser* /*parser*/, const char* data, size_t size)
-{
-	g_header_value.append(data, size);
-	return 0;
-}
-
-static int on_headers_complete(multipartparser* /*parser*/)
-{
-	if (g_header_value.size() > 0)
-		on_header_done();
-	return 0;
-}
-
-static int on_data(multipartparser* /*parser*/, const char* data, size_t size)
-{
-	g_parts.back().body.append(data, size);
-	return 0;
-}
-
-static int on_part_end(multipartparser* /*parser*/)
-{
-	return 0;
-}
-
-static int on_body_end(multipartparser* /*parser*/)
-{
-	g_body_end_called = true;
-	return 0;
-}
-
-
 namespace oai {
 namespace smf_server {
 namespace api {
@@ -136,82 +54,92 @@ using namespace oai::smf_server::helpers;
 using namespace oai::smf_server::model;
 
 SMContextsCollectionApi::SMContextsCollectionApi(std::shared_ptr<Pistache::Rest::Router> rtr) { 
-	router = rtr;
+  router = rtr;
 }
 
 void SMContextsCollectionApi::init() {
-	setupRoutes();
+  setupRoutes();
 }
 
 void SMContextsCollectionApi::setupRoutes() {
-	using namespace Pistache::Rest;
+  using namespace Pistache::Rest;
 
-	Routes::Post(*router, base + "/sm-contexts", Routes::bind(&SMContextsCollectionApi::post_sm_contexts_handler, this));
+  Routes::Post(*router, base + "/sm-contexts", Routes::bind(&SMContextsCollectionApi::post_sm_contexts_handler, this));
 
-	// Default handler, called when a route is not found
-	router->addCustomHandler(Routes::bind(&SMContextsCollectionApi::sm_contexts_collection_api_default_handler, this));
+  // Default handler, called when a route is not found
+  router->addCustomHandler(Routes::bind(&SMContextsCollectionApi::sm_contexts_collection_api_default_handler, this));
 }
 
 void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
 
-	Logger::smf_api_server().info("Received a SM context create request from AMF");
-	Logger::smf_api_server().debug("Request body: %s\n",request.body().c_str());
-	SmContextMessage smContextMessage;
-	SmContextCreateData smContextCreateData;
+  Logger::smf_api_server().info("Received a SM context create request from AMF");
+  Logger::smf_api_server().debug("Request body: %s\n",request.body().c_str());
 
-	//step 1. use multipartparser to decode the request
-	multipartparser_callbacks_init(&g_callbacks);
-	g_callbacks.on_body_begin = &on_body_begin;
-	g_callbacks.on_part_begin = &on_part_begin;
-	g_callbacks.on_header_field = &on_header_field;
-	g_callbacks.on_header_value = &on_header_value;
-	g_callbacks.on_headers_complete = &on_headers_complete;
-	g_callbacks.on_data = &on_data;
-	g_callbacks.on_part_end = &on_part_end;
-	g_callbacks.on_body_end = &on_body_end;
+  std::size_t found = request.body().find("Content-Type");
+  std::string boundary_str = request.body().substr(2, found - 4);
+  Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
 
-	multipartparser parser;
-	init_globals();
-	multipartparser_init(&parser, BOUNDARY);
-	if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
-		response.send(Pistache::Http::Code::Bad_Request, "");
-		return;
-	}
+  SmContextMessage smContextMessage;
+  SmContextCreateData smContextCreateData;
 
-	//at least 2 parts for Json data and N1 (+ N2)
-	if (g_parts.size() < 2){
-		response.send(Pistache::Http::Code::Bad_Request, "");
-		return;
-	}
-	part p0 = g_parts.front(); g_parts.pop_front();
-	Logger::smf_api_server().debug("Request body, part 1: \n%s", p0.body.c_str());
-	part p1 = g_parts.front(); g_parts.pop_front();
-	Logger::smf_api_server().debug("Request body, part 2: \n %s",p1.body.c_str());
-	if (g_parts.size() == 3) {
-		part p2 = g_parts.front(); g_parts.pop_front();
-		Logger::smf_api_server().debug("Request body, part 3: \n %s",p2.body.c_str());
-	}
+  //step 1. use multipartparser to decode the request
+  multipartparser_callbacks_init(&g_callbacks);
+  g_callbacks.on_body_begin = &on_body_begin;
+  g_callbacks.on_part_begin = &on_part_begin;
+  g_callbacks.on_header_field = &on_header_field;
+  g_callbacks.on_header_value = &on_header_value;
+  g_callbacks.on_headers_complete = &on_headers_complete;
+  g_callbacks.on_data = &on_data;
+  g_callbacks.on_part_end = &on_part_end;
+  g_callbacks.on_body_end = &on_body_end;
 
-	//step 2. process the request
-	try {
-		nlohmann::json::parse(p0.body.c_str()).get_to(smContextCreateData);
-		smContextMessage.setJsonData(smContextCreateData);
-		smContextMessage.setBinaryDataN1SmMessage(p1.body.c_str());
-		this->post_sm_contexts(smContextMessage, response);
-	} catch (nlohmann::detail::exception &e) {
-		//send a 400 error
-		response.send(Pistache::Http::Code::Bad_Request, e.what());
-		return;
-	} catch (std::exception &e) {
-		//send a 500 error
-		response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
-		return;
-	}
+  multipartparser parser;
+  init_globals();
+  multipartparser_init(&parser, reinterpret_cast<const char*>(boundary_str.c_str()));
+  if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
+	  Logger::smf_api_server().warn("The received message can not be parsed properly!");
+	  //TODO: fix this issue
+	  //response.send(Pistache::Http::Code::Bad_Request, "");
+    //return;
+  }
+
+  Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
+  //at least 2 parts for Json data and N1 (+ N2)
+  if (g_parts.size() < 2){
+    response.send(Pistache::Http::Code::Bad_Request, "");
+    return;
+  }
+
+  part p0 = g_parts.front(); g_parts.pop_front();
+  Logger::smf_api_server().debug("Request body, part 1: \n%s", p0.body.c_str());
+  part p1 = g_parts.front(); g_parts.pop_front();
+  Logger::smf_api_server().debug("Request body, part 2: \n %s",p1.body.c_str());
+  if (g_parts.size() > 0) {
+    part p2 = g_parts.front(); g_parts.pop_front();
+    Logger::smf_api_server().debug("Request body, part 3: \n %s",p2.body.c_str());
+  }
+
+  //step 2. process the request
+  try {
+    nlohmann::json::parse(p0.body.c_str()).get_to(smContextCreateData);
+    smContextMessage.setJsonData(smContextCreateData);
+    smContextMessage.setBinaryDataN1SmMessage(p1.body.c_str());
+    this->post_sm_contexts(smContextMessage, response);
+  } catch (nlohmann::detail::exception &e) {
+    //send a 400 error
+	  Logger::smf_api_server().warn("Can not parse the json data!");
+	  response.send(Pistache::Http::Code::Bad_Request, e.what());
+    return;
+  } catch (std::exception &e) {
+    //send a 500 error
+    response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
+    return;
+  }
 
 }
 
 void SMContextsCollectionApi::sm_contexts_collection_api_default_handler(const Pistache::Rest::Request &, Pistache::Http::ResponseWriter response) {
-	response.send(Pistache::Http::Code::Not_Found, "The requested method does not exist");
+  response.send(Pistache::Http::Code::Not_Found, "The requested method does not exist");
 }
 
 }

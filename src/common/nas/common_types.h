@@ -38,9 +38,9 @@ typedef uint32_t                 sctp_assoc_id_t;
 
 #define INVALID_RAN_UE_NGAP_ID_KEY 0xFFFFFFFFFFFFFFFF
 #define RAN_UE_NGAP_ID_MASK        0x00FFFFFF
-#define RAN_UE_NGAP_ID_FMT         "0x%06"PRIX32
-#define GNB_UE_NGAP_ID_FMT         "0x%06"PRIX32
-#define AMF_UE_NGAP_ID_FMT         "0x%08"PRIX32
+#define RAN_UE_NGAP_ID_FMT         "0x%06" PRIX32
+#define GNB_UE_NGAP_ID_FMT         "0x%06" PRIX32
+#define AMF_UE_NGAP_ID_FMT         "0x%08" PRIX32
 #define INVALID_AMF_UE_NGAP_ID  0x0
 
 #define AMF_UE_NGAP_ID_MASK_       0x0000FFFFFFFFFF
