@@ -44,7 +44,7 @@ public:
     virtual ~N1N2MessageCollectionDocumentApi() {}
     void init();
 
-    const std::string base = "/namf-comm/v1";
+    const std::string base = "/namf-comm/v2";
 
 private:
     void setupRoutes();
