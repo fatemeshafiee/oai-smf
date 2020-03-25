@@ -18,7 +18,19 @@ int encode_procedure_transaction_identity ( ProcedureTransactionIdentity procedu
     encoded += encode_result;
 
   return encoded;
+/*
+  uint32_t encoded = 0;
+  uint8_t bitStream = 0x0;
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer, PROCEDURE_TRANSACTION_IDENTITY_MINIMUM_LENGTH, len);
+
+  if(iei > 0){
+    bitStream = 0x00 | (iei & 0xf0) | (proceduretransactionidentity & 0x0f);
+  }
+  ENCODE_U8(buffer + encoded, bitStream, encoded);
+  return encoded;
+*/
 }
+
 
 int decode_procedure_transaction_identity ( ProcedureTransactionIdentity * proceduretransactionidentity, uint8_t iei, uint8_t * buffer, uint32_t len  ) 
 {
@@ -31,5 +43,15 @@ int decode_procedure_transaction_identity ( ProcedureTransactionIdentity * proce
   else
     decoded += decode_result;
   return decoded;
+/*
+  int decoded = 0;
+  uint8_t bitStream = 0x0;
+
+  DECODE_U8(buffer + decoded, bitStream, decoded);
+  if(iei != (bitStream & 0xf0))
+    return -1;
+  *proceduretransactionidentity = bitStream & 0x0f;
+  return decoded;
+*/
 }
 

@@ -373,21 +373,19 @@ static int _nas_message_header_encode (
    */
   //ENCODE_U8 (buffer, *(uint8_t *) (header), size);
   ENCODE_U8 (buffer,header->extended_protocol_discriminator,size);
-  printf("extended_protocol_discriminator %d \n",header->extended_protocol_discriminator);
 
   //Security header type associated with a spare half octet;
   ENCODE_U8 (buffer+size, *((uint8_t *) (header)+1),size);
   //ENCODE_U8 (buffer+size,header->security_header_type,size);
-  printf("security_header_type %d \n",header->security_header_type);
+  printf("extended_protocol_discriminator %d, security_header_type %d \n",header->extended_protocol_discriminator, header->security_header_type);
 
-  //printf("security_header_type size = %d\n",size);
   //printf("encoded nas security header type: %x\n",buffer[size-1]);
   //printf("encoded nas security header type: %x\n",header->security_header_type);
 
   if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES ||
       header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     if (header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED) {
-      printf("header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED\n");
+      printf("security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED\n");
       if (length < NAS_MESSAGE_SECURITY_HEADER_SIZE) {
         /*
          * The buffer is not big enough to contain security header
@@ -406,7 +404,7 @@ static int _nas_message_header_encode (
        */
       ENCODE_U8 (buffer + size, header->sequence_number, size);
     }
-    printf("header->security_header_type == SECURITY_HEADER_TYPE_NOT_PROTECTED\n");
+    printf("security_header_type: SECURITY_HEADER_TYPE_NOT_PROTECTED\n");
   }
   return size;
   //OAILOG_STREAM_HEX(OAILOG_LEVEL_DEBUG, LOG_NAS, "encode nas header Incoming NAS message: ", buffer, size)

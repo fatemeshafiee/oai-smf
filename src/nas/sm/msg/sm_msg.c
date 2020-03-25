@@ -191,7 +191,6 @@ fivegsm_msg_encode (
   uint8_t * buffer,
   uint32_t len)
 {
-  printf("fivegsm_msg_encode , start ----------------------\n");
   //OAILOG_FUNC_IN (LOG_NAS);
   int                                     header_result = 0;
   int                                     encode_result = 0;
@@ -211,7 +210,7 @@ fivegsm_msg_encode (
   buffer += header_result;
   len -= header_result;
 
-  printf("************************** msg type %d",msg->header.message_type );
+  printf("Msg type %d",msg->header.message_type );
   switch (msg->header.message_type) {
       case PDU_SESSION_ESTABLISHMENT_REQUEST:
 	  	   encode_result = encode_pdu_session_establishment_request(&msg->pdu_session_establishment_request, buffer, len);
@@ -404,14 +403,11 @@ _fivegsm_msg_encode_header (
    * Encode the procedure transaction identity
    */
   ENCODE_U8 (buffer + size, header->procedure_transaction_identity, size);
-  printf("*********** _fivegsm_msg_encode_header******** %d\n", header->procedure_transaction_identity);
+  printf("fivegsm_msg_encode_header, procedure transaction identity %d", header->procedure_transaction_identity);
   /*
    * Encode the message type
    */
   ENCODE_U8 (buffer + size, header->message_type, size);
-printf("*********** _fivegsm_msg_encode_header******** \n");
-	for(int i = 0; i < size; i++)
-		printf("%02x ", buffer[i]);
 
   return (size);
 }
