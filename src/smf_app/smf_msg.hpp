@@ -40,6 +40,10 @@
 #include "RefToBinaryData.h"
 #include "NgRanTargetId.h"
 
+extern "C" {
+#include "QOSRules.h"
+}
+
 typedef enum {
   PDU_SESSION_MSG_TYPE_NONE = -1,
   PDU_SESSION_MSG_TYPE_FIRST = 0,
@@ -60,15 +64,17 @@ public:
   void set_ul_fteid(const fteid_t& teid);
   void set_arp(const arp_5gc_t& a);
   void set_priority_level (uint8_t p);
+  void set_qos_rule(const QOSRulesIE& rule);
 
   uint8_t  cause_value;
   pfcp::qfi_t qfi;
   fteid_t  ul_fteid;
   arp_5gc_t arp;
   uint8_t priority_level;//1-127
-
+  QOSRulesIE qos_rule;
 };
 
+//---------------------------------------------------------------------------------------
 class qos_flow_context_modified {
 public:
   void set_cause(const uint8_t cause);
@@ -78,14 +84,13 @@ public:
   uint8_t  cause_value;
   pfcp::qfi_t qfi;
   fteid_t  ul_fteid;
-
 };
 
-
+//---------------------------------------------------------------------------------------
 class pdu_session_msg {
 public:
-  pdu_session_msg(){};
-  pdu_session_msg(pdu_session_msg_type_t msg_type):m_msg_type(msg_type){};
+  pdu_session_msg(): m_msg_type(), m_supi(), m_pdu_session_id(), m_dnn(), m_snssai(){};
+  pdu_session_msg(pdu_session_msg_type_t msg_type): m_msg_type(msg_type), m_supi(), m_pdu_session_id(), m_dnn(), m_snssai(){};
   pdu_session_msg(pdu_session_msg_type_t msg_type, supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai):  m_msg_type(msg_type), m_supi(supi), m_pdu_session_id(pdi), m_dnn(dnn), m_snssai(snssai) { }
   virtual ~pdu_session_msg() = default;
 
@@ -119,7 +124,6 @@ private:
   std::string m_dnn;
   snssai_t m_snssai;
 };
-
 
 //---------------------------------------------------------------------------------------
 class pdu_session_create_sm_context: public pdu_session_msg {
@@ -185,26 +189,26 @@ public:
   void set_ipmdr(ipmdr_t const& ipmdr);
 
 private:
-  std::string m_n1_sm_message;
+  std::string m_n1_sm_message; //N1 SM Message before decoding
   bool m_unauthenticated_supi;
+  std::string m_serving_nf_id; //AMF Id
+  std::string m_request_type;
+  std::string m_rat_type;
+  std::string m_presence_in_ladn;
+  std::string m_an_type;
+  std::string m_dnn_selection_mode;//SelMode
   //std::string m_Pei;
   //std::string m_Gpsi;
   //Snssai m_HplmnSnssai;
-  std::string m_serving_nf_id; //AMF Id
   //Guami m_Guami;
   //std::string m_ServiceName;
   //PlmnId m_ServingNetwork;
-  std::string m_request_type;
   //RefToBinaryData m_N1SmMsg;
-  std::string m_an_type;
   //std::string m_SecondAnType;
-  std::string m_rat_type;
-  std::string m_presence_in_ladn;
   //UserLocation m_UeLocation;
   //std::string m_UeTimeZone;
   //UserLocation m_AddUeLocation;
   //std::string m_SmContextStatusUri;
-
   //std::string m_HSmfUri;
   // std::vector<std::string> m_AdditionalHsmfUri;
   // int32_t m_OldPduSessionId;
@@ -214,7 +218,6 @@ private:
   //std::string m_PcfId;
   //std::string m_NrfUri;
   //std::string m_SupportedFeatures;
-  std::string m_dnn_selection_mode;//SelMode
   //std::vector<BackupAmfInfo> m_BackupAmfInfo;
   //TraceData m_TraceData;
   //std::string m_UdmGroupId;
@@ -258,8 +261,23 @@ private:
 class pdu_session_create_sm_context_response : public pdu_session_create_sm_context {
 
 public:
-  pdu_session_create_sm_context_response(): pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE){ }
-  pdu_session_create_sm_context_response(supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai): pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE, supi, pdi, dnn, snssai) {}
+  pdu_session_create_sm_context_response(): pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE){
+    m_n1_sm_msg_is_set = false;
+    m_n2_sm_info_is_set = false;
+    m_cause = 0;
+    m_paa = {};
+    m_code = {};
+    qos_flow_context = {};
+    m_supi = {};
+  }
+  pdu_session_create_sm_context_response(supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai): pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE, supi, pdi, dnn, snssai) {
+    m_n1_sm_msg_is_set = false;
+    m_n2_sm_info_is_set = false;
+    m_cause = 0;
+    m_paa = {};
+    m_code = {};
+    qos_flow_context = {};
+  }
 
   void set_cause(uint8_t cause);
   uint8_t get_cause();
@@ -269,25 +287,21 @@ public:
   Pistache::Http::Code get_http_code();
   void set_qos_flow_context(const qos_flow_context_created& qos_flow);
   qos_flow_context_created get_qos_flow_context() const;
-
-  nlohmann::json n1n2_message_transfer_data; //N1N2MessageTransferReqData from oai::amf::model
-
   std::string get_n2_sm_information() const;
   void set_n2_sm_information(std::string const& value);
-
   std::string get_n1_sm_message() const;
   void set_n1_sm_message(std::string const& value);
-
   bool n1_sm_msg_is_set() const;
   bool n2_sm_info_is_set() const;
-
-  std::string n1_sm_message; //N1 SM message
-  bool m_n1_sm_msg_is_set;
-  std::string n2_sm_information; //N2 SM info
-  bool m_n2_sm_info_is_set;
   void set_amf_url(std::string const& value);
   std::string get_amf_url() const;
+  nlohmann::json n1n2_message_transfer_data; //N1N2MessageTransferReqData from oai::amf::model
+
 private:
+  std::string m_n1_sm_message; //N1 SM message after decoding
+  bool m_n1_sm_msg_is_set;
+  std::string m_n2_sm_information; //N2 SM info after decoding
+  bool m_n2_sm_info_is_set;
   uint8_t m_cause;
   paa_t m_paa;
   Pistache::Http::Code m_code;
@@ -319,9 +333,6 @@ private:
    */
 };
 
-
-//---------------------------------------------------------------------------------------
-//for PDU session update
 //---------------------------------------------------------------------------------------
 class pdu_session_update_sm_context: public pdu_session_msg {
 
@@ -329,8 +340,6 @@ public:
   pdu_session_update_sm_context(): pdu_session_msg(){	};
   pdu_session_update_sm_context(pdu_session_msg_type_t msg_type): pdu_session_msg(msg_type){ };
   pdu_session_update_sm_context(pdu_session_msg_type_t msg_type, supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai): pdu_session_msg(msg_type, supi, pdi, dnn, snssai) { }
-
-
 private:
 
 };
@@ -343,15 +352,18 @@ public:
     m_n2_sm_info_is_set = false;
     m_5gMm_cause_value = 0;
     m_data_forwarding = false;
+    m_upCnx_state_is_set = false;
+    qfis = {};
+    dl_fteid = {};
+//    m_eps_bearer_setup = {};
+//    m_revoke_ebi_list = {};
   };
   std::string get_n2_sm_information() const;
   void set_n2_sm_information(std::string const& value);
   std::string get_n2_sm_info_type() const;
   void set_n2_sm_info_type(std::string const& value);
-
   std::string get_n1_sm_message() const;
   void set_n1_sm_message(std::string const& value);
-
   bool n1_sm_msg_is_set() const;
   bool n2_sm_info_is_set() const;
   void add_qfi(pfcp::qfi_t const& qfi);
@@ -364,47 +376,42 @@ public:
   void set_an_type(std::string const& value);
 
 private:
+
   std::vector<pfcp::qfi_t> qfis;
   fteid_t       dl_fteid; //AN Tunnel Info
-
-  std::string n1_sm_message; //N1 SM message before decoding
+  std::string m_n1_sm_message; //N1 SM message before decoding
   bool m_n1_sm_msg_is_set;
-  std::string n2_sm_information; //N2 SM before decoding
+  std::string m_n2_sm_information; //N2 SM before decoding
   bool m_n2_sm_info_is_set;
-  std::string n2_sm_info_type;
-  //std::string m_Ppei;
+  std::string m_n2_sm_info_type;
   std::string m_nf_instanceId;
-  oai::smf_server::model::Guami m_guami;
-  oai::smf_server::model::PlmnId m_serving_network;
-  //BackupAmfInfo
   std::string m_an_type;
   std::string m_rat_type;
-
- /* SmContextUpdateData:
-      presenceInLadn:
-      ueLocation:
-      ueTimeZone:
-      addUeLocation:
-      hoState:
-      toBeSwitched:
-      failedToBeSwitched:
-   */
   std::string m_upCnx_state;
   bool m_upCnx_state_is_set;
-
-  oai::smf_server::model::RefToBinaryData m_n1_sm_msg;
-  oai::smf_server::model::RefToBinaryData m_n2_sm_info;
-  std::string m_n2_sm_info_type;
-  oai::smf_server::model::NgRanTargetId m_target_id; //$ref: '../amf/TS29518_Namf_Communication.yaml#/components/schemas/NgRanTargetId'
-  std::string m_target_serving_nfId;  // $ref: '../TS29571_CommonData.yaml#/components/schemas/NfInstanceId'
+  std::string m_target_serving_nfId;
   std::string m_sm_context_status_uri;
   bool m_data_forwarding;
-  std::vector<std::string> m_eps_bearer_setup;
-  std::vector<int> m_revoke_ebi_list;
-
-  //NgApCause m_ngAp_cause;
+//  std::vector<std::string> m_eps_bearer_setup;
+//  std::vector<int> m_revoke_ebi_list;
   uint8_t m_5gMm_cause_value;
-  /*
+
+  //oai::smf_server::model::NgRanTargetId m_target_id;
+  //oai::smf_server::model::Guami m_guami;
+  //oai::smf_server::model::PlmnId m_serving_network;
+  //NgApCause m_ngAp_cause;
+  //BackupAmfInfo
+  //std::string m_Ppei;
+
+ /*
+SmContextUpdateData
+  presenceInLadn
+  ueLocation
+  ueTimeZone
+  addUeLocation
+  hoState
+  toBeSwitched
+  failedToBeSwitched
 	sNssai:
 	EpsBearerId:
   release:
@@ -424,7 +431,14 @@ private:
 //for PDU session update response
 class pdu_session_update_sm_context_response: public pdu_session_msg {
 public:
-  pdu_session_update_sm_context_response(): pdu_session_msg(PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE){ };
+  pdu_session_update_sm_context_response(): pdu_session_msg(PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE){
+    m_pti = {};
+    m_cause = 0;
+    m_n1_sm_msg_is_set = false;
+    m_n2_sm_info_is_set = false;
+    qos_flow_context_modifieds = {};
+  };
+
   void set_cause(uint8_t cause);
   uint8_t get_cause();
 
@@ -446,17 +460,20 @@ public:
   void add_qos_flow_context_modified(const qos_flow_context_modified& qos_flow);
   bool get_qos_flow_context_modified (const pfcp::qfi_t& qfi, qos_flow_context_modified& qos_flow);
   void get_all_qos_flow_context_modifieds (std::map<uint8_t, qos_flow_context_modified>& all_flows);
+  nlohmann::json sm_context_updated_data; //N1N2MessageTransferReqData from oai::amf::model
+  procedure_transaction_id_t get_pti() const;
+  void set_pti(procedure_transaction_id_t const& pti);
 
 private:
+  procedure_transaction_id_t m_pti;
   uint8_t m_cause;
-  std::string n1_sm_message; //N1 SM after decoding
+  std::string m_n1_sm_message; //N1 SM after decoding
   bool m_n1_sm_msg_is_set;
   std::string n1_sm_msg_type;
-  std::string n2_sm_information; //N2 SM after decoding
+  std::string m_n2_sm_information; //N2 SM after decoding
   bool m_n2_sm_info_is_set;
   std::string n2_sm_info_type;
   std::map<uint8_t, qos_flow_context_modified> qos_flow_context_modifieds;
-
 
 };
 

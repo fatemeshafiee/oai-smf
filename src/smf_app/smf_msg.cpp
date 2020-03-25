@@ -59,6 +59,11 @@ void qos_flow_context_created::set_priority_level (uint8_t p)
 {
   priority_level = p;
 }
+//-----------------------------------------------------------------------------
+void qos_flow_context_created::set_qos_rule(const QOSRulesIE& rule)
+{
+  qos_rule = rule;
+}
 
 //-----------------------------------------------------------------------------
 void qos_flow_context_modified::set_cause(const uint8_t cause)
@@ -314,23 +319,23 @@ qos_flow_context_created pdu_session_create_sm_context_response::get_qos_flow_co
 
 //-----------------------------------------------------------------------------
 std::string pdu_session_create_sm_context_response::get_n2_sm_information() const{
-  return  n2_sm_information;
+  return  m_n2_sm_information;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_create_sm_context_response::set_n2_sm_information(std::string const& value){
-  n2_sm_information = value;
+  m_n2_sm_information = value;
   m_n2_sm_info_is_set = true;
 }
 
 //-----------------------------------------------------------------------------
 std::string pdu_session_create_sm_context_response::get_n1_sm_message() const{
-  return  n1_sm_message;
+  return  m_n1_sm_message;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_create_sm_context_response::set_n1_sm_message(std::string const& value){
-  n1_sm_message = value;
+  m_n1_sm_message = value;
   m_n1_sm_msg_is_set = true;
 }
 
@@ -361,34 +366,34 @@ std::string pdu_session_create_sm_context_response::get_amf_url() const
 //-----------------------------------------------------------------------------
 /* pdu_session_update_sm_context_request */
 std::string pdu_session_update_sm_context_request::get_n2_sm_information() const{
-  return 	n2_sm_information;
+  return 	m_n2_sm_information;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::set_n2_sm_information(std::string const& value){
-  n2_sm_information = value;
+  m_n2_sm_information = value;
   m_n2_sm_info_is_set = true;
 }
 
 //-----------------------------------------------------------------------------
 std::string pdu_session_update_sm_context_request::get_n2_sm_info_type() const{
-  return n2_sm_info_type;
+  return m_n2_sm_info_type;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::set_n2_sm_info_type(std::string const& value){
-  n2_sm_info_type = value;
+  m_n2_sm_info_type = value;
   m_n2_sm_info_is_set = true;
 }
 
 //-----------------------------------------------------------------------------
 std::string pdu_session_update_sm_context_request::get_n1_sm_message() const{
-  return  n1_sm_message;
+  return  m_n1_sm_message;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::set_n1_sm_message(std::string const& value){
-  n1_sm_message = value;
+  m_n1_sm_message = value;
   m_n1_sm_msg_is_set = true;
 }
 
@@ -459,6 +464,19 @@ void pdu_session_update_sm_context_request::set_an_type(std::string const& value
 }
 
 //-----------------------------------------------------------------------------
+procedure_transaction_id_t pdu_session_update_sm_context_response::get_pti() const
+{
+  return m_pti;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_response::set_pti(procedure_transaction_id_t const& pti)
+{
+  m_pti = pti;
+}
+
+
+//-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_response::set_cause(uint8_t cause)
 {
   m_cause = cause;
@@ -472,12 +490,12 @@ uint8_t pdu_session_update_sm_context_response::get_cause(){
 
 //-----------------------------------------------------------------------------
 std::string pdu_session_update_sm_context_response::get_n2_sm_information() const{
-  return  n2_sm_information;
+  return  m_n2_sm_information;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_response::set_n2_sm_information(std::string const& value){
-  n2_sm_information = value;
+  m_n2_sm_information = value;
 }
 
 //-----------------------------------------------------------------------------
@@ -493,12 +511,12 @@ void pdu_session_update_sm_context_response::set_n2_sm_info_type(std::string con
 
 //-----------------------------------------------------------------------------
 std::string pdu_session_update_sm_context_response::get_n1_sm_message() const{
-  return  n1_sm_message;
+  return  m_n1_sm_message;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_response::set_n1_sm_message(std::string const& value){
-  n1_sm_message = value;
+  m_n1_sm_message = value;
   m_n1_sm_msg_is_set = true;
 }
 
