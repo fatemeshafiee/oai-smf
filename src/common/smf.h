@@ -24,6 +24,8 @@
 #define FILE_SMF_SEEN
 
 #include"3gpp_29.274.h"
+#include"3gpp_29.571.h"
+#include"3gpp_24.501.h"
 
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT     "%" SCNu64
@@ -137,14 +139,13 @@ enum class http_response_codes_e {
 //From 23.502
 enum class session_management_procedures_type_e {
   PDU_SESSION_ESTABLISHMENT_UE_REQUESTED = 0,
-  PDU_SESSION_MODIFICATION_UE_INITIATED = 1,
-  PDU_SESSION_MODIFICATION_SMF_REQUESTED = 2,
-  PDU_SESSION_MODIFICATION_AN_REQUESTED = 3,
-  PDU_SESSION_RELEASE_UE_REQUESTED = 4,
-  PDU_SESSION_RELEASE_NETWORK_REQUESTED = 5,
-  SERVICE_REQUEST_UE_TRIGGERED = 6,
-  SERVICE_REQUEST_NETWORK_TRIGGERED = 7
-
+  SERVICE_REQUEST_UE_TRIGGERED = 1,
+  SERVICE_REQUEST_NETWORK_TRIGGERED = 2,
+  PDU_SESSION_MODIFICATION_UE_INITIATED = 3,
+  PDU_SESSION_MODIFICATION_SMF_REQUESTED = 4,
+  PDU_SESSION_MODIFICATION_AN_REQUESTED = 5,
+  PDU_SESSION_RELEASE_UE_REQUESTED = 6,
+  PDU_SESSION_RELEASE_NETWORK_REQUESTED = 7
 };
 
 static const std::vector<std::string> session_management_procedures_type_e2str = {
@@ -157,5 +158,24 @@ static const std::vector<std::string> session_management_procedures_type_e2str =
     "SERVICE_REQUEST_UE_TRIGGERED",
     "SERVICE_REQUEST_NETWORK_TRIGGERED"
 };
+
+typedef struct qos_profile_gbr_s {
+    gfbr_t gfbr; //Guaranteed Flow Bit Rate
+    mfbr_t mfbr; // Maximum Flow Bit Rate
+  // Notification Control
+  // Maximum Packet Loss Rate (UL/DL)
+} qos_profile_gbr_t;
+
+//
+typedef struct qos_profile_s {
+  uint8_t _5qi;
+  arp_5gc_t arp;
+  //union flow_bit_rate_type{
+  //  reflective_qos_attribute_e  rqa; //Reflective QoS Attribute (RQA)
+  //  qos_profile_gbr_t qos_profile_gbr; //Attributes for GBR
+ // };
+} qos_profile_t;
+
+
 
 #endif

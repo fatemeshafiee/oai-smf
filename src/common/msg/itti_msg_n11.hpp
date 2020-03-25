@@ -108,6 +108,8 @@ public:
   const char* get_msg_name() {return "N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE";};
   smf::pdu_session_update_sm_context_response res;
   Pistache::Http::ResponseWriter http_response;
+  session_management_procedures_type_e session_procedure_type;
+
 
 };
 
