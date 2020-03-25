@@ -50,9 +50,13 @@
 #include "pistache/http.h"
 #include "pistache/router.h"
 #include "SmContextCreateError.h"
-#include "smf_msg.hpp"
+//#include "smf_msg.hpp"
 #include "itti.hpp"
+#include "msg_pfcp.hpp"
 
+extern "C" {
+#include "QOSRules.h"
+}
 
 namespace smf {
 
@@ -65,7 +69,6 @@ public:
   void clear() {
     ul_fteid = {};
     dl_fteid = {};
-    eps_bearer_qos = {};
     pdr_id_ul = {};
     pdr_id_dl = {};
     precedence = {};
@@ -83,8 +86,6 @@ public:
   fteid_t                 ul_fteid; //fteid of UPF
   fteid_t                 dl_fteid; //fteid of AN
 
-  bearer_qos_t            eps_bearer_qos;           // EPS Bearer QoS: ARP, GBR, MBR, QCI.
-
   // PFCP
   // Packet Detection Rule ID
   pfcp::pdr_id_t                    pdr_id_ul;
@@ -97,7 +98,29 @@ public:
   bool                              released; // finally seems necessary, TODO try to find heuristic ?
 
   pdu_session_id_t pdu_session_id;
+
+  //qos_rules[0]: default rule
+  std::vector<QOSRulesIE> qos_rules;
+  //QoS profile
+  qos_profile_t qos_profile;
+  //cause
+  uint8_t  cause_value;
+
+
 };
+
+/*
+typedef struct qos_flow_s {
+  pfcp::qfi_t qfi; //QoS Flow Identifier
+  //qos_rules[0]: default rule
+  std::vector<QOSRulesIE> qos_rules;
+  //QoS profile
+  qos_profile_t qos_profile;
+  //pfcp::create_pdr pdr;
+  //pfcp::create_far far;
+
+} qos_flow_t;
+*/
 
 
 class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
@@ -131,6 +154,7 @@ public:
   bool get_qos_flow(const pfcp::qfi_t& qfi, smf_qos_flow& q);
   void add_qos_flow(smf_qos_flow& flow);
   smf_qos_flow& get_qos_flow(const pfcp::qfi_t& qfi);
+  void get_qos_flows(std::vector<smf_qos_flow>& flows);
 
   bool find_qos_flow(const pfcp::pdr_id_t& pdr_id, smf_qos_flow& flow);
   bool has_qos_flow(const pfcp::pdr_id_t& pdr_id, pfcp::qfi_t& qfi);
@@ -170,6 +194,9 @@ public:
   void generate_far_id(pfcp::far_id_t& far_id);
   void release_far_id(const pfcp::far_id_t& far_id);
   void insert_procedure(smf_procedure* proc);
+
+  void generate_qos_rule_id(uint8_t& rule_id);
+  void release_qos_rule_id(const uint8_t& rule_id);
 
   bool ipv4;                                // IP Address(es): IPv4 address and/or IPv6 prefix
   bool ipv6;                                // IP Address(es): IPv4 address and/or IPv6 prefix
@@ -223,6 +250,14 @@ public:
 
   //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
   upCnx_state_e upCnx_state;
+  //5GSM parameters and capabilities
+  uint8_t maximum_number_of_supported_packet_filters;
+  //TODO: 5GSM Capability (section 9.11.4.1@3GPP TS 24.501 V16.1.0)
+  //TODO: Integrity protection maximum data rate (section 9.11.4.7@@3GPP TS 24.501 V16.1.0)
+  //number_of_supported_packet_filters
+  uint8_t number_of_supported_packet_filters;
+  util::uint_generator<uint32_t>   qos_rule_id_generator;
+
 };
 
 
@@ -233,6 +268,7 @@ public:
   void find_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t>& dnn_configuration);
 private:
   snssai_t single_nssai;
+  //dnn <->dnn_configuration
   std::map <std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;
 };
 
@@ -276,7 +312,7 @@ class smf_context;
 class smf_context : public std::enable_shared_from_this<smf_context> {
 
 public:
-  smf_context() : m_context(), imsi(), imsi_unauthenticated_indicator(false), pending_procedures(), msisdn(), dnn_subscriptions() {}
+  smf_context() : m_context(), imsi(), imsi_unauthenticated_indicator(false), pending_procedures(), msisdn(), dnn_subscriptions(), scid(0) {}
 
   smf_context(smf_context& b) = delete;
 
@@ -386,6 +422,13 @@ public:
   void set_scid(scid_t const& id);
   scid_t get_scid() const;
 
+  /*
+   * Get the default QoS Rule for all QFIs
+   * @param [QOSRulesIE] qos_rule
+   * @return void
+   */
+  void get_default_qos_rule(QOSRulesIE &qos_rule, uint8_t pdu_session_type);
+
 private:
 
   std::vector<std::shared_ptr<dnn_context>> dnns;
@@ -412,6 +455,10 @@ private:
 
   supi_t         supi;
   scid_t scid;
+
+  //list of QOSRules (QFI<->Rule)
+  //std::map<uint8_t, QOSRulesIE> qos_rules;
+
 };
 }
 

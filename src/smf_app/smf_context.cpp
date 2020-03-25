@@ -148,6 +148,14 @@ smf_qos_flow& smf_pdu_session::get_qos_flow(const pfcp::qfi_t& qfi)
 }
 
 //------------------------------------------------------------------------------
+void smf_pdu_session::get_qos_flows(std::vector<smf_qos_flow>& flows){
+  flows.clear();
+  for (auto it : qos_flows) {
+      flows.push_back(it.second);
+    }
+}
+
+//------------------------------------------------------------------------------
 bool smf_pdu_session::find_qos_flow(const pfcp::pdr_id_t& pdr_id, smf_qos_flow& flow)
 {
   for (std::map<uint8_t,smf_qos_flow>::iterator it=qos_flows.begin(); it!=qos_flows.end(); ++it) {
@@ -232,6 +240,18 @@ void smf_pdu_session::generate_pdr_id(pfcp::pdr_id_t& pdr_id)
 void smf_pdu_session::release_pdr_id(const pfcp::pdr_id_t& pdr_id)
 {
   pdr_id_generator.free_uid(pdr_id.rule_id);
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::generate_qos_rule_id(uint8_t& rule_id)
+{
+  rule_id = qos_rule_id_generator.get_uid();
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::release_qos_rule_id(const uint8_t& rule_id)
+{
+  qos_rule_id_generator.free_uid(rule_id);
 }
 
 //------------------------------------------------------------------------------
@@ -385,6 +405,36 @@ void smf_context::get_default_qos(const snssai_t& snssai, const std::string& dnn
 }
 
 //------------------------------------------------------------------------------
+void smf_context::get_default_qos_rule(QOSRulesIE &qos_rule, uint8_t pdu_session_type)
+{
+  //TODO, update according to PDU Session type
+  Logger::smf_app().info( "Get default QoS rule");
+  //see section 9.11.4.13 @ 3GPP TS 24.501 and section 5.7.1.4 @ 3GPP TS 23.501
+  qos_rule.qosruleidentifer = 0;
+  qos_rule.ruleoperationcode = CREATE_NEW_QOS_RULE;
+  qos_rule.dqrbit = THE_QOS_RULE_IS_DEFAULT_QOS_RULE;
+  if ((pdu_session_type == PDU_SESSION_TYPE_E_IPV4) or (pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) or (pdu_session_type == PDU_SESSION_TYPE_E_IPV6) or (pdu_session_type == PDU_SESSION_TYPE_E_ETHERNET)){
+    qos_rule.numberofpacketfilters = 1;
+    Create_ModifyAndAdd_ModifyAndReplace create_modifyandadd_modifyandreplace[1];
+    create_modifyandadd_modifyandreplace[0].packetfilterdirection = 0b11; //bi-directional
+    create_modifyandadd_modifyandreplace[0].packetfilteridentifier = 1;
+    create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
+    qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace = (Create_ModifyAndAdd_ModifyAndReplace *)calloc (1, sizeof (Create_ModifyAndAdd_ModifyAndReplace));
+    qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace =  create_modifyandadd_modifyandreplace;
+    qos_rule.qosruleprecedence = 255;
+  }
+
+  if (pdu_session_type == PDU_SESSION_TYPE_E_UNSTRUCTURED){
+    qos_rule.numberofpacketfilters = 0;
+    qos_rule.qosruleprecedence = 255;
+  }
+
+  qos_rule.segregation = SEGREGATION_NOT_REQUESTED;
+
+}
+
+
+//------------------------------------------------------------------------------
 void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<itti_n11_create_sm_context_request> smreq)
 {
   Logger::smf_app().info("Handle a PDU Session Create SM Context Request message from AMF");
@@ -472,8 +522,15 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
   //pending session??
   //Step 4. check if supi is authenticated
 
+  //TODO: if "Integrity Protection is required", check UE Integrity Protection Maximum Data Rate
+  //TODO: (Optional) Secondary authentication/authorization
+
+  //TODO: Step 5. PCF selection
+  //TODO: Step 5.1. SM Policy Association Establishment to get default PCC rules for this PDU session from PCF
+  //For the moment, SMF uses the local policy (e.g., default QoS rule)
+
   //address allocation based on PDN type
-  //Step 5. paa
+  //Step 6. paa
   bool set_paa = false;
   paa_t paa = {};
 
@@ -495,7 +552,7 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
 
   //smf_app_inst->process_pco_request(extended_protocol_options, pco_resp, pco_ids);
 
-  //Step 7. address allocation based on PDN type
+  //Step 7. Address allocation based on PDN type
   switch (sp->pdn_type.pdn_type) {
   case PDN_TYPE_E_IPV4: {
     if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) { //use SM NAS signalling
@@ -556,10 +613,9 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
     break;
   }
 
-  //TODO: if "Integrity Protection is required", check UE Integrity Protection Maximum Data Rate
-  //TODO: (Optional) Secondary authentication/authorization
+  //TODO: Step 8. SMF-initiated SM Policy Modification (with PCF)
 
-  //Step 8. create session establishment procedure and run the procedure
+  //Step 9. Create session establishment procedure and run the procedure
   //if request is accepted
   if (request_accepted){
     if (set_paa) {
@@ -606,7 +662,7 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
     //un-subscribe to the modifications of Session Management Subscription data for (SUPI, DNN, S-NSSAI)
   }
 
-  //step 9. if error when establishing the pdu session,
+  //step 10. if error when establishing the pdu session,
   //send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs (PDU Session Establishment Reject)
   if (sm_context_resp->res.get_cause() != REQUEST_ACCEPTED) {
     //clear pco, ambr
@@ -645,7 +701,8 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
     std::string n1_sm_msg,n1_sm_msg_hex;
     Logger::smf_app().debug("Create PDU Session Establishment Reject");
     smf_n1_n2_inst.create_n1_sm_container(sm_context_resp_pending->res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg, cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);
-    sm_context_resp_pending->res.set_n1_sm_message(n1_sm_message);
+    smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+    sm_context_resp_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
     //get supi and put into URL
     std::string supi_str;
@@ -681,29 +738,38 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
   Logger::smf_app().info("Handle a PDU Session Update SM Context Request message from AMF");
   pdu_session_update_sm_context_request sm_context_req_msg = smreq->req;
   smf_n1_n2 smf_n1_n2_inst;
-  oai::smf_server::model::SmContextCreateError smContextCreateError;
+  oai::smf_server::model::SmContextUpdateError smContextUpdateError;
   oai::smf_server::model::ProblemDetails problem_details;
-  oai::smf_server::model::RefToBinaryData binary_data;
   bool update_upf = false;
   session_management_procedures_type_e procedure_type (session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
-
 
   //Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and pdu_session must be existed
   std::shared_ptr<dnn_context> sd;
   std::shared_ptr<smf_pdu_session> sp;
   bool find_dnn = find_dnn_context (sm_context_req_msg.get_snssai(), sm_context_req_msg.get_dnn(), sd);
-  bool find_pdn = sd.get()->find_pdu_session(sm_context_req_msg.get_pdu_session_id(), sp);
+  bool find_pdn = false;
+  if (find_dnn){
+    find_pdn = sd.get()->find_pdu_session(sm_context_req_msg.get_pdu_session_id(), sp);
+  }
+  if (!find_dnn or !find_pdn){
+    //error, send reply to AMF with error code "Context Not Found"
+    Logger::smf_app().warn("DNN or PDU session context does not exist!");
+    problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
+    smContextUpdateError.setError(problem_details);
+    smf_n11_inst->send_pdu_session_update_sm_context_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Not_Found);
+    return;
+  }
 
   //we need to store HttpResponse and session-related information to be used when receiving the response from UPF
-  itti_n11_update_sm_context_response *sm_context_resp = new itti_n11_update_sm_context_response(TASK_SMF_APP, TASK_SMF_N11, smreq->http_response);
-  std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_update_sm_context_response>(sm_context_resp);
+  itti_n11_update_sm_context_response *n1_sm_context_resp = new itti_n11_update_sm_context_response(TASK_SMF_APP, TASK_SMF_N11, smreq->http_response);
+  std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp_pending = std::shared_ptr<itti_n11_update_sm_context_response>(n1_sm_context_resp);
 
-  sm_context_resp->res.set_supi(sm_context_req_msg.get_supi());
-  sm_context_resp->res.set_supi_prefix(sm_context_req_msg.get_supi_prefix());
-  sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
-  sm_context_resp->res.set_pdu_session_id(sm_context_req_msg.get_pdu_session_id());
-  sm_context_resp->res.set_snssai(sm_context_req_msg.get_snssai());
-  sm_context_resp->res.set_dnn(sm_context_req_msg.get_dnn());
+  n1_sm_context_resp->res.set_supi(sm_context_req_msg.get_supi());
+  n1_sm_context_resp->res.set_supi_prefix(sm_context_req_msg.get_supi_prefix());
+  n1_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
+  n1_sm_context_resp->res.set_pdu_session_id(sm_context_req_msg.get_pdu_session_id());
+  n1_sm_context_resp->res.set_snssai(sm_context_req_msg.get_snssai());
+  n1_sm_context_resp->res.set_dnn(sm_context_req_msg.get_dnn());
 
 
   //Step 2.1. Decode N1 (if content is available)
@@ -721,34 +787,43 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
       //error, should send reply to AMF with error code!!
       Logger::smf_app().warn("N1 SM container cannot be decoded correctly!");
       problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
-      smContextCreateError.setError(problem_details);
+      smContextUpdateError.setError(problem_details);
       //PDU Session Establishment Reject
       //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
       smf_n1_n2_inst.create_n1_sm_container(sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg, cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE); //TODO: should define 5GSM cause in 24.501
       //Send response to AMF
-      smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_msg);
+      smf_n11_inst->send_pdu_session_update_sm_context_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden, n1_sm_msg);
     }
 
-    Logger::smf_app().debug("NAS header information: extended_protocol_discriminator %d, security_header_type:%d,sequence_number:%d,message_authentication_code:%d",
+    Logger::smf_app().debug("NAS header information, extended_protocol_discriminator %d, security_header_type:%d",
         decoded_nas_msg.header.extended_protocol_discriminator,
-        decoded_nas_msg.header.security_header_type,
-        decoded_nas_msg.header.sequence_number,
-        decoded_nas_msg.header.message_authentication_code);
+        decoded_nas_msg.header.security_header_type);
+
     Logger::smf_app().debug("NAS header information, Message Type %d", decoded_nas_msg.plain.sm.header.message_type);
 
-    switch (decoded_nas_msg.plain.sm.header.message_type){
+
+    //FOR TESTing  PDU_SESSION_MODIFICATION_REQUEST, should be REMOVED!!!
+    uint8_t message_type = PDU_SESSION_MODIFICATION_REQUEST;
+    //end
+    switch (message_type){
+    // switch (decoded_nas_msg.plain.sm.header.message_type){
+
+    //PDU_SESSION_MODIFICATION_REQUEST - UE initiated PDU session modification request
     case PDU_SESSION_MODIFICATION_REQUEST:{
+      Logger::smf_app().debug("PDU_SESSION_MODIFICATION_REQUEST");
       //PDU Session Modification procedure (UE-initiated, step 1.a, Section 4.3.3.2@3GPP TS 23.502)
       procedure_type = session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED;
+      sm_context_resp_pending->session_procedure_type = session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED;
 
       //step 1. assign the necessary information from pdu_session_modification_request to sm_context_req_msg to be used to create N1 SM, N2 SM information
       //decoded_nas_msg.plain.sm.pdu_session_modification_request;
-      //need the following IEs
+      //needs the following IEs
       // PTI,
       /* ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
       PDUSessionIdentity pdusessionidentity;
       ProcedureTransactionIdentity proceduretransactionidentity;
       MessageType messagetype;
+
       uint16_t presence;
       _5GSMCapability _5gsmcapability;
       _5GSMCause _5gsmcause;
@@ -761,7 +836,89 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
       ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
        */
 
-      //pdu_session_update_sm_context_request sm_context_req_msg;
+      //See section 6.4.2 - UE-requested PDU Session modification procedure@ 3GPP TS 24.501
+      //PTI
+      Logger::smf_app().info("PTI %d", decoded_nas_msg.plain.sm.header.procedure_transaction_identity);
+      procedure_transaction_id_t pti = {.procedure_transaction_id = decoded_nas_msg.plain.sm.header.procedure_transaction_identity};
+      n1_sm_context_resp->res.set_pti(pti);
+
+      //TODO: _5GSMCapability _5gsmcapability = decoded_nas_msg.plain.sm.pdu_session_modification_request._5gsmcapability;
+      //
+      //TODO: Cause
+      //TODO: uint8_t maximum_number_of_supported_packet_filters = decoded_nas_msg.plain.sm.pdu_session_modification_request.maximumnumberofsupportedpacketfilters;
+      //sp.get()->set_number_of_supported_packet_filters(maximum_number_of_supported_packet_filters);
+
+      //TODO: AlwaysonPDUSessionRequested
+      //TODO: IntergrityProtectionMaximumDataRate intergrityprotectionmaximumdatarate;
+
+      //TODO: process QoS rules and Qos Flow descriptions
+      uint8_t number_of_rules = decoded_nas_msg.plain.sm.pdu_session_modification_request.qosrules.lengthofqosrulesie;
+      QOSRulesIE * qos_rules_ie = (QOSRulesIE *) calloc (1, sizeof(QOSRulesIE));
+      qos_rules_ie = decoded_nas_msg.plain.sm.pdu_session_modification_request.qosrules.qosrulesie;
+      for (int i = 0; i < number_of_rules; i++){
+          //qos_rules_ie[0].qosruleidentifer
+        if ((qos_rules_ie[i].ruleoperationcode == CREATE_NEW_QOS_RULE) and (qos_rules_ie[i].segregation == SEGREGATION_REQUESTED)){
+          //Request to bind specific SDF to a dedicated QoS flow
+          if (qos_rules_ie[i].qosruleidentifer == 0) {
+            //new QoS rule
+          } else{
+            //existing QoS rule
+          }
+        }
+          //qos_rules_ie[0].ruleoperationcode
+          //qos_rules_ie[0].dqrbit
+          //qos_rules_ie[0].numberofpacketfilters
+          //1st rule
+          // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfilterdirection
+          // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfilteridentifier
+          // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfiltercontents.component_type
+          // qos_rules_ie[0].qosruleprecedence ;
+          // qos_rules_ie[0].segregation ;
+          // qos_rules_ie[0].qosflowidentifer ;
+      }
+
+      /*
+       typedef struct{
+  uint8_t uint;
+  uint16_t value;
+}GFBROrMFBR_UpLinkOrDownLink;
+
+typedef struct{
+  uint8_t uplinkinmilliseconds;
+  uint8_t downlinkinmilliseconds;
+}AveragingWindow;
+
+typedef struct{
+  uint8_t parameteridentifier;
+  //uint8_t lengthofparametercontents;
+  union {
+    uint8_t _5qi;
+    GFBROrMFBR_UpLinkOrDownLink gfbrormfbr_uplinkordownlink;
+    AveragingWindow averagingwindow;
+    uint8_t epsbeareridentity:4;
+  }parametercontents;
+}ParametersList;
+
+typedef struct{
+  uint8_t qfi:6;
+  uint8_t operationcode:3;
+  uint8_t e:1;
+  uint8_t numberofparameters:6;
+  ParametersList *parameterslist;
+}QOSFlowDescriptionsContents;
+
+typedef struct{
+  uint16_t qosflowdescriptionsnumber;   //Custom variables are protocol independent
+  QOSFlowDescriptionsContents *qosflowdescriptionscontents;
+}QOSFlowDescriptions;
+
+
+       */
+
+      //verify the PDU session ID
+      if (smreq->req.get_pdu_session_id() != decoded_nas_msg.plain.sm.pdu_session_modification_request.pdusessionidentity){
+        //TODO: error
+      }
 
       //section 6.3.2. Network-requested PDU Session modification procedure @ 3GPP TS 24.501
       //requested QoS rules (including packet filters) and/or requested QoS flow descriptions
@@ -769,19 +926,30 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
       // PTI
       //or UE capability
 
-      //Create a N1 SM (PDU Session Modification Command) and N2 SM (PDU Session Resource Setup Request Transfer IE)
-      std::string n1_sm_message;
-      std::string n2_sm_info ;
-      smf_n1_n2 smf_n1_n2_inst;
-      //N1 SM (PDU Session Modification Command)
-      smf_n1_n2_inst.create_n1_sm_container(sm_context_req_msg, PDU_SESSION_MODIFICATION_COMMAND, n1_sm_message, cause_value_5gsm_e::CAUSE_0_UNKNOWN); //TODO: need cause?
-      //N2 SM (PDU Session Resource Modify Request Transfer IE)
-      smf_n1_n2_inst.create_n2_sm_information(sm_context_req_msg, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ, n2_sm_info);
 
-      sm_context_resp_pending->res.set_n1_sm_message(n1_sm_message);
-      sm_context_resp_pending->res.set_n1_sm_msg_type("PDU_SESSION_MODIFICATION_COMMAND");
-      sm_context_resp_pending->res.set_n2_sm_information(n2_sm_info);
-      sm_context_resp_pending->res.set_n2_sm_info_type("PDU_RES_MOD_REQ");
+      //Create a N1 SM (PDU Session Modification Command) and N2 SM (PDU Session Resource Modify Request Transfer IE)
+      std::string n1_sm_msg_to_be_created, n1_sm_msg_hex_to_be_created;
+      std::string n2_sm_info_to_be_created, n2_sm_info_hex_to_be_created;
+      //N1 SM (PDU Session Modification Command)
+      smf_n1_n2_inst.create_n1_sm_container(n1_sm_context_resp->res, PDU_SESSION_MODIFICATION_COMMAND, n1_sm_msg_to_be_created, cause_value_5gsm_e::CAUSE_0_UNKNOWN); //TODO: need cause?
+      //N2 SM (PDU Session Resource Modify Request Transfer IE)
+      smf_n1_n2_inst.create_n2_sm_information(n1_sm_context_resp->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ, n2_sm_info_to_be_created);
+      smf_app_inst->convert_string_2_hex(n1_sm_msg_to_be_created, n1_sm_msg_hex_to_be_created);
+      smf_app_inst->convert_string_2_hex(n2_sm_info_to_be_created, n2_sm_info_hex_to_be_created);
+
+      n1_sm_context_resp->res.set_n1_sm_message(n1_sm_msg_hex_to_be_created);
+      n1_sm_context_resp->res.set_n1_sm_msg_type("PDU_SESSION_MODIFICATION_COMMAND");
+      n1_sm_context_resp->res.set_n2_sm_information(n2_sm_info_hex_to_be_created);
+      n1_sm_context_resp->res.set_n2_sm_info_type("PDU_RES_MOD_REQ");
+
+      //Fill the json part
+      //N1SM
+      n1_sm_context_resp->res.sm_context_updated_data["n1SmMsg"]["n1MessageClass"] = "SM";
+      n1_sm_context_resp->res.sm_context_updated_data["n1SmMsg"]["n1MessageContent"]["contentId"] = "n1SmMsg"; //part 2
+      n1_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InformationClass"] = "SM";
+      n1_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_MOD_REQ"; //NGAP message
+      n1_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg"; //part 3
+
       //Store pdu_session_modification_request in itti_n11_update_sm_context_response
       Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N11", sm_context_resp_pending->get_msg_name());
 
@@ -798,6 +966,9 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
       //don't need to create a procedure to update UPF
       break;
     }
+
+    //PDU_SESSION_MODIFICATION_COMPLETE - PDU Session Modification procedure
+
     case PDU_SESSION_MODIFICATION_COMPLETE:{
       //PDU Session Modification procedure (Section 4.3.3.2@3GPP TS 23.502)
       //TODO: should be verified since mentioned PDU_SESSION_MODIFICATION_COMMAND ACK in spec (see Step 11, section 4.3.3.2@3GPP TS 23.502)
@@ -862,7 +1033,9 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
 
     //decode N2 SM Info
     switch (n2_sm_info_type){
+
     //UE-Requested PDU Session Establishment procedure (Section 4.3.2.2.1@3GPP TS 23.502)
+    //or UE Triggered Service Request Procedure (step 2)
     case n2_sm_info_type_e::PDU_RES_SETUP_RSP:{
       Logger::smf_app().info("PDU Session Establishment Request, processing N2 SM Information");
       //Ngap_PDUSessionResourceSetupResponseTransfer_t
@@ -877,9 +1050,11 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
       smf_n1_n2 smf_n1_n2_inst;
       //N1 SM (PDU Session Modification Command)
       smf_n1_n2_inst.create_n2_sm_information(sm_context_req_msg, 1, n2_sm_info_type_e::PDU_RES_SETUP_RSP, n2_sm_info);
-      */
+       */
 
-      procedure_type = session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED;
+      //PDU_SESSION_ESTABLISHMENT_UE_REQUESTED & SERVICE_REQUEST_UE_TRIGGERED
+      procedure_type = session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED;
+
       //Ngap_PDUSessionResourceSetupResponseTransfer
       std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>  decoded_msg = std::make_shared<Ngap_PDUSessionResourceSetupResponseTransfer_t>();
       asn_dec_rval_t rc  = asn_decode(nullptr,ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, (void **)&decoded_msg, (void *)data, data_len);
@@ -955,6 +1130,8 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
 
       break;
     }
+
+    //PDU Session Modification procedure
     case n2_sm_info_type_e::PDU_RES_MOD_FAIL:{
 
     }
@@ -964,6 +1141,7 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
     }
 
     }
+    //free memory
     free(data);
     data = nullptr;
   }
@@ -976,7 +1154,15 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
     sp.get()->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATING);
     //need update UPF
     update_upf = true;
+
+    //get QFIs associated with PDU session ID
+    std::vector<smf_qos_flow> qos_flows = {};
+    sp.get()->get_qos_flows(qos_flows);
+    for (auto i: qos_flows){
+      sm_context_req_msg.add_qfi(i.qfi.qfi);
+    }
     //TODO: to be completed
+
   }
 
   //Step 4. Create a procedure for update sm context and let the procedure handle the request if necessary
@@ -1131,6 +1317,7 @@ void session_management_subscription::insert_dnn_configuration(std::string dnn, 
 
 //------------------------------------------------------------------------------
 void session_management_subscription::find_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t>& dnn_configuration){
+  Logger::smf_app().info( "find_dnn_configuration with dnn %s", dnn.c_str());
   if (dnn_configurations.count(dnn) > 0){
     dnn_configuration = dnn_configurations.at(dnn);
   }

@@ -409,7 +409,7 @@ void smf_app::handle_itti_msg (itti_n11_n1n2_message_transfer_response_status& m
     if (m.msg_type == PDU_SESSION_ESTABLISHMENT_REJECT){
       status = pdu_session_status_e::PDU_SESSION_INACTIVE;
     } else if (m.msg_type == PDU_SESSION_ESTABLISHMENT_ACCEPT){
-      status = pdu_session_status_e::PDU_SESSION_ACTIVE;
+      status = pdu_session_status_e::PDU_SESSION_ESTABLISHMENT_PENDING;
     }
     update_pdu_session_status(m.scid, status);
     Logger::smf_app().debug("Got successful response from AMF (Response code %d), set session status to %s", m.response_code, pdu_session_status_e2str[static_cast<int>(status)].c_str());
@@ -541,6 +541,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
     //TODO:
     //return
   }
+
+  //TODO: store UE 5GSM Capability
 
   //TODO: For the moment, not support PDU session authentication and authorization by the external DN
 
