@@ -208,6 +208,7 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   std::shared_ptr<session_management_subscription> ss = {};
   pc.get()->get_default_qos(sm_context_req->req.get_snssai(), sm_context_req->req.get_dnn(), default_qos);
   qfi.qfi = default_qos._5qi;
+  Logger::smf_app().info( "session_create_sm_context_procedure default qfi %d", qfi.qfi);
 
   //packet detection information
   pdi.set(source_interface); //source interface
@@ -251,7 +252,18 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   q.far_id_ul.second = far_id;
   q.pdr_id_ul = pdr_id;
   q.pdu_session_id = sm_context_req->req.get_pdu_session_id();
+  //default QoS profile
   q.qfi = default_qos._5qi;
+  q.qos_profile._5qi = default_qos._5qi;
+  q.qos_profile.arp = default_qos.arp;
+
+
+  //assign default QoS rule for this
+  QOSRulesIE qos_rule = {};
+  pc.get()->get_default_qos_rule(qos_rule, sm_context_req->req.get_pdu_session_type());
+  q.qos_rules.push_back(qos_rule);
+  ppc->generate_qos_rule_id(q.qos_rules[0].qosruleidentifer);
+  q.qos_rules[0].qosflowidentifer = q.qfi.qfi;
 
   smf_qos_flow q2 = q;
   ppc->add_qos_flow(q2);
@@ -278,6 +290,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
   resp.pfcp_ies.get(cause);
   if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
     resp.pfcp_ies.get(ppc->up_fseid);
+    n11_triggered_pending->res.set_cause(REQUEST_ACCEPTED);
   }
 
   for (auto it : resp.pfcp_ies.created_pdrs) {
@@ -293,14 +306,10 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
           xgpp_conv::pfcp_to_core_fteid(local_up_fteid, q.ul_fteid);
           //TODO: should be updated to 5G N3/N9 interface
           q.ul_fteid.interface_type = S1_U_SGW_GTP_U; //UPF's N3 interface
-          // comment if SPGW-C allocate up fteid
           //Update Qos Flow
           smf_qos_flow q2 = q;
           ppc->add_qos_flow(q2);
         }
-        // uncomment if SPGW-C allocate up fteid
-        // ppc->add_eps_bearer(b);
-        // ppc->add_qos_flow(b);
       } else {
         Logger::smf_app().error( "Could not get EPS bearer for created_pdr %d", pdr_id.rule_id);
       }
@@ -317,7 +326,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 
   //TODO:	how about pdu_session_id??
   smf_qos_flow q = {};
-  qos_flow_context_created qos_flow = {}; //default flow, so Non-GBR
+  qos_flow_context_created qos_flow = {}; //default flow, so Non-GBR, TODO: //we can use smf_qos_flow instead!
   qos_flow.set_cause(REQUEST_ACCEPTED);
   if (not ppc->get_qos_flow(qfi, q)) {
     qos_flow.set_cause(SYSTEM_FAILURE);
@@ -327,6 +336,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
     } else {
       qos_flow.set_ul_fteid(q.ul_fteid); //tunnel info
     }
+    qos_flow.set_qos_rule(q.qos_rules[0]); //set default QoS rule
   }
   qos_flow.set_qfi(qfi);
   qos_flow.set_arp(default_qos.arp);
@@ -352,7 +362,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
   } else { //PDU Session Establishment Accept
-    Logger::smf_app().debug("\nPrepare a PDU Session Establishment Accept message and send to UE\n");
+    Logger::smf_app().debug("Prepare a PDU Session Establishment Accept message and send to UE\n");
     smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res, PDU_SESSION_ESTABLISHMENT_ACCEPT, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN); //TODO: need cause?
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
@@ -381,14 +391,13 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
   if (n11_triggered_pending->res.get_cause() == REQUEST_ACCEPTED){
     //TODO: fill the content of N1N2MessageTransferReqData
     n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["n2InformationClass"] = "SM";
-    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = 1;
+    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = n11_triggered_pending->res.get_pdu_session_id();
     //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
     //n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapMessageType"] = 123; //NGAP message -to be verified: doesn't exist in tester (not required!!)
     n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_SETUP_REQ"; //NGAP message
     n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg"; //part 3
-    //n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] = 222;
-    //n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] = "0000D4";
-    //n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["nasPDU"] = ;//TODO: Doesn't exist in the spec (maybe N1MessageContainer in Spec!!), but exist in the tester!!
+    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] = n11_triggered_pending->res.get_snssai().sST;
+    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] = n11_triggered_pending->res.get_snssai().sD;
     n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["ranInfo"] = "SM";
   }
   //Others information
@@ -631,7 +640,7 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
     }
   } else {
     // send to AMF, update response
-    //TODO: to be completed
+	//TODO: to be completed
     Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());
     int ret = itti_inst->send_msg(n11_triggered_pending);
     if (RETURNok != ret) {
@@ -679,7 +688,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
           flow.dl_fteid = dl_fteid;
           flow.dl_fteid.interface_type = S1_U_ENODEB_GTP_U; //eNB's N3 interface
 
-          // flow.ul_fteid = it.second.ul_fteid;
+         // flow.ul_fteid = it.second.ul_fteid;
 
           pfcp::fteid_t local_up_fteid = {};
           if (it_created_pdr.get(local_up_fteid)) {
@@ -704,7 +713,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
           break;
 
         }
-        /*
+/*
         for (auto qfi: list_of_qfis_to_be_modified){
           pfcp::fteid_t local_up_fteid = {};
           if (it_created_pdr.get(local_up_fteid)) {
@@ -729,7 +738,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
           break;
 
         }
-         */
+        */
       }
     } else {
       Logger::smf_app().error( "Could not get pdr_id for created_pdr in %s", resp.pfcp_ies.get_msg_name());
@@ -781,8 +790,29 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
 	int ret = itti_inst->send_msg(itti_msg);
    */
 
+  // Create N2 SM Information
+  smf_n1_n2 smf_n1_n2_inst;
+  std::string n2_sm_info, n2_sm_info_hex;
+
+
+  //TODO: N2 SM Information
+  smf_n1_n2_inst.create_n2_sm_information(n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ, n2_sm_info);
+  smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+  n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
+
+  //Fill the json part
+  //N2SM
+  //TODO: fill the content of N1N2MessageTransferReqData
+  n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] = "SM";
+  n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = n11_triggered_pending->res.get_pdu_session_id();
+  //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
+  n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_SETUP_REQ"; //NGAP message
+  n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg";
+
+
   //send ITTI message to N11 interface to trigger SessionUpdateSMContextResponse towards AMFs
   Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N11", n11_triggered_pending->get_msg_name());
+  n11_triggered_pending->session_procedure_type = session_procedure_type;//session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED;
   int ret = itti_inst->send_msg(n11_triggered_pending);
   if (RETURNok != ret) {
     Logger::smf_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  n11_triggered_pending->get_msg_name());
@@ -790,15 +820,14 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
 
   //The SMF may subscribe to the UE mobility event notification from the AMF (e.g. location reporting, UE
   //moving into or out of Area Of Interest), by invoking Namf_EventExposure_Subscribe service operation
-  // For LADN, the SMF subscribes to the UE moving into or out of   LADN service area event notification by providing the LADN DNN as an indicator for the Area Of Interest
+  // For LADN, the SMF subscribes to the UE moving into or out of LADN service area event notification by providing the LADN DNN as an indicator for the Area Of Interest
   //see step 17@section 4.3.2.2.1@3GPP TS 23.502
 
   if (cause.cause_value != CAUSE_VALUE_REQUEST_ACCEPTED)
   {
     //TODO: Nsmf_PDUSession_SMContextStatusNotify
     /*  If the PDU Session establishment is not successful, the SMF informs the AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The SMF also releases any N4
-    session(s) created, any PDU Session address if allocated (e.g. IP address) and releases the association with PCF,
-    if any. In this case, step 19 is skipped.
+    session(s) created, any PDU Session address if allocated (e.g. IP address) and releases the association with PCF, if any.
     see step 18, section 4.3.2.2.1@3GPP TS 23.502)
      */
   }
