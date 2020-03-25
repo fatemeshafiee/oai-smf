@@ -175,9 +175,9 @@ void send_pdu_session_establishment_request()
 }
 
 
-void send_pdu_session_modification()
+void send_pdu_session_update_sm_context_establishment()
 {
-  std::cout << "[AMF N11] PDU Session Modification"<<std::endl;
+  std::cout << "[AMF N11] send_pdu_session_update_sm_context_establishment"<<std::endl;
 
   nlohmann::json pdu_session_modification_request;
   std::string n2_msg = "0003e0ac0a0501000000010000";
@@ -308,13 +308,134 @@ void send_pdu_session_modification()
   }
 
 }
+
+void send_pdu_session_update_sm_context_modification()
+{
+  std::cout << "[AMF N11] send_pdu_session_update_sm_context_modification"<<std::endl;
+
+  nlohmann::json pdu_session_modification_request;
+  std::string n2_msg = "0003e0ac0a0501000000010000";
+
+  //format string as hex
+  unsigned char *n2_msg_hex  = format_string_as_hex(n2_msg);
+
+  //encode
+  size_t buffer_size = 128;
+  char *buffer = (char *)calloc(1,buffer_size);
+
+  int  size = 0;
+
+  ENCODE_U8 (buffer, 0x2e , size);
+  ENCODE_U8 (buffer+size, 0x01 , size);
+  ENCODE_U8 (buffer+size, 0x01 , size);
+  ENCODE_U8 (buffer+size, 0xc1 , size);
+  ENCODE_U8 (buffer+size, 0xff , size);
+  ENCODE_U8 (buffer+size, 0xff , size);
+  ENCODE_U8 (buffer+size, 0x95 , size);
+
+  ////step 1.a,UE-initiated: SM Context ID + N1 (PDU Session Modification Request)
+
+
+  std::cout << "Buffer: "<<std::endl;
+  for(int i=0;i<2;i++)
+  {
+    printf("%02x ", buffer[i]);
+  }
+  std::cout << "Buffer: "<<std::endl;
+
+  //Fill Json part
+  //get supi and put into URL
+  std::string supi_str;
+  //std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts");
+  //std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts/imsi-200000000000001/modify");
+  std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts/1/modify");
+
+  //Fill the json part
+  pdu_session_modification_request["n1SmMsg"]["contentId"] = "n1SmMsg"; //part 2
+
+  //N1SM
+  //pdu_session_establishment_request["n1SmMsg"] = "SM";
+  //pdu_session_establishment_request["n1SmMsg"]["contentId"] = "n1SmMsg"; //part 2
+
+  CURL *curl = curl_easy_init();
+
+  //N1N2MessageTransfer Notification URI??
+  std::string json_part = pdu_session_modification_request.dump();
+
+  std::cout<< " Sending message to SMF....\n";
+  if(curl) {
+    std::cout << "send curl command"<<std::endl;
+
+    CURLcode res;
+    struct curl_slist *headers = nullptr;
+    struct curl_slist *slist = nullptr;
+    curl_mime *mime;
+    curl_mime *alt;
+    curl_mimepart *part;
+
+    headers = curl_slist_append(headers, "charsets: utf-8");
+    headers = curl_slist_append(headers, "content-type: multipart/related");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
+
+    mime = curl_mime_init(curl);
+    alt = curl_mime_init(curl);
+
+    //part with N1N2MessageTransferReqData (JsonData)
+    part = curl_mime_addpart(mime);
+    curl_mime_data(part, json_part.c_str(), CURL_ZERO_TERMINATED);
+    curl_mime_type(part, "application/json");
+
+    part = curl_mime_addpart(mime);
+    curl_mime_data(part, reinterpret_cast<const char*>(buffer), size);
+    //curl_mime_data(part, "\x00\x03\xe0\xac\x0a\x05\x01\x01\x01\x01\x01\x00\x00", CURL_ZERO_TERMINATED);
+    //curl_mime_data(part, "\x2e\x01\x01\xc1\xff\xff\x95", CURL_ZERO_TERMINATED);
+
+
+    curl_mime_type(part, "application/vnd.3gpp.5gnas");
+    curl_mime_name (part, "n1SmMsg");
+
+    curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+    //res = curl_easy_perform(curl);
+
+    // Response information.
+    long httpCode(0);
+    std::unique_ptr<std::string> httpData(new std::string());
+
+    // Hook up data handling function.
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+
+    res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    //get cause from the response
+    nlohmann::json response_data;
+    try{
+      response_data = nlohmann::json::parse(*httpData.get());
+    } catch (nlohmann::json::exception& e){
+      std::cout << "Could not get the cause from the response" <<std::endl;
+      //Set the default Cause
+      response_data["cause"] = "504 Gateway Timeout";
+    }
+    std::cout << "[AMF N11] PDU session modification request, response from SMF, Http Code " << httpCode << " cause  "<<  response_data["cause"].dump().c_str()<<std::endl;
+
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+    curl_mime_free(mime);
+  }
+
+}
+
 int main(int argc, char* argv[])
 {
 
   send_pdu_session_establishment_request();
   usleep(10000);
-  send_pdu_session_modification();
-
+  //send_pdu_session_update_sm_context_establishment();
+  send_pdu_session_update_sm_context_modification();
   return 0;
 }
 

@@ -44,14 +44,14 @@ void SessionManagementSubscriptionDataRetrievalApiImpl::get_sm_data(const std::s
 	nlohmann::json jsonData;
 	jsonData["singleNssai"]["sst"] = 222;
 	jsonData["singleNssai"]["sd"] = 123;
-	jsonData["dnnConfigurations"]["default"]["pduSessionTypes"]["defaultSessionType"] = "IPV4";
-	jsonData["dnnConfigurations"]["default"]["sscModes"]["defaultSscMode"] = "SSC_MODE_1";
-	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["5qi"] = 80;
-	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["arp"]["priorityLevel"] = 1;
-	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["arp"]["preemptCap"] = "NOT_PREEMPT";
-	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";
-	jsonData["dnnConfigurations"]["default"]["sessionAmbr"]["uplink"] = "10Mbps";
-	jsonData["dnnConfigurations"]["default"]["sessionAmbr"]["downlink"] = "11Mbps";
+	jsonData["dnnConfigurations"]["carrier.com"]["pduSessionTypes"]["defaultSessionType"] = "IPV4";
+	jsonData["dnnConfigurations"]["carrier.com"]["sscModes"]["defaultSscMode"] = "SSC_MODE_1";
+	jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["5qi"] = 60;
+	jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["arp"]["priorityLevel"] = 1;
+	jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["arp"]["preemptCap"] = "NOT_PREEMPT";
+	jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";
+	jsonData["dnnConfigurations"]["carrier.com"]["sessionAmbr"]["uplink"] = "10Mbps";
+	jsonData["dnnConfigurations"]["carrier.com"]["sessionAmbr"]["downlink"] = "11Mbps";
 
 /*
 	SessionManagementSubscriptionData subscriptionData;
