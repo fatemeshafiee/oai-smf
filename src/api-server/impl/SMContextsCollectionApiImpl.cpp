@@ -64,7 +64,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
   Logger::smf_api_server().debug("smContextMessage, N1 SM message: %s",n1_sm_msg.c_str());
 
   //Step 2. Create a pdu_session_create_sm_context_request message and store the necessary information
-  Logger::smf_api_server().debug("Create a pdu_session_create_sm_context_request message and store the necessary information\n");
+  Logger::smf_api_server().debug("Create a pdu_session_create_sm_context_request message and store the necessary information");
   smf::pdu_session_create_sm_context_request sm_context_req_msg = {};
 
   //set N1 SM Message
@@ -80,27 +80,27 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
   smf_string_to_supi(&supi, supi_str.c_str());
   sm_context_req_msg.set_supi(supi);
   sm_context_req_msg.set_supi_prefix(supi_prefix);
-  Logger::smf_api_server().debug("SmContextCreateData, supi %s, prefix %s, imsi %s  \n",  smContextCreateData.getSupi().c_str(), supi_prefix.c_str(), supi_str.c_str());
+  Logger::smf_api_server().debug("SmContextCreateData, supi %s, prefix %s, imsi %s",  smContextCreateData.getSupi().c_str(), supi_prefix.c_str(), supi_str.c_str());
 
   //dnn
-  Logger::smf_api_server().debug("SmContextCreateData, dnn %s \n", smContextCreateData.getDnn().c_str());
+  Logger::smf_api_server().debug("SmContextCreateData, dnn %s", smContextCreateData.getDnn().c_str());
   sm_context_req_msg.set_dnn(smContextCreateData.getDnn().c_str());
 
   //S-Nssai
-  Logger::smf_api_server().debug("SmContextCreateData, S-NSSAI sst %d, sd %s\n", smContextCreateData.getSNssai().getSst(), smContextCreateData.getSNssai().getSd().c_str());
+  Logger::smf_api_server().debug("SmContextCreateData, S-NSSAI sst %d, sd %s", smContextCreateData.getSNssai().getSst(), smContextCreateData.getSNssai().getSd().c_str());
   snssai_t snssai(smContextCreateData.getSNssai().getSst(), smContextCreateData.getSNssai().getSd().c_str());
   sm_context_req_msg.set_snssai(snssai);
 
   //PDU session ID
-  Logger::smf_api_server().debug("SmContextCreateData, PDU SessionID %d \n", smContextCreateData.getPduSessionId());
+  Logger::smf_api_server().debug("SmContextCreateData, PDU SessionID %d", smContextCreateData.getPduSessionId());
   sm_context_req_msg.set_pdu_session_id(smContextCreateData.getPduSessionId());
 
   //AMF ID (ServingNFId)
-  Logger::smf_api_server().debug("SmContextCreateDatea, ServingNfId %s\n", smContextCreateData.getServingNfId().c_str());
+  Logger::smf_api_server().debug("SmContextCreateDatea, ServingNfId %s", smContextCreateData.getServingNfId().c_str());
   sm_context_req_msg.set_serving_nf_id(smContextCreateData.getServingNfId().c_str()); //TODO: should be verified that AMF ID is stored in GUAMI or ServingNfId
 
   //Request Type
-  Logger::smf_api_server().debug("SmContextCreateData, RequestType %s\n", smContextCreateData.getRequestType().c_str());
+  Logger::smf_api_server().debug("SmContextCreateData, RequestType %s", smContextCreateData.getRequestType().c_str());
   sm_context_req_msg.set_request_type(smContextCreateData.getRequestType());
   //PCF ID
   // Priority Access
@@ -117,7 +117,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(const SmContextMessage &smCon
   //PCFId
 
   // DNN Selection Mode
-  Logger::smf_api_server().debug("SmContextCreateData, SelMode %s\n", smContextCreateData.getSelMode().c_str());
+  Logger::smf_api_server().debug("SmContextCreateData, SelMode %s", smContextCreateData.getSelMode().c_str());
   sm_context_req_msg.set_dnn_selection_mode(smContextCreateData.getSelMode().c_str());
 
   //Subscription for PDU Session Status Notification

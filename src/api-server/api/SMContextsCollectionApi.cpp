@@ -72,9 +72,10 @@ void SMContextsCollectionApi::setupRoutes() {
 
 void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
 
-  Logger::smf_api_server().info("Received a SM context create request from AMF");
-  Logger::smf_api_server().debug("Request body: %s\n",request.body().c_str());
+  Logger::smf_api_server().info("\nReceived a SM context create request from AMF");
+  Logger::smf_api_server().debug("Request body: %s",request.body().c_str());
 
+  //find boundary
   std::size_t found = request.body().find("Content-Type");
   std::string boundary_str = request.body().substr(2, found - 4);
   Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
@@ -127,11 +128,12 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
     this->post_sm_contexts(smContextMessage, response);
   } catch (nlohmann::detail::exception &e) {
     //send a 400 error
-	  Logger::smf_api_server().warn("Can not parse the json data!");
+	  Logger::smf_api_server().warn("Can not parse the json data (error: %s)!", e.what());
 	  response.send(Pistache::Http::Code::Bad_Request, e.what());
     return;
   } catch (std::exception &e) {
     //send a 500 error
+    Logger::smf_api_server().warn("Error: %s!", e.what());
     response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
     return;
   }

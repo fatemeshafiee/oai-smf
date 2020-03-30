@@ -162,6 +162,7 @@ void IndividualSMContextApi::update_sm_context_handler(const Pistache::Rest::Req
   Logger::smf_api_server().info("Received a SM context update request from AMF");
   Logger::smf_api_server().debug("Request body: %s\n",request.body().c_str());
 
+  //find boundary
   std::size_t found = request.body().find("Content-Type");
   std::string boundary_str = request.body().substr(2, found - 4);
   Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
@@ -236,12 +237,12 @@ void IndividualSMContextApi::update_sm_context_handler(const Pistache::Rest::Req
 
   } catch (nlohmann::detail::exception &e) {
     //send a 400 error
-    Logger::smf_api_server().warn("Error in parsing json, send a msg with a 400 error code to AMF");
+    Logger::smf_api_server().warn("Error in parsing json (error: %s), send a msg with a 400 error code to AMF", e.what());
     response.send(Pistache::Http::Code::Bad_Request, e.what());
     return;
   } catch (std::exception &e) {
     //send a 500 error
-    Logger::smf_api_server().warn("Send a msg with a 500 error code to AMF");
+    Logger::smf_api_server().warn("Error (%s ), Send a msg with a 500 error code to AMF", e.what());
     response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
     return;
   }

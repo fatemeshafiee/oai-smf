@@ -78,7 +78,7 @@ private:
     /// Create SM Context
     /// </summary>
     /// <remarks>
-    /// 
+    ///
     /// </remarks>
     /// <param name="smContextMessage"></param>
     virtual void post_sm_contexts(const SmContextMessage &smContextMessage, Pistache::Http::ResponseWriter &response) = 0;
