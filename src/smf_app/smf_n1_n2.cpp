@@ -722,6 +722,17 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
         Ngap_QosFlowSetupRequestList_t   QosFlowSetupRequestList;
      */
 
+    //PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE
+       if (msg.get_msg_type() != PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE){
+         Logger::smf_app().error("Cannot create an PDU Session Establishment Accept for this message (type %d)",msg.get_msg_type());
+         return;
+       }
+       pdu_session_create_sm_context_response& sm_context_res = static_cast<pdu_session_create_sm_context_response&>(msg);
+
+       //get default QoS value
+       qos_flow_context_created qos_flow = {};
+       qos_flow = sm_context_res.get_qos_flow_context();
+
     switch (msg.get_msg_type()) {
     case PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE: {
       pdu_session_create_sm_context_response& sm_context_res = static_cast<pdu_session_create_sm_context_response&>(msg);
@@ -905,9 +916,8 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
 
     pdu_session_update_sm_context_request& sm_context_res = static_cast<pdu_session_update_sm_context_request&>(msg);
     pfcp::qfi_t qfi(60); //for testing purpose
-    qos_flow_context_modified qos_flow;
+    qos_flow_context_modified qos_flow = {};
     //sm_context_res.get_qos_flow_context_modified (qfi, qos_flow);
-
 
     Ngap_PDUSessionResourceModifyRequestTransfer_t *ngap_IEs = nullptr;
     ngap_IEs = (Ngap_PDUSessionResourceModifyRequestTransfer_t *) calloc(1, sizeof(Ngap_PDUSessionResourceModifyRequestTransfer_t));
@@ -926,10 +936,22 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     pduSessionAggregateMaximumBitRate->value.choice.PDUSessionAggregateMaximumBitRate.pDUSessionAggregateMaximumBitRateUL.buf[0] = 0x02;
     ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, pduSessionAggregateMaximumBitRate);
 
-
     //Ngap_UL_NGU_UP_TNLModifyList_t   UL_NGU_UP_TNLModifyList;
-    unsigned char          buf_in_addr[sizeof (struct in_addr)+1];
+
+    //For testing purpose
+    uint32_t key = 0x01020304;
+    std::string ipv4_addr_str = "127.10.5.6";
+    struct in_addr ipv4_addr;
+    IPV4_STR_ADDR_TO_INADDR (util::trim(ipv4_addr_str).c_str(), ipv4_addr, "BAD IPv4 ADDRESS FORMAT !");
+    memcpy (&qos_flow.ul_fteid.ipv4_address,&ipv4_addr, sizeof (struct in_addr));
+    memcpy (&qos_flow.ul_fteid.teid_gre_key,&key, sizeof (uint32_t));
+
+    unsigned char buf_in_addr[sizeof (struct in_addr)+1];
+    struct in_addr  ipv4_address = {};
+    ipv4_address.s_addr = htonl(qos_flow.ul_fteid.ipv4_address.s_addr);
+
     memcpy (buf_in_addr, &qos_flow.ul_fteid.ipv4_address, sizeof (struct in_addr));
+    //memcpy (buf_in_addr, &ipv4_address, sizeof (struct in_addr));
 
     Ngap_PDUSessionResourceModifyRequestTransferIEs_t  *ul_NGU_UP_TNLModifyList =  nullptr;
     ul_NGU_UP_TNLModifyList = (Ngap_PDUSessionResourceModifyRequestTransferIEs_t *) calloc(1, sizeof(Ngap_PDUSessionResourceModifyRequestTransferIEs_t));
@@ -940,39 +962,41 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     ngap_UL_NGU_UP_TNLModifyItem = (Ngap_UL_NGU_UP_TNLModifyItem_t *) calloc (1, sizeof(Ngap_UL_NGU_UP_TNLModifyItem_t));
     ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.present = Ngap_UPTransportLayerInformation_PR_gTPTunnel;
     ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel = (Ngap_GTPTunnel_t  *) calloc (1, sizeof(Ngap_GTPTunnel_t));
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.size = 4;
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf = (uint8_t *)calloc (4, sizeof (uint8_t));
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[0] = 0x0a;
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[1] = 0x0b;
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[2] = 0x0c;
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[3] = 0x0d;
-    //memcpy (ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf, &qos_flow.ul_fteid.teid_gre_key, 4);
+    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf = (uint8_t *)calloc (8, sizeof (uint8_t));
+
+    memcpy (ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf, &qos_flow.ul_fteid.ipv4_address, 4);
+    //memcpy (ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf, buf_in_addr, sizeof (struct in_addr));
+    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.size = 4; //TODO: 4 or 8
     ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.bits_unused = 0;
+
     ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.size = sizeof (struct in_addr);
     ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf = (uint8_t *) calloc (sizeof (struct in_addr), sizeof(uint8_t));
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[0] = 0x0e;
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[1] = 0x0f;
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[2] = 0x10;
-    ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[3] = 0x11;
-    //memcpy (ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf, buf_in_addr, sizeof (struct in_addr));
+    //ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[0] = 0x09;
+    //ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[1] = 0x08;
+    //ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[2] = 0x07;
+    //ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[3] = 0x06;
+    memcpy (ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf, &qos_flow.ul_fteid.teid_gre_key, sizeof (struct in_addr));
+
 
     ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.present = Ngap_UPTransportLayerInformation_PR_gTPTunnel;
     ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel = (Ngap_GTPTunnel_t  *) calloc (1, sizeof(Ngap_GTPTunnel_t));
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.size = 4;
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf = (uint8_t *)calloc (4, sizeof (uint8_t));
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[0] = 0x0a;
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[1] = 0x0b;
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[2] = 0x0c;
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[3] = 0x0d;
-    //memcpy (ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf, &qos_flow.ul_fteid.teid_gre_key, 4);
+
+    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf = (uint8_t *)calloc (8, sizeof (uint8_t));
+    //ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[0] = 0x0a;
+    //ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[1] = 0x0b;
+    //ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[2] = 0x0c;
+    //ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf[3] = 0x0d;
+    memcpy (ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.buf, &qos_flow.ul_fteid.ipv4_address, 4);
+    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.size = 8;
     ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->transportLayerAddress.bits_unused = 0;
+
     ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.size = sizeof (struct in_addr);
     ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf = (uint8_t *) calloc (sizeof (struct in_addr), sizeof(uint8_t));
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[0] = 0x0e;
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[1] = 0x0f;
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[2] = 0x10;
-    ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[3] = 0x11;
-    //memcpy (ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf, buf_in_addr, sizeof (struct in_addr));
+    //ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[0] = 0x09;
+    //ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[1] = 0x08;
+    //ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[2] = 0x07;
+    //ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf[3] = 0x06;
+    memcpy (ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf, &qos_flow.ul_fteid.teid_gre_key,4);
 
     ASN_SEQUENCE_ADD(&ul_NGU_UP_TNLModifyList->value.choice.UL_NGU_UP_TNLModifyList.list, ngap_UL_NGU_UP_TNLModifyItem);
     ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, ul_NGU_UP_TNLModifyList);
@@ -1003,7 +1027,6 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     ASN_SEQUENCE_ADD(&qosFlowAddOrModifyRequestList->value.choice.QosFlowAddOrModifyRequestList.list, ngap_QosFlowAddOrModifyRequestItem);
     //Ngap_E_RAB_ID_t *e_RAB_ID;  //optional
     ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, qosFlowAddOrModifyRequestList);
-
 
     //Ngap_QosFlowList_t   QosFlowList;
     //QoS to release list??
@@ -1097,7 +1120,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
 int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg)
 {
   //TODO: should work with BUPT to finish this function
-  Logger::smf_app().info("Decode NAS message from N1 SM Container\n");
+  Logger::smf_app().info("Decode NAS message from N1 SM Container");
 
   //step 1. Decode NAS  message (for instance, ... only served as an example)
   nas_message_decode_status_t   decode_status = {0};
@@ -1105,18 +1128,15 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm
 
   unsigned int n1SmMsgLen = n1_sm_msg.length();//strlen(n1_sm_msg.c_str());
   unsigned char *datavalue = (unsigned char *)malloc(n1SmMsgLen + 1);
-#if 1
 
   unsigned char *data = (unsigned char *)malloc(n1SmMsgLen + 1);//hardcoded for the moment
   memset(data,0,n1SmMsgLen + 1);
-
   memcpy ((void *)data, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
 
   Logger::smf_app().debug("Data: %s (%d bytes)", data, n1SmMsgLen);
-
-  for(int i = 0;i<n1SmMsgLen;i++)
-    printf(" %02x ",data[i]);
-
+//  for(int i = 0;i<n1SmMsgLen;i++)
+//    printf(" %02x ",data[i]);
+//  printf("\n");
   Logger::smf_app().debug("Data: ");
   for(int i=0;i<n1SmMsgLen;i++)
   {
@@ -1138,7 +1158,6 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm
     printf("%x ",nAsciiCharacter);
     // Concatenate this character onto the output
     datavalue[i/2] = (unsigned char)nAsciiCharacter;
-
     // Skip the next character
     i++;
   }
@@ -1146,9 +1165,9 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm
 
   free(data);
   data = nullptr;
-#else
-  memcpy ((void *)datavalue, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
-#endif
+
+  //memcpy ((void *)datavalue, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
+
   //use a temporary security mechanism
   //construct decode security context
   static uint8_t fivegmm_security_context_flag = 0;
