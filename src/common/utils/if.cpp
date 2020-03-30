@@ -183,7 +183,8 @@ int get_mtu_from_iface(const std::string& if_name, uint32_t& mtu) {
   memset(&ifr, 0, sizeof(ifr));
   int fd = socket(AF_INET, SOCK_DGRAM, 0);
   ifr.ifr_addr.sa_family = AF_INET;
-  strncpy(ifr.ifr_name, (const char *)if_name.c_str(), IFNAMSIZ-1);
+  //strncpy(ifr.ifr_name, (const char *)if_name.c_str(), IFNAMSIZ-1);
+  strcpy(ifr.ifr_name,(const char*)if_name.c_str());
   if (ioctl(fd, SIOCGIFMTU, &ifr)) {
     close(fd);
     Logger::system().error("Failed to probe %s MTU: error %s\n", if_name.c_str(), strerror(errno));
@@ -223,7 +224,8 @@ int get_inet_addr_infos_from_iface(const std::string& if_name, struct in_addr& i
 
   memset(&ifr, 0, sizeof(ifr));
   ifr.ifr_addr.sa_family = AF_INET;
-  strncpy(ifr.ifr_name, (const char *)if_name.c_str(), IFNAMSIZ-1);
+  //strncpy(ifr.ifr_name, (const char *)if_name.c_str(), IFNAMSIZ-1);
+  strcpy(ifr.ifr_name,(const char*)if_name.c_str());
   if (ioctl(fd, SIOCGIFNETMASK, &ifr)) {
     close(fd);
     Logger::system().error("Failed to probe %s inet netmask: error %s\n", if_name.c_str(), strerror(errno));
@@ -240,7 +242,8 @@ int get_inet_addr_infos_from_iface(const std::string& if_name, struct in_addr& i
 
   memset(&ifr, 0, sizeof(ifr));
   ifr.ifr_addr.sa_family = AF_INET;
-  strncpy(ifr.ifr_name, (const char *)if_name.c_str(), IFNAMSIZ-1);
+  //strncpy(ifr.ifr_name, (const char *)if_name.c_str(), IFNAMSIZ-1);
+  strcpy(ifr.ifr_name,(const char*)if_name.c_str());
   if (ioctl(fd, SIOCGIFMTU, &ifr)) {
     Logger::system().error("Failed to probe %s MTU: error %s\n", if_name.c_str(), strerror(errno));
   } else {
