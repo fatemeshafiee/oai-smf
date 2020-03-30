@@ -149,11 +149,9 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   {
     //wys-test-add
     destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS; // ACCESS is for downlink, CORE for uplink
-    outer_header_creation.teid  =  1;
+    outer_header_creation.teid = 1;
     //inet_aton("192.168.20.136", &outer_header_creation.ipv4_address);
     outer_header_creation.ipv4_address = smf_cfg.test_upf_cfg.gnb_addr4 ;
-    //uint16_t port = 4;
-    //outer_header_creation.port_number  = port;
     outer_header_creation.outer_header_creation_description  = pfcp::OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
 
     forwarding_parameters.set(outer_header_creation);
@@ -164,7 +162,6 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
     destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE; // ACCESS is for downlink, CORE for uplink
     forwarding_parameters.set(destination_interface);
   }
-
 
   //destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE; // ACCESS is for downlink, CORE for uplink
   //forwarding_parameters.set(destination_interface);
@@ -351,7 +348,6 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
   smf_n1_n2 smf_n1_n2_inst;
   std::string n1_sm_msg,n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
-
 
   //TODO: should uncomment this line when including UPF in the test
   n11_triggered_pending->res.set_cause(REQUEST_ACCEPTED);//for testing purpose
@@ -790,24 +786,77 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
 	int ret = itti_inst->send_msg(itti_msg);
    */
 
-  // Create N2 SM Information
-  smf_n1_n2 smf_n1_n2_inst;
-  std::string n2_sm_info, n2_sm_info_hex;
+
+  switch (session_procedure_type){
+
+  //TODO: to be verified
+  case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED:{
+    // Create N2 SM Information
+    smf_n1_n2 smf_n1_n2_inst;
+    std::string n2_sm_info, n2_sm_info_hex;
+
+    //TODO: N2 SM Information
+    smf_n1_n2_inst.create_n2_sm_information(n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ, n2_sm_info);
+    smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+    n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
+
+    //TODO: fill the content of SmContextUpdatedData
+    n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] = "SM";
+    n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = n11_triggered_pending->res.get_pdu_session_id();
+    //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
+    n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_MOD_REQ"; //NGAP message
+    n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg";
+
+  }
+  break;
+
+  //UE-Triggered Service Request Procedure (Step 1)
+  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1:{
+    // Create N2 SM Information: PDU Session Resource Setup Request Transfer IE
+    smf_n1_n2 smf_n1_n2_inst;
+    std::string n2_sm_info, n2_sm_info_hex;
+
+    //TODO: N2 SM Information
+    smf_n1_n2_inst.create_n2_sm_information(n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ, n2_sm_info);
+    smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+    n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
+
+    //TODO: fill the content of SmContextUpdatedData
+    n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] = "SM";
+    n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = n11_triggered_pending->res.get_pdu_session_id();
+    //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
+    n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_SETUP_REQ"; //NGAP message
+    n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg";
+
+  }
+  break;
+
+  case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED:{
+    //PDU Session Establishment UE-Requested
+    //No need to create N1/N2 Container, just Cause
+    Logger::smf_app().info( "PDU Session Establishment Request (UE-Initiated)");
+  }
+  break;
+
+  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2:{
+    //PDU Session Establishment UE-Requested
+    //No need to create N1/N2 Container, just Cause
+    Logger::smf_app().info( "UE Triggered Service Request (Step 2)");
+  }
+  break;
+
+  //SERVICE_REQUEST_NETWORK_TRIGGERED
+  //PDU_SESSION_MODIFICATION_UE_INITIATED,
+  //PDU_SESSION_MODIFICATION_SMF_REQUESTED
+  // PDU_SESSION_MODIFICATION_AN_REQUESTED
+  // PDU_SESSION_RELEASE_UE_REQUESTED
+  //PDU_SESSION_RELEASE_NETWORK_REQUESTED
 
 
-  //TODO: N2 SM Information
-  smf_n1_n2_inst.create_n2_sm_information(n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ, n2_sm_info);
-  smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-  n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
+  default: {
 
-  //Fill the json part
-  //N2SM
-  //TODO: fill the content of N1N2MessageTransferReqData
-  n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] = "SM";
-  n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = n11_triggered_pending->res.get_pdu_session_id();
-  //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
-  n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] = "PDU_RES_SETUP_REQ"; //NGAP message
-  n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg";
+  }
+  }
 
 
   //send ITTI message to N11 interface to trigger SessionUpdateSMContextResponse towards AMFs

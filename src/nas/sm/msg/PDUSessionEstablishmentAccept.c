@@ -174,7 +174,7 @@ int encode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
   uint32_t encoded = 0;
   int encoded_result = 0;
 
-  printf ("Encode PDU Session Establishment Accept\n");
+  printf ("\nEncode PDU Session Establishment Accept\n");
   // Check if we got a NULL pointer and if buffer length is >= minimum length expected for the message.
   CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer, PDU_SESSION_ESTABLISHMENT_ACCEPT_MINIMUM_LENGTH, len);
   /*

@@ -10,7 +10,7 @@ int decode_pdu_session_establishment_request( pdu_session_establishment_request_
 {
   uint32_t decoded = 0;
   int decoded_result = 0;
-  printf("decode_pdu_session_establishment_request\n");
+  //printf("decode_pdu_session_establishment_request\n");
   // Check if we got a NULL pointer and if buffer length is >= minimum length expected for the message.
   CHECK_PDU_POINTER_AND_LENGTH_DECODER (buffer, PDU_SESSION_ESTABLISHMENT_REQUEST_MINIMUM_LENGTH, len);
 

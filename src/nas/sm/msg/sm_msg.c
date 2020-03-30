@@ -93,7 +93,7 @@ sm_msg_decode (
   buffer += header_result;
   len -= header_result;
 
-  printf("\ndukl esm message type %d\n",msg->header.message_type);
+//  printf("\n esm message type %d\n",msg->header.message_type);
 
   switch (msg->header.message_type) {
 	  case PDU_SESSION_ESTABLISHMENT_REQUEST:
@@ -210,7 +210,7 @@ fivegsm_msg_encode (
   buffer += header_result;
   len -= header_result;
 
-  printf("Msg type %d",msg->header.message_type );
+  printf(", Msg type %d",msg->header.message_type );
   switch (msg->header.message_type) {
       case PDU_SESSION_ESTABLISHMENT_REQUEST:
 	  	   encode_result = encode_pdu_session_establishment_request(&msg->pdu_session_establishment_request, buffer, len);
@@ -403,7 +403,7 @@ _fivegsm_msg_encode_header (
    * Encode the procedure transaction identity
    */
   ENCODE_U8 (buffer + size, header->procedure_transaction_identity, size);
-  printf("fivegsm_msg_encode_header, procedure transaction identity %d", header->procedure_transaction_identity);
+  printf("fivegsm_msg_encode_header, procedure transaction identity %d ", header->procedure_transaction_identity);
   /*
    * Encode the message type
    */

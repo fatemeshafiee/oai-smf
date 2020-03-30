@@ -439,7 +439,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   //handle PDU Session Create SM Context Request as specified in section 4.3.2 3GPP TS 23.502
   oai::smf_server::model::SmContextCreateError smContextCreateError;
   oai::smf_server::model::ProblemDetails problem_details;
-  std::string n1_sm_message; //N1 SM container
+  std::string n1_sm_message, n1_sm_message_hex; //N1 SM container
   smf_n1_n2 smf_n1_n2_inst;
   nas_message_t	decoded_nas_msg;
 
@@ -459,10 +459,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
     //PDU Session Establishment Reject
     //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
     smf_n1_n2_inst.create_n1_sm_container(context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE); //TODO: should define 5GSM cause in 24.501
-    //Send response to AMF
-    //httpResponse.headers().add<Pistache::Http::Header::Location>(url);
-    smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message);
-
+    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+   //Send response to AMF
+    smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message_hex);
   }
 
   Logger::smf_app().debug("NAS header information: extended protocol discriminator %d, security headertype %d",
@@ -512,8 +511,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
     //PDU Session Establishment Reject
     //(24.501 (section 7.3.1)) NAS N1 SM message: response with a 5GSM STATUS message including cause "#81 Invalid PTI value"
     smf_n1_n2_inst.create_n1_sm_container(context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE); //TODO: should define 5GSM cause in 24.501
+    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     //Send response to AMF
-    smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message);
+    smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message_hex);
   }
 
   //check pdu session id
@@ -531,8 +531,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
     //PDU Session Establishment Reject
     //(24.501 (section 7.4)) implementation dependent->do similar to UE: response with a 5GSM STATUS message including cause "#98 message type not compatible with protocol state."
     smf_n1_n2_inst.create_n1_sm_container(context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_98_MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE); //TODO: should define 5GSM cause in 24.501
+    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     //Send response to AMF
-    smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message);
+    smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message_hex);
   }
 
   //check request type
@@ -554,8 +555,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
     smContextCreateError.setError(problem_details);
     //PDU Session Establishment Reject, 24.501 cause "#27 Missing or unknown DNN"
     smf_n1_n2_inst.create_n1_sm_container(context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN);
+    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     //Send response to AMF
-    smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message);
+    smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message_hex);
     return;
   }
 
@@ -588,6 +590,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   }
 
   //Step 6. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
+  //TODO: Test with UDM (TESTER)
   std::string dnn_selection_mode = smreq->req.get_dnn_selection_mode();
   if (not use_local_configuration_subscription_data(dnn_selection_mode) && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai))
   {
@@ -607,8 +610,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
       smContextCreateError.setError(problem_details);
       //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"?
       smf_n1_n2_inst.create_n1_sm_container(context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
+      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       //Send response (PDU Session Establishment Reject) to AMF
-      smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message);
+      smf_n11_inst->send_pdu_session_create_sm_context_response(smreq->http_response, smContextCreateError, Pistache::Http::Code::Forbidden, n1_sm_message_hex);
       return;
     }
   }
@@ -641,7 +645,7 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
   Logger::smf_app().info("Handle a PDU Session Update SM Context Request from an AMF");
   oai::smf_server::model::SmContextUpdateError smContextUpdateError;
   oai::smf_server::model::ProblemDetails problem_details;
-  std::string n1_sm_message; //N1 SM container
+  std::string n1_sm_message, n1_sm_message_hex; //N1 SM container
   smf_n1_n2 smf_n1_n2_inst; //to encode Ngap IE
 
   //Step 1. get supi, dnn, nssai, pdu_session id from sm_context
@@ -663,8 +667,8 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
     smContextUpdateError.setError(problem_details);
     //PDU Session Update Reject
     smf_n1_n2_inst.create_n1_sm_container(smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
-    //Send response to AMF
-    smf_n11_inst->send_pdu_session_update_sm_context_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden, n1_sm_message);
+    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+    smf_n11_inst->send_pdu_session_update_sm_context_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden, n1_sm_message_hex);
     return;
   }
 
@@ -675,6 +679,7 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
   } else {
     Logger::smf_app().warn("Context associated with this id " SCID_FMT " does not exit!", scid);
     //TODO: send reject to AMF
+    return;
   }
 
   supi_t supi = scf.get()->supi;
@@ -703,9 +708,8 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
     smContextUpdateError.setError(problem_details);
     //Create N1 container
     smf_n1_n2_inst.create_n1_sm_container(context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
-    //Send response to AMF
-    smf_n11_inst->send_pdu_session_update_sm_context_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden, n1_sm_message);
-
+    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+    smf_n11_inst->send_pdu_session_update_sm_context_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden, n1_sm_message_hex);
     return;
   }
 
@@ -721,8 +725,8 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
       smContextUpdateError.setError(problem_details);
       //Create N1 container
       smf_n1_n2_inst.create_n1_sm_container(context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN);
-      //Send response to AMF
-      smf_n11_inst->send_pdu_session_update_sm_context_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden, n1_sm_message);
+      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      smf_n11_inst->send_pdu_session_update_sm_context_response(smreq->http_response, smContextUpdateError, Pistache::Http::Code::Forbidden, n1_sm_message_hex);
       return;
     }
   }

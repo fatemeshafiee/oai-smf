@@ -60,9 +60,7 @@ extern smf::smf_app *smf_app_inst;
 extern smf_config smf_cfg;
 void smf_n11_task (void*);
 
-/*
- * To read content of the response from UDM
- */
+// To read content of the response from UDM
 static std::size_t callback(
     const char* in,
     std::size_t size,
@@ -75,7 +73,6 @@ static std::size_t callback(
 }
 
 //------------------------------------------------------------------------------
-
 void smf_n11_task (void *args_p)
 {
   const task_id_t task_id = TASK_SMF_N11;
@@ -114,7 +111,6 @@ void smf_n11_task (void *args_p)
   } while (true);
 }
 
-
 //------------------------------------------------------------------------------
 smf_n11::smf_n11 ()
 {
@@ -146,8 +142,8 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
   std::string json_part = context_res_msg.n1n2_message_transfer_data.dump();
 
   Logger::smf_n11().debug("Sending message to AMF....");
-  if(curl) {
 
+  if(curl) {
     CURLcode res;
     struct curl_slist *headers = nullptr;
     struct curl_slist *slist = nullptr;
@@ -188,7 +184,6 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
       curl_mime_type(part, "application/vnd.3gpp.ngap");
       curl_mime_name (part, context_res_msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"].dump().c_str());
     }
-
 
     curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
 
@@ -241,17 +236,22 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
 void smf_n11::send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res)
 {
   Logger::smf_n11().debug("Send PDUSessionUpdateContextResponse to AMF ");
+
   switch(sm_context_res->session_procedure_type){
+
   case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
+    Logger::smf_n11().debug("PDU_SESSION_ESTABLISHMENT_UE_REQUESTED");
     //Send reply to AMF
     nlohmann::json sm_context_updated_data;
     sm_context_updated_data["cause"] = sm_context_res->res.get_cause();
-    //sm_context_res->http_response.send(Pistache::Http::Code::Ok,sm_context_updated_data.dump());
-    sm_context_res->http_response.send(Pistache::Http::Code::No_Content);
+    sm_context_res->http_response.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
+    sm_context_res->http_response.send(Pistache::Http::Code::Ok,sm_context_updated_data.dump().c_str());
+
   }
   break;
+
   case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED: {
-    //TODO:
+    Logger::smf_n11().debug("PDU_SESSION_MODIFICATION_UE_INITIATED");
     //send Pistache response with multipart/related message
 
     smf_n1_n2 smf_n1_n2_inst;
@@ -288,124 +288,158 @@ void smf_n11::send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n
 
     sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
 
+  }
+  break;
+
+  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
+    Logger::smf_n11().debug("SERVICE_REQUEST_UE_TRIGGERED Step 1");
+    //send Pistache response with multipart/related message
+
+    smf_n1_n2 smf_n1_n2_inst;
+    std::string boundary = "----Boundary";
+
+    pdu_session_update_sm_context_response context_res_msg = sm_context_res->res;
+    std::string json_part = context_res_msg.sm_context_updated_data.dump();
+    //format string as hex
+    std::string n2_message = context_res_msg.get_n2_sm_information();
+    unsigned char *n2_msg_hex  = smf_app_inst->format_string_as_hex(n2_message);
+
+    sm_context_res->http_response.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("multipart/related; boundary=" + boundary));
+
+    string body;
+    string CRLF = "\r\n";
+    body.append("--" + boundary + CRLF);
+    body.append("Content-Type: application/json" + CRLF);
+    body.append(CRLF);
+    body.append(json_part + CRLF);
+
+    body.append("--" + boundary + CRLF);
+    body.append("Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg" + CRLF);
+    body.append(CRLF);
+    body.append(std::string((char *)n2_msg_hex, n2_message.length()/2) + CRLF);
+    body.append("--" + boundary + "--" + CRLF);
+
+    sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
 
   }
   break;
 
-  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED: {
-      //TODO:
-      //send Pistache response with multipart/related message
+  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2: {
+    Logger::smf_n11().debug("SERVICE_REQUEST_UE_TRIGGERED Step2");
+    //Send reply to AMF
+    nlohmann::json sm_context_updated_data;
+    sm_context_updated_data["cause"] = sm_context_res->res.get_cause();
+    sm_context_res->http_response.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
+    sm_context_res->http_response.send(Pistache::Http::Code::Ok,sm_context_updated_data.dump().c_str());
 
-      smf_n1_n2 smf_n1_n2_inst;
-      std::string boundary = "----Boundary";
-
-      pdu_session_update_sm_context_response context_res_msg = sm_context_res->res;
-      std::string json_part = context_res_msg.sm_context_updated_data.dump();
-      //format string as hex
-      std::string n2_message = context_res_msg.get_n2_sm_information();
-      unsigned char *n2_msg_hex  = smf_app_inst->format_string_as_hex(n2_message);
-
-      sm_context_res->http_response.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("multipart/related; boundary=" + boundary));
-
-      string body;
-      string CRLF = "\r\n";
-      body.append("--" + boundary + CRLF);
-      body.append("Content-Type: application/json" + CRLF);
-      body.append(CRLF);
-      body.append(json_part + CRLF);
-
-      body.append("--" + boundary + CRLF);
-      body.append("Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg" + CRLF);
-      body.append(CRLF);
-      body.append(std::string((char *)n2_msg_hex, n2_message.length()/2) + CRLF);
-      body.append("--" + boundary + "--" + CRLF);
-
-      sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
-
-    }
-    break;
-
+  }
+  break;
 
   default:{
 
   }
   }
 
-
 }
-
 
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code)
 {
 
-  //TODO: Send multipart message
-  nlohmann::json jsonData;
-  to_json(jsonData, smContextUpdateError);
-  std::string resBody = jsonData.dump();
-  //httpResponse.headers().add<Pistache::Http::Header::Location>(url);
-  httpResponse.send(code, resBody);
+  Logger::smf_n11().debug("[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
+  nlohmann::json json_data;
+  to_json(json_data, smContextUpdateError);
+
+  if (!json_data.empty()){
+    httpResponse.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
+    httpResponse.send(code, json_data.dump().c_str());
+  } else{
+    httpResponse.send(code);
+  }
+
 }
 
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code, std::string& n1_sm_msg )
 {
   Logger::smf_n11().debug("[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
-
   //TODO: Send multipart message
-  nlohmann::json jsonData;
-  to_json(jsonData, smContextUpdateError);
-  std::string resBody = jsonData.dump();
-  //http_response.headers().add<Pistache::Http::Header::Location>(uri);
-  httpResponse.send(code, resBody);
 
+  smf_n1_n2 smf_n1_n2_inst;
+  std::string boundary = "----Boundary";
+  nlohmann::json json_part = {};
+  to_json(json_part, smContextUpdateError);
+
+  //format string as hex
+  unsigned char *n1_msg_hex  = smf_app_inst->format_string_as_hex(n1_sm_msg);
+  httpResponse.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("multipart/related; boundary=" + boundary));
+
+  string body;
+  string CRLF = "\r\n";
+  body.append("--" + boundary + CRLF);
+  body.append("Content-Type: application/json" + CRLF);
+  body.append(CRLF);
+  body.append(json_part.dump() + CRLF);
+
+  body.append("--" + boundary + CRLF);
+  body.append("Content-Type: application/vnd.3gpp.5gnas" + CRLF + "Content-Id: n1SmMsg" + CRLF);
+  body.append(CRLF);
+  body.append(std::string((char *)n1_msg_hex, n1_sm_msg.length()/2) + CRLF);
+  body.append("--" + boundary + "--" + CRLF);
+
+  httpResponse.send(code, body);
 
 }
 
-
-
+//------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, std::string& n1_sm_msg )
 {
-
   Logger::smf_n11().debug("[SMF N11] Send PDUSessionCreateContextResponse to AMF!");
-  //TODO: Send multipart message
-  nlohmann::json jsonData;
-  to_json(jsonData, smContextCreateError);
-  jsonData["n1SmMsg"]["contentId"] =  "n1SmMsg"; //multipart
-  std::string resBody = jsonData.dump();
-  auto m1 = MIME(Multipart, Json);
+  //send Pistache response with multipart/related message
+  smf_n1_n2 smf_n1_n2_inst;
+  std::string boundary = "----Boundary";
+  nlohmann::json json_part = {};
+  to_json(json_part, smContextCreateError);
 
-  auto m2 = MIME(Multipart, Star);
-  Pistache::Http::Mime::MediaType m3("application/vnd.3gpp.5gnas", Pistache::Http::Mime::MediaType::DontParse);
+  //format string as hex
+  unsigned char *n1_msg_hex  = smf_app_inst->format_string_as_hex(n1_sm_msg);
+  httpResponse.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("multipart/related; boundary=" + boundary));
 
-  //httpResponse.headers().add<Pistache::Http::Header::Location>(url);
-  //httpResponse.send(code, resBody, m3);
-  // std::string header = "POST %s HTTP 1.1\r\n" + "Host: %s\r\n" + "Content-Length: %d\r\n" + "Connection: Keep-Alive\r\n"
-  //     + "Content-Type: multipart/related; boundary=%s\r\n"+ "Accept-Charset: utf-8\r\n\r\n";
+  string body;
+  string CRLF = "\r\n";
+  body.append("--" + boundary + CRLF);
+  body.append("Content-Type: application/json" + CRLF);
+  body.append(CRLF);
+  body.append(json_part.dump() + CRLF);
 
+  body.append("--" + boundary + CRLF);
+  body.append("Content-Type: application/vnd.3gpp.5gnas" + CRLF + "Content-Id: n1SmMsg" + CRLF);
+  body.append(CRLF);
+  body.append(std::string((char *)n1_msg_hex, n1_sm_msg.length()/2) + CRLF);
+  body.append("--" + boundary + "--" + CRLF);
 
-
-
+  httpResponse.send(code, body);
 
 }
+
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreatedData& smContextCreatedData, Pistache::Http::Code code)
 {
   Logger::smf_n11().debug("[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
-
-  //TODO: Send multipart message
-  nlohmann::json jsonData;
-  to_json(jsonData, smContextCreatedData);
-  std::string resBody = jsonData.dump();
-  //http_response.headers().add<Pistache::Http::Header::Location>(uri);
-  httpResponse.send(code, resBody);
-
+  nlohmann::json json_data;
+  to_json(json_data, smContextCreatedData);
+  if (!json_data.empty()){
+    httpResponse.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
+    httpResponse.send(code, json_data.dump().c_str());
+  } else{
+    httpResponse.send(code);
+  }
 
 }
 
 //------------------------------------------------------------------------------
 void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_modify_session_request_smf_requested> sm_context_mod)
 {
-
+  //TODO:
 }
 

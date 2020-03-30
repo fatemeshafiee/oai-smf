@@ -36,6 +36,7 @@
 
 #include <pistache/http.h>
 #include <pistache/mime.h>
+#include <arpa/inet.h>
 
 extern "C" {
 #include "nas_message.h"

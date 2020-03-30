@@ -97,13 +97,13 @@ int udp_server::create_socket (const struct in_addr &address, const uint16_t por
   addr.sin_addr.s_addr = address.s_addr;
 
   std::string ipv4 = conv::toString(address);
-  Logger::udp().debug("Creating new listen socket on address %s and port %" PRIu16 "\n", ipv4.c_str(), port);
+  Logger::udp().debug("Creating new listen socket on address %s and port %" PRIu16 " ", ipv4.c_str(), port);
 
   if (bind (sd, (struct sockaddr *)&addr, sizeof (struct sockaddr_in)) < 0) {
     /*
      * Bind failed
      */
-    Logger::udp().error("Socket bind failed (%s) for address %s and port %" PRIu16 "\n", strerror (errno), ipv4.c_str(), port);
+    Logger::udp().error("Socket bind failed (%s) for address %s and port %" PRIu16 " ", strerror (errno), ipv4.c_str(), port);
     close (sd);
     return errno;
   }
