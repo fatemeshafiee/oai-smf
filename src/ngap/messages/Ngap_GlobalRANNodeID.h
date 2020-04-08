@@ -18,8 +18,6 @@
 extern "C" {
 #endif
 
-#include "Ngap_GlobalGNB-ID.h"
-
 /* Dependencies */
 typedef enum Ngap_GlobalRANNodeID_PR {
 	Ngap_GlobalRANNodeID_PR_NOTHING,	/* No components present */

@@ -84,6 +84,7 @@
 #include "Ngap_PWSRestartIndication.h"
 #include "Ngap_RerouteNASRequest.h"
 #include "Ngap_RRCInactiveTransitionReport.h"
+#include "Ngap_SecondaryRATDataUsageReport.h"
 #include "Ngap_TraceFailureIndication.h"
 #include "Ngap_TraceStart.h"
 #include "Ngap_UEContextReleaseRequest.h"
@@ -147,6 +148,7 @@ typedef enum Ngap_InitiatingMessage__value_PR {
 	Ngap_InitiatingMessage__value_PR_PWSRestartIndication,
 	Ngap_InitiatingMessage__value_PR_RerouteNASRequest,
 	Ngap_InitiatingMessage__value_PR_RRCInactiveTransitionReport,
+	Ngap_InitiatingMessage__value_PR_SecondaryRATDataUsageReport,
 	Ngap_InitiatingMessage__value_PR_TraceFailureIndication,
 	Ngap_InitiatingMessage__value_PR_TraceStart,
 	Ngap_InitiatingMessage__value_PR_UEContextReleaseRequest,
@@ -173,7 +175,6 @@ typedef struct Ngap_InitiatingMessage {
 			Ngap_InitialContextSetupRequest_t	 InitialContextSetupRequest;
 			Ngap_NGReset_t	 NGReset;
 			Ngap_NGSetupRequest_t	 NGSetupRequest;
-			Ngap_NGSetupFailure_t	 NGSetupFailure;
 			Ngap_PathSwitchRequest_t	 PathSwitchRequest;
 			Ngap_PDUSessionResourceModifyRequest_t	 PDUSessionResourceModifyRequest;
 			Ngap_PDUSessionResourceModifyIndication_t	 PDUSessionResourceModifyIndication;
@@ -209,6 +210,7 @@ typedef struct Ngap_InitiatingMessage {
 			Ngap_PWSRestartIndication_t	 PWSRestartIndication;
 			Ngap_RerouteNASRequest_t	 RerouteNASRequest;
 			Ngap_RRCInactiveTransitionReport_t	 RRCInactiveTransitionReport;
+			Ngap_SecondaryRATDataUsageReport_t	 SecondaryRATDataUsageReport;
 			Ngap_TraceFailureIndication_t	 TraceFailureIndication;
 			Ngap_TraceStart_t	 TraceStart;
 			Ngap_UEContextReleaseRequest_t	 UEContextReleaseRequest;

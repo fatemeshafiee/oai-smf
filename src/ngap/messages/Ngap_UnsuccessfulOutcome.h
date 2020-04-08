@@ -84,6 +84,7 @@
 #include "Ngap_PWSRestartIndication.h"
 #include "Ngap_RerouteNASRequest.h"
 #include "Ngap_RRCInactiveTransitionReport.h"
+#include "Ngap_SecondaryRATDataUsageReport.h"
 #include "Ngap_TraceFailureIndication.h"
 #include "Ngap_TraceStart.h"
 #include "Ngap_UEContextReleaseRequest.h"

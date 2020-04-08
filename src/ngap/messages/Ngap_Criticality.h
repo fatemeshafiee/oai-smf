@@ -31,20 +31,20 @@ typedef long	 Ngap_Criticality_t;
 /* Implementation */
 extern asn_per_constraints_t asn_PER_type_Ngap_Criticality_constr_1;
 extern asn_TYPE_descriptor_t asn_DEF_Ngap_Criticality;
-extern const asn_INTEGER_specifics_t asn_SPC_Criticality_specs_1;
-asn_struct_free_f Criticality_free;
-asn_struct_print_f Criticality_print;
-asn_constr_check_f Criticality_constraint;
-ber_type_decoder_f Criticality_decode_ber;
-der_type_encoder_f Criticality_encode_der;
-xer_type_decoder_f Criticality_decode_xer;
-xer_type_encoder_f Criticality_encode_xer;
-oer_type_decoder_f Criticality_decode_oer;
-oer_type_encoder_f Criticality_encode_oer;
-per_type_decoder_f Criticality_decode_uper;
-per_type_encoder_f Criticality_encode_uper;
-per_type_decoder_f Criticality_decode_aper;
-per_type_encoder_f Criticality_encode_aper;
+extern const asn_INTEGER_specifics_t asn_SPC_Ngap_Criticality_specs_1;
+asn_struct_free_f Ngap_Criticality_free;
+asn_struct_print_f Ngap_Criticality_print;
+asn_constr_check_f Ngap_Criticality_constraint;
+ber_type_decoder_f Ngap_Criticality_decode_ber;
+der_type_encoder_f Ngap_Criticality_encode_der;
+xer_type_decoder_f Ngap_Criticality_decode_xer;
+xer_type_encoder_f Ngap_Criticality_encode_xer;
+oer_type_decoder_f Ngap_Criticality_decode_oer;
+oer_type_encoder_f Ngap_Criticality_encode_oer;
+per_type_decoder_f Ngap_Criticality_decode_uper;
+per_type_encoder_f Ngap_Criticality_encode_uper;
+per_type_decoder_f Ngap_Criticality_decode_aper;
+per_type_encoder_f Ngap_Criticality_encode_aper;
 
 #ifdef __cplusplus
 }
