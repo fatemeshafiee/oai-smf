@@ -28,58 +28,47 @@
  */
 #include "smf_msg.hpp"
 
-
 using namespace smf;
 
 //-----------------------------------------------------------------------------
-void qos_flow_context_created::set_cause(const uint8_t cause)
+void qos_flow_context_updated::set_cause(const uint8_t cause)
 {
   cause_value = cause;
 }
 //-----------------------------------------------------------------------------
-void qos_flow_context_created::set_qfi(const pfcp::qfi_t& q)
+void qos_flow_context_updated::set_qfi(const pfcp::qfi_t& q)
 {
   qfi = q;
 }
 
 //-----------------------------------------------------------------------------
-void qos_flow_context_created::set_ul_fteid(const fteid_t& teid)
+void qos_flow_context_updated::set_ul_fteid(const fteid_t& teid)
 {
   ul_fteid = teid;
 }
 
 //-----------------------------------------------------------------------------
-void qos_flow_context_created::set_arp(const arp_5gc_t& a)
+void qos_flow_context_updated::set_dl_fteid(const fteid_t& teid)
 {
-  arp = a;
+  dl_fteid = teid;
 }
 
 //-----------------------------------------------------------------------------
-void qos_flow_context_created::set_priority_level (uint8_t p)
-{
-  priority_level = p;
-}
-//-----------------------------------------------------------------------------
-void qos_flow_context_created::set_qos_rule(const QOSRulesIE& rule)
+void qos_flow_context_updated::set_qos_rule(const QOSRulesIE& rule)
 {
   qos_rule = rule;
 }
 
-//-----------------------------------------------------------------------------
-void qos_flow_context_modified::set_cause(const uint8_t cause)
+void qos_flow_context_updated::set_qos_profile(const qos_profile_t& profile)
 {
-  cause_value = cause;
-}
-//-----------------------------------------------------------------------------
-void qos_flow_context_modified::set_qfi(const pfcp::qfi_t& q)
-{
-  qfi = q;
+  qos_profile = profile;
 }
 
 //-----------------------------------------------------------------------------
-void qos_flow_context_modified::set_ul_fteid(const fteid_t& teid)
+void qos_flow_context_updated::set_priority_level (uint8_t p)
 {
-  ul_fteid = teid;
+  //priority_level = p;
+  qos_profile.priority_level = p;
 }
 
 //-----------------------------------------------------------------------------
@@ -166,16 +155,17 @@ std::string pdu_session_msg::get_api_root() const
 }
 
 //-----------------------------------------------------------------------------
-uint8_t pdu_session_create_sm_context::get_pdu_session_type() const
+uint8_t pdu_session_msg::get_pdu_session_type() const
 {
   return m_pdu_session_type;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context::set_pdu_session_type (uint8_t const& pdu_session_type)
+void pdu_session_msg::set_pdu_session_type (uint8_t const& pdu_session_type)
 {
   m_pdu_session_type = pdu_session_type;
 }
+
 
 //-----------------------------------------------------------------------------
 extended_protocol_discriminator_t pdu_session_create_sm_context::get_epd() const
@@ -306,13 +296,13 @@ Pistache::Http::Code pdu_session_create_sm_context_response::get_http_code()
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_response::set_qos_flow_context(const qos_flow_context_created& qos_flow)
+void pdu_session_create_sm_context_response::set_qos_flow_context(const qos_flow_context_updated& qos_flow)
 {
   qos_flow_context = qos_flow;
 }
 
 //-----------------------------------------------------------------------------
-qos_flow_context_created pdu_session_create_sm_context_response::get_qos_flow_context() const
+qos_flow_context_updated pdu_session_create_sm_context_response::get_qos_flow_context() const
 {
   return qos_flow_context;
 }
@@ -544,11 +534,11 @@ bool pdu_session_update_sm_context_response::n2_sm_info_is_set() const
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_response::add_qos_flow_context_modified(const qos_flow_context_modified& flow)
+void pdu_session_update_sm_context_response::add_qos_flow_context_updated(const qos_flow_context_updated& flow)
 {
   if ((flow.qfi.qfi >= QOS_FLOW_IDENTIFIER_FIRST) and (flow.qfi.qfi <= QOS_FLOW_IDENTIFIER_LAST)) {
-    qos_flow_context_modifieds.erase(flow.qfi.qfi);
-    qos_flow_context_modifieds.insert(std::pair<uint8_t,qos_flow_context_modified>((uint8_t)flow.qfi.qfi, flow));
+    qos_flow_context_updateds.erase(flow.qfi.qfi);
+    qos_flow_context_updateds.insert(std::pair<uint8_t, qos_flow_context_updated>((uint8_t)flow.qfi.qfi, flow));
     Logger::smf_app().trace( "pdu_session_update_sm_context_response::add_qos_flow_context(%d) success", flow.qfi.qfi);
   } else {
     Logger::smf_app().error( "pdu_session_update_sm_context_response::add_qos_flow_context(%d) failed, invalid QFI", flow.qfi.qfi);
@@ -556,9 +546,9 @@ void pdu_session_update_sm_context_response::add_qos_flow_context_modified(const
 }
 
 //-----------------------------------------------------------------------------
-bool pdu_session_update_sm_context_response::get_qos_flow_context_modified (const pfcp::qfi_t& qfi, qos_flow_context_modified& flow)
+bool pdu_session_update_sm_context_response::get_qos_flow_context_updated (const pfcp::qfi_t& qfi, qos_flow_context_updated& flow)
 {
-  for (auto it : qos_flow_context_modifieds) {
+  for (auto it : qos_flow_context_updateds) {
     if (it.second.qfi == qfi) {
       flow = it.second;
       return true;
@@ -569,11 +559,17 @@ bool pdu_session_update_sm_context_response::get_qos_flow_context_modified (cons
 
 
 //-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_response::get_all_qos_flow_context_modifieds (std::map<uint8_t, qos_flow_context_modified>& all_flows)
+void pdu_session_update_sm_context_response::get_all_qos_flow_context_updateds (std::map<uint8_t, qos_flow_context_updated>& all_flows)
 {
-  for (auto it : qos_flow_context_modifieds) {
-    all_flows.insert(std::pair<uint8_t,qos_flow_context_modified>((uint8_t)it.first, it.second));
+  for (auto it : qos_flow_context_updateds) {
+    all_flows.insert(std::pair<uint8_t,qos_flow_context_updated>((uint8_t)it.first, it.second));
   }
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_response::remove_all_qos_flow_context_updateds ()
+{
+  qos_flow_context_updateds.clear();
 }
 
 

@@ -29,6 +29,10 @@
 #ifndef FILE_SMF_PROCEDURE_HPP_SEEN
 #define FILE_SMF_PROCEDURE_HPP_SEEN
 
+#include <memory>
+#include <mutex>
+#include <set>
+
 #include "3gpp_29.244.hpp"
 #include "3gpp_29.274.hpp"
 #include "itti_msg_n11.hpp"
@@ -38,10 +42,6 @@
 #include "msg_gtpv2c.hpp"
 #include "uint_generator.hpp"
 #include "smf_msg.hpp"
-
-#include <memory>
-#include <mutex>
-#include <set>
 
 namespace smf {
 
@@ -67,7 +67,7 @@ public:
   virtual void handle_itti_msg (itti_n4_session_establishment_response& resp, std::shared_ptr<smf::smf_context> pc) {}
   virtual void handle_itti_msg (itti_n4_session_modification_response& resp, std::shared_ptr<smf::smf_context> pc) {}
   virtual void handle_itti_msg (itti_n4_session_deletion_response& resp, std::shared_ptr<smf::smf_context> pc) {}
-  //tual void handle_itti_msg (itti_s5s8_downlink_data_notification_acknowledge& resp) {}
+  //virtual void handle_itti_msg (itti_s5s8_downlink_data_notification_acknowledge& resp) {}
 };
 
 
@@ -98,9 +98,6 @@ public:
   explicit session_create_sm_context_procedure(std::shared_ptr<smf_pdu_session>& sppc) : smf_procedure(), ppc(sppc),
   n4_triggered(), n11_triggered_pending(), n11_trigger() {}
 
-  /*
-   *
-   */
   int run(std::shared_ptr<itti_n11_create_sm_context_request> req,
       std::shared_ptr<itti_n11_create_sm_context_response>resp,
       std::shared_ptr<smf::smf_context> pc);
@@ -121,9 +118,6 @@ public:
   explicit session_update_sm_context_procedure(std::shared_ptr<smf_pdu_session>& sppc) : smf_procedure(), ppc(sppc),
   n4_triggered(), n11_triggered_pending(), n11_trigger() {}
 
-  /*
-   *
-   */
   int run(std::shared_ptr<itti_n11_update_sm_context_request> req,
       std::shared_ptr<itti_n11_update_sm_context_response>resp,
       std::shared_ptr<smf::smf_context> sc);

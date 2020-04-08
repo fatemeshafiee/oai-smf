@@ -29,8 +29,8 @@
 #ifndef FILE_SMF_MSG_HPP_SEEN
 #define FILE_SMF_MSG_HPP_SEEN
 
-#include "smf.h"
 #include "pistache/http.h"
+#include "smf.h"
 #include "3gpp_29.274.h"
 #include "3gpp_29.244.h"
 #include "3gpp_24.007.h"
@@ -57,41 +57,31 @@ typedef enum {
 
 namespace smf {
 
-class qos_flow_context_created {
+//QoS flow created or modified
+class qos_flow_context_updated {
 public:
   void set_cause(const uint8_t cause);
   void set_qfi(const pfcp::qfi_t& q);
   void set_ul_fteid(const fteid_t& teid);
-  void set_arp(const arp_5gc_t& a);
-  void set_priority_level (uint8_t p);
+  void set_dl_fteid(const fteid_t& teid);
   void set_qos_rule(const QOSRulesIE& rule);
-
+  void set_qos_profile(const qos_profile_t& profile);
+  void set_priority_level (uint8_t p);
   uint8_t  cause_value;
   pfcp::qfi_t qfi;
   fteid_t  ul_fteid;
-  arp_5gc_t arp;
-  uint8_t priority_level;//1-127
+  fteid_t  dl_fteid;
   QOSRulesIE qos_rule;
+  qos_profile_t qos_profile;
 };
 
-//---------------------------------------------------------------------------------------
-class qos_flow_context_modified {
-public:
-  void set_cause(const uint8_t cause);
-  void set_qfi(const pfcp::qfi_t& q);
-  void set_ul_fteid(const fteid_t& teid);
-
-  uint8_t  cause_value;
-  pfcp::qfi_t qfi;
-  fteid_t  ul_fteid;
-};
 
 //---------------------------------------------------------------------------------------
 class pdu_session_msg {
 public:
-  pdu_session_msg(): m_msg_type(), m_supi(), m_pdu_session_id(), m_dnn(), m_snssai(){};
-  pdu_session_msg(pdu_session_msg_type_t msg_type): m_msg_type(msg_type), m_supi(), m_pdu_session_id(), m_dnn(), m_snssai(){};
-  pdu_session_msg(pdu_session_msg_type_t msg_type, supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai):  m_msg_type(msg_type), m_supi(supi), m_pdu_session_id(pdi), m_dnn(dnn), m_snssai(snssai) { }
+  pdu_session_msg(): m_msg_type(), m_supi(), m_pdu_session_id(), m_dnn(), m_snssai(), m_pdu_session_type(0){};
+  pdu_session_msg(pdu_session_msg_type_t msg_type): m_msg_type(msg_type), m_supi(), m_pdu_session_id(), m_dnn(), m_snssai(), m_pdu_session_type(0){};
+  pdu_session_msg(pdu_session_msg_type_t msg_type, supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai):  m_msg_type(msg_type), m_supi(supi), m_pdu_session_id(pdi), m_dnn(dnn), m_snssai(snssai), m_pdu_session_type(0) { }
   virtual ~pdu_session_msg() = default;
 
   pdu_session_msg_type_t get_msg_type() const;
@@ -115,6 +105,9 @@ public:
   void set_api_root(std::string const& value);
   std::string get_api_root() const;
 
+  uint8_t get_pdu_session_type() const;
+  void set_pdu_session_type(uint8_t const& pdu_session_type);
+
 private:
   pdu_session_msg_type_t m_msg_type;
   std::string m_api_root;
@@ -123,6 +116,7 @@ private:
   pdu_session_id_t m_pdu_session_id;
   std::string m_dnn;
   snssai_t m_snssai;
+  uint8_t m_pdu_session_type;
 };
 
 //---------------------------------------------------------------------------------------
@@ -132,17 +126,14 @@ public:
   pdu_session_create_sm_context(): pdu_session_msg(){
     m_epd = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
     m_message_type = PDU_SESSION_MESSAGE_TYPE_UNKNOWN;
-    m_pdu_session_type = PDU_SESSION_TYPE_E_UNKNOWN;
   };
   pdu_session_create_sm_context(pdu_session_msg_type_t msg_type): pdu_session_msg(msg_type){
     m_epd = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
     m_message_type = PDU_SESSION_MESSAGE_TYPE_UNKNOWN;
-    m_pdu_session_type = PDU_SESSION_TYPE_E_UNKNOWN;
   };
   pdu_session_create_sm_context(pdu_session_msg_type_t msg_type, supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai): pdu_session_msg(msg_type, supi, pdi, dnn, snssai) {
     m_epd = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
     m_message_type = PDU_SESSION_MESSAGE_TYPE_UNKNOWN;
-    m_pdu_session_type = PDU_SESSION_TYPE_E_UNKNOWN;
   }
 
   extended_protocol_discriminator_t get_epd() const;
@@ -151,16 +142,12 @@ public:
   procedure_transaction_id_t get_pti() const;
   void set_pti(procedure_transaction_id_t const& pti);
 
-  uint8_t get_pdu_session_type() const;
-  void set_pdu_session_type(uint8_t const& pdu_session_type);
-
   uint8_t get_message_type() const;
   void set_message_type(uint8_t const& message_type);
 
 private:
   extended_protocol_discriminator_t m_epd;
   procedure_transaction_id_t m_pti;
-  uint8_t m_pdu_session_type;
   uint8_t m_message_type;
 };
 
@@ -170,7 +157,6 @@ class pdu_session_create_sm_context_request: public pdu_session_create_sm_contex
 public:
   pdu_session_create_sm_context_request(): pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_REQUEST), m_unauthenticated_supi(true) { }
   pdu_session_create_sm_context_request(supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai): pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_REQUEST, supi, pdi, dnn, snssai), m_unauthenticated_supi(true) {
-    //m_epd = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   }
 
   std::string get_n1_sm_message() const;
@@ -285,8 +271,8 @@ public:
   paa_t get_paa();
   void set_http_code(Pistache::Http::Code code);
   Pistache::Http::Code get_http_code();
-  void set_qos_flow_context(const qos_flow_context_created& qos_flow);
-  qos_flow_context_created get_qos_flow_context() const;
+  void set_qos_flow_context(const qos_flow_context_updated& qos_flow);
+  qos_flow_context_updated get_qos_flow_context() const;
   std::string get_n2_sm_information() const;
   void set_n2_sm_information(std::string const& value);
   std::string get_n1_sm_message() const;
@@ -305,7 +291,7 @@ private:
   uint8_t m_cause;
   paa_t m_paa;
   Pistache::Http::Code m_code;
-  qos_flow_context_created qos_flow_context;
+  qos_flow_context_updated qos_flow_context;
   supi_t m_supi;
   std::string m_supi_prefix;
   std::string amf_url;
@@ -436,30 +422,25 @@ public:
     m_cause = 0;
     m_n1_sm_msg_is_set = false;
     m_n2_sm_info_is_set = false;
-    qos_flow_context_modifieds = {};
+    qos_flow_context_updateds = {};
   };
 
   void set_cause(uint8_t cause);
   uint8_t get_cause();
-
   std::string get_n2_sm_information() const;
   void set_n2_sm_information(std::string const& value);
-
   std::string get_n2_sm_info_type() const;
   void set_n2_sm_info_type(std::string const& value);
-
   std::string get_n1_sm_message() const;
   void set_n1_sm_message(std::string const& value);
-
   std::string get_n1_sm_msg_type() const;
   void set_n1_sm_msg_type(std::string const& value);
-
   bool n1_sm_msg_is_set() const;
   bool n2_sm_info_is_set() const;
-
-  void add_qos_flow_context_modified(const qos_flow_context_modified& qos_flow);
-  bool get_qos_flow_context_modified (const pfcp::qfi_t& qfi, qos_flow_context_modified& qos_flow);
-  void get_all_qos_flow_context_modifieds (std::map<uint8_t, qos_flow_context_modified>& all_flows);
+  void add_qos_flow_context_updated(const qos_flow_context_updated& qos_flow);
+  bool get_qos_flow_context_updated (const pfcp::qfi_t& qfi, qos_flow_context_updated& qos_flow);
+  void get_all_qos_flow_context_updateds (std::map<uint8_t, qos_flow_context_updated>& all_flows);
+  void remove_all_qos_flow_context_updateds();
   nlohmann::json sm_context_updated_data; //N1N2MessageTransferReqData from oai::amf::model
   procedure_transaction_id_t get_pti() const;
   void set_pti(procedure_transaction_id_t const& pti);
@@ -473,7 +454,7 @@ private:
   std::string m_n2_sm_information; //N2 SM after decoding
   bool m_n2_sm_info_is_set;
   std::string n2_sm_info_type;
-  std::map<uint8_t, qos_flow_context_modified> qos_flow_context_modifieds;
+  std::map<uint8_t, qos_flow_context_updated> qos_flow_context_updateds;
 
 };
 
