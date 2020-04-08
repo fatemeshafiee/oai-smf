@@ -37,25 +37,28 @@
 #include <utility>
 #include <vector>
 
+#include "pistache/endpoint.h"
+#include "pistache/http.h"
+#include "pistache/router.h"
 #include "3gpp_24.008.h"
 #include "3gpp_29.274.h"
 #include "3gpp_29.244.h"
 #include "3gpp_29.503.h"
 #include "3gpp_29.502.h"
 #include "common_root_types.h"
+#include "itti.hpp"
+#include "msg_pfcp.hpp"
 #include "smf_procedure.hpp"
 #include "uint_generator.hpp"
 #include "SmContextCreateData.h"
-#include "pistache/endpoint.h"
-#include "pistache/http.h"
-#include "pistache/router.h"
 #include "SmContextCreateError.h"
-//#include "smf_msg.hpp"
-#include "itti.hpp"
-#include "msg_pfcp.hpp"
 
 extern "C" {
 #include "QOSRules.h"
+#include "QOSFlowDescriptions.h"
+#include "PDUSessionEstablishmentAccept.h"
+#include "Ngap_PDUSessionAggregateMaximumBitRate.h"
+
 }
 
 namespace smf {
@@ -106,22 +109,7 @@ public:
   //cause
   uint8_t  cause_value;
 
-
 };
-
-/*
-typedef struct qos_flow_s {
-  pfcp::qfi_t qfi; //QoS Flow Identifier
-  //qos_rules[0]: default rule
-  std::vector<QOSRulesIE> qos_rules;
-  //QoS profile
-  qos_profile_t qos_profile;
-  //pfcp::create_pdr pdr;
-  //pfcp::create_far far;
-
-} qos_flow_t;
-*/
-
 
 class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 public:
@@ -203,27 +191,7 @@ public:
   struct in_addr  ipv4_address;             // IP Address(es): IPv4 address and/or IPv6 prefix
   struct in6_addr ipv6_address;             // IP Address(es): IPv4 address and/or IPv6 prefix
   pdn_type_t           pdn_type;            // IPv4, IPv6, IPv4v6 or Non-IP
-  //                                               (For PMIP-based S5/S8 only).
-  // MS Info Change Reporting support indication: The MME and/or SGSN serving the UE support(s) procedures for reporting User Location Information
-  //                                              and/or User CSG Information.
-  // MS Info Change Reporting Action: Denotes whether the MME and/or the SGSN is/are requested to send changes in User Location Information change.
-  // CSG Information Reporting Action: Denotes whether the MME and/or the SGSN is/are requested to send changes in User CSG Information change.
-  //                                   This field denotes separately whether the MME/SGSN are requested to send changes in User CSG Information
-  //                                   for
-  //                                   (a) CSG cells,
-  //                                   (b) hybrid cells in which the subscriber is a CSG member, and
-  //                                   (c) hybrid cells in which the subscriber is not a CSG member, or any combination of the above.
-  // Presence Reporting Area Action: Denotes whether the MME and/or the SGSN is/arerequested to send changes of UE presence in Presence
-  //                                 Reporting Area.This field denotes separately the Presence Reporting Area identifier and the list
-  //                                 of Presence Reporting Area elements.
-  // BCM: The negotiated Bearer Control Mode for GERAN/UTRAN.
   ebi_t           default_bearer;        //Default Bearer: Identifies the default bearer within the PDN connection by its EPS Bearer Id.
-  //                                       The default bearer is the one which is established first within the PDN connection. (For GTP based
-  //                                       S5/S8 or for PMIP based S5/S8 if multiple PDN connections to the same APN are supported).
-  // EPS PDN Charging Characteristics: The charging characteristics of this PDN connection e.g. normal, prepaid, flat-rate and/or hot billing.
-  // Serving PLMN-Rate-Control: The Serving PLMN-Rate-Control limits the maximum number of uplink/downlink messages per a specific time unit (e.g.
-  //                            minute, hour, day, week) for a PDN connection.
-  // 3GPP PS Data Off Status: Current 3GPP PS Data Off status of the UE.
 
   bool                             released; //(release access bearers request)
 
@@ -239,15 +207,12 @@ public:
 
   uint32_t pdu_session_id;
   std::string amf_id;
-  // QFI
+  // QFI <-> QoS Flow
   std::map<uint8_t,smf_qos_flow> qos_flows;
-
   //pdu session status
   pdu_session_status_e pdu_session_status;
-
   timer_id_t                    timer_T3590;
   timer_id_t                    timer_T3591;
-
   //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
   upCnx_state_e upCnx_state;
   //5GSM parameters and capabilities
@@ -294,15 +259,12 @@ public:
 
   std::string toString() const;
 
-  bool                  in_use;
-  std::string           dnn_in_use;           // The APN currently used, as received from the SGW.
-  //ambr_t          apn_ambr;                 // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
-
+  bool  in_use;
+  std::string  dnn_in_use;           // The APN currently used, as received from the SGW.
+  //ambr_t  apn_ambr;                 // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
   snssai_t nssai;
-
   /* Store all PDU Sessions associated with this DNN context */
   std::vector<std::shared_ptr<smf_pdu_session>> pdu_sessions;
-
   mutable std::recursive_mutex                     m_context;
 };
 
@@ -429,6 +391,11 @@ public:
    */
   void get_default_qos_rule(QOSRulesIE &qos_rule, uint8_t pdu_session_type);
 
+  void get_default_qos_flow_description(QOSFlowDescriptionsContents &qos_flow_description, uint8_t pdu_session_type);
+
+  void get_session_ambr(SessionAMBR& session_ambr, const snssai_t& snssai, const std::string& dnn);
+  void get_session_ambr(Ngap_PDUSessionAggregateMaximumBitRate_t& session_ambr, const snssai_t& snssai, const std::string& dnn);
+
 private:
 
   std::vector<std::shared_ptr<dnn_context>> dnns;
@@ -455,9 +422,6 @@ private:
 
   supi_t         supi;
   scid_t scid;
-
-  //list of QOSRules (QFI<->Rule)
-  //std::map<uint8_t, QOSRulesIE> qos_rules;
 
 };
 }

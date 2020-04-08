@@ -27,20 +27,22 @@
   \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
 
+#include "smf_context.hpp"
+
+#include <algorithm>
+
 #include "itti.hpp"
 #include "logger.hpp"
 #include "smf_app.hpp"
 #include "smf_n11.hpp"
 #include "smf_config.hpp"
-#include "smf_context.hpp"
+#include "smf_n1_n2.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "smf_procedure.hpp"
 #include "ProblemDetails.h"
 #include "3gpp_29.502.h"
 #include "3gpp_24.501.h"
 #include "SmContextCreatedData.h"
-#include <algorithm>
-#include "smf_n1_n2.hpp"
 
 extern "C"{
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
@@ -50,6 +52,7 @@ extern "C"{
 #include "Ngap_QosFlowAddOrModifyResponseList.h"
 #include "Ngap_QosFlowAddOrModifyResponseItem.h"
 }
+
 using namespace smf;
 
 extern itti_mw *itti_inst;
@@ -151,8 +154,8 @@ smf_qos_flow& smf_pdu_session::get_qos_flow(const pfcp::qfi_t& qfi)
 void smf_pdu_session::get_qos_flows(std::vector<smf_qos_flow>& flows){
   flows.clear();
   for (auto it : qos_flows) {
-      flows.push_back(it.second);
-    }
+    flows.push_back(it.second);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -408,28 +411,222 @@ void smf_context::get_default_qos(const snssai_t& snssai, const std::string& dnn
 void smf_context::get_default_qos_rule(QOSRulesIE &qos_rule, uint8_t pdu_session_type)
 {
   //TODO, update according to PDU Session type
-  Logger::smf_app().info( "Get default QoS rule");
+  Logger::smf_app().info( "Get default QoS rule (PDU session type %d)", pdu_session_type);
   //see section 9.11.4.13 @ 3GPP TS 24.501 and section 5.7.1.4 @ 3GPP TS 23.501
-  qos_rule.qosruleidentifer = 0;
+  qos_rule.qosruleidentifer = 0x01;
   qos_rule.ruleoperationcode = CREATE_NEW_QOS_RULE;
   qos_rule.dqrbit = THE_QOS_RULE_IS_DEFAULT_QOS_RULE;
   if ((pdu_session_type == PDU_SESSION_TYPE_E_IPV4) or (pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) or (pdu_session_type == PDU_SESSION_TYPE_E_IPV6) or (pdu_session_type == PDU_SESSION_TYPE_E_ETHERNET)){
     qos_rule.numberofpacketfilters = 1;
-    Create_ModifyAndAdd_ModifyAndReplace create_modifyandadd_modifyandreplace[1];
-    create_modifyandadd_modifyandreplace[0].packetfilterdirection = 0b11; //bi-directional
-    create_modifyandadd_modifyandreplace[0].packetfilteridentifier = 1;
-    create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
     qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace = (Create_ModifyAndAdd_ModifyAndReplace *)calloc (1, sizeof (Create_ModifyAndAdd_ModifyAndReplace));
-    qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace =  create_modifyandadd_modifyandreplace;
-    qos_rule.qosruleprecedence = 255;
+    qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfilterdirection = 0b11; //bi-directional
+    qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfilteridentifier = 1;
+    qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
+    //qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_value = bfromcstralloc(2, "\0");
+    qos_rule.qosruleprecedence = 1;
   }
 
   if (pdu_session_type == PDU_SESSION_TYPE_E_UNSTRUCTURED){
     qos_rule.numberofpacketfilters = 0;
-    qos_rule.qosruleprecedence = 255;
+    qos_rule.qosruleprecedence = 1;
   }
 
   qos_rule.segregation = SEGREGATION_NOT_REQUESTED;
+  qos_rule.qosflowidentifer = 60; //TODO: default value
+
+  Logger::smf_app().debug("Default QoSRules: %x %x %x %x %x %x %x %x %x",
+      qos_rule.qosruleidentifer,
+      qos_rule.ruleoperationcode,
+      qos_rule.dqrbit,
+      qos_rule.numberofpacketfilters,
+      qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace->packetfilterdirection,
+      qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace->packetfilteridentifier,
+      qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace->packetfiltercontents.component_type,
+      qos_rule.qosruleprecedence,
+      qos_rule.segregation,
+      qos_rule.qosflowidentifer);
+}
+
+//------------------------------------------------------------------------------
+void smf_context::get_default_qos_flow_description(QOSFlowDescriptionsContents &qos_flow_description, uint8_t pdu_session_type)
+{
+  //TODO, update according to PDU Session type
+  Logger::smf_app().info( "Get default QoS Flow Description (PDU session type %d)", pdu_session_type);
+  qos_flow_description.qfi = 60;
+  qos_flow_description.operationcode = CREATE_NEW_QOS_FLOW_DESCRIPTION;
+  qos_flow_description.e = PARAMETERS_LIST_IS_INCLUDED;
+  qos_flow_description.numberofparameters = 3;
+  qos_flow_description.parameterslist = (ParametersList*) calloc(3, sizeof(ParametersList));
+  qos_flow_description.parameterslist[0].parameteridentifier = PARAMETER_IDENTIFIER_5QI;
+  qos_flow_description.parameterslist[0].parametercontents._5qi = 60; //TODO: ??
+  qos_flow_description.parameterslist[1].parameteridentifier = PARAMETER_IDENTIFIER_GFBR_UPLINK;
+  qos_flow_description.parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.uint = GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+  qos_flow_description.parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.value = 0x10;
+  qos_flow_description.parameterslist[2].parameteridentifier = PARAMETER_IDENTIFIER_GFBR_DOWNLINK;
+  qos_flow_description.parameterslist[2].parametercontents.gfbrormfbr_uplinkordownlink.uint = GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+  qos_flow_description.parameterslist[2].parametercontents.gfbrormfbr_uplinkordownlink.value = 0x10;
+
+  Logger::smf_app().debug("Default Qos Flow Description: %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x",
+      qos_flow_description.qfi,
+      qos_flow_description.operationcode,
+      qos_flow_description.e,
+      qos_flow_description.numberofparameters,
+      qos_flow_description.parameterslist[0].parameteridentifier,
+      qos_flow_description.parameterslist[0].parametercontents._5qi,
+      qos_flow_description.parameterslist[1].parameteridentifier,
+      qos_flow_description.parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.uint,
+      qos_flow_description.parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.value,
+      qos_flow_description.parameterslist[2].parameteridentifier,
+      qos_flow_description.parameterslist[2].parametercontents.gfbrormfbr_uplinkordownlink.uint,
+      qos_flow_description.parameterslist[2].parametercontents.gfbrormfbr_uplinkordownlink.value);
+
+}
+
+//------------------------------------------------------------------------------
+void smf_context::get_session_ambr(SessionAMBR& session_ambr, const snssai_t& snssai, const std::string& dnn)
+{
+  Logger::smf_app().debug("Get AMBR info from the DNN configuration");
+
+  std::shared_ptr<session_management_subscription> ss;
+  std::shared_ptr<dnn_configuration_t> sdc;
+  find_dnn_subscription(snssai, ss);
+  if (nullptr != ss.get()){
+
+    ss.get()->find_dnn_configuration(dnn, sdc);
+    if (nullptr != sdc.get()){
+      Logger::smf_app().debug("Default AMBR info from the DNN configuration, downlink %s, uplink %s", (sdc.get()->session_ambr).downlink.c_str(), (sdc.get()->session_ambr).uplink.c_str());
+
+      //Downlink
+      size_t leng_of_session_ambr_dl = (sdc.get()->session_ambr).downlink.length();
+      try {
+        std::string session_ambr_dl_unit = (sdc.get()->session_ambr).downlink.substr(leng_of_session_ambr_dl-4); //4 last characters stand for mbps, kbps, ..
+        if (session_ambr_dl_unit.compare("Kbps") == 0)
+          session_ambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
+        if (session_ambr_dl_unit.compare("Mbps") == 0)
+          session_ambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+        if (session_ambr_dl_unit.compare("Gbps") == 0)
+          session_ambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1GBPS;
+        if (session_ambr_dl_unit.compare("Tbps") == 0)
+          session_ambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1TBPS;
+        if (session_ambr_dl_unit.compare("Pbps") == 0)
+          session_ambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1PBPS;
+
+        session_ambr.session_ambr_for_downlink  = std::stoi((sdc.get()->session_ambr).downlink.substr(0, leng_of_session_ambr_dl-4));
+      }
+      catch (const std::exception& e)
+      {
+        Logger::smf_app().warn("Undefined error: %s", e.what());
+        //assign default value
+        session_ambr.session_ambr_for_downlink = 1;
+        session_ambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+
+      }
+
+      //Uplink
+      size_t leng_of_session_ambr_ul = (sdc.get()->session_ambr).uplink.length();
+      try{
+        std::string session_ambr_ul_unit = (sdc.get()->session_ambr).uplink.substr(leng_of_session_ambr_ul-4); //4 last characters stand for mbps, kbps, ..
+        if (session_ambr_ul_unit.compare("Kbps") == 0)
+          session_ambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
+        if (session_ambr_ul_unit.compare("Mbps") == 0)
+          session_ambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+        if (session_ambr_ul_unit.compare("Gbps") == 0)
+          session_ambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1GBPS;
+        if (session_ambr_ul_unit.compare("Tbps") == 0)
+          session_ambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1TBPS;
+        if (session_ambr_ul_unit.compare("Pbps") == 0)
+          session_ambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1PBPS;
+
+        session_ambr.session_ambr_for_uplink  = std::stoi((sdc.get()->session_ambr).uplink.substr(0, leng_of_session_ambr_ul-4));
+      }
+      catch (const std::exception& e)
+      {
+        Logger::smf_app().warn("Undefined error: %s", e.what());
+        //assign default value
+        session_ambr.session_ambr_for_uplink = 1;
+        session_ambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+      }
+    }
+  } else {
+    //use default value
+    session_ambr.session_ambr_for_downlink = 1;
+    session_ambr.uint_for_session_ambr_for_downlink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+    session_ambr.session_ambr_for_uplink = 1;
+    session_ambr.uint_for_session_ambr_for_uplink = AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+  }
+
+}
+
+
+
+//------------------------------------------------------------------------------
+void smf_context::get_session_ambr(Ngap_PDUSessionAggregateMaximumBitRate_t& session_ambr, const snssai_t& snssai, const std::string& dnn)
+{
+  Logger::smf_app().debug("Get AMBR info from the DNN configuration");
+
+  std::shared_ptr<session_management_subscription> ss;
+  std::shared_ptr<dnn_configuration_t> sdc;
+  find_dnn_subscription(snssai, ss);
+
+  uint32_t bit_rate_dl = 1;
+  uint32_t bit_rate_ul = 1;
+
+  session_ambr.pDUSessionAggregateMaximumBitRateDL.size = 4;
+  session_ambr.pDUSessionAggregateMaximumBitRateDL.buf = (uint8_t *) calloc(4, sizeof (uint8_t));
+  session_ambr.pDUSessionAggregateMaximumBitRateUL.size = 4;
+  session_ambr.pDUSessionAggregateMaximumBitRateUL.buf = (uint8_t *) calloc(4, sizeof (uint8_t));
+
+  if (nullptr != ss.get()){
+    ss.get()->find_dnn_configuration(dnn, sdc);
+
+    if (nullptr != sdc.get()){
+      Logger::smf_app().debug("Default AMBR info from the DNN configuration, downlink %s, uplink %s", (sdc.get()->session_ambr).downlink.c_str(), (sdc.get()->session_ambr).uplink.c_str());
+      //Downlink
+      size_t leng_of_session_ambr_dl = (sdc.get()->session_ambr).downlink.length();
+      try {
+        bit_rate_dl = std::stoi((sdc.get()->session_ambr).downlink.substr(0, leng_of_session_ambr_dl - 4));
+        std::string session_ambr_dl_unit = (sdc.get()->session_ambr).downlink.substr(leng_of_session_ambr_dl - 4); //4 last characters stand for mbps, kbps, ..
+        if (session_ambr_dl_unit.compare("Kbps") == 0)
+          bit_rate_dl *= 1000;
+        if (session_ambr_dl_unit.compare("Mbps") == 0)
+          bit_rate_dl *= 1000000;
+        if (session_ambr_dl_unit.compare("Gbps") == 0)
+          bit_rate_dl *= 1000000000;
+        INT32_TO_BUFFER(bit_rate_dl, session_ambr.pDUSessionAggregateMaximumBitRateDL.buf);
+      }
+      catch (const std::exception& e)
+      {
+        Logger::smf_app().warn("Undefined error: %s", e.what());
+        //assign default value
+        bit_rate_dl = 1;
+        INT32_TO_BUFFER(bit_rate_dl, session_ambr.pDUSessionAggregateMaximumBitRateDL.buf);
+      }
+
+      //Uplink
+      size_t leng_of_session_ambr_ul = (sdc.get()->session_ambr).uplink.length();
+      try{
+        bit_rate_ul = std::stoi((sdc.get()->session_ambr).uplink.substr(0, leng_of_session_ambr_ul - 4));
+        std::string session_ambr_ul_unit = (sdc.get()->session_ambr).uplink.substr(leng_of_session_ambr_ul - 4); //4 last characters stand for mbps, kbps, ..
+        if (session_ambr_ul_unit.compare("Kbps") == 0)
+          bit_rate_ul *= 1000;
+        if (session_ambr_ul_unit.compare("Mbps") == 0)
+          bit_rate_ul *= 1000000;
+        if (session_ambr_ul_unit.compare("Gbps") == 0)
+          bit_rate_ul *= 1000000000;
+        INT32_TO_BUFFER(bit_rate_ul, session_ambr.pDUSessionAggregateMaximumBitRateUL.buf);
+      }
+      catch (const std::exception& e)
+      {
+        Logger::smf_app().warn("Undefined error: %s", e.what());
+        //assign default value
+        bit_rate_ul = 1;
+        INT32_TO_BUFFER(bit_rate_ul, session_ambr.pDUSessionAggregateMaximumBitRateUL.buf);
+      }
+    }
+  } else {
+    INT32_TO_BUFFER(bit_rate_dl, session_ambr.pDUSessionAggregateMaximumBitRateDL.buf);
+    INT32_TO_BUFFER(bit_rate_ul, session_ambr.pDUSessionAggregateMaximumBitRateUL.buf);
+  }
 
 }
 
@@ -641,6 +838,9 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
     std::string smContextRef = std::to_string(smreq->scid);
     //headers: Location: contains the URI of the newly created resource, according to the structure: {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
     std::string uri = sm_context_req_msg.get_api_root() + "/" + smContextRef.c_str();
+
+
+    //TODO: disable two following lines to test PDU SESSION ESTABLISHMENT ACCEPT
     sm_context_resp->http_response.headers().add<Pistache::Http::Header::Location>(uri);
     smf_n11_inst->send_pdu_session_create_sm_context_response(sm_context_resp->http_response, smContextCreatedData, Pistache::Http::Code::Created);
 
@@ -699,7 +899,7 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
 		}
      */
 
-    //Create PDU Session Establishment Reject
+    //Create PDU Session Establishment Reject and embedded in Namf_Communication_N1N2MessageTransfer Request
     Logger::smf_app().debug("Create PDU Session Establishment Reject");
     smf_n1_n2_inst.create_n1_sm_container(sm_context_resp_pending->res, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message, cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
@@ -717,10 +917,6 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
     sm_context_resp_pending->res.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageContent"]["contentId"] = "n1SmMsg";
     //sm_context_resp_pending->res.n1n2_message_transfer_data["ppi"] = 1; //Don't need this info for the moment
     sm_context_resp_pending->res.n1n2_message_transfer_data["pduSessionId"] = sm_context_resp_pending->res.get_pdu_session_id();
-    //sm_context_resp_pending->res.n1n2_message_transfer_data["arp"]["priorityLevel"] = 1;
-    //sm_context_resp_pending->res.n1n2_message_transfer_data["arp"]["preemptCap"] = "NOT_PREEMPT";
-    //sm_context_resp_pending->res.n1n2_message_transfer_data["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";
-    //sm_context_resp_pending->res.n1n2_message_transfer_data["5qi"] = ;
 
     //send ITTI message to N11 interface to trigger N1N2MessageTransfer towards AMFs
     Logger::smf_app().info( "Sending ITTI message %s to task TASK_SMF_N11", sm_context_resp_pending->get_msg_name());
@@ -808,12 +1004,12 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
     switch (message_type){
     // switch (decoded_nas_msg.plain.sm.header.message_type){
 
-    //PDU_SESSION_MODIFICATION_REQUEST - UE initiated PDU session modification request
+    //PDU_SESSION_MODIFICATION_REQUEST - UE initiated PDU session modification request (Step 1)
     case PDU_SESSION_MODIFICATION_REQUEST:{
       Logger::smf_app().debug("PDU_SESSION_MODIFICATION_REQUEST");
       //PDU Session Modification procedure (UE-initiated, step 1.a, Section 4.3.3.2@3GPP TS 23.502)
-      procedure_type = session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED;
-      sm_context_resp_pending->session_procedure_type = session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED;
+      procedure_type = session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1;
+      sm_context_resp_pending->session_procedure_type = session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1;
 
       //step 1. assign the necessary information from pdu_session_modification_request to sm_context_req_msg to be used to create N1 SM, N2 SM information
       //decoded_nas_msg.plain.sm.pdu_session_modification_request;
@@ -856,7 +1052,7 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
       QOSRulesIE * qos_rules_ie = (QOSRulesIE *) calloc (1, sizeof(QOSRulesIE));
       qos_rules_ie = decoded_nas_msg.plain.sm.pdu_session_modification_request.qosrules.qosrulesie;
       for (int i = 0; i < number_of_rules; i++){
-          //qos_rules_ie[0].qosruleidentifer
+        //qos_rules_ie[0].qosruleidentifer
         if ((qos_rules_ie[i].ruleoperationcode == CREATE_NEW_QOS_RULE) and (qos_rules_ie[i].segregation == SEGREGATION_REQUESTED)){
           //Request to bind specific SDF to a dedicated QoS flow
           if (qos_rules_ie[i].qosruleidentifer == 0) {
@@ -865,55 +1061,17 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
             //existing QoS rule
           }
         }
-          //qos_rules_ie[0].ruleoperationcode
-          //qos_rules_ie[0].dqrbit
-          //qos_rules_ie[0].numberofpacketfilters
-          //1st rule
-          // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfilterdirection
-          // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfilteridentifier
-          // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfiltercontents.component_type
-          // qos_rules_ie[0].qosruleprecedence ;
-          // qos_rules_ie[0].segregation ;
-          // qos_rules_ie[0].qosflowidentifer ;
+        //qos_rules_ie[0].ruleoperationcode
+        //qos_rules_ie[0].dqrbit
+        //qos_rules_ie[0].numberofpacketfilters
+        //1st rule
+        // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfilterdirection
+        // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfilteridentifier
+        // qos_rules_ie[0].packetfilterlist.create_modifyandadd_modifyandreplace->packetfiltercontents.component_type
+        // qos_rules_ie[0].qosruleprecedence ;
+        // qos_rules_ie[0].segregation ;
+        // qos_rules_ie[0].qosflowidentifer ;
       }
-
-      /*
-       typedef struct{
-  uint8_t uint;
-  uint16_t value;
-}GFBROrMFBR_UpLinkOrDownLink;
-
-typedef struct{
-  uint8_t uplinkinmilliseconds;
-  uint8_t downlinkinmilliseconds;
-}AveragingWindow;
-
-typedef struct{
-  uint8_t parameteridentifier;
-  //uint8_t lengthofparametercontents;
-  union {
-    uint8_t _5qi;
-    GFBROrMFBR_UpLinkOrDownLink gfbrormfbr_uplinkordownlink;
-    AveragingWindow averagingwindow;
-    uint8_t epsbeareridentity:4;
-  }parametercontents;
-}ParametersList;
-
-typedef struct{
-  uint8_t qfi:6;
-  uint8_t operationcode:3;
-  uint8_t e:1;
-  uint8_t numberofparameters:6;
-  ParametersList *parameterslist;
-}QOSFlowDescriptionsContents;
-
-typedef struct{
-  uint16_t qosflowdescriptionsnumber;   //Custom variables are protocol independent
-  QOSFlowDescriptionsContents *qosflowdescriptionscontents;
-}QOSFlowDescriptions;
-
-
-       */
 
       //verify the PDU session ID
       if (smreq->req.get_pdu_session_id() != decoded_nas_msg.plain.sm.pdu_session_modification_request.pdusessionidentity){
@@ -964,11 +1122,11 @@ typedef struct{
         Logger::smf_app().error( "Could not send ITTI message %s to task TASK_SMF_N11",  sm_context_resp_pending->get_msg_name());
       }
       //don't need to create a procedure to update UPF
-      break;
     }
+    break;
 
-    //PDU_SESSION_MODIFICATION_COMPLETE - PDU Session Modification procedure
-
+    //PDU_SESSION_MODIFICATION_COMPLETE - PDU Session Modification procedure (UE-initiated/Network-requested) (step 3)
+    //PDU Session Modification Command Complete
     case PDU_SESSION_MODIFICATION_COMPLETE:{
       //PDU Session Modification procedure (Section 4.3.3.2@3GPP TS 23.502)
       //TODO: should be verified since mentioned PDU_SESSION_MODIFICATION_COMMAND ACK in spec (see Step 11, section 4.3.3.2@3GPP TS 23.502)
@@ -987,33 +1145,36 @@ typedef struct{
       //stop T3591
       itti_inst->timer_remove(sp.get()->timer_T3591);
 
-
-      break;
     }
+    break;
 
+    //PDU Session Release UE-Initiated (Step 1)
     case PDU_SESSION_RELEASE_REQUEST:{
       //PDU Session Release procedure (Section 4.3.4@3GPP TS 23.502)
       //TODO:
-
-
-      break;
     }
+    break;
 
+    //PDU Session Release UE-Initiated (Step 3)
+    case PDU_SESSION_RELEASE_COMPLETE:{
+      //PDU Session Release procedure
+      //TODO:
+    }
+    break;
+
+    //To be verified
     case PDU_SESSION_RELEASE_COMMAND:{
       //PDU Session Release procedure (Section 4.3.4@3GPP TS 23.502)
       //TODO:
 
-      break;
     }
-
-
+    break;
 
     default: {
-
-      //Message Type Unknown
+      Logger::smf_app().warn( "Unknown message type %d", message_type);
+      //TODO:
     }
-    }
-
+    } //end switch
 
   }
 
@@ -1045,64 +1206,54 @@ typedef struct{
       //  struct Ngap_QosFlowList *qosFlowFailedToSetupList;  /* OPTIONAL */
       //  struct Ngap_ProtocolExtensionContainer  *iE_Extensions; /* OPTIONAL */
 
-      //TEST - enable to create a N2 SM information and send to AMF
-      /* std::string n2_sm_info, n2_sm_info_hex ;
-      smf_n1_n2 smf_n1_n2_inst;
-      //N1 SM (PDU Session Modification Command)
-      smf_n1_n2_inst.create_n2_sm_information(sm_context_req_msg, 1, n2_sm_info_type_e::PDU_RES_SETUP_RSP, n2_sm_info);
-       */
-
       //PDU_SESSION_ESTABLISHMENT_UE_REQUESTED & SERVICE_REQUEST_UE_TRIGGERED
       procedure_type = session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED;
       //procedure_type = session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2;
 
       //Ngap_PDUSessionResourceSetupResponseTransfer
       std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>  decoded_msg = std::make_shared<Ngap_PDUSessionResourceSetupResponseTransfer_t>();
-      asn_dec_rval_t rc  = asn_decode(nullptr,ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, (void **)&decoded_msg, (void *)data, data_len);
-      if(rc.code != RC_OK)
-      {
-        Logger::smf_api_server().warn("asn_decode failed with code %d",rc.code );
-        //TODO: send error to AMF??
+      int decode_status = smf_n1_n2_inst.decode_n2_sm_information(decoded_msg, n2_sm_information);
+      if (decode_status == RETURNerror){
+        Logger::smf_api_server().warn("asn_decode failed");
+        //TODO: send error to AMF
       }
+
 
       //TODO: store AN Tunnel Info + list of accepted QFIs
       fteid_t dl_teid;
       //TODO: to be verified which one is teid_gre_key, ipv4_address
-      memcpy (&dl_teid.teid_gre_key, decoded_msg->qosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf, sizeof (struct in_addr));
-      memcpy (&dl_teid.ipv4_address, decoded_msg->qosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf, 4);
+      memcpy (&dl_teid.teid_gre_key, decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf, sizeof (struct in_addr));
+      memcpy (&dl_teid.ipv4_address, decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->transportLayerAddress.buf, 4);
       printf("gTP_TEID:");
-      printf("%02x ", decoded_msg->qosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[0]);
-      printf("%02x ", decoded_msg->qosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[1]);
-      printf("%02x ", decoded_msg->qosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[2]);
-      printf("%02x \n", decoded_msg->qosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[3]);
+      printf("%02x ", decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[0]);
+      printf("%02x ", decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[1]);
+      printf("%02x ", decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[2]);
+      printf("%02x \n", decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf[3]);
       Logger::smf_app().debug("gTP_TEID " "0x%" PRIx32 " ", htonl(dl_teid.teid_gre_key));
       Logger::smf_app().debug("uPTransportLayerInformation IP Addr %s", conv::toString(dl_teid.ipv4_address).c_str());
 
       sm_context_req_msg.set_dl_fteid(dl_teid);
 
-      for (int i =0; i< decoded_msg->qosFlowPerTNLInformation.associatedQosFlowList.list.count; i++ ){
-        pfcp::qfi_t qfi((uint8_t)(decoded_msg->qosFlowPerTNLInformation.associatedQosFlowList.list.array[i])->qosFlowIdentifier);
+      for (int i =0; i< decoded_msg->dLQosFlowPerTNLInformation.associatedQosFlowList.list.count; i++ ){
+        pfcp::qfi_t qfi((uint8_t)(decoded_msg->dLQosFlowPerTNLInformation.associatedQosFlowList.list.array[i])->qosFlowIdentifier);
         sm_context_req_msg.add_qfi(qfi);
-        Logger::smf_app().debug("QoSFlowPerTNLInformation, AssociatedQosFlowList, QFI %d",(decoded_msg->qosFlowPerTNLInformation.associatedQosFlowList.list.array[i])->qosFlowIdentifier );
+        Logger::smf_app().debug("QoSFlowPerTNLInformation, AssociatedQosFlowList, QFI %d",(decoded_msg->dLQosFlowPerTNLInformation.associatedQosFlowList.list.array[i])->qosFlowIdentifier );
       }
       //need to update UPF accordingly
       update_upf = true;
-
-      break;
     }
+    break;
 
-    //PDU Session Modification procedure (UE-initiated, Section 4.3.3.2@3GPP TS 23.502)
+    //PDU Session Modification procedure (UE-initiated, Section 4.3.3.2@3GPP TS 23.502 or SMF-Requested)(Step 2)
     case n2_sm_info_type_e::PDU_RES_MOD_RSP:{
-      procedure_type = session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED;
-      //PDU Session Resource Modify Request Transfer
+      procedure_type = session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2;
 
       //Ngap_PDUSessionResourceModifyResponseTransfer
       std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t>  decoded_msg = std::make_shared<Ngap_PDUSessionResourceModifyResponseTransfer_t>();
-      asn_dec_rval_t rc  = asn_decode(nullptr,ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceModifyResponseTransfer, (void **)&decoded_msg, (void *)data, data_len);
-      if(rc.code != RC_OK)
-      {
-        Logger::smf_api_server().warn("asn_decode failed %d...",rc.code );
-        //TODO: send error to AMF??
+      int decode_status = smf_n1_n2_inst.decode_n2_sm_information(decoded_msg, n2_sm_information);
+      if (decode_status == RETURNerror){
+        Logger::smf_api_server().warn("asn_decode failed");
+        //TODO: send error to AMF
       }
 
       //Ngap_PDUSessionResourceModifyResponseTransfer_t
@@ -1128,20 +1279,26 @@ typedef struct{
 
       //need to update UPF accordingly
       update_upf = true;
-
-      break;
     }
+    break;
 
     //PDU Session Modification procedure
     case n2_sm_info_type_e::PDU_RES_MOD_FAIL:{
-
+      //TODO:
     }
     break;
+
+    //PDU Session Release procedure (UE-initiated, Section 4.3.4.2@3GPP TS 23.502 or SMF-Requested)(Step 2)
+    case n2_sm_info_type_e::PDU_RES_REL_RSP:{
+      //TODO:
+    }
+    break;
+
     default: {
-
+      Logger::smf_app().warn( "Unknown N2 SM info type %d", n2_sm_info_type);
     }
 
-    }
+    } //end switch
     //free memory
     free(data);
     data = nullptr;
