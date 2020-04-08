@@ -78,7 +78,6 @@ typedef struct s_nssai // section 28.4, TS23.003
 typedef uint8_t pdu_session_id;
 
 //should move to 24.501
-
 enum pdu_session_type_e {
   PDU_SESSION_TYPE_E_UNKNOWN = 0,
   PDU_SESSION_TYPE_E_IPV4 = 1,
@@ -142,11 +141,16 @@ enum class session_management_procedures_type_e {
   SERVICE_REQUEST_UE_TRIGGERED_STEP1 = 1,
   SERVICE_REQUEST_UE_TRIGGERED_STEP2 = 2,
   SERVICE_REQUEST_NETWORK_TRIGGERED = 3,
-  PDU_SESSION_MODIFICATION_UE_INITIATED = 4,
-  PDU_SESSION_MODIFICATION_SMF_REQUESTED = 5,
-  PDU_SESSION_MODIFICATION_AN_REQUESTED = 6,
-  PDU_SESSION_RELEASE_UE_REQUESTED = 7,
-  PDU_SESSION_RELEASE_NETWORK_REQUESTED = 8
+  PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1 = 4,
+  PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2 = 5,
+  PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3 = 6,
+  PDU_SESSION_MODIFICATION_SMF_REQUESTED = 7,
+  PDU_SESSION_MODIFICATION_AN_REQUESTED = 8,
+  PDU_SESSION_RELEASE_UE_REQUESTED_STEP1 = 9,
+  PDU_SESSION_RELEASE_UE_REQUESTED_STEP2 = 10,
+  PDU_SESSION_RELEASE_UE_REQUESTED_STEP3 = 11,
+  PDU_SESSION_RELEASE_NETWORK_REQUESTED = 12,
+  PDU_SESSION_TEST = 13
 };
 
 static const std::vector<std::string> session_management_procedures_type_e2str = {
@@ -154,10 +158,14 @@ static const std::vector<std::string> session_management_procedures_type_e2str =
     "SERVICE_REQUEST_UE_TRIGGERED_STEP1",
     "SERVICE_REQUEST_UE_TRIGGERED_STEP2",
     "SERVICE_REQUEST_NETWORK_TRIGGERED",
-    "PDU_SESSION_MODIFICATION_UE_INITIATED",
+    "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1",
+    "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2",
+    "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3",
     "PDU_SESSION_MODIFICATION_SMF_REQUESTED",
     "PDU_SESSION_MODIFICATION_AN_REQUESTED",
-    "PDU_SESSION_RELEASE_UE_REQUESTED",
+    "PDU_SESSION_RELEASE_UE_REQUESTED_STEP1",
+    "PDU_SESSION_RELEASE_UE_REQUESTED_STEP2",
+    "PDU_SESSION_RELEASE_UE_REQUESTED_STEP3",
     "PDU_SESSION_RELEASE_NETWORK_REQUESTED"
 
 };
@@ -169,16 +177,34 @@ typedef struct qos_profile_gbr_s {
   // Maximum Packet Loss Rate (UL/DL)
 } qos_profile_gbr_t;
 
-//
+
+enum class qos_profile_type_e {
+  NON_GBR = 0,
+  GBR = 1
+};
+
+//See Section 5.7.2@3GPP TS 23.501
 typedef struct qos_profile_s {
   uint8_t _5qi;
   arp_5gc_t arp;
-  //union flow_bit_rate_type{
-  //  reflective_qos_attribute_e  rqa; //Reflective QoS Attribute (RQA)
-  //  qos_profile_gbr_t qos_profile_gbr; //Attributes for GBR
- // };
+  uint8_t priority_level;
+  qos_profile_type_e profile_type;
+  union parameter{
+    reflective_qos_attribute_e  rqa; //Reflective QoS Attribute (RQA)
+    qos_profile_gbr_t qos_profile_gbr; //Attributes for GBR
+  };
 } qos_profile_t;
 
+enum class multipart_related_content_part_e {
+  JSON = 0,
+  NAS = 1,
+  NGAP = 2
+};
 
+static const std::vector<std::string> multipart_related_content_part_e2str = {
+    "JSON",
+    "NAS",
+    "NGAP"
+};
 
 #endif

@@ -72,7 +72,7 @@ void send_pdu_session_establishment_request()
   std::cout << "[AMF N11] PDU Session Establishment Request"<<std::endl;
 
   nlohmann::json pdu_session_establishment_request;
-  std::string n1_msg = "2e0101c1ffff95";
+  std::string n1_msg = "2e0101c1ffff91";
   std::string n2_msg;
 
   //format string as hex
@@ -433,9 +433,9 @@ int main(int argc, char* argv[])
 {
 
   send_pdu_session_establishment_request();
-  usleep(10000);
-  //send_pdu_session_update_sm_context_establishment();
-  send_pdu_session_update_sm_context_modification();
+  usleep(100000);
+  send_pdu_session_update_sm_context_establishment();
+  //send_pdu_session_update_sm_context_modification();
   return 0;
 }
 

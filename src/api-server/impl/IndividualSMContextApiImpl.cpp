@@ -88,7 +88,6 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
   Logger::smf_api_server().info("Received a PDUSession_UpdateSMContext Request from AMF.");
 
   smf::pdu_session_update_sm_context_request sm_context_req_msg = {};
-
   SmContextUpdateData smContextUpdateData = smContextUpdateMessage.getJsonData();
 
   if (smContextUpdateData.n2SmInfoIsSet()){

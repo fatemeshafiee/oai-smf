@@ -186,8 +186,8 @@ void IndividualSMContextApi::update_sm_context_handler(const Pistache::Rest::Req
 
   unsigned int str_len = request.body().length();
   unsigned char *data = (unsigned char *)malloc(str_len + 1);
-  memset(data,0,str_len + 1);
-  memcpy ((void *)data, (void *)request.body().c_str(),str_len);
+  memset(data, 0, str_len + 1);
+  memcpy ((void *)data, (void *)request.body().c_str(), str_len);
 
   //if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
   if ((multipartparser_execute(&parser, &g_callbacks, reinterpret_cast<const char*>(data), str_len) != strlen(request.body().c_str())) or (!g_body_begin_called)){
@@ -242,7 +242,7 @@ void IndividualSMContextApi::update_sm_context_handler(const Pistache::Rest::Req
     return;
   } catch (std::exception &e) {
     //send a 500 error
-    Logger::smf_api_server().warn("Error (%s ), Send a msg with a 500 error code to AMF", e.what());
+    Logger::smf_api_server().warn("Error (%s ), send a msg with a 500 error code to AMF", e.what());
     response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
     return;
   }
