@@ -28,38 +28,39 @@
  */
 
 #include "smf_app.hpp"
+
+#include <stdexcept>
+#include <iostream>
+#include <cstdlib>
+
 #include "async_shell_cmd.hpp"
 #include "common_defs.h"
 #include "conversions.hpp"
 #include "itti.hpp"
 #include "logger.hpp"
-#include "smf_paa_dynamic.hpp"
-#include "smf_n4.hpp"
-#include "smf_n10.hpp"
-#include "smf_n11.hpp"
 #include "string.hpp"
 #include "3gpp_29.502.h"
 #include "3gpp_24.007.h"
 #include "smf.h"
 #include "3gpp_24.501.h"
+#include "smf_n1_n2.hpp"
+#include "smf_paa_dynamic.hpp"
+#include "smf_n4.hpp"
+#include "smf_n10.hpp"
+#include "smf_n11.hpp"
+#include "pfcp.hpp"
+#include "itti_msg_nx.hpp"
+#include "SmContextCreatedData.h"
 #include "RefToBinaryData.h"
 #include "SmContextCreateError.h"
 #include "SmContextUpdateError.h"
 #include "SmContextMessage.h"
 #include "ProblemDetails.h"
-#include "smf_n1_n2.hpp"
-#include "SmContextCreatedData.h"
-#include "pfcp.hpp"
-#include "itti_msg_nx.hpp"
 
 extern "C"{
 #include "nas_message.h"
 #include "mmData.h"
 }
-
-#include <stdexcept>
-#include <iostream>
-#include <cstdlib>
 
 #define BUF_LEN 512
 
@@ -404,7 +405,7 @@ void smf_app::handle_itti_msg (itti_n11_n1n2_message_transfer_response_status& m
   //Update PDU Session accordingly
   //TODO: to be completed (process cause)
   pdu_session_status_e status;
-  if (static_cast<http_response_codes_e> (m.response_code) == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
+  if ((static_cast<http_response_codes_e> (m.response_code) == http_response_codes_e::HTTP_RESPONSE_CODE_OK) or (static_cast<http_response_codes_e> (m.response_code) == http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED))
   {
     if (m.msg_type == PDU_SESSION_ESTABLISHMENT_REJECT){
       status = pdu_session_status_e::PDU_SESSION_INACTIVE;
@@ -413,13 +414,10 @@ void smf_app::handle_itti_msg (itti_n11_n1n2_message_transfer_response_status& m
     }
     update_pdu_session_status(m.scid, status);
     Logger::smf_app().debug("Got successful response from AMF (Response code %d), set session status to %s", m.response_code, pdu_session_status_e2str[static_cast<int>(status)].c_str());
-
   }
-  else if (static_cast<http_response_codes_e> (m.response_code) == http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED){
+  else {
     //TODO:
-    Logger::smf_app().debug("Got successful response from AMF (Response code %d), set session status to ACTIVE", m.response_code);
-  } else{ //by default
-    //TODO
+    Logger::smf_app().debug("Got response from AMF (Response code %d)", m.response_code);
   }
 
 }
@@ -481,6 +479,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   smreq->req.set_pdu_session_type(PDU_SESSION_TYPE_E_IPV4); //set default value
   if (decoded_nas_msg.plain.sm.header.message_type == PDU_SESSION_ESTABLISHMENT_REQUEST){
     //TODO: Disable this command temporarily since can't get this info from tester
+    Logger::smf_app().debug("NAS, pdu_session_type %d", decoded_nas_msg.plain.sm.pdu_session_establishment_request._pdusessiontype.pdu_session_type_value);
     //sm_context_req_msg.set_pdu_session_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request._pdusessiontype.pdu_session_type_value);
   }
 

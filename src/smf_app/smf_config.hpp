@@ -30,14 +30,6 @@
 #ifndef FILE_SMF_CONFIG_HPP_SEEN
 #define FILE_SMF_CONFIG_HPP_SEEN
 
-#include "3gpp_29.244.h"
-#include "3gpp_29.274.h"
-#include "gtpv2c.hpp"
-#include "pfcp.hpp"
-#include "thread_sched.hpp"
-
-#include "smf.h"
-
 #include <arpa/inet.h>
 #include <libconfig.h++>
 #include <netinet/in.h>
@@ -45,6 +37,13 @@
 
 #include <mutex>
 #include <vector>
+#include "thread_sched.hpp"
+
+#include "3gpp_29.244.h"
+#include "3gpp_29.274.h"
+#include "gtpv2c.hpp"
+#include "pfcp.hpp"
+#include "smf.h"
 
 
 #define SMF_CONFIG_STRING_SMF_CONFIG                            "SMF"

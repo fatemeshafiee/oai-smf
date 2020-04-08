@@ -27,16 +27,17 @@
   \email: tien-thinh.nguyen@eurecom.fr
  */
 
+#include "smf_n10.hpp"
+
+#include <stdexcept>
+
+#include <curl/curl.h>
+#include <nlohmann/json.hpp>
 #include "smf.h"
 #include "common_defs.h"
 #include "itti.hpp"
 #include "logger.hpp"
-#include "smf_n10.hpp"
 #include "smf_config.hpp"
-#include <curl/curl.h>
-#include <nlohmann/json.hpp>
-
-#include <stdexcept>
 
 #define UDM_CURL_TIMEOUT_MS 100L
 #define UDM_NUMBER_RETRIES 3
@@ -222,6 +223,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
         dnn_configuration->_5g_qos_profile.arp.priority_level = it.value()["5gQosProfile"]["arp"]["priorityLevel"];
         dnn_configuration->_5g_qos_profile.arp.preempt_cap = it.value()["5gQosProfile"]["arp"]["preemptCap"];
         dnn_configuration->_5g_qos_profile.arp.preempt_vuln = it.value()["5gQosProfile"]["arp"]["preemptVuln"];
+        dnn_configuration->_5g_qos_profile.priority_level = 1; //TODO: hardcoded
 
         //session_ambr
         dnn_configuration->session_ambr.uplink = it.value()["sessionAmbr"]["uplink"];

@@ -30,26 +30,27 @@
 #ifndef FILE_SMF_N1_N2_HPP_SEEN
 #define FILE_SMF_N1_N2_HPP_SEEN
 
+#include "pistache/endpoint.h"
+#include "pistache/http.h"
+#include "pistache/router.h"
 #include "smf.h"
 #include "3gpp_29.274.h"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_n11.hpp"
 #include "smf_context.hpp"
 #include "smf_pco.hpp"
-#include "SmContextCreateData.h"
-#include "SmContextCreateError.h"
-#include "pistache/endpoint.h"
-#include "pistache/http.h"
-#include "pistache/router.h"
 #include "smf_msg.hpp"
 #include "smf_app.hpp"
 #include "3gpp_29.502.h"
+#include "SmContextCreateData.h"
+#include "SmContextCreateError.h"
 
 extern "C"{
 #include "nas_message.h"
 #include "mmData.h"
 #include "Ngap_NGAP-PDU.h"
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
+#include "Ngap_PDUSessionResourceModifyResponseTransfer.h"
 }
 
 #include <map>
@@ -96,13 +97,20 @@ public:
   int decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg);
 
   /*
-   * Decode N2 SM Information (using NGAP lib)
-   * @param [Ngap_NGAP_PDU_t&] ngap_msg Store decoded NGAP message
-   * @param [std::string&] n2_sm_info N2 SM Information from AMF
+   * Decode N2 SM Information Ngap_PDUSessionResourceSetupResponseTransfer
+   * @param [std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>&] ngap_IE Store decoded NGAP message
+   * @param [std::string&] n2_sm_info N2 SM Information
    * @return status of the decode process
    */
-  int decode_n2_sm_information(std::unique_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE, std::string& n2_sm_info, std::string& n2_sm_info_type);
+  int decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE, std::string& n2_sm_info);
 
+  /*
+   * Decode N2 SM Information Ngap_PDUSessionResourceModifyResponseTransfer_t
+   * @param [std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t>&] ngap_IE Store decoded NGAP message
+   * @param [std::string&] n2_sm_info N2 SM Information
+   * @return status of the decode process
+   */
+  int decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t>& ngap_IE, std::string& n2_sm_info);
 
 };
 

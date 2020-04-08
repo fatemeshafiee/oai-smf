@@ -27,15 +27,16 @@
   \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
 
-#include "common_defs.h"
-#include "itti.hpp"
-#include "logger.hpp"
-#include "smf_config.hpp"
 #include "smf_n4.hpp"
 
 #include <chrono>
 #include <ctime>
 #include <stdexcept>
+
+#include "common_defs.h"
+#include "itti.hpp"
+#include "logger.hpp"
+#include "smf_config.hpp"
 
 using namespace pfcp;
 using namespace smf;

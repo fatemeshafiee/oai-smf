@@ -28,13 +28,13 @@
 #ifndef FILE_SMF_PFCP_ASSOCIATION_HPP_SEEN
 #define FILE_SMF_PFCP_ASSOCIATION_HPP_SEEN
 
-#include "3gpp_29.244.h"
-#include "itti.hpp"
-
 #include <folly/AtomicHashMap.h>
 #include <folly/AtomicLinkedList.h>
 #include <mutex>
 #include <vector>
+
+#include "3gpp_29.244.h"
+#include "itti.hpp"
 
 namespace smf {
 

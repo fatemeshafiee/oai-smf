@@ -29,11 +29,11 @@
 #ifndef FILE_SMF_N4_HPP_SEEN
 #define FILE_SMF_N4_HPP_SEEN
 
+#include <thread>
+
 #include "itti_msg_n4.hpp"
 #include "pfcp.hpp"
 #include "smf_pfcp_association.hpp"
-
-#include <thread>
 
 namespace smf {
 
@@ -41,7 +41,7 @@ namespace smf {
 #define TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST     (1)
 #define TASK_SMF_N4_TIMEOUT_ASSOCIATION_REQUEST   (2)
 
-class smf_n4  : public pfcp::pfcp_l4_stack {
+class smf_n4 : public pfcp::pfcp_l4_stack {
 private:
   std::thread::id                      thread_id;
   std::thread                          thread;

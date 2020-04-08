@@ -25,9 +25,11 @@
    \date 2019
    \email: lionel.gauthier@eurecom.fr
  */
+
+#include "smf_pfcp_association.hpp"
+
 #include "common_defs.h"
 #include "logger.hpp"
-#include "smf_pfcp_association.hpp"
 #include "smf_procedure.hpp"
 #include "smf_n4.hpp"
 

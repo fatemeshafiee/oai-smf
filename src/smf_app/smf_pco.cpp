@@ -26,15 +26,15 @@
   \email: lionel.gauthier@eurecom.fr
  */
 
+#include "smf_pco.hpp"
+
 #include "common_defs.h"
 #include "3gpp_24.008.h"
 #include "rfc_1332.h"
 #include "rfc_1877.h"
-
 #include "logger.hpp"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
-#include "smf_pco.hpp"
 
 using  namespace smf;
 

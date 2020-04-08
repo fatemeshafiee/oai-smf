@@ -30,6 +30,15 @@
 #ifndef FILE_SMF_APP_HPP_SEEN
 #define FILE_SMF_APP_HPP_SEEN
 
+#include <map>
+#include <set>
+#include <shared_mutex>
+#include <string>
+#include <thread>
+
+#include "pistache/endpoint.h"
+#include "pistache/http.h"
+#include "pistache/router.h"
 #include "smf.h"
 #include "3gpp_29.274.h"
 #include "3gpp_29.502.h"
@@ -37,20 +46,11 @@
 #include "itti_msg_n11.hpp"
 #include "smf_context.hpp"
 #include "smf_pco.hpp"
+#include "smf_msg.hpp"
 #include "SmContextCreateData.h"
 #include "SmContextUpdateData.h"
 #include "SmContextCreateError.h"
 #include "SmContextUpdateError.h"
-#include "pistache/endpoint.h"
-#include "pistache/http.h"
-#include "pistache/router.h"
-#include "smf_msg.hpp"
-
-#include <map>
-#include <set>
-#include <shared_mutex>
-#include <string>
-#include <thread>
 
 namespace smf {
 

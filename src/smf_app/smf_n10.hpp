@@ -29,11 +29,12 @@
 #ifndef FILE_SMF_N10_HPP_SEEN
 #define FILE_SMF_N10_HPP_SEEN
 
+#include <thread>
+#include <map>
+
 #include "smf.h"
 #include "3gpp_29.503.h"
 #include "smf_context.hpp"
-#include <thread>
-#include <map>
 
 namespace smf {
 

@@ -27,26 +27,12 @@
   \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
 
-#include "3gpp_29.274.hpp"
-#include "common_defs.h"
-#include "epc.h"
-#include "if.hpp"
-#include "logger.hpp"
-#include "smf_app.hpp"
 #include "smf_config.hpp"
-#include "string.hpp"
-
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
 
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-
-using namespace std;
-using namespace libconfig;
-using namespace smf;
+#include "string.hpp"
 
 // C includes
 #include <arpa/inet.h>
@@ -55,6 +41,20 @@ using namespace smf;
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include "3gpp_29.274.hpp"
+#include "common_defs.h"
+#include "epc.h"
+#include "if.hpp"
+#include "logger.hpp"
+#include "smf_app.hpp"
+
+using namespace std;
+using namespace libconfig;
+using namespace smf;
 
 extern smf_app *smf_app_inst;
 extern smf_config smf_cfg;

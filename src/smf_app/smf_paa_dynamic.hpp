@@ -29,10 +29,10 @@
 #ifndef FILE_SMF_PAA_DYNAMIC_HPP_SEEN
 #define FILE_SMF_PAA_DYNAMIC_HPP_SEEN
 
-#include "logger.hpp"
-
 #include <map>
 #include <bitset>
+
+#include "logger.hpp"
 
 class ipv6_pool {
 public:
