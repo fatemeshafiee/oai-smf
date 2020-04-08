@@ -29,13 +29,14 @@
 #ifndef FILE_SMF_N11_HPP_SEEN
 #define FILE_SMF_N11_HPP_SEEN
 
+#include <thread>
+#include <map>
+
 #include "smf.h"
 #include "3gpp_29.503.h"
 #include "smf_context.hpp"
 #include "SmContextCreatedData.h"
 #include "SmContextUpdateError.h"
-#include <thread>
-#include <map>
 
 namespace smf {
 
@@ -50,12 +51,37 @@ public:
   smf_n11();
   smf_n11(smf_n11 const&)    = delete;
   void operator=(smf_n11 const&)     = delete;
-  void send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
-  void send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res);
-  void send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_modify_session_request_smf_requested> sm_context_mod);
-  void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code);
-  //void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code, std::string& n1_sm_msg );
 
+  /*
+   * Send N1N2 Message Transfer Request to AMF
+   * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res: Content of message to be sent
+   *
+   */
+  void send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
+
+  /*
+   * Send update session response to AMF
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res] sm_context_res
+   *
+   */
+
+  void send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res);
+
+  /*
+   * Send N1N2 Message Transfer Request to AMF
+   * @param [std::shared_ptr<itti_n11_modify_session_request_smf_requested>] sm_context_mod: Content of message to be sent
+   *
+   */
+  void send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_modify_session_request_smf_requested> sm_context_mod);
+
+  /*
+   * Send update session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [ oai::smf_server::model::SmContextUpdateError] SmContextUpdateError
+   * @param [Pistache::Http::Code] code, response code
+   *
+   */
+  void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code);
 
   /*
    * Send create session response to AMF
@@ -86,8 +112,6 @@ public:
     */
    void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code, std::string& n1_sm_msg );
 
-
-
   /*
    * Send create session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
@@ -97,9 +121,29 @@ public:
    */
   void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreatedData& smContextCreatedData, Pistache::Http::Code code);
 
+  /*
+   * Create HTTP body content for multipart/related message
+   * @param [std::string] body: Body of the created message
+   * @param [std::string] json_part: Json part of multipart/related msg
+   * @param [std::string] boundary: Boundary of multipart/related msg
+   * @param [std::string] n1_message: N1 (NAS) part
+   * @param [std::string] n2_message: N2 (NGAP) part
+   *
+   */
+  void create_multipart_related_content(std::string& body, std::string& json_part, std::string& boundary, std::string& n1_message, std::string& n2_message);
+
+  /*
+   * Create HTTP body content for multipart/related message
+   * @param [std::string] body: Body of the created message
+   * @param [std::string] json_part: Json part of multipart/related msg
+   * @param [std::string] boundary: Boundary of multipart/related msg
+   * @param [std::string] message: N1 (NAS) or N2 (NGAP) part
+   * @param [uint8_t] content_type: 1 for NAS content, else NGAP content
+   *
+   */
+  void create_multipart_related_content(std::string& body, std::string& json_part, std::string& boundary, std::string& message, multipart_related_content_part_e content_type);
 
 };
-
 
 }
 #endif /* FILE_SMF_N11_HPP_SEEN */
