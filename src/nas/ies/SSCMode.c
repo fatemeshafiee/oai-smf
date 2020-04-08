@@ -19,6 +19,7 @@ int encode_ssc_mode ( SSCMode sscmode, uint8_t iei, uint8_t * buffer, uint32_t l
   bitStream |= (sscmode.ssc_mode_value & 0x07);
   ENCODE_U8(buffer+encoded,bitStream,encoded);
 
+
   return encoded;
 }
 

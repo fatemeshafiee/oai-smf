@@ -34,7 +34,7 @@
 #define TEST_MAC_ENCRYPT_DECRYPT__	0
 
 
-#define NAS_MESSAGE_SECURITY_HEADER_SIZE    7  //7*8bits
+#define NAS_MESSAGE_SECURITY_HEADER_SIZE    7
 
 /*********************************************************/
 /************************* 9.1 24501**********************/
@@ -52,7 +52,7 @@ typedef struct nas_message_security_header_s {
 #endif
   uint32_t message_authentication_code;
   uint8_t sequence_number;
-} nas_message_security_header_t;
+} __attribute__((__packed__)) nas_message_security_header_t;
 
 /* Structure of plain NAS message */
 typedef union {

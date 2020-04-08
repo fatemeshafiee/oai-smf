@@ -205,12 +205,15 @@ int encode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
   if((encoded_result = encode__pdu_session_type (pdu_session_establishment_accept->_pdusessiontype, 0, buffer+encoded,len-encoded))<0)
     return encoded_result;
   else
-    encoded+=encoded_result;
+    encoded += encoded_result;
+  //TODO: In Wireshark Version 3.2.2 (Git commit a3efece3d640), SSC Mode (4 bit) + PDU sessiion type (4 bit) = 1 byte,
+  //so disable encode SSC Mode for the moment, Should be verified later
 
-  if((encoded_result = encode_ssc_mode (pdu_session_establishment_accept->sscmode, 0, buffer+encoded,len-encoded))<0)
+/*  if((encoded_result = encode_ssc_mode (pdu_session_establishment_accept->sscmode, 0, buffer+encoded,len-encoded))<0)
     return encoded_result;
   else
     encoded+=encoded_result;
+*/
 
   if((encoded_result = encode_qos_rules (pdu_session_establishment_accept->qosrules, 0, buffer+encoded,len-encoded))<0)
     return encoded_result;
@@ -261,15 +264,15 @@ int encode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
     else
       encoded+=encoded_result;
   }
-
-  /*if((pdu_session_establishment_accept->presence & PDU_SESSION_ESTABLISHMENT_ACCEPT_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE) == PDU_SESSION_ESTABLISHMENT_ACCEPT_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE)
+/*
+  if((pdu_session_establishment_accept->presence & PDU_SESSION_ESTABLISHMENT_ACCEPT_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE) == PDU_SESSION_ESTABLISHMENT_ACCEPT_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE)
     {
 	    if((encoded_result = encode_mapped_eps_bearer_contexts (pdu_session_establishment_accept->mappedepsbearercontexts, PDU_SESSION_ESTABLISHMENT_ACCEPT_MAPPED_EPS_BEARER_CONTEXTS_IEI, buffer+encoded,len-encoded))<0)
 	        return encoded_result;
 	    else
 	        encoded+=encoded_result;
-	}*/
-
+	}
+*/
   if((pdu_session_establishment_accept->presence & PDU_SESSION_ESTABLISHMENT_ACCEPT_EAP_MESSAGE_PRESENCE) == PDU_SESSION_ESTABLISHMENT_ACCEPT_EAP_MESSAGE_PRESENCE)
   {
     if((encoded_result = encode_eap_message (pdu_session_establishment_accept->eapmessage, PDU_SESSION_ESTABLISHMENT_ACCEPT_EAP_MESSAGE_IEI, buffer+encoded,len-encoded))<0)
@@ -291,15 +294,15 @@ int encode_pdu_session_establishment_accept( pdu_session_establishment_accept_ms
     if((encoded_result = encode_extended_protocol_configuration_options (pdu_session_establishment_accept->extendedprotocolconfigurationoptions, PDU_SESSION_ESTABLISHMENT_ACCEPT_E_P_C_O_IEI, buffer+encoded,len-encoded))<0)
       return encoded_result;
     else
-      encoded+=encoded_result;
+      encoded += encoded_result;
   }
 
   if((pdu_session_establishment_accept->presence & PDU_SESSION_ESTABLISHMENT_ACCEPT_DNN_PRESENCE) == PDU_SESSION_ESTABLISHMENT_ACCEPT_DNN_PRESENCE)
   {
-    if((encoded_result = encode_dnn (pdu_session_establishment_accept->dnn, PDU_SESSION_ESTABLISHMENT_ACCEPT_DNN_IEI, buffer+encoded,len-encoded))<0)
+    if((encoded_result = encode_dnn (pdu_session_establishment_accept->dnn, PDU_SESSION_ESTABLISHMENT_ACCEPT_DNN_IEI, buffer + encoded, len - encoded))<0)
       return encoded_result;
     else
-      encoded+=encoded_result;
+      encoded += encoded_result;
   }
 
 

@@ -8,36 +8,45 @@
 
 int encode_qos_rules ( QOSRules qosrules, uint8_t iei, uint8_t * buffer, uint32_t len  ) 
 {
-  uint8_t *lenqosrule = NULL;
-  uint8_t lenmoment = 0;
+  uint8_t *len_qosrule = NULL;
+  uint8_t *len_qosrulesie = NULL;
+  uint8_t len_pos_qos_rule = 0;
   uint8_t bitstream = 0;
   uint16_t lenqosrule_16 = 0;
   uint32_t encoded = 0;
   int encode_result = 0;
   int i = 0,j = 0;
+  uint32_t temp = 0;
 
   CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer,((iei > 0) ? QOS_RULES_MINIMUM_LENGTH_TLVE : QOS_RULES_MINIMUM_LENGTH_LVE), len);
 
 
   if( iei > 0 )
   {
-    *buffer=iei;
+    *buffer = iei;
     encoded++;
   }
 
+
+  len_qosrulesie = buffer + encoded;
+  encoded += 2; //ENCODE_U16(buffer + encoded, qosrules.lengthofqosrulesie, encoded);
+  uint8_t len_pos_qos_rulesie = encoded;
+/*
   *(buffer + encoded) = qosrules.lengthofqosrulesie/(1<<8);
   encoded++;
+
   *(buffer + encoded) = qosrules.lengthofqosrulesie%(1<<8);
   encoded++;
+*/
 
-  for(i=0;i<qosrules.lengthofqosrulesie;i++)
+  for(i = 0; i < qosrules.lengthofqosrulesie; i++)
   {
-    ENCODE_U8(buffer+encoded,qosrules.qosrulesie[i].qosruleidentifer,encoded);
+    ENCODE_U8(buffer + encoded, qosrules.qosrulesie[i].qosruleidentifer, encoded);
 
-    lenqosrule = buffer + encoded;
+    len_qosrule = buffer + encoded;
     encoded++;
     encoded++;
-    lenmoment = encoded;
+    len_pos_qos_rule = encoded;
 
     bitstream = (uint8_t)(qosrules.qosrulesie[i].ruleoperationcode << 5);
     bitstream |= (uint8_t)(qosrules.qosrulesie[i].dqrbit << 4);
@@ -46,23 +55,23 @@ int encode_qos_rules ( QOSRules qosrules, uint8_t iei, uint8_t * buffer, uint32_
 
     if((bitstream >> 5) == MODIFY_EXISTING_QOS_RULE_AND_DELETE_PACKET_FILTERS)
     {
-      for(j = 0;j < (bitstream & 0x0f);j++)
+      for(j = 0; j < (bitstream & 0x0f); j++)
       {
-        ENCODE_U8(buffer+encoded,(uint8_t)qosrules.qosrulesie[i].packetfilterlist.modifyanddelete[j].packetfilteridentifier,encoded);
+        ENCODE_U8(buffer + encoded, (uint8_t)qosrules.qosrulesie[i].packetfilterlist.modifyanddelete[j].packetfilteridentifier, encoded);
       }
-      ENCODE_U8(buffer+encoded,qosrules.qosrulesie[i].qosruleprecedence,encoded);
-      ENCODE_U8(buffer+encoded,(uint8_t)((qosrules.qosrulesie[i].segregation<<6) | (qosrules.qosrulesie[i].qosflowidentifer & 0x3f)),encoded);
+      ENCODE_U8(buffer + encoded, qosrules.qosrulesie[i].qosruleprecedence, encoded);
+      ENCODE_U8(buffer + encoded, (uint8_t)((qosrules.qosrulesie[i].segregation<<6) | (qosrules.qosrulesie[i].qosflowidentifer & 0x3f)), encoded);
     }
     else if(((bitstream >> 5) == CREATE_NEW_QOS_RULE) || ((bitstream >> 5) == MODIFY_EXISTING_QOS_RULE_AND_ADD_PACKET_FILTERS) || ((bitstream >> 5) == MODIFY_EXISTING_QOS_RULE_AND_REPLACE_ALL_PACKET_FILTERS))
     {
-      for(j = 0;j < (bitstream & 0x0f);j++)
+      for(j = 0; j < (bitstream & 0x0f); j++)
       {
-        ENCODE_U8(buffer+encoded,(uint8_t)((qosrules.qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace[j].packetfilterdirection << 4)|(qosrules.qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace[j].packetfilteridentifier & 0x0f)),encoded);
+        ENCODE_U8(buffer + encoded, (uint8_t)((qosrules.qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace[j].packetfilterdirection << 4)|(qosrules.qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace[j].packetfilteridentifier & 0x0f)),encoded);
 
-        uint8_t *lenghtofpacketfiltercontents = buffer + encoded;
+        uint8_t *len_packetfiltercontents = buffer + encoded;
         encoded++;
 
-        ENCODE_U8(buffer+encoded,qosrules.qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace[j].packetfiltercontents.component_type,encoded);
+        ENCODE_U8(buffer + encoded, qosrules.qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace[j].packetfiltercontents.component_type, encoded);
 
         if(qosrules.qosrulesie[i].packetfilterlist.create_modifyandadd_modifyandreplace[j].packetfiltercontents.component_type != QOS_RULE_MATCHALL_TYPE)
         {
@@ -72,17 +81,18 @@ int encode_qos_rules ( QOSRules qosrules, uint8_t iei, uint8_t * buffer, uint32_
             encoded += encode_result;
         }
 
-        *lenghtofpacketfiltercontents = encode_result+1;
+        *len_packetfiltercontents = encode_result+1;
       }
-      ENCODE_U8(buffer+encoded,qosrules.qosrulesie[i].qosruleprecedence,encoded);
-      ENCODE_U8(buffer+encoded,(uint8_t)((qosrules.qosrulesie[i].segregation<<6) | (qosrules.qosrulesie[i].qosflowidentifer & 0x3f)),encoded);
+      ENCODE_U8(buffer + encoded, qosrules.qosrulesie[i].qosruleprecedence, encoded);
+      ENCODE_U8(buffer + encoded, (uint8_t)((qosrules.qosrulesie[i].segregation<<6) | (qosrules.qosrulesie[i].qosflowidentifer & 0x3f)), encoded);
     }
-    lenqosrule_16 = encoded - lenmoment;
-    *lenqosrule = lenqosrule_16/(1<<8);
-    lenqosrule++;
-    *lenqosrule = lenqosrule_16%(1<<8);
+
+    //len of qos rule
+    ENCODE_U16(len_qosrule, encoded - len_pos_qos_rule, temp);
   }
 
+  //len of qos rule ie
+  ENCODE_U16(len_qosrulesie, encoded - len_pos_qos_rulesie, temp);
   return encoded;
 }
 

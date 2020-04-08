@@ -18,7 +18,7 @@ int encode__pdu_session_type ( _PDUSessionType _pdusessiontype, uint8_t iei, uin
     }
 
     bitStream |= (_pdusessiontype.pdu_session_type_value & 0x07);
-    ENCODE_U8(buffer+encoded,bitStream,encoded);
+    ENCODE_U8(buffer + encoded, bitStream, encoded);
 
     return encoded;
 }

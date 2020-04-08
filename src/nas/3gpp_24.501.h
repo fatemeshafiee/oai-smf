@@ -19,6 +19,14 @@
  *      contact@openairinterface.org
  */
 
+/*
+ *  This file contains NAS header bits format
+ *  Refer TS24.007 TS24.501
+ *  Auther: Puzyu Dukl
+ *  Time:
+ *  Email:
+ */
+
 #ifndef FILE_3GPP_24_501_H_SEEN
 #define FILE_3GPP_24_501_H_SEEN
 #ifdef __cplusplus
@@ -31,14 +39,6 @@ extern "C" {
 #define SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED     0b0010
 #define SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_NEW          0b0011
 #define SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED_NEW 0b0100
-
-/*
- *  This file contains NAS header bits format
- *  Refer TS24.007 TS24.501
- *  Auther: Puzyu Dukl
- *  Time:
- *  Email: hr@
- */
 
 /*Extended Protocol Discriminator (EPD)*/
 
@@ -55,13 +55,11 @@ extern "C" {
 #define IntegrityProtectedWithNew5GNASSecurityContext               0b0011
 #define IntegrityProtectedAndCipheredWithNew5GNASSecurityContext    0b0100
 
-#define SpareHalfOctet                                              0b0000 /*填充用*/
+#define SpareHalfOctet                                              0b0000
 
 /* Message Type for Mobility Management */
 
-// 0b01******
 /* 5GS Mobility Management Messages */
-
 #define REGISTRATION_REQUEST                    0b01000001
 #define REGISTRATION_ACCEPT                     0b01000010
 #define REGISTRATION_COMPLETE                   0b01000011
@@ -96,7 +94,6 @@ extern "C" {
 
 /* Message Type for Session Management */
 
-//0b11******
 //5GS Session Management Messages
 //TODO should be updated with enum
 #define PDU_SESSION_MESSAGE_TYPE_UNKNOWN        0b00000000
@@ -136,7 +133,6 @@ enum request_type_e {
 
 /*
  * Message Authentication Code
- * 木得定义
  * The message authentication code (MAC) information element contains
  * the integrity protection information for the message.
  */
@@ -177,7 +173,7 @@ enum request_type_e {
  * 5GMM cause types
  */
 
-#define IIEGAL_UE                         	0b00000011 
+#define IIEGAL_UE                             	0b00000011
 #define PEI_NOT_ACCEPTED                        0b00000101
 #define IIEGAL_ME                               0b00000110
 #define FGS_SERVICES_NOT_ALLOWED                0b00000111

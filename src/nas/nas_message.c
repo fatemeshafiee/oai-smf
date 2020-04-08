@@ -100,24 +100,21 @@ static uint32_t _nas_message_get_mac (
     int const direction,
     fivegmm_security_context_t * const fivegmm_security_context);
 
-
-
-
 /****************************************************************************
  **                                                                        **
- ** Name:  nas_message_encode()                                      **
+ ** Name:  nas_message_encode()                                            **
  **                                                                        **
  ** Description: Encode layer 3 NAS message                                **
  **                                                                        **
- ** Inputs   msg:   L3 NAS message structure to encode         **
- **    length:  Maximal capacity of the output buffer      **
- **    Others:  None                                       **
+ **    Inputs   msg:   L3 NAS message structure to encode                  **
+ **    length:  Maximal capacity of the output buffer                      **
+ **    Others:  None                                                       **
  **                                                                        **
- ** Outputs:   buffer:  Pointer to the encoded data buffer         **
- **      Return:  The number of bytes in the buffer if the   **
- **       data have been successfully encoded;       **
- **       A negative error code otherwise.           **
- **    Others:  None                                       **
+ **    Outputs: buffer:  Pointer to the encoded data buffer                **
+ **    Return:  The number of bytes in the buffer if the                   **
+ **             data have been successfully encoded;                       **
+ **             A negative error code otherwise.                           **
+ **    Others:  None                                                       **
  **                                                                        **
  ***************************************************************************/
 int nas_message_encode (
@@ -244,18 +241,13 @@ int nas_message_decode (
   }
   size  = _nas_message_header_decode (buffer, &msg->header, length, status, &is_sr);
   //OAILOG_DEBUG(LOG_NAS, "return header size(%d)\n",size);
-  //printf("Msg header, extended_protocol_discriminator 0x%x\n", (&msg->header)->extended_protocol_discriminator);
-  //printf("Msg header, security_header_type:0x%x\n", (&msg->header)->security_header_type);
-  //printf("Msg header, sequence_number:0x%x\n", (&msg->header)->sequence_number);
-  //printf("Msg header, message_authentication_code:0x%x\n", msg->header.message_authentication_code);
   //OAILOG_DEBUG (LOG_NAS, "_nas_message_header_decode returned size %d\n", size);
 
   if (size < 0) {
     return TLV_BUFFER_TOO_SHORT;
     //OAILOG_FUNC_RETURN (LOG_NAS, TLV_BUFFER_TOO_SHORT);
   }
-  //if (size > 2) {
-  if(0){ //TODO:hardcoded to decode NAS plain message 
+  if (size > 1) {
     // found security header
     /*
      * Compute offset of the sequence number field
@@ -325,16 +317,10 @@ int nas_message_decode (
     //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
   }
 
-  if (size > 1) {
-    //return size+bytes;
-    //OAILOG_FUNC_RETURN (LOG_NAS, size + bytes);
-  }
   //return bytes;
   //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
   return RETURNok;
 }
-
-
 
 /****************************************************************************/
 /*********************  L O C A L    F U N C T I O N S  *********************/
@@ -342,21 +328,21 @@ int nas_message_decode (
 
 /****************************************************************************
  **                                                                        **
- ** Name:  _nas_message_header_encode()                              **
+ ** Name:  _nas_message_header_encode()                                    **
  **                                                                        **
  ** Description: Encode header of a security protected NAS message         **
  **                                                                        **
- ** Inputs   header:  Security header structure to encode        **
- **    length:  Maximal capacity of the output buffer      **
- **    Others:  None                                       **
+ ** Inputs   header:  Security header structure to encode                  **
+ **          length:  Maximal capacity of the output buffer                **
+ **          Others:  None                                                 **
  **                                                                        **
- ** Outputs:   buffer:  Pointer to the encoded data buffer         **
- **      Return:  The number of bytes in the buffer if the   **
- **       data have been successfully encoded;       **
- **       1, if the header is not a security header  **
- **       (header of plain NAS message);             **
- **       -1 otherwise.                              **
- **    Others:  None                                       **
+ ** Outputs:   buffer:  Pointer to the encoded data buffer                 **
+ **            Return:  The number of bytes in the buffer if the           **
+ **                     data have been successfully encoded;               **
+ **                     1, if the header is not a security header          **
+ **                     (header of plain NAS message);                     **
+ **                     -1 otherwise.                                      **
+ **            Others:  None                                               **
  **                                                                        **
  ***************************************************************************/
 static int _nas_message_header_encode (
@@ -372,18 +358,15 @@ static int _nas_message_header_encode (
    * * * * identity, and protocol discriminator)
    */
   //ENCODE_U8 (buffer, *(uint8_t *) (header), size);
-  ENCODE_U8 (buffer,header->extended_protocol_discriminator,size);
+  ENCODE_U8 (buffer, header->extended_protocol_discriminator, size);
 
   //Security header type associated with a spare half octet;
-  ENCODE_U8 (buffer+size, *((uint8_t *) (header)+1),size);
+  ENCODE_U8 (buffer+size, *((uint8_t *)(header) + 1), size);
   //ENCODE_U8 (buffer+size,header->security_header_type,size);
-  printf("extended_protocol_discriminator %d, security_header_type %d \n",header->extended_protocol_discriminator, header->security_header_type);
+  printf("extended_protocol_discriminator %d, security_header_type %d \n", header->extended_protocol_discriminator, header->security_header_type);
 
-  //printf("encoded nas security header type: %x\n",buffer[size-1]);
-  //printf("encoded nas security header type: %x\n",header->security_header_type);
-
-  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES ||
-      header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
+//      header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     if (header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED) {
       printf("security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED\n");
       if (length < NAS_MESSAGE_SECURITY_HEADER_SIZE) {
@@ -459,7 +442,6 @@ static int _nas_message_protected_encode (
           SECU_DIRECTION_DOWNLINK,
 #endif
           size, fivegmm_security_context);
-      //printf("_nas_message_encrypt, bytes: %d\n",bytes);
     }
 
     free_wrapper ((void**) &plain_msg);
@@ -470,21 +452,20 @@ static int _nas_message_protected_encode (
 
 /****************************************************************************
  **                                                                        **
- ** Name:  _nas_message_plain_encode()                               **
+ ** Name:  _nas_message_plain_encode()                                     **
  **                                                                        **
  ** Description: Encode plain NAS message                                  **
  **                                                                        **
- ** Inputs:  pd:    Protocol discriminator of the NAS message  **
- **       to encode                                  **
- **      msg:   Plain NAS message structure to encode      **
- **    length:  Maximal capacity of the output buffer      **
- **    Others:  None                                       **
+ ** Inputs:  Header:  Header of the NAS message to be encoded              **
+ **          Msg:     Plain NAS message structure to encode                **
+ **          length:  Maximal capacity of the output buffer                **
+ **          Others:  None                                                 **
  **                                                                        **
- ** Outputs:   buffer:  Pointer to the encoded data buffer         **
- **      Return:  The number of bytes in the buffer if the   **
- **       data have been successfully encoded;       **
- **       A negative error code otherwise.           **
- **    Others:  None                                       **
+ ** Outputs: Buffer:  Pointer to the encoded data buffer                   **
+ **          Return:  The number of bytes in the buffer if the             **
+ **                   data have been successfully encoded;                 **
+ **                   A negative error code otherwise.                     **
+ **          Others:  None                                                 **
  **                                                                        **
  ***************************************************************************/
 static int _nas_message_plain_encode (
@@ -650,22 +631,20 @@ static int _nas_message_encrypt (
 
 /****************************************************************************
  **                                                                        **
- ** Name:  _nas_message_get_mac()                                        **
+ ** Name:  _nas_message_get_mac()                                          **
  **                                                                        **
  ** Description: Run integrity algorithm onto cyphered or uncyphered NAS   **
- **    message encoded in the input buffer and return the compu-         **
- **    ted message authentication code                                   **
+ **    message encoded in the input buffer and return the computed         **
+ **    message authentication code                                         **
  **                                                                        **
- ** Inputs   buffer:  Pointer to the integrity protected data            **
- **       buffer                                                     **
- **    count:   Value of the uplink NAS counter                        **
- **    length:  Length of the input buffer                             **
- **      direction                                                         **
- **    Others:  None                                                   **
+ ** Inputs   buffer:  Pointer to the integrity protected data buffer       **
+ **          length:  Length of the input buffer                           **
+ **          direction                                                     **
+ **          Others:  None                                                 **
  **                                                                        **
- ** Outputs:   None                                                      **
- **      Return:  The message authentication code                    **
- **    Others:  None                                                   **
+ ** Outputs: None                                                          **
+ **          Return:  The message authentication code                      **
+ **          Others:  None                                                 **
  **                                                                        **
  ***************************************************************************/
 static uint32_t _nas_message_get_mac (
@@ -781,11 +760,12 @@ static int _nas_message_header_decode (
    * Decode the first octet of the header 
    */
   DECODE_U8 (buffer, header->extended_protocol_discriminator , size);
-  DECODE_U8 (buffer + size, header->security_header_type , size);
+
   //OAILOG_DEBUG(LOG_NAS,"security header type(%x)\n",header->security_header_type&0x0f);
   *is_sr = false;
-  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES ||
-      header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES){
+    DECODE_U8 (buffer + size, header->security_header_type , size);
+  //    header->extended_protocol_discriminator == EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     if (header->security_header_type != SECURITY_HEADER_TYPE_NOT_PROTECTED) {
       if (status) {
         switch (header->security_header_type) {
@@ -894,16 +874,10 @@ static int _nas_message_decrypt (
   case SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_NEW:
     //OAILOG_DEBUG (LOG_NAS, "No decryption of message length %lu according to security header type 0x%02x\n", length, security_header_type);
     memcpy (dest, src, length);
-    //DECODE_U8 (dest, *(uint8_t *) (&header), size);
-    //DECODE_U8(dest,header.extended_protocol_discriminator,size);
-    //DECODE_U8(dest+size,header.security_header_type,size);
-    //OAILOG_FUNC_RETURN (LOG_NAS, header.extended_protocol_discriminator);
-    //LOG_FUNC_RETURN (LOG_NAS, length);
     break;
 
   case SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED:
   case SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED_NEW:
-    //printf("SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED or SECURITY_HEADER_TYPE_INTEGRITY_PROTECTED_CYPHERED_NEW\n");
     if ( fivegmm_security_context) {
       switch (fivegmm_security_context->selected_algorithms.encryption) {
       case NAS_SECURITY_ALGORITHMS_NEA1:{

@@ -54,7 +54,7 @@ typedef struct subscribed_default_qos_s{
 
 enum reflective_qos_attribute_e{
   RQOS = 1,
-  NO_RQOS =2
+  NO_RQOS = 2
 };
 
 static const std::vector<std::string> reflective_qos_attribute_e2str = {"ERROR", "RQOS", "NO_RQOS"};

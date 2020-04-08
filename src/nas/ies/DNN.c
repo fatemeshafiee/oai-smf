@@ -9,25 +9,28 @@
 int encode_dnn ( DNN dnn, uint8_t iei, uint8_t * buffer, uint32_t len  ) 
 {
   uint8_t *lenPtr = NULL;
+  uint8_t len_pos = 0;
   uint32_t encoded = 0;
   int encode_result = 0;
   CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer,((iei > 0) ? DNN_MINIMUM_LENGTH_TLV : DNN_MINIMUM_LENGTH_TLV-1) , len);
 
-  if( iei > 0 )
+  if(iei > 0 )
   {
-    *buffer=iei;
+    *buffer = iei;
     encoded++;
   }
 
   lenPtr = (buffer + encoded);
-  encoded++;
+  encoded++; //ENCODE_U8(buffer + encoded, dnn.length, encoded);
+  len_pos = encoded;
 
-  if ((encode_result = encode_bstring (dnn, buffer + encoded, len - encoded)) < 0)//加密,实体,首地址,长度
+  if ((encode_result = encode_bstring (dnn, buffer + encoded, len - encoded)) < 0)
     return encode_result;
   else
     encoded += encode_result;
 
-  *lenPtr = encoded - 1 - ((iei > 0) ? 1 : 0);
+  //set length
+  *(uint8_t*)(lenPtr) = encoded - len_pos;
 
   return encoded;
 }
