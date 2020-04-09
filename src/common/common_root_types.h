@@ -56,6 +56,15 @@ typedef uint64_t                 seid_t;
 #define INVALID_SEID             ((seid_t)0x00000000)
 #define UNASSIGNED_SEID          ((seid_t)0x00000000)
 
+
+// SM Context IDs (SCIDs)
+typedef uint32_t                 scid_t;
+#define SCID_FMT                 "0x%" PRIx32
+#define SCID_SCAN_FMT            SCNx32
+#define INVALID_SCID             ((scid_t)0x00000000)
+#define UNASSIGNED_SCID          ((scid_t)0x00000000)
+
+
 //------------------------------------------------------------------------------
 // IMSI
 typedef uint64_t                 imsi64_t;

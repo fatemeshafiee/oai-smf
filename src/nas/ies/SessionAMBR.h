@@ -43,10 +43,11 @@
 
 //typedef bstring SessionAMBR;
 typedef struct{
-	uint8_t uint_for_session_ambr_for_downlink;
-	uint16_t session_ambr_for_downlink;
-	uint8_t uint_for_session_ambr_for_uplink;
-	uint16_t session_ambr_for_uplink;
+  uint8_t length;
+  uint8_t uint_for_session_ambr_for_downlink;
+  uint16_t session_ambr_for_downlink;
+  uint8_t uint_for_session_ambr_for_uplink;
+  uint16_t session_ambr_for_uplink;
 }SessionAMBR;
 
 

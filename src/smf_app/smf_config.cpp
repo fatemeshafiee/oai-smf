@@ -21,31 +21,18 @@
 
 /*! \file smf_config.cpp
   \brief
-  \author Lionel Gauthier
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
   \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
+ */
 
-#include "3gpp_29.274.hpp"
-#include "common_defs.h"
-#include "epc.h"
-#include "if.hpp"
-#include "logger.hpp"
-#include "smf_app.hpp"
 #include "smf_config.hpp"
-#include "string.hpp"
-
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
 
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-
-using namespace std;
-using namespace libconfig;
-using namespace smf;
+#include "string.hpp"
 
 // C includes
 #include <arpa/inet.h>
@@ -54,6 +41,20 @@ using namespace smf;
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include "3gpp_29.274.hpp"
+#include "common_defs.h"
+#include "epc.h"
+#include "if.hpp"
+#include "logger.hpp"
+#include "smf_app.hpp"
+
+using namespace std;
+using namespace libconfig;
+using namespace smf;
 
 extern smf_app *smf_app_inst;
 extern smf_config smf_cfg;
@@ -136,22 +137,15 @@ int smf_config::load_itti(const Setting& itti_cfg, itti_cfg_t& cfg)
   }
 
   try {
-    const Setting& s5s8_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_S5S8_SCHED_PARAMS];
-    load_thread_sched_params(s5s8_sched_params_cfg, cfg.s5s8_sched_params);
+    const Setting& n4_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_N4_SCHED_PARAMS];
+    load_thread_sched_params(n4_sched_params_cfg, cfg.n4_sched_params);
   } catch(const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
-    const Setting& sx_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_SX_SCHED_PARAMS];
-    load_thread_sched_params(sx_sched_params_cfg, cfg.sx_sched_params);
-  } catch(const SettingNotFoundException &nfex) {
-    Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
-  }
-
-  try {
-    const Setting& pgw_app_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_PGW_APP_SCHED_PARAMS];
-    load_thread_sched_params(pgw_app_sched_params_cfg, cfg.pgw_app_sched_params);
+    const Setting& smf_app_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_SMF_APP_SCHED_PARAMS];
+    load_thread_sched_params(smf_app_sched_params_cfg, cfg.smf_app_sched_params);
   } catch(const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
@@ -209,6 +203,24 @@ int smf_config::load_interface(const Setting& if_cfg, interface_cfg_t & cfg)
 }
 
 //------------------------------------------------------------------------------
+int smf_config::load_upf_config(const Setting& if_cfg, test_upf_cfg_t & cfg)
+{
+  std::string is_test = {};
+  if_cfg.lookupValue(SMF_CONFIG_STRING_TEST_UPF_IS_TEST,is_test);
+  util::trim(is_test);
+  if (not boost::iequals(is_test, "none")) {
+  	cfg.is_test   = atoi(is_test.c_str());
+	
+    std::string address = {};
+    if_cfg.lookupValue(SMF_CONFIG_STRING_TEST_UPF_GNB_IPV4_ADDRESS, address);
+    util::trim(address);
+	inet_aton(address.c_str(), &cfg.gnb_addr4);
+  }
+  return RETURNok;
+}
+
+
+//------------------------------------------------------------------------------
 int smf_config::load(const string& config_file)
 {
   Config                 cfg;
@@ -263,9 +275,6 @@ int smf_config::load(const string& config_file)
 
   try {
     const Setting &nw_if_cfg = smf_cfg[SMF_CONFIG_STRING_INTERFACES];
-
-    const Setting& sx_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_SX];
-    load_interface(sx_cfg, sx);
 
     const Setting& n4_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_N4];
     load_interface(n4_cfg, n4);
@@ -375,11 +384,11 @@ int smf_config::load(const string& config_file)
       apn_cfg.lookupValue(SMF_CONFIG_STRING_IPV6_POOL, apn[apn_idx].pool_id_iv6);
 
       if ((0 <= apn[apn_idx].pool_id_iv4) && (apn[apn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV6)) {
-        Logger::smf_app().error("PDN_TYPE versus pool identifier %d 'th APN in config file\n", i+1);
+        Logger::smf_app().error("PDN_TYPE versus pool identifier %d 'th APN in config file", i+1);
         throw ("PDN_TYPE versus pool identifier APN");
       }
       if ((0 <= apn[apn_idx].pool_id_iv6) && (apn[apn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV4)) {
-        Logger::smf_app().error("PDN_TYPE versus pool identifier %d 'th APN in config file\n", i+1);
+        Logger::smf_app().error("PDN_TYPE versus pool identifier %d 'th APN in config file", i+1);
         throw ("PDN_TYPE versus pool identifier APN");
       }
 
@@ -389,7 +398,7 @@ int smf_config::load(const string& config_file)
         for (int j = 0; j < apn_idx; j++) {
           if (boost::iequals(apn[j].apn, apn[apn_idx].apn)) {
             doublon = true;
-            Logger::smf_app().info("%d'th APN %s already found in config file (%d 'th APN %s), bypassing\n", i+1, apn[apn_idx].apn.c_str(), j+1, apn[j].apn.c_str());
+            Logger::smf_app().info("%d'th APN %s already found in config file (%d 'th APN %s), bypassing", i+1, apn[apn_idx].apn.c_str(), j+1, apn[j].apn.c_str());
           }
         }
         if (not doublon) {
@@ -397,7 +406,7 @@ int smf_config::load(const string& config_file)
           num_apn++;
         }
       } else {
-        Logger::smf_app().error("Bypass %d'th APN %s in config file\n", i+1, apn[apn_idx].apn.c_str());
+        Logger::smf_app().error("Bypass %d'th APN %s in config file", i+1, apn[apn_idx].apn.c_str());
       }
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_IPV4_ADDRESS, astring);
@@ -450,8 +459,8 @@ int smf_config::load(const string& config_file)
     IPV4_STR_ADDR_TO_INADDR (util::trim(astring).c_str(), amf_ipv4_addr, "BAD IPv4 ADDRESS FORMAT FOR AMF !");
     amf_addr.ipv4_addr = amf_ipv4_addr;
     if (!(amf_cfg.lookupValue(SMF_CONFIG_STRING_AMF_PORT, amf_port))) {
-          Logger::smf_app().error(SMF_CONFIG_STRING_AMF_PORT "failed");
-          throw (SMF_CONFIG_STRING_AMF_PORT "failed");
+      Logger::smf_app().error(SMF_CONFIG_STRING_AMF_PORT "failed");
+      throw (SMF_CONFIG_STRING_AMF_PORT "failed");
     }
     amf_addr.port = amf_port;
 
@@ -462,12 +471,35 @@ int smf_config::load(const string& config_file)
     IPV4_STR_ADDR_TO_INADDR (util::trim(astring).c_str(), udm_ipv4_addr, "BAD IPv4 ADDRESS FORMAT FOR UDM !");
     udm_addr.ipv4_addr = udm_ipv4_addr;
     if (!(udm_cfg.lookupValue(SMF_CONFIG_STRING_UDM_PORT, udm_port))) {
-          Logger::smf_app().error(SMF_CONFIG_STRING_UDM_PORT "failed");
-          throw (SMF_CONFIG_STRING_UDM_PORT "failed");
+      Logger::smf_app().error(SMF_CONFIG_STRING_UDM_PORT "failed");
+      throw (SMF_CONFIG_STRING_UDM_PORT "failed");
     }
     udm_addr.port = udm_port;
 
 
+    //UPF list
+    unsigned char buf_in_addr[sizeof (struct in_addr)+1];
+    const Setting& upf_list_cfg = smf_cfg[SMF_CONFIG_STRING_UPF_LIST];
+    count = upf_list_cfg.getLength();
+    for (int i = 0; i < count; i++) {
+      const Setting &upf_cfg = upf_list_cfg[i];
+
+      string address = {};
+      if (upf_cfg.lookupValue(SMF_CONFIG_STRING_UPF_IPV4_ADDRESS, address)) {
+        pfcp::node_id_t n = {};
+        n.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS; // actually
+        if (inet_pton (AF_INET, util::trim(address).c_str(), buf_in_addr) == 1) {
+          memcpy (&n.u1.ipv4_address, buf_in_addr, sizeof (struct in_addr));
+        } else {
+          Logger::smf_app().error("CONFIG: BAD IPV4 ADDRESS in " SMF_CONFIG_STRING_UPF_LIST " item %d", i);
+          throw ("CONFIG: BAD ADDRESS in " SMF_CONFIG_STRING_UPF_LIST);
+        }
+        upfs.push_back(n);
+      } else {
+        // TODO IPV6_ADDRESS, FQDN
+        throw ("Bad value in section %s : item no %d in config file %s", SMF_CONFIG_STRING_UPF_LIST, i, config_file.c_str());
+      }
+    }
   }
   catch(const SettingNotFoundException &nfex)
   {
@@ -481,14 +513,9 @@ int smf_config::load(const string& config_file)
 void smf_config::display ()
 {
   Logger::smf_app().info( "==== EURECOM %s v%s ====", PACKAGE_NAME, PACKAGE_VERSION);
-  Logger::smf_app().info( "Configuration PGW-C:");
+  Logger::smf_app().info( "Configuration SMF:");
   Logger::smf_app().info( "- Instance ..............: %d\n", instance);
   Logger::smf_app().info( "- PID dir ...............: %s\n", pid_dir.c_str());
-
-  Logger::smf_app().info( "- SX Networking:");
-  Logger::smf_app().info( "    iface ................: %s", sx.if_name.c_str());
-  Logger::smf_app().info( "    ip ...................: %s", inet_ntoa (sx.addr4));
-  Logger::smf_app().info( "    port .................: %d", sx.port);
 
   Logger::smf_app().info( "- N4 Networking:");
   Logger::smf_app().info( "    iface ................: %s", n4.if_name.c_str());
@@ -500,12 +527,6 @@ void smf_config::display ()
   Logger::smf_app().info( "    ip ...................: %s", inet_ntoa (n11.addr4));
   Logger::smf_app().info( "    port .................: %d", n11.port);
 
-
-  Logger::smf_app().info( "- SX Threading:");
-  Logger::smf_app().info( "    CPU id............: %d", sx.thread_rd_sched_params.cpu_id);
-  Logger::smf_app().info( "    Scheduling policy : %d", sx.thread_rd_sched_params.sched_policy);
-  Logger::smf_app().info( "    Scheduling prio  .: %d", sx.thread_rd_sched_params.sched_priority);
-
   Logger::smf_app().info( "- N4 Threading:");
   Logger::smf_app().info( "    CPU id............: %d", n4.thread_rd_sched_params.cpu_id);
   Logger::smf_app().info( "    Scheduling policy : %d", n4.thread_rd_sched_params.sched_policy);
@@ -515,18 +536,14 @@ void smf_config::display ()
   Logger::smf_app().info( "    CPU id............: %d", itti.itti_timer_sched_params.cpu_id);
   Logger::smf_app().info( "    Scheduling policy : %d", itti.itti_timer_sched_params.sched_policy);
   Logger::smf_app().info( "    Scheduling prio  .: %d", itti.itti_timer_sched_params.sched_priority);
-  Logger::smf_app().info( "- ITTI S5S8 Task Threading:");
-  Logger::smf_app().info( "    CPU id............: %d", itti.s5s8_sched_params.cpu_id);
-  Logger::smf_app().info( "    Scheduling policy : %d", itti.s5s8_sched_params.sched_policy);
-  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.s5s8_sched_params.sched_priority);
-  Logger::smf_app().info( "- ITTI Sx Task Threading:");
-  Logger::smf_app().info( "    CPU id............: %d", itti.sx_sched_params.cpu_id);
-  Logger::smf_app().info( "    Scheduling policy : %d", itti.sx_sched_params.sched_policy);
-  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.sx_sched_params.sched_priority);
-  Logger::smf_app().info( "- ITTI PGW_APP task Threading:");
-  Logger::smf_app().info( "    CPU id............: %d", itti.pgw_app_sched_params.cpu_id);
-  Logger::smf_app().info( "    Scheduling policy : %d", itti.pgw_app_sched_params.sched_policy);
-  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.pgw_app_sched_params.sched_priority);
+  Logger::smf_app().info( "- ITTI N4 Task Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", itti.n4_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", itti.n4_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.n4_sched_params.sched_priority);
+  Logger::smf_app().info( "- ITTI SMF_APP task Threading:");
+  Logger::smf_app().info( "    CPU id............: %d", itti.smf_app_sched_params.cpu_id);
+  Logger::smf_app().info( "    Scheduling policy : %d", itti.smf_app_sched_params.sched_policy);
+  Logger::smf_app().info( "    Scheduling prio  .: %d", itti.smf_app_sched_params.sched_priority);
   Logger::smf_app().info( "- ITTI ASYNC_CMD task Threading:");
   Logger::smf_app().info( "    CPU id............: %d", itti.async_cmd_sched_params.cpu_id);
   Logger::smf_app().info( "    Scheduling policy : %d", itti.async_cmd_sched_params.sched_policy);
@@ -562,7 +579,7 @@ void smf_config::display ()
       std::string range_low(inet_ntoa (ue_pool_range_low[apn[i].pool_id_iv4]));
       std::string range_high(inet_ntoa (ue_pool_range_high[apn[i].pool_id_iv4]));
       Logger::smf_app().info( "        " SMF_CONFIG_STRING_IPV4_POOL ":  %d ( %s - %s)",
-                               apn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
+          apn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
     }
     if (apn[i].pool_id_iv6 >= 0) {
       Logger::smf_app().info( "        " SMF_CONFIG_STRING_IPV6_POOL ":  %d", apn[i].pool_id_iv6);
@@ -579,6 +596,10 @@ void smf_config::display ()
   Logger::smf_app().info( "    UDM ..........: %s", inet_ntoa (*((struct in_addr *)&udm_addr.ipv4_addr)));
   Logger::smf_app().info( "    UDM Port  ..........: %lu  ", udm_addr.port);
 
+  Logger::smf_app().info( "- UPF support (test upf)");
+  Logger::smf_app().info( "       UPF is test ..........: %lu  ", test_upf_cfg.is_test);
+  Logger::smf_app().info( "       Gnb Address ..........: %s", inet_ntoa (*((struct in_addr *)&test_upf_cfg.gnb_addr4)));
+  
 }
 
 //------------------------------------------------------------------------------
@@ -641,15 +662,24 @@ bool smf_config::is_dotted_dnn_handled(const std::string& dnn, const pdu_session
 {
   Logger::smf_app().debug( "requested dnn: %s", dnn.c_str());
   for (int i = 0; i < smf_cfg.num_apn; i++) {
-	  Logger::smf_app().debug( "apn_label: %s", smf_cfg.apn[i].apn_label.c_str());
+    Logger::smf_app().debug( "apn_label: %s, apn: %s", smf_cfg.apn[i].apn_label.c_str(),smf_cfg.apn[i].apn.c_str() );
     //if (0 == dnn.compare(smf_cfg.apn[i].apn_label)) {
-	  if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
+    if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
+      Logger::smf_app().debug( "DNN matched!");
+      Logger::smf_app().debug( "pdu session type %d, pdn_type %d", pdn_session_type.pdu_session_type, smf_cfg.apn[i].pdn_type.pdn_type);
       if (pdn_session_type.pdu_session_type == smf_cfg.apn[i].pdn_type.pdn_type) {
         return true;
       }
     }
   }
   return false;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_config::get_default_dnn()
+{
+  Logger::smf_app().debug( "Default DNN: %s", smf_cfg.apn[0].apn.c_str());
+  return smf_cfg.apn[0].apn;
 }
 
 

@@ -43,9 +43,15 @@ void N1N2MessageCollectionDocumentApi::n1_n2_message_transfer_handler(const Pist
     std::cout <<"Received a N1N2MessageTrasfer request with ueID " << ueContextId.c_str()<<std::endl;
     
     // Getting the body param
-    
-    N1N2MessageTransferReqData n1N2MessageTransferReqData;
-    
+    //N1N2MessageTransferReqData n1N2MessageTransferReqData;
+    nlohmann::json response_data;
+    response_data["cause"] = "504 Gateway Timeout";
+    response_data.dump().c_str();
+    response.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
+    response.send(Pistache::Http::Code::Ok, response_data.dump().c_str());
+
+
+  /*
     try {
       nlohmann::json::parse(request.body()).get_to(n1N2MessageTransferReqData);
       this->n1_n2_message_transfer(ueContextId, n1N2MessageTransferReqData, response);
@@ -58,6 +64,7 @@ void N1N2MessageCollectionDocumentApi::n1_n2_message_transfer_handler(const Pist
         response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
         return;
     }
+*/
 
 }
 

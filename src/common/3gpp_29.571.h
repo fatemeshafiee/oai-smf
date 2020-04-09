@@ -36,6 +36,7 @@ enum preemtion_capability_e {
 
 static const std::vector<std::string> preemtion_capability_e2str = {"Error", "NOT_PREEMPT", "MAY_PREEMPT"};
 
+//see section 5.5.4.1@TS 29.571
 typedef struct arp_5gc_s {
 	  uint8_t priority_level;// (integer 1-15)
 	  std::string preempt_cap;
@@ -43,11 +44,19 @@ typedef struct arp_5gc_s {
 } arp_5gc_t;
 
 
+//see section 5.4.4.1@TS 29.571
 typedef struct subscribed_default_qos_s{
 	uint8_t _5qi;
 	arp_5gc_t arp;
 	uint8_t priority_level;//1-127
 } subscribed_default_qos_t;
 
+
+enum reflective_qos_attribute_e{
+  RQOS = 1,
+  NO_RQOS = 2
+};
+
+static const std::vector<std::string> reflective_qos_attribute_e2str = {"ERROR", "RQOS", "NO_RQOS"};
 
 #endif

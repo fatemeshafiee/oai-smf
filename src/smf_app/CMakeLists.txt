@@ -21,18 +21,22 @@
 include_directories(${SRC_TOP_DIR}/common)
 include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/utils)
+include_directories(${SRC_TOP_DIR}/common/ngap)
 include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/gtpv2c)
 include_directories(${SRC_TOP_DIR}/pfcp)
 include_directories(${SRC_TOP_DIR}/smf)
+include_directories(${SRC_TOP_DIR}/ngap)
 include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
 
 add_library (SMF STATIC
+  ${SRC_TOP_DIR}/common/ngap/ngap_common.c
   smf_app.cpp
   smf_config.cpp
   smf_context.cpp
+  smf_n1_n2.cpp
   smf_pfcp_association.cpp
   smf_pco.cpp
   smf_procedure.cpp

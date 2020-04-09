@@ -20,19 +20,19 @@
  */
 
 /*! \file smf_paa_dynamic.hpp
-* \brief
-* \author Lionel Gauthier
-* \company Eurecom
-* \email: lionel.gauthier@eurecom.fr
-*/
+ * \brief
+ * \author Lionel Gauthier
+ * \company Eurecom
+ * \email: lionel.gauthier@eurecom.fr
+ */
 
 #ifndef FILE_SMF_PAA_DYNAMIC_HPP_SEEN
 #define FILE_SMF_PAA_DYNAMIC_HPP_SEEN
 
-#include "logger.hpp"
-
 #include <map>
 #include <bitset>
+
+#include "logger.hpp"
 
 class ipv6_pool {
 public:
@@ -307,4 +307,4 @@ public:
 
 };
 
-#endif /* FILE_PGW_PAA_DYNAMIC_HPP_SEEN */
+#endif /* FILE_SMF_PAA_DYNAMIC_HPP_SEEN */

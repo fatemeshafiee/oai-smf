@@ -9,8 +9,9 @@
 
 
 typedef struct{
+  uint8_t spare:5;
   uint8_t ssc_mode_value:3;
-}SSCMode;
+} __attribute__((__packed__)) SSCMode;
 
 
 int encode_ssc_mode ( SSCMode sscmode, uint8_t iei, uint8_t * buffer, uint32_t len  ) ;

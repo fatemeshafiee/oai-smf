@@ -101,5 +101,70 @@ static const std::vector<std::string> pdu_session_application_error_e2str = {
 };
 
 
+//6.1.6.3.12 Enumeration: N2SmInfoType @3GPP TS 29.502 V16.0.0
+enum class n2_sm_info_type_e {
+  PDU_RES_SETUP_REQ       = 1, //PDU Session Resource Setup Request Transfer
+  PDU_RES_SETUP_RSP       = 2, //PDU Session Resource Setup Response Transfer
+  PDU_RES_SETUP_FAIL      = 3, //PDU Session Resource Setup Unsuccessful Transfer
+  PDU_RES_REL_CMD         = 4, //PDU Session Resource Release Command Transfer
+  PDU_RES_REL_RSP         = 5, //PDU Session Resource Release Response Transfer
+  PDU_RES_MOD_REQ         = 6, //PDU Session Resource Modify Request Transfer
+  PDU_RES_MOD_RSP         = 7, //PDU Session Resource Modify Response Transfer
+  PDU_RES_MOD_FAIL        = 8, //PDU Session Resource Modify Unsuccessful Transfer
+  PDU_RES_NTY             = 9, //PDU Session Resource Notify Transfer
+  PDU_RES_NTY_REL         = 10, //PDU Session Resource Notify Released Transfer
+  PDU_RES_MOD_IND         = 11, //PDU Session Resource Modify Indication Transfer
+  PDU_RES_MOD_CFM         = 12, //PDU Session Resource Modify Confirm Transfer
+  PATH_SWITCH_REQ         = 13, //Path Switch Request Transfer
+  PATH_SWITCH_SETUP_FAIL  = 14, //Path Switch Request Setup Failed Transfer
+  PATH_SWITCH_REQ_ACK     = 15, //Path Switch Request Acknowledge Transfer
+  PATH_SWITCH_REQ_FAIL    = 16, //Path Switch Request Unsuccessful Transfer
+  HANDOVER_REQUIRED       = 17, //Handover Required Transfer
+  HANDOVER_CMD            = 18, //Handover Command Transfer
+  HANDOVER_PREP_FAIL      = 19, //Handover Preparation Unsuccessful Transfer
+  HANDOVER_REQ_ACK        = 20, //Handover Request Acknowledge Transfer
+  HANDOVER_RES_ALLOC_FAIL = 21, //Handover Resource Allocation Unsuccessful Transfer
+  SECONDARY_RAT_USAGE     = 22 //Secondary RAT Data Usage Report Transfer
+};
+
+static const std::vector<std::string> n2_sm_info_type_e2str = {
+		"UNKNOWN_TYPE",
+		"PDU_RES_SETUP_REQ",
+		"PDU_RES_SETUP_RSP",
+		"PDU_RES_SETUP_FAIL",
+		"PDU_RES_REL_CMD",
+		"PDU_RES_REL_RSP",
+		"PDU_RES_MOD_REQ",
+		"PDU_RES_MOD_RSP",
+		"PDU_RES_MOD_FAIL",
+		"PDU_RES_NTY",
+		"PDU_RES_NTY_REL",
+		"PDU_RES_MOD_IND",
+		"PDU_RES_MOD_CFM",
+		"PATH_SWITCH_REQ",
+		"PATH_SWITCH_SETUP_FAIL",
+		"PATH_SWITCH_REQ_ACK",
+		"PATH_SWITCH_REQ_FAIL",
+		"HANDOVER_REQUIRED",
+		"HANDOVER_CMD",
+		"HANDOVER_PREP_FAIL",
+		"HANDOVER_REQ_ACK",
+		"HANDOVER_RES_ALLOC_FAIL",
+		"SECONDARY_RAT_USAGE"
+};
+
+enum class upCnx_state_e {
+  UPCNX_STATE_ACTIVATED = 0,
+  UPCNX_STATE_DEACTIVATED  = 1,
+  UPCNX_STATE_ACTIVATING =2
+};
+
+static const std::vector<std::string> upCnx_state_e2str = {
+    "UPCNX_STATE_ACTIVATED",
+    "UPCNX_STATE_DEACTIVATED",
+    "UPCNX_STATE_ACTIVATING"
+};
+
+
 
 #endif

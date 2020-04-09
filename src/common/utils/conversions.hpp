@@ -44,6 +44,13 @@
 #define IPV4_ADDR_DISPLAY_8(aDDRESS)            \
     (aDDRESS)[0], (aDDRESS)[1], (aDDRESS)[2], (aDDRESS)[3]
 
+/* Convert an integer on 32 bits to the given bUFFER */
+#define INT32_TO_BUFFER(x, buf) \
+    (buf)[0] = (x) >> 24,       \
+    (buf)[1] = (x) >> 16,       \
+    (buf)[2] = (x) >> 8,       \
+    (buf)[3] = (x)
+
 
 class conv {
   public:

@@ -52,44 +52,49 @@
 #define QOS_RULE_ETHERTYPE_TYPE								0b10000111
 
 typedef struct{
+  uint8_t spare:4;
 	uint8_t packetfilteridentifier:4;
-}ModifyAndDelete;
+} __attribute__((__packed__)) ModifyAndDelete;
 
 typedef struct{
 	uint8_t component_type;
 	bstring component_value;
 }PacketFilterContents;
+
 typedef struct{
+  uint8_t spare:2;
 	uint8_t packetfilterdirection:2;
 	uint8_t packetfilteridentifier:4;
-	//uint8_t lenghtofpacketfiltercontents;
+	uint8_t lenghtofpacketfiltercontents;
 	PacketFilterContents packetfiltercontents;
 	
-}Create_ModifyAndAdd_ModifyAndReplace;
+}__attribute__((__packed__)) Create_ModifyAndAdd_ModifyAndReplace;
 
 typedef struct{
 	uint8_t qosruleidentifer;
-	//uint16_t LengthofQoSrule;
+	uint16_t LengthofQoSrule;
 	uint8_t ruleoperationcode:3;
 	uint8_t dqrbit:1;
 	uint8_t numberofpacketfilters:4;
 	union {
 		ModifyAndDelete *modifyanddelete;
 		Create_ModifyAndAdd_ModifyAndReplace *create_modifyandadd_modifyandreplace;
-	}packetfilterlist;
+	} packetfilterlist;
 	//uint16_t packetfilterlistnumber;
 	uint8_t qosruleprecedence;
+	uint8_t spare:1;
 	uint8_t segregation:1;
 	uint8_t qosflowidentifer:6;
-}QOSRulesIE;
+}__attribute__((__packed__)) QOSRulesIE;
 
 typedef struct{
 	uint16_t lengthofqosrulesie;
 	QOSRulesIE *qosrulesie;
 }QOSRules;
 
-int encode_qos_rules ( QOSRules qosrules, uint8_t iei, uint8_t * buffer, uint32_t len  ) ;
-int decode_qos_rules ( QOSRules * qosrules, uint8_t iei, uint8_t * buffer, uint32_t len  ) ;
+int encode_qos_rules ( QOSRules qosrules, uint8_t iei, uint8_t * buffer, uint32_t len );
+int decode_qos_rules ( QOSRules * qosrules, uint8_t iei, uint8_t * buffer, uint32_t len);
+void free_decode_qos_rules(QOSRules * qosrules);
 
 void free_decode_qos_rules(QOSRules * qosrules);
 

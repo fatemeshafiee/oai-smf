@@ -97,8 +97,9 @@ public:
     /// <summary>
     /// 
     /// </summary>
-    AccessType getAnType() const;
-    void setAnType(AccessType const& value);
+    //AccessType getAnType() const;
+    std::string getAnType() const;
+    void setAnType(std::string const& value);
     bool anTypeIsSet() const;
     void unsetAnType();
     /// <summary>
@@ -111,8 +112,9 @@ public:
     /// <summary>
     /// 
     /// </summary>
-    RatType getRatType() const;
-    void setRatType(RatType const& value);
+    //RatType getRatType() const;
+    std::string getRatType() const;
+    void setRatType(std::string const& value);
     bool ratTypeIsSet() const;
     void unsetRatType();
     /// <summary>
@@ -146,8 +148,9 @@ public:
     /// <summary>
     /// 
     /// </summary>
-    UpCnxState getUpCnxState() const;
-    void setUpCnxState(UpCnxState const& value);
+    //UpCnxState getUpCnxState() const;
+    std::string getUpCnxState() const;
+    void setUpCnxState(std::string const& value);
     bool upCnxStateIsSet() const;
     void unsetUpCnxState();
     /// <summary>
@@ -188,8 +191,11 @@ public:
     /// <summary>
     /// 
     /// </summary>
-    N2SmInfoType getN2SmInfoType() const;
-    void setN2SmInfoType(N2SmInfoType const& value);
+    //N2SmInfoType getN2SmInfoType() const;
+    //void setN2SmInfoType(N2SmInfoType const& value);
+    std::string getN2SmInfoType() const;
+    void setN2SmInfoType(std::string const& value);
+
     bool n2SmInfoTypeIsSet() const;
     void unsetN2SmInfoType();
     /// <summary>
@@ -330,11 +336,11 @@ protected:
     bool m_ServingNetworkIsSet;
     std::vector<BackupAmfInfo> m_BackupAmfInfo;
     bool m_BackupAmfInfoIsSet;
-    AccessType m_AnType;
+    std::string m_AnType;
     bool m_AnTypeIsSet;
     AccessType m_SecondAnType;
     bool m_SecondAnTypeIsSet;
-    RatType m_RatType;
+    std::string m_RatType;
     bool m_RatTypeIsSet;
     PresenceState m_PresenceInLadn;
     bool m_PresenceInLadnIsSet;
@@ -344,7 +350,8 @@ protected:
     bool m_UeTimeZoneIsSet;
     UserLocation m_AddUeLocation;
     bool m_AddUeLocationIsSet;
-    UpCnxState m_UpCnxState;
+    //UpCnxState m_UpCnxState;
+    std::string m_UpCnxState;
     bool m_UpCnxStateIsSet;
     HoState m_HoState;
     bool m_HoStateIsSet;
@@ -356,7 +363,8 @@ protected:
     bool m_N1SmMsgIsSet;
     RefToBinaryData m_N2SmInfo;
     bool m_N2SmInfoIsSet;
-    N2SmInfoType m_N2SmInfoType;
+    //N2SmInfoType m_N2SmInfoType;
+    std::string m_N2SmInfoType;
     bool m_N2SmInfoTypeIsSet;
     NgRanTargetId m_TargetId;
     bool m_TargetIdIsSet;

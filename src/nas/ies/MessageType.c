@@ -8,17 +8,11 @@
 
 int encode_message_type ( MessageType messagetype, uint8_t iei, uint8_t * buffer, uint32_t len  ) 
 {
-/*
+  /*
     uint8_t *lenPtr;
     uint32_t encoded = 0;
     int encode_result;
     CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer,MESSAGE_TYPE_MINIMUM_LENGTH , len);
-    
-
-
-
-
-
 
     if ((encode_result = encode_bstring (messagetype, buffer + encoded, len - encoded)) < 0)//加密,实体,首地址,长度
         return encode_result;
@@ -27,12 +21,12 @@ int encode_message_type ( MessageType messagetype, uint8_t iei, uint8_t * buffer
 
 
     return encoded;
-*/
+   */
 }
 
 int decode_message_type ( MessageType * messagetype, uint8_t iei, uint8_t * buffer, uint32_t len  ) 
 {
-/*
+  /*
 	int decoded=0;
 	int decode_result;
 
@@ -42,6 +36,6 @@ int decode_message_type ( MessageType * messagetype, uint8_t iei, uint8_t * buff
     else
         decoded += decode_result;
             return decoded;
-*/
+   */
 }
 

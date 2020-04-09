@@ -20,19 +20,20 @@
  */
 
 /*! \file smf_n4.hpp
-   \author  Lionel GAUTHIER
-   \date 2019
-   \email: lionel.gauthier@eurecom.fr
-*/
+  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
+  \company Eurecom
+  \date 2019
+  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
+ */
 
 #ifndef FILE_SMF_N4_HPP_SEEN
 #define FILE_SMF_N4_HPP_SEEN
 
+#include <thread>
+
 #include "itti_msg_n4.hpp"
 #include "pfcp.hpp"
 #include "smf_pfcp_association.hpp"
-
-#include <thread>
 
 namespace smf {
 
@@ -40,7 +41,7 @@ namespace smf {
 #define TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST     (1)
 #define TASK_SMF_N4_TIMEOUT_ASSOCIATION_REQUEST   (2)
 
-class smf_n4  : public pfcp::pfcp_l4_stack {
+class smf_n4 : public pfcp::pfcp_l4_stack {
 private:
   std::thread::id                      thread_id;
   std::thread                          thread;
@@ -86,6 +87,7 @@ public:
   void send_n4_msg (itti_n4_session_modification_request& s);
   void send_n4_msg (itti_n4_session_deletion_request& s);
   void send_n4_msg (itti_n4_session_report_response& s);
+  void send_association_setup_request(itti_n4_association_setup_request& i);
 
   void send_heartbeat_request(std::shared_ptr<pfcp_association>& a);
   void send_heartbeat_response(const endpoint& r_endpoint, const uint64_t trxn_id);
@@ -96,6 +98,7 @@ public:
   void handle_receive_heartbeat_request(pfcp::pfcp_msg& msg, const endpoint& r_endpoint);
   void handle_receive_heartbeat_response(pfcp::pfcp_msg& msg, const endpoint& r_endpoint);
   void handle_receive_association_setup_request(pfcp::pfcp_msg& msg, const endpoint& r_endpoint);
+  void handle_receive_association_setup_response(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint);
 
   void handle_receive_session_establishment_response(pfcp::pfcp_msg& msg, const endpoint& r_endpoint);
   void handle_receive_session_modification_response(pfcp::pfcp_msg& msg, const endpoint& r_endpoint);

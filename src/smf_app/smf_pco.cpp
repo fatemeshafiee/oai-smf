@@ -19,22 +19,22 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pgw_pco.cpp
+/*! \file smf_pco.cpp
   \brief
   \author Lionel Gauthier
   \company Eurecom
   \email: lionel.gauthier@eurecom.fr
-*/
+ */
+
+#include "smf_pco.hpp"
 
 #include "common_defs.h"
 #include "3gpp_24.008.h"
 #include "rfc_1332.h"
 #include "rfc_1877.h"
-
 #include "logger.hpp"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
-#include "smf_pco.hpp"
 
 using  namespace smf;
 
@@ -102,101 +102,101 @@ int smf_app::process_pco_request_ipcp(protocol_configuration_options_t& pco_resp
         ipcp_req_option, ipcp_req_option_length, ipcp_req_remaining_length, pco_in_index);
 
     switch (ipcp_req_option) {
-      case IPCP_OPTION_PRIMARY_DNS_SERVER_IP_ADDRESS: {
-          /* RFC 1877
-           * This Configuration Option defines a method for negotiating with
-           * the remote peer the address of the primary DNS server to be used
-           * on the local end of the link. If local peer requests an invalid
-           * server address (which it will typically do intentionally) the
-           * remote peer specifies the address by NAKing this option, and
-           * returning the IP address of a valid DNS server.
-           * By default, no primary DNS address is provided.
-           */
-          Logger::smf_app().trace("PCO: Protocol identifier IPCP option PRIMARY_DNS_SERVER_IP_ADDRESS length %u", ipcp_req_option_length);
-          if (ipcp_req_option_length >= 6) {
-            ipcp_dns_prim_ipv4_addr = htonl((((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2)) << 24) |
-                (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3)) << 16) |
-                (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4)) << 8) |
-                (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
-            Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_prim_ipv4_addr 0x%x", ipcp_dns_prim_ipv4_addr);
+    case IPCP_OPTION_PRIMARY_DNS_SERVER_IP_ADDRESS: {
+      /* RFC 1877
+       * This Configuration Option defines a method for negotiating with
+       * the remote peer the address of the primary DNS server to be used
+       * on the local end of the link. If local peer requests an invalid
+       * server address (which it will typically do intentionally) the
+       * remote peer specifies the address by NAKing this option, and
+       * returning the IP address of a valid DNS server.
+       * By default, no primary DNS address is provided.
+       */
+      Logger::smf_app().trace("PCO: Protocol identifier IPCP option PRIMARY_DNS_SERVER_IP_ADDRESS length %u", ipcp_req_option_length);
+      if (ipcp_req_option_length >= 6) {
+        ipcp_dns_prim_ipv4_addr = htonl((((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2)) << 24) |
+            (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3)) << 16) |
+            (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4)) << 8) |
+            (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
+        Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_prim_ipv4_addr 0x%x", ipcp_dns_prim_ipv4_addr);
 
-            if (ipcp_dns_prim_ipv4_addr == INADDR_ANY) {
-              ipcp_out_dns_prim_ipv4_addr = smf_cfg.default_dnsv4.s_addr;
-              /* RFC 1877:
-               * Primary-DNS-Address
-               *  The four octet Primary-DNS-Address is the address of the primary
-               *  DNS server to be used by the local peer. If all four octets are
-               *  set to zero, it indicates an explicit request that the peer
-               *  provide the address information in a Config-Nak packet. */
-              ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
-            } else if (smf_cfg.default_dnsv4.s_addr != ipcp_dns_prim_ipv4_addr) {
-              ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
-              ipcp_out_dns_prim_ipv4_addr = smf_cfg.default_dnsv4.s_addr;
-            } else {
-              ipcp_out_dns_prim_ipv4_addr = ipcp_dns_prim_ipv4_addr;
-            }
-
-            Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_prim_ipv4_addr 0x%x", ipcp_out_dns_prim_ipv4_addr);
-          }
-          uint8_t idp[6] = {0};
-          idp[0] = IPCP_OPTION_PRIMARY_DNS_SERVER_IP_ADDRESS;
-          idp[1] = 6;
-          idp[2] = (uint8_t) (ipcp_out_dns_prim_ipv4_addr & 0x000000FF);
-          idp[3] = (uint8_t) ((ipcp_out_dns_prim_ipv4_addr >> 8) & 0x000000FF);
-          idp[4] = (uint8_t) ((ipcp_out_dns_prim_ipv4_addr >> 16) & 0x000000FF);
-          idp[5] = (uint8_t) ((ipcp_out_dns_prim_ipv4_addr >> 24) & 0x000000FF);
-          ipcp_out_length += 6;
-          std::string tmp_s((const char*)&idp[0],6);
-          poc_id_resp.protocol_id_contents.append(tmp_s);
+        if (ipcp_dns_prim_ipv4_addr == INADDR_ANY) {
+          ipcp_out_dns_prim_ipv4_addr = smf_cfg.default_dnsv4.s_addr;
+          /* RFC 1877:
+           * Primary-DNS-Address
+           *  The four octet Primary-DNS-Address is the address of the primary
+           *  DNS server to be used by the local peer. If all four octets are
+           *  set to zero, it indicates an explicit request that the peer
+           *  provide the address information in a Config-Nak packet. */
+          ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
+        } else if (smf_cfg.default_dnsv4.s_addr != ipcp_dns_prim_ipv4_addr) {
+          ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
+          ipcp_out_dns_prim_ipv4_addr = smf_cfg.default_dnsv4.s_addr;
+        } else {
+          ipcp_out_dns_prim_ipv4_addr = ipcp_dns_prim_ipv4_addr;
         }
-        break;
 
-      case IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS: {
-          /* RFC 1877
-           * This Configuration Option defines a method for negotiating with
-           * the remote peer the address of the secondary DNS server to be used
-           * on the local end of the link. If local peer requests an invalid
-           * server address (which it will typically do intentionally) the
-           * remote peer specifies the address by NAKing this option, and
-           * returning the IP address of a valid DNS server.
-           * By default, no secondary DNS address is provided.
-           */
-          Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS length %u", ipcp_req_option_length);
+        Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_prim_ipv4_addr 0x%x", ipcp_out_dns_prim_ipv4_addr);
+      }
+      uint8_t idp[6] = {0};
+      idp[0] = IPCP_OPTION_PRIMARY_DNS_SERVER_IP_ADDRESS;
+      idp[1] = 6;
+      idp[2] = (uint8_t) (ipcp_out_dns_prim_ipv4_addr & 0x000000FF);
+      idp[3] = (uint8_t) ((ipcp_out_dns_prim_ipv4_addr >> 8) & 0x000000FF);
+      idp[4] = (uint8_t) ((ipcp_out_dns_prim_ipv4_addr >> 16) & 0x000000FF);
+      idp[5] = (uint8_t) ((ipcp_out_dns_prim_ipv4_addr >> 24) & 0x000000FF);
+      ipcp_out_length += 6;
+      std::string tmp_s((const char*)&idp[0],6);
+      poc_id_resp.protocol_id_contents.append(tmp_s);
+    }
+    break;
 
-          if (ipcp_req_option_length >= 6) {
-            ipcp_dns_sec_ipv4_addr = htonl((((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2)) << 24) |
-                (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3)) << 16) |
-                (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4)) << 8) |
-                (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
-            Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_sec_ipv4_addr 0x%x", ipcp_dns_sec_ipv4_addr);
+    case IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS: {
+      /* RFC 1877
+       * This Configuration Option defines a method for negotiating with
+       * the remote peer the address of the secondary DNS server to be used
+       * on the local end of the link. If local peer requests an invalid
+       * server address (which it will typically do intentionally) the
+       * remote peer specifies the address by NAKing this option, and
+       * returning the IP address of a valid DNS server.
+       * By default, no secondary DNS address is provided.
+       */
+      Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS length %u", ipcp_req_option_length);
 
-            if (ipcp_dns_sec_ipv4_addr == INADDR_ANY) {
-              ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
-              ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
-            } else if (smf_cfg.default_dns_secv4.s_addr != ipcp_dns_sec_ipv4_addr) {
-              ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
-              ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
-            } else {
-              ipcp_out_dns_sec_ipv4_addr = ipcp_dns_sec_ipv4_addr;
-            }
+      if (ipcp_req_option_length >= 6) {
+        ipcp_dns_sec_ipv4_addr = htonl((((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2)) << 24) |
+            (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3)) << 16) |
+            (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4)) << 8) |
+            (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
+        Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_sec_ipv4_addr 0x%x", ipcp_dns_sec_ipv4_addr);
 
-            Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_sec_ipv4_addr 0x%x", ipcp_out_dns_sec_ipv4_addr);
-          }
-          uint8_t ids[6] = {0};
-          ids[0] = IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS;
-          ids[1] = 6;
-          ids[2] = (uint8_t) (ipcp_out_dns_sec_ipv4_addr & 0x000000FF);
-          ids[3] = (uint8_t) ((ipcp_out_dns_sec_ipv4_addr >> 8) & 0x000000FF);
-          ids[4] = (uint8_t) ((ipcp_out_dns_sec_ipv4_addr >> 16) & 0x000000FF);
-          ids[5] = (uint8_t) ((ipcp_out_dns_sec_ipv4_addr >> 24) & 0x000000FF);
-          ipcp_out_length += 6;
-          std::string tmp_s((const char*)&ids[0],6);
-          poc_id_resp.protocol_id_contents.append(tmp_s);
+        if (ipcp_dns_sec_ipv4_addr == INADDR_ANY) {
+          ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
+          ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
+        } else if (smf_cfg.default_dns_secv4.s_addr != ipcp_dns_sec_ipv4_addr) {
+          ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
+          ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
+        } else {
+          ipcp_out_dns_sec_ipv4_addr = ipcp_dns_sec_ipv4_addr;
         }
-        break;
 
-      default:
-        Logger::smf_app().debug("PCO: Protocol identifier IPCP option 0x%04X unknown\n", ipcp_req_option);
+        Logger::smf_app().debug("PCO: Protocol identifier IPCP option SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_sec_ipv4_addr 0x%x", ipcp_out_dns_sec_ipv4_addr);
+      }
+      uint8_t ids[6] = {0};
+      ids[0] = IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS;
+      ids[1] = 6;
+      ids[2] = (uint8_t) (ipcp_out_dns_sec_ipv4_addr & 0x000000FF);
+      ids[3] = (uint8_t) ((ipcp_out_dns_sec_ipv4_addr >> 8) & 0x000000FF);
+      ids[4] = (uint8_t) ((ipcp_out_dns_sec_ipv4_addr >> 16) & 0x000000FF);
+      ids[5] = (uint8_t) ((ipcp_out_dns_sec_ipv4_addr >> 24) & 0x000000FF);
+      ipcp_out_length += 6;
+      std::string tmp_s((const char*)&ids[0],6);
+      poc_id_resp.protocol_id_contents.append(tmp_s);
+    }
+    break;
+
+    default:
+      Logger::smf_app().debug("PCO: Protocol identifier IPCP option 0x%04X unknown\n", ipcp_req_option);
     }
     pco_in_index += ipcp_req_option_length;
   }
@@ -249,21 +249,21 @@ int smf_app::process_pco_link_mtu_request(protocol_configuration_options_t& pco_
 
 //------------------------------------------------------------------------------
 int smf_app::process_pco_request(
-  const protocol_configuration_options_t& pco_req,
-  protocol_configuration_options_t& pco_resp,
-  protocol_configuration_options_ids_t & pco_ids) {
+    const protocol_configuration_options_t& pco_req,
+    protocol_configuration_options_t& pco_resp,
+    protocol_configuration_options_ids_t & pco_ids) {
 
   switch (pco_req.configuration_protocol) {
-    case PCO_CONFIGURATION_PROTOCOL_PPP_FOR_USE_WITH_IP_PDP_TYPE_OR_IP_PDN_TYPE:
-      pco_resp.ext = 1;
-      pco_resp.spare = 0;
-      pco_resp.num_protocol_or_container_id = 0;
-      pco_resp.configuration_protocol = pco_req.configuration_protocol;
-      break;
+  case PCO_CONFIGURATION_PROTOCOL_PPP_FOR_USE_WITH_IP_PDP_TYPE_OR_IP_PDN_TYPE:
+    pco_resp.ext = 1;
+    pco_resp.spare = 0;
+    pco_resp.num_protocol_or_container_id = 0;
+    pco_resp.configuration_protocol = pco_req.configuration_protocol;
+    break;
 
-    default:
-      Logger::smf_app().warn("PCO: configuration protocol 0x%X not supported now", pco_req.configuration_protocol);
-      break;
+  default:
+    Logger::smf_app().warn("PCO: configuration protocol 0x%X not supported now", pco_req.configuration_protocol);
+    break;
   }
 
   for (int id = 0; id < pco_req.num_protocol_or_container_id; id++) {
@@ -291,17 +291,17 @@ int smf_app::process_pco_request(
 
     default:
       Logger::smf_app().warn("PCO: Protocol/container identifier 0x%04X not supported now",
-        pco_req.protocol_or_container_ids[id].protocol_id);
+          pco_req.protocol_or_container_ids[id].protocol_id);
     }
   }
 
   if (smf_cfg.force_push_pco) {
     pco_ids.ci_ip_address_allocation_via_nas_signalling = true;
     if (!pco_ids.ci_dns_server_ipv4_address_request) {
-      process_pco_dns_server_request(pco_resp, NULL);
+      process_pco_dns_server_request(pco_resp, nullptr);
     }
     if (!pco_ids.ci_ipv4_link_mtu_request) {
-      process_pco_link_mtu_request(pco_resp, NULL);
+      process_pco_link_mtu_request(pco_resp, nullptr);
     }
   }
   return RETURNok;
