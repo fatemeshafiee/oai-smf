@@ -322,7 +322,8 @@ file(GLOB NAS_src_files
     ${SRC_TOP_DIR}/utils/multipartparser.c
     ${SRC_TOP_DIR}/nas/security/*.c
     ${SRC_TOP_DIR}/common/*.c
-    ${SRC_TOP_DIR}/ngap/messages/*.c
+    ${SRC_TOP_DIR}/ngap/asn1c/*.c
+    ${SRC_TOP_DIR}/ngap/ies/*.c
 )   
 
 set(NAS_include_files
@@ -336,12 +337,18 @@ set(NAS_include_files
   ${NAS_DIR}/security
   ${SRC_TOP_DIR}/utils
   ${SRC_TOP_DIR}/utils/bstr
-  ${SRC_TOP_DIR}/ngap/messages
+  ${SRC_TOP_DIR}/ngap/asn1c
+  ${SRC_TOP_DIR}/ngap/ies
   ${SRC_TOP_DIR}/common
   )
 
 add_library(NAS ${NAS_src_files} ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES})
 
+set(NGAP_include_files
+  ${SRC_TOP_DIR}/ngap/asn1c
+  ${SRC_TOP_DIR}/ngap/ies
+  ${SRC_TOP_DIR}/common/ngap
+  )
 
 add_definitions("-DPACKAGE_NAME=\"SMF\"")
 
@@ -358,6 +365,7 @@ include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 include_directories(${SMF_API_SERVER_include_files})
 include_directories(${NAS_include_files})
+include_directories(${NGAP_include_files})
 
 add_executable(smf
   ${SRC_TOP_DIR}/oai_smf/main.cpp

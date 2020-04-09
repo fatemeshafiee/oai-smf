@@ -10,6 +10,6 @@ asn1c \
     -fno-include-deps \
     -findirect-choice \
     -gen-PER \
-    -D src \
-    asn.1/*.asn1
+    -D ies \
+    ./scripts/asn.1/*.asn1
 
