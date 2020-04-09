@@ -43,7 +43,7 @@ cd /oai-cn5g-smf/build/scripts
 
 ## Create configuration file for SMF
 cd /oai-cn5g-smf/build/scripts
-./smf_conf_local.sh
+./smf_conf.sh
 
 ## launch SMF
 sudo smf -c /usr/local/etc/oai/smf.conf -o 
@@ -54,7 +54,7 @@ cd /openair-cn-cups/build/scripts
 ./build_spgwu -I -f
 ./build_spgwu -c -V -b Debug -j
 
-cd /oai-cn5g-smf/src/test/upf
+cp /oai-cn5g-smf/src/test/upf/spgwu_conf.sh . 
 ./spgwu_conf.sh
 sudo spgwu -c /usr/local/etc/oai/spgw_u.conf  -o
 
