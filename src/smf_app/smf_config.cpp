@@ -90,7 +90,7 @@ int smf_config::load_thread_sched_params(const Setting& thread_sched_params_cfg,
 
   try {
     thread_sched_params_cfg.lookupValue(SMF_CONFIG_STRING_THREAD_RD_CPU_ID, cfg.cpu_id);
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
   try {
@@ -111,7 +111,7 @@ int smf_config::load_thread_sched_params(const Setting& thread_sched_params_cfg,
       Logger::smf_app().error("thread_rd_sched_policy: %s, unknown in config file", thread_rd_sched_policy.c_str());
       return RETURNerror;
     }
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
@@ -121,7 +121,7 @@ int smf_config::load_thread_sched_params(const Setting& thread_sched_params_cfg,
       Logger::smf_app().error("thread_rd_sched_priority: %d, must be in interval [1..99] in config file", cfg.sched_priority);
       return RETURNerror;
     }
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
   return RETURNok;
@@ -132,28 +132,28 @@ int smf_config::load_itti(const Setting& itti_cfg, itti_cfg_t& cfg)
   try {
     const Setting& itti_timer_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_ITTI_TIMER_SCHED_PARAMS];
     load_thread_sched_params(itti_timer_sched_params_cfg, cfg.itti_timer_sched_params);
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& n4_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_N4_SCHED_PARAMS];
     load_thread_sched_params(n4_sched_params_cfg, cfg.n4_sched_params);
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& smf_app_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_SMF_APP_SCHED_PARAMS];
     load_thread_sched_params(smf_app_sched_params_cfg, cfg.smf_app_sched_params);
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& async_cmd_sched_params_cfg = itti_cfg[SMF_CONFIG_STRING_ASYNC_CMD_SCHED_PARAMS];
     load_thread_sched_params(async_cmd_sched_params_cfg, cfg.async_cmd_sched_params);
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
@@ -195,7 +195,7 @@ int smf_config::load_interface(const Setting& if_cfg, interface_cfg_t & cfg)
     try {
       const Setting& sched_params_cfg = if_cfg[SMF_CONFIG_STRING_SCHED_PARAMS];
       load_thread_sched_params(sched_params_cfg, cfg.thread_rd_sched_params);
-    } catch(const SettingNotFoundException &nfex) {
+    } catch (const SettingNotFoundException &nfex) {
       Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
     }
   }
@@ -227,27 +227,21 @@ int smf_config::load(const string& config_file)
   unsigned char          buf_in6_addr[sizeof (struct in6_addr)];
 
   // Read the file. If there is an error, report it and exit.
-  try
-  {
+  try {
     cfg.readFile(config_file.c_str());
-  }
-  catch(const FileIOException &fioex)
-  {
+  } catch(const FileIOException &fioex) {
     Logger::smf_app().error("I/O error while reading file %s - %s", config_file.c_str(), fioex.what());
     throw;
-  }
-  catch(const ParseException &pex)
-  {
+  } catch (const ParseException &pex) {
     Logger::smf_app().error("Parse error at %s:%d - %s", pex.getFile(), pex.getLine(), pex.getError());
     throw;
   }
 
   const Setting& root = cfg.getRoot();
 
-  try
-  {
+  try {
     const Setting& smf_cfg = root[SMF_CONFIG_STRING_SMF_CONFIG];
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }
@@ -256,20 +250,20 @@ int smf_config::load(const string& config_file)
 
   try {
     smf_cfg.lookupValue(SMF_CONFIG_STRING_INSTANCE, instance);
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     smf_cfg.lookupValue(SMF_CONFIG_STRING_PID_DIRECTORY, pid_dir);
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
   try {
     const Setting& itti_cfg = smf_cfg[SMF_CONFIG_STRING_ITTI_TASKS];
     load_itti(itti_cfg, itti);
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
@@ -282,7 +276,7 @@ int smf_config::load(const string& config_file)
     const Setting& n11_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_N11];
     load_interface(n11_cfg, n11);
 
-  } catch(const SettingNotFoundException &nfex) {
+  } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }
@@ -415,7 +409,6 @@ int smf_config::load(const string& config_file)
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV4_ADDRESS, astring);
     IPV4_STR_ADDR_TO_INADDR (util::trim(astring).c_str(), default_dns_secv4, "BAD IPv4 ADDRESS FORMAT FOR DEFAULT DNS !");
 
-
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS, astring);
     if (inet_pton (AF_INET6, util::trim(astring).c_str(), buf_in6_addr) == 1) {
       memcpy (&default_dnsv6, buf_in6_addr, sizeof (struct in6_addr));
@@ -476,7 +469,6 @@ int smf_config::load(const string& config_file)
     }
     udm_addr.port = udm_port;
 
-
     //UPF list
     unsigned char buf_in_addr[sizeof (struct in_addr)+1];
     const Setting& upf_list_cfg = smf_cfg[SMF_CONFIG_STRING_UPF_LIST];
@@ -500,9 +492,7 @@ int smf_config::load(const string& config_file)
         throw ("Bad value in section %s : item no %d in config file %s", SMF_CONFIG_STRING_UPF_LIST, i, config_file.c_str());
       }
     }
-  }
-  catch(const SettingNotFoundException &nfex)
-  {
+  } catch(const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }

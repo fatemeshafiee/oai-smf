@@ -495,13 +495,13 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   Logger::smf_app().info("Handle a PDU Session Create SM Context Request message from AMF, supi " SUPI_64_FMT ", dnn %s, snssai_sst %d", supi64, dnn.c_str(), snssai.sST );
 
   //If no DNN information from UE, set to default value
-  if (dnn.length() == 0){
+  if (dnn.length() == 0) {
     dnn == smf_cfg.get_default_dnn();
   }
 
   //Step 2. Verify Procedure transaction id, pdu session id, message type, request type, etc.
   //check pti
-  if ((pti.procedure_transaction_id == PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED) || (pti.procedure_transaction_id > PROCEDURE_TRANSACTION_IDENTITY_LAST)){
+  if ((pti.procedure_transaction_id == PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED) || (pti.procedure_transaction_id > PROCEDURE_TRANSACTION_IDENTITY_LAST)) {
     Logger::smf_app().warn(" Invalid PTI value (pti = %d)", pti.procedure_transaction_id);
     problem_details.setCause(pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
     smContextCreateError.setError(problem_details);
@@ -515,7 +515,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   }
 
   //check pdu session id
-  if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED) || (pdu_session_id > PDU_SESSION_IDENTITY_LAST)){
+  if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED) || (pdu_session_id > PDU_SESSION_IDENTITY_LAST)) {
     Logger::smf_app().warn(" Invalid PDU Session ID value (psi = %d)", pdu_session_id);
     //section 7.3.2@3GPP TS 24.501; NAS N1 SM message: ignore the message
     return;
@@ -535,7 +535,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   }
 
   //check request type
-  if (request_type.compare("INITIAL_REQUEST") !=0 ){
+  if (request_type.compare("INITIAL_REQUEST") !=0 ) {
     Logger::smf_app().warn("Invalid request type (request type = %s)", "INITIAL_REQUEST");
     //TODO:
     //return
@@ -576,7 +576,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   std::shared_ptr<dnn_context> sd = {};
 
   if (!sc.get()->find_dnn_context(snssai, dnn, sd)) {
-    if (nullptr == sd.get()){
+    if (nullptr == sd.get()) {
       //create a new one and insert to the list
       Logger::smf_app().debug("Create a DNN context and add to the SMF context");
       sd = std::shared_ptr<dnn_context>(new dnn_context(dnn));
@@ -590,8 +590,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   //Step 6. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
   //TODO: Test with UDM (TESTER)
   std::string dnn_selection_mode = smreq->req.get_dnn_selection_mode();
-  if (not use_local_configuration_subscription_data(dnn_selection_mode) && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai))
-  {
+  if (not use_local_configuration_subscription_data(dnn_selection_mode) && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai)) {
     //uses a dummy UDM to test this part
     Logger::smf_app().debug("Retrieve Session Management Subscription data from an UDM");
     session_management_subscription* s=  new session_management_subscription (snssai);
@@ -838,22 +837,22 @@ bool smf_app::is_create_sm_context_request_valid()
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::convert_string_2_hex(std::string& input_str, std::string& output_str){
-
+void smf_app::convert_string_2_hex(std::string& input_str, std::string& output_str)
+{
   Logger::smf_app().debug("Convert string to Hex");
   unsigned char *data = (unsigned char *) malloc (input_str.length() + 1);
   memset(data, 0, input_str.length() + 1);
   memcpy ((void *)data, (void *)input_str.c_str(), input_str.length());
 
   Logger::smf_app().debug("Input: ");
-  for(int i = 0; i < input_str.length(); i++) {
+  for (int i = 0; i < input_str.length(); i++) {
     printf("%02x ", data[i]);
   }
   printf("\n");
   char *datahex = (char *) malloc (input_str.length() * 2 + 1);
   memset(datahex, 0, input_str.length() *2 + 1);
 
-  for(int i = 0; i < input_str.length(); i++)
+  for (int i = 0; i < input_str.length(); i++)
     sprintf(datahex + i*2, "%02x", data[i]);
 
   output_str = reinterpret_cast<char*> (datahex);
@@ -861,8 +860,8 @@ void smf_app::convert_string_2_hex(std::string& input_str, std::string& output_s
 }
 
 //---------------------------------------------------------------------------------------------
-unsigned char * smf_app::format_string_as_hex(std::string str){
-
+unsigned char * smf_app::format_string_as_hex(std::string str)
+{
   unsigned int str_len =  str.length();
   char *data = (char *)malloc(str_len + 1);
   memset(data, 0, str_len + 1);
@@ -874,7 +873,7 @@ unsigned char * smf_app::format_string_as_hex(std::string str){
   Logger::smf_app().debug("[Format string as Hex] Input string (%d bytes): %s ", str_len, str.c_str());
   Logger::smf_app().debug("Data (formatted):");
 
-  for(int i = 0; i < str_len/2; i++)
+  for (int i = 0; i < str_len/2; i++)
     printf(" %02x ",data_hex[i]);
   printf("\n");
 
@@ -933,7 +932,7 @@ void smf_app::update_pdu_session_status(const scid_t scid, const pdu_session_sta
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user)
 {
-  //send session modification request again...
+  //TODO: send session modification request again...
 }
 
 //---------------------------------------------------------------------------------------------
