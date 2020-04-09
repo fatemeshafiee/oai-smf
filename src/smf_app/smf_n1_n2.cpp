@@ -40,7 +40,6 @@
 
 extern "C" {
 #include "nas_message.h"
-#include "mmData.h"
 #include "Ngap_NGAP-PDU.h"
 #include "Ngap_ProtocolIE-Field.h"
 #include "Ngap_ProcedureCode.h"
@@ -110,16 +109,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
   SM_msg *sm_msg = &nas_msg.plain.sm;
   sm_msg->header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   sm_msg->header.pdu_session_identity = msg.get_pdu_session_id();
-
-  //TODO: should be updated
-  // construct security context
-  fivegmm_security_context_t * security = (fivegmm_security_context_t *)calloc(1,sizeof(fivegmm_security_context_t));
-  security->selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-  security->dl_count.overflow = 0xffff;
-  security->dl_count.seq_num =  0x23;
-  security->knas_enc[0] = 0x14;
-  security->selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-  security->knas_int[0] = 0x41;
 
   switch (n1_msg_type){
 
@@ -352,7 +341,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
     //PDU Session Type
     sm_msg->pdu_session_modification_command.messagetype = sm_context_res.get_msg_type();
     //Presence
-    sm_msg->pdu_session_modification_command.presence = 0xffff; //TODO: to be updated
+    sm_msg->pdu_session_modification_command.presence = 0xff; //TODO: to be updated
     //5GSMCause
     sm_msg->pdu_session_modification_command._5gsmcause = sm_context_res.get_cause();
 
@@ -446,7 +435,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
   }//end Switch
 
   //Encode NAS message
-  bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, security);
+  bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, nullptr);
 
   Logger::smf_app().debug("Buffer Data: ");
   for(int i = 0; i < bytes; i++)
@@ -900,25 +889,8 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm
     printf(" %02x ",data_hex[i]);
   printf("\n");
 
-  //use a temporary security mechanism
-  //construct decode security context
-  static uint8_t fivegmm_security_context_flag = 0;
-  static fivegmm_security_context_t securitydecode;
-  if(!fivegmm_security_context_flag)
-  {
-    securitydecode.selected_algorithms.encryption = NAS_SECURITY_ALGORITHMS_NEA1;
-    securitydecode.dl_count.overflow = 0xffff;
-    securitydecode.dl_count.seq_num =  0x23;
-    securitydecode.ul_count.overflow = 0xffff;
-    securitydecode.ul_count.seq_num =  0x23;
-    securitydecode.knas_enc[0] = 0x14;
-    securitydecode.selected_algorithms.integrity = NAS_SECURITY_ALGORITHMS_NIA1;
-    securitydecode.knas_int[0] = 0x41;
-    fivegmm_security_context_flag ++;
-  }
-
   //decode the NAS message (using NAS lib)
-  decoder_rc = nas_message_decode (data_hex, &nas_msg, msg_len/2, &securitydecode, &decode_status);
+  decoder_rc = nas_message_decode (data_hex, &nas_msg, msg_len/2, nullptr, &decode_status);
   Logger::smf_app().debug("NAS message type 0x%x ", nas_msg.plain.sm.header.message_type);
 
   Logger::smf_app().debug("NAS header decode, Extended protocol discriminator 0x%x, Security header type 0x%x",
