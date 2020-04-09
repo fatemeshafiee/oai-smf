@@ -84,12 +84,12 @@
 typedef struct{
 	uint8_t uint;
 	uint16_t value;
-}GFBROrMFBR_UpLinkOrDownLink;
+} GFBROrMFBR_UpLinkOrDownLink;
 
 typedef struct{
 	uint8_t uplinkinmilliseconds;
 	uint8_t downlinkinmilliseconds;
-}AveragingWindow;
+} AveragingWindow;
 
 typedef struct{
 	uint8_t parameteridentifier;
@@ -100,7 +100,7 @@ typedef struct{
 		AveragingWindow averagingwindow;
 		uint8_t epsbeareridentity:4;
 	}parametercontents;
-}ParametersList;
+} ParametersList;
 
 typedef struct{
 	uint8_t qfi:6;
@@ -108,12 +108,12 @@ typedef struct{
 	uint8_t e:1;
 	uint8_t numberofparameters:6;
 	ParametersList *parameterslist;
-}QOSFlowDescriptionsContents;
+} QOSFlowDescriptionsContents;
 
 typedef struct{
 	uint16_t qosflowdescriptionsnumber;		//Custom variables are protocol independent 
 	QOSFlowDescriptionsContents *qosflowdescriptionscontents;
-}QOSFlowDescriptions;
+} QOSFlowDescriptions;
 
 
 int encode_qos_flow_descriptions ( QOSFlowDescriptions qosflowdescriptions, uint8_t iei, uint8_t * buffer, uint32_t len  ) ;

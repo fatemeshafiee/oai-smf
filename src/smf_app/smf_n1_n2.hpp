@@ -30,6 +30,12 @@
 #ifndef FILE_SMF_N1_N2_HPP_SEEN
 #define FILE_SMF_N1_N2_HPP_SEEN
 
+#include <map>
+#include <set>
+#include <shared_mutex>
+#include <string>
+#include <thread>
+
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
@@ -47,17 +53,10 @@
 
 extern "C"{
 #include "nas_message.h"
-#include "mmData.h"
 #include "Ngap_NGAP-PDU.h"
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
 #include "Ngap_PDUSessionResourceModifyResponseTransfer.h"
 }
-
-#include <map>
-#include <set>
-#include <shared_mutex>
-#include <string>
-#include <thread>
 
 namespace smf {
 

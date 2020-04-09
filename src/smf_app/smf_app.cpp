@@ -59,7 +59,6 @@
 
 extern "C"{
 #include "nas_message.h"
-#include "mmData.h"
 }
 
 #define BUF_LEN 512
