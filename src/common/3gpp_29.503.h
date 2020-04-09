@@ -60,10 +60,4 @@ typedef struct dnn_configuration_s {
 	//staticIpAddresses
 } dnn_configuration_t;
 
-
-
-
-
-
-
 #endif

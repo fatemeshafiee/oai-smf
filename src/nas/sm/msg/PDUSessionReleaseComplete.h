@@ -38,12 +38,12 @@
 
 
 #define PDU_SESSION_RELEASE_COMPLETE__5GSM_CAUSE_IEI		0x59
-#define PDU_SESSION_RELEASE_COMPLETE_E_P_C_O_IEI			0x7B
+#define PDU_SESSION_RELEASE_COMPLETE_E_P_C_O_IEI		  	0x7B
 
 #define PDU_SESSION_RELEASE_COMPLETE__5GSM_CAUSE_PRESENCE	(1<<0)
-#define PDU_SESSION_RELEASE_COMPLETE_E_P_C_O_PRESENCE		(1<<1)
+#define PDU_SESSION_RELEASE_COMPLETE_E_P_C_O_PRESENCE		  (1<<1)
 
-typedef struct pdu_session_release_complete_msg_tag{
+typedef struct pdu_session_release_complete_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
@@ -51,8 +51,7 @@ typedef struct pdu_session_release_complete_msg_tag{
 	uint8_t presence;
 	_5GSMCause _5gsmcause;
 	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-}pdu_session_release_complete_msg;
-
+} pdu_session_release_complete_msg;
 
 int decode_pdu_session_release_complete(pdu_session_release_complete_msg *pdusessionreleasecomplete, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_release_complete(pdu_session_release_complete_msg *pdusessionreleasecomplete, uint8_t *buffer, uint32_t len);

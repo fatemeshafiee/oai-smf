@@ -92,12 +92,12 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
 
   //To be updated according to NAS implementation
   int size = NAS_MESSAGE_SECURITY_HEADER_SIZE;
-  int bytes = 0;
+  int bytes = { 0 };
   int length = BUF_LEN;
   unsigned char data[BUF_LEN] = {'\0'};
   memset(data,0,sizeof(data));
 
-  nas_message_t nas_msg;
+  nas_message_t nas_msg = {};
   memset(&nas_msg, 0, sizeof(nas_message_t));
   nas_msg.header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
@@ -190,7 +190,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
     //TODO: get from subscription DB
     supi_t supi =  sm_context_res.get_supi();
     supi64_t supi64 = smf_supi_to_u64(supi);
-    std::shared_ptr<smf_context> sc;
+    std::shared_ptr<smf_context> sc = {};
     if (smf_app_inst->is_supi_2_smf_context(supi64)) {
       Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "", supi64);
       sc = smf_app_inst->supi_2_smf_context(supi64);
@@ -360,7 +360,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
     //TODO: get from subscription DB
     supi_t supi =  sm_context_res.get_supi();
     supi64_t supi64 = smf_supi_to_u64(supi);
-    std::shared_ptr<smf_context> sc;
+    std::shared_ptr<smf_context> sc = {};
     if (smf_app_inst->is_supi_2_smf_context(supi64)) {
       Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "", supi64);
       sc = smf_app_inst->supi_2_smf_context(supi64);
@@ -392,23 +392,17 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
     sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0].qosflowidentifer = 60;
 
     //MappedEPSBearerContexts
+    //TODO:
 
     //QOSFlowDescriptions
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionsnumber = 1;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents = (QOSFlowDescriptionsContents *) calloc (1, sizeof(QOSFlowDescriptionsContents));
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].qfi = 1;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].operationcode = CREATE_NEW_QOS_FLOW_DESCRIPTION;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].e = PARAMETERS_LIST_IS_INCLUDED;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].numberofparameters = 3;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist = (ParametersList *) calloc (3, sizeof(ParametersList));
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[0].parameteridentifier = PARAMETER_IDENTIFIER_5QI;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[0].parametercontents._5qi = 0b01000001;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[1].parameteridentifier = PARAMETER_IDENTIFIER_GFBR_UPLINK;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.uint = GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[1].parametercontents.gfbrormfbr_uplinkordownlink.value = 0x1000;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[2].parameteridentifier = PARAMETER_IDENTIFIER_GFBR_DOWNLINK;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[2].parametercontents.gfbrormfbr_uplinkordownlink.uint = GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_4KBPS;
-    sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0].parameterslist[2].parametercontents.gfbrormfbr_uplinkordownlink.value = 0x2000;
+    //authorized QoS flow descriptions IE: QoSFlowDescritions
+    if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+      Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "", supi64);
+      sc = smf_app_inst->supi_2_smf_context(supi64);
+      sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionsnumber = 1;
+      sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents = (QOSFlowDescriptionsContents *) calloc (1, sizeof(QOSFlowDescriptionsContents));
+      sc.get()->get_default_qos_flow_description(sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents[0], sm_context_res.get_pdu_session_type());
+    }
   }
   break;
 
@@ -502,7 +496,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
       pdu_session_update_sm_context_response& sm_context_res = static_cast<pdu_session_update_sm_context_response&>(msg);
 
       //get default QoS value
-      std::map<uint8_t, qos_flow_context_updated> qos_flows;
+      std::map<uint8_t, qos_flow_context_updated> qos_flows = {};
       sm_context_res.get_all_qos_flow_context_updateds (qos_flows);
       for (std::map<uint8_t, qos_flow_context_updated>::iterator it = qos_flows.begin(); it!=qos_flows.end(); ++it)
         Logger::smf_app().debug("qos_flow_context_updated qfi %d", it->first);
@@ -531,7 +525,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     //SessionAMBR
     supi_t supi =  msg.get_supi();
     supi64_t supi64 = smf_supi_to_u64(supi);
-    std::shared_ptr<smf_context> sc;
+    std::shared_ptr<smf_context> sc = {};
     if (smf_app_inst->is_supi_2_smf_context(supi64)) {
       Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "", supi64);
       sc = smf_app_inst->supi_2_smf_context(supi64);
@@ -644,7 +638,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     pdu_session_update_sm_context_response& sm_context_res = static_cast<pdu_session_update_sm_context_response&>(msg);
 
     //get default QoS info
-    std::map<uint8_t, qos_flow_context_updated> qos_flows;
+    std::map<uint8_t, qos_flow_context_updated> qos_flows = {};
     sm_context_res.get_all_qos_flow_context_updateds (qos_flows);
     for (std::map<uint8_t, qos_flow_context_updated>::iterator it = qos_flows.begin(); it!=qos_flows.end(); ++it)
       Logger::smf_app().debug("qos_flow_context_updated qfi %d", it->first);
@@ -666,7 +660,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
 
     supi_t supi =  sm_context_res.get_supi();
     supi64_t supi64 = smf_supi_to_u64(supi);
-    std::shared_ptr<smf_context> sc;
+    std::shared_ptr<smf_context> sc = {};
     if (smf_app_inst->is_supi_2_smf_context(supi64)) {
       Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "", supi64);
       sc = smf_app_inst->supi_2_smf_context(supi64);
@@ -768,7 +762,6 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     ngap_msg_str = ngap_message;
   }
   break;
-
 
   case n2_sm_info_type_e::PDU_RES_SETUP_RSP: {
     //PDU Session Resource Setup Response Transfer
@@ -889,54 +882,23 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
 //TODO: should be polished
 int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg)
 {
-  //TODO: should work with BUPT to finish this function
   Logger::smf_app().info("Decode NAS message from N1 SM Container");
 
   //step 1. Decode NAS  message (for instance, ... only served as an example)
-  nas_message_decode_status_t   decode_status = {0};
+  nas_message_decode_status_t decode_status = {0};
   int decoder_rc = RETURNok;
 
-  unsigned int n1SmMsgLen = n1_sm_msg.length();//strlen(n1_sm_msg.c_str());
-  unsigned char *datavalue = (unsigned char *)malloc(n1SmMsgLen + 1);
+  unsigned int msg_len = n1_sm_msg.length();
+  char *data = (char *)malloc(msg_len + 1);
+  memset(data, 0, msg_len + 1);
+  memcpy ((void *)data, (void *)n1_sm_msg.c_str(), msg_len);
 
-  unsigned char *data = (unsigned char *)malloc(n1SmMsgLen + 1);//hardcoded for the moment
-  memset(data,0,n1SmMsgLen + 1);
-  memcpy ((void *)data, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
-
-  Logger::smf_app().debug("Data: %s (%d bytes)", data, n1SmMsgLen);
-  //  for(int i = 0;i<n1SmMsgLen;i++)
-  //    printf(" %02x ",data[i]);
-  //  printf("\n");
-  Logger::smf_app().debug("Data: ");
-  for(int i=0;i<n1SmMsgLen;i++)
-  {
-    char datatmp[3] = {0};
-    memcpy(datatmp,&data[i],2);
-    // Ensure both characters are hexadecimal
-    bool bBothDigits = true;
-
-    for(int j = 0; j < 2; ++j)
-    {
-      if(!isxdigit(datatmp[j]))
-        bBothDigits = false;
-    }
-    if(!bBothDigits)
-      break;
-    // Convert two hexadecimal characters into one character
-    unsigned int nAsciiCharacter;
-    sscanf(datatmp, "%x", &nAsciiCharacter);
-    printf("%x ",nAsciiCharacter);
-    // Concatenate this character onto the output
-    datavalue[i/2] = (unsigned char)nAsciiCharacter;
-    // Skip the next character
-    i++;
-  }
+  uint8_t *data_hex = (uint8_t *)malloc(msg_len/2 + 1);
+  conv::ascii_to_hex (data_hex, (const char *) data);
+  printf("Content: ");
+  for(int i = 0;i<msg_len/2;i++)
+    printf(" %02x ",data_hex[i]);
   printf("\n");
-
-  free(data);
-  data = nullptr;
-
-  //memcpy ((void *)datavalue, (void *)n1_sm_msg.c_str(),n1SmMsgLen);
 
   //use a temporary security mechanism
   //construct decode security context
@@ -956,7 +918,7 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm
   }
 
   //decode the NAS message (using NAS lib)
-  decoder_rc = nas_message_decode (datavalue, &nas_msg, n1SmMsgLen/2, &securitydecode, &decode_status);
+  decoder_rc = nas_message_decode (data_hex, &nas_msg, msg_len/2, &securitydecode, &decode_status);
   Logger::smf_app().debug("NAS message type 0x%x ", nas_msg.plain.sm.header.message_type);
 
   Logger::smf_app().debug("NAS header decode, Extended protocol discriminator 0x%x, Security header type 0x%x",

@@ -487,8 +487,8 @@ void smf_context::get_session_ambr(SessionAMBR& session_ambr, const snssai_t& sn
 {
   Logger::smf_app().debug("Get AMBR info from the DNN configuration");
 
-  std::shared_ptr<session_management_subscription> ss;
-  std::shared_ptr<dnn_configuration_t> sdc;
+  std::shared_ptr<session_management_subscription> ss = {};
+  std::shared_ptr<dnn_configuration_t> sdc = {};
   find_dnn_subscription(snssai, ss);
   if (nullptr != ss.get()){
 
@@ -564,12 +564,12 @@ void smf_context::get_session_ambr(Ngap_PDUSessionAggregateMaximumBitRate_t& ses
 {
   Logger::smf_app().debug("Get AMBR info from the DNN configuration");
 
-  std::shared_ptr<session_management_subscription> ss;
-  std::shared_ptr<dnn_configuration_t> sdc;
+  std::shared_ptr<session_management_subscription> ss = {};
+  std::shared_ptr<dnn_configuration_t> sdc = {};
   find_dnn_subscription(snssai, ss);
 
-  uint32_t bit_rate_dl = 1;
-  uint32_t bit_rate_ul = 1;
+  uint32_t bit_rate_dl = { 1 };
+  uint32_t bit_rate_ul = { 1 };
 
   session_ambr.pDUSessionAggregateMaximumBitRateDL.size = 4;
   session_ambr.pDUSessionAggregateMaximumBitRateDL.buf = (uint8_t *) calloc(4, sizeof (uint8_t));
@@ -636,10 +636,10 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
 {
   Logger::smf_app().info("Handle a PDU Session Create SM Context Request message from AMF");
   pdu_session_create_sm_context_request sm_context_req_msg = smreq->req;
-  oai::smf_server::model::SmContextCreateError smContextCreateError;
-  oai::smf_server::model::ProblemDetails problem_details;
+  oai::smf_server::model::SmContextCreateError smContextCreateError = {};
+  oai::smf_server::model::ProblemDetails problem_details = {};
   std::string n1_sm_message, n1_sm_msg_hex; //N1 SM container
-  smf_n1_n2 smf_n1_n2_inst;
+  smf_n1_n2 smf_n1_n2_inst = {};
   bool request_accepted = true;
 
   //Step 1. get necessary information
@@ -680,7 +680,7 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
   sm_context_resp->set_scid(smreq->scid);
 
   //Step 3. find pdu_session
-  std::shared_ptr<dnn_context> sd;
+  std::shared_ptr<dnn_context> sd = {};
   bool find_dnn = find_dnn_context (snssai, dnn, sd);
 
   //step 3.1. create dnn context if not exist
@@ -699,7 +699,7 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
   }
 
   //step 3.2. create pdn connection if not exist
-  std::shared_ptr<smf_pdu_session> sp;
+  std::shared_ptr<smf_pdu_session> sp = {};
   bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
 
   if (nullptr == sp.get()){
@@ -759,8 +759,8 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
       //depend of subscription information: staticIpAddress in DNN Configuration
       //TODO: check static IP address is available in the subscription information (SessionManagementSubscription) or in DHCP/DN-AAA
 
-      std::shared_ptr<session_management_subscription> ss;
-      std::shared_ptr<dnn_configuration_t> sdc;
+      std::shared_ptr<session_management_subscription> ss = {};
+      std::shared_ptr<dnn_configuration_t> sdc = {};
       find_dnn_subscription(snssai, ss);
       if (nullptr != ss.get()){
         ss.get()->find_dnn_configuration(sd->dnn_in_use, sdc);
@@ -933,15 +933,15 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
 {
   Logger::smf_app().info("Handle a PDU Session Update SM Context Request message from AMF");
   pdu_session_update_sm_context_request sm_context_req_msg = smreq->req;
-  smf_n1_n2 smf_n1_n2_inst;
-  oai::smf_server::model::SmContextUpdateError smContextUpdateError;
-  oai::smf_server::model::ProblemDetails problem_details;
+  smf_n1_n2 smf_n1_n2_inst = {};
+  oai::smf_server::model::SmContextUpdateError smContextUpdateError = {};
+  oai::smf_server::model::ProblemDetails problem_details = {};
   bool update_upf = false;
   session_management_procedures_type_e procedure_type (session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
 
   //Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and pdu_session must be existed
-  std::shared_ptr<dnn_context> sd;
-  std::shared_ptr<smf_pdu_session> sp;
+  std::shared_ptr<dnn_context> sd = {};
+  std::shared_ptr<smf_pdu_session> sp = {};
   bool find_dnn = find_dnn_context (sm_context_req_msg.get_snssai(), sm_context_req_msg.get_dnn(), sd);
   bool find_pdn = false;
   if (find_dnn){
@@ -970,9 +970,8 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
 
   //Step 2.1. Decode N1 (if content is available)
   if (sm_context_req_msg.n1_sm_msg_is_set()){
-    std::string n1_sm_msg; //N1 SM container
-    std::string n1_sm_msg_hex; //N1 SM container
-    nas_message_t decoded_nas_msg;
+    std::string n1_sm_msg, n1_sm_msg_hex; //N1 SM container
+    nas_message_t decoded_nas_msg = {};
 
     //Decode NAS and get the necessary information
     n1_sm_msg = sm_context_req_msg.get_n1_sm_message();
@@ -996,7 +995,6 @@ void smf_context::handle_pdu_session_update_sm_context_request (std::shared_ptr<
         decoded_nas_msg.header.security_header_type);
 
     Logger::smf_app().debug("NAS header information, Message Type %d", decoded_nas_msg.plain.sm.header.message_type);
-
 
     //FOR TESTing  PDU_SESSION_MODIFICATION_REQUEST, should be REMOVED!!!
     uint8_t message_type = PDU_SESSION_MODIFICATION_REQUEST;

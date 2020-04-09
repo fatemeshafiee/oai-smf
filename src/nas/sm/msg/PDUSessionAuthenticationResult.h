@@ -38,12 +38,12 @@
 0)
 
 #define PDU_SESSION_AUTHENTICATION_RESULT_EAP_MESSAGE_IEI 		0x78
-#define PDU_SESSION_AUTHENTICATION_RESULT_E_P_C_O_IEI			0x7B
+#define PDU_SESSION_AUTHENTICATION_RESULT_EPCO_IEI			      0x7B
 
 #define PDU_SESSION_AUTHENTICATION_RESULT_EAP_MESSAGE_PRESENCE 	(1<<0)
-#define PDU_SESSION_AUTHENTICATION_RESULT_E_P_C_O_PRESENCE		(1<<1)
+#define PDU_SESSION_AUTHENTICATION_RESULT_EPCO_PRESENCE		      (1<<1)
 
-typedef struct pdu_session_authentication_result_msg_tag{
+typedef struct pdu_session_authentication_result_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
@@ -51,7 +51,7 @@ typedef struct pdu_session_authentication_result_msg_tag{
 	uint8_t presence;
 	EAPMessage eapmessage;
 	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-}pdu_session_authentication_result_msg;
+} pdu_session_authentication_result_msg;
 
 
 int decode_pdu_session_authentication_result(pdu_session_authentication_result_msg *pdusessionauthenticationresult, uint8_t *buffer, uint32_t len);

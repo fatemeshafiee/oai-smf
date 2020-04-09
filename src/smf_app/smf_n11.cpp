@@ -130,7 +130,7 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
   //TODO: use RestSDK for client, use curl to send data for the moment
   Logger::smf_n11().debug("Send Communication_N1N2MessageTransfer to AMF");
 
-  smf_n1_n2 smf_n1_n2_inst;
+  smf_n1_n2 smf_n1_n2_inst = {};
 
   pdu_session_create_sm_context_response context_res_msg = sm_context_res->res;
   std::string n1_message = context_res_msg.get_n1_sm_message();
@@ -210,7 +210,7 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
   Logger::smf_n11().debug("Sending message to AMF....");
 
   if(curl) {
-    CURLcode res;
+    CURLcode res = {};
     struct curl_slist *headers = nullptr;
     struct curl_slist *slist = nullptr;
     curl_mime *mime;
@@ -223,7 +223,7 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
     curl_easy_setopt(curl, CURLOPT_URL, context_res_msg.get_amf_url().c_str() );
     curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:sn11"); //Only for testing in all-in-one scenario
+    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:sn11"); //Only for testing in all-in-one scenario
 
     mime = curl_mime_init(curl);
     alt = curl_mime_init(curl);
@@ -255,7 +255,7 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
     curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
 
     // Response information.
-    long httpCode(0);
+    long httpCode = {0};
     std::unique_ptr<std::string> httpData(new std::string());
 
     // Hook up data handling function.
@@ -266,7 +266,7 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
     //get cause from the response
-    json response_data;
+    json response_data = {};
     try{
       response_data = json::parse(*httpData.get());
     } catch (json::exception& e){
@@ -318,7 +318,6 @@ void smf_n11::send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n
     create_multipart_related_content(body, json_part, boundary, n1_message, n2_message);
     sm_context_res->http_response.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("multipart/related; boundary=" + boundary));
     sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
-
   }
   break;
 
@@ -327,7 +326,6 @@ void smf_n11::send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n
     std::string json_part = sm_context_res->res.sm_context_updated_data.dump();
     sm_context_res->http_response.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
     sm_context_res->http_response.send(Pistache::Http::Code::Ok,json_part.c_str());
-
   }
   break;
 
@@ -383,7 +381,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(Pistache::Http::Respon
 {
 
   Logger::smf_n11().debug("[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
-  nlohmann::json json_data;
+  nlohmann::json json_data = {};
   to_json(json_data, smContextUpdateError);
 
   if (!json_data.empty()){
@@ -433,7 +431,7 @@ void smf_n11::send_pdu_session_create_sm_context_response(Pistache::Http::Respon
 void smf_n11::send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreatedData& smContextCreatedData, Pistache::Http::Code code)
 {
   Logger::smf_n11().debug("[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
-  nlohmann::json json_data;
+  nlohmann::json json_data = {};
   to_json(json_data, smContextCreatedData);
   if (!json_data.empty()){
     httpResponse.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));

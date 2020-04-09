@@ -47,17 +47,17 @@
 0)
 
 
-#define PDU_SESSION_RELEASE_COMMAND_GPRS_TIMER3_IEI								0x37
-#define PDU_SESSION_RELEASE_COMMAND_EAP_MESSAGE_IEI								0x78
+#define PDU_SESSION_RELEASE_COMMAND_GPRS_TIMER3_IEI						            		0x37
+#define PDU_SESSION_RELEASE_COMMAND_EAP_MESSAGE_IEI								            0x78
 #define PDU_SESSION_RELEASE_COMMAND__5GSM_CONGESTION_REATTEMPT_INDICATOR_IEI	0x61
-#define PDU_SESSION_RELEASE_COMMAND_E_P_C_O_IEI									0x7B
+#define PDU_SESSION_RELEASE_COMMAND_E_P_C_O_IEI									              0x7B
 
-#define PDU_SESSION_RELEASE_COMMAND_GPRS_TIMER3_PRESENCE							(1<<0)
-#define PDU_SESSION_RELEASE_COMMAND_EAP_MESSAGE_PRESENCE							(1<<1)
+#define PDU_SESSION_RELEASE_COMMAND_GPRS_TIMER3_PRESENCE							            (1<<0)
+#define PDU_SESSION_RELEASE_COMMAND_EAP_MESSAGE_PRESENCE						             	(1<<1)
 #define PDU_SESSION_RELEASE_COMMAND__5GSM_CONGESTION_REATTEMPT_INDICATOR_PRESENCE	(1<<2)
-#define PDU_SESSION_RELEASE_COMMAND_E_P_C_O_PRESENCE								(1<<3)
+#define PDU_SESSION_RELEASE_COMMAND_E_P_C_O_PRESENCE							              	(1<<3)
 
-typedef struct pdu_session_release_command_msg_tag{
+typedef struct pdu_session_release_command_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
@@ -68,8 +68,7 @@ typedef struct pdu_session_release_command_msg_tag{
 	EAPMessage eapmessage;
 	_5GSMCongestionReattemptIndicator _5gsmcongestionreattemptindicator;
 	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-}pdu_session_release_command_msg;
-
+} pdu_session_release_command_msg;
 
 int decode_pdu_session_release_command(pdu_session_release_command_msg *pdusessionreleasecommand, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_release_command(pdu_session_release_command_msg *pdusessionreleasecommand, uint8_t *buffer, uint32_t len);

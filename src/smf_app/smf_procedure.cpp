@@ -157,9 +157,7 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
 
     forwarding_parameters.set(outer_header_creation);
     forwarding_parameters.set(destination_interface);
-  }
-  else
-  {
+  } else {
     destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE; // ACCESS is for downlink, CORE for uplink
     forwarding_parameters.set(destination_interface);
   }
@@ -190,7 +188,7 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   pfcp::qfi_t                      qfi = {};
 
   source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
-  local_fteid.ch   = 1;
+  local_fteid.ch = 1;
   //local_fteid.chid = 1;
 
   xgpp_conv::paa_to_pfcp_ue_ip_address(sm_context_resp->res.get_paa(), ue_ip_address);
@@ -200,7 +198,6 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   ppc->generate_pdr_id(pdr_id);
   //precedence.precedence = it.bearer_level_qos.pl; //TODO
 
-  //qfi
   //get the default QoS profile
   subscribed_default_qos_t default_qos = {};
   std::shared_ptr<session_management_subscription> ss = {};
@@ -337,7 +334,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
     qos_flow.set_qos_rule(q.qos_rules[0]); //set default QoS rule
   }
   qos_flow.set_qfi(qfi);
-  qos_profile_t profile;
+  qos_profile_t profile = {};
   profile.arp = default_qos.arp;
   qos_flow.set_qos_profile(profile);
   //qos_flow.set_arp(default_qos.arp);
@@ -349,7 +346,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
   //fill content for N1N2MessageTransfer (including N1, N2 SM)
 
   // Create N1 SM container & N2 SM Information
-  smf_n1_n2 smf_n1_n2_inst;
+  smf_n1_n2 smf_n1_n2_inst = {};
   std::string n1_sm_msg,n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
 
@@ -374,9 +371,8 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
 
   //Fill N1N2MesasgeTransferRequestData
   //get supi and put into URL
-  std::string supi_str;
   supi_t supi = n11_triggered_pending->res.get_supi();
-  supi_str = n11_triggered_pending->res.get_supi_prefix() + "-" + smf_supi_to_string (supi);
+  std::string supi_str = n11_triggered_pending->res.get_supi_prefix() + "-" + smf_supi_to_string (supi);
   std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v2/ue-contexts/" + supi_str.c_str() +"/n1-n2-messages";
   n11_triggered_pending->res.set_amf_url(url);
   Logger::smf_n11().debug("N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
@@ -447,11 +443,10 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
   n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
   n4_triggered = std::shared_ptr<itti_n4_session_modification_request>(n4_ser);
 
-
   //TODO: To be completed
   //qos Flow to be modified
   pdu_session_update_sm_context_request sm_context_req_msg = sm_context_req->req;
-  std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified;
+  std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified = {};
   sm_context_req_msg.get_qfis(list_of_qfis_to_be_modified);
 
   for (auto i:list_of_qfis_to_be_modified){
@@ -462,7 +457,7 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
   sm_context_req_msg.get_dl_fteid(dl_fteid); //eNB's fteid
 
   for (auto qfi: list_of_qfis_to_be_modified){
-    smf_qos_flow qos_flow;
+    smf_qos_flow qos_flow = {};
     if (!ppc->get_qos_flow(qfi, qos_flow)){ //no QoS flow found
       Logger::smf_app().error( "Update SM Context procedure: could not found QoS flow with QFI %d", qfi.qfi);
       //Set cause to SYSTEM_FAILURE and send response
@@ -502,7 +497,6 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
       n4_ser->pfcp_ies.set(update_far);
 
       send_n4 = true;
-
       qos_flow.far_id_dl.first = true;
 
     }else {
@@ -663,6 +657,10 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
 void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modification_response& resp, std::shared_ptr<smf::smf_context> sc)
 {
 
+  smf_n1_n2 smf_n1_n2_inst = {};
+  std::string n1_sm_msg,n1_sm_msg_hex;
+  std::string n2_sm_info, n2_sm_info_hex;
+
   Logger::smf_app().info( "Handle itti_n4_session_modification_response: pdu-session-id %d", n11_trigger.get()->req.get_pdu_session_id());
   //TODO: to be completed
 
@@ -675,11 +673,10 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   }
 
   //list of accepted QFI(s) and AN Tunnel Info corresponding to the PDU Session
-  std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified;
+  std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified = {};
   n11_trigger->req.get_qfis(list_of_qfis_to_be_modified);
   ::fteid_t dl_fteid = {};
   n11_trigger->req.get_dl_fteid(dl_fteid);
-
 
   std::map<uint8_t, qos_flow_context_updated> qos_flow_context_to_be_updateds = {};
   n11_triggered_pending->res.get_all_qos_flow_context_updateds(qos_flow_context_to_be_updateds);
@@ -704,7 +701,6 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
           if (it_created_pdr.get(local_up_fteid)) {
             xgpp_conv::pfcp_to_core_fteid(local_up_fteid, flow.ul_fteid);
             flow.ul_fteid.interface_type = S1_U_SGW_GTP_U; //UPF's N3 interface, TODO: should be modified
-
             Logger::smf_app().warn( "got local_up_fteid from created_pdr %s", flow.ul_fteid.toString().c_str());
           } else {
             //UPF doesn't include its fteid in the response
@@ -815,10 +811,6 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
     //N1 SM: PDU Session Modification Command​
     //N2 SM: PDU Session Resource Modify Request Transfer IE
 
-    smf_n1_n2 smf_n1_n2_inst;
-    std::string n1_sm_msg,n1_sm_msg_hex;
-    std::string n2_sm_info, n2_sm_info_hex;
-
     //N1 SM
     smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res, PDU_SESSION_MODIFICATION_COMMAND, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN); //TODO: need cause?
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
@@ -851,8 +843,6 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   //UE-Triggered Service Request Procedure (Step 1)
   case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1:{
     // Create N2 SM Information: PDU Session Resource Setup Request Transfer IE
-    smf_n1_n2 smf_n1_n2_inst;
-    std::string n2_sm_info, n2_sm_info_hex;
 
     //N2 SM Information
     smf_n1_n2_inst.create_n2_sm_information(n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ, n2_sm_info);
@@ -881,10 +871,6 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1:{
     //N1 SM: PDU Session Modification Command​
     //N2 SM: PDU Session Resource Modify Request Transfer IE
-
-    smf_n1_n2 smf_n1_n2_inst;
-    std::string n1_sm_msg,n1_sm_msg_hex;
-    std::string n2_sm_info, n2_sm_info_hex;
 
     //N1 SM
     smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res, PDU_SESSION_MODIFICATION_COMMAND, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN); //TODO: need cause?
@@ -929,10 +915,6 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
     //N1 SM: PDU Session Release Command​
     //N2 SM: PDU Session Resource Release Command Transfer
     Logger::smf_app().info( "PDU Session Release UE-initiated (Step 1))");
-
-    smf_n1_n2 smf_n1_n2_inst;
-    std::string n1_sm_msg,n1_sm_msg_hex;
-    std::string n2_sm_info, n2_sm_info_hex;
 
     //N1 SM
     smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res, PDU_SESSION_RELEASE_COMMAND, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN); //TODO: need cause?

@@ -96,6 +96,4 @@ int encode_qos_rules ( QOSRules qosrules, uint8_t iei, uint8_t * buffer, uint32_
 int decode_qos_rules ( QOSRules * qosrules, uint8_t iei, uint8_t * buffer, uint32_t len);
 void free_decode_qos_rules(QOSRules * qosrules);
 
-void free_decode_qos_rules(QOSRules * qosrules);
-
 #endif

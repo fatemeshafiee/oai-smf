@@ -278,7 +278,6 @@
 #include "Ngap_ServedGUAMIItem.h"
 #include "Ngap_GNB-ID.h"
 #include "Ngap_NGAP-PDU.h"
-#include "as_message.h"
 #endif
 
 #include  "assertions.h"

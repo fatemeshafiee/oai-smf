@@ -45,15 +45,15 @@
 0)
 
 
-#define PDU_SESSION_MODIFICATION_REJECT_GPRS_TIMER3_IEI								0x37
-#define PDU_SESSION_MODIFICATION_REJECT_E_P_C_O_IEI									0x7B
+#define PDU_SESSION_MODIFICATION_REJECT_GPRS_TIMER3_IEI			             					0x37
+#define PDU_SESSION_MODIFICATION_REJECT_E_P_C_O_IEI									              0x7B
 #define PDU_SESSION_MODIFICATION_REJECT__5GSM_CONGESTION_REATTEMPT_INDICATOR_IEI	0x61
 
-#define PDU_SESSION_MODIFICATION_REJECT_GPRS_TIMER3_PRESENCE							(1<<0)
-#define PDU_SESSION_MODIFICATION_REJECT_E_P_C_O_PRESENCE								(1<<1)
+#define PDU_SESSION_MODIFICATION_REJECT_GPRS_TIMER3_PRESENCE						        	    (1<<0)
+#define PDU_SESSION_MODIFICATION_REJECT_E_P_C_O_PRESENCE								              (1<<1)
 #define PDU_SESSION_MODIFICATION_REJECT__5GSM_CONGESTION_REATTEMPT_INDICATOR_PRESENCE	(1<<2)
 
-typedef struct pdu_session_modification_reject_msg_tag{
+typedef struct pdu_session_modification_reject_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
@@ -63,7 +63,7 @@ typedef struct pdu_session_modification_reject_msg_tag{
 	GPRSTimer3 gprstimer3;
 	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 	_5GSMCongestionReattemptIndicator _5gsmcongestionreattemptindicator;
-}pdu_session_modification_reject_msg;
+} pdu_session_modification_reject_msg;
 
 
 int decode_pdu_session_modification_reject(pdu_session_modification_reject_msg *pdusessionmodificationreject, uint8_t *buffer, uint32_t len);

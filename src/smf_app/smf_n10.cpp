@@ -123,7 +123,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
   //retrieve a UE's Session Management Subscription Data (TS29503_Nudm_SDM.yaml: /{supi}/sm-data)
   //use curl to send data for the moment
 
-  nlohmann::json jsonData;
+  nlohmann::json jsonData = {};
   curl_global_init(CURL_GLOBAL_DEFAULT);
   struct curl_slist *headers = nullptr;
   headers = curl_slist_append(headers, "Accept: application/json");
@@ -135,7 +135,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
   Logger::smf_n10().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
 
   if(curl) {
-    CURLcode res;
+    CURLcode res = {};
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
@@ -143,7 +143,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, UDM_CURL_TIMEOUT_MS);
 
     // Response information.
-    long httpCode(0);
+    long httpCode = {0};
     std::unique_ptr<std::string> httpData(new std::string());
 
     // Hook up data handling function.
@@ -168,9 +168,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
           Logger::smf_n10().warn("[get_sm_data] Couldn't Parse json data from UDM");
         }
         numRetries++;
-      }
-      else
-      {
+      } else {
         Logger::smf_n10().warn("[get_sm_data] Couldn't GET response from UDM, URL %s, retry ...", url.c_str());
         //retry
         numRetries++;
@@ -188,7 +186,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
       Logger::smf_n10().debug("[get_sm_data] DNN %s", it.key().c_str());
 
       //dnn_configuration_t *dnn_configuration = new (dnn_configuration_t);
-      //std::shared_ptr<dnn_configuration_t> sdc;
+      //std::shared_ptr<dnn_configuration_t> sdc = {};
       //subscription->find_dnn_configuration(it.key(), sdc);
 
       try {

@@ -38,10 +38,6 @@ Description Contains global security definitions
 #ifndef FILE_SECURITYDEF_SEEN
 #define FILE_SECURITYDEF_SEEN
 
-/****************************************************************************/
-/*********************  G L O B A L    C O N S T A N T S  *******************/
-/****************************************************************************/
-
 /*
  * Index of the first byte of each fields of the AUTN parameter
  */
@@ -72,10 +68,6 @@ Description Contains global security definitions
 
 /* "Separation bit" of AMF field */
 #define AUTH_AMF_SEPARATION_BIT(a)  ((a) & 0x80)
-
-/****************************************************************************/
-/************************  G L O B A L    T Y P E S  ************************/
-/****************************************************************************/
 
 /*
  * EPS authentication vector

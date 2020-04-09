@@ -39,10 +39,10 @@
 0)
 
 
-#define PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_IEI			0x7B
+#define PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_IEI			  0x7B
 #define PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_PRESENCE	(1<<0)
 
-typedef struct pdu_session_modification_command_reject_msg_tag{
+typedef struct pdu_session_modification_command_reject_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
@@ -50,7 +50,7 @@ typedef struct pdu_session_modification_command_reject_msg_tag{
 	_5GSMCause _5gsmcause;
 	uint8_t presence;
 	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-}pdu_session_modification_command_reject_msg;
+} pdu_session_modification_command_reject_msg;
 
 
 int decode_pdu_session_modification_command_reject(pdu_session_modification_command_reject_msg *pdusessionmodificationcommandreject, uint8_t *buffer, uint32_t len);

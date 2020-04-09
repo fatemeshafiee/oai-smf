@@ -59,24 +59,24 @@
 
 
 
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_PDU_SESSION_TYPE_IEI								0x90
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_SSC_MODE_IEI										0xA0
-#define PDU_SESSION_ESTABLISHMENT_REQUEST__5GSM_CAPABILITY_IEI								0x28
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_MAXIMUM_NUMBER_OF_SUPPORTED_IEI					0x55
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_ALWAYSON_PDU_SESSION_REQUESTED_IEI				0xB0
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_SMPDUDN_REQUEST_CONTAINER_INFORMATION_IEI			0x39
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_E_P_C_O_IEI										0x7B
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_PDU_SESSION_TYPE_IEI								       0x90
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_SSC_MODE_IEI										           0xA0
+#define PDU_SESSION_ESTABLISHMENT_REQUEST__5GSM_CAPABILITY_IEI								       0x28
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_MAXIMUM_NUMBER_OF_SUPPORTED_IEI					   0x55
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_ALWAYSON_PDU_SESSION_REQUESTED_IEI				 0xB0
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_SMPDUDN_REQUEST_CONTAINER_INFORMATION_IEI	 0x39
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_EPCO_IEI										               0x7B
 
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_PDU_SESSION_TYPE_PRESENT 							(1<<0)
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_SSC_MODE_PRESENT 									(1<<1)
-#define PDU_SESSION_ESTABLISHMENT_REQUEST__5GSM_CAPABILITY_PRESENT 							(1<<2)
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_MAXIMUM_NUMBER_OF_SUPPORTED_PRESENT 				(1<<3)
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_ALWAYSON_PDU_SESSION_REQUESTED_PRESENT 			(1<<4)
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_SMPDUDN_REQUEST_CONTAINER_INFORMATION_PRESENT 	(1<<5)
-#define PDU_SESSION_ESTABLISHMENT_REQUEST_E_P_C_O_PRESENT 									(1<<6)
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_PDU_SESSION_TYPE_PRESENT 							        (1<<0)
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_SSC_MODE_PRESENT 									            (1<<1)
+#define PDU_SESSION_ESTABLISHMENT_REQUEST__5GSM_CAPABILITY_PRESENT 							        (1<<2)
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_MAXIMUM_NUMBER_OF_SUPPORTED_PRESENT 				  (1<<3)
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_ALWAYSON_PDU_SESSION_REQUESTED_PRESENT 			  (1<<4)
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_SMPDUDN_REQUEST_CONTAINER_INFORMATION_PRESENT (1<<5)
+#define PDU_SESSION_ESTABLISHMENT_REQUEST_EPCO_PRESENT 									                (1<<6)
 
 
-typedef struct pdu_session_establishment_request_msg_tag{
+typedef struct pdu_session_establishment_request_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
@@ -90,7 +90,7 @@ typedef struct pdu_session_establishment_request_msg_tag{
 	AlwaysonPDUSessionRequested alwaysonpdusessionrequested;
 	SMPDUDNRequestContainer smpdudnrequestcontainer;
 	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-}pdu_session_establishment_request_msg;
+} pdu_session_establishment_request_msg;
 
 int decode_pdu_session_establishment_request(pdu_session_establishment_request_msg *pdusessionestablishmentrequest, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_establishment_request(pdu_session_establishment_request_msg *pdusessionestablishmentrequest, uint8_t *buffer, uint32_t len);

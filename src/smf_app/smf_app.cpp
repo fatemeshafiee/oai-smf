@@ -435,11 +435,11 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
 {
   Logger::smf_app().info("Handle a PDU Session Create SM Context Request from an AMF");
   //handle PDU Session Create SM Context Request as specified in section 4.3.2 3GPP TS 23.502
-  oai::smf_server::model::SmContextCreateError smContextCreateError;
-  oai::smf_server::model::ProblemDetails problem_details;
+  oai::smf_server::model::SmContextCreateError smContextCreateError = {};
+  oai::smf_server::model::ProblemDetails problem_details = {};
   std::string n1_sm_message, n1_sm_message_hex; //N1 SM container
-  smf_n1_n2 smf_n1_n2_inst;
-  nas_message_t	decoded_nas_msg;
+  smf_n1_n2 smf_n1_n2_inst = {};
+  nas_message_t	decoded_nas_msg = {};
 
   //Step 1. Decode NAS and get the necessary information
   std::string n1_sm_msg = smreq->req.get_n1_sm_message();
@@ -561,7 +561,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   }
 
   //Step 4. create a context for this supi if not existed, otherwise update
-  std::shared_ptr<smf_context> sc;
+  std::shared_ptr<smf_context> sc = {};
   if (is_supi_2_smf_context(supi64)) {
     Logger::smf_app().debug("Update SMF context with SUPI " SUPI_64_FMT "", supi64);
     sc = supi_2_smf_context(supi64);
@@ -574,7 +574,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_
   }
 
   //Step 5. Create/update context with dnn information
-  std::shared_ptr<dnn_context> sd;
+  std::shared_ptr<dnn_context> sd = {};
 
   if (!sc.get()->find_dnn_context(snssai, dnn, sd)) {
     if (nullptr == sd.get()){
@@ -642,14 +642,14 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
 {
   //handle PDU Session Update SM Context Request as specified in section 4.3.2 3GPP TS 23.502
   Logger::smf_app().info("Handle a PDU Session Update SM Context Request from an AMF");
-  oai::smf_server::model::SmContextUpdateError smContextUpdateError;
-  oai::smf_server::model::ProblemDetails problem_details;
+  oai::smf_server::model::SmContextUpdateError smContextUpdateError = {};
+  oai::smf_server::model::ProblemDetails problem_details = {};
   std::string n1_sm_message, n1_sm_message_hex; //N1 SM container
-  smf_n1_n2 smf_n1_n2_inst; //to encode Ngap IE
+  smf_n1_n2 smf_n1_n2_inst = {}; //to encode Ngap IE
 
   //Step 1. get supi, dnn, nssai, pdu_session id from sm_context
   //SM Context ID - uint32_t in our case
-  scid_t scid;
+  scid_t scid = {};
   try {
     scid = std::stoi(smreq->scid);
   }
@@ -671,7 +671,7 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
     return;
   }
 
-  std::shared_ptr<smf_context_ref> scf;
+  std::shared_ptr<smf_context_ref> scf = {};
 
   if (is_scid_2_smf_context(scid)) {
     scf = scid_2_smf_context(scid);
@@ -695,7 +695,7 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
 
   pdu_session_update_sm_context_request context_req_msg = smreq->req;
   //Step 2. find the smf context
-  std::shared_ptr<smf_context> sc;
+  std::shared_ptr<smf_context> sc = {};
 
   if (is_supi_2_smf_context(supi64)) {
     sc = supi_2_smf_context(supi64);
@@ -713,7 +713,7 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
   }
 
   //get dnn context
-  std::shared_ptr<dnn_context> sd;
+  std::shared_ptr<dnn_context> sd = {};
 
   if (!sc.get()->find_dnn_context(scf.get()->nssai, dnn, sd)) {
     if (nullptr == sd.get()){
@@ -743,15 +743,15 @@ void smf_app::handle_network_requested_pdu_session_modification()
 {
   std::shared_ptr<itti_nx_modify_pdu_session_request_network_requested> itti_msg = std::make_shared<itti_nx_modify_pdu_session_request_network_requested>(TASK_SMF_N11, TASK_SMF_APP);
 
-  supi_t supi;
+  supi_t supi = {};
   std::string dnn;
-  pdu_session_id_t pdu_session_id ;
-  snssai_t nssai ;
+  pdu_session_id_t pdu_session_id = {0};
+  snssai_t nssai = {};
 
   supi64_t supi64 = smf_supi_to_u64(supi);
 
   //Step 2. find the smf context
-  std::shared_ptr<smf_context> sc;
+  std::shared_ptr<smf_context> sc = {};
 
   if (is_supi_2_smf_context(supi64)) {
     sc = supi_2_smf_context(supi64);
@@ -761,7 +761,7 @@ void smf_app::handle_network_requested_pdu_session_modification()
   }
 
   //get dnn context
-  std::shared_ptr<dnn_context> sd;
+  std::shared_ptr<dnn_context> sd = {};
 
   if (!sc.get()->find_dnn_context(nssai, dnn, sd)) {
     if (nullptr == sd.get()){
@@ -843,90 +843,44 @@ void smf_app::convert_string_2_hex(std::string& input_str, std::string& output_s
 
   Logger::smf_app().debug("Convert string to Hex");
   unsigned char *data = (unsigned char *) malloc (input_str.length() + 1);
-  memset(data, 0, input_str.length()  + 1);
+  memset(data, 0, input_str.length() + 1);
   memcpy ((void *)data, (void *)input_str.c_str(), input_str.length());
 
-  Logger::smf_app().debug("Input string:");
+  Logger::smf_app().debug("Input: ");
   for(int i = 0; i < input_str.length(); i++) {
     printf("%02x ", data[i]);
   }
   printf("\n");
   char *datahex = (char *) malloc (input_str.length() * 2 + 1);
-  memset(datahex, 0, input_str.length() *2  + 1);
+  memset(datahex, 0, input_str.length() *2 + 1);
 
   for(int i = 0; i < input_str.length(); i++)
     sprintf(datahex + i*2, "%02x", data[i]);
 
   output_str = reinterpret_cast<char*> (datahex);
-  Logger::smf_app().debug("Output str: \n %s ", output_str.c_str());
+  Logger::smf_app().debug("Output: \n %s ", output_str.c_str());
 }
 
 //---------------------------------------------------------------------------------------------
 unsigned char * smf_app::format_string_as_hex(std::string str){
-  unsigned int str_len = str.length();
-  unsigned char * datavalue  = (unsigned char *)malloc(str_len/2 + 1);
 
-  unsigned char *data = (unsigned char *)malloc(str_len + 1);
-  memset(data,0,str_len + 1);
+  unsigned int str_len =  str.length();
+  char *data = (char *)malloc(str_len + 1);
+  memset(data, 0, str_len + 1);
+  memcpy ((void *)data, (void *)str.c_str(), str_len);
 
-  memcpy ((void *)data, (void *)str.c_str(),str_len);
+  unsigned char *data_hex = (uint8_t *)malloc(str_len/2 + 1);
+  conv::ascii_to_hex (data_hex, (const char *) data);
 
-  std::cout << "[Format string as Hex] Input string (" << str_len <<" bytes): \n" << str.c_str()   <<std::endl;
- /* for(int i = 0;i < str_len; i++)
-  {
-    printf("%02x ", data[i]);
-  }
-*/
-  std::cout <<"Data (formatted): \n";
-  for(int i=0; i < str_len; i++)
-  {
-    //printf("%02x ", data[i]);
-    char datatmp[3] = {0};
-    memcpy(datatmp,&data[i],2);
-    // Ensure both characters are hexadecimal
-    bool bBothDigits = true;
+  Logger::smf_app().debug("[Format string as Hex] Input string (%d bytes): %s ", str_len, str.c_str());
+  Logger::smf_app().debug("Data (formatted):");
 
-    for(int j = 0; j < 2; ++j)
-    {
-      if(!isxdigit(datatmp[j]))
-        bBothDigits = false;
-    }
-    //if(!bBothDigits)
-    //  break;
-    // Convert two hexadecimal characters into one character
-    unsigned int nAsciiCharacter;
-    sscanf(datatmp, "%x", &nAsciiCharacter);
-    printf("%x ",nAsciiCharacter);
-    // Concatenate this character onto the output
-    datavalue[i/2] = (unsigned char)nAsciiCharacter;
-
-    // Skip the next character
-    i++;
-  }
+  for(int i = 0; i < str_len/2; i++)
+    printf(" %02x ",data_hex[i]);
   printf("\n");
 
-  free(data);
-  data = nullptr;
+  return data_hex;
 
-  return datavalue;
-}
-
-//---------------------------------------------------------------------------------------------
-void smf_app::print_string_as_hex(std::string str){
-  Logger::smf_app().debug("print_string_as_hex, input %s", str.c_str());
-  unsigned int str_len = str.length();
-  unsigned char *data = (unsigned char *)malloc(str_len + 1);
-  memset(data,0,str_len + 1);
-
-  memcpy ((void *)data, (void *)str.c_str(),str_len);
-  printf ("\nData as Hex: ");
-  for(int i=0;i<str_len;i++)
-  {
-    printf("%02x ",data[i]);
-  }
-  printf (" (%d bytes) \n", str_len);
-  free(data);
-  data = nullptr;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -935,7 +889,7 @@ void smf_app::update_pdu_session_status(const scid_t scid, const pdu_session_sta
   Logger::smf_app().info("Update PDU Session Status");
 
   //get the smf context
-  std::shared_ptr<smf_context_ref> scf;
+  std::shared_ptr<smf_context_ref> scf = {};
 
   if (is_scid_2_smf_context(scid)) {
     scf = scid_2_smf_context(scid);
@@ -947,7 +901,7 @@ void smf_app::update_pdu_session_status(const scid_t scid, const pdu_session_sta
   supi64_t supi64 = smf_supi_to_u64(supi);
   pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
 
-  std::shared_ptr<smf_context> sc;
+  std::shared_ptr<smf_context> sc = {};
 
   if (is_supi_2_smf_context(supi64)) {
     sc = supi_2_smf_context(supi64);
@@ -958,7 +912,7 @@ void smf_app::update_pdu_session_status(const scid_t scid, const pdu_session_sta
   }
 
   //get dnn context
-  std::shared_ptr<dnn_context> sd;
+  std::shared_ptr<dnn_context> sd = {};
 
   if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
     if (nullptr == sd.get()){
@@ -967,7 +921,7 @@ void smf_app::update_pdu_session_status(const scid_t scid, const pdu_session_sta
     }
   }
   //get smd_pdu_session
-  std::shared_ptr<smf_pdu_session> sp;
+  std::shared_ptr<smf_pdu_session> sp = {};
   bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
 
   if (nullptr == sp.get()){

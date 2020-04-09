@@ -66,15 +66,15 @@ typedef union {
   pdu_session_release_complete_msg pdu_session_release_complete;
 
   _5gsm_status_msg _5gsm_status;
-}SM_msg;
+} SM_msg;
 
 int sm_msg_decode (
-  SM_msg * msg,
-  uint8_t * buffer,
-  uint32_t len);
+    SM_msg * msg,
+    uint8_t * buffer,
+    uint32_t len);
 
 int fivegsm_msg_encode (
-  SM_msg * msg,
-  uint8_t * buffer,
-  uint32_t len);
+    SM_msg * msg,
+    uint8_t * buffer,
+    uint32_t len);
 #endif

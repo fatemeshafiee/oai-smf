@@ -36,13 +36,13 @@
 0)
 
 
-typedef struct _5gsm_status_msg_tag{
+typedef struct _5gsm_status_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
 	MessageType messagetype;
 	_5GSMCause _5gsmcause;
-}_5gsm_status_msg;
+} _5gsm_status_msg;
 
 
 int decode__5gsm_status(_5gsm_status_msg *_5gsmstatus, uint8_t *buffer, uint32_t len);

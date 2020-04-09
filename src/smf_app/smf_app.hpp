@@ -253,8 +253,6 @@ public:
 
   unsigned char * format_string_as_hex(std::string str);
 
-  void print_string_as_hex(std::string str);
-
   void start_upf_association(const pfcp::node_id_t& node_id);
 
   /*

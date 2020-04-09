@@ -135,7 +135,8 @@ int decode_qos_flow_descriptions ( QOSFlowDescriptions * qosflowdescriptions, ui
         decoded_tmp = decoded_tmp + *(buffer + decoded_tmp) + 1;
       }
     }
-    qosflowdescriptionsnumber    ++;
+    qosflowdescriptionsnumber
+    ++;
   }
 
   qosflowdescriptions->qosflowdescriptionsnumber = qosflowdescriptionsnumber;
@@ -207,5 +208,4 @@ void free_decode_qos_flow_descriptions(QOSFlowDescriptions * qosflowdescriptions
   free(qosflowdescriptions->qosflowdescriptionscontents);
   qosflowdescriptions->qosflowdescriptionscontents = NULL;
 }
-
 

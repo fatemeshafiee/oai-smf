@@ -52,19 +52,19 @@
 0)
 
 
-#define PDU_SESSION_ESTABLISHMENT_REJECT_GPRS_TIMER3_IEI								0x37
-#define PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_IEI							0xF0
-#define PDU_SESSION_ESTABLISHMENT_REJECT_EAP_MESSAGE_IEI								0x78
-#define PDU_SESSION_ESTABLISHMENT_REJECT_E_P_C_O_IEI									0x7B
+#define PDU_SESSION_ESTABLISHMENT_REJECT_GPRS_TIMER3_IEI						            		0x37
+#define PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_IEI						          	0xF0
+#define PDU_SESSION_ESTABLISHMENT_REJECT_EAP_MESSAGE_IEI								            0x78
+#define PDU_SESSION_ESTABLISHMENT_REJECT_E_P_C_O_IEI							              		0x7B
 #define PDU_SESSION_ESTABLISHMENT_REJECT__5GSM_CONGESTION_REATTEMPT_INDICATOR_IEI		0x61
 
-#define PDU_SESSION_ESTABLISHMENT_REJECT_GPRS_TIMER3_PRESENCE 								(1<<0)
-#define PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_PRESENCE							(1<<1)
-#define PDU_SESSION_ESTABLISHMENT_REJECT_EAP_MESSAGE_PRESENCE								(1<<2)
-#define PDU_SESSION_ESTABLISHMENT_REJECT_E_P_C_O_PRESENCE									(1<<3)
-#define PDU_SESSION_ESTABLISHMENT_REJECT__5GSM_CONGESTION_REATTEMPT_INDICATOR_PRESENCE		(1<<4)
+#define PDU_SESSION_ESTABLISHMENT_REJECT_GPRS_TIMER3_PRESENCE 								          (1<<0)
+#define PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_PRESENCE							        (1<<1)
+#define PDU_SESSION_ESTABLISHMENT_REJECT_EAP_MESSAGE_PRESENCE								            (1<<2)
+#define PDU_SESSION_ESTABLISHMENT_REJECT_E_P_C_O_PRESENCE									              (1<<3)
+#define PDU_SESSION_ESTABLISHMENT_REJECT__5GSM_CONGESTION_REATTEMPT_INDICATOR_PRESENCE  (1<<4)
 
-typedef struct pdu_session_establishment_reject_msg_tag{
+typedef struct pdu_session_establishment_reject_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
@@ -76,7 +76,7 @@ typedef struct pdu_session_establishment_reject_msg_tag{
 	EAPMessage eapmessage;
 	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 	_5GSMCongestionReattemptIndicator _5gsmcongestionreattemptindicator;
-}pdu_session_establishment_reject_msg;
+} pdu_session_establishment_reject_msg;
 
 
 int decode_pdu_session_establishment_reject(pdu_session_establishment_reject_msg *pdusessionestablishmentreject, uint8_t *buffer, uint32_t len);

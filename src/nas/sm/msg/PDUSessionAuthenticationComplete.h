@@ -38,10 +38,10 @@
 		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + \
 0)
 
-#define PDU_SESSION_AUTHENTICATION_COMPLETE_E_P_C_O_IEI			0x7B
-#define PDU_SESSION_AUTHENTICATION_COMPLETE_E_P_C_O_PRESENCE	(1<<0)
+#define PDU_SESSION_AUTHENTICATION_COMPLETE_EPCO_IEI			  0x7B
+#define PDU_SESSION_AUTHENTICATION_COMPLETE_EPCO_PRESENCE	(1<<0)
 
-typedef struct pdu_session_authentication_complete_msg_tag{
+typedef struct pdu_session_authentication_complete_msg_tag {
 	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
 	PDUSessionIdentity pdusessionidentity;
 	ProcedureTransactionIdentity proceduretransactionidentity;
@@ -49,7 +49,7 @@ typedef struct pdu_session_authentication_complete_msg_tag{
 	EAPMessage eapmessage;
 	uint8_t presence;
 	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-}pdu_session_authentication_complete_msg;
+} pdu_session_authentication_complete_msg;
 
 
 int decode_pdu_session_authentication_complete(pdu_session_authentication_complete_msg *pdusessionauthenticationcomplete, uint8_t *buffer, uint32_t len);
