@@ -43,7 +43,7 @@ cd /oai-cn5g-smf/build/scripts
 
 ## Create configuration file for SMF
 cd /oai-cn5g-smf/build/scripts
-./smf_conf.sh
+./smf_conf_local.sh
 
 ## launch SMF
 sudo smf -c /usr/local/etc/oai/smf.conf -o 

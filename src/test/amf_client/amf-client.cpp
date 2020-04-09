@@ -203,7 +203,7 @@ void send_pdu_session_update_sm_context_establishment()
   ENCODE_U8 (buffer+size, 0x00 , size);
   ENCODE_U8 (buffer+size, 0x01 , size);
   ENCODE_U8 (buffer+size, 0x00 , size);
-  ENCODE_U8 (buffer+size, 0x00 , size);
+  ENCODE_U8 (buffer+size, 0x3c , size);
 
 
 /*
