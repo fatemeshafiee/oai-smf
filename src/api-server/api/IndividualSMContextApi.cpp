@@ -79,10 +79,12 @@ void IndividualSMContextApi::release_sm_context_handler(const Pistache::Rest::Re
   //TODO: to be updated as update_sm_context_handler
   Logger::smf_api_server().info("Received a Nsmf_PDUSession_UpdateSMContext: PDU Session Release request from AMF");
   Logger::smf_api_server().debug("Request body: %s\n",request.body().c_str());
-  SmContextReleaseMessage smContextReleaseMessage;
+  SmContextReleaseMessage smContextReleaseMessage = {};
 
-  // Getting the path params
-  auto smContextRef = request.param(":smContextRef").as<std::string>();
+  //find boundary
+  std::size_t found = request.body().find("Content-Type");
+  std::string boundary_str = request.body().substr(2, found - 4);
+  Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
 
   //step 1. use multipartparser to decode the request
   multipartparser_callbacks_init(&g_callbacks);
@@ -95,33 +97,53 @@ void IndividualSMContextApi::release_sm_context_handler(const Pistache::Rest::Re
   g_callbacks.on_part_end = &on_part_end;
   g_callbacks.on_body_end = &on_body_end;
 
-  multipartparser parser;
+  multipartparser parser = {};
   init_globals();
-  multipartparser_init(&parser, BOUNDARY);
-  if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
-    response.send(Pistache::Http::Code::Bad_Request, "");
-    return;
-  }
+  multipartparser_init(&parser, reinterpret_cast<const char*>(boundary_str.c_str()));
 
-  //at least 2 parts for Json data and N1/N2
-  if (g_parts.size() < 2){
-    response.send(Pistache::Http::Code::Bad_Request, "");
-    return;
+  unsigned int str_len = request.body().length();
+  unsigned char *data = (unsigned char *)malloc(str_len + 1);
+  memset(data, 0, str_len + 1);
+  memcpy ((void *)data, (void *)request.body().c_str(), str_len);
+
+  //if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
+  if ((multipartparser_execute(&parser, &g_callbacks, reinterpret_cast<const char*>(data), str_len) != strlen(request.body().c_str())) or (!g_body_begin_called)){
+    Logger::smf_api_server().warn("The received message can not be parsed properly!");
+    //TODO: fix this issue
+    //response.send(Pistache::Http::Code::Bad_Request, "");
+    //return;
   }
+  free(data);
+  data = nullptr;
+
+  uint8_t size = g_parts.size();
+
+  Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
   part p0 = g_parts.front(); g_parts.pop_front();
-  Logger::smf_api_server().debug("Request body, part 1: \n%s", p0.body.c_str());
-  part p1 = g_parts.front(); g_parts.pop_front();
-  Logger::smf_api_server().debug("Request body, part 2: \n %s",p1.body.c_str());
-  //part p2 = g_parts.front(); g_parts.pop_front();
-  //Logger::smf_api_server().debug("Request body, part 3: \n %s",p2.body.c_str());
+  Logger::smf_api_server().debug("Request body, part 1: %s", p0.body.c_str());
+  part p1 = {};
 
+  if (size > 1){
+    p1 = g_parts.front(); g_parts.pop_front();
+    Logger::smf_api_server().debug("Request body, part 2: %s (%d bytes)",p1.body.c_str(), p1.body.length());
+    //part p2 = g_parts.front(); g_parts.pop_front();
+    //Logger::smf_api_server().debug("Request body, part 3: \n %s",p2.body.c_str());
+  }
   // Getting the body param
-  SmContextReleaseData smContextReleaseData;
+  SmContextReleaseData smContextReleaseData = {};
 
   try {
     nlohmann::json::parse(p0.body.c_str()).get_to(smContextReleaseData);
     smContextReleaseMessage.setJsonData(smContextReleaseData);
-    smContextReleaseMessage.setBinaryDataN2SmInformation(p1.body.c_str());
+    if (size > 1){
+      if (smContextReleaseData.n2SmInfoIsSet()){
+        //N2 SM (for Session establishment, or for session modification)
+        Logger::smf_api_server().debug("N2 SM information is set");
+        smContextReleaseMessage.setBinaryDataN2SmInformation(p1.body);
+      }
+    }
+    // Getting the path params
+    auto smContextRef = request.param(":smContextRef").as<std::string>();
     this->release_sm_context(smContextRef, smContextReleaseMessage, response);
 
   } catch (nlohmann::detail::exception &e) {
@@ -141,7 +163,7 @@ void IndividualSMContextApi::retrieve_sm_context_handler(const Pistache::Rest::R
 
   // Getting the body param
 
-  SmContextRetrieveData smContextRetrieveData;
+  SmContextRetrieveData smContextRetrieveData = {};
 
   try {
     nlohmann::json::parse(request.body()).get_to(smContextRetrieveData);
@@ -167,7 +189,7 @@ void IndividualSMContextApi::update_sm_context_handler(const Pistache::Rest::Req
   std::string boundary_str = request.body().substr(2, found - 4);
   Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
 
-  SmContextUpdateMessage smContextUpdateMessage;
+  SmContextUpdateMessage smContextUpdateMessage = {};
 
   //step 1. use multipartparser to decode the request
   multipartparser_callbacks_init(&g_callbacks);
@@ -180,7 +202,7 @@ void IndividualSMContextApi::update_sm_context_handler(const Pistache::Rest::Req
   g_callbacks.on_part_end = &on_part_end;
   g_callbacks.on_body_end = &on_body_end;
 
-  multipartparser parser;
+  multipartparser parser = {};
   init_globals();
   multipartparser_init(&parser, reinterpret_cast<const char*>(boundary_str.c_str()));
 
@@ -214,7 +236,7 @@ void IndividualSMContextApi::update_sm_context_handler(const Pistache::Rest::Req
   }
 
   // Getting the body param
-  SmContextUpdateData smContextUpdateData;
+  SmContextUpdateData smContextUpdateData = {};
   try {
     nlohmann::json::parse(p0.body.c_str()).get_to(smContextUpdateData);
     smContextUpdateMessage.setJsonData(smContextUpdateData);

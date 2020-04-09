@@ -44,7 +44,7 @@ void IndividualPDUSessionHSMFApi::release_pdu_session_handler(const Pistache::Re
     
     // Getting the body param
     
-    ReleaseData releaseData;
+    ReleaseData releaseData = {};
     
     try {
       nlohmann::json::parse(request.body()).get_to(releaseData);
@@ -66,7 +66,7 @@ void IndividualPDUSessionHSMFApi::update_pdu_session_handler(const Pistache::Res
     
     // Getting the body param
     
-    HsmfUpdateData hsmfUpdateData;
+    HsmfUpdateData hsmfUpdateData = {};
     
     try {
       nlohmann::json::parse(request.body()).get_to(hsmfUpdateData);

@@ -80,8 +80,8 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
   std::string boundary_str = request.body().substr(2, found - 4);
   Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
 
-  SmContextMessage smContextMessage;
-  SmContextCreateData smContextCreateData;
+  SmContextMessage smContextMessage = {};
+  SmContextCreateData smContextCreateData = {};
 
   //step 1. use multipartparser to decode the request
   multipartparser_callbacks_init(&g_callbacks);
@@ -94,7 +94,7 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
   g_callbacks.on_part_end = &on_part_end;
   g_callbacks.on_body_end = &on_body_end;
 
-  multipartparser parser;
+  multipartparser parser = {};
   init_globals();
   multipartparser_init(&parser, reinterpret_cast<const char*>(boundary_str.c_str()));
   if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
