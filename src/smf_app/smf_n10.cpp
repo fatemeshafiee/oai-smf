@@ -55,10 +55,10 @@ void smf_n10_task (void*);
  * To read content of the response from UDM
  */
 static std::size_t callback(
-    const char* in,
+    const char *in,
     std::size_t size,
     std::size_t num,
-    std::string* out)
+    std::string *out)
 {
   const std::size_t totalBytes(size * num);
   out->append(in, totalBytes);
@@ -84,14 +84,12 @@ void smf_n10_task (void *args_p)
       //}
       break;
 
-
     case TERMINATE:
       if (itti_msg_terminate *terminate = dynamic_cast<itti_msg_terminate*>(msg)) {
         Logger::smf_n10().info( "Received terminate message");
         return;
       }
       break;
-
 
     default:
       Logger::smf_n10().info( "no handler for msg type %d", msg->msg_type);
@@ -113,9 +111,9 @@ smf_n10::smf_n10 ()
 }
 
 
-
 void smf_n10::handle_receive_sm_data_notification()
 {
+  //TODO:
 }
 
 bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, std::shared_ptr<session_management_subscription> subscription)
@@ -134,7 +132,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
   std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.udm_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.udm_addr.port) + "/nudm-sdm/v2/" + std::to_string(supi) +"/sm-data";
   Logger::smf_n10().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
 
-  if(curl) {
+  if (curl) {
     CURLcode res = {};
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -151,20 +149,19 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
     //curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData);
     int numRetries = 0;
-    while (numRetries < UDM_NUMBER_RETRIES){
+    while (numRetries < UDM_NUMBER_RETRIES) {
       res = curl_easy_perform(curl);
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
       Logger::smf_n10().debug("[get_sm_data] Response from UDM, Http Code: %d ", httpCode);
 
-      if (static_cast<http_response_codes_e> (httpCode) == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
-      {
+      if (static_cast<http_response_codes_e> (httpCode) == http_response_codes_e::HTTP_RESPONSE_CODE_OK) {
         Logger::smf_n10().debug("[get_sm_data] Got successful response from UDM, URL: %s ", url.c_str());
         //Logger::smf_n10().debug("[get_sm_data] Http Data from UDM: %s ", *httpData.get());
-        try{
+        try {
           jsonData = nlohmann::json::parse(*httpData.get());
           //curl_easy_cleanup(curl);
           break;
-        } catch (json::exception& e){
+        } catch (json::exception& e) {
           Logger::smf_n10().warn("[get_sm_data] Couldn't Parse json data from UDM");
         }
         numRetries++;
@@ -178,7 +175,7 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
   }
 
   //process the response
-  if (!jsonData.empty()){
+  if (!jsonData.empty()) {
     Logger::smf_n10().debug("[get_sm_data] GET response from UDM %s", jsonData.dump().c_str());
 
     //retrieve SessionManagementSubscription and store in the context
@@ -230,13 +227,13 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
 
         //sdc = std::shared_ptr<dnn_configuration_t> (dnn_configuration);
         subscription->insert_dnn_configuration(it.key(), dnn_configuration);
-      } catch (nlohmann::json::exception& e){
+      } catch (nlohmann::json::exception& e) {
         Logger::smf_n10().warn("[get_sm_data] exception message %s, exception id %d ", e.what(), e.id);
         return false;
       }
     }
     return true;
-  } else{
+  } else {
     return false;
   }
 

@@ -72,16 +72,15 @@ extern smf_app *smf_app_inst;
  * To read content of the response from UDM
  */
 static std::size_t callback(
-    const char* in,
+    const char *in,
     std::size_t size,
     std::size_t num,
-    std::string* out)
+    std::string *out)
 {
   const std::size_t totalBytes(size * num);
   out->append(in, totalBytes);
   return totalBytes;
 }
-
 
 //-----------------------------------------------------------------------------------------------------
 void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type, std::string& nas_msg_str, cause_value_5gsm_e sm_cause)
@@ -94,7 +93,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
   int bytes = { 0 };
   int length = BUF_LEN;
   unsigned char data[BUF_LEN] = {'\0'};
-  memset(data,0,sizeof(data));
+  memset(data, 0, sizeof(data));
 
   nas_message_t nas_msg = {};
   memset(&nas_msg, 0, sizeof(nas_message_t));
@@ -117,7 +116,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
     //PDU Session Establishment Accept is including in the N1N2MessageTransfer Request sent from SMF to AMF (PDU Session Establishment procedure)
 
     //PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE
-    if (msg.get_msg_type() != PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE){
+    if (msg.get_msg_type() != PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE) {
       Logger::smf_app().error("Cannot create an PDU Session Establishment Accept for this message (type %d)",msg.get_msg_type());
       return;
     }
@@ -427,7 +426,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
   }
   break;
 
-  default:{
+  default: {
     Logger::smf_app().debug("Unknown PDU Session Type");
     //TODO:
   }
@@ -438,7 +437,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg& msg, uint8_t n1_msg_type
   bytes = nas_message_encode (data, &nas_msg, sizeof(data)/*don't know the size*/, nullptr);
 
   Logger::smf_app().debug("Buffer Data: ");
-  for(int i = 0; i < bytes; i++)
+  for (int i = 0; i < bytes; i++)
     printf("%02x ", data[i]);
   printf(" (bytes %d)\n", bytes);
 
@@ -453,7 +452,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
   //TODO: To be filled with the correct parameters
   Logger::smf_app().info("Create N2 SM Information, NGAP message type %d, IE type %d", ngap_msg_type, ngap_ie_type);
 
-  switch (ngap_ie_type){
+  switch (ngap_ie_type) {
 
   //PDU Session Resource Setup Request Transfer
   //need to be verified with Wireshark (case 1)
@@ -581,7 +580,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.nonDynamic5QI = (Ngap_NonDynamic5QIDescriptor_t *)(calloc (1, sizeof(Ngap_NonDynamic5QIDescriptor_t)));
     ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.qosCharacteristics.choice.nonDynamic5QI->fiveQI = (uint8_t) qos_flow.qfi.qfi;
     ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.priorityLevelARP = qos_flow.qos_profile.arp.priority_level;
-    if (qos_flow.qos_profile.arp.preempt_cap.compare("NOT_PREEMPT") == 0){
+    if (qos_flow.qos_profile.arp.preempt_cap.compare("NOT_PREEMPT") == 0) {
       ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.pre_emptionCapability = Ngap_Pre_emptionCapability_shall_not_trigger_pre_emption;
     } else {
       ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters.allocationAndRetentionPriority.pre_emptionCapability = Ngap_Pre_emptionCapability_may_trigger_pre_emption;
@@ -607,9 +606,9 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     }
 
     Logger::smf_app().debug("N2 SM buffer data: ");
-    for(int i = 0; i < er.encoded; i++)
-      printf("%02x ", (char)buffer[i]);
-    printf(" (%d bytes)\n",(int)er.encoded);
+    for( int i = 0; i < er.encoded; i++)
+      printf("%02x ", (char) buffer[i]);
+    printf(" (%d bytes)\n",(int) er.encoded);
     std::string ngap_message ((char*) buffer,  er.encoded);
     ngap_msg_str = ngap_message;
   }
@@ -712,12 +711,12 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
     ngap_QosFlowAddOrModifyRequestItem->qosFlowLevelQosParameters->qosCharacteristics.choice.nonDynamic5QI = (Ngap_NonDynamic5QIDescriptor_t *)(calloc (1, sizeof(Ngap_NonDynamic5QIDescriptor_t)));
     ngap_QosFlowAddOrModifyRequestItem->qosFlowLevelQosParameters->qosCharacteristics.choice.nonDynamic5QI->fiveQI = qos_flow.qfi.qfi;
     ngap_QosFlowAddOrModifyRequestItem->qosFlowLevelQosParameters->allocationAndRetentionPriority.priorityLevelARP = qos_flow.qos_profile.priority_level;
-    if (qos_flow.qos_profile.arp.preempt_cap.compare("NOT_PREEMPT") == 0){
+    if (qos_flow.qos_profile.arp.preempt_cap.compare("NOT_PREEMPT") == 0) {
       ngap_QosFlowAddOrModifyRequestItem->qosFlowLevelQosParameters->allocationAndRetentionPriority.pre_emptionCapability = Ngap_Pre_emptionCapability_shall_not_trigger_pre_emption;
     } else {
       ngap_QosFlowAddOrModifyRequestItem->qosFlowLevelQosParameters->allocationAndRetentionPriority.pre_emptionCapability = Ngap_Pre_emptionCapability_may_trigger_pre_emption;
     }
-    if ( qos_flow.qos_profile.arp.preempt_vuln.compare("NOT_PREEMPTABLE") == 0) {
+    if (qos_flow.qos_profile.arp.preempt_vuln.compare("NOT_PREEMPTABLE") == 0) {
       ngap_QosFlowAddOrModifyRequestItem->qosFlowLevelQosParameters->allocationAndRetentionPriority.pre_emptionVulnerability = Ngap_Pre_emptionVulnerability_not_pre_emptable;
     } else {
       ngap_QosFlowAddOrModifyRequestItem->qosFlowLevelQosParameters->allocationAndRetentionPriority.pre_emptionVulnerability = Ngap_Pre_emptionVulnerability_pre_emptable;
@@ -734,19 +733,18 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
 
     //encode
     size_t buffer_size = 512;
-    char *buffer = (char *)calloc(1, buffer_size);
+    char *buffer = (char *) calloc(1, buffer_size);
 
     asn_enc_rval_t er = aper_encode_to_buffer(&asn_DEF_Ngap_PDUSessionResourceModifyRequestTransfer, nullptr, ngap_IEs, (void *)buffer, buffer_size);
-    if(er.encoded < 0)
-    {
+    if (er.encoded < 0) {
       Logger::smf_app().warn("[Create N2 SM Information] NGAP PDU Session Resource Modify Request Transfer encode failed, er.encoded: %d", er.encoded);
       return;
     }
 
     Logger::smf_app().debug("N2 SM buffer data: ");
     for(int i = 0; i < er.encoded; i++)
-      printf("%02x ", (char)buffer[i]);
-    printf(" (%d bytes)\n",(int)er.encoded);
+      printf("%02x ", (char) buffer[i]);
+    printf(" (%d bytes)\n",(int) er.encoded);
     std::string ngap_message ((char*) buffer,  er.encoded);
     ngap_msg_str = ngap_message;
   }
@@ -791,18 +789,17 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
 
     //encode
     size_t buffer_size = 512;
-    char *buffer = (char *)calloc(1,buffer_size);
+    char *buffer = (char *) calloc(1,buffer_size);
 
     asn_enc_rval_t er = aper_encode_to_buffer(&asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, nullptr, ngap_resource_response_transfer, (void *)buffer, buffer_size);
-    if(er.encoded < 0)
-    {
+    if (er.encoded < 0) {
       Logger::smf_app().warn("[Create N2 SM Information] NGAP PDU Session Resource Setup Response Transfer encode failed, er.encoded: %d", er.encoded);
       return;
     }
 
     Logger::smf_app().debug("N2 SM buffer data: ");
-    for(int i = 0; i < er.encoded; i++)
-      printf("%02x ", (char)buffer[i]);
+    for (int i = 0; i < er.encoded; i++)
+      printf("%02x ", (char) buffer[i]);
     Logger::smf_app().debug(" (%d bytes) \n",er.encoded);
     std::string ngap_message ((char*) buffer,  er.encoded);
     ngap_msg_str = ngap_message;
@@ -842,18 +839,17 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_
 
     //encode
     size_t buffer_size = 512;
-    char *buffer = (char *)calloc(1,buffer_size);
+    char *buffer = (char *) calloc(1,buffer_size);
 
     asn_enc_rval_t er = aper_encode_to_buffer(&asn_DEF_Ngap_PDUSessionResourceReleaseCommandTransfer, nullptr, ngap_resource_release_command_transfer, (void *)buffer, buffer_size);
-    if(er.encoded < 0)
-    {
+    if (er.encoded < 0) {
       Logger::smf_app().warn("[Create N2 SM Information] NGAP PDU Session Release Command encode failed, er.encoded: %d", er.encoded);
       return;
     }
 
     Logger::smf_app().debug("N2 SM buffer data: ");
-    for(int i = 0; i < er.encoded; i++)
-      printf("%02x ", (char)buffer[i]);
+    for (int i = 0; i < er.encoded; i++)
+      printf("%02x ", (char) buffer[i]);
     Logger::smf_app().debug(" (%d bytes) \n",er.encoded);
     std::string ngap_message ((char*) buffer,  er.encoded);
     ngap_msg_str = ngap_message;
@@ -878,15 +874,15 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm
   int decoder_rc = RETURNok;
 
   unsigned int msg_len = n1_sm_msg.length();
-  char *data = (char *)malloc(msg_len + 1);
+  char *data = (char *) malloc(msg_len + 1);
   memset(data, 0, msg_len + 1);
   memcpy ((void *)data, (void *)n1_sm_msg.c_str(), msg_len);
 
-  uint8_t *data_hex = (uint8_t *)malloc(msg_len/2 + 1);
+  uint8_t *data_hex = (uint8_t *) malloc(msg_len/2 + 1);
   conv::ascii_to_hex (data_hex, (const char *) data);
   printf("Content: ");
-  for(int i = 0;i<msg_len/2;i++)
-    printf(" %02x ",data_hex[i]);
+  for (int i = 0; i < msg_len/2; i++)
+    printf(" %02x ", data_hex[i]);
   printf("\n");
 
   //decode the NAS message (using NAS lib)
@@ -911,14 +907,13 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm
 int smf_n1_n2::decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE, std::string& n2_sm_info){
   Logger::smf_app().info("Decode NGAP message (PDUSessionResourceSetupResponseTransfer) from N2 SM Information");
   unsigned int data_len = n2_sm_info.length();
-  unsigned char *data = (unsigned char *)malloc(data_len + 1);
+  unsigned char *data = (unsigned char *) malloc(data_len + 1);
   memset(data, 0, data_len + 1);
   memcpy ((void *)data, (void *)n2_sm_info.c_str(), data_len);
 
   //PDUSessionResourceSetupResponseTransfer
   asn_dec_rval_t rc  = asn_decode(nullptr, ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, (void **)&ngap_IE, (void *)data, data_len);
-  if(rc.code != RC_OK)
-  {
+  if (rc.code != RC_OK) {
     Logger::smf_api_server().warn("asn_decode failed with code %d", rc.code );
     return RETURNerror;
   }
@@ -931,14 +926,13 @@ int smf_n1_n2::decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceM
   Logger::smf_app().info("Decode NGAP message (Ngap_PDUSessionResourceModifyResponseTransfer) from N2 SM Information");
 
   unsigned int data_len = n2_sm_info.length();
-  unsigned char *data = (unsigned char *)malloc(data_len + 1);
+  unsigned char *data = (unsigned char *) malloc(data_len + 1);
   memset(data, 0, data_len + 1);
   memcpy ((void *)data, (void *)n2_sm_info.c_str(), data_len);
 
   //Ngap_PDUSessionResourceModifyResponseTransfer
   asn_dec_rval_t rc  = asn_decode(nullptr, ATS_ALIGNED_CANONICAL_PER, &asn_DEF_Ngap_PDUSessionResourceModifyResponseTransfer, (void **)&ngap_IE, (void *)data, data_len);
-  if(rc.code != RC_OK)
-  {
+  if (rc.code != RC_OK) {
     Logger::smf_api_server().warn("asn_decode failed with code %d", rc.code );
     return RETURNerror;
   }

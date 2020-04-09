@@ -35,6 +35,7 @@ void qos_flow_context_updated::set_cause(const uint8_t cause)
 {
   cause_value = cause;
 }
+
 //-----------------------------------------------------------------------------
 void qos_flow_context_updated::set_qfi(const pfcp::qfi_t& q)
 {
@@ -165,7 +166,6 @@ void pdu_session_msg::set_pdu_session_type (uint8_t const& pdu_session_type)
 {
   m_pdu_session_type = pdu_session_type;
 }
-
 
 //-----------------------------------------------------------------------------
 extended_protocol_discriminator_t pdu_session_create_sm_context::get_epd() const
@@ -354,7 +354,6 @@ std::string pdu_session_create_sm_context_response::get_amf_url() const
 }
 
 //-----------------------------------------------------------------------------
-/* pdu_session_update_sm_context_request */
 std::string pdu_session_update_sm_context_request::get_n2_sm_information() const{
   return 	m_n2_sm_information;
 }
@@ -408,7 +407,7 @@ void pdu_session_update_sm_context_request::add_qfi(pfcp::qfi_t const& qfi)
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::get_qfis(std::vector<pfcp::qfi_t>& q)
 {
-  for (auto qfi: qfis){
+  for (auto qfi: qfis) {
     q.push_back(qfi);
   }
 }
@@ -426,7 +425,6 @@ void pdu_session_update_sm_context_request::get_dl_fteid(fteid_t& t)
   t = dl_fteid;
 
 }
-
 
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::set_upCnx_state(std::string const& value)
@@ -465,7 +463,6 @@ void pdu_session_update_sm_context_response::set_pti(procedure_transaction_id_t 
   m_pti = pti;
 }
 
-
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_response::set_cause(uint8_t cause)
 {
@@ -476,7 +473,6 @@ void pdu_session_update_sm_context_response::set_cause(uint8_t cause)
 uint8_t pdu_session_update_sm_context_response::get_cause(){
   return m_cause;
 }
-
 
 //-----------------------------------------------------------------------------
 std::string pdu_session_update_sm_context_response::get_n2_sm_information() const{

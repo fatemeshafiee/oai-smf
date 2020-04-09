@@ -64,10 +64,10 @@ void smf_n11_task (void*);
 
 // To read content of the response from UDM
 static std::size_t callback(
-    const char* in,
+    const char *in,
     std::size_t size,
     std::size_t num,
-    std::string* out)
+    std::string *out)
 {
   const std::size_t totalBytes(size * num);
   out->append(in, totalBytes);
@@ -116,7 +116,7 @@ void smf_n11_task (void *args_p)
 smf_n11::smf_n11 ()
 {
   Logger::smf_n11().startup("Starting...");
-  if (itti_inst->create_task(TASK_SMF_N11, smf_n11_task, nullptr) ) {
+  if (itti_inst->create_task(TASK_SMF_N11, smf_n11_task, nullptr)) {
     Logger::smf_n11().error( "Cannot create task TASK_SMF_N11" );
     throw std::runtime_error( "Cannot create task TASK_SMF_N11" );
   }
@@ -209,7 +209,7 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
 
   Logger::smf_n11().debug("Sending message to AMF....");
 
-  if(curl) {
+  if (curl) {
     CURLcode res = {};
     struct curl_slist *headers = nullptr;
     struct curl_slist *slist = nullptr;
@@ -267,9 +267,9 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
 
     //get cause from the response
     json response_data = {};
-    try{
+    try {
       response_data = json::parse(*httpData.get());
-    } catch (json::exception& e){
+    } catch (json::exception& e) {
       Logger::smf_n11().error( "Could not get the cause from the response");
       //Set the default Cause
       response_data["cause"] = "504 Gateway Timeout";
@@ -283,7 +283,7 @@ void smf_n11::send_n1n2_message_transfer_request(std::shared_ptr<itti_n11_create
     itti_msg->set_cause(response_data["cause"]);
     if (context_res_msg.get_cause() == REQUEST_ACCEPTED) {
       itti_msg->set_msg_type(PDU_SESSION_ESTABLISHMENT_ACCEPT);
-    }else {
+    } else {
       itti_msg->set_msg_type(PDU_SESSION_ESTABLISHMENT_REJECT);
     }
     std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> i = std::shared_ptr<itti_n11_n1n2_message_transfer_response_status>(itti_msg);
@@ -304,7 +304,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(std::shared_ptr<itti_n
 {
   Logger::smf_n11().debug("Send PDUSessionUpdateContextResponse to AMF ");
 
-  switch(sm_context_res->session_procedure_type){
+  switch (sm_context_res->session_procedure_type) {
 
   case session_management_procedures_type_e::PDU_SESSION_TEST: {
     Logger::smf_n11().debug("PDU_SESSION_TEST");
@@ -384,10 +384,10 @@ void smf_n11::send_pdu_session_update_sm_context_response(Pistache::Http::Respon
   nlohmann::json json_data = {};
   to_json(json_data, smContextUpdateError);
 
-  if (!json_data.empty()){
+  if (!json_data.empty()) {
     httpResponse.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
     httpResponse.send(code, json_data.dump().c_str());
-  } else{
+  } else {
     httpResponse.send(code);
   }
 
@@ -433,10 +433,10 @@ void smf_n11::send_pdu_session_create_sm_context_response(Pistache::Http::Respon
   Logger::smf_n11().debug("[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
   nlohmann::json json_data = {};
   to_json(json_data, smContextCreatedData);
-  if (!json_data.empty()){
+  if (!json_data.empty()) {
     httpResponse.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
     httpResponse.send(code, json_data.dump().c_str());
-  } else{
+  } else {
     httpResponse.send(code);
   }
 

@@ -49,7 +49,6 @@ extern smf_n4  *smf_n4_inst;
 void smf_n4_task (void*);
 
 //------------------------------------------------------------------------------
-
 void smf_n4_task (void *args_p)
 {
   const task_id_t task_id = TASK_SMF_N4;
@@ -204,7 +203,7 @@ smf_n4::smf_n4() : pfcp_l4_stack(string(inet_ntoa(smf_cfg.n4.addr4)), smf_cfg.n4
   cp_function_features.load = 0;
 
 
-  if (itti_inst->create_task(TASK_SMF_N4, smf_n4_task, nullptr) ) {
+  if (itti_inst->create_task(TASK_SMF_N4, smf_n4_task, nullptr)) {
     Logger::smf_n4().error( "Cannot create task TASK_SMF_N4" );
     throw std::runtime_error( "Cannot create task TASK_SMF_N4" );
   }
@@ -262,6 +261,7 @@ void smf_n4::handle_receive_pfcp_msg(pfcp_msg& msg, const endpoint& remote_endpo
     Logger::smf_n4().info( "handle_receive_pfcp_msg msg %d length %d, unknown, discarded!", msg.get_message_type(), msg.get_message_length());
   }
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_heartbeat_request(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint)
 {
@@ -280,6 +280,7 @@ void smf_n4::handle_receive_heartbeat_request(pfcp::pfcp_msg& msg, const endpoin
     send_heartbeat_response(remote_endpoint, trxn_id);
   }
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_heartbeat_response(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint)
 {
@@ -298,6 +299,7 @@ void smf_n4::handle_receive_heartbeat_response(pfcp::pfcp_msg& msg, const endpoi
     pfcp_associations::get_instance().handle_receive_heartbeat_response(trxn_id);
   }
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_association_setup_request(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint)
 {
@@ -388,6 +390,7 @@ void smf_n4::handle_receive_association_setup_response(pfcp::pfcp_msg& msg, cons
   }
 
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_session_establishment_response(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint)
 {
@@ -411,6 +414,7 @@ void smf_n4::handle_receive_session_establishment_response(pfcp::pfcp_msg& msg, 
   }
   // else ignore
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_session_modification_response(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint)
 {
@@ -434,6 +438,7 @@ void smf_n4::handle_receive_session_modification_response(pfcp::pfcp_msg& msg, c
   }
   // else ignore
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_session_deletion_response(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint)
 {
@@ -457,6 +462,7 @@ void smf_n4::handle_receive_session_deletion_response(pfcp::pfcp_msg& msg, const
   }
   // else ignore
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_session_report_request(pfcp::pfcp_msg& msg, const endpoint& remote_endpoint)
 {
@@ -486,11 +492,13 @@ void smf_n4::send_n4_msg(itti_n4_association_setup_response& i)
 {
   send_response(i.r_endpoint, i.pfcp_ies, i.trxn_id);
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::send_n4_msg(itti_n4_session_report_response& i)
 {
   send_response(i.r_endpoint, i.seid, i.pfcp_ies, i.trxn_id);
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::send_heartbeat_request(std::shared_ptr<pfcp_association>& a)
 {
@@ -510,6 +518,7 @@ void smf_n4::send_heartbeat_request(std::shared_ptr<pfcp_association>& a)
     Logger::smf_n4().warn( "TODO send_heartbeat_request() node_id IPV6, FQDN!");
   }
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::send_heartbeat_response(const endpoint& r_endpoint, const uint64_t trxn_id)
 {
@@ -518,21 +527,25 @@ void smf_n4::send_heartbeat_response(const endpoint& r_endpoint, const uint64_t 
   h.set(r);
   send_response(r_endpoint, h, trxn_id);
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::send_n4_msg(itti_n4_session_establishment_request& i)
 {
   send_request(i.r_endpoint, i.seid, i.pfcp_ies, TASK_SMF_N4, i.trxn_id);
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::send_n4_msg(itti_n4_session_modification_request& i)
 {
   send_request(i.r_endpoint, i.seid, i.pfcp_ies, TASK_SMF_N4, i.trxn_id);
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::send_n4_msg(itti_n4_session_deletion_request& i)
 {
   send_request(i.r_endpoint, i.seid, i.pfcp_ies, TASK_SMF_N4, i.trxn_id);
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive(char* recv_buffer, const std::size_t bytes_transferred, const endpoint& remote_endpoint)
 {
@@ -549,6 +562,7 @@ void smf_n4::handle_receive(char* recv_buffer, const std::size_t bytes_transferr
     Logger::smf_n4().info( "handle_receive exception %s", e.what());
   }
 }
+
 //------------------------------------------------------------------------------
 void smf_n4::time_out_itti_event(const uint32_t timer_id)
 {

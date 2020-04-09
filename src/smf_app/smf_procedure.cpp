@@ -59,7 +59,7 @@ int n4_session_restore_procedure::run()
 {
   if (pending_sessions.size()) {
     itti_n4_restore *itti_msg = nullptr;
-    for (std::set<pfcp::fseid_t>::iterator it=pending_sessions.begin(); it!=pending_sessions.end();++it) {
+    for (std::set<pfcp::fseid_t>::iterator it=pending_sessions.begin(); it!=pending_sessions.end(); ++it) {
       if (!itti_msg) {
         itti_msg = new itti_n4_restore(TASK_SMF_N4, TASK_SMF_APP);
       }
@@ -146,8 +146,7 @@ int session_create_sm_context_procedure::run(std::shared_ptr<itti_n11_create_sm_
   //wys-test-add
   pfcp::outer_header_creation_t     outer_header_creation = {};
 
-  if(smf_cfg.test_upf_cfg.is_test)
-  {
+  if(smf_cfg.test_upf_cfg.is_test) {
     //wys-test-add
     destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS; // ACCESS is for downlink, CORE for uplink
     outer_header_creation.teid = 1;
@@ -383,7 +382,7 @@ void session_create_sm_context_procedure::handle_itti_msg (itti_n4_session_estab
   n11_triggered_pending->res.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageContent"]["contentId"] = "n1SmMsg"; //part 2
 
   //N2SM
-  if (n11_triggered_pending->res.get_cause() == REQUEST_ACCEPTED){
+  if (n11_triggered_pending->res.get_cause() == REQUEST_ACCEPTED) {
     //TODO: fill the content of N1N2MessageTransferReqData
     n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["n2InformationClass"] = "SM";
     n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["PduSessionId"] = n11_triggered_pending->res.get_pdu_session_id();
@@ -449,16 +448,16 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
   std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified = {};
   sm_context_req_msg.get_qfis(list_of_qfis_to_be_modified);
 
-  for (auto i:list_of_qfis_to_be_modified){
+  for (auto i:list_of_qfis_to_be_modified) {
     Logger::smf_app().debug( "qfi to be modified: %d", i.qfi);
   }
 
   ::fteid_t dl_fteid = {};
   sm_context_req_msg.get_dl_fteid(dl_fteid); //eNB's fteid
 
-  for (auto qfi: list_of_qfis_to_be_modified){
+  for (auto qfi: list_of_qfis_to_be_modified) {
     smf_qos_flow qos_flow = {};
-    if (!ppc->get_qos_flow(qfi, qos_flow)){ //no QoS flow found
+    if (!ppc->get_qos_flow(qfi, qos_flow)) { //no QoS flow found
       Logger::smf_app().error( "Update SM Context procedure: could not found QoS flow with QFI %d", qfi.qfi);
       //Set cause to SYSTEM_FAILURE and send response
       qos_flow_context_updated qcu = {};
@@ -467,9 +466,9 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
       n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
       continue;
     }
-    pfcp::far_id_t                    far_id = {};
-    pfcp::pdr_id_t                    pdr_id = {};
-    if ((dl_fteid == qos_flow.dl_fteid) and (not qos_flow.released)){
+    pfcp::far_id_t far_id = {};
+    pfcp::pdr_id_t pdr_id = {};
+    if ((dl_fteid == qos_flow.dl_fteid) and (not qos_flow.released)) {
       Logger::smf_app().debug( "Update SM Context procedure: QFI %d dl_fteid unchanged", qfi.qfi);
       qos_flow_context_updated qcu = {};
       qcu.set_cause(REQUEST_ACCEPTED);
@@ -571,13 +570,13 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
       source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
 
       //local_fteid.from_core_fteid(peb.sgw_fteid_s5_s8_up);
-      if ( ppc->ipv4) {
+      if (ppc->ipv4) {
         ue_ip_address.v4 = 1;
         ue_ip_address.ipv4_address.s_addr = ppc->ipv4_address.s_addr;
       }
-      if ( ppc->ipv6) {
+      if (ppc->ipv6) {
         ue_ip_address.v6 = 1;
-        ue_ip_address.ipv6_address        = ppc->ipv6_address;
+        ue_ip_address.ipv6_address = ppc->ipv6_address;
       }
 
       // DOIT simple
@@ -605,8 +604,8 @@ int session_update_sm_context_procedure::run(std::shared_ptr<itti_n11_update_sm_
       Logger::smf_app().debug( "Update SM Context procedure: Update FAR, qos_flow.pdr_id_dl.rule_id %d", qos_flow.pdr_id_dl.rule_id);
       // Update FAR
       far_id.far_id = qos_flow.far_id_ul.second.far_id;
-      pfcp::update_far                    update_far = {};
-      pfcp::apply_action_t                apply_action = {};
+      pfcp::update_far update_far = {};
+      pfcp::apply_action_t apply_action = {};
 
       update_far.set(qos_flow.far_id_ul.second);
       apply_action.forw = 1;
@@ -685,7 +684,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   for (std::map<uint8_t, qos_flow_context_updated>::iterator it = qos_flow_context_to_be_updateds.begin(); it != qos_flow_context_to_be_updateds.end(); ++it)
     Logger::smf_app().debug("qos_flow_context_to_be_modifieds qfi %d", it->first);
 
-  for (auto it_created_pdr : resp.pfcp_ies.created_pdrs) {
+  for (auto it_created_pdr: resp.pfcp_ies.created_pdrs) {
     pfcp::pdr_id_t pdr_id = {};
     if (it_created_pdr.get(pdr_id)) {
       smf_qos_flow flow = {};
@@ -757,7 +756,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
 
   if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
     // TODO failed rule id
-    for (auto it_update_far : n4_triggered->pfcp_ies.update_fars) {
+    for (auto it_update_far: n4_triggered->pfcp_ies.update_fars) {
       pfcp::far_id_t  far_id = {};
       if (it_update_far.get(far_id)) {
         smf_qos_flow flow = {};
@@ -803,7 +802,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   //change value here to test the corresponding message
   session_procedure_type = session_management_procedures_type_e::PDU_SESSION_TEST;
 
-  switch (session_procedure_type){
+  switch (session_procedure_type) {
 
   //FOR TESTING PURPOSE
   case session_management_procedures_type_e::PDU_SESSION_TEST: {
@@ -833,7 +832,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //PDU Session Establishment UE-Requested
-  case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED:{
+  case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
     //No need to create N1/N2 Container, just Cause
     Logger::smf_app().info( "PDU Session Establishment Request (UE-Initiated)");
     n11_triggered_pending->res.sm_context_updated_data["cause"] = n11_triggered_pending->res.get_cause();
@@ -841,7 +840,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //UE-Triggered Service Request Procedure (Step 1)
-  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1:{
+  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
     // Create N2 SM Information: PDU Session Resource Setup Request Transfer IE
 
     //N2 SM Information
@@ -860,7 +859,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //UE-triggered Service Request (Step 2)
-  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2:{
+  case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2: {
     //No need to create N1/N2 Container, just Cause
     Logger::smf_app().info( "UE Triggered Service Request (Step 2)");
     n11_triggered_pending->res.sm_context_updated_data["cause"] = n11_triggered_pending->res.get_cause();
@@ -868,7 +867,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //PDU Session Modification UE-initiated (Step 1)
-  case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1:{
+  case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1: {
     //N1 SM: PDU Session Modification Command​
     //N2 SM: PDU Session Resource Modify Request Transfer IE
 
@@ -895,7 +894,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //PDU Session Modification UE-initiated (Step 2)
-  case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2:{
+  case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
     //No need to create N1/N2 Container
     Logger::smf_app().info( "PDU Session Modification UE-initiated (Step 2)");
     //TODO:
@@ -903,7 +902,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //PDU Session Modification UE-initiated (Step 3)
-  case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3:{
+  case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3: {
     //No need to create N1/N2 Container
     Logger::smf_app().info( "PDU Session Modification UE-initiated (Step 3)");
     //TODO:
@@ -911,7 +910,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //PDU Session Release UE-initiated (Step 1)
-  case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1:{
+  case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
     //N1 SM: PDU Session Release Command​
     //N2 SM: PDU Session Resource Release Command Transfer
     Logger::smf_app().info( "PDU Session Release UE-initiated (Step 1))");
@@ -939,7 +938,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //PDU Session Release UE-initiated (Step 2)
-  case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP2:{
+  case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP2: {
     //No need to create N1/N2 Container
     Logger::smf_app().info( "PDU Session Release UE-initiated (Step 2)");
     //TODO:
@@ -947,7 +946,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   break;
 
   //PDU Session Release UE-initiated (Step 3)
-  case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP3:{
+  case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP3: {
     //No need to create N1/N2 Container
     Logger::smf_app().info( "PDU Session Release UE-initiated (Step 3)");
     //TODO:
@@ -973,8 +972,7 @@ void session_update_sm_context_procedure::handle_itti_msg (itti_n4_session_modif
   // For LADN, the SMF subscribes to the UE moving into or out of LADN service area event notification by providing the LADN DNN as an indicator for the Area Of Interest
   //see step 17@section 4.3.2.2.1@3GPP TS 23.502
 
-  if (cause.cause_value != CAUSE_VALUE_REQUEST_ACCEPTED)
-  {
+  if (cause.cause_value != CAUSE_VALUE_REQUEST_ACCEPTED) {
     //TODO: Nsmf_PDUSession_SMContextStatusNotify
     /*  If the PDU Session establishment is not successful, the SMF informs the AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The SMF also releases any N4
     session(s) created, any PDU Session address if allocated (e.g. IP address) and releases the association with PCF, if any.

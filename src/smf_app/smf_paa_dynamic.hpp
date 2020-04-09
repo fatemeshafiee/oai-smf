@@ -39,14 +39,14 @@ public:
   struct in6_addr prefix;
   int             prefix_len;
 
-  ipv6_pool() : prefix(), prefix_len(0) {}
+  ipv6_pool(): prefix(), prefix_len(0) {}
 
   ipv6_pool(const struct in6_addr prfix, const int prfix_len) {
     prefix = prfix;
     prefix_len = prfix_len;
   }
 
-  ipv6_pool(const ipv6_pool& p) : prefix(p.prefix), prefix_len(p.prefix_len) {}
+  ipv6_pool(const ipv6_pool& p): prefix(p.prefix), prefix_len(p.prefix_len) {}
 
 
   bool alloc_address(struct in6_addr& allocated)
@@ -57,7 +57,6 @@ public:
 
   void free_address(const struct in_addr& allocated) {}
 };
-
 
 
 class ipv4_pool {
@@ -104,7 +103,7 @@ public:
     start.s_addr = 0;
   };
 
-  ipv4_pool(const struct in_addr first, const uint32_t range) : alloc() {
+  ipv4_pool(const struct in_addr first, const uint32_t range): alloc() {
     start.s_addr = first.s_addr;
     num = range;
     int range32 = range >> 5;
@@ -117,7 +116,7 @@ public:
     }
   };
 
-  ipv4_pool(const ipv4_pool& p) : num(p.num), alloc(p.alloc) {
+  ipv4_pool(const ipv4_pool& p): num(p.num), alloc(p.alloc) {
     start.s_addr = p.start.s_addr;
   };
 
@@ -156,7 +155,7 @@ public:
   std::vector<uint32_t> ipv4_pool_ids;
   std::vector<uint32_t> ipv6_pool_ids;
 
-  apn_dynamic_pools() : ipv4_pool_ids(), ipv6_pool_ids() {}
+  apn_dynamic_pools(): ipv4_pool_ids(), ipv6_pool_ids() {}
 
   void add_ipv4_pool_id(const uint32_t id)
   {
@@ -175,7 +174,7 @@ private:
 
   std::map<std::string, apn_dynamic_pools>   apns;
 
-  paa_dynamic() : ipv4_pools(), ipv6_pools(), apns() {};
+  paa_dynamic(): ipv4_pools(), ipv6_pools(), apns() {};
 
 public:
   static paa_dynamic& get_instance()
@@ -277,7 +276,7 @@ public:
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4V6) {
         bool success = false;
         std::vector<uint32_t>::const_iterator it4 = {};
-        for (it4 = apn_pool.ipv4_pool_ids.begin();it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].free_address(paa.ipv4_address)) {
             return true;
           }
@@ -295,7 +294,7 @@ public:
   {
     if (apns.count(apn_label)) {
       apn_dynamic_pools& apn_pool = apns[apn_label];
-      for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin();it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+      for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
         if (ipv4_pools[*it4].free_address(ipv4_address)) {
           return true;
         }

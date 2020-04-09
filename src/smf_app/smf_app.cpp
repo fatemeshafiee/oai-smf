@@ -124,7 +124,6 @@ scid_t smf_app::generate_smf_context_ref()
   return sm_context_ref_generator.get_uid();
 }
 
-
 //------------------------------------------------------------------------------
 bool smf_app::is_seid_n4_exist(const uint64_t& seid) const
 {
@@ -276,7 +275,6 @@ smf_app::smf_app (const std::string& config_file) : m_seid2smf_context()
   Logger::smf_app().startup( "Started" );
 }
 
-
 //------------------------------------------------------------------------------
 //From SPGWU
 void smf_app::start_upf_association(const pfcp::node_id_t& node_id)
@@ -396,7 +394,6 @@ void smf_app::handle_itti_msg (std::shared_ptr<itti_n4_session_report_request> s
   }
 }
 
-
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg (itti_n11_n1n2_message_transfer_response_status& m)
 {
@@ -420,7 +417,6 @@ void smf_app::handle_itti_msg (itti_n11_n1n2_message_transfer_response_status& m
   }
 
 }
-
 
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg (itti_n11_update_pdu_session_status& m)
@@ -735,7 +731,6 @@ void smf_app::handle_pdu_session_update_sm_context_request (std::shared_ptr<itti
 
 }
 
-
 //------------------------------------------------------------------------------
 void smf_app::handle_network_requested_pdu_session_modification()
 {
@@ -770,8 +765,8 @@ void smf_app::handle_network_requested_pdu_session_modification()
   // handle the message in smf_context
   //  sc.get()->handle_network_requested_pdu_session_modification(itti_msg);
 
-
 }
+
 //------------------------------------------------------------------------------
 bool smf_app::is_supi_2_smf_context(const supi64_t& supi) const
 {
