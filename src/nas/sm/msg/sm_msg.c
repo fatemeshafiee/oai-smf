@@ -25,16 +25,8 @@
 #include "TLVEncoder.h"
 
 //Local definitions
-static int _fivegsm_msg_decode_header (
-    sm_msg_header_t * header,
-    const uint8_t * buffer,
-    uint32_t len);
-
-static int _fivegsm_msg_encode_header (
-    const sm_msg_header_t * header,
-    uint8_t * buffer,
-    uint32_t len);
-
+static int _fivegsm_msg_decode_header (sm_msg_header_t *header, const uint8_t *buffer, uint32_t len);
+static int _fivegsm_msg_encode_header (const sm_msg_header_t *header, uint8_t *buffer, uint32_t len);
 
 /****************************************************************************
  **                                                                        **
@@ -54,16 +46,13 @@ static int _fivegsm_msg_encode_header (
  **                                                                        **
  ***************************************************************************/
 int
-sm_msg_decode (
-    SM_msg * msg,
-    uint8_t * buffer,
-    uint32_t len)
+sm_msg_decode (SM_msg *msg, uint8_t *buffer, uint32_t len)
 {
-  int                                     header_result = 0;
-  int                                     decode_result = 0;
-  uint8_t                                *buffer_log = buffer;
-  uint32_t                                len_log = len;
-  int                                     down_link = 0;
+  int header_result = 0;
+  int decode_result = 0;
+  uint8_t *buffer_log = buffer;
+  uint32_t len_log = len;
+  int down_link = 0;
   //OAILOG_FUNC_IN (LOG_NAS);
   /*
    * First decode the SM message header
@@ -159,15 +148,12 @@ sm_msg_decode (
  **                                                                        **
  ***************************************************************************/
 int
-fivegsm_msg_encode (
-    SM_msg * msg,
-    uint8_t * buffer,
-    uint32_t len)
+fivegsm_msg_encode (SM_msg * msg, uint8_t * buffer, uint32_t len)
 {
-  int                                     header_result = 0;
-  int                                     encode_result = 0;
-  uint8_t                                *buffer_log = buffer;
-  int                                     down_link = 1;
+  int header_result = 0;
+  int encode_result = 0;
+  uint8_t *buffer_log = buffer;
+  int down_link = 1;
   /*
    * First encode the ESM message header
    */
@@ -265,12 +251,9 @@ fivegsm_msg_encode (
  **                                                                        **
  ***************************************************************************/
 static int
-_fivegsm_msg_decode_header (
-    sm_msg_header_t * header,
-    const uint8_t * buffer,
-    uint32_t len)
+_fivegsm_msg_decode_header (sm_msg_header_t *header, const uint8_t *buffer, uint32_t len)
 {
-  int                                     size = 0;
+  int size = 0;
 
   /*
    * Check the buffer length
@@ -329,12 +312,9 @@ _fivegsm_msg_decode_header (
  **                                                                        **
  ***************************************************************************/
 static int
-_fivegsm_msg_encode_header (
-    const sm_msg_header_t * header,
-    uint8_t * buffer,
-    uint32_t len)
+_fivegsm_msg_encode_header (const sm_msg_header_t *header, uint8_t *buffer, uint32_t len)
 {
-  int                                     size = 0;
+  int size = 0;
 
   /*
    * Check the buffer length

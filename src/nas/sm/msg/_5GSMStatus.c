@@ -6,7 +6,7 @@
 #include "TLVDecoder.h"
 #include "_5GSMStatus.h"
 
-int decode__5gsm_status( _5gsm_status_msg *_5gsm_status, uint8_t* buffer, uint32_t len)
+int decode__5gsm_status( _5gsm_status_msg *_5gsm_status, uint8_t *buffer, uint32_t len)
 {
   uint32_t decoded = 0;
   int decoded_result = 0;
@@ -23,7 +23,7 @@ int decode__5gsm_status( _5gsm_status_msg *_5gsm_status, uint8_t* buffer, uint32
 }
 
 
-int encode__5gsm_status( _5gsm_status_msg *_5gsm_status, uint8_t* buffer, uint32_t len)
+int encode__5gsm_status( _5gsm_status_msg *_5gsm_status, uint8_t *buffer, uint32_t len)
 {
   uint32_t encoded = 0;
   int encoded_result = 0;

@@ -6,7 +6,7 @@
 #include "TLVDecoder.h"
 #include "PDUSessionModificationReject.h"
 
-int decode_pdu_session_modification_reject( pdu_session_modification_reject_msg *pdu_session_modification_reject, uint8_t* buffer, uint32_t len)
+int decode_pdu_session_modification_reject( pdu_session_modification_reject_msg *pdu_session_modification_reject, uint8_t *buffer, uint32_t len)
 {
   uint32_t decoded = 0;
   int decoded_result = 0;
@@ -58,7 +58,7 @@ int decode_pdu_session_modification_reject( pdu_session_modification_reject_msg 
 }
 
 
-int encode_pdu_session_modification_reject( pdu_session_modification_reject_msg *pdu_session_modification_reject, uint8_t* buffer, uint32_t len)
+int encode_pdu_session_modification_reject( pdu_session_modification_reject_msg *pdu_session_modification_reject, uint8_t *buffer, uint32_t len)
 {
   uint32_t encoded = 0;
   int encoded_result = 0;

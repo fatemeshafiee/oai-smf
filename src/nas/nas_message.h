@@ -22,7 +22,6 @@
 #ifndef NAS_MESSAGE_H_
 #define NAS_MESSAGE_H_
 
-
 #include "mm_msg.h"
 #include "sm_msg.h"
 #include "common_types.h"
@@ -42,8 +41,8 @@
 /* Structure of security protected header */
 typedef struct nas_message_security_header_s {
 #ifdef __LITTLE_ENDIAN_BITFIELD
-  extended_protocol_discriminator_t    extended_protocol_discriminator;//3gpp_24.501.h
-  uint8_t                         security_header_type:4;
+  extended_protocol_discriminator_t extended_protocol_discriminator;//3gpp_24.501.h
+  uint8_t security_header_type:4;
   uint8_t spare_half_octet:4;
 #endif
 #ifdef __BIG_ENDIAN_BITFIELD
@@ -81,14 +80,14 @@ typedef struct nas_message_decode_status_s {
   uint8_t ciphered_message:1;
   uint8_t mac_matched:1;
   uint8_t security_context_available:1;
-  int     fivegmm_cause;
+  int fivegmm_cause;
 } nas_message_decode_status_t;
 
 int nas_message_encode(                   
-    unsigned char              *buffer,
+    unsigned char *buffer,
     const nas_message_t * const msg,
-    size_t                      length,
-    void                       *security);
+    size_t length,
+    void *security);
 
 int nas_message_decode (
     const unsigned char *const buffer,

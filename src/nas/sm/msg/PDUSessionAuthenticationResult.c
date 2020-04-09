@@ -6,7 +6,7 @@
 #include "TLVDecoder.h"
 #include "PDUSessionAuthenticationResult.h"
 
-int decode_pdu_session_authentication_result( pdu_session_authentication_result_msg *pdu_session_authentication_result, uint8_t* buffer, uint32_t len)
+int decode_pdu_session_authentication_result( pdu_session_authentication_result_msg *pdu_session_authentication_result, uint8_t *buffer, uint32_t len)
 {
   uint32_t decoded = 0;
   int decoded_result = 0;
@@ -44,7 +44,7 @@ int decode_pdu_session_authentication_result( pdu_session_authentication_result_
 }
 
 
-int encode_pdu_session_authentication_result( pdu_session_authentication_result_msg *pdu_session_authentication_result, uint8_t* buffer, uint32_t len)
+int encode_pdu_session_authentication_result( pdu_session_authentication_result_msg *pdu_session_authentication_result, uint8_t *buffer, uint32_t len)
 {
   uint32_t encoded = 0;
   int encoded_result = 0;
