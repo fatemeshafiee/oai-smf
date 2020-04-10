@@ -904,7 +904,8 @@ void smf_context::handle_pdu_session_create_sm_context_request (std::shared_ptr<
     std::string supi_str;
     supi_t supi = sm_context_resp_pending->res.get_supi();
     supi_str = sm_context_resp_pending->res.get_supi_prefix() + "-" + smf_supi_to_string (supi);
-    std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v2/ue-contexts/" + supi_str.c_str() +"/n1-n2-messages";
+    //std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v2/ue-contexts/" + supi_str.c_str() +"/n1-n2-messages";
+    std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + fmt::format(NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
     sm_context_resp_pending->res.set_amf_url(url);
 
     //Fill the json part

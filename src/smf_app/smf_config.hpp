@@ -54,7 +54,7 @@
 #define SMF_CONFIG_STRING_IPV4_ADDRESS                          "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_PORT                                  "PORT"
 #define SMF_CONFIG_STRING_INTERFACE_N4                          "N4"
-#define SMF_CONFIG_STRING_INTERFACE_N11                          "N11"
+#define SMF_CONFIG_STRING_INTERFACE_SBI                         "SBI"
 
 #define SMF_CONFIG_STRING_SMF_MASQUERADE_SGI                    "PGW_MASQUERADE_SGI"
 #define SMF_CONFIG_STRING_UE_TCP_MSS_CLAMPING                   "UE_TCP_MSS_CLAMPING"
@@ -77,9 +77,6 @@
 #define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS          "DEFAULT_DNS_SEC_IPV6_ADDRESS"
 #define SMF_CONFIG_STRING_UE_MTU                                "UE_MTU"
 #define SMF_CONFIG_STRING_GTPV1U_REALIZATION                    "GTPV1U_REALIZATION"
-#define SMF_CONFIG_STRING_NO_GTP_KERNEL_AVAILABLE               "NO_GTP_KERNEL_AVAILABLE"
-#define SMF_CONFIG_STRING_GTP_KERNEL_MODULE                     "GTP_KERNEL_MODULE"
-#define SMF_CONFIG_STRING_GTP_KERNEL                            "GTP_KERNEL"
 
 #define SMF_CONFIG_STRING_INTERFACE_DISABLED                    "none"
 
@@ -100,16 +97,6 @@
 #define SMF_ABORT_ON_ERROR true
 #define SMF_WARN_ON_ERROR  false
 
-#define SMF_CONFIG_STRING_OVS_CONFIG                            "OVS"
-#define SMF_CONFIG_STRING_OVS_BRIDGE_NAME                       "BRIDGE_NAME"
-#define SMF_CONFIG_STRING_OVS_EGRESS_PORT_NUM                   "EGRESS_PORT_NUM"
-#define SMF_CONFIG_STRING_OVS_GTP_PORT_NUM                      "GTP_PORT_NUM"
-#define SMF_CONFIG_STRING_OVS_L2_EGRESS_PORT                    "L2_EGRESS_PORT"
-#define SMF_CONFIG_STRING_OVS_UPLINK_MAC                        "UPLINK_MAC"
-#define SMF_CONFIG_STRING_OVS_SGI_ARP_CACHE                     "SGI_ARP_CACHE"
-#define SMF_CONFIG_STRING_IP                                    "IP"
-#define SMF_CONFIG_STRING_MAC                                   "MAC"
-
 #define SMF_CONFIG_STRING_SCHED_PARAMS                          "SCHED_PARAMS"
 #define SMF_CONFIG_STRING_THREAD_RD_CPU_ID                      "CPU_ID"
 #define SMF_CONFIG_STRING_THREAD_RD_SCHED_POLICY                "SCHED_POLICY"
@@ -123,20 +110,20 @@
 #define SMF_CONFIG_STRING_ASYNC_CMD_SCHED_PARAMS                "ASYNC_CMD_SCHED_PARAMS"
 
 
-#define SMF_CONFIG_STRING_AMF                                  "AMF"
-#define SMF_CONFIG_STRING_AMF_IPV4_ADDRESS                     "IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_AMF_PORT                             "PORT"
-#define SMF_CONFIG_STRING_UDM                                  "UDM"
-#define SMF_CONFIG_STRING_UDM_IPV4_ADDRESS                     "IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_UDM_PORT                             "PORT"
+#define SMF_CONFIG_STRING_AMF                                   "AMF"
+#define SMF_CONFIG_STRING_AMF_IPV4_ADDRESS                      "IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_AMF_PORT                              "PORT"
+#define SMF_CONFIG_STRING_UDM                                   "UDM"
+#define SMF_CONFIG_STRING_UDM_IPV4_ADDRESS                      "IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_UDM_PORT                              "PORT"
 
 //test_upf
-#define SMF_CONFIG_STRING_TEST_UPF                             "TEST_UPF"
-#define SMF_CONFIG_STRING_TEST_UPF_IS_TEST                     "IS_TEST"
-#define SMF_CONFIG_STRING_TEST_UPF_GNB_IPV4_ADDRESS            "GNB_IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_TEST_UPF                              "TEST_UPF"
+#define SMF_CONFIG_STRING_TEST_UPF_IS_TEST                      "IS_TEST"
+#define SMF_CONFIG_STRING_TEST_UPF_GNB_IPV4_ADDRESS             "GNB_IPV4_ADDRESS"
 
-#define SMF_CONFIG_STRING_UPF_LIST                             "UPF_LIST"
-#define SMF_CONFIG_STRING_UPF_IPV4_ADDRESS                     "IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_UPF_LIST                              "UPF_LIST"
+#define SMF_CONFIG_STRING_UPF_IPV4_ADDRESS                      "IPV4_ADDRESS"
 
 #define PGW_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -178,7 +165,7 @@ public:
   unsigned int      instance = 0;
 
   interface_cfg_t n4;
-  interface_cfg_t n11;
+  interface_cfg_t sbi;
   itti_cfg_t      itti;
   test_upf_cfg_t  test_upf_cfg;
 
@@ -235,7 +222,7 @@ public:
 
   std::vector<pfcp::node_id_t> upfs;
 
-  smf_config() : m_rw_lock(), pcef(), num_apn(0), pid_dir(), instance(0), n4(), n11(), itti(), upfs() {
+  smf_config() : m_rw_lock(), pcef(), num_apn(0), pid_dir(), instance(0), n4(), sbi(), itti(), upfs() {
     for (int i = 0; i < PGW_NUM_APN_MAX; i++) {
       apn[i] = {};
     }
@@ -266,8 +253,8 @@ public:
     n4.thread_rd_sched_params.sched_priority = 90;
     n4.port = pfcp::default_port;
 
-    n11.thread_rd_sched_params.sched_priority = 90;
-    n11.port = 80;
+    sbi.thread_rd_sched_params.sched_priority = 90;
+    sbi.port = 80;
 
     amf_addr.ipv4_addr.s_addr = INADDR_ANY;
     amf_addr.port = 80;

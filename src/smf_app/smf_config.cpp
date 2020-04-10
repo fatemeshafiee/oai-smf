@@ -273,8 +273,8 @@ int smf_config::load(const string& config_file)
     const Setting& n4_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_N4];
     load_interface(n4_cfg, n4);
 
-    const Setting& n11_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_N11];
-    load_interface(n11_cfg, n11);
+    const Setting& n11_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_SBI];
+    load_interface(n11_cfg, sbi);
 
   } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
@@ -512,10 +512,10 @@ void smf_config::display ()
   Logger::smf_app().info( "    ip ...................: %s", inet_ntoa (n4.addr4));
   Logger::smf_app().info( "    port .................: %d", n4.port);
 
-  Logger::smf_app().info( "- N11 Networking:");
-  Logger::smf_app().info( "    iface ................: %s", n11.if_name.c_str());
-  Logger::smf_app().info( "    ip ...................: %s", inet_ntoa (n11.addr4));
-  Logger::smf_app().info( "    port .................: %d", n11.port);
+  Logger::smf_app().info( "- SBI Networking:");
+  Logger::smf_app().info( "    iface ................: %s", sbi.if_name.c_str());
+  Logger::smf_app().info( "    ip ...................: %s", inet_ntoa (sbi.addr4));
+  Logger::smf_app().info( "    port .................: %d", sbi.port);
 
   Logger::smf_app().info( "- N4 Threading:");
   Logger::smf_app().info( "    CPU id............: %d", n4.thread_rd_sched_params.cpu_id);
@@ -644,8 +644,6 @@ int smf_config::get_pfcp_fseid(pfcp::fseid_t& fseid)
 smf_config::~smf_config()
 {
 }
-
-
 
 //------------------------------------------------------------------------------
 bool smf_config::is_dotted_dnn_handled(const std::string& dnn, const pdu_session_type_t& pdn_session_type)
