@@ -28,7 +28,17 @@ openair-cn5g-smf
     ├── utils:     Common utilities.   
     └── udp :      UDP server implementation.
 
-# OAI-SMF
+# OAI-SMF testbed: network topology
+AMF (eno1:amf 172.16.1.102)-----------------SBI interfaces-----------------(eno1:udm 172.16.1.103) UDM 
+                                               |
+                                               |
+                                     (eno1:smf 172.16.1.101)
+                                              SMF
+                                     (eno1:sn4 172.16.2.101)
+                                               |
+                                               |
+                                    (eno1:sn4 172.16.2.102)                                                        
+gNB (172.16.3.101)---(eno1:s1u 172.16.3.102)UPF/SPGW-U (SGI: eno1)----------------------------DNN
 
 ## Download source code from Gitlab
 git clone https://gitlab.eurecom.fr/oai/oai-cn5g-smf/
@@ -54,7 +64,8 @@ cd /openair-cn-cups/build/scripts
 ./build_spgwu -I -f
 ./build_spgwu -c -V -b Debug -j
 
-cp /oai-cn5g-smf/src/test/upf/spgwu_conf.sh . 
+#configure SPGWU using an example configure file (spgw_u.conf)
+cd /oai-cn5g-smf/src/test/upf/
 ./spgwu_conf.sh
 sudo spgwu -c /usr/local/etc/oai/spgw_u.conf  -o
 
@@ -64,7 +75,7 @@ mkdir build
 cd build
 cmake ..
 make
-./udm-server
+sudo ./udm-server
 
 ## Build and launch AMF server
 cd /oai-cn5g-smf/src/test/amf
@@ -72,7 +83,7 @@ mkdir build
 cd build
 cmake ..
 make
-./amf-api-server 
+sudo ./amf-server 
 
 ## Build and launch AMF client
 cd /oai-cn5g-smf/src/test/amf_client
