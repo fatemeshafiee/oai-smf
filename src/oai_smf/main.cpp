@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 
 
   //SMF API server
-  Pistache::Address addr(std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.n11.addr4))) , Pistache::Port(smf_cfg.n11.port));
+  Pistache::Address addr(std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.sbi.addr4))) , Pistache::Port(smf_cfg.sbi.port));
   SMFApiServer smfApiServer(addr, smf_app_inst);
   smfApiServer.init(2);
   std::thread smf_api_manager(&SMFApiServer::start, smfApiServer);

@@ -67,7 +67,6 @@ static std::size_t callback(
 
 
 //------------------------------------------------------------------------------
-
 void smf_n10_task (void *args_p)
 {
   const task_id_t task_id = TASK_SMF_N10;
@@ -129,7 +128,8 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
   headers = curl_slist_append(headers, "charsets: utf-8");
 
   CURL *curl = curl_easy_init();
-  std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.udm_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.udm_addr.port) + "/nudm-sdm/v2/" + std::to_string(supi) +"/sm-data";
+//  std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.udm_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.udm_addr.port) + "/nudm-sdm/v2/" + std::to_string(supi) +"/sm-data";
+  std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.udm_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.udm_addr.port) + fmt::format(NUDM_SDM_GET_SM_DATA_URL, std::to_string(supi));
   Logger::smf_n10().debug("[get_sm_data] UDM's URL: %s ", url.c_str());
 
   if (curl) {
@@ -179,13 +179,8 @@ bool smf_n10::get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, st
     Logger::smf_n10().debug("[get_sm_data] GET response from UDM %s", jsonData.dump().c_str());
 
     //retrieve SessionManagementSubscription and store in the context
-    for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin(); it != jsonData["dnnConfigurations"].end(); ++it ){
+    for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin(); it != jsonData["dnnConfigurations"].end(); ++it ) {
       Logger::smf_n10().debug("[get_sm_data] DNN %s", it.key().c_str());
-
-      //dnn_configuration_t *dnn_configuration = new (dnn_configuration_t);
-      //std::shared_ptr<dnn_configuration_t> sdc = {};
-      //subscription->find_dnn_configuration(it.key(), sdc);
-
       try {
         std::shared_ptr<dnn_configuration_t> dnn_configuration = std::make_shared<dnn_configuration_t>();
         //PDU Session Type
