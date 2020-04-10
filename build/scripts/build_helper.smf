@@ -137,7 +137,6 @@ install_pistache_from_git() {
     git submodule update --init
     cd pistache && git checkout master
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
-    cd pistache
     mkdir _build && cd _build
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
@@ -186,7 +185,6 @@ install_nlohmann_from_git() {
     git submodule update --init
     cd json && git checkout master
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
-    cd json
     mkdir _build && cd _build
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret

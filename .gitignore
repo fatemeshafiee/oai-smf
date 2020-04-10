@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+# CI artifacts
+archives
+src/oai_rules_result*
+test_results_oai_smf.html
