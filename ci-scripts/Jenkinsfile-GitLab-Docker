@@ -76,7 +76,7 @@ pipeline {
             echo "Node       is ${NODE_NAME}"
           }
           echo "Git URL    is ${GIT_URL}"
-          if (params.PrivateGitLabRepository_Credentials != null) {
+          if (params.PrivateGitLabRepository_Credentials == null) {
             echo "No credentials to access Private Repository"
             sh "./ci-scripts/fail.sh"
           }
