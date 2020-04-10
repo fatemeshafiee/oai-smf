@@ -134,7 +134,11 @@ pipeline {
                   } else {
                     // Currently this pipeline only runs for pushes to `develop` branch
                     // First clean image registry
-                    myShCmd('docker image rm oai-smf:develop', new_host_flag, new_host_user, new_host)
+                    try {
+                      myShCmd('docker image rm oai-smf:develop', new_host_flag, new_host_user, new_host)
+                    } catch (Exception e) {
+                      echo "Maybe a previous build went wrong"
+                    }
                     myShCmd('docker image prune --force', new_host_flag, new_host_user, new_host)
                     myShCmd('docker build --target oai-smf --tag oai-smf:develop --file ci-scripts/Dockerfile.private.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg CI_SRC_BRANCH="develop" . > archives/smf_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
                   }
