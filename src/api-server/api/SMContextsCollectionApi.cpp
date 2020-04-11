@@ -98,9 +98,9 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
   init_globals();
   multipartparser_init(&parser, reinterpret_cast<const char*>(boundary_str.c_str()));
   if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
-	  Logger::smf_api_server().warn("The received message can not be parsed properly!");
-	  //TODO: fix this issue
-	  //response.send(Pistache::Http::Code::Bad_Request, "");
+    Logger::smf_api_server().warn("The received message can not be parsed properly!");
+    //TODO: fix this issue
+    //response.send(Pistache::Http::Code::Bad_Request, "");
     //return;
   }
 
@@ -128,8 +128,8 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
     this->post_sm_contexts(smContextMessage, response);
   } catch (nlohmann::detail::exception &e) {
     //send a 400 error
-	  Logger::smf_api_server().warn("Can not parse the json data (error: %s)!", e.what());
-	  response.send(Pistache::Http::Code::Bad_Request, e.what());
+    Logger::smf_api_server().warn("Can not parse the json data (error: %s)!", e.what());
+    response.send(Pistache::Http::Code::Bad_Request, e.what());
     return;
   } catch (std::exception &e) {
     //send a 500 error

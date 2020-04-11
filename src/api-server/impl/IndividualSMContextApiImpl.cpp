@@ -31,7 +31,6 @@
  *      contact@openairinterface.org
  */
 
-
 #include "IndividualSMContextApiImpl.h"
 
 namespace oai {
@@ -40,9 +39,12 @@ namespace api {
 
 using namespace oai::smf_server::model;
 
-IndividualSMContextApiImpl::IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr,  smf::smf_app *smf_app_inst, std::string address)
-: IndividualSMContextApi(rtr), m_smf_app(smf_app_inst), m_address(address)
-{ }
+IndividualSMContextApiImpl::IndividualSMContextApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr, smf::smf_app *smf_app_inst, std::string address)
+    :
+    IndividualSMContextApi(rtr),
+    m_smf_app(smf_app_inst),
+    m_address(address) {
+}
 
 void IndividualSMContextApiImpl::release_sm_context(const std::string &smContextRef, const SmContextReleaseMessage &smContextReleaseMessage, Pistache::Http::ResponseWriter &response) {
 
@@ -52,11 +54,11 @@ void IndividualSMContextApiImpl::release_sm_context(const std::string &smContext
   //handle Nsmf_PDUSession_UpdateSMContext Request
   Logger::smf_api_server().info("Received a PDUSession_UpdateSMContext Request: PDU Session Release request from AMF.");
   //Get the SmContextUpdateData from this message and process in smf_app
-  smf::pdu_session_update_sm_context_request sm_context_req_msg = {};
+  smf::pdu_session_update_sm_context_request sm_context_req_msg = { };
 
   SmContextReleaseData smContextReleaseData = smContextReleaseMessage.getJsonData();
 
-  if (smContextReleaseData.n2SmInfoIsSet()){
+  if (smContextReleaseData.n2SmInfoIsSet()) {
     //N2 SM (for Session establishment)
     std::string n2_sm_information = smContextReleaseMessage.getBinaryDataN2SmInformation();
     //std::string n2_sm_information = (smContextUpdateData.getN2SmInfo()).getContentId();
@@ -87,10 +89,10 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
   //Get the SmContextUpdateData from this message and process in smf_app
   Logger::smf_api_server().info("Received a PDUSession_UpdateSMContext Request from AMF.");
 
-  smf::pdu_session_update_sm_context_request sm_context_req_msg = {};
+  smf::pdu_session_update_sm_context_request sm_context_req_msg = { };
   SmContextUpdateData smContextUpdateData = smContextUpdateMessage.getJsonData();
 
-  if (smContextUpdateData.n2SmInfoIsSet()){
+  if (smContextUpdateData.n2SmInfoIsSet()) {
     //N2 SM (for Session establishment)
     std::string n2_sm_information = smContextUpdateMessage.getBinaryDataN2SmInformation();
     Logger::smf_api_server().debug("smContextMessage, n2 sm information %s", n2_sm_information.c_str());
@@ -98,7 +100,7 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
     sm_context_req_msg.set_n2_sm_information(n2_sm_information);
     sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
 
-  } else if (smContextUpdateData.n1SmMsgIsSet()){
+  } else if (smContextUpdateData.n1SmMsgIsSet()) {
     //N1 SM (for session modification)
     std::string n1_sm_message = smContextUpdateMessage.getBinaryDataN1SmMessage();
     Logger::smf_api_server().debug("smContextMessage, n1 sm message %s", n1_sm_message.c_str());
@@ -110,11 +112,14 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
   //Step 4: PDU Session IDs, Operation Type, UE location Info, Access Type, RAT Type, UE presence in LADN service area, Indication of Access Type can be changed
   //PDU Session IDs
   //UpCnxState, for activation of user plane (see 5.2.2.3.2.2@3GPP TS 29.502)
-  if(smContextUpdateData.upCnxStateIsSet()) sm_context_req_msg.set_upCnx_state(smContextUpdateData.getUpCnxState());
+  if (smContextUpdateData.upCnxStateIsSet())
+    sm_context_req_msg.set_upCnx_state(smContextUpdateData.getUpCnxState());
   //Access Type
-  if (smContextUpdateData.anTypeIsSet()) sm_context_req_msg.set_an_type(smContextUpdateData.getAnType());
+  if (smContextUpdateData.anTypeIsSet())
+    sm_context_req_msg.set_an_type(smContextUpdateData.getAnType());
   //RAT Type
-  if (smContextUpdateData.ratTypeIsSet()) sm_context_req_msg.set_rat_type(smContextUpdateData.getRatType());
+  if (smContextUpdateData.ratTypeIsSet())
+    sm_context_req_msg.set_rat_type(smContextUpdateData.getRatType());
   //TODO:
   //UE presence in LADN service area
   //UE location information
@@ -126,13 +131,11 @@ void IndividualSMContextApiImpl::update_sm_context(const std::string &smContextR
   //TODO: Existing PDU session, step 3, SUPI, DNN, S-NSSAIs, SM Context ID, AMF ID, Request Type, N1 SM Container (PDU Session Establishment Request), User location, Access Type, RAT Type, PEI
   //step 15. (SM Context ID -> SCID, N2 SM, Request Type)(Initial Request)
   //TODO: verify why Request Type is not define in smContextUpdateData
-
   /* PDU Session Modification (SM Context ID -> SCID, N1/N2), section 4.3.3.2@3GPP TS 23.502: */
   //step 1.a,UE-initiated: SM Context ID + N1 (PDU Session Modification Request)
   //step 1.e (AN initiated modification): SM Context ID, N2 SM information (QFI, User location Information and an indication that the QoS Flow is released)
   //step 7a, SM Context ID, N2 SM information, UE location information
   //Step 11, SM Context ID, N1 SM (PDU Session Modification Command ACK), User location
-
   //Step 3. Handle the itti_n11_update_sm_context_request message in smf_app
   std::shared_ptr<itti_n11_update_sm_context_request> itti_msg = std::make_shared<itti_n11_update_sm_context_request>(TASK_SMF_N11, TASK_SMF_APP, response, smContextRef);
   itti_msg->req = sm_context_req_msg;
