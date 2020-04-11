@@ -21,10 +21,10 @@
 
 /*! \file smf_n1_n2.hpp
  * \brief
-  \author  Tien-Thinh NGUYEN
-  \company Eurecom
-  \date 2019
-  \email: tien-thinh.nguyen@eurecom.fr
+ \author  Tien-Thinh NGUYEN
+ \company Eurecom
+ \date 2019
+ \email: tien-thinh.nguyen@eurecom.fr
  */
 
 #ifndef FILE_SMF_N1_N2_HPP_SEEN
@@ -51,7 +51,7 @@
 #include "SmContextCreateData.h"
 #include "SmContextCreateError.h"
 
-extern "C"{
+extern "C" {
 #include "nas_message.h"
 #include "Ngap_NGAP-PDU.h"
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
@@ -61,12 +61,14 @@ extern "C"{
 namespace smf {
 
 class smf_n1_n2 {
-private:
+ private:
 
-public:
-  smf_n1_n2(){};
-  smf_n1_n2(smf_n1_n2 const&)    = delete;
-  void operator=(smf_n1_n2 const&)     = delete;
+ public:
+  smf_n1_n2() {
+  }
+  ;
+  smf_n1_n2(smf_n1_n2 const&) = delete;
+  void operator=(smf_n1_n2 const&) = delete;
 
   /*
    * Create N1 SM Container to send to AMF (using NAS lib)
@@ -76,7 +78,7 @@ public:
    * @param [uint8_t] sm_cause store NAS Cause
    *
    */
-  void create_n1_sm_container(pdu_session_msg& msg, uint8_t msg_type, std::string& nas_msg_str, cause_value_5gsm_e sm_cause);
+  void create_n1_sm_container(pdu_session_msg &msg, uint8_t msg_type, std::string &nas_msg_str, cause_value_5gsm_e sm_cause);
 
   /*
    * Create N2 SM Information to send to AMF (using NAS lib)
@@ -85,7 +87,7 @@ public:
    * @param [std::string&] ngap_msg_str store NGAP message in form of string
    *
    */
-  void create_n2_sm_information(pdu_session_msg& msg, uint8_t ngap_msg_type, n2_sm_info_type_e ngap_ie_type, std::string& ngap_msg_str);
+  void create_n2_sm_information(pdu_session_msg &msg, uint8_t ngap_msg_type, n2_sm_info_type_e ngap_ie_type, std::string &ngap_msg_str);
 
   /*
    * Decode N1 SM Container into the NAS mesasge (using NAS lib)
@@ -93,7 +95,7 @@ public:
    * @param [std::string&] n1_sm_msg N1 SM Container from AMF
    * @return status of the decode process
    */
-  int decode_n1_sm_container(nas_message_t& nas_msg, std::string& n1_sm_msg);
+  int decode_n1_sm_container(nas_message_t &nas_msg, std::string &n1_sm_msg);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceSetupResponseTransfer
@@ -101,7 +103,7 @@ public:
    * @param [std::string&] n2_sm_info N2 SM Information
    * @return status of the decode process
    */
-  int decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE, std::string& n2_sm_info);
+  int decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t> &ngap_IE, std::string &n2_sm_info);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceModifyResponseTransfer_t
@@ -109,11 +111,10 @@ public:
    * @param [std::string&] n2_sm_info N2 SM Information
    * @return status of the decode process
    */
-  int decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t>& ngap_IE, std::string& n2_sm_info);
+  int decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t> &ngap_IE, std::string &n2_sm_info);
 
 };
 
-} // namespace smf
-
+}  // namespace smf
 
 #endif /* FILE_SMF_N1_N2_HPP_SEEN */

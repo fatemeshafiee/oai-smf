@@ -20,10 +20,10 @@
  */
 
 /*! \file smf_n11.hpp
-  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
-  \company Eurecom
-  \date 2019
-  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
+ \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
+ \company Eurecom
+ \date 2019
+ \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
 
 #ifndef FILE_SMF_N11_HPP_SEEN
@@ -41,16 +41,16 @@
 namespace smf {
 
 class smf_n11 {
-private:
+ private:
   std::thread::id thread_id;
   std::thread thread;
 
   void handle_receive_sm_data_notification();
 
-public:
+ public:
   smf_n11();
-  smf_n11(smf_n11 const&)    = delete;
-  void operator=(smf_n11 const&)     = delete;
+  smf_n11(smf_n11 const&) = delete;
+  void operator=(smf_n11 const&) = delete;
 
   /*
    * Send N1N2 Message Transfer Request to AMF
@@ -81,7 +81,7 @@ public:
    * @param [Pistache::Http::Code] code, response code
    *
    */
-  void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code);
+  void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter &httpResponse, oai::smf_server::model::SmContextUpdateError &smContextUpdateError, Pistache::Http::Code code);
 
   /*
    * Send create session response to AMF
@@ -90,7 +90,7 @@ public:
    * @param [Pistache::Http::Code] code, response code
    *
    */
-  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code);
+  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter &httpResponse, oai::smf_server::model::SmContextCreateError &smContextCreateError, Pistache::Http::Code code);
 
   /*
    * Send create session response to AMF
@@ -100,17 +100,19 @@ public:
    * @param [std::string] n1_sm_msg, N1 SM message content
    *
    */
-  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreateError& smContextCreateError, Pistache::Http::Code code, std::string& n1_sm_msg );
+  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter &httpResponse, oai::smf_server::model::SmContextCreateError &smContextCreateError, Pistache::Http::Code code,
+                                                   std::string &n1_sm_msg);
 
   /*
-    * Send update session response to AMF
-    * @param [Pistache::Http::ResponseWriter] httpResponse
-    * @param [ oai::smf_server::model::SmContextUpdateError] smContextUpdateError
-    * @param [Pistache::Http::Code] code, response code
-    * @param [std::string] n1_sm_msg, N1 SM message content
-    *
-    */
-   void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextUpdateError& smContextUpdateError, Pistache::Http::Code code, std::string& n1_sm_msg );
+   * Send update session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [ oai::smf_server::model::SmContextUpdateError] smContextUpdateError
+   * @param [Pistache::Http::Code] code, response code
+   * @param [std::string] n1_sm_msg, N1 SM message content
+   *
+   */
+  void send_pdu_session_update_sm_context_response(Pistache::Http::ResponseWriter &httpResponse, oai::smf_server::model::SmContextUpdateError &smContextUpdateError, Pistache::Http::Code code,
+                                                   std::string &n1_sm_msg);
 
   /*
    * Send create session response to AMF
@@ -119,7 +121,7 @@ public:
    * @param [Pistache::Http::Code] code, response code
    *
    */
-  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter& httpResponse, oai::smf_server::model::SmContextCreatedData& smContextCreatedData, Pistache::Http::Code code);
+  void send_pdu_session_create_sm_context_response(Pistache::Http::ResponseWriter &httpResponse, oai::smf_server::model::SmContextCreatedData &smContextCreatedData, Pistache::Http::Code code);
 
   /*
    * Create HTTP body content for multipart/related message
@@ -130,7 +132,7 @@ public:
    * @param [std::string] n2_message: N2 (NGAP) part
    *
    */
-  void create_multipart_related_content(std::string& body, std::string& json_part, std::string& boundary, std::string& n1_message, std::string& n2_message);
+  void create_multipart_related_content(std::string &body, std::string &json_part, std::string &boundary, std::string &n1_message, std::string &n2_message);
 
   /*
    * Create HTTP body content for multipart/related message
@@ -141,7 +143,7 @@ public:
    * @param [uint8_t] content_type: 1 for NAS content, else NGAP content
    *
    */
-  void create_multipart_related_content(std::string& body, std::string& json_part, std::string& boundary, std::string& message, multipart_related_content_part_e content_type);
+  void create_multipart_related_content(std::string &body, std::string &json_part, std::string &boundary, std::string &message, multipart_related_content_part_e content_type);
 
 };
 

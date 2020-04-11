@@ -35,38 +35,43 @@
 #include "logger.hpp"
 
 class ipv6_pool {
-public:
+ public:
   struct in6_addr prefix;
-  int             prefix_len;
+  int prefix_len;
 
-  ipv6_pool(): prefix(), prefix_len(0) {}
+  ipv6_pool()
+      :
+      prefix(),
+      prefix_len(0) {
+  }
 
   ipv6_pool(const struct in6_addr prfix, const int prfix_len) {
     prefix = prfix;
     prefix_len = prfix_len;
   }
 
-  ipv6_pool(const ipv6_pool& p): prefix(p.prefix), prefix_len(p.prefix_len) {}
+  ipv6_pool(const ipv6_pool &p)
+      :
+      prefix(p.prefix),
+      prefix_len(p.prefix_len) {
+  }
 
-
-  bool alloc_address(struct in6_addr& allocated)
-  {
+  bool alloc_address(struct in6_addr &allocated) {
     allocated = prefix;
     return true;
   }
 
-  void free_address(const struct in_addr& allocated) {}
+  void free_address(const struct in_addr &allocated) {
+  }
 };
 
-
 class ipv4_pool {
-protected:
+ protected:
   struct in_addr start;
-  int            num;
-  std::map<int, uint32_t>     alloc;
+  int num;
+  std::map<int, uint32_t> alloc;
 
-  bool alloc_free_bit(int& bit_pos)
-  {
+  bool alloc_free_bit(int &bit_pos) {
     bit_pos = 0;
     for (int i = 0; i < alloc.size(); ++i) {
       if (alloc[i] != std::numeric_limits<uint32_t>::max()) {
@@ -85,8 +90,7 @@ protected:
     return false;
   }
 
-  bool free_bit(const int bit_pos)
-  {
+  bool free_bit(const int bit_pos) {
     if (bit_pos < num) {
       int bit_pos32 = bit_pos >> 5;
       int word_bit_pos = bit_pos & 0x0000001F;
@@ -98,12 +102,18 @@ protected:
     return false;
   }
 
-public:
-  ipv4_pool() : num(0), alloc() {
+ public:
+  ipv4_pool()
+      :
+      num(0),
+      alloc() {
     start.s_addr = 0;
-  };
+  }
+  ;
 
-  ipv4_pool(const struct in_addr first, const uint32_t range): alloc() {
+  ipv4_pool(const struct in_addr first, const uint32_t range)
+      :
+      alloc() {
     start.s_addr = first.s_addr;
     num = range;
     int range32 = range >> 5;
@@ -114,26 +124,29 @@ public:
     if (range & 0x0000001F) {
       alloc[i] = std::numeric_limits<uint32_t>::max() << (range & 0x0000001F);
     }
-  };
+  }
+  ;
 
-  ipv4_pool(const ipv4_pool& p): num(p.num), alloc(p.alloc) {
+  ipv4_pool(const ipv4_pool &p)
+      :
+      num(p.num),
+      alloc(p.alloc) {
     start.s_addr = p.start.s_addr;
-  };
+  }
+  ;
 
-  bool alloc_address(struct in_addr& allocated)
-  {
+  bool alloc_address(struct in_addr &allocated) {
     int bit_pos = 0;
     if (alloc_free_bit(bit_pos)) {
-      allocated.s_addr =  be32toh(start.s_addr) + bit_pos; // overflow
-      allocated.s_addr =  htobe32(allocated.s_addr);
+      allocated.s_addr = be32toh(start.s_addr) + bit_pos;  // overflow
+      allocated.s_addr = htobe32(allocated.s_addr);
       return true;
     }
     allocated.s_addr = 0;
     return false;
   }
 
-  bool free_address(const struct in_addr& allocated)
-  {
+  bool free_address(const struct in_addr &allocated) {
     if (in_pool(allocated)) {
       int bit_pos = be32toh(allocated.s_addr) - be32toh(start.s_addr);
       return free_bit(bit_pos);
@@ -141,8 +154,7 @@ public:
     return false;
   }
 
-  bool in_pool(const struct in_addr& a) const
-  {
+  bool in_pool(const struct in_addr &a) const {
     int addr_start = be32toh(start.s_addr);
     int addr = be32toh(a.s_addr);
     return ((addr - addr_start) < num);
@@ -151,43 +163,49 @@ public:
 
 class apn_dynamic_pools {
 
-public:
+ public:
   std::vector<uint32_t> ipv4_pool_ids;
   std::vector<uint32_t> ipv6_pool_ids;
 
-  apn_dynamic_pools(): ipv4_pool_ids(), ipv6_pool_ids() {}
+  apn_dynamic_pools()
+      :
+      ipv4_pool_ids(),
+      ipv6_pool_ids() {
+  }
 
-  void add_ipv4_pool_id(const uint32_t id)
-  {
+  void add_ipv4_pool_id(const uint32_t id) {
     ipv4_pool_ids.push_back(id);
   }
-  void add_ipv6_pool_id(const uint32_t id)
-  {
+  void add_ipv6_pool_id(const uint32_t id) {
     ipv6_pool_ids.push_back(id);
   }
 };
 
 class paa_dynamic {
-private:
+ private:
   std::map<int32_t, ipv4_pool> ipv4_pools;
   std::map<int32_t, ipv6_pool> ipv6_pools;
 
-  std::map<std::string, apn_dynamic_pools>   apns;
+  std::map<std::string, apn_dynamic_pools> apns;
 
-  paa_dynamic(): ipv4_pools(), ipv6_pools(), apns() {};
+  paa_dynamic()
+      :
+      ipv4_pools(),
+      ipv6_pools(),
+      apns() {
+  }
+  ;
 
-public:
-  static paa_dynamic& get_instance()
-  {
-    static paa_dynamic  instance;
+ public:
+  static paa_dynamic& get_instance() {
+    static paa_dynamic instance;
     return instance;
   }
 
   paa_dynamic(paa_dynamic const&) = delete;
   void operator=(paa_dynamic const&) = delete;
 
-  void add_pool(const std::string& apn_label, const int pool_id, const struct in_addr& first, const int range)
-  {
+  void add_pool(const std::string &apn_label, const int pool_id, const struct in_addr &first, const int range) {
     if (pool_id >= 0) {
       uint32_t uint32pool_id = uint32_t(pool_id);
       if (!ipv4_pools.count(uint32pool_id)) {
@@ -195,15 +213,14 @@ public:
         ipv4_pools[uint32pool_id] = pool;
       }
       if (!apns.count(apn_label)) {
-        apn_dynamic_pools adp = {};
+        apn_dynamic_pools adp = { };
         adp.add_ipv4_pool_id(uint32pool_id);
         apns[apn_label] = adp;
       }
     }
   }
 
-  void add_pool(const std::string& apn_label, const int pool_id, const struct in6_addr& prefix, const int prefix_len)
-  {
+  void add_pool(const std::string &apn_label, const int pool_id, const struct in6_addr &prefix, const int prefix_len) {
     if (pool_id >= 0) {
       uint32_t uint32pool_id = uint32_t(pool_id);
       if (!ipv6_pools.count(uint32pool_id)) {
@@ -211,19 +228,18 @@ public:
         ipv6_pools[uint32pool_id] = pool;
       }
       if (!apns.count(apn_label)) {
-        apn_dynamic_pools adp = {};
+        apn_dynamic_pools adp = { };
         adp.add_ipv6_pool_id(uint32pool_id);
         apns[apn_label] = adp;
       }
     }
   }
 
-  bool get_free_paa(const std::string& apn_label, paa_t& paa)
-  {
+  bool get_free_paa(const std::string &apn_label, paa_t &paa) {
     if (apns.count(apn_label)) {
-      apn_dynamic_pools& apn_pool = apns[apn_label];
+      apn_dynamic_pools &apn_pool = apns[apn_label];
       if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4) {
-        for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin();it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].alloc_address(paa.ipv4_address)) {
             return true;
           }
@@ -232,14 +248,14 @@ public:
         return false;
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4V6) {
         bool success = false;
-        std::vector<uint32_t>::const_iterator it4 = {};
-        for (it4 = apn_pool.ipv4_pool_ids.begin();it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+        std::vector<uint32_t>::const_iterator it4 = { };
+        for (it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].alloc_address(paa.ipv4_address)) {
             success = true;
           }
         }
         if (success) {
-          for (std::vector<uint32_t>::const_iterator it6 = apn_pool.ipv6_pool_ids.begin();it6 != apn_pool.ipv6_pool_ids.end(); ++it6) {
+          for (std::vector<uint32_t>::const_iterator it6 = apn_pool.ipv6_pool_ids.begin(); it6 != apn_pool.ipv6_pool_ids.end(); ++it6) {
             if (ipv6_pools[*it6].alloc_address(paa.ipv6_address)) {
               return true;
             }
@@ -249,7 +265,7 @@ public:
         Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4V6 for APN %s", apn_label.c_str());
         return false;
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV6) {
-        for (std::vector<uint32_t>::const_iterator it6 = apn_pool.ipv6_pool_ids.begin();it6 != apn_pool.ipv6_pool_ids.end(); ++it6) {
+        for (std::vector<uint32_t>::const_iterator it6 = apn_pool.ipv6_pool_ids.begin(); it6 != apn_pool.ipv6_pool_ids.end(); ++it6) {
           if (ipv6_pools[*it6].alloc_address(paa.ipv6_address)) {
             return true;
           }
@@ -262,12 +278,11 @@ public:
     return false;
   }
 
-  bool release_paa(const std::string& apn_label, const paa_t& paa)
-  {
+  bool release_paa(const std::string &apn_label, const paa_t &paa) {
     if (apns.count(apn_label)) {
-      apn_dynamic_pools& apn_pool = apns[apn_label];
+      apn_dynamic_pools &apn_pool = apns[apn_label];
       if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4) {
-        for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin();it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].free_address(paa.ipv4_address)) {
             return true;
           }
@@ -275,7 +290,7 @@ public:
         return false;
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4V6) {
         bool success = false;
-        std::vector<uint32_t>::const_iterator it4 = {};
+        std::vector<uint32_t>::const_iterator it4 = { };
         for (it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].free_address(paa.ipv4_address)) {
             return true;
@@ -290,10 +305,9 @@ public:
     return false;
   }
 
-  bool release_paa(const std::string& apn_label, const struct in_addr& ipv4_address)
-  {
+  bool release_paa(const std::string &apn_label, const struct in_addr &ipv4_address) {
     if (apns.count(apn_label)) {
-      apn_dynamic_pools& apn_pool = apns[apn_label];
+      apn_dynamic_pools &apn_pool = apns[apn_label];
       for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
         if (ipv4_pools[*it4].free_address(ipv4_address)) {
           return true;

@@ -20,10 +20,10 @@
  */
 
 /*! \file smf_pco.hpp
-  \brief
-  \author Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
+ \brief
+ \author Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
  */
 #ifndef FILE_SMF_PCO_HPP_SEEN
 #define FILE_SMF_PCO_HPP_SEEN
@@ -40,13 +40,13 @@
  */
 typedef struct protocol_configuration_options_ids_s {
   // Protocol identifiers (from configuration protocol options list)
-  uint8_t pi_ipcp: 1;
+  uint8_t pi_ipcp :1;
 
   // Container identifiers (from additional parameters list)
-  uint8_t ci_dns_server_ipv4_address_request: 1;
-  uint8_t ci_ip_address_allocation_via_nas_signalling: 1;
-  uint8_t ci_ipv4_address_allocation_via_dhcpv4: 1;
-  uint8_t ci_ipv4_link_mtu_request: 1;
+  uint8_t ci_dns_server_ipv4_address_request :1;
+  uint8_t ci_ip_address_allocation_via_nas_signalling :1;
+  uint8_t ci_ipv4_address_allocation_via_dhcpv4 :1;
+  uint8_t ci_ipv4_link_mtu_request :1;
 } protocol_configuration_options_ids_t;
 
 #endif
