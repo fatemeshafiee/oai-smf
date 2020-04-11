@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include <sys/socket.h>
 #include <stdlib.h>
@@ -22,7 +22,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <net/if.h>
-
 
 #include <fstream>      // std::ifstream
 #include <string>
@@ -36,10 +35,9 @@
 using namespace std;
 
 //------------------------------------------------------------------------------
-bool util::get_iface_l2_addr(const std::string& iface, std::string& mac)
-{
+bool util::get_iface_l2_addr(const std::string &iface, std::string &mac) {
   std::string mac_address_path = fmt::format("/sys/class/net/{}/address", iface);
-  std::ifstream mac_address_in(mac_address_path.c_str(), ios_base::in | ios_base::binary );
+  std::ifstream mac_address_in(mac_address_path.c_str(), ios_base::in | ios_base::binary);
   char wb[32];
   mac_address_in.get(wb, 32);
   mac.assign(wb);
@@ -58,23 +56,22 @@ bool util::get_iface_l2_addr(const std::string& iface, std::string& mac)
 
 }
 //------------------------------------------------------------------------------
-bool util::get_gateway_and_iface(std::string& gw, std::string& iface)
-{
-  int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
-  int     sock = -1, msgseq = 0;
-  struct  nlmsghdr *nlh, *nlmsg;
-  struct  rtmsg *route_entry;
+bool util::get_gateway_and_iface(std::string &gw, std::string &iface) {
+  int received_bytes = 0, msg_len = 0, route_attribute_len = 0;
+  int sock = -1, msgseq = 0;
+  struct nlmsghdr *nlh, *nlmsg;
+  struct rtmsg *route_entry;
   // This struct contain route attributes (route type)
-  struct  rtattr *route_attribute;
-  char    gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE+1];
-  char    msgbuf[BUFFER_SIZE], buffer[BUFFER_SIZE];
-  char    *ptr = buffer;
+  struct rtattr *route_attribute;
+  char gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE + 1];
+  char msgbuf[BUFFER_SIZE], buffer[BUFFER_SIZE];
+  char *ptr = buffer;
   struct timeval tv;
-  int     rv = RETURNok;
+  int rv = RETURNok;
 
   if ((sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE)) < 0) {
-      perror("socket failed");
-      return false;
+    perror("socket failed");
+    return false;
   }
 
   memset(msgbuf, 0, sizeof(msgbuf));
@@ -83,81 +80,77 @@ bool util::get_gateway_and_iface(std::string& gw, std::string& iface)
   memset(buffer, 0, sizeof(buffer));
 
   /* point the header and the msg structure pointers into the buffer */
-  nlmsg = (struct nlmsghdr *)msgbuf;
+  nlmsg = (struct nlmsghdr*) msgbuf;
 
   /* Fill in the nlmsg header*/
   nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
-  nlmsg->nlmsg_type = RTM_GETROUTE; // Get the routes from kernel routing table .
-  nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST; // The message is a request for dump.
-  nlmsg->nlmsg_seq = msgseq++; // Sequence of the message packet.
-  nlmsg->nlmsg_pid = getpid(); // PID of process sending the request.
+  nlmsg->nlmsg_type = RTM_GETROUTE;  // Get the routes from kernel routing table .
+  nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;  // The message is a request for dump.
+  nlmsg->nlmsg_seq = msgseq++;  // Sequence of the message packet.
+  nlmsg->nlmsg_pid = getpid();  // PID of process sending the request.
 
   /* 1 Sec Timeout to avoid stall */
   tv.tv_sec = 1;
-  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval));
+  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval*) &tv, sizeof(struct timeval));
   /* send msg */
   if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
-      perror("send failed");
-      return false;
+    perror("send failed");
+    return false;
   }
 
   /* receive response */
   do {
     received_bytes = recv(sock, ptr, sizeof(buffer) - msg_len, 0);
     if (received_bytes < 0) {
-        perror("Error in recv");
-        return false;
+      perror("Error in recv");
+      return false;
     }
 
-    nlh = (struct nlmsghdr *) ptr;
+    nlh = (struct nlmsghdr*) ptr;
 
     /* Check if the header is valid */
-    if((NLMSG_OK(nlmsg, received_bytes) == 0) ||
-       (nlmsg->nlmsg_type == NLMSG_ERROR))
-    {
-        perror("Error in received packet");
-        return false;
+    if ((NLMSG_OK(nlmsg, received_bytes) == 0) || (nlmsg->nlmsg_type == NLMSG_ERROR)) {
+      perror("Error in received packet");
+      return false;
     }
 
     /* If we received all data break */
     if (nlh->nlmsg_type == NLMSG_DONE)
-        break;
+      break;
     else {
-        ptr += received_bytes;
-        msg_len += received_bytes;
+      ptr += received_bytes;
+      msg_len += received_bytes;
     }
 
     /* Break if its not a multi part message */
     if ((nlmsg->nlmsg_flags & NLM_F_MULTI) == 0)
-        break;
+      break;
   } while ((nlmsg->nlmsg_seq != msgseq) || (nlmsg->nlmsg_pid != getpid()));
 
   /* parse response */
-  for ( ; NLMSG_OK(nlh, received_bytes); nlh = NLMSG_NEXT(nlh, received_bytes)) {
+  for (; NLMSG_OK(nlh, received_bytes); nlh = NLMSG_NEXT(nlh, received_bytes)) {
     /* Get the route data */
-    route_entry = (struct rtmsg *) NLMSG_DATA(nlh);
+    route_entry = (struct rtmsg*) NLMSG_DATA(nlh);
 
     /* We are just interested in main routing table */
     if (route_entry->rtm_table != RT_TABLE_MAIN)
-        continue;
+      continue;
 
-    route_attribute = (struct rtattr *) RTM_RTA(route_entry);
+    route_attribute = (struct rtattr*) RTM_RTA(route_entry);
     route_attribute_len = RTM_PAYLOAD(nlh);
 
     /* Loop through all attributes */
-    for ( ; RTA_OK(route_attribute, route_attribute_len);
-          route_attribute = RTA_NEXT(route_attribute, route_attribute_len)) {
-        switch(route_attribute->rta_type) {
+    for (; RTA_OK(route_attribute, route_attribute_len); route_attribute = RTA_NEXT(route_attribute, route_attribute_len)) {
+      switch (route_attribute->rta_type) {
         case RTA_OIF:
-            if_indextoname(*(int *)RTA_DATA(route_attribute), interface);
-            break;
+          if_indextoname(*(int*) RTA_DATA(route_attribute), interface);
+          break;
         case RTA_GATEWAY:
-            inet_ntop(AF_INET, RTA_DATA(route_attribute),
-                      gateway_address, sizeof(gateway_address));
-            break;
+          inet_ntop(AF_INET, RTA_DATA(route_attribute), gateway_address, sizeof(gateway_address));
+          break;
         default:
-            break;
-        }
+          break;
+      }
     }
 
     if ((*gateway_address) && (*interface)) {

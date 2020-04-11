@@ -19,44 +19,40 @@
  *      contact@openairinterface.org
  */
 
-
 #ifndef FILE_3GPP_29_571_SEEN
 #define FILE_3GPP_29_571_SEEN
 
-
 typedef struct session_ambr_s {
-	std::string uplink;
-	std::string downlink;
+  std::string uplink;
+  std::string downlink;
 } session_ambr_t;
 
 enum preemtion_capability_e {
-	NOT_PREEMPT = 1,
-	MAY_PREEMPT = 2
+  NOT_PREEMPT = 1,
+  MAY_PREEMPT = 2
 };
 
-static const std::vector<std::string> preemtion_capability_e2str = {"Error", "NOT_PREEMPT", "MAY_PREEMPT"};
+static const std::vector<std::string> preemtion_capability_e2str = { "Error", "NOT_PREEMPT", "MAY_PREEMPT" };
 
 //see section 5.5.4.1@TS 29.571
 typedef struct arp_5gc_s {
-	  uint8_t priority_level;// (integer 1-15)
-	  std::string preempt_cap;
-	  std::string preempt_vuln; //NOT_PREEMPTABLE, PREEMPTABLE
+  uint8_t priority_level;  // (integer 1-15)
+  std::string preempt_cap;
+  std::string preempt_vuln;  //NOT_PREEMPTABLE, PREEMPTABLE
 } arp_5gc_t;
 
-
 //see section 5.4.4.1@TS 29.571
-typedef struct subscribed_default_qos_s{
-	uint8_t _5qi;
-	arp_5gc_t arp;
-	uint8_t priority_level;//1-127
+typedef struct subscribed_default_qos_s {
+  uint8_t _5qi;
+  arp_5gc_t arp;
+  uint8_t priority_level;  //1-127
 } subscribed_default_qos_t;
 
-
-enum reflective_qos_attribute_e{
+enum reflective_qos_attribute_e {
   RQOS = 1,
   NO_RQOS = 2
 };
 
-static const std::vector<std::string> reflective_qos_attribute_e2str = {"ERROR", "RQOS", "NO_RQOS"};
+static const std::vector<std::string> reflective_qos_attribute_e2str = { "ERROR", "RQOS", "NO_RQOS" };
 
 #endif

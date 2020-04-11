@@ -20,18 +20,17 @@
  */
 
 /*! \file conversions.hpp
-  \brief
-  \author Sebastien ROUX, Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \author Sebastien ROUX, Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 
 #ifndef FILE_CONVERSIONS_HPP_SEEN
 #define FILE_CONVERSIONS_HPP_SEEN
 #include <stdint.h>
 #include <string>
 #include <netinet/in.h>
-
 
 /* Used to format an uint32_t containing an ipv4 address */
 #define IN_ADDR_FMT    "%u.%u.%u.%u"
@@ -51,15 +50,14 @@
     (buf)[2] = (x) >> 8,       \
     (buf)[3] = (x)
 
-
 class conv {
-  public:
-    static void hexa_to_ascii(uint8_t *from, char *to, size_t length);
-    static int ascii_to_hex(uint8_t *dst, const char *h);
-    static struct in_addr fromString(const std::string addr4);
-    static std::string toString(const struct in_addr& inaddr);
-    static std::string toString(const struct in6_addr& in6addr);
-    static std::string mccToString(const uint8_t digit1, const uint8_t digit2, const uint8_t digit3);
-    static std::string mncToString(const uint8_t digit1, const uint8_t digit2, const uint8_t digit3);
+ public:
+  static void hexa_to_ascii(uint8_t *from, char *to, size_t length);
+  static int ascii_to_hex(uint8_t *dst, const char *h);
+  static struct in_addr fromString(const std::string addr4);
+  static std::string toString(const struct in_addr &inaddr);
+  static std::string toString(const struct in6_addr &in6addr);
+  static std::string mccToString(const uint8_t digit1, const uint8_t digit2, const uint8_t digit3);
+  static std::string mncToString(const uint8_t digit1, const uint8_t digit2, const uint8_t digit3);
 };
 #endif /* FILE_CONVERSIONS_HPP_SEEN */

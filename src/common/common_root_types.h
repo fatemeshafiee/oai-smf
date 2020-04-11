@@ -20,10 +20,10 @@
  */
 
 /*! \file common_root_types.h
-  \brief
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 
 #ifndef FILE_COMMON_ROOT_TYPES_SEEN
 #define FILE_COMMON_ROOT_TYPES_SEEN
@@ -43,31 +43,29 @@
 #define PROC_ID_FMT             "0x%" PRIx64
 
 // TEIDs
-typedef uint32_t                 teid_t;
+typedef uint32_t teid_t;
 #define TEID_FMT                 "0x%" PRIx32
 #define TEID_SCAN_FMT            SCNx32
 #define INVALID_TEID             ((teid_t)0x00000000)
 #define UNASSIGNED_TEID          ((teid_t)0x00000000)
 
 // SEIDs
-typedef uint64_t                 seid_t;
+typedef uint64_t seid_t;
 #define SEID_FMT                 "0x%" PRIx64
 #define SEID_SCAN_FMT            SCNx64
 #define INVALID_SEID             ((seid_t)0x00000000)
 #define UNASSIGNED_SEID          ((seid_t)0x00000000)
 
-
 // SM Context IDs (SCIDs)
-typedef uint32_t                 scid_t;
+typedef uint32_t scid_t;
 #define SCID_FMT                 "0x%" PRIx32
 #define SCID_SCAN_FMT            SCNx32
 #define INVALID_SCID             ((scid_t)0x00000000)
 #define UNASSIGNED_SCID          ((scid_t)0x00000000)
 
-
 //------------------------------------------------------------------------------
 // IMSI
-typedef uint64_t                 imsi64_t;
+typedef uint64_t imsi64_t;
 #define IMSI_64_FMT              "%" SCNu64
 #define INVALID_IMSI64           (imsi64_t)0
 

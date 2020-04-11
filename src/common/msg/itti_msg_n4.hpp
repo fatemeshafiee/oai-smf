@@ -23,7 +23,7 @@
    \author  Lionel GAUTHIER
    \date 2019
    \email: lionel.gauthier@eurecom.fr
-*/
+ */
 
 #ifndef ITTI_MSG_N4_HPP_INCLUDED_
 #define ITTI_MSG_N4_HPP_INCLUDED_
@@ -34,7 +34,7 @@
 #include "msg_pfcp.hpp"
 
 class itti_n4_msg : public itti_msg {
-public:
+ public:
   itti_n4_msg(const itti_msg_type_t  msg_type, const task_id_t origin, const task_id_t destination):
     itti_msg(msg_type, origin, destination) {
     l_endpoint = {};
@@ -61,7 +61,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_heartbeat_request : public itti_n4_msg {
-public:
+ public:
   itti_n4_heartbeat_request(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_HEARTBEAT_REQUEST, origin, destination) {  }
   itti_n4_heartbeat_request(const itti_n4_heartbeat_request& i) : itti_n4_msg(i)  {
@@ -79,7 +79,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_heartbeat_response  : public itti_n4_msg {
-public:
+ public:
   itti_n4_heartbeat_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_HEARTBEAT_RESPONSE, origin, destination) {
   }
@@ -97,7 +97,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_pfcp_pfd_management_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_pfcp_pfd_management_request(const task_id_t origin, const task_id_t destination): itti_n4_msg(N4_PFCP_PFD_MANAGEMENT_REQUEST, origin, destination) {
   }
   itti_n4_pfcp_pfd_management_request(const itti_n4_pfcp_pfd_management_request& i) : itti_n4_msg(i) {
@@ -114,7 +114,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_pfcp_pfd_management_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_pfcp_pfd_management_response(const task_id_t origin, const task_id_t destination): itti_n4_msg(N4_PFCP_PFD_MANAGEMENT_RESPONSE, origin, destination) {
   }
   itti_n4_pfcp_pfd_management_response(const itti_n4_pfcp_pfd_management_response& i) : itti_n4_msg(i) {
@@ -132,7 +132,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_association_setup_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_association_setup_request(const task_id_t origin, const task_id_t destination): itti_n4_msg(N4_ASSOCIATION_SETUP_REQUEST, origin, destination) {
   }
   itti_n4_association_setup_request(const itti_n4_association_setup_request& i) : itti_n4_msg(i) {
@@ -149,7 +149,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_association_setup_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_association_setup_response(const task_id_t origin, const task_id_t destination): itti_n4_msg(N4_ASSOCIATION_SETUP_RESPONSE, origin, destination) {
   }
   itti_n4_association_setup_response(const itti_n4_association_setup_response& i) : itti_n4_msg(i) {
@@ -166,7 +166,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_association_update_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_association_update_request(const task_id_t origin, const task_id_t destination): itti_n4_msg(N4_ASSOCIATION_UPDATE_REQUEST, origin, destination) {
   }
   itti_n4_association_update_request(const itti_n4_association_update_request& i) : itti_n4_msg(i) {
@@ -183,7 +183,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_association_update_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_association_update_response(const task_id_t origin, const task_id_t destination): itti_n4_msg(N4_ASSOCIATION_UPDATE_RESPONSE, origin, destination) {
   }
   itti_n4_association_update_response(const itti_n4_association_update_response& i) : itti_n4_msg(i) {
@@ -200,7 +200,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_association_release_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_association_release_request(const task_id_t origin, const task_id_t destination): itti_n4_msg(N4_ASSOCIATION_RELEASE_REQUEST, origin, destination) {
   }
   itti_n4_association_release_request(const itti_n4_association_release_request& i) : itti_n4_msg(i) {
@@ -218,7 +218,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_association_release_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_association_release_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_ASSOCIATION_RELEASE_RESPONSE, origin, destination) {
   }
@@ -236,7 +236,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_version_not_supported_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_version_not_supported_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_VERSION_NOT_SUPPORTED_RESPONSE, origin, destination) {
   }
@@ -254,7 +254,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_node_report_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_node_report_request(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_NODE_REPORT_REQUEST, origin, destination) {
   }
@@ -272,7 +272,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_node_report_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_node_report_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_NODE_REPORT_RESPONSE, origin, destination) {
   }
@@ -290,7 +290,7 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_n4_session_set_deletion_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_set_deletion_request(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_SET_DELETION_REQUEST, origin, destination) {
   }
@@ -307,7 +307,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_set_deletion_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_set_deletion_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_SET_DELETION_RESPONSE, origin, destination) {
   }
@@ -324,7 +324,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_establishment_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_establishment_request(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_ESTABLISHMENT_REQUEST, origin, destination) {
   }
@@ -341,7 +341,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_establishment_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_establishment_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_ESTABLISHMENT_RESPONSE, origin, destination) {
   }
@@ -358,7 +358,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_modification_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_modification_request(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_MODIFICATION_REQUEST, origin, destination) {
   }
@@ -375,7 +375,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_modification_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_modification_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_MODIFICATION_RESPONSE, origin, destination) {
   }
@@ -392,7 +392,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_deletion_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_deletion_request(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_DELETION_REQUEST, origin, destination) {
   }
@@ -409,7 +409,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_deletion_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_deletion_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_DELETION_RESPONSE, origin, destination) {
   }
@@ -426,7 +426,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_report_request   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_report_request(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_REPORT_REQUEST, origin, destination) {
   }
@@ -443,7 +443,7 @@ public:
 } ;
 //-----------------------------------------------------------------------------
 class itti_n4_session_report_response   : public itti_n4_msg {
-public:
+ public:
   itti_n4_session_report_response(const task_id_t origin, const task_id_t destination):
     itti_n4_msg(N4_SESSION_REPORT_RESPONSE, origin, destination) {
   }

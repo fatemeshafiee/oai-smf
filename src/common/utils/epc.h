@@ -64,7 +64,7 @@
    a[2] = LOW_NIBBLE(b[1]) + '0'; \
    a[3] = '\0'; \
 }
-   
+
 #define PARSE_PLMNID(a) \
    char mnc[4], mcc[4]; \
    PARSE_MNC(mnc,a); \
@@ -86,7 +86,7 @@ namespace EPC
       x_3gpp_mme,
       x_3gpp_msc
    };
-   
+
    enum AppProtocolEnum
    {
       x_unknown,
@@ -115,7 +115,7 @@ namespace EPC
       x_s8_pmip,
       x_sv
    };
-   
+
    enum PGWAppProtocolEnum
    {
       pgw_x_gn,
@@ -131,7 +131,7 @@ namespace EPC
       pgw_x_s8_gtp,
       pgw_x_s8_pmip
    };
-   
+
    enum SGWAppProtocolEnum
    {
       sgw_x_s11,
@@ -145,13 +145,13 @@ namespace EPC
       sgw_x_s8_gtp,
       sgw_x_s8_pmip
    };
-   
+
    enum GGSNAppProtocolEnum
    {
       ggsn_x_gn,
       ggsn_x_gp
    };
-   
+
    enum SGSNAppProtocolEnum
    {
       sgsn_x_gn,
@@ -162,7 +162,7 @@ namespace EPC
       sgsn_x_s4,
       sgsn_x_sv
    };
-   
+
    enum MMEAppProtocolEnum
    {
       mme_x_gn,
@@ -175,12 +175,12 @@ namespace EPC
       mme_x_s6a,
       mme_x_sv
    };
-   
+
    enum MSCAppProtocolEnum
    {
       msc_x_sv
    };
-   
+
    enum DiameterApplicationEnum
    {
       dia_app_unknown,
@@ -325,20 +325,20 @@ namespace EPC
       static std::string apn( const char *apnoi, const char *mnc, const char *mcc );
       static std::string apn( const char *apnoi, const unsigned char *plmnid );
       static std::string apn_label(const std::string& apn);
-   
+
       static AppServiceEnum getAppService( const std::string &s );
       static AppProtocolEnum getAppProtocol( const std::string &p );
 
       static const char *getAppService( AppServiceEnum s );
       static const char *getAppProtocol( AppProtocolEnum proto );
-   
+
       static AppProtocolEnum getAppProtocol( PGWAppProtocolEnum proto );
       static AppProtocolEnum getAppProtocol( SGWAppProtocolEnum proto );
       static AppProtocolEnum getAppProtocol( GGSNAppProtocolEnum proto );
       static AppProtocolEnum getAppProtocol( SGSNAppProtocolEnum proto );
       static AppProtocolEnum getAppProtocol( MMEAppProtocolEnum proto );
       static AppProtocolEnum getAppProtocol( MSCAppProtocolEnum proto );
-   
+
       static std::string diameter_fqdn( const char *mnc, const char *mcc );
       static std::string diameter_fqdn( const unsigned char *plmnid );
 
@@ -350,7 +350,7 @@ namespace EPC
    private:
       Utility() {}
    };
-   
+
 
 
 } // namespace EPC

@@ -20,11 +20,11 @@
  */
 
 /*! \file rfc_1332.h
-  \brief
-  \author Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \author Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 #ifndef FILE_RFC_1332_SEEN
 #define FILE_RFC_1332_SEEN
 
@@ -47,6 +47,5 @@
 #define IPCP_CODE_TERMINATE_REQUEST                                     (0x05)
 #define IPCP_CODE_TERMINATE_ACK                                         (0x06)
 #define IPCP_CODE_REJECT                                                (0x07)
-
 
 #endif
