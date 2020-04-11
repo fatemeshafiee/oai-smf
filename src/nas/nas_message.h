@@ -32,7 +32,6 @@
 #define DIRECTION__ 1//SECU_DIRECTION_DOWNLINK
 #define TEST_MAC_ENCRYPT_DECRYPT__	0
 
-
 #define NAS_MESSAGE_SECURITY_HEADER_SIZE  7
 
 /*********************************************************/
@@ -41,9 +40,9 @@
 /* Structure of security protected header */
 typedef struct nas_message_security_header_s {
 #ifdef __LITTLE_ENDIAN_BITFIELD
-  extended_protocol_discriminator_t extended_protocol_discriminator;//3gpp_24.501.h
-  uint8_t security_header_type:4;
-  uint8_t spare_half_octet:4;
+  extended_protocol_discriminator_t extended_protocol_discriminator;  //3gpp_24.501.h
+  uint8_t security_header_type :4;
+  uint8_t spare_half_octet :4;
 #endif
 #ifdef __BIG_ENDIAN_BITFIELD
   uint8_t spare_half_octet:4;
@@ -55,10 +54,9 @@ typedef struct nas_message_security_header_s {
 
 /* Structure of plain NAS message */
 typedef union {
-  MM_msg mm;    /* NAS MM */
-  SM_msg sm;    /* NAS SM  */
+  MM_msg mm; /* NAS MM */
+  SM_msg sm; /* NAS SM  */
 } nas_message_plain_t;
-
 
 /* Structure of security protected NAS message */
 typedef struct nas_message_security_protected_s {
@@ -76,24 +74,15 @@ typedef struct {
 } nas_message_t;
 
 typedef struct nas_message_decode_status_s {
-  uint8_t integrity_protected_message:1;
-  uint8_t ciphered_message:1;
-  uint8_t mac_matched:1;
-  uint8_t security_context_available:1;
+  uint8_t integrity_protected_message :1;
+  uint8_t ciphered_message :1;
+  uint8_t mac_matched :1;
+  uint8_t security_context_available :1;
   int fivegmm_cause;
 } nas_message_decode_status_t;
 
-int nas_message_encode(                   
-    unsigned char *buffer,
-    const nas_message_t * const msg,
-    size_t length,
-    void *security);
+int nas_message_encode(unsigned char *buffer, const nas_message_t *const msg, size_t length, void *security);
 
-int nas_message_decode (
-    const unsigned char *const buffer,
-    nas_message_t * msg,
-    size_t length,
-    void *security,
-    nas_message_decode_status_t * status);
+int nas_message_decode(const unsigned char *const buffer, nas_message_t *msg, size_t length, void *security, nas_message_decode_status_t *status);
 
 #endif

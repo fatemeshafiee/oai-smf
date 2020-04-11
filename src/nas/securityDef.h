@@ -20,21 +20,21 @@
  */
 
 /*****************************************************************************
-Source      securityDef.h
+ Source      securityDef.h
 
-Version     0.1
+ Version     0.1
 
-Date        2013/05/02
+ Date        2013/05/02
 
-Product     NAS stack
+ Product     NAS stack
 
-Subsystem   include
+ Subsystem   include
 
-Author      Frederic Maurel
+ Author      Frederic Maurel
 
-Description Contains global security definitions
+ Description Contains global security definitions
 
-*****************************************************************************/
+ *****************************************************************************/
 #ifndef FILE_SECURITYDEF_SEEN
 #define FILE_SECURITYDEF_SEEN
 
@@ -84,6 +84,5 @@ typedef struct {
   uint8_t xres_size;
   uint8_t xres[AUTH_XRES_SIZE];
 } auth_vector_t;
-
 
 #endif /* FILE_SECURITYDEF_SEEN*/

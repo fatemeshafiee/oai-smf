@@ -17,7 +17,6 @@
 #include "MappedEPSBearerContexts.h"
 #include "ExtendedProtocolConfigurationOptions.h"
 
-
 #if 0
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_MODIFICATION_REQUEST_MINIMUM_LENGTH ( \
@@ -39,7 +38,6 @@
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_MODIFICATION_REQUEST_MINIMUM_LENGTH 0
 
-
 /* Maximum length macro. Formed by maximum length of each field */
 #define PDU_SESSION_MODIFICATION_REQUEST_MAXIMUM_LENGTH ( \
 		EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH + \
@@ -57,7 +55,6 @@
 		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + \
 0)
 
-
 #define PDU_SESSION_MODIFICATION_REQUEST__5GSM_CAPABILITY_IEI					            	0x28
 #define PDU_SESSION_MODIFICATION_REQUEST__5GSM_CAUSE_IEI							              0x59
 #define PDU_SESSION_MODIFICATION_REQUEST_MAXIMUM_NUMBER_OF_SUPPORTED_IEI			      0x55
@@ -67,7 +64,6 @@
 #define PDU_SESSION_MODIFICATION_REQUEST_QOS_FLOW_DESCRIPTIONS_IEI					        0x79
 #define PDU_SESSION_MODIFICATION_REQUEST_MAPPED_EPS_BEARER_CONTEXTS_IEI				      0x75
 #define PDU_SESSION_MODIFICATION_REQUEST_E_P_C_O_IEI								                0x7B
-
 
 #define PDU_SESSION_MODIFICATION_REQUEST__5GSM_CAPABILITY_PRESENCE							          (1<<0)
 #define PDU_SESSION_MODIFICATION_REQUEST__5GSM_CAUSE_PRESENCE								              (1<<1)
@@ -79,24 +75,22 @@
 #define PDU_SESSION_MODIFICATION_REQUEST_MAPPED_EPS_BEARER_CONTEXTS_PRESENCE				      (1<<7)
 #define PDU_SESSION_MODIFICATION_REQUEST_E_P_C_O_PRESENCE								                	(1<<8)
 
-
 typedef struct pdu_session_modification_request_msg_tag {
-	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-	PDUSessionIdentity pdusessionidentity;
-	ProcedureTransactionIdentity proceduretransactionidentity;
-	MessageType messagetype;
-	uint16_t presence;
-	_5GSMCapability _5gsmcapability;
-	_5GSMCause _5gsmcause;
-	MaximumNumberOfSupportedPacketFilters maximumnumberofsupportedpacketfilters;
-	AlwaysonPDUSessionRequested alwaysonpdusessionrequested;
-	IntergrityProtectionMaximumDataRate intergrityprotectionmaximumdatarate;
-	QOSRules qosrules;
-	QOSFlowDescriptions qosflowdescriptions;
-	MappedEPSBearerContexts mappedepsbearercontexts;
-	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
+  ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+  PDUSessionIdentity pdusessionidentity;
+  ProcedureTransactionIdentity proceduretransactionidentity;
+  MessageType messagetype;
+  uint16_t presence;
+  _5GSMCapability _5gsmcapability;
+  _5GSMCause _5gsmcause;
+  MaximumNumberOfSupportedPacketFilters maximumnumberofsupportedpacketfilters;
+  AlwaysonPDUSessionRequested alwaysonpdusessionrequested;
+  IntergrityProtectionMaximumDataRate intergrityprotectionmaximumdatarate;
+  QOSRules qosrules;
+  QOSFlowDescriptions qosflowdescriptions;
+  MappedEPSBearerContexts mappedepsbearercontexts;
+  ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 } pdu_session_modification_request_msg;
-
 
 int decode_pdu_session_modification_request(pdu_session_modification_request_msg *pdusessionmodificationrequest, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_modification_request(pdu_session_modification_request_msg *pdusessionmodificationrequest, uint8_t *buffer, uint32_t len);

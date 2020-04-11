@@ -16,7 +16,6 @@
 #include "QOSFlowDescriptions.h"
 #include "ExtendedProtocolConfigurationOptions.h"
 
-
 #if 0
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_MODIFICATION_COMMAND_MINIMUM_LENGTH ( \
@@ -37,7 +36,6 @@
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_MODIFICATION_COMMAND_MINIMUM_LENGTH  0
 
-
 /* Maximum length macro. Formed by maximum length of each field */
 #define PDU_SESSION_MODIFICATION_COMMAND_MAXIMUM_LENGTH ( \
     EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH + \
@@ -53,7 +51,6 @@
     QOS_FLOW_DESCRIPTIONS_MAXIMUM_LENGTH_TLVE + \
     EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + \
     0)
-
 
 #define PDU_SESSION_MODIFICATION_COMMAND__5GSM_CAUSE_IEI				          		0x59
 #define PDU_SESSION_MODIFICATION_COMMAND_SESSION_AMBR_IEI				          		0x2A
@@ -73,7 +70,6 @@
 #define PDU_SESSION_MODIFICATION_COMMAND_QOS_FLOW_DESCRIPTIONS_PRESENCE				    (1<<6)
 #define PDU_SESSION_MODIFICATION_COMMAND_E_P_C_O_PRESENCE							            (1<<7)
 
-
 typedef struct pdu_session_modification_command_msg_tag {
   ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
   PDUSessionIdentity pdusessionidentity;
@@ -89,7 +85,6 @@ typedef struct pdu_session_modification_command_msg_tag {
   QOSFlowDescriptions qosflowdescriptions;
   ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 } pdu_session_modification_command_msg;
-
 
 int decode_pdu_session_modification_command(pdu_session_modification_command_msg *pdusessionmodificationcommand, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_modification_command(pdu_session_modification_command_msg *pdusessionmodificationcommand, uint8_t *buffer, uint32_t len);

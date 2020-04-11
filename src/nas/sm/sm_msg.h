@@ -68,13 +68,7 @@ typedef union {
   _5gsm_status_msg _5gsm_status;
 } SM_msg;
 
-int sm_msg_decode (
-    SM_msg * msg,
-    uint8_t * buffer,
-    uint32_t len);
+int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len);
 
-int fivegsm_msg_encode (
-    SM_msg * msg,
-    uint8_t * buffer,
-    uint32_t len);
+int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len);
 #endif

@@ -16,7 +16,6 @@
 #include "SMPDUDNRequestContainer.h"
 #include "ExtendedProtocolConfigurationOptions.h"
 
-
 #if 0
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_ESTABLISHMENT_REQUEST_MINIMUM_LENGTH ( \
@@ -40,7 +39,6 @@
 		INTERGRITY_PROTECTION_MAXIMUM_DATA_RATE_MINIMUM_LENGTH_V + \
 0)
 
-
 /* Maximum length macro. Formed by maximum length of each field */
 #define PDU_SESSION_ESTABLISHMENT_REQUEST_MAXIMUM_LENGTH ( \
 		EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH + \
@@ -56,8 +54,6 @@
 		SMPDUDN_REQUEST_CONTAINER_MAXIMUM_LENGTH_TLV + \
 		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + \
 0)
-
-
 
 #define PDU_SESSION_ESTABLISHMENT_REQUEST_PDU_SESSION_TYPE_IEI								       0x90
 #define PDU_SESSION_ESTABLISHMENT_REQUEST_SSC_MODE_IEI										           0xA0
@@ -75,21 +71,20 @@
 #define PDU_SESSION_ESTABLISHMENT_REQUEST_SMPDUDN_REQUEST_CONTAINER_INFORMATION_PRESENT (1<<5)
 #define PDU_SESSION_ESTABLISHMENT_REQUEST_EPCO_PRESENT 									                (1<<6)
 
-
 typedef struct pdu_session_establishment_request_msg_tag {
-	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-	PDUSessionIdentity pdusessionidentity;
-	ProcedureTransactionIdentity proceduretransactionidentity;
-	MessageType messagetype;
-	IntergrityProtectionMaximumDataRate intergrityprotectionmaximumdatarate;
-	uint8_t presence;
-	_PDUSessionType _pdusessiontype;
-	SSCMode sscmode;
-	_5GSMCapability _5gsmcapability;
-	MaximumNumberOfSupportedPacketFilters maximumnumberofsupportedpacketfilters;
-	AlwaysonPDUSessionRequested alwaysonpdusessionrequested;
-	SMPDUDNRequestContainer smpdudnrequestcontainer;
-	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
+  ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+  PDUSessionIdentity pdusessionidentity;
+  ProcedureTransactionIdentity proceduretransactionidentity;
+  MessageType messagetype;
+  IntergrityProtectionMaximumDataRate intergrityprotectionmaximumdatarate;
+  uint8_t presence;
+  _PDUSessionType _pdusessiontype;
+  SSCMode sscmode;
+  _5GSMCapability _5gsmcapability;
+  MaximumNumberOfSupportedPacketFilters maximumnumberofsupportedpacketfilters;
+  AlwaysonPDUSessionRequested alwaysonpdusessionrequested;
+  SMPDUDNRequestContainer smpdudnrequestcontainer;
+  ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 } pdu_session_establishment_request_msg;
 
 int decode_pdu_session_establishment_request(pdu_session_establishment_request_msg *pdusessionestablishmentrequest, uint8_t *buffer, uint32_t len);

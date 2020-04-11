@@ -199,16 +199,8 @@ enum request_type_e {
 #ifdef __cplusplus
 }
 
-static const std::vector<std::string> request_type_e2str = {
-  "ERROR",
-  "INITIAL REQUEST",
-  "EXISTING_PDU_SESSION",
-  "INITIAL_EMERGENCY_REQUEST",
-  "EXISTING_EMERGENCY_PDU_SESSION",
-  "MODIFICATION_REQUEST",
-  "MA_PDU_REQUEST",
-  "RESERVED"
-};
+static const std::vector<std::string> request_type_e2str = { "ERROR", "INITIAL REQUEST", "EXISTING_PDU_SESSION", "INITIAL_EMERGENCY_REQUEST", "EXISTING_EMERGENCY_PDU_SESSION", "MODIFICATION_REQUEST",
+    "MA_PDU_REQUEST", "RESERVED" };
 
 enum class cause_value_5gsm_e {
   CAUSE_0_UNKNOWN = 0,
@@ -299,7 +291,7 @@ enum class cause_value_5gsm_e {
 
 enum cause_value_protocol_errors_e {
   CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE = 95
-  /*
+/*
  Cause #95 – Semantically incorrect message
  Cause #96 – Invalid mandatory information
  Cause #97 – Message type non-existent or not implemented
@@ -308,7 +300,7 @@ enum cause_value_protocol_errors_e {
  Cause #100 – Conditional IE error
  Cause #101 – Message not compatible with protocol state
  Cause #111 – Protocol error, unspecified
-   */
+ */
 
 };
 
@@ -322,12 +314,7 @@ enum class pdu_session_status_e {
   PDU_SESSION_ACTIVE = 4
 };
 
-static const std::vector<std::string> pdu_session_status_e2str = {
-    "PDU_SESSION_INACTIVE",
-    "PDU_SESSION_INACTIVE_PENDING",
-    "PDU_SESSION_MODIFICATION_PENDING",
-    "PDU_SESSION_ACTIVE"
-};
+static const std::vector<std::string> pdu_session_status_e2str = { "PDU_SESSION_INACTIVE", "PDU_SESSION_INACTIVE_PENDING", "PDU_SESSION_MODIFICATION_PENDING", "PDU_SESSION_ACTIVE" };
 
 //see Table 9.11.4.12.1: QoS flow descriptions information element
 typedef struct flow_bit_rate_type_s {

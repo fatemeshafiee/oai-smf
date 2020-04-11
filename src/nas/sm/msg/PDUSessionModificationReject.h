@@ -12,8 +12,6 @@
 #include "ExtendedProtocolConfigurationOptions.h"
 #include "_5GSMCongestionReattemptIndicator.h"
 
-
-
 #if 0
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_MODIFICATION_REJECT_MINIMUM_LENGTH ( \
@@ -32,7 +30,6 @@
 		_5GSM_CAUSE_MINIMUM_LENGTH_V + \
 0)
 
-
 /* Maximum length macro. Formed by maximum length of each field */
 #define PDU_SESSION_MODIFICATION_REJECT_MAXIMUM_LENGTH ( \
 		EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH + \
@@ -44,7 +41,6 @@
 		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + \
 0)
 
-
 #define PDU_SESSION_MODIFICATION_REJECT_GPRS_TIMER3_IEI			             					0x37
 #define PDU_SESSION_MODIFICATION_REJECT_E_P_C_O_IEI									              0x7B
 #define PDU_SESSION_MODIFICATION_REJECT__5GSM_CONGESTION_REATTEMPT_INDICATOR_IEI	0x61
@@ -54,17 +50,16 @@
 #define PDU_SESSION_MODIFICATION_REJECT__5GSM_CONGESTION_REATTEMPT_INDICATOR_PRESENCE	(1<<2)
 
 typedef struct pdu_session_modification_reject_msg_tag {
-	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-	PDUSessionIdentity pdusessionidentity;
-	ProcedureTransactionIdentity proceduretransactionidentity;
-	MessageType messagetype;
-	_5GSMCause _5gsmcause;
-	uint8_t presence;
-	GPRSTimer3 gprstimer3;
-	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-	_5GSMCongestionReattemptIndicator _5gsmcongestionreattemptindicator;
+  ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+  PDUSessionIdentity pdusessionidentity;
+  ProcedureTransactionIdentity proceduretransactionidentity;
+  MessageType messagetype;
+  _5GSMCause _5gsmcause;
+  uint8_t presence;
+  GPRSTimer3 gprstimer3;
+  ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
+  _5GSMCongestionReattemptIndicator _5gsmcongestionreattemptindicator;
 } pdu_session_modification_reject_msg;
-
 
 int decode_pdu_session_modification_reject(pdu_session_modification_reject_msg *pdusessionmodificationreject, uint8_t *buffer, uint32_t len);
 int encode_pdu_session_modification_reject(pdu_session_modification_reject_msg *pdusessionmodificationreject, uint8_t *buffer, uint32_t len);
