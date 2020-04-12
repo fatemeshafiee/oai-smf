@@ -62,8 +62,10 @@ struct gtpc_exception : public std::exception {
 
 struct gtpc_msg_bad_length_exception : public gtpc_exception {
  public:
-  gtpc_msg_bad_length_exception(const uint8_t msg_type, const uint16_t msg_size) throw () {
-    phrase = fmt::format("GTPV2-C msg {} Bad Length {} Exception", msg_type, msg_size);
+  gtpc_msg_bad_length_exception(const uint8_t msg_type,
+                                const uint16_t msg_size) throw () {
+    phrase = fmt::format("GTPV2-C msg {} Bad Length {} Exception", msg_type,
+                         msg_size);
   }
   gtpc_msg_bad_length_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -74,8 +76,12 @@ struct gtpc_msg_bad_length_exception : public gtpc_exception {
 
 struct gtpc_msg_unimplemented_ie_exception : public gtpc_exception {
  public:
-  gtpc_msg_unimplemented_ie_exception(const uint8_t msg_type, const uint8_t ie_type, const uint8_t instance = 0) throw () {
-    phrase = fmt::format("GTPV2-C msg {} Unimplemented {} IE Instance {} Exception", msg_type, ie_type, instance);
+  gtpc_msg_unimplemented_ie_exception(const uint8_t msg_type,
+                                      const uint8_t ie_type,
+                                      const uint8_t instance = 0) throw () {
+    phrase = fmt::format(
+        "GTPV2-C msg {} Unimplemented {} IE Instance {} Exception", msg_type,
+        ie_type, instance);
   }
   gtpc_msg_unimplemented_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -86,8 +92,10 @@ struct gtpc_msg_unimplemented_ie_exception : public gtpc_exception {
 
 struct gtpc_msg_illegal_ie_exception : public gtpc_exception {
  public:
-  gtpc_msg_illegal_ie_exception(const uint8_t msg_type, const uint8_t ie_type, const char *file, const int line) throw () {
-    phrase = fmt::format("GTPV2-C msg {} Illegal IE {} Exception {}:{}", msg_type, ie_type, file, line);
+  gtpc_msg_illegal_ie_exception(const uint8_t msg_type, const uint8_t ie_type,
+                                const char *file, const int line) throw () {
+    phrase = fmt::format("GTPV2-C msg {} Illegal IE {} Exception {}:{}",
+                         msg_type, ie_type, file, line);
   }
   gtpc_msg_illegal_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -111,10 +119,12 @@ struct gtpc_ie_exception : public gtpc_exception {
 struct gtpc_missing_ie_exception : public gtpc_exception {
  public:
   gtpc_missing_ie_exception(uint8_t gtpc_msg, uint8_t ie_type) throw () {
-    phrase = fmt::format("GTPV2-C msg {} missing IE {} Exception", gtpc_msg, ie_type);
+    phrase = fmt::format("GTPV2-C msg {} missing IE {} Exception", gtpc_msg,
+                         ie_type);
   }
   gtpc_missing_ie_exception(const char *gtpc_msg, const char *ie_type) throw () {
-    phrase = fmt::format("GTPV2-C msg {} missing IE {} Exception", gtpc_msg, ie_type);
+    phrase = fmt::format("GTPV2-C msg {} missing IE {} Exception", gtpc_msg,
+                         ie_type);
   }
   gtpc_missing_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -161,7 +171,8 @@ struct gtpc_tlv_bad_instance_exception : public gtpc_tlv_exception {
   gtpc_tlv_bad_instance_exception(uint8_t ie_type, uint8_t ie_instance) throw ()
       :
       gtpc_tlv_exception(ie_type) {
-    phrase = fmt::format("GTPV2-C IE TLV {} Bad Instance {} Exception", ie_type, ie_instance);
+    phrase = fmt::format("GTPV2-C IE TLV {} Bad Instance {} Exception", ie_type,
+                         ie_instance);
   }
   virtual ~gtpc_tlv_bad_instance_exception() throw () {
   }
@@ -172,7 +183,8 @@ struct gtpc_ie_value_exception : public gtpc_ie_exception {
   gtpc_ie_value_exception(uint8_t ie_type, const char *field) throw ()
       :
       gtpc_ie_exception(ie_type) {
-    phrase = fmt::format("GTPV2-C IE {} Bad Value of {} Exception", ie_type, field);
+    phrase = fmt::format("GTPV2-C IE {} Bad Value of {} Exception", ie_type,
+                         field);
   }
   virtual ~gtpc_ie_value_exception() throw () {
   }
@@ -928,7 +940,8 @@ enum pdn_type_e {
   PDN_TYPE_E_IPV4V6 = 3,
   PDN_TYPE_E_NON_IP = 4,
 };
-static const std::vector<std::string> pdn_type_e2str = { "Error", "IPV4", "IPV6", "IPV4V6", "NON_IP" };
+static const std::vector<std::string> pdn_type_e2str = { "Error", "IPV4",
+    "IPV6", "IPV4V6", "NON_IP" };
 
 typedef struct pdn_type_s {
   uint8_t pdn_type;
@@ -973,7 +986,8 @@ struct paa_s {
         return false;
         break;
       case PDN_TYPE_E_IPV6:
-        if (ipv6_address.s6_addr32[0] | ipv6_address.s6_addr32[1] | ipv6_address.s6_addr32[2] | ipv6_address.s6_addr32[3])
+        if (ipv6_address.s6_addr32[0] | ipv6_address.s6_addr32[1]
+            | ipv6_address.s6_addr32[2] | ipv6_address.s6_addr32[3])
           return true;
         return false;
         break;
@@ -981,7 +995,8 @@ struct paa_s {
         // TODO
         if (ipv4_address.s_addr)
           return true;
-        if (ipv6_address.s6_addr32[0] | ipv6_address.s6_addr32[1] | ipv6_address.s6_addr32[2] | ipv6_address.s6_addr32[3])
+        if (ipv6_address.s6_addr32[0] | ipv6_address.s6_addr32[1]
+            | ipv6_address.s6_addr32[2] | ipv6_address.s6_addr32[3])
           return true;
         return false;
         break;
@@ -1013,7 +1028,8 @@ typedef struct bearer_qos_s {
   uint64_t guaranted_bit_rate_for_downlink;
 
   bool operator==(const struct bearer_qos_s &q) const {
-    return ((q.label_qci == label_qci) && (q.pl == pl) && (q.pvi == pvi) && (q.pci == pci));
+    return ((q.label_qci == label_qci) && (q.pl == pl) && (q.pvi == pvi)
+        && (q.pci == pci));
   }
   //------------------------------------------------------------------------------
   std::string toString() const {
@@ -1021,7 +1037,8 @@ typedef struct bearer_qos_s {
     s.append("MBR UL=").append(std::to_string(maximum_bit_rate_for_uplink));
     s.append(", MBR DL=").append(std::to_string(maximum_bit_rate_for_downlink));
     s.append(", GBR UL=").append(std::to_string(guaranted_bit_rate_for_uplink));
-    s.append(", GBR DL=").append(std::to_string(guaranted_bit_rate_for_downlink));
+    s.append(", GBR DL=").append(
+        std::to_string(guaranted_bit_rate_for_downlink));
     s.append(", PCI=").append(std::to_string(pci));
     s.append(", PL=").append(std::to_string(pl));
     s.append(", PVI=").append(std::to_string(pvi));
@@ -1181,9 +1198,12 @@ typedef struct gtpc2c_ecgi_field_s {
     std::string mncs = conv::mncToString(mnc_digit_1, mnc_digit_2, mnc_digit_3);
     s.append("mcc=").append(mccs).append(", MNC=").append(mncs);
     s.append(", ECI=").append(std::to_string(eci));
-    uint32_t we_utran_cell_identifier = static_cast<uint32_t>(e_utran_cell_identifier[0]) << 16;
-    we_utran_cell_identifier |= (static_cast<uint32_t>(e_utran_cell_identifier[1]) << 8);
-    we_utran_cell_identifier |= static_cast<uint32_t>(e_utran_cell_identifier[2]);
+    uint32_t we_utran_cell_identifier =
+        static_cast<uint32_t>(e_utran_cell_identifier[0]) << 16;
+    we_utran_cell_identifier |=
+        (static_cast<uint32_t>(e_utran_cell_identifier[1]) << 8);
+    we_utran_cell_identifier |=
+        static_cast<uint32_t>(e_utran_cell_identifier[2]);
     s.append(", EUCI=").append(std::to_string(we_utran_cell_identifier));
     return s;
   }
@@ -1315,7 +1335,8 @@ struct interface_type_s {
 
   //------------------------------------------------------------------------------
   std::string toString() const {
-    if ((interface_type >= INTERFACE_TYPE_MIN) && (interface_type <= INTERFACE_TYPE_MAX)) {
+    if ((interface_type >= INTERFACE_TYPE_MIN)
+        && (interface_type <= INTERFACE_TYPE_MAX)) {
       return std::string(interface_type2char[interface_type]);
     } else {
       return std::to_string(interface_type);
@@ -1333,15 +1354,26 @@ struct fully_qualified_tunnel_endpoint_identifier_s {
   struct in_addr ipv4_address;
   struct in6_addr ipv6_address;
 
-  bool operator<(const struct fully_qualified_tunnel_endpoint_identifier_s &f) const {
-    return (teid_gre_key < f.teid_gre_key) or (ipv4_address.s_addr < f.ipv4_address.s_addr) or (interface_type < f.interface_type) or (v4 == f.v4) or (v6 == f.v6)
-        or (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0]) or (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1]) or (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2])
+  bool operator<(
+      const struct fully_qualified_tunnel_endpoint_identifier_s &f) const {
+    return (teid_gre_key < f.teid_gre_key)
+        or (ipv4_address.s_addr < f.ipv4_address.s_addr)
+        or (interface_type < f.interface_type) or (v4 == f.v4) or (v6 == f.v6)
+        or (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0])
+        or (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1])
+        or (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2])
         or (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3]);
   }
 
-  bool operator==(const struct fully_qualified_tunnel_endpoint_identifier_s &f) const {
-    return (teid_gre_key == f.teid_gre_key) and (ipv4_address.s_addr == f.ipv4_address.s_addr) and (interface_type == f.interface_type) and (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0])
-        and (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1]) and (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2]) and (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3])
+  bool operator==(
+      const struct fully_qualified_tunnel_endpoint_identifier_s &f) const {
+    return (teid_gre_key == f.teid_gre_key)
+        and (ipv4_address.s_addr == f.ipv4_address.s_addr)
+        and (interface_type == f.interface_type)
+        and (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0])
+        and (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1])
+        and (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2])
+        and (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3])
         and (v4 == f.v4) and (v6 == f.v6);
   }
   //------------------------------------------------------------------------------

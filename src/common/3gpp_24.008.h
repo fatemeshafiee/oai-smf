@@ -148,8 +148,12 @@ typedef struct protocol_configuration_options_s {
 
 typedef uint8_t packet_flow_identifier_t;
 
-int encode_packet_flow_identifier_ie(packet_flow_identifier_t *packetflowidentifier, const bool iei_present, uint8_t *buffer, const uint32_t len);
-int decode_packet_flow_identifier_ie(packet_flow_identifier_t *packetflowidentifier, const bool iei_present, uint8_t *buffer, const uint32_t len);
+int encode_packet_flow_identifier_ie(
+    packet_flow_identifier_t *packetflowidentifier, const bool iei_present,
+    uint8_t *buffer, const uint32_t len);
+int decode_packet_flow_identifier_ie(
+    packet_flow_identifier_t *packetflowidentifier, const bool iei_present,
+    uint8_t *buffer, const uint32_t len);
 
 //------------------------------------------------------------------------------
 // 10.5.6.12 Traffic Flow Template

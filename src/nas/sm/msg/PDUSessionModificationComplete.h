@@ -43,7 +43,11 @@ typedef struct pdu_session_modification_complete_msg_tag {
   ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 } pdu_session_modification_complete_msg;
 
-int decode_pdu_session_modification_complete(pdu_session_modification_complete_msg *pdusessionmodificationcomplete, uint8_t *buffer, uint32_t len);
-int encode_pdu_session_modification_complete(pdu_session_modification_complete_msg *pdusessionmodificationcomplete, uint8_t *buffer, uint32_t len);
+int decode_pdu_session_modification_complete(
+    pdu_session_modification_complete_msg *pdusessionmodificationcomplete,
+    uint8_t *buffer, uint32_t len);
+int encode_pdu_session_modification_complete(
+    pdu_session_modification_complete_msg *pdusessionmodificationcomplete,
+    uint8_t *buffer, uint32_t len);
 
 #endif

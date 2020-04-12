@@ -81,8 +81,11 @@ typedef struct nas_message_decode_status_s {
   int fivegmm_cause;
 } nas_message_decode_status_t;
 
-int nas_message_encode(unsigned char *buffer, const nas_message_t *const msg, size_t length, void *security);
+int nas_message_encode(unsigned char *buffer, const nas_message_t *const msg,
+                       size_t length, void *security);
 
-int nas_message_decode(const unsigned char *const buffer, nas_message_t *msg, size_t length, void *security, nas_message_decode_status_t *status);
+int nas_message_decode(const unsigned char *const buffer, nas_message_t *msg,
+                       size_t length, void *security,
+                       nas_message_decode_status_t *status);
 
 #endif

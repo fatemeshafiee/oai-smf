@@ -78,7 +78,9 @@ class smf_n1_n2 {
    * @param [uint8_t] sm_cause store NAS Cause
    *
    */
-  void create_n1_sm_container(pdu_session_msg &msg, uint8_t msg_type, std::string &nas_msg_str, cause_value_5gsm_e sm_cause);
+  void create_n1_sm_container(pdu_session_msg &msg, uint8_t msg_type,
+                              std::string &nas_msg_str,
+                              cause_value_5gsm_e sm_cause);
 
   /*
    * Create N2 SM Information to send to AMF (using NAS lib)
@@ -87,7 +89,9 @@ class smf_n1_n2 {
    * @param [std::string&] ngap_msg_str store NGAP message in form of string
    *
    */
-  void create_n2_sm_information(pdu_session_msg &msg, uint8_t ngap_msg_type, n2_sm_info_type_e ngap_ie_type, std::string &ngap_msg_str);
+  void create_n2_sm_information(pdu_session_msg &msg, uint8_t ngap_msg_type,
+                                n2_sm_info_type_e ngap_ie_type,
+                                std::string &ngap_msg_str);
 
   /*
    * Decode N1 SM Container into the NAS mesasge (using NAS lib)
@@ -103,7 +107,9 @@ class smf_n1_n2 {
    * @param [std::string&] n2_sm_info N2 SM Information
    * @return status of the decode process
    */
-  int decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t> &ngap_IE, std::string &n2_sm_info);
+  int decode_n2_sm_information(
+      std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t> &ngap_IE,
+      std::string &n2_sm_info);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceModifyResponseTransfer_t
@@ -111,7 +117,9 @@ class smf_n1_n2 {
    * @param [std::string&] n2_sm_info N2 SM Information
    * @return status of the decode process
    */
-  int decode_n2_sm_information(std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t> &ngap_IE, std::string &n2_sm_info);
+  int decode_n2_sm_information(
+      std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t> &ngap_IE,
+      std::string &n2_sm_info);
 
 };
 

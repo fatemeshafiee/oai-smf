@@ -50,7 +50,9 @@ class async_shell_cmd {
   async_shell_cmd(async_shell_cmd const&) = delete;
   void operator=(async_shell_cmd const&) = delete;
 
-  int run_command(const task_id_t sender_itti_task, const bool is_abort_on_error, const char *src_file, const int src_line, const std::string &cmd_str);
+  int run_command(const task_id_t sender_itti_task,
+                  const bool is_abort_on_error, const char *src_file,
+                  const int src_line, const std::string &cmd_str);
 
 };
 

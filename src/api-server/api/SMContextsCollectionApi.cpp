@@ -53,7 +53,8 @@ namespace api {
 using namespace oai::smf_server::helpers;
 using namespace oai::smf_server::model;
 
-SMContextsCollectionApi::SMContextsCollectionApi(std::shared_ptr<Pistache::Rest::Router> rtr) { 
+SMContextsCollectionApi::SMContextsCollectionApi(
+    std::shared_ptr<Pistache::Rest::Router> rtr) {
   router = rtr;
 }
 
@@ -64,24 +65,32 @@ void SMContextsCollectionApi::init() {
 void SMContextsCollectionApi::setupRoutes() {
   using namespace Pistache::Rest;
 
-  Routes::Post(*router, base + "/sm-contexts", Routes::bind(&SMContextsCollectionApi::post_sm_contexts_handler, this));
+  Routes::Post(
+      *router, base + "/sm-contexts",
+      Routes::bind(&SMContextsCollectionApi::post_sm_contexts_handler, this));
 
   // Default handler, called when a route is not found
-  router->addCustomHandler(Routes::bind(&SMContextsCollectionApi::sm_contexts_collection_api_default_handler, this));
+  router->addCustomHandler(
+      Routes::bind(
+          &SMContextsCollectionApi::sm_contexts_collection_api_default_handler,
+          this));
 }
 
-void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
+void SMContextsCollectionApi::post_sm_contexts_handler(
+    const Pistache::Rest::Request &request,
+    Pistache::Http::ResponseWriter response) {
 
-  Logger::smf_api_server().info("\nReceived a SM context create request from AMF");
-  Logger::smf_api_server().debug("Request body: %s",request.body().c_str());
+  Logger::smf_api_server().info(
+      "\nReceived a SM context create request from AMF");
+  Logger::smf_api_server().debug("Request body: %s", request.body().c_str());
 
   //find boundary
   std::size_t found = request.body().find("Content-Type");
   std::string boundary_str = request.body().substr(2, found - 4);
   Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
 
-  SmContextMessage smContextMessage = {};
-  SmContextCreateData smContextCreateData = {};
+  SmContextMessage smContextMessage = { };
+  SmContextCreateData smContextCreateData = { };
 
   //step 1. use multipartparser to decode the request
   multipartparser_callbacks_init(&g_callbacks);
@@ -94,11 +103,15 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
   g_callbacks.on_part_end = &on_part_end;
   g_callbacks.on_body_end = &on_body_end;
 
-  multipartparser parser = {};
+  multipartparser parser = { };
   init_globals();
-  multipartparser_init(&parser, reinterpret_cast<const char*>(boundary_str.c_str()));
-  if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
-    Logger::smf_api_server().warn("The received message can not be parsed properly!");
+  multipartparser_init(&parser,
+                       reinterpret_cast<const char*>(boundary_str.c_str()));
+  if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(),
+                               strlen(request.body().c_str()))
+      != strlen(request.body().c_str())) or (!g_body_begin_called)) {
+    Logger::smf_api_server().warn(
+        "The received message can not be parsed properly!");
     //TODO: fix this issue
     //response.send(Pistache::Http::Code::Bad_Request, "");
     //return;
@@ -106,18 +119,23 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
 
   Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
   //at least 2 parts for Json data and N1 (+ N2)
-  if (g_parts.size() < 2){
+  if (g_parts.size() < 2) {
     response.send(Pistache::Http::Code::Bad_Request, "");
     return;
   }
 
-  part p0 = g_parts.front(); g_parts.pop_front();
+  part p0 = g_parts.front();
+  g_parts.pop_front();
   Logger::smf_api_server().debug("Request body, part 1: \n%s", p0.body.c_str());
-  part p1 = g_parts.front(); g_parts.pop_front();
-  Logger::smf_api_server().debug("Request body, part 2: \n %s",p1.body.c_str());
+  part p1 = g_parts.front();
+  g_parts.pop_front();
+  Logger::smf_api_server().debug("Request body, part 2: \n %s",
+                                 p1.body.c_str());
   if (g_parts.size() > 0) {
-    part p2 = g_parts.front(); g_parts.pop_front();
-    Logger::smf_api_server().debug("Request body, part 3: \n %s",p2.body.c_str());
+    part p2 = g_parts.front();
+    g_parts.pop_front();
+    Logger::smf_api_server().debug("Request body, part 3: \n %s",
+                                   p2.body.c_str());
   }
 
   //step 2. process the request
@@ -128,7 +146,8 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
     this->post_sm_contexts(smContextMessage, response);
   } catch (nlohmann::detail::exception &e) {
     //send a 400 error
-    Logger::smf_api_server().warn("Can not parse the json data (error: %s)!", e.what());
+    Logger::smf_api_server().warn("Can not parse the json data (error: %s)!",
+                                  e.what());
     response.send(Pistache::Http::Code::Bad_Request, e.what());
     return;
   } catch (std::exception &e) {
@@ -140,8 +159,10 @@ void SMContextsCollectionApi::post_sm_contexts_handler(const Pistache::Rest::Req
 
 }
 
-void SMContextsCollectionApi::sm_contexts_collection_api_default_handler(const Pistache::Rest::Request &, Pistache::Http::ResponseWriter response) {
-  response.send(Pistache::Http::Code::Not_Found, "The requested method does not exist");
+void SMContextsCollectionApi::sm_contexts_collection_api_default_handler(
+    const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response) {
+  response.send(Pistache::Http::Code::Not_Found,
+                "The requested method does not exist");
 }
 
 }

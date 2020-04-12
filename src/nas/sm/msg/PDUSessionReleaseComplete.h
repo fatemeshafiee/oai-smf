@@ -50,7 +50,11 @@ typedef struct pdu_session_release_complete_msg_tag {
   ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 } pdu_session_release_complete_msg;
 
-int decode_pdu_session_release_complete(pdu_session_release_complete_msg *pdusessionreleasecomplete, uint8_t *buffer, uint32_t len);
-int encode_pdu_session_release_complete(pdu_session_release_complete_msg *pdusessionreleasecomplete, uint8_t *buffer, uint32_t len);
+int decode_pdu_session_release_complete(
+    pdu_session_release_complete_msg *pdusessionreleasecomplete,
+    uint8_t *buffer, uint32_t len);
+int encode_pdu_session_release_complete(
+    pdu_session_release_complete_msg *pdusessionreleasecomplete,
+    uint8_t *buffer, uint32_t len);
 
 #endif

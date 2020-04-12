@@ -54,7 +54,8 @@ void async_cmd_task(void*);
 void async_cmd_task(void *args_p) {
   const task_id_t task_id = TASK_ASYNC_SHELL_CMD;
 
-  const thread_sched_params *const sched_params = (const util::thread_sched_params* const ) args_p;
+  const thread_sched_params *const sched_params =
+      (const util::thread_sched_params* const ) args_p;
   sched_params->apply(task_id, Logger::async_cmd());
 
   itti_inst->notify_task_ready(task_id);
@@ -69,9 +70,13 @@ void async_cmd_task(void *args_p) {
           int rc = system((const char*) to->system_command.c_str());
 
           if (rc) {
-            Logger::async_cmd().error("Failed cmd from %d: %s ", to->origin, (const char*) to->system_command.c_str());
+            Logger::async_cmd().error("Failed cmd from %d: %s ", to->origin,
+                                      (const char*) to->system_command.c_str());
             if (to->is_abort_on_error) {
-              Logger::async_cmd().error("Terminate cause failed cmd %s at %s:%d", to->system_command.c_str(), to->src_file.c_str(), to->src_line);
+              Logger::async_cmd().error(
+                  "Terminate cause failed cmd %s at %s:%d",
+                  to->system_command.c_str(), to->src_file.c_str(),
+                  to->src_line);
               itti_inst->send_terminate_msg(to->origin);
             }
           }
@@ -85,7 +90,8 @@ void async_cmd_task(void *args_p) {
         break;
 
       case TERMINATE:
-        if (itti_msg_terminate *terminate = dynamic_cast<itti_msg_terminate*>(msg)) {
+        if (itti_msg_terminate *terminate =
+            dynamic_cast<itti_msg_terminate*>(msg)) {
           Logger::async_cmd().info("Received terminate message");
           return;
         }
@@ -105,7 +111,8 @@ void async_cmd_task(void *args_p) {
 async_shell_cmd::async_shell_cmd(util::thread_sched_params &sched_params) {
   Logger::async_cmd().startup("Starting...");
 
-  if (itti_inst->create_task(TASK_ASYNC_SHELL_CMD, async_cmd_task, &sched_params)) {
+  if (itti_inst->create_task(TASK_ASYNC_SHELL_CMD, async_cmd_task,
+                             &sched_params)) {
     Logger::async_cmd().error("Cannot create task TASK_ASYNC_SHELL_CMD");
     throw std::runtime_error("Cannot create task TASK_ASYNC_SHELL_CMD");
   }
@@ -113,12 +120,18 @@ async_shell_cmd::async_shell_cmd(util::thread_sched_params &sched_params) {
 }
 
 //------------------------------------------------------------------------------
-int async_shell_cmd::run_command(const task_id_t sender_itti_task, const bool is_abort_on_error, const char *src_file, const int src_line, const std::string &cmd_str) {
-  itti_async_shell_cmd cmd(sender_itti_task, TASK_ASYNC_SHELL_CMD, cmd_str, is_abort_on_error, src_file, src_line);
-  std::shared_ptr<itti_async_shell_cmd> msg = std::make_shared<itti_async_shell_cmd>(cmd);
+int async_shell_cmd::run_command(const task_id_t sender_itti_task,
+                                 const bool is_abort_on_error,
+                                 const char *src_file, const int src_line,
+                                 const std::string &cmd_str) {
+  itti_async_shell_cmd cmd(sender_itti_task, TASK_ASYNC_SHELL_CMD, cmd_str,
+                           is_abort_on_error, src_file, src_line);
+  std::shared_ptr<itti_async_shell_cmd> msg = std::make_shared<
+      itti_async_shell_cmd>(cmd);
   int ret = itti_inst->send_msg(msg);
   if (RETURNok != ret) {
-    Logger::async_cmd().error("Could not send ITTI message to task TASK_ASYNC_SHELL_CMD");
+    Logger::async_cmd().error(
+        "Could not send ITTI message to task TASK_ASYNC_SHELL_CMD");
     return RETURNerror ;
   }
   return RETURNok ;

@@ -86,7 +86,11 @@ typedef struct pdu_session_modification_command_msg_tag {
   ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 } pdu_session_modification_command_msg;
 
-int decode_pdu_session_modification_command(pdu_session_modification_command_msg *pdusessionmodificationcommand, uint8_t *buffer, uint32_t len);
-int encode_pdu_session_modification_command(pdu_session_modification_command_msg *pdusessionmodificationcommand, uint8_t *buffer, uint32_t len);
+int decode_pdu_session_modification_command(
+    pdu_session_modification_command_msg *pdusessionmodificationcommand,
+    uint8_t *buffer, uint32_t len);
+int encode_pdu_session_modification_command(
+    pdu_session_modification_command_msg *pdusessionmodificationcommand,
+    uint8_t *buffer, uint32_t len);
 
 #endif

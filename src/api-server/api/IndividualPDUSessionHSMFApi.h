@@ -48,9 +48,13 @@ class IndividualPDUSessionHSMFApi {
  private:
   void setupRoutes();
 
-  void release_pdu_session_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
-  void update_pdu_session_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
-  void individual_pdu_session_hsmf_api_default_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
+  void release_pdu_session_handler(const Pistache::Rest::Request &request,
+                                   Pistache::Http::ResponseWriter response);
+  void update_pdu_session_handler(const Pistache::Rest::Request &request,
+                                  Pistache::Http::ResponseWriter response);
+  void individual_pdu_session_hsmf_api_default_handler(
+      const Pistache::Rest::Request &request,
+      Pistache::Http::ResponseWriter response);
 
   std::shared_ptr<Pistache::Rest::Router> router;
 
@@ -62,7 +66,9 @@ class IndividualPDUSessionHSMFApi {
   /// </remarks>
   /// <param name="pduSessionRef">PDU session reference</param>
   /// <param name="releaseData">representation of the data to be sent to H-SMF when releasing the PDU session (optional)</param>
-  virtual void release_pdu_session(const std::string &pduSessionRef, const ReleaseData &releaseData, Pistache::Http::ResponseWriter &response) = 0;
+  virtual void release_pdu_session(
+      const std::string &pduSessionRef, const ReleaseData &releaseData,
+      Pistache::Http::ResponseWriter &response) = 0;
 
   /// <summary>
   /// Update (initiated by V-SMF)
@@ -72,7 +78,9 @@ class IndividualPDUSessionHSMFApi {
   /// </remarks>
   /// <param name="pduSessionRef">PDU session reference</param>
   /// <param name="hsmfUpdateData">representation of the updates to apply to the PDU session</param>
-  virtual void update_pdu_session(const std::string &pduSessionRef, const HsmfUpdateData &hsmfUpdateData, Pistache::Http::ResponseWriter &response) = 0;
+  virtual void update_pdu_session(const std::string &pduSessionRef,
+                                  const HsmfUpdateData &hsmfUpdateData,
+                                  Pistache::Http::ResponseWriter &response) = 0;
 
 };
 

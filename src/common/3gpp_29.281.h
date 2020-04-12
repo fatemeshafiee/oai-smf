@@ -60,8 +60,10 @@ struct gtpu_exception : public std::exception {
 
 struct gtpu_msg_bad_length_exception : public gtpu_exception {
  public:
-  gtpu_msg_bad_length_exception(const uint8_t msg_type, const uint16_t msg_size) throw () {
-    phrase = fmt::format("GTPV1-U msg {} Bad Length {} Exception", msg_type, msg_size);
+  gtpu_msg_bad_length_exception(const uint8_t msg_type,
+                                const uint16_t msg_size) throw () {
+    phrase = fmt::format("GTPV1-U msg {} Bad Length {} Exception", msg_type,
+                         msg_size);
   }
   gtpu_msg_bad_length_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -72,8 +74,12 @@ struct gtpu_msg_bad_length_exception : public gtpu_exception {
 
 struct gtpu_msg_unimplemented_ie_exception : public gtpu_exception {
  public:
-  gtpu_msg_unimplemented_ie_exception(const uint8_t msg_type, const uint8_t ie_type, const uint8_t instance = 0) throw () {
-    phrase = fmt::format("GTPV1-U msg {} Unimplemented {} IE Instance {} Exception", msg_type, ie_type, instance);
+  gtpu_msg_unimplemented_ie_exception(const uint8_t msg_type,
+                                      const uint8_t ie_type,
+                                      const uint8_t instance = 0) throw () {
+    phrase = fmt::format(
+        "GTPV1-U msg {} Unimplemented {} IE Instance {} Exception", msg_type,
+        ie_type, instance);
   }
   gtpu_msg_unimplemented_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -84,8 +90,10 @@ struct gtpu_msg_unimplemented_ie_exception : public gtpu_exception {
 
 struct gtpu_msg_illegal_ie_exception : public gtpu_exception {
  public:
-  gtpu_msg_illegal_ie_exception(const uint8_t msg_type, const uint8_t ie_type) throw () {
-    phrase = fmt::format("GTPV1-U msg {} Illegal {} Exception", msg_type, ie_type);
+  gtpu_msg_illegal_ie_exception(const uint8_t msg_type,
+                                const uint8_t ie_type) throw () {
+    phrase = fmt::format("GTPV1-U msg {} Illegal {} Exception", msg_type,
+                         ie_type);
   }
   gtpu_msg_illegal_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -144,7 +152,8 @@ struct gtpu_ie_value_exception : public gtpu_ie_exception {
   gtpu_ie_value_exception(uint8_t ie_type, const char *field) throw ()
       :
       gtpu_ie_exception(ie_type) {
-    phrase = fmt::format("GTPV1-U IE {} Bad Value of {} Exception", ie_type, field);
+    phrase = fmt::format("GTPV1-U IE {} Bad Value of {} Exception", ie_type,
+                         field);
   }
   virtual ~gtpu_ie_value_exception() throw () {
   }

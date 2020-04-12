@@ -36,16 +36,13 @@
  *      contact@openairinterface.org
  */
 
-
 #ifndef SMContextsCollectionApi_H_
 #define SMContextsCollectionApi_H_
-
 
 #include <pistache/http.h>
 #include <pistache/router.h>
 #include <pistache/http_headers.h>
 #include <pistache/optional.h>
-
 
 #include "SmContextMessage.h"
 #include "ProblemDetails.h"
@@ -58,10 +55,11 @@ namespace api {
 
 using namespace oai::smf_server::model;
 
-class  SMContextsCollectionApi {
+class SMContextsCollectionApi {
  public:
   SMContextsCollectionApi(std::shared_ptr<Pistache::Rest::Router>);
-  virtual ~SMContextsCollectionApi() {}
+  virtual ~SMContextsCollectionApi() {
+  }
   void init();
 
   const std::string base = "/nsmf-pdusession/v2";
@@ -69,8 +67,11 @@ class  SMContextsCollectionApi {
  private:
   void setupRoutes();
 
-  void post_sm_contexts_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
-  void sm_contexts_collection_api_default_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
+  void post_sm_contexts_handler(const Pistache::Rest::Request &request,
+                                Pistache::Http::ResponseWriter response);
+  void sm_contexts_collection_api_default_handler(
+      const Pistache::Rest::Request &request,
+      Pistache::Http::ResponseWriter response);
 
   std::shared_ptr<Pistache::Rest::Router> router;
 
@@ -81,7 +82,8 @@ class  SMContextsCollectionApi {
   ///
   /// </remarks>
   /// <param name="smContextMessage"></param>
-  virtual void post_sm_contexts(const SmContextMessage &smContextMessage, Pistache::Http::ResponseWriter &response) = 0;
+  virtual void post_sm_contexts(const SmContextMessage &smContextMessage,
+                                Pistache::Http::ResponseWriter &response) = 0;
 
 };
 

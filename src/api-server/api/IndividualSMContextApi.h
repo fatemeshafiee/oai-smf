@@ -76,10 +76,15 @@ class IndividualSMContextApi {
  private:
   void setupRoutes();
 
-  void release_sm_context_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
-  void retrieve_sm_context_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
-  void update_sm_context_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
-  void individual_sm_context_api_default_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
+  void release_sm_context_handler(const Pistache::Rest::Request &request,
+                                  Pistache::Http::ResponseWriter response);
+  void retrieve_sm_context_handler(const Pistache::Rest::Request &request,
+                                   Pistache::Http::ResponseWriter response);
+  void update_sm_context_handler(const Pistache::Rest::Request &request,
+                                 Pistache::Http::ResponseWriter response);
+  void individual_sm_context_api_default_handler(
+      const Pistache::Rest::Request &request,
+      Pistache::Http::ResponseWriter response);
 
   std::shared_ptr<Pistache::Rest::Router> router;
 
@@ -91,7 +96,10 @@ class IndividualSMContextApi {
   /// </remarks>
   /// <param name="smContextRef">SM context reference</param>
   /// <param name="smContextReleaseData">representation of the data to be sent to the SMF when releasing the SM context (optional)</param>
-  virtual void release_sm_context(const std::string &smContextRef, const SmContextReleaseMessage &smContextReleaseMessage, Pistache::Http::ResponseWriter &response) = 0;
+  virtual void release_sm_context(
+      const std::string &smContextRef,
+      const SmContextReleaseMessage &smContextReleaseMessage,
+      Pistache::Http::ResponseWriter &response) = 0;
 
   /// <summary>
   /// Retrieve SM Context
@@ -101,7 +109,10 @@ class IndividualSMContextApi {
   /// </remarks>
   /// <param name="smContextRef">SM context reference</param>
   /// <param name="smContextRetrieveData">parameters used to retrieve the SM context (optional)</param>
-  virtual void retrieve_sm_context(const std::string &smContextRef, const SmContextRetrieveData &smContextRetrieveData, Pistache::Http::ResponseWriter &response) = 0;
+  virtual void retrieve_sm_context(
+      const std::string &smContextRef,
+      const SmContextRetrieveData &smContextRetrieveData,
+      Pistache::Http::ResponseWriter &response) = 0;
 
   /// <summary>
   /// Update SM Context
@@ -111,7 +122,10 @@ class IndividualSMContextApi {
   /// </remarks>
   /// <param name="smContextRef">SM context reference</param>
   /// <param name="smContextUpdateData">representation of the updates to apply to the SM context</param>
-  virtual void update_sm_context(const std::string &smContextRef, const SmContextUpdateMessage &smContextUpdateMessage, Pistache::Http::ResponseWriter &response) = 0;
+  virtual void update_sm_context(
+      const std::string &smContextRef,
+      const SmContextUpdateMessage &smContextUpdateMessage,
+      Pistache::Http::ResponseWriter &response) = 0;
 
 };
 

@@ -60,8 +60,14 @@ struct pfcp_exception : public std::exception {
 
 struct pfcp_msg_bad_length_exception : public pfcp_exception {
  public:
-  pfcp_msg_bad_length_exception(const uint8_t msg_type, const uint16_t hdr_size, const uint16_t ie_size, const uint16_t check_ie_size, const char *file, const int line) throw () {
-    phrase = fmt::format("PFCP msg {} Bad Length hdr.length {}/ sum ie {} / check sum ie {} Exception {}:{}", msg_type, hdr_size, ie_size, check_ie_size, file, line);
+  pfcp_msg_bad_length_exception(const uint8_t msg_type, const uint16_t hdr_size,
+                                const uint16_t ie_size,
+                                const uint16_t check_ie_size, const char *file,
+                                const int line) throw () {
+    phrase =
+        fmt::format(
+            "PFCP msg {} Bad Length hdr.length {}/ sum ie {} / check sum ie {} Exception {}:{}",
+            msg_type, hdr_size, ie_size, check_ie_size, file, line);
   }
   pfcp_msg_bad_length_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -72,8 +78,12 @@ struct pfcp_msg_bad_length_exception : public pfcp_exception {
 
 struct pfcp_msg_unimplemented_ie_exception : public pfcp_exception {
  public:
-  pfcp_msg_unimplemented_ie_exception(const uint8_t msg_type, const uint16_t ie_type, const uint8_t instance = 0) throw () {
-    phrase = fmt::format("PFCP msg {} Unimplemented {} IE Instance {} Exception", msg_type, ie_type, instance);
+  pfcp_msg_unimplemented_ie_exception(const uint8_t msg_type,
+                                      const uint16_t ie_type,
+                                      const uint8_t instance = 0) throw () {
+    phrase = fmt::format(
+        "PFCP msg {} Unimplemented {} IE Instance {} Exception", msg_type,
+        ie_type, instance);
   }
   pfcp_msg_unimplemented_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -84,8 +94,10 @@ struct pfcp_msg_unimplemented_ie_exception : public pfcp_exception {
 
 struct pfcp_msg_illegal_ie_exception : public pfcp_exception {
  public:
-  pfcp_msg_illegal_ie_exception(const uint8_t msg_type, const uint16_t ie_type, const char *file, const int line) throw () {
-    phrase = fmt::format("PFCP msg {} Illegal IE {} Exception {}:{}", msg_type, ie_type, file, line);
+  pfcp_msg_illegal_ie_exception(const uint8_t msg_type, const uint16_t ie_type,
+                                const char *file, const int line) throw () {
+    phrase = fmt::format("PFCP msg {} Illegal IE {} Exception {}:{}", msg_type,
+                         ie_type, file, line);
   }
   pfcp_msg_illegal_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
@@ -130,10 +142,12 @@ struct pfcp_tlv_exception : public pfcp_ie_exception {
 
 struct pfcp_tlv_bad_length_exception : public pfcp_tlv_exception {
  public:
-  pfcp_tlv_bad_length_exception(uint16_t ie_type, uint16_t ie_length, const char *file, const int line) throw ()
+  pfcp_tlv_bad_length_exception(uint16_t ie_type, uint16_t ie_length,
+                                const char *file, const int line) throw ()
       :
       pfcp_tlv_exception(ie_type) {
-    phrase = fmt::format("PFCP IE TLV {} Bad Length {} Exception {}:{}", ie_type, ie_length, file, line);
+    phrase = fmt::format("PFCP IE TLV {} Bad Length {} Exception {}:{}",
+                         ie_type, ie_length, file, line);
   }
   virtual ~pfcp_tlv_bad_length_exception() throw () {
   }
@@ -144,7 +158,8 @@ struct pfcp_ie_value_exception : public pfcp_ie_exception {
   pfcp_ie_value_exception(uint16_t ie_type, const char *field) throw ()
       :
       pfcp_ie_exception(ie_type) {
-    phrase = fmt::format("PFCP IE {} Bad Value of {} Exception", ie_type, field);
+    phrase = fmt::format("PFCP IE {} Bad Value of {} Exception", ie_type,
+                         field);
   }
   virtual ~pfcp_ie_value_exception() throw () {
   }
@@ -402,9 +417,13 @@ struct fteid_s {
   uint8_t choose_id;
 
   bool operator==(const struct fteid_s &f) const {
-    return (teid == f.teid) and (ipv4_address.s_addr == f.ipv4_address.s_addr) and (chid == f.chid) and (ch == f.ch) and (choose_id == f.choose_id)
-        and (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0]) and (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1]) and (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2])
-        and (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3]) and (v4 == f.v4) and (v6 == f.v6);
+    return (teid == f.teid) and (ipv4_address.s_addr == f.ipv4_address.s_addr)
+        and (chid == f.chid) and (ch == f.ch) and (choose_id == f.choose_id)
+        and (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0])
+        and (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1])
+        and (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2])
+        and (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3])
+        and (v4 == f.v4) and (v6 == f.v6);
   }
   bool is_zero() const {
     return ((!v4) and (!v6));
@@ -813,8 +832,12 @@ typedef struct fseid_s {
   struct in6_addr ipv6_address;
 
   bool operator==(const struct fseid_s &i) const {
-    if ((i.seid == this->seid) && (i.v4 == this->v4) && (i.ipv4_address.s_addr == this->ipv4_address.s_addr) && (i.v6 == this->v6) && (i.ipv6_address.s6_addr32[0] == this->ipv6_address.s6_addr32[0])
-        && (i.ipv6_address.s6_addr32[1] == this->ipv6_address.s6_addr32[1]) && (i.ipv6_address.s6_addr32[2] == this->ipv6_address.s6_addr32[2])
+    if ((i.seid == this->seid) && (i.v4 == this->v4)
+        && (i.ipv4_address.s_addr == this->ipv4_address.s_addr)
+        && (i.v6 == this->v6)
+        && (i.ipv6_address.s6_addr32[0] == this->ipv6_address.s6_addr32[0])
+        && (i.ipv6_address.s6_addr32[1] == this->ipv6_address.s6_addr32[1])
+        && (i.ipv6_address.s6_addr32[2] == this->ipv6_address.s6_addr32[2])
         && (i.ipv6_address.s6_addr32[3] == this->ipv6_address.s6_addr32[3])) {
       return true;
     } else {
@@ -835,15 +858,19 @@ typedef struct fseid_s {
     } else if (this->v4)
       return true;
     if (i.v6 == this->v6) {
-      uint64_t i64 = ((uint64_t) i.ipv6_address.s6_addr32[0] << 32) | ((uint64_t) i.ipv6_address.s6_addr32[1]);
-      uint64_t this64 = ((uint64_t) this->ipv6_address.s6_addr32[0] << 32) | ((uint64_t) this->ipv6_address.s6_addr32[1]);
+      uint64_t i64 = ((uint64_t) i.ipv6_address.s6_addr32[0] << 32)
+          | ((uint64_t) i.ipv6_address.s6_addr32[1]);
+      uint64_t this64 = ((uint64_t) this->ipv6_address.s6_addr32[0] << 32)
+          | ((uint64_t) this->ipv6_address.s6_addr32[1]);
 
       if (i64 < this64)
         return true;
       else if (i64 > this64)
         return false;
-      i64 = ((uint64_t) i.ipv6_address.s6_addr32[2] << 32) | ((uint64_t) i.ipv6_address.s6_addr32[3]);
-      this64 = ((uint64_t) this->ipv6_address.s6_addr32[2] << 32) | ((uint64_t) this->ipv6_address.s6_addr32[3]);
+      i64 = ((uint64_t) i.ipv6_address.s6_addr32[2] << 32)
+          | ((uint64_t) i.ipv6_address.s6_addr32[3]);
+      this64 = ((uint64_t) this->ipv6_address.s6_addr32[2] << 32)
+          | ((uint64_t) this->ipv6_address.s6_addr32[3]);
       if (i64 < this64)
         return true;
       else if (i64 > this64)
@@ -873,9 +900,13 @@ struct node_id_s {
   } u1;
   std::string fqdn;  // should be in union but problem with virtual ~
   bool operator==(const struct node_id_s &i) const {
-    if ((i.node_id_type == this->node_id_type) && (i.u1.ipv4_address.s_addr == this->u1.ipv4_address.s_addr) && (i.fqdn == this->fqdn)
-        && (i.u1.ipv6_address.s6_addr32[0] == this->u1.ipv6_address.s6_addr32[0]) && (i.u1.ipv6_address.s6_addr32[1] == this->u1.ipv6_address.s6_addr32[1])
-        && (i.u1.ipv6_address.s6_addr32[2] == this->u1.ipv6_address.s6_addr32[2]) && (i.u1.ipv6_address.s6_addr32[3] == this->u1.ipv6_address.s6_addr32[3])) {
+    if ((i.node_id_type == this->node_id_type)
+        && (i.u1.ipv4_address.s_addr == this->u1.ipv4_address.s_addr)
+        && (i.fqdn == this->fqdn)
+        && (i.u1.ipv6_address.s6_addr32[0] == this->u1.ipv6_address.s6_addr32[0])
+        && (i.u1.ipv6_address.s6_addr32[1] == this->u1.ipv6_address.s6_addr32[1])
+        && (i.u1.ipv6_address.s6_addr32[2] == this->u1.ipv6_address.s6_addr32[2])
+        && (i.u1.ipv6_address.s6_addr32[3] == this->u1.ipv6_address.s6_addr32[3])) {
       return true;
     } else {
       return false;
@@ -2017,7 +2048,9 @@ struct hash<pfcp::fseid_t> {
       return h;
     }
     if (k.v6) {
-      h = k.seid ^ (k.ipv6_address.s6_addr32[0] ^ k.ipv6_address.s6_addr32[1] ^ k.ipv6_address.s6_addr32[2] ^ k.ipv6_address.s6_addr32[3]);
+      h = k.seid
+          ^ (k.ipv6_address.s6_addr32[0] ^ k.ipv6_address.s6_addr32[1]
+              ^ k.ipv6_address.s6_addr32[2] ^ k.ipv6_address.s6_addr32[3]);
       return h;
     }
     return k.seid;
@@ -2038,7 +2071,8 @@ class hash<pfcp::node_id_t> {
         return h;
         break;
       case pfcp::NODE_ID_TYPE_IPV6_ADDRESS:
-        h = k.u1.ipv6_address.s6_addr32[0] ^ k.u1.ipv6_address.s6_addr32[1] ^ k.u1.ipv6_address.s6_addr32[2] ^ k.u1.ipv6_address.s6_addr32[3];
+        h = k.u1.ipv6_address.s6_addr32[0] ^ k.u1.ipv6_address.s6_addr32[1]
+            ^ k.u1.ipv6_address.s6_addr32[2] ^ k.u1.ipv6_address.s6_addr32[3];
         return h;
         break;
       case pfcp::NODE_ID_TYPE_FQDN:

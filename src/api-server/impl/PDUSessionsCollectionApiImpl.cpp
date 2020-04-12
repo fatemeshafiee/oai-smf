@@ -18,16 +18,21 @@ namespace api {
 
 using namespace oai::smf_server::model;
 
-PDUSessionsCollectionApiImpl::PDUSessionsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr, smf::smf_app *smf_app_inst, std::string address)
+PDUSessionsCollectionApiImpl::PDUSessionsCollectionApiImpl(
+    std::shared_ptr<Pistache::Rest::Router> rtr, smf::smf_app *smf_app_inst,
+    std::string address)
     :
     PDUSessionsCollectionApi(rtr),
     m_smf_app(smf_app_inst),
     m_address(address) {
 }
 
-void PDUSessionsCollectionApiImpl::post_pdu_sessions(const PduSessionCreateData &pduSessionCreateData, Pistache::Http::ResponseWriter &response) {
+void PDUSessionsCollectionApiImpl::post_pdu_sessions(
+    const PduSessionCreateData &pduSessionCreateData,
+    Pistache::Http::ResponseWriter &response) {
   Logger::smf_api_server().info("post_pdu_sessions...");
-  response.send(Pistache::Http::Code::Ok, "Post_pdu_sessions API has not been implemented yet!\n");
+  response.send(Pistache::Http::Code::Ok,
+                "Post_pdu_sessions API has not been implemented yet!\n");
 
 }
 

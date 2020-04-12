@@ -36,12 +36,15 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 bool util::get_iface_l2_addr(const std::string &iface, std::string &mac) {
-  std::string mac_address_path = fmt::format("/sys/class/net/{}/address", iface);
-  std::ifstream mac_address_in(mac_address_path.c_str(), ios_base::in | ios_base::binary);
+  std::string mac_address_path = fmt::format("/sys/class/net/{}/address",
+                                             iface);
+  std::ifstream mac_address_in(mac_address_path.c_str(),
+                               ios_base::in | ios_base::binary);
   char wb[32];
   mac_address_in.get(wb, 32);
   mac.assign(wb);
-  Logger::pfcp_switch().error("Found IFace %s MAC %s", iface.c_str(), mac.c_str());
+  Logger::pfcp_switch().error("Found IFace %s MAC %s", iface.c_str(),
+                              mac.c_str());
   mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
   return true;
 //  ifr = {};
@@ -91,7 +94,8 @@ bool util::get_gateway_and_iface(std::string &gw, std::string &iface) {
 
   /* 1 Sec Timeout to avoid stall */
   tv.tv_sec = 1;
-  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval*) &tv, sizeof(struct timeval));
+  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval*) &tv,
+             sizeof(struct timeval));
   /* send msg */
   if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
     perror("send failed");
@@ -109,7 +113,8 @@ bool util::get_gateway_and_iface(std::string &gw, std::string &iface) {
     nlh = (struct nlmsghdr*) ptr;
 
     /* Check if the header is valid */
-    if ((NLMSG_OK(nlmsg, received_bytes) == 0) || (nlmsg->nlmsg_type == NLMSG_ERROR)) {
+    if ((NLMSG_OK(nlmsg, received_bytes) == 0)
+        || (nlmsg->nlmsg_type == NLMSG_ERROR)) {
       perror("Error in received packet");
       return false;
     }
@@ -140,13 +145,15 @@ bool util::get_gateway_and_iface(std::string &gw, std::string &iface) {
     route_attribute_len = RTM_PAYLOAD(nlh);
 
     /* Loop through all attributes */
-    for (; RTA_OK(route_attribute, route_attribute_len); route_attribute = RTA_NEXT(route_attribute, route_attribute_len)) {
+    for (; RTA_OK(route_attribute, route_attribute_len); route_attribute =
+        RTA_NEXT(route_attribute, route_attribute_len)) {
       switch (route_attribute->rta_type) {
         case RTA_OIF:
           if_indextoname(*(int*) RTA_DATA(route_attribute), interface);
           break;
         case RTA_GATEWAY:
-          inet_ntop(AF_INET, RTA_DATA(route_attribute), gateway_address, sizeof(gateway_address));
+          inet_ntop(AF_INET, RTA_DATA(route_attribute), gateway_address,
+                    sizeof(gateway_address));
           break;
         default:
           break;

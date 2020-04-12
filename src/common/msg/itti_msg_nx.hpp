@@ -34,15 +34,20 @@
 #include "pistache/http.h"
 
 class itti_nx_msg : public itti_msg {
-public:
-	itti_nx_msg(const itti_msg_type_t  msg_type, const task_id_t orig, const task_id_t dest):
-    itti_msg(msg_type, orig, dest) {
+ public:
+  itti_nx_msg(const itti_msg_type_t msg_type, const task_id_t orig,
+              const task_id_t dest)
+      :
+      itti_msg(msg_type, orig, dest) {
 
   }
-	itti_nx_msg(const itti_nx_msg& i) : itti_msg(i) {}
-	itti_nx_msg(const itti_nx_msg& i, const task_id_t orig, const task_id_t dest) :
-		itti_nx_msg(i)
-  {
+  itti_nx_msg(const itti_nx_msg &i)
+      :
+      itti_msg(i) {
+  }
+  itti_nx_msg(const itti_nx_msg &i, const task_id_t orig, const task_id_t dest)
+      :
+      itti_nx_msg(i) {
     origin = orig;
     destination = dest;
   }
@@ -51,13 +56,27 @@ public:
 
 //-----------------------------------------------------------------------------
 class itti_nx_modify_pdu_session_request_network_requested : public itti_nx_msg {
-public:
-	itti_nx_modify_pdu_session_request_network_requested(const task_id_t orig, const task_id_t dest):
-		itti_nx_msg(NX_SESSION_MODIFICATION_REQUEST_NETWORK_REQUESTED, orig, dest) {}
-	itti_nx_modify_pdu_session_request_network_requested(const itti_nx_modify_pdu_session_request_network_requested& i) : itti_nx_msg(i)  {}
-	itti_nx_modify_pdu_session_request_network_requested(const itti_nx_modify_pdu_session_request_network_requested& i, const task_id_t orig, const task_id_t dest) :
-		itti_nx_msg(i, orig, dest){}
-  const char* get_msg_name() {return "NX_SESSION_MODIFICATION_REQUEST_NETWORK_REQUESTED";};
+ public:
+  itti_nx_modify_pdu_session_request_network_requested(const task_id_t orig,
+                                                       const task_id_t dest)
+      :
+      itti_nx_msg(NX_SESSION_MODIFICATION_REQUEST_NETWORK_REQUESTED, orig, dest) {
+  }
+  itti_nx_modify_pdu_session_request_network_requested(
+      const itti_nx_modify_pdu_session_request_network_requested &i)
+      :
+      itti_nx_msg(i) {
+  }
+  itti_nx_modify_pdu_session_request_network_requested(
+      const itti_nx_modify_pdu_session_request_network_requested &i,
+      const task_id_t orig, const task_id_t dest)
+      :
+      itti_nx_msg(i, orig, dest) {
+  }
+  const char* get_msg_name() {
+    return "NX_SESSION_MODIFICATION_REQUEST_NETWORK_REQUESTED";
+  }
+  ;
 //  smf::pdu_session_create_sm_context_request req;
 };
 

@@ -72,7 +72,8 @@ class pfcp_association {
     is_restore_sessions_pending = false;
     timer_association = ITTI_INVALID_TIMER_ID;
   }
-  pfcp_association(const pfcp::node_id_t &node_id, pfcp::recovery_time_stamp_t &recovery_time_stamp)
+  pfcp_association(const pfcp::node_id_t &node_id,
+                   pfcp::recovery_time_stamp_t &recovery_time_stamp)
       :
       node_id(node_id),
       recovery_time_stamp(recovery_time_stamp),
@@ -85,7 +86,8 @@ class pfcp_association {
     trxn_id_heartbeat = 0;
     timer_association = ITTI_INVALID_TIMER_ID;
   }
-  pfcp_association(const pfcp::node_id_t &ni, pfcp::recovery_time_stamp_t &rts, pfcp::up_function_features_s &uff)
+  pfcp_association(const pfcp::node_id_t &ni, pfcp::recovery_time_stamp_t &rts,
+                   pfcp::up_function_features_s &uff)
       :
       node_id(ni),
       recovery_time_stamp(rts),
@@ -146,7 +148,8 @@ class pfcp_associations {
       pending_associations() {
   }
   ;
-  void trigger_heartbeat_request_procedure(std::shared_ptr<pfcp_association> &s);
+  void trigger_heartbeat_request_procedure(
+      std::shared_ptr<pfcp_association> &s);
 
  public:
   static pfcp_associations& get_instance() {
@@ -157,12 +160,20 @@ class pfcp_associations {
   pfcp_associations(pfcp_associations const&) = delete;
   void operator=(pfcp_associations const&) = delete;
 
-  bool add_association(pfcp::node_id_t &node_id, pfcp::recovery_time_stamp_t &recovery_time_stamp, bool &restore_n4_sessions);
-  bool add_association(pfcp::node_id_t &node_id, pfcp::recovery_time_stamp_t &recovery_time_stamp, pfcp::up_function_features_s &function_features, bool &restore_n4_sessions);
-  bool get_association(const pfcp::node_id_t &node_id, std::shared_ptr<pfcp_association> &sa) const;
-  bool get_association(const pfcp::fseid_t &cp_fseid, std::shared_ptr<pfcp_association> &sa) const;
+  bool add_association(pfcp::node_id_t &node_id,
+                       pfcp::recovery_time_stamp_t &recovery_time_stamp,
+                       bool &restore_n4_sessions);
+  bool add_association(pfcp::node_id_t &node_id,
+                       pfcp::recovery_time_stamp_t &recovery_time_stamp,
+                       pfcp::up_function_features_s &function_features,
+                       bool &restore_n4_sessions);
+  bool get_association(const pfcp::node_id_t &node_id,
+                       std::shared_ptr<pfcp_association> &sa) const;
+  bool get_association(const pfcp::fseid_t &cp_fseid,
+                       std::shared_ptr<pfcp_association> &sa) const;
 
-  void notify_add_session(const pfcp::node_id_t &node_id, const pfcp::fseid_t &cp_fseid);
+  void notify_add_session(const pfcp::node_id_t &node_id,
+                          const pfcp::fseid_t &cp_fseid);
   void notify_del_session(const pfcp::fseid_t &cp_fseid);
 
   void restore_n4_sessions(const pfcp::node_id_t &node_id);
@@ -171,7 +182,8 @@ class pfcp_associations {
   void timeout_heartbeat_request(timer_id_t timer_id, uint64_t arg2_user);
   void handle_receive_heartbeat_response(const uint64_t trxn_id);
 
-  bool select_up_node(pfcp::node_id_t &node_id, const int node_selection_criteria);
+  bool select_up_node(pfcp::node_id_t &node_id,
+                      const int node_selection_criteria);
   bool add_peer_candidate_node(const pfcp::node_id_t &node_id);
 
 };

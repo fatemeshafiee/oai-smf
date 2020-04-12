@@ -205,7 +205,8 @@ class paa_dynamic {
   paa_dynamic(paa_dynamic const&) = delete;
   void operator=(paa_dynamic const&) = delete;
 
-  void add_pool(const std::string &apn_label, const int pool_id, const struct in_addr &first, const int range) {
+  void add_pool(const std::string &apn_label, const int pool_id,
+                const struct in_addr &first, const int range) {
     if (pool_id >= 0) {
       uint32_t uint32pool_id = uint32_t(pool_id);
       if (!ipv4_pools.count(uint32pool_id)) {
@@ -220,7 +221,8 @@ class paa_dynamic {
     }
   }
 
-  void add_pool(const std::string &apn_label, const int pool_id, const struct in6_addr &prefix, const int prefix_len) {
+  void add_pool(const std::string &apn_label, const int pool_id,
+                const struct in6_addr &prefix, const int prefix_len) {
     if (pool_id >= 0) {
       uint32_t uint32pool_id = uint32_t(pool_id);
       if (!ipv6_pools.count(uint32pool_id)) {
@@ -239,38 +241,46 @@ class paa_dynamic {
     if (apns.count(apn_label)) {
       apn_dynamic_pools &apn_pool = apns[apn_label];
       if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4) {
-        for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids
+            .begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].alloc_address(paa.ipv4_address)) {
             return true;
           }
         }
-        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4 for APN %s", apn_label.c_str());
+        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4 for APN %s",
+                               apn_label.c_str());
         return false;
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4V6) {
         bool success = false;
         std::vector<uint32_t>::const_iterator it4 = { };
-        for (it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (it4 = apn_pool.ipv4_pool_ids.begin();
+            it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].alloc_address(paa.ipv4_address)) {
             success = true;
           }
         }
         if (success) {
-          for (std::vector<uint32_t>::const_iterator it6 = apn_pool.ipv6_pool_ids.begin(); it6 != apn_pool.ipv6_pool_ids.end(); ++it6) {
+          for (std::vector<uint32_t>::const_iterator it6 = apn_pool
+              .ipv6_pool_ids.begin(); it6 != apn_pool.ipv6_pool_ids.end();
+              ++it6) {
             if (ipv6_pools[*it6].alloc_address(paa.ipv6_address)) {
               return true;
             }
           }
           ipv4_pools[*it4].free_address(paa.ipv4_address);
         }
-        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4V6 for APN %s", apn_label.c_str());
+        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4V6 for APN %s",
+                               apn_label.c_str());
         return false;
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV6) {
-        for (std::vector<uint32_t>::const_iterator it6 = apn_pool.ipv6_pool_ids.begin(); it6 != apn_pool.ipv6_pool_ids.end(); ++it6) {
+        for (std::vector<uint32_t>::const_iterator it6 = apn_pool.ipv6_pool_ids
+            .begin(); it6 != apn_pool.ipv6_pool_ids.end(); ++it6) {
           if (ipv6_pools[*it6].alloc_address(paa.ipv6_address)) {
             return true;
           }
         }
-        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV6 for APN %s", apn_label.c_str());
+        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV6 for APN %s",
+                               apn_label.c_str());
         return false;
       }
     }
@@ -282,7 +292,8 @@ class paa_dynamic {
     if (apns.count(apn_label)) {
       apn_dynamic_pools &apn_pool = apns[apn_label];
       if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4) {
-        for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids
+            .begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].free_address(paa.ipv4_address)) {
             return true;
           }
@@ -291,7 +302,8 @@ class paa_dynamic {
       } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4V6) {
         bool success = false;
         std::vector<uint32_t>::const_iterator it4 = { };
-        for (it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (it4 = apn_pool.ipv4_pool_ids.begin();
+            it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].free_address(paa.ipv4_address)) {
             return true;
           }
@@ -301,20 +313,24 @@ class paa_dynamic {
         return true;
       }
     }
-    Logger::smf_app().warn("Could not release PAA for APN %s", apn_label.c_str());
+    Logger::smf_app().warn("Could not release PAA for APN %s",
+                           apn_label.c_str());
     return false;
   }
 
-  bool release_paa(const std::string &apn_label, const struct in_addr &ipv4_address) {
+  bool release_paa(const std::string &apn_label,
+                   const struct in_addr &ipv4_address) {
     if (apns.count(apn_label)) {
       apn_dynamic_pools &apn_pool = apns[apn_label];
-      for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids.begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
+      for (std::vector<uint32_t>::const_iterator it4 = apn_pool.ipv4_pool_ids
+          .begin(); it4 != apn_pool.ipv4_pool_ids.end(); ++it4) {
         if (ipv4_pools[*it4].free_address(ipv4_address)) {
           return true;
         }
       }
     }
-    Logger::smf_app().warn("Could not release PAA for APN %s", apn_label.c_str());
+    Logger::smf_app().warn("Could not release PAA for APN %s",
+                           apn_label.c_str());
     return false;
   }
 

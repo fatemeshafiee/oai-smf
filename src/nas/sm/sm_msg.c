@@ -25,8 +25,10 @@
 #include "TLVEncoder.h"
 
 //Local definitions
-static int _fivegsm_msg_decode_header(sm_msg_header_t *header, const uint8_t *buffer, uint32_t len);
-static int _fivegsm_msg_encode_header(const sm_msg_header_t *header, uint8_t *buffer, uint32_t len);
+static int _fivegsm_msg_decode_header(sm_msg_header_t *header,
+                                      const uint8_t *buffer, uint32_t len);
+static int _fivegsm_msg_encode_header(const sm_msg_header_t *header,
+                                      uint8_t *buffer, uint32_t len);
 
 /****************************************************************************
  **                                                                        **
@@ -67,49 +69,64 @@ int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
 
   switch (msg->header.message_type) {
     case PDU_SESSION_ESTABLISHMENT_REQUEST:
-      decode_result = decode_pdu_session_establishment_request(&msg->pdu_session_establishment_request, buffer, len);
+      decode_result = decode_pdu_session_establishment_request(
+          &msg->pdu_session_establishment_request, buffer, len);
       break;
     case PDU_SESSION_ESTABLISHMENT_ACCEPT:
-      decode_result = decode_pdu_session_establishment_accept(&msg->pdu_session_establishment_accept, buffer, len);
+      decode_result = decode_pdu_session_establishment_accept(
+          &msg->pdu_session_establishment_accept, buffer, len);
       break;
     case PDU_SESSION_ESTABLISHMENT_REJECT:
-      decode_result = decode_pdu_session_establishment_reject(&msg->pdu_session_establishment_reject, buffer, len);
+      decode_result = decode_pdu_session_establishment_reject(
+          &msg->pdu_session_establishment_reject, buffer, len);
       break;
     case PDU_SESSION_AUTHENTICATION_COMMAND:
-      decode_result = decode_pdu_session_authentication_command(&msg->pdu_session_authentication_command, buffer, len);
+      decode_result = decode_pdu_session_authentication_command(
+          &msg->pdu_session_authentication_command, buffer, len);
       break;
     case PDU_SESSION_AUTHENTICATION_COMPLETE:
-      decode_result = decode_pdu_session_authentication_complete(&msg->pdu_session_authentication_complete, buffer, len);
+      decode_result = decode_pdu_session_authentication_complete(
+          &msg->pdu_session_authentication_complete, buffer, len);
       break;
     case PDU_SESSION_AUTHENTICATION_RESULT:
-      decode_result = decode_pdu_session_authentication_result(&msg->pdu_session_authentication_result, buffer, len);
+      decode_result = decode_pdu_session_authentication_result(
+          &msg->pdu_session_authentication_result, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_REQUEST:
-      decode_result = decode_pdu_session_modification_request(&msg->pdu_session_modification_request, buffer, len);
+      decode_result = decode_pdu_session_modification_request(
+          &msg->pdu_session_modification_request, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_REJECT:
-      decode_result = decode_pdu_session_modification_reject(&msg->pdu_session_modification_reject, buffer, len);
+      decode_result = decode_pdu_session_modification_reject(
+          &msg->pdu_session_modification_reject, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_COMMAND:
-      decode_result = decode_pdu_session_modification_command(&msg->pdu_session_modification_command, buffer, len);
+      decode_result = decode_pdu_session_modification_command(
+          &msg->pdu_session_modification_command, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_COMPLETE:
-      decode_result = decode_pdu_session_modification_complete(&msg->pdu_session_modification_complete, buffer, len);
+      decode_result = decode_pdu_session_modification_complete(
+          &msg->pdu_session_modification_complete, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_COMMANDREJECT:
-      decode_result = decode_pdu_session_modification_command_reject(&msg->pdu_session_modification_command_reject, buffer, len);
+      decode_result = decode_pdu_session_modification_command_reject(
+          &msg->pdu_session_modification_command_reject, buffer, len);
       break;
     case PDU_SESSION_RELEASE_REQUEST:
-      decode_result = decode_pdu_session_release_request(&msg->pdu_session_release_request, buffer, len);
+      decode_result = decode_pdu_session_release_request(
+          &msg->pdu_session_release_request, buffer, len);
       break;
     case PDU_SESSION_RELEASE_REJECT:
-      decode_result = decode_pdu_session_release_reject(&msg->pdu_session_release_reject, buffer, len);
+      decode_result = decode_pdu_session_release_reject(
+          &msg->pdu_session_release_reject, buffer, len);
       break;
     case PDU_SESSION_RELEASE_COMMAND:
-      decode_result = decode_pdu_session_release_command(&msg->pdu_session_release_command, buffer, len);
+      decode_result = decode_pdu_session_release_command(
+          &msg->pdu_session_release_command, buffer, len);
       break;
     case PDU_SESSION_RELEASE_COMPLETE:
-      decode_result = decode_pdu_session_release_complete(&msg->pdu_session_release_complete, buffer, len);
+      decode_result = decode_pdu_session_release_complete(
+          &msg->pdu_session_release_complete, buffer, len);
       break;
     case _5GSM_STATUS:
       decode_result = decode__5gsm_status(&msg->_5gsm_status, buffer, len);
@@ -166,49 +183,64 @@ int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
   printf(", message type %d", msg->header.message_type);
   switch (msg->header.message_type) {
     case PDU_SESSION_ESTABLISHMENT_REQUEST:
-      encode_result = encode_pdu_session_establishment_request(&msg->pdu_session_establishment_request, buffer, len);
+      encode_result = encode_pdu_session_establishment_request(
+          &msg->pdu_session_establishment_request, buffer, len);
       break;
     case PDU_SESSION_ESTABLISHMENT_ACCEPT:
-      encode_result = encode_pdu_session_establishment_accept(&msg->pdu_session_establishment_accept, buffer, len);
+      encode_result = encode_pdu_session_establishment_accept(
+          &msg->pdu_session_establishment_accept, buffer, len);
       break;
     case PDU_SESSION_ESTABLISHMENT_REJECT:
-      encode_result = encode_pdu_session_establishment_reject(&msg->pdu_session_establishment_reject, buffer, len);
+      encode_result = encode_pdu_session_establishment_reject(
+          &msg->pdu_session_establishment_reject, buffer, len);
       break;
     case PDU_SESSION_AUTHENTICATION_COMMAND:
-      encode_result = encode_pdu_session_authentication_command(&msg->pdu_session_authentication_command, buffer, len);
+      encode_result = encode_pdu_session_authentication_command(
+          &msg->pdu_session_authentication_command, buffer, len);
       break;
     case PDU_SESSION_AUTHENTICATION_COMPLETE:
-      encode_result = encode_pdu_session_authentication_complete(&msg->pdu_session_authentication_complete, buffer, len);
+      encode_result = encode_pdu_session_authentication_complete(
+          &msg->pdu_session_authentication_complete, buffer, len);
       break;
     case PDU_SESSION_AUTHENTICATION_RESULT:
-      encode_result = encode_pdu_session_authentication_result(&msg->pdu_session_authentication_result, buffer, len);
+      encode_result = encode_pdu_session_authentication_result(
+          &msg->pdu_session_authentication_result, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_REQUEST:
-      encode_result = encode_pdu_session_modification_request(&msg->pdu_session_modification_request, buffer, len);
+      encode_result = encode_pdu_session_modification_request(
+          &msg->pdu_session_modification_request, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_REJECT:
-      encode_result = encode_pdu_session_modification_reject(&msg->pdu_session_modification_reject, buffer, len);
+      encode_result = encode_pdu_session_modification_reject(
+          &msg->pdu_session_modification_reject, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_COMMAND:
-      encode_result = encode_pdu_session_modification_command(&msg->pdu_session_modification_command, buffer, len);
+      encode_result = encode_pdu_session_modification_command(
+          &msg->pdu_session_modification_command, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_COMPLETE:
-      encode_result = encode_pdu_session_modification_complete(&msg->pdu_session_modification_complete, buffer, len);
+      encode_result = encode_pdu_session_modification_complete(
+          &msg->pdu_session_modification_complete, buffer, len);
       break;
     case PDU_SESSION_MODIFICATION_COMMANDREJECT:
-      encode_result = encode_pdu_session_modification_command_reject(&msg->pdu_session_modification_command_reject, buffer, len);
+      encode_result = encode_pdu_session_modification_command_reject(
+          &msg->pdu_session_modification_command_reject, buffer, len);
       break;
     case PDU_SESSION_RELEASE_REQUEST:
-      encode_result = encode_pdu_session_release_request(&msg->pdu_session_release_request, buffer, len);
+      encode_result = encode_pdu_session_release_request(
+          &msg->pdu_session_release_request, buffer, len);
       break;
     case PDU_SESSION_RELEASE_REJECT:
-      encode_result = encode_pdu_session_release_reject(&msg->pdu_session_release_reject, buffer, len);
+      encode_result = encode_pdu_session_release_reject(
+          &msg->pdu_session_release_reject, buffer, len);
       break;
     case PDU_SESSION_RELEASE_COMMAND:
-      encode_result = encode_pdu_session_release_command(&msg->pdu_session_release_command, buffer, len);
+      encode_result = encode_pdu_session_release_command(
+          &msg->pdu_session_release_command, buffer, len);
       break;
     case PDU_SESSION_RELEASE_COMPLETE:
-      encode_result = encode_pdu_session_release_complete(&msg->pdu_session_release_complete, buffer, len);
+      encode_result = encode_pdu_session_release_complete(
+          &msg->pdu_session_release_complete, buffer, len);
       break;
     case _5GSM_STATUS:
       encode_result = encode__5gsm_status(&msg->_5gsm_status, buffer, len);
@@ -246,7 +278,8 @@ int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
  **            Others:  None                                               **
  **                                                                        **
  ***************************************************************************/
-static int _fivegsm_msg_decode_header(sm_msg_header_t *header, const uint8_t *buffer, uint32_t len) {
+static int _fivegsm_msg_decode_header(sm_msg_header_t *header,
+                                      const uint8_t *buffer, uint32_t len) {
   int size = 0;
 
   /*
@@ -279,7 +312,8 @@ static int _fivegsm_msg_decode_header(sm_msg_header_t *header, const uint8_t *bu
   /*
    * Check the protocol discriminator
    */
-  if (header->extended_protocol_discriminator != EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
+  if (header->extended_protocol_discriminator
+      != EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     //OAILOG_ERROR (LOG_NAS, "SM-MSG   - extended protocol discriminator: 0x%x\n", header->extended_protocol_discriminator);
     return (TLV_PROTOCOL_NOT_SUPPORTED);
   }
@@ -305,7 +339,8 @@ static int _fivegsm_msg_decode_header(sm_msg_header_t *header, const uint8_t *bu
  **            Others:  None                                               **
  **                                                                        **
  ***************************************************************************/
-static int _fivegsm_msg_encode_header(const sm_msg_header_t *header, uint8_t *buffer, uint32_t len) {
+static int _fivegsm_msg_encode_header(const sm_msg_header_t *header,
+                                      uint8_t *buffer, uint32_t len) {
   int size = 0;
 
   /*
@@ -318,7 +353,8 @@ static int _fivegsm_msg_encode_header(const sm_msg_header_t *header, uint8_t *bu
   /*
    * Check the protocol discriminator
    */
-  else if (header->extended_protocol_discriminator != EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
+  else if (header->extended_protocol_discriminator
+      != EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     //OAILOG_ERROR (LOG_NAS, "SM-MSG   - Unexpected protocol discriminator: 0x%x\n", header->extended_protocol_discriminator);
     return (TLV_PROTOCOL_NOT_SUPPORTED);
   }

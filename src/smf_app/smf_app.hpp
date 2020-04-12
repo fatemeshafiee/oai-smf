@@ -115,29 +115,44 @@ class smf_app {
 
   int apply_config(const smf_config &cfg);
 
-  int pco_push_protocol_or_container_id(protocol_configuration_options_t &pco, pco_protocol_or_container_id_t *const poc_id /* STOLEN_REF poc_id->contents*/);
-  int process_pco_request_ipcp(protocol_configuration_options_t &pco_resp, const pco_protocol_or_container_id_t *const poc_id);
-  int process_pco_dns_server_request(protocol_configuration_options_t &pco_resp, const pco_protocol_or_container_id_t *const poc_id);
-  int process_pco_link_mtu_request(protocol_configuration_options_t &pco_resp, const pco_protocol_or_container_id_t *const poc_id);
+  int pco_push_protocol_or_container_id(
+      protocol_configuration_options_t &pco,
+      pco_protocol_or_container_id_t *const poc_id /* STOLEN_REF poc_id->contents*/);
+  int process_pco_request_ipcp(
+      protocol_configuration_options_t &pco_resp,
+      const pco_protocol_or_container_id_t *const poc_id);
+  int process_pco_dns_server_request(
+      protocol_configuration_options_t &pco_resp,
+      const pco_protocol_or_container_id_t *const poc_id);
+  int process_pco_link_mtu_request(
+      protocol_configuration_options_t &pco_resp,
+      const pco_protocol_or_container_id_t *const poc_id);
 
  public:
   explicit smf_app(const std::string &config_file);
   smf_app(smf_app const&) = delete;
   void operator=(smf_app const&) = delete;
 
-  void set_seid_2_smf_context(const seid_t &seid, std::shared_ptr<smf_context> &pc);
-  bool seid_2_smf_context(const seid_t &seid, std::shared_ptr<smf_context> &pc) const;
+  void set_seid_2_smf_context(const seid_t &seid,
+                              std::shared_ptr<smf_context> &pc);
+  bool seid_2_smf_context(const seid_t &seid,
+                          std::shared_ptr<smf_context> &pc) const;
 
   void delete_smf_context(std::shared_ptr<smf_context> spc);
 
   int static_paa_get_free_paa(const std::string &apn, paa_t &paa);
   int static_paa_release_address(const std::string &apn, struct in_addr &addr);
   int static_paa_get_num_ipv4_pool(void);
-  int static_paa_get_ipv4_pool(const int pool_id, struct in_addr *const range_low, struct in_addr *const range_high, struct in_addr *const netaddr, struct in_addr *const netmask,
-                               std::vector<struct in_addr>::iterator &it_out_of_nw);
+  int static_paa_get_ipv4_pool(
+      const int pool_id, struct in_addr *const range_low,
+      struct in_addr *const range_high, struct in_addr *const netaddr,
+      struct in_addr *const netmask,
+      std::vector<struct in_addr>::iterator &it_out_of_nw);
   int static_paa_get_pool_id(const struct in_addr &ue_addr);
 
-  int process_pco_request(const protocol_configuration_options_t &pco_req, protocol_configuration_options_t &pco_resp, protocol_configuration_options_ids_t &pco_ids);
+  int process_pco_request(const protocol_configuration_options_t &pco_req,
+                          protocol_configuration_options_t &pco_resp,
+                          protocol_configuration_options_ids_t &pco_ids);
 
   void handle_itti_msg(itti_n4_session_establishment_response &m);
   void handle_itti_msg(itti_n4_session_modification_response &m);
@@ -168,7 +183,8 @@ class smf_app {
   void generate_smf_context_ref(std::string &smf_ref);
   scid_t generate_smf_context_ref();
 
-  void set_scid_2_smf_context(const scid_t &id, std::shared_ptr<smf_context_ref> scf);
+  void set_scid_2_smf_context(const scid_t &id,
+                              std::shared_ptr<smf_context_ref> scf);
   std::shared_ptr<smf_context_ref> scid_2_smf_context(const scid_t &scid) const;
   bool is_scid_2_smf_context(const scid_t &scid) const;
 
@@ -177,14 +193,16 @@ class smf_app {
    * @param [std::shared_ptr<itti_n11_create_sm_context_request>&] Request message
    * @return void
    */
-  void handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+  void handle_pdu_session_create_sm_context_request(
+      std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
   /*
    * Handle PDUSession_UpdateSMContextRequest from AMF
    * @param [std::shared_ptr<itti_n11_update_sm_context_request>&] Request message
    * @return void
    */
-  void handle_pdu_session_update_sm_context_request(std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+  void handle_pdu_session_update_sm_context_request(
+      std::shared_ptr<itti_n11_update_sm_context_request> smreq);
 
   /*
    * Handle network-requested pdu session modification
@@ -206,7 +224,8 @@ class smf_app {
    * @param [std::shared_ptr<smf_context>] sc Shared_ptr Pointer to an SMF context
    * @return True if existed, otherwise false
    */
-  void set_supi_2_smf_context(const supi64_t &supi, std::shared_ptr<smf_context> sc);
+  void set_supi_2_smf_context(const supi64_t &supi,
+                              std::shared_ptr<smf_context> sc);
 
   /*
    * Get SM Context
@@ -220,7 +239,8 @@ class smf_app {
    * @param [std::string] dnn_selection_mode
    * @return True if SMF uses the local configuration to check the validity of the UE request, False otherwise
    */
-  bool use_local_configuration_subscription_data(const std::string &dnn_selection_mode);
+  bool use_local_configuration_subscription_data(
+      const std::string &dnn_selection_mode);
 
   /*
    * Verify whether the Session Management Data is existed
@@ -229,7 +249,8 @@ class smf_app {
    * @param [snssai_t] S-NSSAI
    * @return True if SMF uses the local configuration to check the validity of the UE request, False otherwise
    */
-  bool is_supi_dnn_snssai_subscription_data(supi_t &supi, std::string &dnn, snssai_t &snssai);
+  bool is_supi_dnn_snssai_subscription_data(supi_t &supi, std::string &dnn,
+                                            snssai_t &snssai);
 
   /*
    * Verify whether the UE request is valid according to the user subscription and with local policies
@@ -256,7 +277,8 @@ class smf_app {
    * @param [const pdu_session_status_e] status PDU Session Status
    * @return void
    */
-  void update_pdu_session_status(const scid_t id, const pdu_session_status_e status);
+  void update_pdu_session_status(const scid_t id,
+                                 const pdu_session_status_e status);
 
   void timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user);
   n2_sm_info_type_e n2_sm_info_type_str2e(std::string n2_info_type);

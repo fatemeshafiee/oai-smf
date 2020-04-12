@@ -185,12 +185,12 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   void generate_qos_rule_id(uint8_t &rule_id);
   void release_qos_rule_id(const uint8_t &rule_id);
 
-  bool ipv4;                                // IP Address(es): IPv4 address and/or IPv6 prefix
-  bool ipv6;                                // IP Address(es): IPv4 address and/or IPv6 prefix
-  struct in_addr ipv4_address;             // IP Address(es): IPv4 address and/or IPv6 prefix
-  struct in6_addr ipv6_address;             // IP Address(es): IPv4 address and/or IPv6 prefix
+  bool ipv4;                  // IP Address(es): IPv4 address and/or IPv6 prefix
+  bool ipv6;                  // IP Address(es): IPv4 address and/or IPv6 prefix
+  struct in_addr ipv4_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
+  struct in6_addr ipv6_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
   pdn_type_t pdn_type;            // IPv4, IPv6, IPv4v6 or Non-IP
-  ebi_t default_bearer;        //Default Bearer: Identifies the default bearer within the PDN connection by its EPS Bearer Id.
+  ebi_t default_bearer;  //Default Bearer: Identifies the default bearer within the PDN connection by its EPS Bearer Id.
 
   bool released;  //(release access bearers request)
 
@@ -231,8 +231,10 @@ class session_management_subscription {
       single_nssai(snssai),
       dnn_configurations() {
   }
-  void insert_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
-  void find_dnn_configuration(std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
+  void insert_dnn_configuration(
+      std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
+  void find_dnn_configuration(
+      std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
  private:
   snssai_t single_nssai;
   //dnn <->dnn_configuration
@@ -265,7 +267,8 @@ class dnn_context {
   dnn_context(dnn_context &b) = delete;
 
   /* Find the PDU Session */
-  bool find_pdu_session(const uint32_t pdu_session_id, std::shared_ptr<smf_pdu_session> &pdn);
+  bool find_pdu_session(const uint32_t pdu_session_id,
+                        std::shared_ptr<smf_pdu_session> &pdn);
 
   /* Insert a PDU Session into the DNN context */
   void insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp);
@@ -273,7 +276,7 @@ class dnn_context {
   std::string toString() const;
 
   bool in_use;
-  std::string dnn_in_use;           // The APN currently used, as received from the SGW.
+  std::string dnn_in_use;   // The APN currently used, as received from the SGW.
   //ambr_t  apn_ambr;                 // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
   snssai_t nssai;
   /* Store all PDU Sessions associated with this DNN context */
@@ -300,13 +303,15 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   smf_context(smf_context &b) = delete;
 
   void insert_procedure(std::shared_ptr<smf_procedure> &sproc);
-  bool find_procedure(const uint64_t &trxn_id, std::shared_ptr<smf_procedure> &proc);
+  bool find_procedure(const uint64_t &trxn_id,
+                      std::shared_ptr<smf_procedure> &proc);
   void remove_procedure(smf_procedure *proc);
 
 #define IS_FIND_PDN_WITH_LOCAL_TEID true
 #define IS_FIND_PDN_WITH_PEER_TEID  false
 
-  bool find_pdu_session(const pfcp::pdr_id_t &pdr_id, std::shared_ptr<smf_pdu_session> &pdn, ebi_t &ebi);
+  bool find_pdu_session(const pfcp::pdr_id_t &pdr_id,
+                        std::shared_ptr<smf_pdu_session> &pdn, ebi_t &ebi);
 
   void handle_itti_msg(itti_n4_session_establishment_response&);
   void handle_itti_msg(itti_n4_session_modification_response&);
@@ -318,7 +323,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [std::shared_ptr<itti_n11_create_sm_context_request] smreq Request message
    * @return void
    */
-  void handle_pdu_session_create_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+  void handle_pdu_session_create_sm_context_request(
+      std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
   /*
    * Handle messages from AMF (e.g., PDU_SESSION_UPDATESMContextRequest)
@@ -326,7 +332,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [pdu_session_procedure_t procedure] pdu session procedure: session establishment/modification/release
    * @return void
    */
-  void handle_pdu_session_update_sm_context_request(std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+  void handle_pdu_session_update_sm_context_request(
+      std::shared_ptr<itti_n11_update_sm_context_request> smreq);
 
   /*
    * Find DNN context with name
@@ -334,7 +341,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [std::shared_ptr<dnn_context>&] dnn_context dnn context to be found
    * @return void
    */
-  bool find_dnn_context(const snssai_t &nssai, const std::string &dnn, std::shared_ptr<dnn_context> &dnn_context);
+  bool find_dnn_context(const snssai_t &nssai, const std::string &dnn,
+                        std::shared_ptr<dnn_context> &dnn_context);
 
   /*
    * Insert a DNN context into SMF context
@@ -349,7 +357,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @return true if the request is valid, otherwise return false
    *
    */
-  bool verify_sm_context_request(std::shared_ptr<itti_n11_create_sm_context_request> smreq);
+  bool verify_sm_context_request(
+      std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
   /*
    * Insert a session management subscription into the SMF context
@@ -357,7 +366,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to the subscription
    * @return void
    */
-  void insert_dnn_subscription(const snssai_t &snssai, std::shared_ptr<session_management_subscription> &ss);
+  void insert_dnn_subscription(
+      const snssai_t &snssai,
+      std::shared_ptr<session_management_subscription> &ss);
 
   /*
    * Find a session management subscription from a SMF context
@@ -365,7 +376,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to the subscription
    * @return void
    */
-  bool find_dnn_subscription(const snssai_t &snssai, std::shared_ptr<session_management_subscription> &ss);
+  bool find_dnn_subscription(
+      const snssai_t &snssai,
+      std::shared_ptr<session_management_subscription> &ss);
 
   /*
    * Convert all members of this class to string for logging
@@ -380,7 +393,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [subscribed_default_qos_t] default_qos
    * @return void
    */
-  void get_default_qos(const snssai_t &snssai, const std::string &dnn, subscribed_default_qos_t &default_qos);
+  void get_default_qos(const snssai_t &snssai, const std::string &dnn,
+                       subscribed_default_qos_t &default_qos);
 
   /*
    * Set the value for Supi
@@ -412,18 +426,22 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   void get_default_qos_rule(QOSRulesIE &qos_rule, uint8_t pdu_session_type);
 
-  void get_default_qos_flow_description(QOSFlowDescriptionsContents &qos_flow_description, uint8_t pdu_session_type);
+  void get_default_qos_flow_description(
+      QOSFlowDescriptionsContents &qos_flow_description,
+      uint8_t pdu_session_type);
 
-  void get_session_ambr(SessionAMBR &session_ambr, const snssai_t &snssai, const std::string &dnn);
-  void get_session_ambr(Ngap_PDUSessionAggregateMaximumBitRate_t &session_ambr, const snssai_t &snssai, const std::string &dnn);
+  void get_session_ambr(SessionAMBR &session_ambr, const snssai_t &snssai,
+                        const std::string &dnn);
+  void get_session_ambr(Ngap_PDUSessionAggregateMaximumBitRate_t &session_ambr,
+                        const snssai_t &snssai, const std::string &dnn);
 
  private:
 
   std::vector<std::shared_ptr<dnn_context>> dnns;
-  imsi_t imsi;                           // IMSI (International Mobile Subscriber Identity) is the subscriber permanent identity.
+  imsi_t imsi;  // IMSI (International Mobile Subscriber Identity) is the subscriber permanent identity.
   bool imsi_unauthenticated_indicator;  // This is an IMSI indicator to show the IMSI is unauthenticated.
   // TO BE CHECKED me_identity_t    me_identity;       // Mobile Equipment Identity (e.g. IMEI/IMEISV).
-  msisdn_t msisdn;                       // The basic MSISDN of the UE. The presence is dictated by its storage in the HSS.
+  msisdn_t msisdn;  // The basic MSISDN of the UE. The presence is dictated by its storage in the HSS.
   //  selected_cn_operator_id                          // Selected core network operator identity (to support networksharing as defined in TS 23.251
   // NOT IMPLEMENTED RAT type  Current RAT (implicit)
   // NOT IMPLEMENTED Trace reference                        // Identifies a record or a collection of records for a particular trace.

@@ -32,7 +32,8 @@ enum preemtion_capability_e {
   MAY_PREEMPT = 2
 };
 
-static const std::vector<std::string> preemtion_capability_e2str = { "Error", "NOT_PREEMPT", "MAY_PREEMPT" };
+static const std::vector<std::string> preemtion_capability_e2str = { "Error",
+    "NOT_PREEMPT", "MAY_PREEMPT" };
 
 //see section 5.5.4.1@TS 29.571
 typedef struct arp_5gc_s {
@@ -53,6 +54,7 @@ enum reflective_qos_attribute_e {
   NO_RQOS = 2
 };
 
-static const std::vector<std::string> reflective_qos_attribute_e2str = { "ERROR", "RQOS", "NO_RQOS" };
+static const std::vector<std::string> reflective_qos_attribute_e2str = {
+    "ERROR", "RQOS", "NO_RQOS" };
 
 #endif

@@ -54,10 +54,15 @@ class SMFApiServer {
       m_httpEndpoint(std::make_shared<Pistache::Http::Endpoint>(address)) {
     m_router = std::make_shared<Pistache::Rest::Router>();
     m_address = address.host() + ":" + (address.port()).toString();
-    m_individualPDUSessionHSMFApiImpl = std::make_shared<IndividualPDUSessionHSMFApiImpl>(m_router, smf_app_inst, m_address);
-    m_individualSMContextApiImpl = std::make_shared<IndividualSMContextApiImpl>(m_router, smf_app_inst, m_address);
-    m_pduSessionsCollectionApiImpl = std::make_shared<PDUSessionsCollectionApiImpl>(m_router, smf_app_inst, m_address);
-    m_smContextsCollectionApiImpl = std::make_shared<SMContextsCollectionApiImpl>(m_router, smf_app_inst, m_address);
+    m_individualPDUSessionHSMFApiImpl = std::make_shared<
+        IndividualPDUSessionHSMFApiImpl>(m_router, smf_app_inst, m_address);
+    m_individualSMContextApiImpl = std::make_shared<IndividualSMContextApiImpl>(
+        m_router, smf_app_inst, m_address);
+    m_pduSessionsCollectionApiImpl = std::make_shared<
+        PDUSessionsCollectionApiImpl>(m_router, smf_app_inst, m_address);
+    m_smContextsCollectionApiImpl =
+        std::make_shared<SMContextsCollectionApiImpl>(m_router, smf_app_inst,
+                                                      m_address);
 
   }
   void init(size_t thr = 1);

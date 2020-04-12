@@ -60,13 +60,16 @@ namespace api {
 
 using namespace oai::smf_server::model;
 
-class SMContextsCollectionApiImpl : public oai::smf_server::api::SMContextsCollectionApi {
+class SMContextsCollectionApiImpl :
+    public oai::smf_server::api::SMContextsCollectionApi {
  public:
-  SMContextsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst, std::string address);
+  SMContextsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router>,
+                              smf::smf_app *smf_app_inst, std::string address);
   ~SMContextsCollectionApiImpl() {
   }
 
-  void post_sm_contexts(const SmContextMessage &smContextMessage, Pistache::Http::ResponseWriter &response);
+  void post_sm_contexts(const SmContextMessage &smContextMessage,
+                        Pistache::Http::ResponseWriter &response);
  private:
   smf::smf_app *m_smf_app;
   std::string m_address;

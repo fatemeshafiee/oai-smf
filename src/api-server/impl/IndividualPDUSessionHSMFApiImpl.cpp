@@ -18,20 +18,28 @@ namespace api {
 
 using namespace oai::smf_server::model;
 
-IndividualPDUSessionHSMFApiImpl::IndividualPDUSessionHSMFApiImpl(std::shared_ptr<Pistache::Rest::Router> rtr, smf::smf_app *smf_app_inst, std::string address)
+IndividualPDUSessionHSMFApiImpl::IndividualPDUSessionHSMFApiImpl(
+    std::shared_ptr<Pistache::Rest::Router> rtr, smf::smf_app *smf_app_inst,
+    std::string address)
     :
     IndividualPDUSessionHSMFApi(rtr),
     m_smf_app(smf_app_inst),
     m_address(address) {
 }
 
-void IndividualPDUSessionHSMFApiImpl::release_pdu_session(const std::string &pduSessionRef, const ReleaseData &releaseData, Pistache::Http::ResponseWriter &response) {
+void IndividualPDUSessionHSMFApiImpl::release_pdu_session(
+    const std::string &pduSessionRef, const ReleaseData &releaseData,
+    Pistache::Http::ResponseWriter &response) {
   Logger::smf_api_server().info("release_pdu_session...");
-  response.send(Pistache::Http::Code::Ok, "Release_pdu_session API has not been implemented yet!\n");
+  response.send(Pistache::Http::Code::Ok,
+                "Release_pdu_session API has not been implemented yet!\n");
 }
-void IndividualPDUSessionHSMFApiImpl::update_pdu_session(const std::string &pduSessionRef, const HsmfUpdateData &hsmfUpdateData, Pistache::Http::ResponseWriter &response) {
+void IndividualPDUSessionHSMFApiImpl::update_pdu_session(
+    const std::string &pduSessionRef, const HsmfUpdateData &hsmfUpdateData,
+    Pistache::Http::ResponseWriter &response) {
   Logger::smf_api_server().info("update_pdu_session...");
-  response.send(Pistache::Http::Code::Ok, "Update_pdu_session API has not been implemented yet!\n");
+  response.send(Pistache::Http::Code::Ok,
+                "Update_pdu_session API has not been implemented yet!\n");
 }
 
 }

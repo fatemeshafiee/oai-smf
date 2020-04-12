@@ -46,8 +46,11 @@ class PDUSessionsCollectionApi {
  private:
   void setupRoutes();
 
-  void post_pdu_sessions_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
-  void pdu_sessions_collection_api_default_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
+  void post_pdu_sessions_handler(const Pistache::Rest::Request &request,
+                                 Pistache::Http::ResponseWriter response);
+  void pdu_sessions_collection_api_default_handler(
+      const Pistache::Rest::Request &request,
+      Pistache::Http::ResponseWriter response);
 
   std::shared_ptr<Pistache::Rest::Router> router;
 
@@ -58,7 +61,9 @@ class PDUSessionsCollectionApi {
   ///
   /// </remarks>
   /// <param name="pduSessionCreateData">representation of the PDU session to be created in the H-SMF</param>
-  virtual void post_pdu_sessions(const PduSessionCreateData &pduSessionCreateData, Pistache::Http::ResponseWriter &response) = 0;
+  virtual void post_pdu_sessions(
+      const PduSessionCreateData &pduSessionCreateData,
+      Pistache::Http::ResponseWriter &response) = 0;
 
 };
 

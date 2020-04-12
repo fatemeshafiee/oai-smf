@@ -57,7 +57,9 @@ class conv {
   static struct in_addr fromString(const std::string addr4);
   static std::string toString(const struct in_addr &inaddr);
   static std::string toString(const struct in6_addr &in6addr);
-  static std::string mccToString(const uint8_t digit1, const uint8_t digit2, const uint8_t digit3);
-  static std::string mncToString(const uint8_t digit1, const uint8_t digit2, const uint8_t digit3);
+  static std::string mccToString(const uint8_t digit1, const uint8_t digit2,
+                                 const uint8_t digit3);
+  static std::string mncToString(const uint8_t digit1, const uint8_t digit2,
+                                 const uint8_t digit3);
 };
 #endif /* FILE_CONVERSIONS_HPP_SEEN */

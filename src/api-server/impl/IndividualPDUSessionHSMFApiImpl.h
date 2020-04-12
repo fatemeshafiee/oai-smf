@@ -42,14 +42,21 @@ namespace api {
 
 using namespace oai::smf_server::model;
 
-class IndividualPDUSessionHSMFApiImpl : public oai::smf_server::api::IndividualPDUSessionHSMFApi {
+class IndividualPDUSessionHSMFApiImpl :
+    public oai::smf_server::api::IndividualPDUSessionHSMFApi {
  public:
-  IndividualPDUSessionHSMFApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst, std::string address);
+  IndividualPDUSessionHSMFApiImpl(std::shared_ptr<Pistache::Rest::Router>,
+                                  smf::smf_app *smf_app_inst,
+                                  std::string address);
   ~IndividualPDUSessionHSMFApiImpl() {
   }
 
-  void release_pdu_session(const std::string &pduSessionRef, const ReleaseData &releaseData, Pistache::Http::ResponseWriter &response);
-  void update_pdu_session(const std::string &pduSessionRef, const HsmfUpdateData &hsmfUpdateData, Pistache::Http::ResponseWriter &response);
+  void release_pdu_session(const std::string &pduSessionRef,
+                           const ReleaseData &releaseData,
+                           Pistache::Http::ResponseWriter &response);
+  void update_pdu_session(const std::string &pduSessionRef,
+                          const HsmfUpdateData &hsmfUpdateData,
+                          Pistache::Http::ResponseWriter &response);
  private:
   smf::smf_app *m_smf_app;
   std::string m_address;

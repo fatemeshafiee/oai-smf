@@ -154,7 +154,9 @@ class smf_config {
   int load_itti(const libconfig::Setting &itti_cfg, itti_cfg_t &cfg);
   int load_upf_config(const libconfig::Setting &if_cfg, test_upf_cfg_t &cfg);
   int load_interface(const libconfig::Setting &if_cfg, interface_cfg_t &cfg);
-  int load_thread_sched_params(const libconfig::Setting &thread_sched_params_cfg, util::thread_sched_params &cfg);
+  int load_thread_sched_params(
+      const libconfig::Setting &thread_sched_params_cfg,
+      util::thread_sched_params &cfg);
 
  public:
   /* Reader/writer lock for this configuration */
@@ -280,10 +282,12 @@ class smf_config {
   int load(const std::string &config_file);
   int finalize();
   void display();
-  bool is_dotted_apn_handled(const std::string &apn, const pdn_type_t &pdn_type);
+  bool is_dotted_apn_handled(const std::string &apn,
+                             const pdn_type_t &pdn_type);
   int get_pfcp_node_id(pfcp::node_id_t &node_id);
   int get_pfcp_fseid(pfcp::fseid_t &fseid);
-  bool is_dotted_dnn_handled(const std::string &apn, const pdu_session_type_t &pdn_session_type);
+  bool is_dotted_dnn_handled(const std::string &apn,
+                             const pdu_session_type_t &pdn_session_type);
   std::string get_default_dnn();
 };
 

@@ -20,7 +20,8 @@ namespace api {
 using namespace oai::smf_server::helpers;
 using namespace oai::smf_server::model;
 
-IndividualPDUSessionHSMFApi::IndividualPDUSessionHSMFApi(std::shared_ptr<Pistache::Rest::Router> rtr) { 
+IndividualPDUSessionHSMFApi::IndividualPDUSessionHSMFApi(
+    std::shared_ptr<Pistache::Rest::Router> rtr) {
   router = rtr;
 }
 
@@ -31,20 +32,33 @@ void IndividualPDUSessionHSMFApi::init() {
 void IndividualPDUSessionHSMFApi::setupRoutes() {
   using namespace Pistache::Rest;
 
-  Routes::Post(*router, base + "/pdu-sessions/:pduSessionRef/release", Routes::bind(&IndividualPDUSessionHSMFApi::release_pdu_session_handler, this));
-  Routes::Post(*router, base + "/pdu-sessions/:pduSessionRef/modify", Routes::bind(&IndividualPDUSessionHSMFApi::update_pdu_session_handler, this));
+  Routes::Post(
+      *router,
+      base + "/pdu-sessions/:pduSessionRef/release",
+      Routes::bind(&IndividualPDUSessionHSMFApi::release_pdu_session_handler,
+                   this));
+  Routes::Post(
+      *router,
+      base + "/pdu-sessions/:pduSessionRef/modify",
+      Routes::bind(&IndividualPDUSessionHSMFApi::update_pdu_session_handler,
+                   this));
 
   // Default handler, called when a route is not found
-  router->addCustomHandler(Routes::bind(&IndividualPDUSessionHSMFApi::individual_pdu_session_hsmf_api_default_handler, this));
+  router->addCustomHandler(
+      Routes::bind(
+          &IndividualPDUSessionHSMFApi::individual_pdu_session_hsmf_api_default_handler,
+          this));
 }
 
-void IndividualPDUSessionHSMFApi::release_pdu_session_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
+void IndividualPDUSessionHSMFApi::release_pdu_session_handler(
+    const Pistache::Rest::Request &request,
+    Pistache::Http::ResponseWriter response) {
   // Getting the path params
   auto pduSessionRef = request.param(":pduSessionRef").as<std::string>();
 
   // Getting the body param
 
-  ReleaseData releaseData = {};
+  ReleaseData releaseData = { };
 
   try {
     nlohmann::json::parse(request.body()).get_to(releaseData);
@@ -60,13 +74,15 @@ void IndividualPDUSessionHSMFApi::release_pdu_session_handler(const Pistache::Re
   }
 
 }
-void IndividualPDUSessionHSMFApi::update_pdu_session_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
+void IndividualPDUSessionHSMFApi::update_pdu_session_handler(
+    const Pistache::Rest::Request &request,
+    Pistache::Http::ResponseWriter response) {
   // Getting the path params
   auto pduSessionRef = request.param(":pduSessionRef").as<std::string>();
 
   // Getting the body param
 
-  HsmfUpdateData hsmfUpdateData = {};
+  HsmfUpdateData hsmfUpdateData = { };
 
   try {
     nlohmann::json::parse(request.body()).get_to(hsmfUpdateData);
@@ -83,8 +99,10 @@ void IndividualPDUSessionHSMFApi::update_pdu_session_handler(const Pistache::Res
 
 }
 
-void IndividualPDUSessionHSMFApi::individual_pdu_session_hsmf_api_default_handler(const Pistache::Rest::Request &, Pistache::Http::ResponseWriter response) {
-  response.send(Pistache::Http::Code::Not_Found, "The requested method does not exist");
+void IndividualPDUSessionHSMFApi::individual_pdu_session_hsmf_api_default_handler(
+    const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response) {
+  response.send(Pistache::Http::Code::Not_Found,
+                "The requested method does not exist");
 }
 
 }

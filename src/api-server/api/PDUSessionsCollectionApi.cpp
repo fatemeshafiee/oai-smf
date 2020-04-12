@@ -20,7 +20,8 @@ namespace api {
 using namespace oai::smf_server::helpers;
 using namespace oai::smf_server::model;
 
-PDUSessionsCollectionApi::PDUSessionsCollectionApi(std::shared_ptr<Pistache::Rest::Router> rtr) {
+PDUSessionsCollectionApi::PDUSessionsCollectionApi(
+    std::shared_ptr<Pistache::Rest::Router> rtr) {
   router = rtr;
 }
 
@@ -31,13 +32,20 @@ void PDUSessionsCollectionApi::init() {
 void PDUSessionsCollectionApi::setupRoutes() {
   using namespace Pistache::Rest;
 
-  Routes::Post(*router, base + "/pdu-sessions", Routes::bind(&PDUSessionsCollectionApi::post_pdu_sessions_handler, this));
+  Routes::Post(
+      *router, base + "/pdu-sessions",
+      Routes::bind(&PDUSessionsCollectionApi::post_pdu_sessions_handler, this));
 
   // Default handler, called when a route is not found
-  router->addCustomHandler(Routes::bind(&PDUSessionsCollectionApi::pdu_sessions_collection_api_default_handler, this));
+  router->addCustomHandler(
+      Routes::bind(
+          &PDUSessionsCollectionApi::pdu_sessions_collection_api_default_handler,
+          this));
 }
 
-void PDUSessionsCollectionApi::post_pdu_sessions_handler(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
+void PDUSessionsCollectionApi::post_pdu_sessions_handler(
+    const Pistache::Rest::Request &request,
+    Pistache::Http::ResponseWriter response) {
 
   // Getting the body param
 
@@ -58,8 +66,10 @@ void PDUSessionsCollectionApi::post_pdu_sessions_handler(const Pistache::Rest::R
 
 }
 
-void PDUSessionsCollectionApi::pdu_sessions_collection_api_default_handler(const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response) {
-  response.send(Pistache::Http::Code::Not_Found, "The requested method does not exist");
+void PDUSessionsCollectionApi::pdu_sessions_collection_api_default_handler(
+    const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response) {
+  response.send(Pistache::Http::Code::Not_Found,
+                "The requested method does not exist");
 }
 
 }

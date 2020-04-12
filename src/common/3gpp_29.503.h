@@ -30,7 +30,8 @@ enum ssc_mode_e {
   SSC_MODE_2 = 2,
   SSC_MODE_3 = 3,
 };
-static const std::vector<std::string> ssc_mode_e2str = { "Error", "SSC_MODE_1", "SSC_MODE_2", "SSC_MODE_3" };
+static const std::vector<std::string> ssc_mode_e2str = { "Error", "SSC_MODE_1",
+    "SSC_MODE_2", "SSC_MODE_3" };
 
 typedef struct ssc_mode_s {
   uint8_t ssc_mode;

@@ -40,13 +40,16 @@ namespace api {
 
 using namespace oai::smf_server::model;
 
-class PDUSessionsCollectionApiImpl : public oai::smf_server::api::PDUSessionsCollectionApi {
+class PDUSessionsCollectionApiImpl :
+    public oai::smf_server::api::PDUSessionsCollectionApi {
  public:
-  PDUSessionsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router>, smf::smf_app *smf_app_inst, std::string address);
+  PDUSessionsCollectionApiImpl(std::shared_ptr<Pistache::Rest::Router>,
+                               smf::smf_app *smf_app_inst, std::string address);
   ~PDUSessionsCollectionApiImpl() {
   }
 
-  void post_pdu_sessions(const PduSessionCreateData &pduSessionCreateData, Pistache::Http::ResponseWriter &response);
+  void post_pdu_sessions(const PduSessionCreateData &pduSessionCreateData,
+                         Pistache::Http::ResponseWriter &response);
  private:
   smf::smf_app *m_smf_app;
   std::string m_address;

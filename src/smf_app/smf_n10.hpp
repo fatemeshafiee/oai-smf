@@ -49,7 +49,9 @@ class smf_n10 {
   smf_n10();
   smf_n10(smf_n10 const&) = delete;
   void operator=(smf_n10 const&) = delete;
-  bool get_sm_data(supi64_t &supi, std::string &dnn, snssai_t &snssai, std::shared_ptr<session_management_subscription> subscription);
+  bool get_sm_data(
+      supi64_t &supi, std::string &dnn, snssai_t &snssai,
+      std::shared_ptr<session_management_subscription> subscription);
   void subscribe_sm_data();
 
 };

@@ -51,7 +51,11 @@ typedef struct pdu_session_authentication_result_msg_tag {
   ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 } pdu_session_authentication_result_msg;
 
-int decode_pdu_session_authentication_result(pdu_session_authentication_result_msg *pdusessionauthenticationresult, uint8_t *buffer, uint32_t len);
-int encode_pdu_session_authentication_result(pdu_session_authentication_result_msg *pdusessionauthenticationresult, uint8_t *buffer, uint32_t len);
+int decode_pdu_session_authentication_result(
+    pdu_session_authentication_result_msg *pdusessionauthenticationresult,
+    uint8_t *buffer, uint32_t len);
+int encode_pdu_session_authentication_result(
+    pdu_session_authentication_result_msg *pdusessionauthenticationresult,
+    uint8_t *buffer, uint32_t len);
 
 #endif

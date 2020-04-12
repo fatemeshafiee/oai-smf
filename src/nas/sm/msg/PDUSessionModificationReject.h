@@ -61,7 +61,11 @@ typedef struct pdu_session_modification_reject_msg_tag {
   _5GSMCongestionReattemptIndicator _5gsmcongestionreattemptindicator;
 } pdu_session_modification_reject_msg;
 
-int decode_pdu_session_modification_reject(pdu_session_modification_reject_msg *pdusessionmodificationreject, uint8_t *buffer, uint32_t len);
-int encode_pdu_session_modification_reject(pdu_session_modification_reject_msg *pdusessionmodificationreject, uint8_t *buffer, uint32_t len);
+int decode_pdu_session_modification_reject(
+    pdu_session_modification_reject_msg *pdusessionmodificationreject,
+    uint8_t *buffer, uint32_t len);
+int encode_pdu_session_modification_reject(
+    pdu_session_modification_reject_msg *pdusessionmodificationreject,
+    uint8_t *buffer, uint32_t len);
 
 #endif

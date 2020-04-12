@@ -41,7 +41,9 @@ typedef struct _5gsm_status_msg_tag {
   _5GSMCause _5gsmcause;
 } _5gsm_status_msg;
 
-int decode__5gsm_status(_5gsm_status_msg *_5gsmstatus, uint8_t *buffer, uint32_t len);
-int encode__5gsm_status(_5gsm_status_msg *_5gsmstatus, uint8_t *buffer, uint32_t len);
+int decode__5gsm_status(_5gsm_status_msg *_5gsmstatus, uint8_t *buffer,
+                        uint32_t len);
+int encode__5gsm_status(_5gsm_status_msg *_5gsmstatus, uint8_t *buffer,
+                        uint32_t len);
 
 #endif

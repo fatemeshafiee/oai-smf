@@ -120,7 +120,11 @@ typedef struct pdu_session_establishment_accept_msg_tag {
   DNN dnn;
 } pdu_session_establishment_accept_msg;
 
-int decode_pdu_session_establishment_accept(pdu_session_establishment_accept_msg *pdusessionestablishmentaccept, uint8_t *buffer, uint32_t len);
-int encode_pdu_session_establishment_accept(pdu_session_establishment_accept_msg *pdusessionestablishmentaccept, uint8_t *buffer, uint32_t len);
+int decode_pdu_session_establishment_accept(
+    pdu_session_establishment_accept_msg *pdusessionestablishmentaccept,
+    uint8_t *buffer, uint32_t len);
+int encode_pdu_session_establishment_accept(
+    pdu_session_establishment_accept_msg *pdusessionestablishmentaccept,
+    uint8_t *buffer, uint32_t len);
 
 #endif

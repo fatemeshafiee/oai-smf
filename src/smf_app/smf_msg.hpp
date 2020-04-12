@@ -97,7 +97,8 @@ class pdu_session_msg {
       m_pdu_session_type(0) {
   }
   ;
-  pdu_session_msg(pdu_session_msg_type_t msg_type, supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai)
+  pdu_session_msg(pdu_session_msg_type_t msg_type, supi_t supi,
+                  pdu_session_id_t pdi, std::string dnn, snssai_t snssai)
       :
       m_msg_type(msg_type),
       m_supi(supi),
@@ -161,7 +162,9 @@ class pdu_session_create_sm_context : public pdu_session_msg {
     m_message_type = PDU_SESSION_MESSAGE_TYPE_UNKNOWN;
   }
   ;
-  pdu_session_create_sm_context(pdu_session_msg_type_t msg_type, supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai)
+  pdu_session_create_sm_context(pdu_session_msg_type_t msg_type, supi_t supi,
+                                pdu_session_id_t pdi, std::string dnn,
+                                snssai_t snssai)
       :
       pdu_session_msg(msg_type, supi, pdi, dnn, snssai) {
     m_epd = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
@@ -184,7 +187,8 @@ class pdu_session_create_sm_context : public pdu_session_msg {
 };
 
 //---------------------------------------------------------------------------------------
-class pdu_session_create_sm_context_request : public pdu_session_create_sm_context {
+class pdu_session_create_sm_context_request :
+    public pdu_session_create_sm_context {
 
  public:
   pdu_session_create_sm_context_request()
@@ -192,9 +196,11 @@ class pdu_session_create_sm_context_request : public pdu_session_create_sm_conte
       pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_REQUEST),
       m_unauthenticated_supi(true) {
   }
-  pdu_session_create_sm_context_request(supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai)
+  pdu_session_create_sm_context_request(supi_t supi, pdu_session_id_t pdi,
+                                        std::string dnn, snssai_t snssai)
       :
-      pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_REQUEST, supi, pdi, dnn, snssai),
+      pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_REQUEST, supi,
+                                    pdi, dnn, snssai),
       m_unauthenticated_supi(true) {
   }
 
@@ -282,7 +288,8 @@ class pdu_session_create_sm_context_request : public pdu_session_create_sm_conte
 };
 
 //---------------------------------------------------------------------------------------
-class pdu_session_create_sm_context_response : public pdu_session_create_sm_context {
+class pdu_session_create_sm_context_response :
+    public pdu_session_create_sm_context {
 
  public:
   pdu_session_create_sm_context_response()
@@ -296,9 +303,11 @@ class pdu_session_create_sm_context_response : public pdu_session_create_sm_cont
     qos_flow_context = { };
     m_supi = { };
   }
-  pdu_session_create_sm_context_response(supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai)
+  pdu_session_create_sm_context_response(supi_t supi, pdu_session_id_t pdi,
+                                         std::string dnn, snssai_t snssai)
       :
-      pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE, supi, pdi, dnn, snssai) {
+      pdu_session_create_sm_context(PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE,
+                                    supi, pdi, dnn, snssai) {
     m_n1_sm_msg_is_set = false;
     m_n2_sm_info_is_set = false;
     m_cause = 0;
@@ -375,7 +384,9 @@ class pdu_session_update_sm_context : public pdu_session_msg {
       pdu_session_msg(msg_type) {
   }
   ;
-  pdu_session_update_sm_context(pdu_session_msg_type_t msg_type, supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai)
+  pdu_session_update_sm_context(pdu_session_msg_type_t msg_type, supi_t supi,
+                                pdu_session_id_t pdi, std::string dnn,
+                                snssai_t snssai)
       :
       pdu_session_msg(msg_type, supi, pdi, dnn, snssai) {
   }
@@ -497,8 +508,10 @@ class pdu_session_update_sm_context_response : public pdu_session_msg {
   bool n1_sm_msg_is_set() const;
   bool n2_sm_info_is_set() const;
   void add_qos_flow_context_updated(const qos_flow_context_updated &qos_flow);
-  bool get_qos_flow_context_updated(const pfcp::qfi_t &qfi, qos_flow_context_updated &qos_flow);
-  void get_all_qos_flow_context_updateds(std::map<uint8_t, qos_flow_context_updated> &all_flows);
+  bool get_qos_flow_context_updated(const pfcp::qfi_t &qfi,
+                                    qos_flow_context_updated &qos_flow);
+  void get_all_qos_flow_context_updateds(
+      std::map<uint8_t, qos_flow_context_updated> &all_flows);
   void remove_all_qos_flow_context_updateds();
   nlohmann::json sm_context_updated_data;  //N1N2MessageTransferReqData from oai::amf::model
   procedure_transaction_id_t get_pti() const;

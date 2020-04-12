@@ -34,7 +34,8 @@
 #include <inttypes.h>
 
 //------------------------------------------------------------------------------
-void xgpp_conv::paa_to_pfcp_ue_ip_address(const paa_t &paa, pfcp::ue_ip_address_t &ue_ip_address) {
+void xgpp_conv::paa_to_pfcp_ue_ip_address(
+    const paa_t &paa, pfcp::ue_ip_address_t &ue_ip_address) {
   switch (paa.pdn_type.pdn_type) {
     case PDN_TYPE_E_IPV4:
       ue_ip_address.v4 = 1;
@@ -56,7 +57,9 @@ void xgpp_conv::paa_to_pfcp_ue_ip_address(const paa_t &paa, pfcp::ue_ip_address_
   }
 }
 //------------------------------------------------------------------------------
-void xgpp_conv::pdn_ip_to_pfcp_ue_ip_address(const pdn_type_t &pdn_type, const struct in_addr &ipv4_address, const struct in6_addr ipv6_address, pfcp::ue_ip_address_t &ue_ip_address) {
+void xgpp_conv::pdn_ip_to_pfcp_ue_ip_address(
+    const pdn_type_t &pdn_type, const struct in_addr &ipv4_address,
+    const struct in6_addr ipv6_address, pfcp::ue_ip_address_t &ue_ip_address) {
   switch (pdn_type.pdn_type) {
     case PDN_TYPE_E_IPV4:
       ue_ip_address.v4 = 1;
@@ -78,7 +81,8 @@ void xgpp_conv::pdn_ip_to_pfcp_ue_ip_address(const pdn_type_t &pdn_type, const s
   }
 }
 //------------------------------------------------------------------------------
-void xgpp_conv::pfcp_to_core_fteid(const pfcp::fteid_t &pfteid, fteid_t &fteid) {
+void xgpp_conv::pfcp_to_core_fteid(const pfcp::fteid_t &pfteid,
+                                   fteid_t &fteid) {
   fteid.v4 = pfteid.v4;
   fteid.v6 = pfteid.v6;
   fteid.ipv4_address.s_addr = pfteid.ipv4_address.s_addr;
@@ -86,7 +90,8 @@ void xgpp_conv::pfcp_to_core_fteid(const pfcp::fteid_t &pfteid, fteid_t &fteid) 
   fteid.teid_gre_key = pfteid.teid;
 }
 //------------------------------------------------------------------------------
-void xgpp_conv::pfcp_from_core_fteid(pfcp::fteid_t &pfteid, const fteid_t &fteid) {
+void xgpp_conv::pfcp_from_core_fteid(pfcp::fteid_t &pfteid,
+                                     const fteid_t &fteid) {
   pfteid.chid = 0;
   pfteid.ch = 0;
   pfteid.choose_id = 0;
@@ -128,17 +133,20 @@ void xgpp_conv::pfcp_cause_to_core_cause(const pfcp::cause_t &pc, cause_t &c) {
 }
 
 //------------------------------------------------------------------------------
-bool xgpp_conv::endpoint_to_gtp_u_peer_address(const endpoint &ep, gtp_u_peer_address_t &peer_address) {
+bool xgpp_conv::endpoint_to_gtp_u_peer_address(
+    const endpoint &ep, gtp_u_peer_address_t &peer_address) {
   switch (ep.family()) {
     case AF_INET: {
-      const struct sockaddr_in *const sin = reinterpret_cast<const sockaddr_in* const >(&ep.addr_storage);
+      const struct sockaddr_in *const sin =
+          reinterpret_cast<const sockaddr_in* const >(&ep.addr_storage);
       peer_address.ipv4_address.s_addr = sin->sin_addr.s_addr;
       peer_address.is_v4 = true;
       return true;
     }
       break;
     case AF_INET6: {
-      const struct sockaddr_in6 *const sin6 = reinterpret_cast<const sockaddr_in6* const >(&ep.addr_storage);
+      const struct sockaddr_in6 *const sin6 =
+          reinterpret_cast<const sockaddr_in6* const >(&ep.addr_storage);
       peer_address.ipv6_address = sin6->sin6_addr;
       peer_address.is_v4 = false;
       return true;

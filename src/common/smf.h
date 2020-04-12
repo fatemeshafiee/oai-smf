@@ -93,7 +93,8 @@ enum pdu_session_type_e {
   PDU_SESSION_TYPE_E_RESERVED = 7,
 };
 
-static const std::vector<std::string> pdu_session_type_e2str = { "Error", "IPV4", "IPV6", "IPV4V6", "UNSTRUCTURED", "ETHERNET", "IPV4V6", "RESERVED" };
+static const std::vector<std::string> pdu_session_type_e2str = { "Error",
+    "IPV4", "IPV6", "IPV4V6", "UNSTRUCTURED", "ETHERNET", "IPV4V6", "RESERVED" };
 
 typedef struct pdu_session_type_s {
   uint8_t pdu_session_type;
@@ -166,12 +167,22 @@ enum class session_management_procedures_type_e {
   PDU_SESSION_TEST = 13
 };
 
-static const std::vector<std::string> session_management_procedures_type_e2str = { "PDU_SESSION_ESTABLISHMENT_UE_REQUESTED", "SERVICE_REQUEST_UE_TRIGGERED_STEP1", "SERVICE_REQUEST_UE_TRIGGERED_STEP2",
-    "SERVICE_REQUEST_NETWORK_TRIGGERED", "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1", "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2", "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3",
-    "PDU_SESSION_MODIFICATION_SMF_REQUESTED", "PDU_SESSION_MODIFICATION_AN_REQUESTED", "PDU_SESSION_RELEASE_UE_REQUESTED_STEP1", "PDU_SESSION_RELEASE_UE_REQUESTED_STEP2",
-    "PDU_SESSION_RELEASE_UE_REQUESTED_STEP3", "PDU_SESSION_RELEASE_NETWORK_REQUESTED"
+static const std::vector<std::string> session_management_procedures_type_e2str =
+    { "PDU_SESSION_ESTABLISHMENT_UE_REQUESTED",
+        "SERVICE_REQUEST_UE_TRIGGERED_STEP1",
+        "SERVICE_REQUEST_UE_TRIGGERED_STEP2",
+        "SERVICE_REQUEST_NETWORK_TRIGGERED",
+        "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1",
+        "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2",
+        "PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3",
+        "PDU_SESSION_MODIFICATION_SMF_REQUESTED",
+        "PDU_SESSION_MODIFICATION_AN_REQUESTED",
+        "PDU_SESSION_RELEASE_UE_REQUESTED_STEP1",
+        "PDU_SESSION_RELEASE_UE_REQUESTED_STEP2",
+        "PDU_SESSION_RELEASE_UE_REQUESTED_STEP3",
+        "PDU_SESSION_RELEASE_NETWORK_REQUESTED"
 
-};
+    };
 
 typedef struct qos_profile_gbr_s {
   gfbr_t gfbr;  //Guaranteed Flow Bit Rate
@@ -203,7 +214,8 @@ enum class multipart_related_content_part_e {
   NGAP = 2
 };
 
-static const std::vector<std::string> multipart_related_content_part_e2str = { "JSON", "NAS", "NGAP" };
+static const std::vector<std::string> multipart_related_content_part_e2str = {
+    "JSON", "NAS", "NGAP" };
 
 #define NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL  "/namf-comm/v2/ue-contexts/{}/n1-n2-messages" //may get from configuration file
 #define NUDM_SDM_GET_SM_DATA_URL                      "/nudm-sdm/v2/{}/sm-data"                     //may get from configuration file
