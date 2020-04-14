@@ -180,7 +180,8 @@ static const std::vector<std::string> session_management_procedures_type_e2str =
         "PDU_SESSION_RELEASE_UE_REQUESTED_STEP1",
         "PDU_SESSION_RELEASE_UE_REQUESTED_STEP2",
         "PDU_SESSION_RELEASE_UE_REQUESTED_STEP3",
-        "PDU_SESSION_RELEASE_NETWORK_REQUESTED"
+        "PDU_SESSION_RELEASE_NETWORK_REQUESTED",
+        "PDU_SESSION_TEST"
 
     };
 

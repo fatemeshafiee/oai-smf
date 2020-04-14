@@ -498,20 +498,20 @@ void smf_context::get_default_qos_flow_description(
   qos_flow_description.parameterslist = (ParametersList*) calloc(
       3, sizeof(ParametersList));
   qos_flow_description.parameterslist[0].parameteridentifier =
-      PARAMETER_IDENTIFIER_5QI;
+  PARAMETER_IDENTIFIER_5QI;
   qos_flow_description.parameterslist[0].parametercontents._5qi = 60;  //TODO: ??
   qos_flow_description.parameterslist[1].parameteridentifier =
-      PARAMETER_IDENTIFIER_GFBR_UPLINK;
+  PARAMETER_IDENTIFIER_GFBR_UPLINK;
   qos_flow_description.parameterslist[1].parametercontents
       .gfbrormfbr_uplinkordownlink.uint =
-      GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+  GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
   qos_flow_description.parameterslist[1].parametercontents
       .gfbrormfbr_uplinkordownlink.value = 0x10;
   qos_flow_description.parameterslist[2].parameteridentifier =
-      PARAMETER_IDENTIFIER_GFBR_DOWNLINK;
+  PARAMETER_IDENTIFIER_GFBR_DOWNLINK;
   qos_flow_description.parameterslist[2].parametercontents
       .gfbrormfbr_uplinkordownlink.uint =
-      GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+  GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
   qos_flow_description.parameterslist[2].parametercontents
       .gfbrormfbr_uplinkordownlink.value = 0x10;
 
@@ -561,19 +561,19 @@ void smf_context::get_session_ambr(SessionAMBR &session_ambr,
             .substr(leng_of_session_ambr_dl - 4);  //4 last characters stand for mbps, kbps, ..
         if (session_ambr_dl_unit.compare("Kbps") == 0)
           session_ambr.uint_for_session_ambr_for_downlink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
         if (session_ambr_dl_unit.compare("Mbps") == 0)
           session_ambr.uint_for_session_ambr_for_downlink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
         if (session_ambr_dl_unit.compare("Gbps") == 0)
           session_ambr.uint_for_session_ambr_for_downlink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1GBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1GBPS;
         if (session_ambr_dl_unit.compare("Tbps") == 0)
           session_ambr.uint_for_session_ambr_for_downlink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1TBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1TBPS;
         if (session_ambr_dl_unit.compare("Pbps") == 0)
           session_ambr.uint_for_session_ambr_for_downlink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1PBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1PBPS;
 
         session_ambr.session_ambr_for_downlink = std::stoi(
             (sdc.get()->session_ambr).downlink.substr(
@@ -583,7 +583,7 @@ void smf_context::get_session_ambr(SessionAMBR &session_ambr,
         //assign default value
         session_ambr.session_ambr_for_downlink = 1;
         session_ambr.uint_for_session_ambr_for_downlink =
-            AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+        AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
       }
 
       //Uplink
@@ -594,19 +594,19 @@ void smf_context::get_session_ambr(SessionAMBR &session_ambr,
             .substr(leng_of_session_ambr_ul - 4);  //4 last characters stand for mbps, kbps, ..
         if (session_ambr_ul_unit.compare("Kbps") == 0)
           session_ambr.uint_for_session_ambr_for_uplink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1KBPS;
         if (session_ambr_ul_unit.compare("Mbps") == 0)
           session_ambr.uint_for_session_ambr_for_uplink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
         if (session_ambr_ul_unit.compare("Gbps") == 0)
           session_ambr.uint_for_session_ambr_for_uplink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1GBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1GBPS;
         if (session_ambr_ul_unit.compare("Tbps") == 0)
           session_ambr.uint_for_session_ambr_for_uplink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1TBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1TBPS;
         if (session_ambr_ul_unit.compare("Pbps") == 0)
           session_ambr.uint_for_session_ambr_for_uplink =
-              AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1PBPS;
+          AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1PBPS;
 
         session_ambr.session_ambr_for_uplink = std::stoi(
             (sdc.get()->session_ambr).uplink.substr(
@@ -616,17 +616,17 @@ void smf_context::get_session_ambr(SessionAMBR &session_ambr,
         //assign default value
         session_ambr.session_ambr_for_uplink = 1;
         session_ambr.uint_for_session_ambr_for_uplink =
-            AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+        AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
       }
     }
   } else {
     //use default value
     session_ambr.session_ambr_for_downlink = 1;
     session_ambr.uint_for_session_ambr_for_downlink =
-        AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+    AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
     session_ambr.session_ambr_for_uplink = 1;
     session_ambr.uint_for_session_ambr_for_uplink =
-        AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+    AMBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
   }
 
 }
@@ -727,7 +727,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   oai::smf_server::model::SmContextCreateError smContextCreateError = { };
   oai::smf_server::model::ProblemDetails problem_details = { };
   oai::smf_server::model::RefToBinaryData refToBinaryData = { };
-  std::string n1_sm_message, n1_sm_msg_hex;  //N1 SM container
+  std::string n1_sm_message, n1_sm_msg_hex;
   smf_n1_n2 smf_n1_n2_inst = { };
   bool request_accepted = true;
 
@@ -799,16 +799,16 @@ void smf_context::handle_pdu_session_create_sm_context_request(
                             dnn.c_str());
   }
 
-  //step 3.2. create pdn connection if not exist
+  //step 3.2. create pdu session if not exist
   std::shared_ptr<smf_pdu_session> sp = { };
-  bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
+  bool find_pdu = sd.get()->find_pdu_session(pdu_session_id, sp);
 
   if (nullptr == sp.get()) {
     Logger::smf_app().debug("Create a new PDN connection!");
-    //create a new pdn connection
+    //create a new pdu session
     sp = std::shared_ptr<smf_pdu_session>(new smf_pdu_session());
     sp.get()->pdn_type.pdn_type = sm_context_req_msg.get_pdu_session_type();
-    sp.get()->pdu_session_id = pdu_session_id;  //should check also nas_msg.pdusessionidentity ??
+    sp.get()->pdu_session_id = pdu_session_id;
     sp.get()->amf_id = sm_context_req_msg.get_serving_nf_id();  //amf id
     sd->insert_pdu_session(sp);
   } else {
@@ -969,9 +969,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
       // error !
       Logger::smf_app().info(
-          "PDU SESSION CREATE SM CONTEXT REQUEST procedure failed");
+          "PDU Session Establishment Request: Create SM Context Request procedure failed");
       remove_procedure(proc);
-      //Set cause to error to trigger PDU session establishment reject (step 9)
+      //Set cause to error to trigger PDU session establishment reject (step 10)
       sm_context_resp->res.set_cause(UNKNOWN_ERROR);
     }
 
@@ -1029,7 +1029,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     supi_t supi = sm_context_resp_pending->res.get_supi();
     supi_str = sm_context_resp_pending->res.get_supi_prefix() + "-"
         + smf_supi_to_string(supi);
-    //std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.amf_addr.port) + "/namf-comm/v2/ue-contexts/" + supi_str.c_str() +"/n1-n2-messages";
     std::string url = std::string(
         inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) + ":"
         + std::to_string(smf_cfg.amf_addr.port)
@@ -1039,9 +1038,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     //Fill the json part
     sm_context_resp_pending->res.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageClass"] =
-        N1N2_MESSAGE_CLASS;
+    N1N2_MESSAGE_CLASS;
     sm_context_resp_pending->res.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
-        N1_SM_CONTENT_ID;
+    N1_SM_CONTENT_ID;
     //sm_context_resp_pending->res.n1n2_message_transfer_data["ppi"] = 1; //Don't need this info for the moment
     sm_context_resp_pending->res.n1n2_message_transfer_data["pduSessionId"] =
         sm_context_resp_pending->res.get_pdu_session_id();
@@ -1069,6 +1068,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = { };
   oai::smf_server::model::ProblemDetails problem_details = { };
   oai::smf_server::model::RefToBinaryData refToBinaryData = { };
+  std::string n1_sm_msg, n1_sm_msg_hex;
   bool update_upf = false;
   session_management_procedures_type_e procedure_type(
       session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
@@ -1078,12 +1078,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
   std::shared_ptr<smf_pdu_session> sp = { };
   bool find_dnn = find_dnn_context(sm_context_req_msg.get_snssai(),
                                    sm_context_req_msg.get_dnn(), sd);
-  bool find_pdn = false;
+  bool find_pdu = false;
   if (find_dnn) {
-    find_pdn = sd.get()->find_pdu_session(
+    find_pdu = sd.get()->find_pdu_session(
         sm_context_req_msg.get_pdu_session_id(), sp);
   }
-  if (!find_dnn or !find_pdn) {
+  if (!find_dnn or !find_pdu) {
     //error, send reply to AMF with error code "Context Not Found"
     Logger::smf_app().warn("DNN or PDU session context does not exist!");
     problem_details.setCause(
@@ -1091,9 +1091,15 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     smContextUpdateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextUpdateError.setN1SmMsg(refToBinaryData);
+    //Create N1 container
+    smf_n1_n2_inst.create_n1_sm_container(
+        sm_context_req_msg,
+        PDU_SESSION_ESTABLISHMENT_REJECT,
+        n1_sm_msg, cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
+    smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Not_Found);
+        Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
     return;
   }
 
@@ -1114,7 +1120,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
   //Step 2.1. Decode N1 (if content is available)
   if (sm_context_req_msg.n1_sm_msg_is_set()) {
-    std::string n1_sm_msg, n1_sm_msg_hex;  //N1 SM container
     nas_message_t decoded_nas_msg = { };
 
     //Decode NAS and get the necessary information
@@ -1124,7 +1129,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     int decoder_rc = smf_n1_n2_inst.decode_n1_sm_container(decoded_nas_msg,
                                                            n1_sm_msg);
     if (decoder_rc != RETURNok) {
-      //error, should send reply to AMF with error code!!
+      //error, send reply to AMF with error code!!
       Logger::smf_app().warn("N1 SM container cannot be decoded correctly!");
       problem_details.setCause(
           pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
@@ -1135,10 +1140,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
       smf_n1_n2_inst.create_n1_sm_container(
           sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-          cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);  //TODO: should define 5GSM cause in 24.501
+          cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
+      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       smf_n11_inst->send_pdu_session_update_sm_context_response(
           smreq->http_response, smContextUpdateError,
-          Pistache::Http::Code::Forbidden, n1_sm_msg);
+          Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+      return;
     }
 
     Logger::smf_app().debug(
@@ -1148,14 +1155,11 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     Logger::smf_app().debug("NAS header information, Message Type %d",
                             decoded_nas_msg.plain.sm.header.message_type);
 
-    //FOR TESTing  PDU_SESSION_MODIFICATION_REQUEST, should be REMOVED!!!
-    uint8_t message_type = PDU_SESSION_MODIFICATION_REQUEST;
-    //end
+    uint8_t message_type = decoded_nas_msg.plain.sm.header.message_type;
     switch (message_type) {
-      // switch (decoded_nas_msg.plain.sm.header.message_type){
-
       //PDU_SESSION_MODIFICATION_REQUEST - UE initiated PDU session modification request (Step 1)
       case PDU_SESSION_MODIFICATION_REQUEST: {
+        //TODO: to be finished
         Logger::smf_app().debug("PDU_SESSION_MODIFICATION_REQUEST");
         //PDU Session Modification procedure (UE-initiated, step 1.a, Section 4.3.3.2@3GPP TS 23.502)
         procedure_type =
@@ -1270,15 +1274,15 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //Fill the json part
         //N1SM
         n1_sm_context_resp->res.sm_context_updated_data["n1SmMsg"]["n1MessageClass"] =
-            N1N2_MESSAGE_CLASS;
+        N1N2_MESSAGE_CLASS;
         n1_sm_context_resp->res.sm_context_updated_data["n1SmMsg"]["n1MessageContent"]["contentId"] =
-            N1_SM_CONTENT_ID;  //part 2
+        N1_SM_CONTENT_ID;  //part 2
         n1_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InformationClass"] =
-            N1N2_MESSAGE_CLASS;
+        N1N2_MESSAGE_CLASS;
         n1_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InfoContent"]["ngapIeType"] =
             "PDU_RES_MOD_REQ";  //NGAP message
         n1_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
-            N2_SM_CONTENT_ID;  //part 3
+        N2_SM_CONTENT_ID;  //part 3
 
         //Store pdu_session_modification_request in itti_n11_update_sm_context_response
         Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
@@ -1379,12 +1383,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       case n2_sm_info_type_e::PDU_RES_SETUP_RSP: {
         Logger::smf_app().info(
             "PDU Session Establishment Request, processing N2 SM Information");
-        //Ngap_PDUSessionResourceSetupResponseTransfer_t
-        //  Ngap_QosFlowPerTNLInformation_t  qosFlowPerTNLInformation;
-        //  struct Ngap_QosFlowPerTNLInformation  *additionalQosFlowPerTNLInformation;  /* OPTIONAL */
-        //  struct Ngap_SecurityResult  *securityResult;  /* OPTIONAL */
-        //  struct Ngap_QosFlowList *qosFlowFailedToSetupList;  /* OPTIONAL */
-        //  struct Ngap_ProtocolExtensionContainer  *iE_Extensions; /* OPTIONAL */
 
         //PDU_SESSION_ESTABLISHMENT_UE_REQUESTED & SERVICE_REQUEST_UE_TRIGGERED
         procedure_type =
@@ -1397,13 +1395,28 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         int decode_status = smf_n1_n2_inst.decode_n2_sm_information(
             decoded_msg, n2_sm_information);
         if (decode_status == RETURNerror) {
-          Logger::smf_api_server().warn("asn_decode failed");
-          //TODO: send error to AMF
+          //error, send error to AMF
+          Logger::smf_app().warn(
+              "Decode N2 SM (Ngap_PDUSessionResourceSetupResponseTransfer) failed!");
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
+          smContextUpdateError.setError(problem_details);
+          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+          smContextUpdateError.setN1SmMsg(refToBinaryData);
+          //PDU Session Establishment Reject
+          //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
+          smf_n1_n2_inst.create_n1_sm_container(
+              sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
+              cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
+          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+          return;
         }
 
-        //TODO: store AN Tunnel Info + list of accepted QFIs
+        //store AN Tunnel Info + list of accepted QFIs
         fteid_t dl_teid;
-        //TODO: to be verified which one is teid_gre_key, ipv4_address
         memcpy(
             &dl_teid.teid_gre_key,
             decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
@@ -1468,16 +1481,26 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             decoded_msg, n2_sm_information);
         if (decode_status == RETURNerror) {
           Logger::smf_api_server().warn("asn_decode failed");
-          //TODO: send error to AMF
-        }
+          //send error to AMF
+          Logger::smf_app().warn(
+              "Decode N2 SM (Ngap_PDUSessionResourceModifyResponseTransfer) failed!");
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
+          smContextUpdateError.setError(problem_details);
+          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+          smContextUpdateError.setN1SmMsg(refToBinaryData);
+          //PDU Session Establishment Reject
+          //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
+          smf_n1_n2_inst.create_n1_sm_container(
+              sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
+              cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
+          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+          return;
 
-        //Ngap_PDUSessionResourceModifyResponseTransfer_t
-        // struct Ngap_UPTransportLayerInformation *dL_NGU_UP_TNLInformation;  /* OPTIONAL */
-        // struct Ngap_UPTransportLayerInformation *uL_NGU_UP_TNLInformation;  /* OPTIONAL */
-        // struct Ngap_QosFlowAddOrModifyResponseList  *qosFlowAddOrModifyResponseList;  /* OPTIONAL */
-        // struct Ngap_QosFlowPerTNLInformation  *additionalQosFlowPerTNLInformation;  /* OPTIONAL */
-        // struct Ngap_QosFlowList *qosFlowFailedToAddOrModifyList;  /* OPTIONAL */
-        //struct Ngap_ProtocolExtensionContainer  *iE_Extensions; /* OPTIONAL */
+        }
 
         //if dL_NGU_UP_TNLInformation is included, it shall be considered as the new DL transfort layer addr for the PDU session (should be verified)
         fteid_t dl_teid;
@@ -1554,7 +1577,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
   //Step 4. Create a procedure for update sm context and let the procedure handle the request if necessary
   if (update_upf) {
-    //TODO:
     session_update_sm_context_procedure *proc =
         new session_update_sm_context_procedure(sp);
     std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
@@ -1564,9 +1586,24 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     insert_procedure(sproc);
     if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
       // error !
-      Logger::smf_app().info(
-          "PDU SESSION CREATE SM CONTEXT REQUEST procedure failed");
+      Logger::smf_app().info("PDU Update SM Context Request procedure failed");
       remove_procedure(proc);
+      //send error to AMF
+      problem_details.setCause(
+          pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);
+      smContextUpdateError.setError(problem_details);
+      refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+      smContextUpdateError.setN1SmMsg(refToBinaryData);
+      //PDU Session Establishment Reject
+      smf_n1_n2_inst.create_n1_sm_container(
+          sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
+          cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE);
+      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+      smf_n11_inst->send_pdu_session_update_sm_context_response(
+          smreq->http_response, smContextUpdateError,
+          Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+      return;
+
     }
   }
 

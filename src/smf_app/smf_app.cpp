@@ -61,8 +61,6 @@ extern "C" {
 #include "nas_message.h"
 }
 
-#define BUF_LEN 512
-
 using namespace smf;
 
 #define SYSTEM_CMD_MAX_STR_SIZE 512
@@ -447,7 +445,7 @@ void smf_app::handle_itti_msg(
 void smf_app::handle_itti_msg(itti_n11_update_pdu_session_status &m) {
   Logger::smf_app().info(
       "Set PDU Session Status to %s",
-      pdu_session_status_e2str[static_cast<int>(m.pdu_session_status)]);
+      pdu_session_status_e2str[static_cast<int>(m.pdu_session_status)].c_str());
   update_pdu_session_status(m.scid, m.pdu_session_status);
 }
 
@@ -484,7 +482,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
     smf_n1_n2_inst.create_n1_sm_container(
         context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-        cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);  //TODO: should define 5GSM cause in 24.501
+        cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     //Send response to AMF
     smf_n11_inst->send_pdu_session_create_sm_context_response(
@@ -506,6 +504,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   smreq->req.set_message_type(decoded_nas_msg.plain.sm.header.message_type);
 
   //Integrity protection maximum data rate (Mandatory)
+  //TODO:
 
   //PDU session type (Optional)
   smreq->req.set_pdu_session_type(PDU_SESSION_TYPE_E_IPV4);  //set default value
@@ -516,7 +515,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         "NAS, pdu_session_type %d",
         decoded_nas_msg.plain.sm.pdu_session_establishment_request
             ._pdusessiontype.pdu_session_type_value);
-    //sm_context_req_msg.set_pdu_session_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request._pdusessiontype.pdu_session_type_value);
+    smreq->req.set_pdu_session_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request._pdusessiontype.pdu_session_type_value);
   }
 
   //Get necessary information
@@ -556,7 +555,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     //(24.501 (section 7.3.1)) NAS N1 SM message: response with a 5GSM STATUS message including cause "#81 Invalid PTI value"
     smf_n1_n2_inst.create_n1_sm_container(
         context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-        cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE);  //TODO: should define 5GSM cause in 24.501
+        cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     //Send response to AMF
     smf_n11_inst->send_pdu_session_create_sm_context_response(
@@ -742,23 +741,16 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   scid_t scid = { };
   try {
     scid = std::stoi(smreq->scid);
-  }
-  /*catch (const std::out_of_range& err){
-
-   } catch (const std::invalid_argument& err){
-
-   }*/
-  catch (const std::exception &err) {
+  } catch (const std::exception &err) {
     //TODO: send PDUSession_SMUpdateContext Response (including PDU Session EStablishment Reject) to AMF with CAUSE: invalid context
     Logger::smf_app().warn(
-        "Received PDU_SESSION_UPDATESMCONTEXT_REQUEST, couldn't retrieve the corresponding SMF context, ignore message!");
-
+        "Received a PDU Session Update SM Context Request, couldn't retrieve the corresponding SMF context, ignore message!");
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
     smContextUpdateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextUpdateError.setN1SmMsg(refToBinaryData);
-    //PDU Session Update Reject
+    //PDU Session Establishment Reject
     smf_n1_n2_inst.create_n1_sm_container(
         smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
         cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
@@ -776,7 +768,19 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   } else {
     Logger::smf_app().warn(
         "Context associated with this id " SCID_FMT " does not exit!", scid);
-    //TODO: send reject to AMF
+    problem_details.setCause(
+        pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
+    smContextUpdateError.setError(problem_details);
+    refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+    smContextUpdateError.setN1SmMsg(refToBinaryData);
+    //PDU Session Establishment Reject
+    smf_n1_n2_inst.create_n1_sm_container(
+        smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
+        cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
+    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+    smf_n11_inst->send_pdu_session_update_sm_context_response(
+        smreq->http_response, smContextUpdateError,
+        Pistache::Http::Code::Forbidden, n1_sm_message_hex);
     return;
   }
 
@@ -793,9 +797,9 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   smreq->req.set_pdu_session_id(pdu_session_id);
 
   pdu_session_update_sm_context_request context_req_msg = smreq->req;
+
   //Step 2. find the smf context
   std::shared_ptr<smf_context> sc = { };
-
   if (is_supi_2_smf_context(supi64)) {
     sc = supi_2_smf_context(supi64);
     Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
@@ -803,7 +807,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   } else {
     //send PDUSession_SMUpdateContext Response (including PDU Session EStablishment Reject) to AMF
     Logger::smf_app().warn(
-        "Received PDU_SESSION_UPDATESMCONTEXT_REQUEST with Supi " SUPI_64_FMT "couldn't retrieve the corresponding SMF context, ignore message!",
+        "Received PDU Session Update SM Context Request with Supi " SUPI_64_FMT "couldn't retrieve the corresponding SMF context, ignore message!",
         supi64);
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
@@ -815,7 +819,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
         context_req_msg,
         PDU_SESSION_ESTABLISHMENT_REJECT,
         n1_sm_message,
-        cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
+        cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
@@ -831,7 +835,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
       //Error, DNN context doesn't exist
       // send PDUSession_SMUpdateContext Response (including PDU Session EStablishment Reject) to AMF
       Logger::smf_app().warn(
-          "Received PDU_SESSION_UPDATESMCONTEXT_REQUEST, couldn't retrieve the corresponding SMF context, ignore message!");
+          "Received PDU Session Update SM Context Request, couldn't retrieve the corresponding SMF context, ignore message!");
       problem_details.setCause(
           pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
       smContextUpdateError.setError(problem_details);
