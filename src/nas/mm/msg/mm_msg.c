@@ -65,8 +65,8 @@ fivegmm_msg_encode (
   //OAILOG_FUNC_IN (LOG_NAS_EMM);
   int                                     header_result;
   int                                     encode_result;
-  uint8_t                                *buffer_log = buffer;
-  bool                                    is_down_link = true;
+//  uint8_t                                *buffer_log = buffer;
+//  bool                                    is_down_link = true;
   /*
    * First encode the EMM message header
    */
@@ -202,9 +202,9 @@ mm_msg_decode (
   //OAILOG_FUNC_IN (LOG_NAS);
   int                                     header_result = 0;
   int                                     decode_result = 0;
-  uint8_t                                *buffer_log = buffer;
-  uint32_t                                len_log = len;
-  bool                                    is_down_link = false;
+//  uint8_t                                *buffer_log = buffer;
+//  uint32_t                                len_log = len;
+//  bool                                    is_down_link = false;
 
   /*
    * First decode the MM message header

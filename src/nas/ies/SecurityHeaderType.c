@@ -12,7 +12,7 @@ int encode_security_header_type ( SecurityHeaderType securityheadertype, uint8_t
     int encode_result;
     CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer,SECURITY_HEADER_TYPE_MINIMUM_LENGTH , len);
     
-    if ((encode_result = encode_bstring (securityheadertype, buffer + encoded, len - encoded)) < 0)//加密,实体,首地址,长度
+    if ((encode_result = encode_bstring (securityheadertype, buffer + encoded, len - encoded)) < 0)
         return encode_result;
     else
         encoded += encode_result;

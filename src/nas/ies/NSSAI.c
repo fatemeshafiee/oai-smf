@@ -21,8 +21,9 @@ int encode_nssai ( NSSAI nssai, uint8_t iei, uint8_t * buffer, uint32_t len  )
   lenPtr = (buffer + encoded);
   encoded++;
 
+  //TODO: fix it for MM
   /*
-    if ((encode_result = encode_bstring (nssai, buffer + encoded, len - encoded)) < 0)//加密,实体,首地址,长度
+    if ((encode_result = encode_bstring (nssai, buffer + encoded, len - encoded)) < 0)
         return encode_result;
     else
         encoded += encode_result;
@@ -35,7 +36,7 @@ int decode_nssai ( NSSAI * nssai, uint8_t iei, uint8_t * buffer, uint32_t len  )
 {
   int decoded=0;
   uint8_t ielen=0;
-  int decode_result;
+//  int decode_result;
 
   if (iei > 0)
   {
@@ -47,12 +48,13 @@ int decode_nssai ( NSSAI * nssai, uint8_t iei, uint8_t * buffer, uint32_t len  )
   ielen = *(buffer + decoded);
   decoded++;
   CHECK_LENGTH_DECODER (len - decoded, ielen);
-
-
+  //TODO: fix it for MM
+/*
   if((decode_result = decode_bstring (nssai, ielen, buffer + decoded, len - decoded)) < 0)
     return decode_result;
   else
     decoded += decode_result;
+ */
   return decoded;
 }
 

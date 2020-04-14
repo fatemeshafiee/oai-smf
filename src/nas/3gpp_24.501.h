@@ -318,7 +318,8 @@ enum class pdu_session_status_e {
 
 static const std::vector<std::string> pdu_session_status_e2str = {
     "PDU_SESSION_INACTIVE", "PDU_SESSION_INACTIVE_PENDING",
-    "PDU_SESSION_MODIFICATION_PENDING", "PDU_SESSION_ACTIVE" };
+    "PDU_SESSION_MODIFICATION_PENDING", "PDU_SESSION_ESTABLISHMENT_PENDING",
+    "PDU_SESSION_ACTIVE" };
 
 //see Table 9.11.4.12.1: QoS flow descriptions information element
 typedef struct flow_bit_rate_type_s {

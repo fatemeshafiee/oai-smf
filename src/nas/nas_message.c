@@ -630,7 +630,7 @@ static uint32_t _nas_message_get_mac(
   switch (fivegmm_security_context->selected_algorithms.integrity) {
     case NAS_SECURITY_ALGORITHMS_NIA1: {
       uint8_t mac[4];
-      nas_stream_cipher_t stream_cipher;
+      nas_stream_cipher_t stream_cipher = { 0 };
       uint32_t count;
       uint32_t *mac32;
 
@@ -668,7 +668,7 @@ static uint32_t _nas_message_get_mac(
       break;
     case NAS_SECURITY_ALGORITHMS_NIA2: {
       uint8_t mac[4];
-      nas_stream_cipher_t stream_cipher;
+      nas_stream_cipher_t stream_cipher = { 0 };
       uint32_t count;
       uint32_t *mac32;
 
@@ -866,7 +866,7 @@ static int _nas_message_decrypt(
             //stream_cipher.message = (uint8_t*)src;
             uint8_t *src_encrypt = NULL;
             src_encrypt = (uint8_t*) calloc(1, length + 3);
-            memset(src_encrypt, 0, sizeof(src_encrypt));
+            memset(src_encrypt, 0, sizeof(uint8_t));
             memcpy(src_encrypt, src, length);
             stream_cipher.message = (uint8_t*) src_encrypt;
 

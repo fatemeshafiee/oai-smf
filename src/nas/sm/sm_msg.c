@@ -50,9 +50,7 @@ static int _fivegsm_msg_encode_header(const sm_msg_header_t *header,
 int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
   int header_result = 0;
   int decode_result = 0;
-  uint8_t *buffer_log = buffer;
-  uint32_t len_log = len;
-  int down_link = 0;
+
   //OAILOG_FUNC_IN (LOG_NAS);
   /*
    * First decode the SM message header
@@ -165,8 +163,6 @@ int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
 int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
   int header_result = 0;
   int encode_result = 0;
-  uint8_t *buffer_log = buffer;
-  int down_link = 1;
   /*
    * First encode the ESM message header
    */
