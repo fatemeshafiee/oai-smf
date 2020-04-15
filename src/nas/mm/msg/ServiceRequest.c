@@ -9,7 +9,7 @@
 int decode_service_request( service_request_msg *service_request, uint8_t* buffer, uint32_t len)
 {
     uint32_t decoded = 0;
-    int decoded_result = 0;
+//    int decoded_result = 0;
 
     // Check if we got a NULL pointer and if buffer length is >= minimum length expected for the message.
     CHECK_PDU_POINTER_AND_LENGTH_DECODER (buffer, SERVICE_REQUEST_MINIMUM_LENGTH, len);
@@ -72,7 +72,7 @@ int decode_service_request( service_request_msg *service_request, uint8_t* buffe
 int encode_service_request( service_request_msg *service_request, uint8_t* buffer, uint32_t len)
 {
     uint32_t encoded = 0;
-    int encoded_result = 0;
+//    int encoded_result = 0;
     
     // Check if we got a NULL pointer and if buffer length is >= minimum length expected for the message.
     CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer, SERVICE_REQUEST_MINIMUM_LENGTH, len);

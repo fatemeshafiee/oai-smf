@@ -20,11 +20,11 @@
  */
 
 /*! \file 3gpp_29.281.h
-  \brief
-  \author Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \author Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 
 #ifndef FILE_3GPP_29_281_SEEN
 #define FILE_3GPP_29_281_SEEN
@@ -41,97 +41,122 @@
 namespace gtpv1u {
 
 struct gtpu_exception : public std::exception {
-  gtpu_exception() throw() {
+  gtpu_exception() throw () {
     cause = 0;
     phrase.assign("GTPV1-U Exception unknown cause");
   }
 
-  gtpu_exception(int acause) throw() {
+  gtpu_exception(int acause) throw () {
     cause = acause;
     phrase = fmt::format("GTPV1-U Exception cause {}", cause);
   }
-  const char * what () const throw () {
-      return phrase.c_str();
-   }
-public:
-   int cause;
-   std::string phrase;
+  const char* what() const throw () {
+    return phrase.c_str();
+  }
+ public:
+  int cause;
+  std::string phrase;
 };
 
 struct gtpu_msg_bad_length_exception : public gtpu_exception {
-public:
-  gtpu_msg_bad_length_exception(const uint8_t msg_type, const uint16_t msg_size) throw() {
-    phrase = fmt::format("GTPV1-U msg {} Bad Length {} Exception", msg_type, msg_size);
+ public:
+  gtpu_msg_bad_length_exception(const uint8_t msg_type,
+                                const uint16_t msg_size) throw () {
+    phrase = fmt::format("GTPV1-U msg {} Bad Length {} Exception", msg_type,
+                         msg_size);
   }
-  gtpu_msg_bad_length_exception(std::string& aphrase) throw() {
+  gtpu_msg_bad_length_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpu_msg_bad_length_exception() throw(){}
+  virtual ~gtpu_msg_bad_length_exception() throw () {
+  }
 };
 
 struct gtpu_msg_unimplemented_ie_exception : public gtpu_exception {
-public:
-  gtpu_msg_unimplemented_ie_exception(const uint8_t msg_type, const uint8_t ie_type, const uint8_t instance = 0) throw() {
-    phrase = fmt::format("GTPV1-U msg {} Unimplemented {} IE Instance {} Exception", msg_type, ie_type, instance);
+ public:
+  gtpu_msg_unimplemented_ie_exception(const uint8_t msg_type,
+                                      const uint8_t ie_type,
+                                      const uint8_t instance = 0) throw () {
+    phrase = fmt::format(
+        "GTPV1-U msg {} Unimplemented {} IE Instance {} Exception", msg_type,
+        ie_type, instance);
   }
-  gtpu_msg_unimplemented_ie_exception(std::string& aphrase) throw() {
+  gtpu_msg_unimplemented_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpu_msg_unimplemented_ie_exception() throw(){}
+  virtual ~gtpu_msg_unimplemented_ie_exception() throw () {
+  }
 };
 
 struct gtpu_msg_illegal_ie_exception : public gtpu_exception {
-public:
-  gtpu_msg_illegal_ie_exception(const uint8_t msg_type, const uint8_t ie_type) throw() {
-    phrase = fmt::format("GTPV1-U msg {} Illegal {} Exception", msg_type, ie_type);
+ public:
+  gtpu_msg_illegal_ie_exception(const uint8_t msg_type,
+                                const uint8_t ie_type) throw () {
+    phrase = fmt::format("GTPV1-U msg {} Illegal {} Exception", msg_type,
+                         ie_type);
   }
-  gtpu_msg_illegal_ie_exception(std::string& aphrase) throw() {
+  gtpu_msg_illegal_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpu_msg_illegal_ie_exception() throw(){}
+  virtual ~gtpu_msg_illegal_ie_exception() throw () {
+  }
 };
 
 struct gtpu_ie_exception : public gtpu_exception {
-public:
-  gtpu_ie_exception(uint8_t ie_type) throw() {
+ public:
+  gtpu_ie_exception(uint8_t ie_type) throw () {
     phrase = fmt::format("GTPV1-U IE {} Exception", ie_type);
   }
-  gtpu_ie_exception(std::string& aphrase) throw() {
+  gtpu_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpu_ie_exception() throw(){}
+  virtual ~gtpu_ie_exception() throw () {
+  }
 };
 
 struct gtpu_ie_unimplemented_exception : public gtpu_ie_exception {
-public:
-  gtpu_ie_unimplemented_exception(uint8_t ie_type) throw() : gtpu_ie_exception(ie_type) {
+ public:
+  gtpu_ie_unimplemented_exception(uint8_t ie_type) throw ()
+      :
+      gtpu_ie_exception(ie_type) {
     phrase = fmt::format("GTPV1-U IE {} Unimplemented Exception", ie_type);
   }
-  virtual ~gtpu_ie_unimplemented_exception() throw(){}
+  virtual ~gtpu_ie_unimplemented_exception() throw () {
+  }
 };
 
 struct gtpu_tlv_exception : public gtpu_ie_exception {
-public:
-  gtpu_tlv_exception(uint8_t ie_type) throw() : gtpu_ie_exception(ie_type) {
+ public:
+  gtpu_tlv_exception(uint8_t ie_type) throw ()
+      :
+      gtpu_ie_exception(ie_type) {
     phrase = fmt::format("GTPV1-U IE TLV {} Exception", ie_type);
   }
-  virtual ~gtpu_tlv_exception() throw(){}
+  virtual ~gtpu_tlv_exception() throw () {
+  }
 };
 
 struct gtpu_tlv_bad_length_exception : public gtpu_tlv_exception {
-public:
-  gtpu_tlv_bad_length_exception(uint8_t ie_type, uint16_t ie_length) throw() : gtpu_tlv_exception(ie_type){
+ public:
+  gtpu_tlv_bad_length_exception(uint8_t ie_type, uint16_t ie_length) throw ()
+      :
+      gtpu_tlv_exception(ie_type) {
     phrase = fmt::format("GTPV1-U IE TLV {} Bad Length {} Exception", ie_type);
   }
-  virtual ~gtpu_tlv_bad_length_exception() throw(){}
+  virtual ~gtpu_tlv_bad_length_exception() throw () {
+  }
 };
 
 struct gtpu_ie_value_exception : public gtpu_ie_exception {
-public:
-  gtpu_ie_value_exception(uint8_t ie_type, const char* field) throw() : gtpu_ie_exception(ie_type){
-    phrase = fmt::format("GTPV1-U IE {} Bad Value of {} Exception", ie_type, field);
+ public:
+  gtpu_ie_value_exception(uint8_t ie_type, const char *field) throw ()
+      :
+      gtpu_ie_exception(ie_type) {
+    phrase = fmt::format("GTPV1-U IE {} Bad Value of {} Exception", ie_type,
+                         field);
   }
-  virtual ~gtpu_ie_value_exception() throw(){}
+  virtual ~gtpu_ie_value_exception() throw () {
+  }
 };
 
 #define GTPU_IE_RECOVERY                                                     14
@@ -147,26 +172,26 @@ public:
 #define GTPU_END_MARKER                                                     (254)
 #define GTPU_G_PDU                                                          (255)
 
-} // namespace
+}  // namespace
 
-  // 8.2 Recovery
+// 8.2 Recovery
 
 // 8.3 Tunnel Endpoint Identifier Data I
 typedef struct tunnel_endpoint_identifier_data_i_s {
-  uint32_t  tunnel_endpoint_identifier_data_i;
+  uint32_t tunnel_endpoint_identifier_data_i;
 } tunnel_endpoint_identifier_data_i_t;
 
 // 8.4 GTP-U Peer Address
 typedef struct gtp_u_peer_address_s {
   // may use variant if can stay with C++17
-  struct in_addr   ipv4_address;
-  struct in6_addr  ipv6_address;
+  struct in_addr ipv4_address;
+  struct in6_addr ipv6_address;
   bool is_v4;
 } gtp_u_peer_address_t;
 
 // 8.5 Extension Header Type List
 typedef struct extension_header_type_list_s {
-  uint8_t  length;
+  uint8_t length;
   std::vector<uint8_t> extension_types_list;
 } extension_header_type_list_t;
 

@@ -77,12 +77,37 @@ static void setUpUnixSignals(std::vector<int> quitSignals) {
 
 using namespace oai::udm::api;
 
-int main() {
+int main(int argc, char* argv[]) {
 #ifdef __linux__
     std::vector<int> sigs{SIGQUIT, SIGINT, SIGTERM, SIGHUP};
     setUpUnixSignals(sigs);
 #endif
-    Pistache::Address addr("172.16.1.103", Pistache::Port(80));
+    std::string udm_ip_address;
+    if ((argc != 1) && (argc != 3)) {
+        std::cout << "Error: Usage is " <<std::endl;
+        std::cout << "  " << argv[0] << " [ -i www.xxx.yy.zz ]" <<std::endl;
+        return -1;
+    }
+
+    if (argc == 1) {
+        udm_ip_address.append(std::string("172.16.1.103"));
+    } else {
+        int opt = 0;
+        while ((opt = getopt(argc, argv, "i:")) != -1) {
+            switch(opt) {
+            case 'i':
+                udm_ip_address.append(optarg);
+                break;
+            default:
+                std::cout << "Error: Usage is " <<std::endl;
+                std::cout << "  " << argv[0] << " [ -i www.xxx.yy.zz ]" <<std::endl;
+                return -1;
+                break;
+            }
+        }
+    }
+
+    Pistache::Address addr(udm_ip_address, Pistache::Port(80));
 
     httpEndpoint = new Pistache::Http::Endpoint((addr));
     auto router = std::make_shared<Pistache::Rest::Router>();

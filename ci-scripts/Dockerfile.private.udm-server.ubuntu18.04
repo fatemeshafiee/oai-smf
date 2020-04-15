@@ -62,12 +62,13 @@ RUN /bin/bash -c "if [[ -v BUILD_FOR_CI ]]; then git merge --ff origin/$CI_DEST_
 # Installing and Building SMF
 WORKDIR /openair-smf/build/scripts
 RUN ./build_smf --install-deps --force
-RUN ./build_smf --clean --Verbose --build-type Debug --jobs
+WORKDIR /openair-smf/src/test/udm
+RUN mkdir build && cd build && cmake .. && make
 
 #---------------------------------------------------------------------
 # TARGET IMAGE
 #---------------------------------------------------------------------
-FROM ubuntu:bionic as oai-smf
+FROM ubuntu:bionic as test-udm-server
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -75,26 +76,13 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
     psmisc \
     net-tools \
-    bc \
-    tshark \
-    libgoogle-glog0v5 \
-    libdouble-conversion1 \
-    libconfig++9v5 \
-    libcurl4-gnutls-dev \
   && rm -rf /var/lib/apt/lists/*
 
 # Copying executable and generated libraries
-WORKDIR /openair-smf/bin
-COPY --from=oai-smf-builder /openair-smf/build/smf/build/smf oai_smf
+WORKDIR /test-udm-server/bin
+COPY --from=oai-smf-builder /openair-smf/src/test/udm/build/udm-server .
 COPY --from=oai-smf-builder /usr/local/lib/libpistache.so /usr/local/lib/
-COPY --from=oai-smf-builder /openair-smf/build/smf/build/libNAS.so /usr/local/lib/
-COPY --from=oai-smf-builder /openair-smf/build/smf/build/libSMF_API.so /usr/local/lib/
 RUN ldconfig
 
-# Copying template configuration files
-# The configuration folder will be flat
-WORKDIR /openair-smf/etc
-COPY --from=oai-smf-builder /openair-smf/etc/smf.conf .
-
-WORKDIR /openair-smf
+WORKDIR /test-udm-server
 

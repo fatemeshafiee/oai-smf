@@ -33,9 +33,6 @@
 #include  "Ngap_Criticality.h"
 #include  "Ngap_CriticalityDiagnostics-IE-Item.h"
 
-
-
-
 #if  0
 #include "Ngap_AdditionalQosFlowInformation.h"
 #include "Ngap_AllocationAndRetentionPriority.h"
@@ -302,17 +299,12 @@
     if (mandatory) DevAssert(ie != NULL); \
   } while(0)
 
+typedef int (*ngap_message_decoded_callback)(const sctp_assoc_id_t assoc_id,
+                                             const sctp_stream_id_t stream,
+                                             struct Ngap_NGAP_PDU *message_p);
 
-typedef int (*ngap_message_decoded_callback)(
-    const sctp_assoc_id_t             assoc_id,
-    const sctp_stream_id_t            stream,
-    struct Ngap_NGAP_PDU *message_p
-);
+int check_NGAP_pdu_constraints(Ngap_NGAP_PDU_t *pdu);
 
-
-
-int  check_NGAP_pdu_constraints(Ngap_NGAP_PDU_t *pdu);
-
-int  ngap_amf_decode_pdu(Ngap_NGAP_PDU_t *pdu, const_bstring const raw);
+int ngap_amf_decode_pdu(Ngap_NGAP_PDU_t *pdu, const_bstring const raw);
 
 #endif

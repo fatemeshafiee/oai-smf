@@ -22,7 +22,6 @@
 #include "ExtendedProtocolConfigurationOptions.h"
 #include "DNN.h"
 
-
 #if 0
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_ESTABLISHMENT_ACCEPT_MINIMUM_LENGTH ( \
@@ -55,7 +54,6 @@
 		SESSION_AMBR_MINIMUM_LENGTH_LV + \
 0)
 
-
 /* Maximum length macro. Formed by maximum length of each field */
 #define PDU_SESSION_ESTABLISHMENT_ACCEPT_MAXIMUM_LENGTH ( \
 		EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH + \
@@ -77,7 +75,6 @@
 		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + \
 		DNN_MAXIMUM_LENGTH_TLV + \
 0)
-
 
 #define PDU_SESSION_ESTABLISHMENT_ACCEPT__5GSM_CAUSE_IEI		          				0x59
 #define PDU_SESSION_ESTABLISHMENT_ACCEPT_PDU_ADDRESS_IEI					          	0x29
@@ -102,29 +99,32 @@
 #define PDU_SESSION_ESTABLISHMENT_ACCEPT_DNN_PRESENCE						              		(1<<9)
 
 typedef struct pdu_session_establishment_accept_msg_tag {
-	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-	PDUSessionIdentity pdusessionidentity;
-	ProcedureTransactionIdentity proceduretransactionidentity;
-	MessageType messagetype;
-	_PDUSessionType _pdusessiontype;
-	SSCMode sscmode;
-	QOSRules qosrules;
-	SessionAMBR sessionambr;
-	uint16_t presence;
-	_5GSMCause _5gsmcause;
-	PDUAddress pduaddress;
-	GPRSTimer gprstimer;
-	SNSSAI snssai;
-	AlwaysonPDUSessionIndication alwaysonpdusessionindication;
-	MappedEPSBearerContexts mappedepsbearercontexts;
-	EAPMessage eapmessage;
-	QOSFlowDescriptions qosflowdescriptions;
-	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-	DNN dnn;
+  ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+  PDUSessionIdentity pdusessionidentity;
+  ProcedureTransactionIdentity proceduretransactionidentity;
+  MessageType messagetype;
+  _PDUSessionType _pdusessiontype;
+  SSCMode sscmode;
+  QOSRules qosrules;
+  SessionAMBR sessionambr;
+  uint16_t presence;
+  _5GSMCause _5gsmcause;
+  PDUAddress pduaddress;
+  GPRSTimer gprstimer;
+  SNSSAI snssai;
+  AlwaysonPDUSessionIndication alwaysonpdusessionindication;
+  MappedEPSBearerContexts mappedepsbearercontexts;
+  EAPMessage eapmessage;
+  QOSFlowDescriptions qosflowdescriptions;
+  ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
+  DNN dnn;
 } pdu_session_establishment_accept_msg;
 
-
-int decode_pdu_session_establishment_accept(pdu_session_establishment_accept_msg *pdusessionestablishmentaccept, uint8_t *buffer, uint32_t len);
-int encode_pdu_session_establishment_accept(pdu_session_establishment_accept_msg *pdusessionestablishmentaccept, uint8_t *buffer, uint32_t len);
+int decode_pdu_session_establishment_accept(
+    pdu_session_establishment_accept_msg *pdusessionestablishmentaccept,
+    uint8_t *buffer, uint32_t len);
+int encode_pdu_session_establishment_accept(
+    pdu_session_establishment_accept_msg *pdusessionestablishmentaccept,
+    uint8_t *buffer, uint32_t len);
 
 #endif

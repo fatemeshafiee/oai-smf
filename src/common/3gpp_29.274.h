@@ -20,11 +20,11 @@
  */
 
 /*! \file 3gpp_29.274.h
-  \brief
-  \author Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \author Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 
 #ifndef FILE_3GPP_29_274_SEEN
 #define FILE_3GPP_29_274_SEEN
@@ -38,124 +38,156 @@
 #include <stdint.h>
 #include <string>
 
-extern const char* interface_type2char[];
+extern const char *interface_type2char[];
 
 namespace gtpv2c {
 
 struct gtpc_exception : public std::exception {
-  gtpc_exception() throw() {
+  gtpc_exception() throw () {
     cause = 0;
     phrase.assign("GTPV2-C Exception unknown cause");
   }
 
-  gtpc_exception(int acause) throw() {
+  gtpc_exception(int acause) throw () {
     cause = acause;
     phrase = fmt::format("GTPV2-C Exception cause {}", cause);
   }
-  const char * what () const throw () {
-      return phrase.c_str();
-   }
-public:
-   int cause;
-   std::string phrase;
+  const char* what() const throw () {
+    return phrase.c_str();
+  }
+ public:
+  int cause;
+  std::string phrase;
 };
 
 struct gtpc_msg_bad_length_exception : public gtpc_exception {
-public:
-  gtpc_msg_bad_length_exception(const uint8_t msg_type, const uint16_t msg_size) throw() {
-    phrase = fmt::format("GTPV2-C msg {} Bad Length {} Exception", msg_type, msg_size);
+ public:
+  gtpc_msg_bad_length_exception(const uint8_t msg_type,
+                                const uint16_t msg_size) throw () {
+    phrase = fmt::format("GTPV2-C msg {} Bad Length {} Exception", msg_type,
+                         msg_size);
   }
-  gtpc_msg_bad_length_exception(std::string& aphrase) throw() {
+  gtpc_msg_bad_length_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpc_msg_bad_length_exception() throw(){}
+  virtual ~gtpc_msg_bad_length_exception() throw () {
+  }
 };
 
 struct gtpc_msg_unimplemented_ie_exception : public gtpc_exception {
-public:
-  gtpc_msg_unimplemented_ie_exception(const uint8_t msg_type, const uint8_t ie_type, const uint8_t instance = 0) throw() {
-    phrase = fmt::format("GTPV2-C msg {} Unimplemented {} IE Instance {} Exception", msg_type, ie_type, instance);
+ public:
+  gtpc_msg_unimplemented_ie_exception(const uint8_t msg_type,
+                                      const uint8_t ie_type,
+                                      const uint8_t instance = 0) throw () {
+    phrase = fmt::format(
+        "GTPV2-C msg {} Unimplemented {} IE Instance {} Exception", msg_type,
+        ie_type, instance);
   }
-  gtpc_msg_unimplemented_ie_exception(std::string& aphrase) throw() {
+  gtpc_msg_unimplemented_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpc_msg_unimplemented_ie_exception() throw(){}
+  virtual ~gtpc_msg_unimplemented_ie_exception() throw () {
+  }
 };
 
 struct gtpc_msg_illegal_ie_exception : public gtpc_exception {
-public:
-  gtpc_msg_illegal_ie_exception(const uint8_t msg_type, const uint8_t ie_type, const char* file, const int line) throw() {
-    phrase = fmt::format("GTPV2-C msg {} Illegal IE {} Exception {}:{}", msg_type, ie_type, file, line);
+ public:
+  gtpc_msg_illegal_ie_exception(const uint8_t msg_type, const uint8_t ie_type,
+                                const char *file, const int line) throw () {
+    phrase = fmt::format("GTPV2-C msg {} Illegal IE {} Exception {}:{}",
+                         msg_type, ie_type, file, line);
   }
-  gtpc_msg_illegal_ie_exception(std::string& aphrase) throw() {
+  gtpc_msg_illegal_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpc_msg_illegal_ie_exception() throw(){}
+  virtual ~gtpc_msg_illegal_ie_exception() throw () {
+  }
 };
 
 struct gtpc_ie_exception : public gtpc_exception {
-public:
-  gtpc_ie_exception(uint8_t ie_type) throw() {
+ public:
+  gtpc_ie_exception(uint8_t ie_type) throw () {
     phrase = fmt::format("GTPV2-C IE {} Exception", ie_type);
   }
-  gtpc_ie_exception(std::string& aphrase) throw() {
+  gtpc_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpc_ie_exception() throw(){}
+  virtual ~gtpc_ie_exception() throw () {
+  }
 };
 
 struct gtpc_missing_ie_exception : public gtpc_exception {
-public:
-  gtpc_missing_ie_exception(uint8_t gtpc_msg, uint8_t ie_type) throw() {
-    phrase = fmt::format("GTPV2-C msg {} missing IE {} Exception", gtpc_msg, ie_type);
+ public:
+  gtpc_missing_ie_exception(uint8_t gtpc_msg, uint8_t ie_type) throw () {
+    phrase = fmt::format("GTPV2-C msg {} missing IE {} Exception", gtpc_msg,
+                         ie_type);
   }
-  gtpc_missing_ie_exception(const char* gtpc_msg, const char* ie_type) throw() {
-    phrase = fmt::format("GTPV2-C msg {} missing IE {} Exception", gtpc_msg, ie_type);
+  gtpc_missing_ie_exception(const char *gtpc_msg, const char *ie_type) throw () {
+    phrase = fmt::format("GTPV2-C msg {} missing IE {} Exception", gtpc_msg,
+                         ie_type);
   }
-  gtpc_missing_ie_exception(std::string& aphrase) throw() {
+  gtpc_missing_ie_exception(std::string &aphrase) throw () {
     phrase = aphrase;
   }
-  virtual ~gtpc_missing_ie_exception() throw(){}
+  virtual ~gtpc_missing_ie_exception() throw () {
+  }
 };
 
 struct gtpc_ie_unimplemented_exception : public gtpc_ie_exception {
-public:
-  gtpc_ie_unimplemented_exception(uint8_t ie_type) throw() : gtpc_ie_exception(ie_type) {
+ public:
+  gtpc_ie_unimplemented_exception(uint8_t ie_type) throw ()
+      :
+      gtpc_ie_exception(ie_type) {
     phrase = fmt::format("GTPV2-C IE {} Unimplemented Exception", ie_type);
   }
-  virtual ~gtpc_ie_unimplemented_exception() throw(){}
+  virtual ~gtpc_ie_unimplemented_exception() throw () {
+  }
 };
 
 struct gtpc_tlv_exception : public gtpc_ie_exception {
-public:
-  gtpc_tlv_exception(uint8_t ie_type) throw() : gtpc_ie_exception(ie_type) {
+ public:
+  gtpc_tlv_exception(uint8_t ie_type) throw ()
+      :
+      gtpc_ie_exception(ie_type) {
     phrase = fmt::format("GTPV2-C IE TLV {} Exception", ie_type);
   }
-  virtual ~gtpc_tlv_exception() throw(){}
+  virtual ~gtpc_tlv_exception() throw () {
+  }
 };
 
 struct gtpc_tlv_bad_length_exception : public gtpc_tlv_exception {
-public:
-  gtpc_tlv_bad_length_exception(uint8_t ie_type, uint16_t ie_length) throw() : gtpc_tlv_exception(ie_type){
+ public:
+  gtpc_tlv_bad_length_exception(uint8_t ie_type, uint16_t ie_length) throw ()
+      :
+      gtpc_tlv_exception(ie_type) {
     phrase = fmt::format("GTPV2-C IE TLV {} Bad Length {} Exception", ie_type);
   }
-  virtual ~gtpc_tlv_bad_length_exception() throw(){}
+  virtual ~gtpc_tlv_bad_length_exception() throw () {
+  }
 };
 
 struct gtpc_tlv_bad_instance_exception : public gtpc_tlv_exception {
-public:
-  gtpc_tlv_bad_instance_exception(uint8_t ie_type, uint8_t ie_instance) throw() : gtpc_tlv_exception(ie_type){
-    phrase = fmt::format("GTPV2-C IE TLV {} Bad Instance {} Exception", ie_type, ie_instance);
+ public:
+  gtpc_tlv_bad_instance_exception(uint8_t ie_type, uint8_t ie_instance) throw ()
+      :
+      gtpc_tlv_exception(ie_type) {
+    phrase = fmt::format("GTPV2-C IE TLV {} Bad Instance {} Exception", ie_type,
+                         ie_instance);
   }
-  virtual ~gtpc_tlv_bad_instance_exception() throw(){}
+  virtual ~gtpc_tlv_bad_instance_exception() throw () {
+  }
 };
 
 struct gtpc_ie_value_exception : public gtpc_ie_exception {
-public:
-  gtpc_ie_value_exception(uint8_t ie_type, const char* field) throw() : gtpc_ie_exception(ie_type){
-    phrase = fmt::format("GTPV2-C IE {} Bad Value of {} Exception", ie_type, field);
+ public:
+  gtpc_ie_value_exception(uint8_t ie_type, const char *field) throw ()
+      :
+      gtpc_ie_exception(ie_type) {
+    phrase = fmt::format("GTPV2-C IE {} Bad Value of {} Exception", ie_type,
+                         field);
   }
-  virtual ~gtpc_ie_value_exception() throw(){}
+  virtual ~gtpc_ie_value_exception() throw () {
+  }
 };
 
 #define GTP_IE_IMSI                                                  (1)
@@ -290,7 +322,6 @@ public:
 #define GTP_IE_WLAN_OFFLOADABILITY_INDICATION                        (1000)
 #define GTP_IE_MAXIMUM_PACKET_LOSS                                   (1001)
 
-
 #define GTP_ECHO_REQUEST                                                   (1)
 #define GTP_ECHO_RESPONSE                                                  (2)
 #define GTP_VERSION_NOT_SUPPORTED_INDICATION                               (3)
@@ -383,49 +414,50 @@ public:
 struct imsi_s {
   union {
     struct {
-      uint8_t digit1:4;
-      uint8_t digit2:4;
-      uint8_t digit3:4;
-      uint8_t digit4:4;
-      uint8_t digit5:4;
-      uint8_t digit6:4;
-      uint8_t digit7:4;
-      uint8_t digit8:4;
-      uint8_t digit9:4;
-      uint8_t digit10:4;
-      uint8_t digit11:4;
-      uint8_t digit12:4;
-      uint8_t digit13:4;
-      uint8_t digit14:4;
-      uint8_t digit15:4;
-      uint8_t filler:4;
+      uint8_t digit1 :4;
+      uint8_t digit2 :4;
+      uint8_t digit3 :4;
+      uint8_t digit4 :4;
+      uint8_t digit5 :4;
+      uint8_t digit6 :4;
+      uint8_t digit7 :4;
+      uint8_t digit8 :4;
+      uint8_t digit9 :4;
+      uint8_t digit10 :4;
+      uint8_t digit11 :4;
+      uint8_t digit12 :4;
+      uint8_t digit13 :4;
+      uint8_t digit14 :4;
+      uint8_t digit15 :4;
+      uint8_t filler :4;
     } digits;
 #define IMSI_BCD8_SIZE                    8
     uint8_t b[IMSI_BCD8_SIZE];
   } u1;
   uint num_digits;
 
-  imsi_s() : num_digits(0)
-  {
+  imsi_s()
+      :
+      num_digits(0) {
     memset(u1.b, 0, sizeof(u1.b));
   }
 
-  imsi_s(const imsi_s& i) : num_digits(i.num_digits)
-  {
+  imsi_s(const imsi_s &i)
+      :
+      num_digits(i.num_digits) {
     memcpy(u1.b, i.u1.b, sizeof(u1.b));
   }
 
-  std::string toString() const
-  {
-    std::string s = {};
+  std::string toString() const {
+    std::string s = { };
     int l_i = 0;
     int l_j = 0;
-    while(l_i < IMSI_BCD8_SIZE) {
-      if((u1.b[l_i] & 0xf) > 9)
+    while (l_i < IMSI_BCD8_SIZE) {
+      if ((u1.b[l_i] & 0xf) > 9)
         break;
       s.append(std::to_string(u1.b[l_i] & 0xf));
       l_j++;
-      if(((u1.b[l_i] & 0xf0) >> 4) > 9)
+      if (((u1.b[l_i] & 0xf0) >> 4) > 9)
         break;
       s.append(std::to_string((u1.b[l_i] & 0xf0) >> 4));
       l_j++;
@@ -435,17 +467,16 @@ struct imsi_s {
   }
 
   //------------------------------------------------------------------------------
-  imsi64_t to_imsi64() const
-  {
+  imsi64_t to_imsi64() const {
     imsi64_t imsi64 = 0;
-    for (int i=0; i < IMSI_BCD8_SIZE; i++) {
+    for (int i = 0; i < IMSI_BCD8_SIZE; i++) {
       uint8_t d1 = u1.b[i];
       uint8_t d2 = (d1 & 0xf0) >> 4;
       d1 = d1 & 0x0f;
       if (10 > d1) {
-        imsi64 = imsi64*10 + d1;
+        imsi64 = imsi64 * 10 + d1;
         if (10 > d2) {
-          imsi64 = imsi64*10 + d2;
+          imsi64 = imsi64 * 10 + d2;
         } else {
           break;
         }
@@ -456,11 +487,11 @@ struct imsi_s {
     return imsi64;
   }
 
-  imsi_s& operator++ ()     // prefix ++
+  imsi_s& operator++()     // prefix ++
   {
     int l_i = IMSI_BCD8_SIZE - 1;
     uint8_t carry = 1;
-    while(l_i > 5) {
+    while (l_i > 5) {
       uint8_t b = u1.b[l_i];
       uint8_t d0 = b & 0x0f;
       uint8_t d1 = b & 0xf0;
@@ -468,7 +499,7 @@ struct imsi_s {
         d0 += carry;
         if (d0 <= 9) {
           u1.b[l_i] = d0 | d1;
-          return(*this);
+          return (*this);
         } else {
           d0 = 0;
           u1.b[l_i] = d0 | d1;
@@ -478,7 +509,7 @@ struct imsi_s {
         d1 += carry;
         if (d1 <= 9) {
           u1.b[l_i] = d0 | d1;
-          return(*this);
+          return (*this);
         } else {
           d1 = 0;
           u1.b[l_i] = d0 | d1;
@@ -488,21 +519,21 @@ struct imsi_s {
     }
     return (*this);
   }
-} ;
+};
 typedef struct imsi_s imsi_t;
 
 //-------------------------------------
 // 8.4 Cause
 enum cause_value_e {
   /* Request / Initial message */
-  UNKNOWN_ERROR                   = -1,
-  LOCAL_DETACH                    = 2,
-  COMPLETE_DETACH                 = 3,
-  RAT_CHANGE_3GPP_TO_NON_3GPP     = 4,  ///< RAT changed from 3GPP to Non-3GPP
-  ISR_DEACTIVATION                = 5,
-  ERROR_IND_FROM_RNC_ENB_SGSN     = 6,
-  IMSI_DETACH_ONLY                = 7,
-  REACTIVATION_REQUESTED          = 8,
+  UNKNOWN_ERROR = -1,
+  LOCAL_DETACH = 2,
+  COMPLETE_DETACH = 3,
+  RAT_CHANGE_3GPP_TO_NON_3GPP = 4,  ///< RAT changed from 3GPP to Non-3GPP
+  ISR_DEACTIVATION = 5,
+  ERROR_IND_FROM_RNC_ENB_SGSN = 6,
+  IMSI_DETACH_ONLY = 7,
+  REACTIVATION_REQUESTED = 8,
   PDN_RECONNECTION_TO_THIS_APN_DISALLOWED = 9,
   ACCESS_CHANGED_FROM_NON_3GPP_TO_3GPP = 10,
   PDN_CONNECTION_INACTIVITY_TIMER_EXPIRES = 11,
@@ -511,61 +542,61 @@ enum cause_value_e {
   QOS_PARAMETER_MISMATCH = 14,
 
   /* Acceptance in a Response/Triggered message */
-  REQUEST_ACCEPTED                = 16,
-  REQUEST_ACCEPTED_PARTIALLY      = 17,
-  NEW_PDN_TYPE_DUE_TO_NETWORK_PREFERENCE = 18, ///< New PDN type due to network preference
-  NEW_PDN_TYPE_DUE_TO_SINGLE_ADDRESS_BEARER_ONLY = 19, ///< New PDN type due to single address bearer only
+  REQUEST_ACCEPTED = 16,
+  REQUEST_ACCEPTED_PARTIALLY = 17,
+  NEW_PDN_TYPE_DUE_TO_NETWORK_PREFERENCE = 18,  ///< New PDN type due to network preference
+  NEW_PDN_TYPE_DUE_TO_SINGLE_ADDRESS_BEARER_ONLY = 19,  ///< New PDN type due to single address bearer only
   /* Rejection in a Response triggered message. */
-  CONTEXT_NOT_FOUND               = 64,
-  INVALID_MESSAGE_FORMAT          = 65,
+  CONTEXT_NOT_FOUND = 64,
+  INVALID_MESSAGE_FORMAT = 65,
   VERSION_NOT_SUPPORTED_BY_NEXT_PEER = 66,
-  INVALID_LENGTH                  = 67,
-  SERVICE_NOT_SUPPORTED           = 68,
-  MANDATORY_IE_INCORRECT          = 69,
-  MANDATORY_IE_MISSING            = 70,
-  SYSTEM_FAILURE                  = 72,
-  NO_RESOURCES_AVAILABLE          = 73,
+  INVALID_LENGTH = 67,
+  SERVICE_NOT_SUPPORTED = 68,
+  MANDATORY_IE_INCORRECT = 69,
+  MANDATORY_IE_MISSING = 70,
+  SYSTEM_FAILURE = 72,
+  NO_RESOURCES_AVAILABLE = 73,
   SEMANTIC_ERROR_IN_THE_TFT_OPERATION = 74,
   SYNTACTIC_ERROR_IN_THE_TFT_OPERATION = 75,
   SEMANTIC_ERRORS_IN_PACKET_FILTER = 76,
   SYNTACTIC_ERRORS_IN_PACKET_FILTER = 77,
-  MISSING_OR_UNKNOWN_APN          = 78,
-  GRE_KEY_NOT_FOUND               = 80,
-  RELOCATION_FAILURE              = 81,
-  DENIED_IN_RAT                   = 82,
+  MISSING_OR_UNKNOWN_APN = 78,
+  GRE_KEY_NOT_FOUND = 80,
+  RELOCATION_FAILURE = 81,
+  DENIED_IN_RAT = 82,
   PREFERRED_PDN_TYPE_NOT_SUPPORTED = 83,
   ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED = 84,
   UE_CONTEXT_WITHOUT_TFT_ALREADY_ACTIVATED = 85,
-  PROTOCOL_TYPE_NOT_SUPPORTED     = 86,
-  UE_NOT_RESPONDING               = 87,
-  UE_REFUSES                      = 88,
-  SERVICE_DENIED                  = 89,
-  UNABLE_TO_PAGE_UE               = 90,
-  NO_MEMORY_AVAILABLE             = 91,
-  USER_AUTHENTICATION_FAILED      = 92,
+  PROTOCOL_TYPE_NOT_SUPPORTED = 86,
+  UE_NOT_RESPONDING = 87,
+  UE_REFUSES = 88,
+  SERVICE_DENIED = 89,
+  UNABLE_TO_PAGE_UE = 90,
+  NO_MEMORY_AVAILABLE = 91,
+  USER_AUTHENTICATION_FAILED = 92,
   APN_ACCESS_DENIED_NO_SUBSCRIPTION = 93,
-  REQUEST_REJECTED                = 94,
-  P_TMSI_SIGNATURE_MISMATCH       = 95,
-  IMSI_IMEI_NOT_KNOWN             = 96,
+  REQUEST_REJECTED = 94,
+  P_TMSI_SIGNATURE_MISMATCH = 95,
+  IMSI_IMEI_NOT_KNOWN = 96,
   SEMANTIC_ERROR_IN_THE_TAD_OPERATION = 97,
   SYNTACTIC_ERROR_IN_THE_TAD_OPERATION = 98,
-  REMOTE_PEER_NOT_RESPONDING      = 100,
+  REMOTE_PEER_NOT_RESPONDING = 100,
   COLLISION_WITH_NETWORK_INITIATED_REQUEST = 101,
   UNABLE_TO_PAGE_UE_DUE_TO_SUSPENSION = 102,
-  CONDITIONAL_IE_MISSING          = 103,
+  CONDITIONAL_IE_MISSING = 103,
   APN_RESTRICTION_TYPE_INCOMPATIBLE_WITH_CURRENTLY_ACTIVE_PDN_CONNECTION = 104,
   INVALID_OVERALL_LENGTH_OF_THE_TRIGGERED_RESPONSE_MESSAGE_AND_A_PIGGYBACKED_INITIAL_MESSAGE = 105,
-  DATA_FORWARDING_NOT_SUPPORTED   = 106,
-  INVALID_REPLY_FROM_REMOTE_PEER  = 107,
-  FALLBACK_TO_GTPV1               = 108,
-  INVALID_PEER                    = 109,
-  TEMPORARILY_REJECTED_DUE_TO_TAU_HO_PROCEDURE_IN_PROGRESS      = 110,
+  DATA_FORWARDING_NOT_SUPPORTED = 106,
+  INVALID_REPLY_FROM_REMOTE_PEER = 107,
+  FALLBACK_TO_GTPV1 = 108,
+  INVALID_PEER = 109,
+  TEMPORARILY_REJECTED_DUE_TO_TAU_HO_PROCEDURE_IN_PROGRESS = 110,
   MODIFICATIONS_NOT_LIMITED_TO_S1_U_BEARERS = 111,
   REQUEST_REJECTED_FOR_PMIPv6_REASON = 112,
-  APN_CONGESTION                  = 113,
-  BEARER_HANDLING_NOT_SUPPORTED   = 114,
-  UE_ALREADY_RE_ATTACHED          = 115,
-  MULTIPLE_PDN_CONNECTIONS_FOR_A_GIVEN_APN_NOT_ALLOWED           = 116,
+  APN_CONGESTION = 113,
+  BEARER_HANDLING_NOT_SUPPORTED = 114,
+  UE_ALREADY_RE_ATTACHED = 115,
+  MULTIPLE_PDN_CONNECTIONS_FOR_A_GIVEN_APN_NOT_ALLOWED = 116,
   TARGET_ACCESS_RESTRICTED_FOR_THE_SUBSCRIBER = 117,
   MME_SGSN_REFUSES_DUE_TO_VPLMN_POLICY = 119,
   GTP_C_ENTITY_CONGESTION = 120,
@@ -580,13 +611,13 @@ enum cause_value_e {
 };
 
 typedef struct cause_s {
-  uint8_t  cause_value;
-  uint8_t  pce:1;
-  uint8_t  bce:1;
-  uint8_t  cs:1;
-  uint8_t  offending_ie_instance:4;
-  uint8_t  filler:1;
-  uint8_t  offending_ie_type;
+  uint8_t cause_value;
+  uint8_t pce :1;
+  uint8_t bce :1;
+  uint8_t cs :1;
+  uint8_t offending_ie_instance :4;
+  uint8_t filler :1;
+  uint8_t offending_ie_type;
   uint16_t offending_ie_length;
 } cause_t;
 //------------------------------------------------------------------------------
@@ -617,19 +648,32 @@ typedef struct ambr_s {
 
 typedef struct ebi_s {
   uint8_t ebi;
-  ebi_s() : ebi(EPS_BEARER_IDENTITY_UNASSIGNED) {}
-  ebi_s(const uint8_t& e) : ebi(e) {}
-  ebi_s(const struct ebi_s& e) : ebi(e.ebi) {}
+  ebi_s()
+      :
+      ebi(EPS_BEARER_IDENTITY_UNASSIGNED) {
+  }
+  ebi_s(const uint8_t &e)
+      :
+      ebi(e) {
+  }
+  ebi_s(const struct ebi_s &e)
+      :
+      ebi(e.ebi) {
+  }
 
-  inline bool operator==(const struct ebi_s& rhs) const { return ebi == rhs.ebi; }
-  inline bool operator!=(const struct ebi_s& rhs) const { return !(ebi == rhs.ebi); }
+  inline bool operator==(const struct ebi_s &rhs) const {
+    return ebi == rhs.ebi;
+  }
+  inline bool operator!=(const struct ebi_s &rhs) const {
+    return !(ebi == rhs.ebi);
+  }
 } ebi_t;
 //-------------------------------------
 // 8.9 IP Address
 typedef struct ip_address_s {
-  bool is_ipv4; // if not ipv4, then it is ipv6
+  bool is_ipv4;  // if not ipv4, then it is ipv6
   union {
-    struct in_addr  ipv4_address;
+    struct in_addr ipv4_address;
     struct in6_addr ipv6_address;
   } address;
 } ip_address_t;
@@ -641,48 +685,49 @@ struct mei_s {
 #define MEI_MAX_LENGTH      (16)
   union {
     struct {
-      uint8_t digit1:4;
-      uint8_t digit2:4;
-      uint8_t digit3:4;
-      uint8_t digit4:4;
-      uint8_t digit5:4;
-      uint8_t digit6:4;
-      uint8_t digit7:4;
-      uint8_t digit8:4;
-      uint8_t digit9:4;
-      uint8_t digit10:4;
-      uint8_t digit11:4;
-      uint8_t digit12:4;
-      uint8_t digit13:4;
-      uint8_t digit14:4;
-      uint8_t digit15:4;
-      uint8_t filler:4;
+      uint8_t digit1 :4;
+      uint8_t digit2 :4;
+      uint8_t digit3 :4;
+      uint8_t digit4 :4;
+      uint8_t digit5 :4;
+      uint8_t digit6 :4;
+      uint8_t digit7 :4;
+      uint8_t digit8 :4;
+      uint8_t digit9 :4;
+      uint8_t digit10 :4;
+      uint8_t digit11 :4;
+      uint8_t digit12 :4;
+      uint8_t digit13 :4;
+      uint8_t digit14 :4;
+      uint8_t digit15 :4;
+      uint8_t filler :4;
     } digits;
-    uint8_t b[MEI_MAX_LENGTH/2];
+    uint8_t b[MEI_MAX_LENGTH / 2];
   } u1;
   uint num_digits;
 
-  mei_s() : num_digits(0)
-  {
+  mei_s()
+      :
+      num_digits(0) {
     memset(u1.b, 0, sizeof(u1.b));
   }
 
-  mei_s(const mei_s& i) : num_digits(i.num_digits)
-  {
+  mei_s(const mei_s &i)
+      :
+      num_digits(i.num_digits) {
     memcpy(u1.b, i.u1.b, sizeof(u1.b));
   }
 
-  std::string toString() const
-  {
-    std::string s = {};
+  std::string toString() const {
+    std::string s = { };
     int l_i = 0;
     int l_j = 0;
-    while(l_i < MEI_MAX_LENGTH/2) {
-      if((u1.b[l_i] & 0xf) > 9)
+    while (l_i < MEI_MAX_LENGTH / 2) {
+      if ((u1.b[l_i] & 0xf) > 9)
         break;
       s.append(std::to_string(u1.b[l_i] & 0xf));
       l_j++;
-      if(((u1.b[l_i] & 0xf0) >> 4) > 9)
+      if (((u1.b[l_i] & 0xf0) >> 4) > 9)
         break;
       s.append(std::to_string((u1.b[l_i] & 0xf0) >> 4));
       l_j++;
@@ -691,11 +736,11 @@ struct mei_s {
     return s;
   }
 
-  mei_s& operator++ ()     // prefix ++
+  mei_s& operator++()     // prefix ++
   {
-    int l_i = MEI_MAX_LENGTH/2 - 1 - 1; // depends if imei or imei_sv -1 again
+    int l_i = MEI_MAX_LENGTH / 2 - 1 - 1;  // depends if imei or imei_sv -1 again
     uint8_t carry = 1;
-    while(l_i) {
+    while (l_i) {
       uint8_t b = u1.b[l_i];
       uint8_t d0 = b & 0x0f;
       uint8_t d1 = b & 0xf0;
@@ -703,7 +748,7 @@ struct mei_s {
         d0 += carry;
         if (d0 <= 9) {
           u1.b[l_i] = d0 | d1;
-          return(*this);
+          return (*this);
         } else {
           d0 = 0;
           u1.b[l_i] = d0 | d1;
@@ -713,7 +758,7 @@ struct mei_s {
         d1 += carry;
         if (d1 <= 9) {
           u1.b[l_i] = d0 | d1;
-          return(*this);
+          return (*this);
         } else {
           d1 = 0;
           u1.b[l_i] = d0 | d1;
@@ -723,7 +768,7 @@ struct mei_s {
     }
     return (*this);
   }
-} ;
+};
 
 typedef struct mei_s mei_t;
 //-------------------------------------
@@ -732,47 +777,48 @@ struct msisdn_s {
 #define MSISDN_MAX_LENGTH      (15)
   union {
     struct {
-      uint8_t digit1:4;
-      uint8_t digit2:4;
-      uint8_t digit3:4;
-      uint8_t digit4:4;
-      uint8_t digit5:4;
-      uint8_t digit6:4;
-      uint8_t digit7:4;
-      uint8_t digit8:4;
-      uint8_t digit9:4;
-      uint8_t digit10:4;
-      uint8_t digit11:4;
-      uint8_t digit12:4;
-      uint8_t digit13:4;
-      uint8_t digit14:4;
-      uint8_t digit15:4;
+      uint8_t digit1 :4;
+      uint8_t digit2 :4;
+      uint8_t digit3 :4;
+      uint8_t digit4 :4;
+      uint8_t digit5 :4;
+      uint8_t digit6 :4;
+      uint8_t digit7 :4;
+      uint8_t digit8 :4;
+      uint8_t digit9 :4;
+      uint8_t digit10 :4;
+      uint8_t digit11 :4;
+      uint8_t digit12 :4;
+      uint8_t digit13 :4;
+      uint8_t digit14 :4;
+      uint8_t digit15 :4;
     } digits;
-    uint8_t b[MSISDN_MAX_LENGTH/2+1];
+    uint8_t b[MSISDN_MAX_LENGTH / 2 + 1];
   } u1;
   uint num_digits;
 
-  msisdn_s() : num_digits(0)
-  {
+  msisdn_s()
+      :
+      num_digits(0) {
     memset(u1.b, 0, sizeof(u1.b));
   }
 
-  msisdn_s(const msisdn_s& i) : num_digits(i.num_digits)
-  {
+  msisdn_s(const msisdn_s &i)
+      :
+      num_digits(i.num_digits) {
     memcpy(u1.b, i.u1.b, sizeof(u1.b));
   }
 
-  std::string toString() const
-  {
-    std::string s = {};
+  std::string toString() const {
+    std::string s = { };
     int l_i = 0;
     int l_j = 0;
-    while(l_i < sizeof(u1.b)) {
-      if((u1.b[l_i] & 0xf) > 9)
+    while (l_i < sizeof(u1.b)) {
+      if ((u1.b[l_i] & 0xf) > 9)
         break;
       s.append(std::to_string(u1.b[l_i] & 0xf));
       l_j++;
-      if(((u1.b[l_i] & 0xf0) >> 4) > 9)
+      if (((u1.b[l_i] & 0xf0) >> 4) > 9)
         break;
       s.append(std::to_string((u1.b[l_i] & 0xf0) >> 4));
       l_j++;
@@ -782,11 +828,11 @@ struct msisdn_s {
   }
 
   // Should be refined see spec
-  msisdn_s& operator++ ()     // prefix ++
+  msisdn_s& operator++()     // prefix ++
   {
     int l_i = sizeof(u1.b) - 1;
     uint8_t carry = 1;
-    while(l_i > 5) {
+    while (l_i > 5) {
       uint8_t b = u1.b[l_i];
       uint8_t d0 = b & 0x0f;
       uint8_t d1 = b & 0xf0;
@@ -794,7 +840,7 @@ struct msisdn_s {
         d0 += carry;
         if (d0 <= 9) {
           u1.b[l_i] = d0 | d1;
-          return(*this);
+          return (*this);
         } else {
           d0 = 0;
           u1.b[l_i] = d0 | d1;
@@ -804,7 +850,7 @@ struct msisdn_s {
         d1 += carry;
         if (d1 <= 9) {
           u1.b[l_i] = d0 | d1;
-          return(*this);
+          return (*this);
         } else {
           d1 = 0;
           u1.b[l_i] = d0 | d1;
@@ -821,69 +867,70 @@ typedef struct msisdn_s msisdn_t;
 //-------------------------------------
 // 8.12 Indication
 typedef struct indication_s {
-  uint8_t daf:1;
-  uint8_t dtf:1;
-  uint8_t hi:1;
-  uint8_t dfi:1;
-  uint8_t oi:1;
-  uint8_t isrsi:1;
-  uint8_t israi:1;
-  uint8_t sgwci:1;
+  uint8_t daf :1;
+  uint8_t dtf :1;
+  uint8_t hi :1;
+  uint8_t dfi :1;
+  uint8_t oi :1;
+  uint8_t isrsi :1;
+  uint8_t israi :1;
+  uint8_t sgwci :1;
 
-  uint8_t sqci:1;
-  uint8_t uimsi:1;
-  uint8_t cfsi:1;
-  uint8_t crsi:1;
-  uint8_t p:1;
-  uint8_t pt:1;
-  uint8_t si:1;
-  uint8_t msv:1;
+  uint8_t sqci :1;
+  uint8_t uimsi :1;
+  uint8_t cfsi :1;
+  uint8_t crsi :1;
+  uint8_t p :1;
+  uint8_t pt :1;
+  uint8_t si :1;
+  uint8_t msv :1;
 
-  uint8_t retloc:1;
-  uint8_t pbic:1;
-  uint8_t srni:1;
-  uint8_t s6af:1;
-  uint8_t s4af:1;
-  uint8_t mbmdt:1;
-  uint8_t israu:1;
-  uint8_t ccrsi:1;
+  uint8_t retloc :1;
+  uint8_t pbic :1;
+  uint8_t srni :1;
+  uint8_t s6af :1;
+  uint8_t s4af :1;
+  uint8_t mbmdt :1;
+  uint8_t israu :1;
+  uint8_t ccrsi :1;
 
-  uint8_t cprai:1;
-  uint8_t arrl:1;
-  uint8_t ppof:1;
-  uint8_t ppon:1;
-  uint8_t ppsi:1;
-  uint8_t csfbi:1;
-  uint8_t clii:1;
-  uint8_t cpsr:1;
+  uint8_t cprai :1;
+  uint8_t arrl :1;
+  uint8_t ppof :1;
+  uint8_t ppon :1;
+  uint8_t ppsi :1;
+  uint8_t csfbi :1;
+  uint8_t clii :1;
+  uint8_t cpsr :1;
 
-  uint8_t nsi:1;
-  uint8_t uasi:1;
-  uint8_t dtci:1;
-  uint8_t bdwi:1;
-  uint8_t psci:1;
-  uint8_t pcri:1;
-  uint8_t aosi:1;
-  uint8_t aopi:1;
+  uint8_t nsi :1;
+  uint8_t uasi :1;
+  uint8_t dtci :1;
+  uint8_t bdwi :1;
+  uint8_t psci :1;
+  uint8_t pcri :1;
+  uint8_t aosi :1;
+  uint8_t aopi :1;
 
-  uint8_t roaai:1;
-  uint8_t epcosi:1;
-  uint8_t cpopci:1;
-  uint8_t pmtsmi:1;
-  uint8_t s11tf:1;
-  uint8_t pnsi:1;
-  uint8_t unaccsi:1;
-  uint8_t wpmsi:1;
+  uint8_t roaai :1;
+  uint8_t epcosi :1;
+  uint8_t cpopci :1;
+  uint8_t pmtsmi :1;
+  uint8_t s11tf :1;
+  uint8_t pnsi :1;
+  uint8_t unaccsi :1;
+  uint8_t wpmsi :1;
 
-  uint8_t spare1:1;
-  uint8_t spare2:1;
-  uint8_t spare3:1;
-  uint8_t eevrsi:1;
-  uint8_t ltemui:1;
-  uint8_t ltempi:1;
-  uint8_t enbcpi:1;
-  uint8_t tspcmi:1;
+  uint8_t spare1 :1;
+  uint8_t spare2 :1;
+  uint8_t spare3 :1;
+  uint8_t eevrsi :1;
+  uint8_t ltemui :1;
+  uint8_t ltempi :1;
+  uint8_t enbcpi :1;
+  uint8_t tspcmi :1;
 } indication_t;
+
 //-------------------------------------
 // 8.13 Protocol Configuration Options (PCO)
 //-------------------------------------
@@ -894,55 +941,64 @@ enum pdn_type_e {
   PDN_TYPE_E_IPV4V6 = 3,
   PDN_TYPE_E_NON_IP = 4,
 };
-static const std::vector<std::string> pdn_type_e2str = {"Error", "IPV4", "IPV6", "IPV4V6", "NON_IP"};
+
+static const std::vector<std::string> pdn_type_e2str = { "Error", "IPV4",
+    "IPV6", "IPV4V6", "NON_IP" };
 
 typedef struct pdn_type_s {
   uint8_t pdn_type;
-  pdn_type_s() : pdn_type(PDN_TYPE_E_IPV4) {}
-  pdn_type_s(const uint8_t& p) : pdn_type(p) {}
-  pdn_type_s(const struct pdn_type_s& p) : pdn_type(p.pdn_type) {}
-  bool operator==(const struct pdn_type_s& p) const
-  {
+  pdn_type_s()
+      :
+      pdn_type(PDN_TYPE_E_IPV4) {
+  }
+  pdn_type_s(const uint8_t &p)
+      :
+      pdn_type(p) {
+  }
+  pdn_type_s(const struct pdn_type_s &p)
+      :
+      pdn_type(p.pdn_type) {
+  }
+  bool operator==(const struct pdn_type_s &p) const {
     return (p.pdn_type == pdn_type);
   }
   //------------------------------------------------------------------------------
-  bool operator==(const pdn_type_e& p) const
-  {
+  bool operator==(const pdn_type_e &p) const {
     return (p == pdn_type);
   }
   //------------------------------------------------------------------------------
-  const std::string& toString() const {return pdn_type_e2str.at(pdn_type);}
+  const std::string& toString() const {
+    return pdn_type_e2str.at(pdn_type);
+  }
 } pdn_type_t;
 
 //-------------------------------------
 // 8.14 PDN Address Allocation (PAA)
 struct paa_s {
   pdn_type_t pdn_type;
-  uint8_t         ipv6_prefix_length;
+  uint8_t ipv6_prefix_length;
   struct in6_addr ipv6_address;
-  struct in_addr  ipv4_address;
+  struct in_addr ipv4_address;
   //------------------------------------------------------------------------------
   bool is_ip_assigned() {
     switch (pdn_type.pdn_type) {
       case PDN_TYPE_E_IPV4:
-        if (ipv4_address.s_addr) return true;
+        if (ipv4_address.s_addr)
+          return true;
         return false;
         break;
       case PDN_TYPE_E_IPV6:
-        if (ipv6_address.s6_addr32[0] |
-          ipv6_address.s6_addr32[1] |
-          ipv6_address.s6_addr32[2] |
-          ipv6_address.s6_addr32[3])
+        if (ipv6_address.s6_addr32[0] | ipv6_address.s6_addr32[1]
+            | ipv6_address.s6_addr32[2] | ipv6_address.s6_addr32[3])
           return true;
         return false;
         break;
       case PDN_TYPE_E_IPV4V6:
         // TODO
-        if (ipv4_address.s_addr) return true;
-        if (ipv6_address.s6_addr32[0] |
-          ipv6_address.s6_addr32[1] |
-          ipv6_address.s6_addr32[2] |
-          ipv6_address.s6_addr32[3])
+        if (ipv4_address.s_addr)
+          return true;
+        if (ipv6_address.s6_addr32[0] | ipv6_address.s6_addr32[1]
+            | ipv6_address.s6_addr32[2] | ipv6_address.s6_addr32[3])
           return true;
         return false;
         break;
@@ -962,32 +1018,29 @@ typedef struct paa_s paa_t;
 #define PRE_EMPTION_VULNERABILITY_DISABLED (0x1)
 
 typedef struct bearer_qos_s {
-  uint8_t  spare1:1;
-  uint8_t  pci:1;
-  uint8_t  pl:4;
-  uint8_t  spare2:1;
-  uint8_t  pvi:1;
-  uint8_t  label_qci;
+  uint8_t spare1 :1;
+  uint8_t pci :1;
+  uint8_t pl :4;
+  uint8_t spare2 :1;
+  uint8_t pvi :1;
+  uint8_t label_qci;
   uint64_t maximum_bit_rate_for_uplink;
   uint64_t maximum_bit_rate_for_downlink;
   uint64_t guaranted_bit_rate_for_uplink;
   uint64_t guaranted_bit_rate_for_downlink;
 
-  bool operator==(const struct bearer_qos_s& q) const
-  {
-    return ((q.label_qci == label_qci) &&
-    (q.pl == pl) &&
-    (q.pvi == pvi) &&
-    (q.pci == pci));
+  bool operator==(const struct bearer_qos_s &q) const {
+    return ((q.label_qci == label_qci) && (q.pl == pl) && (q.pvi == pvi)
+        && (q.pci == pci));
   }
   //------------------------------------------------------------------------------
-  std::string toString() const
-  {
-    std::string s = {};
+  std::string toString() const {
+    std::string s = { };
     s.append("MBR UL=").append(std::to_string(maximum_bit_rate_for_uplink));
     s.append(", MBR DL=").append(std::to_string(maximum_bit_rate_for_downlink));
     s.append(", GBR UL=").append(std::to_string(guaranted_bit_rate_for_uplink));
-    s.append(", GBR DL=").append(std::to_string(guaranted_bit_rate_for_downlink));
+    s.append(", GBR DL=").append(
+        std::to_string(guaranted_bit_rate_for_downlink));
     s.append(", PCI=").append(std::to_string(pci));
     s.append(", PL=").append(std::to_string(pl));
     s.append(", PVI=").append(std::to_string(pvi));
@@ -996,11 +1049,10 @@ typedef struct bearer_qos_s {
   }
 } bearer_qos_t;
 
-
 //-------------------------------------
 // 8.16 Flow Quality of Service (Flow QoS)
 typedef struct flow_qos_s {
-  uint8_t  label_qci;
+  uint8_t label_qci;
   uint64_t maximum_bit_rate_for_uplink;
   uint64_t maximum_bit_rate_for_downlink;
   uint64_t guaranted_bit_rate_for_uplink;
@@ -1023,25 +1075,45 @@ enum rat_type_e {
 };
 struct rat_type_s {
   uint8_t rat_type;
-  rat_type_s() : rat_type(RAT_TYPE_E_EUTRAN_WB_EUTRAN) {}
-  rat_type_s(const rat_type_e r) : rat_type(r) {}
-  rat_type_s(const rat_type_s& i) : rat_type(i.rat_type) {}
+  rat_type_s()
+      :
+      rat_type(RAT_TYPE_E_EUTRAN_WB_EUTRAN) {
+  }
+  rat_type_s(const rat_type_e r)
+      :
+      rat_type(r) {
+  }
+  rat_type_s(const rat_type_s &i)
+      :
+      rat_type(i.rat_type) {
+  }
   //------------------------------------------------------------------------------
-  std::string toString() const
-  {
-    switch(rat_type) {
-      case RAT_TYPE_E_EUTRAN_WB_EUTRAN: return std::string("EUTRAN_WB_EUTRAN");
-      case RAT_TYPE_E_EUTRAN_NB_IOT: return std::string("EUTRAN_NB_IOT");
-      case RAT_TYPE_E_LTE_M: return std::string("LTE_M");
-      case RAT_TYPE_E_NR: return std::string("NR");
-      case RAT_TYPE_E_VIRTUAL: return std::string("VIRTUAL");
-      case RAT_TYPE_E_RESERVED: return std::string("RESERVED");
-      case RAT_TYPE_E_UTRAN: return std::string("UTRAN");
-      case RAT_TYPE_E_GERAN: return std::string("GERAN");
-      case RAT_TYPE_E_WLAN: return std::string("WLAN");
-      case RAT_TYPE_E_GAN: return std::string("GAN");
-      case RAT_TYPE_E_HSPA_EVOLUTION: return std::string("HSPA_EVOLUTION");
-      default: return std::to_string(rat_type);
+  std::string toString() const {
+    switch (rat_type) {
+      case RAT_TYPE_E_EUTRAN_WB_EUTRAN:
+        return std::string("EUTRAN_WB_EUTRAN");
+      case RAT_TYPE_E_EUTRAN_NB_IOT:
+        return std::string("EUTRAN_NB_IOT");
+      case RAT_TYPE_E_LTE_M:
+        return std::string("LTE_M");
+      case RAT_TYPE_E_NR:
+        return std::string("NR");
+      case RAT_TYPE_E_VIRTUAL:
+        return std::string("VIRTUAL");
+      case RAT_TYPE_E_RESERVED:
+        return std::string("RESERVED");
+      case RAT_TYPE_E_UTRAN:
+        return std::string("UTRAN");
+      case RAT_TYPE_E_GERAN:
+        return std::string("GERAN");
+      case RAT_TYPE_E_WLAN:
+        return std::string("WLAN");
+      case RAT_TYPE_E_GAN:
+        return std::string("GAN");
+      case RAT_TYPE_E_HSPA_EVOLUTION:
+        return std::string("HSPA_EVOLUTION");
+      default:
+        return std::to_string(rat_type);
     }
   }
 };
@@ -1099,7 +1171,7 @@ typedef struct gtpc2c_rai_field_s {
 } rai_field_t;
 //-------------------------------------
 // 8.21.4 TAI field
-typedef struct gtpc2c_tai_field_s{
+typedef struct gtpc2c_tai_field_s {
   uint8_t mcc_digit_2 :4;
   uint8_t mcc_digit_1 :4;
   uint8_t mnc_digit_3 :4;
@@ -1122,21 +1194,22 @@ typedef struct gtpc2c_ecgi_field_s {
   uint8_t e_utran_cell_identifier[3];
 
   //------------------------------------------------------------------------------
-  std::string toString() const
-  {
-    std::string s = {};
-    std::string mccs = conv::mccToString(mcc_digit_1, mcc_digit_2,mcc_digit_3);
-    std::string mncs = conv::mncToString(mnc_digit_1, mnc_digit_2,mnc_digit_3);
+  std::string toString() const {
+    std::string s = { };
+    std::string mccs = conv::mccToString(mcc_digit_1, mcc_digit_2, mcc_digit_3);
+    std::string mncs = conv::mncToString(mnc_digit_1, mnc_digit_2, mnc_digit_3);
     s.append("mcc=").append(mccs).append(", MNC=").append(mncs);
     s.append(", ECI=").append(std::to_string(eci));
-    uint32_t we_utran_cell_identifier = static_cast<uint32_t>(e_utran_cell_identifier[0]) << 16;
-    we_utran_cell_identifier |= (static_cast<uint32_t>(e_utran_cell_identifier[1]) << 8);
-    we_utran_cell_identifier |= static_cast<uint32_t>(e_utran_cell_identifier[2]);
+    uint32_t we_utran_cell_identifier =
+        static_cast<uint32_t>(e_utran_cell_identifier[0]) << 16;
+    we_utran_cell_identifier |=
+        (static_cast<uint32_t>(e_utran_cell_identifier[1]) << 8);
+    we_utran_cell_identifier |=
+        static_cast<uint32_t>(e_utran_cell_identifier[2]);
     s.append(", EUCI=").append(std::to_string(we_utran_cell_identifier));
     return s;
   }
 } ecgi_field_t;
-
 
 //-------------------------------------
 // 8.21.6 LAI field
@@ -1253,13 +1326,19 @@ enum interface_type_e {
 struct interface_type_s {
   interface_type_e interface_type;
 
-  interface_type_s() : interface_type(INTERFACE_TYPE_MIN) {}
-  interface_type_s(interface_type_e t) : interface_type(t) {}
+  interface_type_s()
+      :
+      interface_type(INTERFACE_TYPE_MIN) {
+  }
+  interface_type_s(interface_type_e t)
+      :
+      interface_type(t) {
+  }
 
   //------------------------------------------------------------------------------
-  std::string toString() const
-  {
-    if ((interface_type >= INTERFACE_TYPE_MIN) && (interface_type <= INTERFACE_TYPE_MAX)) {
+  std::string toString() const {
+    if ((interface_type >= INTERFACE_TYPE_MIN)
+        && (interface_type <= INTERFACE_TYPE_MAX)) {
       return std::string(interface_type2char[interface_type]);
     } else {
       return std::to_string(interface_type);
@@ -1269,45 +1348,40 @@ struct interface_type_s {
 
 typedef struct interface_type_s interface_type_t;
 
-
 struct fully_qualified_tunnel_endpoint_identifier_s {
   uint8_t v4 :1;
   uint8_t v6 :1;
   uint8_t interface_type :6;
   uint32_t teid_gre_key;
-  struct in_addr  ipv4_address;
+  struct in_addr ipv4_address;
   struct in6_addr ipv6_address;
 
-  bool operator<(const struct fully_qualified_tunnel_endpoint_identifier_s& f) const
-  {
-    return (teid_gre_key < f.teid_gre_key) or
-    (ipv4_address.s_addr < f.ipv4_address.s_addr) or
-    (interface_type < f.interface_type) or
-    (v4 == f.v4) or
-    (v6 == f.v6) or
-    (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0]) or
-    (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1]) or
-    (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2]) or
-    (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3]);
+  bool operator<(
+      const struct fully_qualified_tunnel_endpoint_identifier_s &f) const {
+    return (teid_gre_key < f.teid_gre_key)
+        or (ipv4_address.s_addr < f.ipv4_address.s_addr)
+        or (interface_type < f.interface_type) or (v4 == f.v4) or (v6 == f.v6)
+        or (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0])
+        or (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1])
+        or (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2])
+        or (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3]);
   }
 
-  bool operator==(const struct fully_qualified_tunnel_endpoint_identifier_s& f) const
-  {
-    return (teid_gre_key == f.teid_gre_key) and
-    (ipv4_address.s_addr == f.ipv4_address.s_addr) and
-    (interface_type == f.interface_type) and
-    (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0]) and
-    (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1]) and
-    (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2]) and
-    (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3]) and
-    (v4 == f.v4) and
-    (v6 == f.v6);
+  bool operator==(
+      const struct fully_qualified_tunnel_endpoint_identifier_s &f) const {
+    return (teid_gre_key == f.teid_gre_key)
+        and (ipv4_address.s_addr == f.ipv4_address.s_addr)
+        and (interface_type == f.interface_type)
+        and (ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0])
+        and (ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1])
+        and (ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2])
+        and (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3])
+        and (v4 == f.v4) and (v6 == f.v6);
   }
   //------------------------------------------------------------------------------
-  std::string toString() const
-  {
-    std::string s = {};
-    interface_type_t iface_type((interface_type_e)interface_type);
+  std::string toString() const {
+    std::string s = { };
+    interface_type_t iface_type((interface_type_e) interface_type);
     if ((v4) || (v6)) {
       s.append("Interface type=").append(iface_type.toString());
       s.append(", TEID=").append(std::to_string(teid_gre_key));
@@ -1322,12 +1396,13 @@ struct fully_qualified_tunnel_endpoint_identifier_s {
     }
     return s;
   }
-  bool is_zero() const {return ((!v4) and(!v6));}
-} ;
+  bool is_zero() const {
+    return ((!v4) and (!v6));
+  }
+};
 
 typedef struct fully_qualified_tunnel_endpoint_identifier_s fully_qualified_tunnel_endpoint_identifier_t;
 typedef struct fully_qualified_tunnel_endpoint_identifier_s fteid_t;
-
 
 //-------------------------------------
 // 8.24 Global CN-Id
@@ -1465,7 +1540,7 @@ typedef struct plmn_id_s {
     struct {
       uint8_t mcc_digit_2 :4;
       uint8_t mcc_digit_1 :4;
-      uint8_t filler1111  :4;
+      uint8_t filler1111 :4;
       uint8_t mcc_digit_3 :4;
       uint8_t mnc_digit_2 :4;
       uint8_t mnc_digit_1 :4;
@@ -1499,7 +1574,7 @@ typedef struct target_id_for_type_rnc_id_s {
     uint8_t rac;
     uint16_t rnc_id;
   } target_id_for_type_rnc_id_hdr;
-  char* extended_rnc_id;
+  char *extended_rnc_id;
 } target_id_for_type_rnc_id_t;
 
 typedef struct target_id_for_type_macro_enodeb_s {
@@ -1586,12 +1661,12 @@ typedef struct target_id_for_type_extended_macro_ng_enodeb_s {
 typedef struct target_identification_s {
   uint8_t target_type;
   union {
-    target_id_for_type_rnc_id_t          rnc_id;
-    target_id_for_type_macro_enodeb_t    macro_enodeb_id;
+    target_id_for_type_rnc_id_t rnc_id;
+    target_id_for_type_macro_enodeb_t macro_enodeb_id;
     target_id_for_type_cell_identifier_t cell_identifier;
-    target_id_for_type_home_enodeb_t     home_enodeb_id;
+    target_id_for_type_home_enodeb_t home_enodeb_id;
     target_id_for_type_extended_macro_enodeb_t extended_macro_enodeb_id;
-    target_id_for_type_gnode_id_t        gnodeb_id;
+    target_id_for_type_gnode_id_t gnodeb_id;
     target_id_for_type_macro_ng_enodeb_t macro_ng_enodeb_id;
     target_id_for_type_extended_macro_ng_enodeb_t extended_ng_enodeb_id;
   } target_id;
@@ -1602,7 +1677,7 @@ typedef struct target_identification_s {
 typedef struct packet_flow_id_s {
   uint8_t spare1 :4;
   uint8_t ebi :4;
-  char* packet_flow_id;
+  char *packet_flow_id;
 } packet_flow_id_t;
 
 //-------------------------------------
@@ -1637,8 +1712,8 @@ typedef struct selection_mode_s {
 enum node_id_type_e {
   GLOBAL_UNICAST_IPv4 = 0,
   GLOBAL_UNICAST_IPv6 = 1,
-  TYPE_EXOTIC         = 2, ///< (MCC * 1000 + MNC) << 12 + Integer value assigned to MME by operator
-} ;
+  TYPE_EXOTIC = 2,  ///< (MCC * 1000 + MNC) << 12 + Integer value assigned to MME by operator
+};
 
 // Values of Number of CSID other than 1 are only employed in the Delete PDN Connection Set Request.
 typedef struct fq_csid_s {
@@ -1646,8 +1721,8 @@ typedef struct fq_csid_s {
     uint8_t node_id_type :4;
     uint8_t number_of_csids :4;
     union {
-      struct in_addr   unicast_ipv4;
-      struct in6_addr  unicast_ipv6;
+      struct in_addr unicast_ipv4;
+      struct in6_addr unicast_ipv6;
       struct {
         uint16_t mcc;
         uint16_t mnc;
@@ -1662,7 +1737,7 @@ typedef struct fq_csid_s {
 //-------------------------------------
 // 8.65 Node Type
 enum node_type_e {
-  NODE_TYPE_E_MME  = 0,
+  NODE_TYPE_E_MME = 0,
   NODE_TYPE_E_SGSN = 1
 };
 
@@ -1689,7 +1764,6 @@ typedef struct private_extension_s {
 typedef struct transaction_identifier_s {
   uint8_t transaction_identifier;
 } transaction_identifier_t;
-
 
 //-------------------------------------
 // 8.75 User CSG Information (UCI)
@@ -1837,7 +1911,6 @@ typedef struct signalling_priority_indication_s {
   uint8_t lapi :1;
 } signalling_priority_indication_t;
 
-
 //-------------------------------------
 // 8.90 Additional MM context for SRVCC
 typedef struct additional_mm_context_for_srvcc_s {
@@ -1876,7 +1949,6 @@ typedef struct ipv4_configuration_parameters_s {
   uint8_t subnet_prefix_length;
   uint32_t ipv4_default_router_address;
 } ipv4_configuration_parameters_t;
-
 
 //-------------------------------------
 // 8.98 Change to Report Flags
@@ -1951,14 +2023,13 @@ typedef struct ran_nas_cause_s {
   uint8_t protocol_type :4;
   uint8_t cause_type :4;
   union {
-    uint16_t s1ap; // TODO
+    uint16_t s1ap;  // TODO
     uint8_t emm;
     uint8_t esm;
     uint16_t diameter;
     uint16_t ikev2;
   } cause_value;
 } ran_nas_cause_t;
-
 
 //-------------------------------------
 // 8.104 CN Operator Selection Entity
@@ -2001,18 +2072,17 @@ typedef struct presence_reporting_area_action_s {
     uint8_t spare6 :2;
     uint8_t number_of_cgi :6;
   } presence_reporting_area_action_hdr;
-  char*  *tais;
-  char*  *macro_enb_ids;
-  char*  *home_enb_ids;
-  char*  *ecgis;
-  char*  *rais;
-  char*  *sais;
-  char*  *cgis;
+  char **tais;
+  char **macro_enb_ids;
+  char **home_enb_ids;
+  char **ecgis;
+  char **rais;
+  char **sais;
+  char **cgis;
   uint8_t spare7 :2;
   uint8_t number_of_extended_macro_enodeb :6;
-  char*  *extended_macro_enb_ids;
+  char **extended_macro_enb_ids;
 } presence_reporting_area_action_t;
-
 
 //-------------------------------------
 // 8.109 Presence Reporting Area Information
@@ -2074,7 +2144,7 @@ typedef struct paging_and_service_information_s {
 // 8.118 Integer Number
 typedef struct integer_number_s {
   union {
-    uint8_t  i8;
+    uint8_t i8;
     uint16_t i16;
     uint32_t i32;
   } u;
@@ -2137,7 +2207,6 @@ typedef struct counter_s {
   uint8_t counter_value;
 } counter_t;
 
-
 //-------------------------------------
 // 8.133 UP Function Selection Indication Flags
 typedef struct up_function_selection_indication_flags_s {
@@ -2163,25 +2232,24 @@ namespace std {
 
 template<>
 class hash<fteid_t> {
-public:
-  size_t operator()(const fteid_t &k) const
-    {
-      using std::size_t;
-      using std::hash;
-      std::size_t h1 = std::hash<uint32_t>()(k.interface_type);
-      std::size_t h2 = std::hash<uint32_t>()(k.teid_gre_key) ^ h1;
+ public:
+  size_t operator()(const fteid_t &k) const {
+    using std::size_t;
+    using std::hash;
+    std::size_t h1 = std::hash<uint32_t>()(k.interface_type);
+    std::size_t h2 = std::hash<uint32_t>()(k.teid_gre_key) ^ h1;
 
-      if (k.v4) {
-        h2 ^= std::hash<uint32_t>()(k.ipv4_address.s_addr);
-      }
-      if (k.v6) {
-        h2 ^= std::hash<uint32_t>()(k.ipv6_address.s6_addr32[0]);
-        h2 ^= std::hash<uint32_t>()(k.ipv6_address.s6_addr32[1]);
-        h2 ^= std::hash<uint32_t>()(k.ipv6_address.s6_addr32[2]);
-        h2 ^= std::hash<uint32_t>()(k.ipv6_address.s6_addr32[3]);
-      }
-      return h2;
+    if (k.v4) {
+      h2 ^= std::hash<uint32_t>()(k.ipv4_address.s_addr);
     }
-  };
+    if (k.v6) {
+      h2 ^= std::hash<uint32_t>()(k.ipv6_address.s6_addr32[0]);
+      h2 ^= std::hash<uint32_t>()(k.ipv6_address.s6_addr32[1]);
+      h2 ^= std::hash<uint32_t>()(k.ipv6_address.s6_addr32[2]);
+      h2 ^= std::hash<uint32_t>()(k.ipv6_address.s6_addr32[3]);
+    }
+    return h2;
+  }
+};
 }
 #endif /* FILE_3GPP_29_274_SEEN */

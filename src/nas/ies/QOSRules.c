@@ -12,7 +12,6 @@ int encode_qos_rules ( QOSRules qosrules, uint8_t iei, uint8_t * buffer, uint32_
   uint8_t *len_qosrulesie = NULL;
   uint8_t len_pos_qos_rule = 0;
   uint8_t bitstream = 0;
-  uint16_t lenqosrule_16 = 0;
   uint32_t encoded = 0;
   int encode_result = 0;
   int i = 0,j = 0;
@@ -102,7 +101,7 @@ int decode_qos_rules ( QOSRules * qosrules, uint8_t iei, uint8_t * buffer, uint3
   uint16_t ielen=0;
   int decode_result = 0;
   uint16_t numberrules = 0;
-  uint16_t lenqosrule = 0;
+//  uint16_t lenqosrule = 0;
   uint8_t bitstream = 0;
   int i=0,j=0;
 

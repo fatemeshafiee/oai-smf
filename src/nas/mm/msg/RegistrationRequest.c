@@ -375,7 +375,7 @@ int encode_registration_request( registration_request_msg *registration_request,
     }
    */
   //test
-  if(registration_request->presence & REGISTRATION_REQUEST_ALLOWED_PDU_SESSION_STATUS_PRESENT
+  if((registration_request->presence & REGISTRATION_REQUEST_ALLOWED_PDU_SESSION_STATUS_PRESENT)
       == REGISTRATION_REQUEST_ALLOWED_PDU_SESSION_STATUS_PRESENT){
     if((encoded_result = encode_allowed_pdu_session_status (registration_request->allowedpdusessionstatus, REGISTRATION_REQUEST_ALLOWED_PDU_SESSION_STATUS_IEI, buffer+encoded,len-encoded))<0)
       return encoded_result;

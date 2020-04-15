@@ -10,7 +10,6 @@
 #include "EAPMessage.h"
 #include "ExtendedProtocolConfigurationOptions.h"
 
-
 #if 0
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_AUTHENTICATION_COMPLETE_MINIMUM_LENGTH ( \
@@ -22,7 +21,7 @@
 		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MINIMUM_LENGTH + \
 0)
 #endif
-	
+
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_AUTHENTICATION_COMPLETE_MINIMUM_LENGTH ( \
 		EAP_MESSAGE_MINIMUM_LENGTH_LVE + \
@@ -42,17 +41,20 @@
 #define PDU_SESSION_AUTHENTICATION_COMPLETE_EPCO_PRESENCE	(1<<0)
 
 typedef struct pdu_session_authentication_complete_msg_tag {
-	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-	PDUSessionIdentity pdusessionidentity;
-	ProcedureTransactionIdentity proceduretransactionidentity;
-	MessageType messagetype;
-	EAPMessage eapmessage;
-	uint8_t presence;
-	ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
+  ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+  PDUSessionIdentity pdusessionidentity;
+  ProcedureTransactionIdentity proceduretransactionidentity;
+  MessageType messagetype;
+  EAPMessage eapmessage;
+  uint8_t presence;
+  ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
 } pdu_session_authentication_complete_msg;
 
-
-int decode_pdu_session_authentication_complete(pdu_session_authentication_complete_msg *pdusessionauthenticationcomplete, uint8_t *buffer, uint32_t len);
-int encode_pdu_session_authentication_complete(pdu_session_authentication_complete_msg *pdusessionauthenticationcomplete, uint8_t *buffer, uint32_t len);
+int decode_pdu_session_authentication_complete(
+    pdu_session_authentication_complete_msg *pdusessionauthenticationcomplete,
+    uint8_t *buffer, uint32_t len);
+int encode_pdu_session_authentication_complete(
+    pdu_session_authentication_complete_msg *pdusessionauthenticationcomplete,
+    uint8_t *buffer, uint32_t len);
 
 #endif

@@ -10,7 +10,7 @@ int encode__5gs_mobile_identity ( _5GSMobileIdentity  _5gsmobileidentity, uint8_
 {
   uint8_t *lenPtr;
   uint32_t encoded = 0;
-  int encode_result;
+
   CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer,_5GS_MOBILE_IDENTITY_MINIMUM_LENGTH , len);
 
   lenPtr = (buffer + encoded);

@@ -20,11 +20,11 @@
  */
 
 /*! \file 3gpp_24.008.h
-  \brief
-  \author Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \author Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 #ifndef FILE_3GPP_24_008_SEEN
 #define FILE_3GPP_24_008_SEEN
 
@@ -124,21 +124,20 @@
 #define PCO_CI_IM_CN_SUBSYSTEM_SIGNALING_FLAG                                             (0x0002)
 
 typedef struct pco_protocol_or_container_id_s {
-  uint16_t    protocol_id;
-  uint8_t     length_of_protocol_id_contents;
+  uint16_t protocol_id;
+  uint8_t length_of_protocol_id_contents;
   std::string protocol_id_contents;
 } pco_protocol_or_container_id_t;
 
 typedef struct protocol_configuration_options_s {
-  uint8_t     ext:1;
-  uint8_t     spare:4;
-  uint8_t     configuration_protocol:3;
-  uint8_t     num_protocol_or_container_id;
+  uint8_t ext :1;
+  uint8_t spare :4;
+  uint8_t configuration_protocol :3;
+  uint8_t num_protocol_or_container_id;
   // arbitrary value, can be greater than defined (250/3)
 # define PCO_UNSPEC_MAXIMUM_PROTOCOL_ID_OR_CONTAINER_ID 8
   pco_protocol_or_container_id_t protocol_or_container_ids[PCO_UNSPEC_MAXIMUM_PROTOCOL_ID_OR_CONTAINER_ID];
 } protocol_configuration_options_t;
-
 
 //------------------------------------------------------------------------------
 // 10.5.6.11 Packet Flow Identifier
@@ -149,8 +148,12 @@ typedef struct protocol_configuration_options_s {
 
 typedef uint8_t packet_flow_identifier_t;
 
-int encode_packet_flow_identifier_ie(packet_flow_identifier_t *packetflowidentifier, const bool iei_present, uint8_t *buffer, const uint32_t len);
-int decode_packet_flow_identifier_ie(packet_flow_identifier_t *packetflowidentifier, const bool iei_present, uint8_t *buffer, const uint32_t len);
+int encode_packet_flow_identifier_ie(
+    packet_flow_identifier_t *packetflowidentifier, const bool iei_present,
+    uint8_t *buffer, const uint32_t len);
+int decode_packet_flow_identifier_ie(
+    packet_flow_identifier_t *packetflowidentifier, const bool iei_present,
+    uint8_t *buffer, const uint32_t len);
 
 //------------------------------------------------------------------------------
 // 10.5.6.12 Traffic Flow Template
@@ -246,7 +249,8 @@ typedef struct packet_filter_contents_s {
  * and "no TFT operation" shall be empty.
  * ---------------------------------------------------------------
  */
-typedef struct {} no_packet_filter_t;
+typedef struct {
+} no_packet_filter_t;
 
 typedef no_packet_filter_t delete_existing_tft_t;
 typedef no_packet_filter_t no_tft_operation_t;
@@ -257,7 +261,7 @@ typedef no_packet_filter_t no_tft_operation_t;
  * ------------------------------------------------------------------
  */
 #define TRAFFIC_FLOW_TEMPLATE_PACKET_IDENTIFIER_MAX 16
-typedef struct packet_filter_identifier_s{
+typedef struct packet_filter_identifier_s {
   uint8_t identifier;
 } packet_filter_identifier_t;
 
@@ -271,15 +275,15 @@ typedef packet_filter_identifier_t delete_packet_filter_t;
  */
 #define TRAFFIC_FLOW_TEMPLATE_NB_PACKET_FILTERS_MAX 4
 typedef struct packet_filter_s {
-  uint8_t         spare:2;
+  uint8_t spare :2;
 #define TRAFFIC_FLOW_TEMPLATE_PRE_REL7_TFT_FILTER 0b00
 #define TRAFFIC_FLOW_TEMPLATE_DOWNLINK_ONLY       0b01
 #define TRAFFIC_FLOW_TEMPLATE_UPLINK_ONLY         0b10
 #define TRAFFIC_FLOW_TEMPLATE_BIDIRECTIONAL       0b11
-  uint8_t         direction:2;
-  uint8_t         identifier:4;
-  uint8_t         eval_precedence;
-  uint8_t         length;
+  uint8_t direction :2;
+  uint8_t identifier :4;
+  uint8_t eval_precedence;
+  uint8_t length;
   packet_filter_contents_t packetfiltercontents;
 } packet_filter_t;
 
@@ -290,29 +294,28 @@ typedef packet_filter_t replace_packet_filter_t;
  * Packet filter list
  * ------------------
  */
-typedef union  {
-  create_new_tft_t        createnewtft[TRAFFIC_FLOW_TEMPLATE_NB_PACKET_FILTERS_MAX];
-  add_packet_filter_t     addpacketfilter[TRAFFIC_FLOW_TEMPLATE_NB_PACKET_FILTERS_MAX];
+typedef union {
+  create_new_tft_t createnewtft[TRAFFIC_FLOW_TEMPLATE_NB_PACKET_FILTERS_MAX];
+  add_packet_filter_t addpacketfilter[TRAFFIC_FLOW_TEMPLATE_NB_PACKET_FILTERS_MAX];
   replace_packet_filter_t replacepacketfilter[TRAFFIC_FLOW_TEMPLATE_NB_PACKET_FILTERS_MAX];
-  delete_packet_filter_t  deletepacketfilter[TRAFFIC_FLOW_TEMPLATE_PACKET_IDENTIFIER_MAX];
-  delete_existing_tft_t   deleteexistingtft;
-  no_tft_operation_t      notftoperation;
+  delete_packet_filter_t deletepacketfilter[TRAFFIC_FLOW_TEMPLATE_PACKET_IDENTIFIER_MAX];
+  delete_existing_tft_t deleteexistingtft;
+  no_tft_operation_t notftoperation;
 } packet_filter_list_t;
 
-
-typedef struct parameter_s{
+typedef struct parameter_s {
 #define PARAMETER_IDENTIFIER_AUTHORIZATION_TOKEN        0x01 // Authorization Token
 #define PARAMETER_IDENTIFIER_FLOW_IDENTIFIER            0x02 // Flow Identifier
 #define PARAMETER_IDENTIFIER_PACKET_FILTER_IDENTIFIER   0x03 // Packet Filter Identifier
-  uint8_t              parameteridentifier;
-  uint8_t              length;
-  std::string              contents;
+  uint8_t parameteridentifier;
+  uint8_t length;
+  std::string contents;
 } parameter_t;
 
-typedef struct parameters_list_s{
-  uint8_t              num_parameters;
+typedef struct parameters_list_s {
+  uint8_t num_parameters;
 #define TRAFFIC_FLOW_TEMPLATE_NB_PARAMETERS_MAX 16 // TODO or may use []
-  parameter_t          parameter[TRAFFIC_FLOW_TEMPLATE_NB_PARAMETERS_MAX];
+  parameter_t parameter[TRAFFIC_FLOW_TEMPLATE_NB_PARAMETERS_MAX];
 } parameters_list_t;
 
 typedef struct traffic_flow_template_s {
@@ -324,15 +327,15 @@ typedef struct traffic_flow_template_s {
 #define TRAFFIC_FLOW_TEMPLATE_OPCODE_DELETE_PACKET_FILTERS_FROM_EXISTING_TFT  0b101
 #define TRAFFIC_FLOW_TEMPLATE_OPCODE_NO_TFT_OPERATION                         0b110
 #define TRAFFIC_FLOW_TEMPLATE_OPCODE_RESERVED                                 0b111
-  uint8_t              tftoperationcode:3;
+  uint8_t tftoperationcode :3;
 #define TRAFFIC_FLOW_TEMPLATE_PARAMETER_LIST_IS_NOT_INCLUDED  0
 #define TRAFFIC_FLOW_TEMPLATE_PARAMETER_LIST_IS_INCLUDED      1
-  uint8_t              ebit:1;
-  uint8_t              numberofpacketfilters:4;
+  uint8_t ebit :1;
+  uint8_t numberofpacketfilters :4;
   packet_filter_list_t packetfilterlist;
-  parameters_list_t    parameterslist; // The parameters list contains a variable number of parameters that may be
-                                       // transferred. If the parameters list is included, the E bit is set to 1; otherwise, the E bit
-                                       // is set to 0.
+  parameters_list_t parameterslist;  // The parameters list contains a variable number of parameters that may be
+                                     // transferred. If the parameters list is included, the E bit is set to 1; otherwise, the E bit
+                                     // is set to 0.
 } traffic_flow_template_t;
 
 #define TFT_ENCODE_IEI_TRUE     true

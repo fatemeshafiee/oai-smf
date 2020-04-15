@@ -20,11 +20,11 @@
  */
 
 /*! \file common_defs.h
-  \brief
-  \author Sebastien ROUX, Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \author Sebastien ROUX, Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 
 #ifndef FILE_COMMON_DEFS_SEEN
 #define FILE_COMMON_DEFS_SEEN
@@ -38,24 +38,24 @@
 
 typedef enum {
   /* Fatal errors - received message should not be processed */
-  TLV_MAC_MISMATCH                        = -14,
-  TLV_BUFFER_NULL                         = -13,
-  TLV_BUFFER_TOO_SHORT                    = -12,
-  TLV_PROTOCOL_NOT_SUPPORTED              = -11,
-  TLV_WRONG_MESSAGE_TYPE                  = -10,
-  TLV_OCTET_STRING_TOO_LONG_FOR_IEI       = -9,
+  TLV_MAC_MISMATCH = -14,
+  TLV_BUFFER_NULL = -13,
+  TLV_BUFFER_TOO_SHORT = -12,
+  TLV_PROTOCOL_NOT_SUPPORTED = -11,
+  TLV_WRONG_MESSAGE_TYPE = -10,
+  TLV_OCTET_STRING_TOO_LONG_FOR_IEI = -9,
 
-  TLV_VALUE_DOESNT_MATCH                  = -4,
-  TLV_MANDATORY_FIELD_NOT_PRESENT         = -3,
-  TLV_UNEXPECTED_IEI                      = -2,
+  TLV_VALUE_DOESNT_MATCH = -4,
+  TLV_MANDATORY_FIELD_NOT_PRESENT = -3,
+  TLV_UNEXPECTED_IEI = -2,
 
 //  RETURNerror                             = -1,
 //  RETURNok                                = 0,
 
-  TLV_ERROR_OK                            =  RETURNok,
+  TLV_ERROR_OK = RETURNok,
   /* Defines error code limit below which received message should be discarded
    * because it cannot be further processed */
-  TLV_FATAL_ERROR                         = TLV_VALUE_DOESNT_MATCH
+  TLV_FATAL_ERROR = TLV_VALUE_DOESNT_MATCH
 
 } error_code_e;
 //------------------------------------------------------------------------------
@@ -101,8 +101,6 @@ typedef enum {
     *(uint32_t*)(buffer) = htonl(value);  \
     size += sizeof(uint32_t)
 
-
-
 #define IPV4_STR_ADDR_TO_INT_NWBO(AdDr_StR,NwBo,MeSsAgE ) do {\
             struct in_addr inp;\
             if ( inet_aton(AdDr_StR, &inp ) < 0 ) {\
@@ -140,16 +138,12 @@ typedef enum {
    && ((((__const uint32_t *) (a))[2] & (((__const uint32_t *) (m))[2])) == (((__const uint32_t *) (b))[2] & (((__const uint32_t *) (m))[2])))  \
    && ((((__const uint32_t *) (a))[3] & (((__const uint32_t *) (m))[3])) == (((__const uint32_t *) (b))[3] & (((__const uint32_t *) (m))[3]))))
 
-
-
-
 ////////////
 #define IPV4_STR_ADDR_TO_INADDR(AdDr_StR,InAdDr,MeSsAgE ) do {\
             if ( inet_aton(AdDr_StR, &InAdDr ) <= 0 ) {\
               throw (MeSsAgE);\
             }\
         } while (0)
-
 
 #ifndef UNUSED
 #define UNUSED(x) (void)(x)

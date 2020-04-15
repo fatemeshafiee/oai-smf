@@ -20,11 +20,11 @@
  */
 
 /*! \file security_types.h
-  \brief
-  \author Sebastien ROUX, Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \author Sebastien ROUX, Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 
 #if HAVE_CONFIG_H
 # include "config.h"
@@ -59,11 +59,11 @@
 
 /* Some methods to convert a string to an int64_t */
 /*
-#define STRING_TO_64BITS(sTRING, cONTAINER)    \
+ #define STRING_TO_64BITS(sTRING, cONTAINER)    \
     sscanf(sTRING, "%" SCN64, cONTAINER)
-#define STRING_TO_U64BITS(sTRING, cONTAINER)    \
+ #define STRING_TO_U64BITS(sTRING, cONTAINER)    \
     sscanf(sTRING, "%" SCNu64, cONTAINER)
-*/
+ */
 
 /* Converts a string to 128 bits gmplib integer holder */
 # define STRING_TO_XBITS(sTRING, lENGTH, cONTAINER, rET)        \
@@ -119,7 +119,7 @@ bUFFER[24], bUFFER[25], bUFFER[26], bUFFER[27], bUFFER[28], bUFFER[29], bUFFER[3
 /* Holds an E-UTRAN authentication vector */
 typedef struct eutran_vector_s {
   uint8_t rand[RAND_LENGTH_OCTETS];
-  res_t   xres;
+  res_t xres;
   uint8_t autn[AUTN_LENGTH_OCTETS];
   uint8_t kasme[KASME_LENGTH_OCTETS];
 } eutran_vector_t;
@@ -144,8 +144,8 @@ typedef enum {
   NAS_INT_ALG = 0x02,
   RRC_ENC_ALG = 0x03,
   RRC_INT_ALG = 0x04,
-  UP_ENC_ALG  = 0x05,
-  UP_INT_ALG  = 0x06
+  UP_ENC_ALG = 0x05,
+  UP_INT_ALG = 0x06
 } algorithm_type_dist_t;
 
 #endif /* FILE_SECURITY_TYPES_SEEN */

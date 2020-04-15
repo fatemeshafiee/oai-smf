@@ -20,10 +20,10 @@
  */
 
 /*! \file smf_n10.hpp
-  \author  Tien-Thinh NGUYEN
-  \company Eurecom
-  \date 2019
-  \email: tien-thinh.nguyen@eurecom.fr
+ \author  Tien-Thinh NGUYEN
+ \company Eurecom
+ \date 2019
+ \email: tien-thinh.nguyen@eurecom.fr
  */
 
 #ifndef FILE_SMF_N10_HPP_SEEN
@@ -39,21 +39,22 @@
 namespace smf {
 
 class smf_n10 {
-private:
-  std::thread::id                      thread_id;
-  std::thread                          thread;
+ private:
+  std::thread::id thread_id;
+  std::thread thread;
 
   void handle_receive_sm_data_notification();
 
-public:
+ public:
   smf_n10();
-  smf_n10(smf_n10 const&)    = delete;
-  void operator=(smf_n10 const&)     = delete;
-  bool get_sm_data(supi64_t& supi, std::string& dnn, snssai_t& snssai, std::shared_ptr<session_management_subscription> subscription);
+  smf_n10(smf_n10 const&) = delete;
+  void operator=(smf_n10 const&) = delete;
+  bool get_sm_data(
+      supi64_t &supi, std::string &dnn, snssai_t &snssai,
+      std::shared_ptr<session_management_subscription> subscription);
   void subscribe_sm_data();
 
 };
-
 
 }
 #endif /* FILE_SMF_N10_HPP_SEEN */

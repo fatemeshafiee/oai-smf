@@ -6,15 +6,19 @@
 #include "TLVDecoder.h"
 #include "PDUSessionModificationCommandReject.h"
 
-int decode_pdu_session_modification_command_reject( pdu_session_modification_command_reject_msg *pdu_session_modification_command_reject, uint8_t *buffer, uint32_t len)
-{
+int decode_pdu_session_modification_command_reject(
+    pdu_session_modification_command_reject_msg *pdu_session_modification_command_reject,
+    uint8_t *buffer, uint32_t len) {
   uint32_t decoded = 0;
   int decoded_result = 0;
 
   // Check if we got a NULL pointer and if buffer length is >= minimum length expected for the message.
-  CHECK_PDU_POINTER_AND_LENGTH_DECODER (buffer, PDU_SESSION_MODIFICATION_COMMAND_REJECT_MINIMUM_LENGTH, len);
+  CHECK_PDU_POINTER_AND_LENGTH_DECODER(
+      buffer, PDU_SESSION_MODIFICATION_COMMAND_REJECT_MINIMUM_LENGTH, len);
 
-  if ((decoded_result = decode__5gsm_cause (&pdu_session_modification_command_reject->_5gsmcause, 0, buffer + decoded, len - decoded)) < 0) {
+  if ((decoded_result = decode__5gsm_cause(
+      &pdu_session_modification_command_reject->_5gsmcause, 0, buffer + decoded,
+      len - decoded)) < 0) {
     return decoded_result;
   } else {
     decoded += decoded_result;
@@ -27,37 +31,51 @@ int decode_pdu_session_modification_command_reject( pdu_session_modification_com
       break;
 
     switch (ieiDecoded) {
-    case PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_IEI:
-      if ((decoded_result = decode_extended_protocol_configuration_options (&pdu_session_modification_command_reject->extendedprotocolconfigurationoptions, PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_IEI, buffer + decoded, len - decoded)) < 0)
-        return decoded_result;
-      else {
-        decoded += decoded_result;
-        pdu_session_modification_command_reject->presence |= PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_PRESENCE;
-      }
-      break;
+      case PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_IEI:
+        if ((decoded_result = decode_extended_protocol_configuration_options(
+            &pdu_session_modification_command_reject
+                ->extendedprotocolconfigurationoptions,
+            PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_IEI,
+            buffer + decoded, len - decoded)) < 0)
+          return decoded_result;
+        else {
+          decoded += decoded_result;
+          pdu_session_modification_command_reject->presence |=
+              PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_PRESENCE;
+        }
+        break;
     }
   }
 
   return decoded;
 }
 
-
-int encode_pdu_session_modification_command_reject( pdu_session_modification_command_reject_msg *pdu_session_modification_command_reject, uint8_t *buffer, uint32_t len)
-{
+int encode_pdu_session_modification_command_reject(
+    pdu_session_modification_command_reject_msg *pdu_session_modification_command_reject,
+    uint8_t *buffer, uint32_t len) {
   uint32_t encoded = 0;
   int encoded_result = 0;
 
   // Check if we got a NULL pointer and if buffer length is >= minimum length expected for the message.
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER (buffer, PDU_SESSION_MODIFICATION_COMMAND_REJECT_MINIMUM_LENGTH, len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer, PDU_SESSION_MODIFICATION_COMMAND_REJECT_MINIMUM_LENGTH, len);
 
-  if((encoded_result = encode__5gsm_cause (pdu_session_modification_command_reject->_5gsmcause, 0, buffer + encoded, len - encoded)) < 0) {
+  if ((encoded_result = encode__5gsm_cause(
+      pdu_session_modification_command_reject->_5gsmcause, 0, buffer + encoded,
+      len - encoded)) < 0) {
     return encoded_result;
   } else {
     encoded += encoded_result;
   }
 
-  if ((pdu_session_modification_command_reject->presence & PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_PRESENCE) == PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_PRESENCE) {
-    if ((encoded_result = encode_extended_protocol_configuration_options (pdu_session_modification_command_reject->extendedprotocolconfigurationoptions, PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_IEI, buffer + encoded, len - encoded)) < 0)
+  if ((pdu_session_modification_command_reject->presence
+      & PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_PRESENCE)
+      == PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_PRESENCE) {
+    if ((encoded_result = encode_extended_protocol_configuration_options(
+        pdu_session_modification_command_reject
+            ->extendedprotocolconfigurationoptions,
+        PDU_SESSION_MODIFICATION_COMMAND_REJECT_E_P_C_O_IEI, buffer + encoded,
+        len - encoded)) < 0)
       return encoded_result;
     else
       encoded += encoded_result;

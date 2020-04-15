@@ -19,7 +19,6 @@
  *      contact@openairinterface.org
  */
 
-
 #ifndef FILE_COMMON_TYPES_SEEN
 #define FILE_COMMON_TYPES_SEEN
 
@@ -28,11 +27,8 @@
 #include "3gpp_24.007.h"
 #include "3gpp_24.501.h"
 
-
-typedef uint16_t                 sctp_stream_id_t;
-typedef uint32_t                 sctp_assoc_id_t;
-
-
+typedef uint16_t sctp_stream_id_t;
+typedef uint32_t sctp_assoc_id_t;
 
 //UE NGAP IDs
 
@@ -45,11 +41,9 @@ typedef uint32_t                 sctp_assoc_id_t;
 
 #define AMF_UE_NGAP_ID_MASK_       0x0000FFFFFFFFFF
 
-
-typedef uint8_t       ksi_t;
+typedef uint8_t ksi_t;
 #define KSI_NO_KEY_AVAILABLE     0x07
 
 typedef uint32_t ipv4_nbo_t;
-
 
 #endif

@@ -21,10 +21,10 @@
 
 /*! \file smf_config.hpp
  * \brief
-  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
-  \company Eurecom
-  \date 2019
-  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
+ \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
+ \company Eurecom
+ \date 2019
+ \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
 
 #ifndef FILE_SMF_CONFIG_HPP_SEEN
@@ -44,7 +44,6 @@
 #include "gtpv2c.hpp"
 #include "pfcp.hpp"
 #include "smf.h"
-
 
 #define SMF_CONFIG_STRING_SMF_CONFIG                            "SMF"
 #define SMF_CONFIG_STRING_PID_DIRECTORY                         "PID_DIRECTORY"
@@ -109,7 +108,6 @@
 #define SMF_CONFIG_STRING_SMF_APP_SCHED_PARAMS                  "SMF_APP_SCHED_PARAMS"
 #define SMF_CONFIG_STRING_ASYNC_CMD_SCHED_PARAMS                "ASYNC_CMD_SCHED_PARAMS"
 
-
 #define SMF_CONFIG_STRING_AMF                                   "AMF"
 #define SMF_CONFIG_STRING_AMF_IPV4_ADDRESS                      "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_AMF_PORT                              "PORT"
@@ -130,18 +128,18 @@
 namespace smf {
 
 typedef struct interface_cfg_s {
-  std::string     if_name;
-  struct in_addr  addr4;
-  struct in_addr  network4;
+  std::string if_name;
+  struct in_addr addr4;
+  struct in_addr network4;
   struct in6_addr addr6;
-  unsigned int    mtu;
-  unsigned int    port;
+  unsigned int mtu;
+  unsigned int port;
   util::thread_sched_params thread_rd_sched_params;
 } interface_cfg_t;
 
 typedef struct test_upf_cfg_s {
-  uint8_t         is_test;
-  struct in_addr  gnb_addr4;
+  uint8_t is_test;
+  struct in_addr gnb_addr4;
 } test_upf_cfg_t;
 
 typedef struct itti_cfg_s {
@@ -152,62 +150,61 @@ typedef struct itti_cfg_s {
 } itti_cfg_t;
 
 class smf_config {
-private:
-  int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
-  int load_upf_config(const libconfig::Setting& if_cfg, test_upf_cfg_t & cfg);
-  int load_interface(const libconfig::Setting& if_cfg, interface_cfg_t& cfg);
-  int load_thread_sched_params(const libconfig::Setting& thread_sched_params_cfg, util::thread_sched_params& cfg);
+ private:
+  int load_itti(const libconfig::Setting &itti_cfg, itti_cfg_t &cfg);
+  int load_upf_config(const libconfig::Setting &if_cfg, test_upf_cfg_t &cfg);
+  int load_interface(const libconfig::Setting &if_cfg, interface_cfg_t &cfg);
+  int load_thread_sched_params(
+      const libconfig::Setting &thread_sched_params_cfg,
+      util::thread_sched_params &cfg);
 
-public:
+ public:
   /* Reader/writer lock for this configuration */
-  std::mutex        m_rw_lock;
-  std::string       pid_dir;
-  unsigned int      instance = 0;
+  std::mutex m_rw_lock;
+  std::string pid_dir;
+  unsigned int instance = 0;
 
   interface_cfg_t n4;
   interface_cfg_t sbi;
-  itti_cfg_t      itti;
-  test_upf_cfg_t  test_upf_cfg;
+  itti_cfg_t itti;
+  test_upf_cfg_t test_upf_cfg;
 
   struct in_addr default_dnsv4;
   struct in_addr default_dns_secv4;
   struct in6_addr default_dnsv6;
   struct in6_addr default_dns_secv6;
 
-
 #define PGW_NUM_APN_MAX 5
-  int              num_apn;
+  int num_apn;
   struct {
-    std::string    apn;
-    std::string    apn_label;
-    int            pool_id_iv4;
-    int            pool_id_iv6;
-    pdn_type_t     pdn_type;
+    std::string apn;
+    std::string apn_label;
+    int pool_id_iv4;
+    int pool_id_iv6;
+    pdn_type_t pdn_type;
   } apn[PGW_NUM_APN_MAX];
 
-  int              num_ue_pool;
+  int num_ue_pool;
 #define PGW_NUM_UE_POOL_MAX 96
-  struct in_addr   ue_pool_range_low[PGW_NUM_UE_POOL_MAX];
-  struct in_addr   ue_pool_range_high[PGW_NUM_UE_POOL_MAX];
-  struct in_addr   ue_pool_network[PGW_NUM_UE_POOL_MAX];
-  struct in_addr   ue_pool_netmask[PGW_NUM_UE_POOL_MAX];
+  struct in_addr ue_pool_range_low[PGW_NUM_UE_POOL_MAX];
+  struct in_addr ue_pool_range_high[PGW_NUM_UE_POOL_MAX];
+  struct in_addr ue_pool_network[PGW_NUM_UE_POOL_MAX];
+  struct in_addr ue_pool_netmask[PGW_NUM_UE_POOL_MAX];
   //computed from config, UE IP adresses that matches ue_pool_network[]/ue_pool_netmask[] but do not match ue_pool_range_low[] - ue_pool_range_high[]
   // The problem here is that OpenFlow do not deal with ip ranges but with netmasks
   std::vector<struct in_addr> ue_pool_excluded[PGW_NUM_UE_POOL_MAX];
 
-  int              num_paa6_pool;
-  struct in6_addr  paa_pool6_prefix[PGW_NUM_UE_POOL_MAX];
-  uint8_t          paa_pool6_prefix_len[PGW_NUM_UE_POOL_MAX];
+  int num_paa6_pool;
+  struct in6_addr paa_pool6_prefix[PGW_NUM_UE_POOL_MAX];
+  uint8_t paa_pool6_prefix_len[PGW_NUM_UE_POOL_MAX];
 
-
-
-  bool             force_push_pco;
-  uint             ue_mtu;
+  bool force_push_pco;
+  uint ue_mtu;
 
   struct {
-    bool      tcp_ecn_enabled = false;           // test for CoDel qdisc
-    unsigned int  apn_ambr_ul;
-    unsigned int  apn_ambr_dl;
+    bool tcp_ecn_enabled = false;           // test for CoDel qdisc
+    unsigned int apn_ambr_ul;
+    unsigned int apn_ambr_dl;
   } pcef;
 
   struct {
@@ -222,9 +219,19 @@ public:
 
   std::vector<pfcp::node_id_t> upfs;
 
-  smf_config() : m_rw_lock(), pcef(), num_apn(0), pid_dir(), instance(0), n4(), sbi(), itti(), upfs() {
+  smf_config()
+      :
+      m_rw_lock(),
+      pcef(),
+      num_apn(0),
+      pid_dir(),
+      instance(0),
+      n4(),
+      sbi(),
+      itti(),
+      upfs() {
     for (int i = 0; i < PGW_NUM_APN_MAX; i++) {
-      apn[i] = {};
+      apn[i] = { };
     }
     default_dnsv4.s_addr = INADDR_ANY;
     default_dns_secv4.s_addr = INADDR_ANY;
@@ -234,13 +241,13 @@ public:
     num_ue_pool = 0;
     num_paa6_pool = 0;
     for (int i = 0; i < PGW_NUM_UE_POOL_MAX; i++) {
-      ue_pool_range_low[i] = {};
-      ue_pool_range_high[i] = {};
-      ue_pool_network[i] = {};
-      ue_pool_netmask[i] = {};
-      paa_pool6_prefix[i] = {};
-      paa_pool6_prefix_len[i] = {};
-      ue_pool_excluded[i] = {};
+      ue_pool_range_low[i] = { };
+      ue_pool_range_high[i] = { };
+      ue_pool_network[i] = { };
+      ue_pool_netmask[i] = { };
+      paa_pool6_prefix[i] = { };
+      paa_pool6_prefix_len[i] = { };
+      ue_pool_excluded[i] = { };
     }
     force_push_pco = true;
     ue_mtu = 1500;
@@ -261,21 +268,29 @@ public:
     amf_addr.ipv4_addr.s_addr = INADDR_ANY;
     udm_addr.port = 80;
 
-  };
+  }
+  ;
   ~smf_config();
-  void lock() {m_rw_lock.lock();};
-  void unlock() {m_rw_lock.unlock();};
-  int load(const std::string& config_file);
+  void lock() {
+    m_rw_lock.lock();
+  }
+  ;
+  void unlock() {
+    m_rw_lock.unlock();
+  }
+  ;
+  int load(const std::string &config_file);
   int finalize();
   void display();
-  bool is_dotted_apn_handled(const std::string& apn, const pdn_type_t& pdn_type);
-  int get_pfcp_node_id(pfcp::node_id_t& node_id);
-  int get_pfcp_fseid(pfcp::fseid_t& fseid);
-  bool is_dotted_dnn_handled(const std::string& apn, const pdu_session_type_t& pdn_session_type);
+  bool is_dotted_apn_handled(const std::string &apn,
+                             const pdn_type_t &pdn_type);
+  int get_pfcp_node_id(pfcp::node_id_t &node_id);
+  int get_pfcp_fseid(pfcp::fseid_t &fseid);
+  bool is_dotted_dnn_handled(const std::string &apn,
+                             const pdu_session_type_t &pdn_session_type);
   std::string get_default_dnn();
 };
 
-} // namespace smf
-
+}  // namespace smf
 
 #endif /* FILE_SMF_CONFIG_HPP_SEEN */

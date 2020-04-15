@@ -20,11 +20,11 @@
  */
 
 /*! \file rfc_1877.h
-  \brief
-  \author Lionel Gauthier
-  \company Eurecom
-  \email: lionel.gauthier@eurecom.fr
-*/
+ \brief
+ \author Lionel Gauthier
+ \company Eurecom
+ \email: lionel.gauthier@eurecom.fr
+ */
 
 #ifndef FILE_RFC_1877_SEEN
 #define FILE_RFC_1877_SEEN
@@ -33,6 +33,5 @@
 #define IPCP_OPTION_PRIMARY_NBNS_SERVER_IP_ADDRESS                      (0x82)
 #define IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS                     (0x83)
 #define IPCP_OPTION_SECONDARY_NBNS_SERVER_IP_ADDRESS                    (0x84)
-
 
 #endif
