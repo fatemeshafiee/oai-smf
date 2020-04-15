@@ -48,7 +48,10 @@ pipeline {
     gitlabBuilds(builds: [
       "Build SMF Image",
       "Static Code Analysis",
-      "Code Formatting Checker"
+      "Code Formatting Checker",
+      "Build AMF-server",
+      "Build UMD-server",
+      "Build AMF-client"
     ])
 
   }
@@ -240,10 +243,178 @@ pipeline {
         }
       }
     }
+    stage('Build Test Images') {
+      stages {
+        stage('Build Test AMF-server') {
+          steps {
+            script {
+              gitlabCommitStatus(name: "Build AMF-server") {
+                withCredentials([
+                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${params.PrivateGitLabRepository_Credentials}", usernameVariable: 'git_username', passwordVariable: 'git_password']
+                  ]) {
+                  if ("MERGE".equals(env.gitlabActionType)) {
+                    myShCmd('docker build --target test-amf-server --tag test-amf-server:test-deploy --file ci-scripts/Dockerfile.private.amf-server.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg BUILD_FOR_CI="True" --build-arg CI_SRC_BRANCH="' + env.ghprbSourceBranch + '" --build-arg CI_SRC_COMMIT="' + env.ghprbActualCommit + '" --build-arg CI_DEST_BRANCH="develop" . > archives/amf_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
+                  } else {
+                    myShCmd('docker build --target test-amf-server --tag test-amf-server:test-deploy --file ci-scripts/Dockerfile.private.amf-server.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg CI_SRC_BRANCH="develop" . > archives/amf_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
+                  }
+                }
+                myShCmd('docker image ls >> archives/amf_server_docker_image_build.log', new_host_flag, new_host_user, new_host)
+              }
+            }
+          }
+          post {
+            always {
+              script {
+                copyFrom2ndServer('archives/amf_server_docker_image_build.log', 'archives', new_host_flag, new_host_user, new_host)
+              }
+            }
+            success {
+              sh "echo 'TEST-AMF-SERVER DOCKER IMAGE BUILD: OK' >> archives/amf_server_docker_image_build.log"
+            }
+            unsuccessful {
+              sh "echo 'TEST-AMF-SERVER DOCKER IMAGE BUILD: KO' >> archives/amf_server_docker_image_build.log"
+            }
+          }
+        }
+        stage('Build Test UMD-server') {
+          steps {
+            script {
+              gitlabCommitStatus(name: "Build UMD-server") {
+                withCredentials([
+                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${params.PrivateGitLabRepository_Credentials}", usernameVariable: 'git_username', passwordVariable: 'git_password']
+                  ]) {
+                  if ("MERGE".equals(env.gitlabActionType)) {
+                    myShCmd('docker build --target test-umd-server --tag test-umd-server:test-deploy --file ci-scripts/Dockerfile.private.umd-server.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg BUILD_FOR_CI="True" --build-arg CI_SRC_BRANCH="' + env.ghprbSourceBranch + '" --build-arg CI_SRC_COMMIT="' + env.ghprbActualCommit + '" --build-arg CI_DEST_BRANCH="develop" . > archives/umd_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
+                  } else {
+                    myShCmd('docker build --target test-umd-server --tag test-umd-server:test-deploy --file ci-scripts/Dockerfile.private.umd-server.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg CI_SRC_BRANCH="develop" . > archives/umd_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
+                  }
+                }
+                myShCmd('docker image ls >> archives/umd_server_docker_image_build.log', new_host_flag, new_host_user, new_host)
+              }
+            }
+          }
+          post {
+            always {
+              script {
+                copyFrom2ndServer('archives/umd_server_docker_image_build.log', 'archives', new_host_flag, new_host_user, new_host)
+              }
+            }
+            success {
+              sh "echo 'TEST-UMD-SERVER DOCKER IMAGE BUILD: OK' >> archives/umd_server_docker_image_build.log"
+            }
+            unsuccessful {
+              sh "echo 'TEST-UMD-SERVER DOCKER IMAGE BUILD: KO' >> archives/umd_server_docker_image_build.log"
+            }
+          }
+        }
+        stage('Build Test AMF-client') {
+          steps {
+            script {
+              gitlabCommitStatus(name: "Build AMF-client") {
+                withCredentials([
+                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${params.PrivateGitLabRepository_Credentials}", usernameVariable: 'git_username', passwordVariable: 'git_password']
+                  ]) {
+                  if ("MERGE".equals(env.gitlabActionType)) {
+                    myShCmd('docker build --target test-amf-client --tag test-amf-client:test-deploy --file ci-scripts/Dockerfile.private.amf-client.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg BUILD_FOR_CI="True" --build-arg CI_SRC_BRANCH="' + env.ghprbSourceBranch + '" --build-arg CI_SRC_COMMIT="' + env.ghprbActualCommit + '" --build-arg CI_DEST_BRANCH="develop" . > archives/amf_client_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
+                  } else {
+                    myShCmd('docker build --target test-amf-client --tag test-amf-client:test-deploy --file ci-scripts/Dockerfile.private.amf-client.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg CI_SRC_BRANCH="develop" . > archives/amf_client_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
+                  }
+                }
+                myShCmd('docker image ls >> archives/amf_client_docker_image_build.log', new_host_flag, new_host_user, new_host)
+              }
+            }
+          }
+          post {
+            always {
+              script {
+                copyFrom2ndServer('archives/amf_client_docker_image_build.log', 'archives', new_host_flag, new_host_user, new_host)
+              }
+            }
+            success {
+              sh "echo 'TEST-AMF-CLIENT DOCKER IMAGE BUILD: OK' >> archives/amf_client_docker_image_build.log"
+            }
+            unsuccessful {
+              sh "echo 'TEST-AMF-CLIENT DOCKER IMAGE BUILD: KO' >> archives/amf_client_docker_image_build.log"
+            }
+          }
+        }
+      }
+    }
+    stage('Deploy Simple Test') {
+      stages {
+        stage ('Create Networks') {
+          steps {
+            script {
+              myShCmd('docker network create --attachable --subnet 192.168.28.0/24 --ip-range 192.168.28.0/24 ci-sbi', new_host_flag, new_host_user, new_host)
+              myShCmd('docker network create --attachable --subnet 192.168.29.0/24 --ip-range 192.168.29.0/24 ci-n4', new_host_flag, new_host_user, new_host)
+            }
+          }
+        }
+        stage ('Deploy Containers') {
+          steps {
+            script {
+              if ("MERGE".equals(env.gitlabActionType)) {
+                myShCmd('docker run --name ci-oai-smf -d oai-smf:ci-temp /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
+              } else {
+                myShCmd('docker run --name ci-oai-smf -d oai-smf:develop /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
+              }
+              // SBI --> eth1
+              myShCmd('docker network connect ci-sbi ci-oai-smf', new_host_flag, new_host_user, new_host)
+              // N4 --> eth2
+              myShCmd('docker network connect ci-n4 ci-oai-smf', new_host_flag, new_host_user, new_host)
+              // Test containers
+              myShCmd('docker run --name ci-test-amf-server -d test-amf-server:test-deploy /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
+              myShCmd('docker network connect ci-sbi ci-test-amf-server', new_host_flag, new_host_user, new_host)
+              myShCmd('docker run --name ci-test-udm-server -d test-udm-server:test-deploy /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
+              myShCmd('docker network connect ci-sbi ci-test-udm-server', new_host_flag, new_host_user, new_host)
+              myShCmd('docker run --name ci-test-amf-client -d test-amf-client:test-deploy /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
+              myShCmd('docker network connect ci-sbi ci-test-amf-client', new_host_flag, new_host_user, new_host)
+              // SPGWU as UPF
+              myShCmd('docker run --name ci-oai-spgwu -d oai-spgwu-tiny:develop /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
+              // N4 --> eth1
+              myShCmd('docker network connect ci-n4 ci-oai-spgwu', new_host_flag, new_host_user, new_host)
+            }
+          }
+        }
+        stage ('Test') {
+          steps {
+            script {
+              sh "sleep 30"
+            }
+          }
+        }
+        stage ('Undeploy Containers') {
+          steps {
+            script {
+              myShCmd('docker rm -f ci-oai-smf ci-test-amf-server ci-test-udm-server ci-test-amf-client ci-oai-spgwu', new_host_flag, new_host_user, new_host)
+            }
+          }
+        }
+        stage ('Delete Networks') {
+          steps {
+            script {
+              myShCmd('docker network rm ci-sbi ci-n4', new_host_flag, new_host_user, new_host)
+            }
+          }
+        }
+      }
+    }
   }
   post {
     cleanup {
       script {
+        // Deleting containers in case of errors
+        try {
+        } catch (Exception e) {
+          echo "We failed to remove any existing containers"
+          myShCmd('docker rm -f ci-oai-smf', new_host_flag, new_host_user, new_host)
+        }
+        // Deleting networks in case of errors
+        try {
+          myShCmd('docker network rm ci-sbi ci-n4', new_host_flag, new_host_user, new_host)
+        } catch (Exception e) {
+          echo "We failed to remove any existing networks"
+        }
         // Removing temporary / intermediate images
         try {
           if ("MERGE".equals(env.gitlabActionType)) {
@@ -251,6 +422,11 @@ pipeline {
           }
         } catch (Exception e) {
           echo "We failed to delete the OAI-SMF temp image"
+        }
+        try {
+          myShCmd('docker image rm --force test-amf-server:test-deploy test-umd-server:test-deploy test-amf-client:test-deploy', new_host_flag, new_host_user, new_host)
+        } catch (Exception e) {
+          echo "We failed to delete the test temp images"
         }
         try {
           myShCmd('docker image prune --force', new_host_flag, new_host_user, new_host)

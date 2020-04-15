@@ -67,7 +67,7 @@ unsigned char * format_string_as_hex(std::string str){
   return datavalue;
 }
 
-void send_pdu_session_establishment_request()
+void send_pdu_session_establishment_request(std::string smf_ip_address)
 {
   std::cout << "[AMF N11] PDU Session Establishment Request"<<std::endl;
 
@@ -81,7 +81,9 @@ void send_pdu_session_establishment_request()
   //Fill Json part
   //get supi and put into URL
   std::string supi_str;
-  std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts");
+  std::string url = std::string("http://");
+  url.append(smf_ip_address);
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts"));
 
   //Fill the json part
   pdu_session_establishment_request["supi"] = "imsi-200000000000001";
@@ -175,7 +177,7 @@ void send_pdu_session_establishment_request()
 }
 
 
-void send_pdu_session_update_sm_context_establishment()
+void send_pdu_session_update_sm_context_establishment(std::string smf_ip_address)
 {
   std::cout << "[AMF N11] send_pdu_session_update_sm_context_establishment"<<std::endl;
 
@@ -227,7 +229,9 @@ void send_pdu_session_update_sm_context_establishment()
   std::string supi_str;
   //std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts");
   //std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts/imsi-200000000000001/modify");
-  std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts/1/modify");
+  std::string url = std::string("http://");
+  url.append(smf_ip_address);
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
   pdu_session_modification_request["n2SmInfoType"] = "PDU_RES_SETUP_RSP";
@@ -309,7 +313,7 @@ void send_pdu_session_update_sm_context_establishment()
 
 }
 
-void send_pdu_session_update_sm_context_modification()
+void send_pdu_session_update_sm_context_modification(std::string smf_ip_address)
 {
   std::cout << "[AMF N11] send_pdu_session_update_sm_context_modification"<<std::endl;
 
@@ -348,7 +352,9 @@ void send_pdu_session_update_sm_context_modification()
   std::string supi_str;
   //std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts");
   //std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts/imsi-200000000000001/modify");
-  std::string url = std::string("http://172.16.1.101/nsmf-pdusession/v2/sm-contexts/1/modify");
+  std::string url = std::string("http://");
+  url.append(smf_ip_address);
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
   pdu_session_modification_request["n1SmMsg"]["contentId"] = "n1SmMsg"; //part 2
@@ -431,11 +437,36 @@ void send_pdu_session_update_sm_context_modification()
 
 int main(int argc, char* argv[])
 {
+  std::string smf_ip_address;
 
-  send_pdu_session_establishment_request();
+  if ((argc != 1) && (argc != 3)) {
+    std::cout << "Error: Usage is " <<std::endl;
+    std::cout << "  " << argv[0] << " [ -i www.xxx.yy.zz ]" <<std::endl;
+    return -1;
+  }
+
+  if (argc == 1) {
+    smf_ip_address.append(std::string("172.16.1.101"));
+  } else {
+    int opt = 0;
+    while ((opt = getopt(argc, argv, "i:")) != -1) {
+      switch(opt) {
+      case 'i':
+        smf_ip_address.append(optarg);
+        break;
+      default:
+        std::cout << "Error: Usage is " <<std::endl;
+        std::cout << "  " << argv[0] << " [ -i www.xxx.yy.zz ]" <<std::endl;
+        return -1;
+        break;
+      }
+    }
+  }
+
+  send_pdu_session_establishment_request(smf_ip_address);
   usleep(100000);
-  send_pdu_session_update_sm_context_establishment();
-  //send_pdu_session_update_sm_context_modification();
+  send_pdu_session_update_sm_context_establishment(smf_ip_address);
+  //send_pdu_session_update_sm_context_modification(smf_ip_address);
   return 0;
 }
 
