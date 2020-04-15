@@ -51,6 +51,7 @@ extern "C" {
 #include "Ngap_AssociatedQosFlowItem.h"
 #include "Ngap_QosFlowAddOrModifyResponseList.h"
 #include "Ngap_QosFlowAddOrModifyResponseItem.h"
+#include "dynamic_memory_check.h"
 }
 
 using namespace smf;
@@ -1089,17 +1090,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
     smContextUpdateError.setError(problem_details);
-    refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-    smContextUpdateError.setN1SmMsg(refToBinaryData);
-    //Create N1 container
-    smf_n1_n2_inst.create_n1_sm_container(
-        sm_context_req_msg,
-        PDU_SESSION_ESTABLISHMENT_REJECT,
-        n1_sm_msg, cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
-    smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
+        Pistache::Http::Code::Not_Found);
     return;
   }
 
@@ -1134,17 +1127,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       problem_details.setCause(
           pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
       smContextUpdateError.setError(problem_details);
-      refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-      smContextUpdateError.setN1SmMsg(refToBinaryData);
-      //PDU Session Establishment Reject
-      //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
-      smf_n1_n2_inst.create_n1_sm_container(
-          sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-          cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
-      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       smf_n11_inst->send_pdu_session_update_sm_context_response(
           smreq->http_response, smContextUpdateError,
-          Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+          Pistache::Http::Code::Forbidden);
       return;
     }
 
@@ -1234,6 +1219,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           // qos_rules_ie[0].segregation ;
           // qos_rules_ie[0].qosflowidentifer ;
         }
+        free_wrapper((void **) &qos_rules_ie);
 
         //verify the PDU session ID
         if (smreq->req.get_pdu_session_id()
@@ -1370,11 +1356,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     n2_sm_info_type_e n2_sm_info_type = smf_app_inst->n2_sm_info_type_str2e(
         n2_sm_info_type_str);
 
-    unsigned int data_len = n2_sm_information.length();
-    unsigned char *data = (unsigned char*) malloc(data_len + 1);
-    memset(data, 0, data_len + 1);
-    memcpy((void*) data, (void*) n2_sm_information.c_str(), data_len);
-
     //decode N2 SM Info
     switch (n2_sm_info_type) {
 
@@ -1401,6 +1382,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           problem_details.setCause(
               pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
           smContextUpdateError.setError(problem_details);
+          //TODO: need to verify with/without N1 SM
           refToBinaryData.setContentId(N1_SM_CONTENT_ID);
           smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
@@ -1411,7 +1393,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
           smf_n11_inst->send_pdu_session_update_sm_context_response(
               smreq->http_response, smContextUpdateError,
-              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+              Pistache::Http::Code::Forbidden);
           return;
         }
 
@@ -1487,6 +1469,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           problem_details.setCause(
               pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
           smContextUpdateError.setError(problem_details);
+          //TODO: need to verify with/without N1 SM
           refToBinaryData.setContentId(N1_SM_CONTENT_ID);
           smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
@@ -1548,9 +1531,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       }
 
     }  //end switch
-    //free memory
-    free(data);
-    data = nullptr;
   }
 
   //Step 3. For Service Request
@@ -1592,6 +1572,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       problem_details.setCause(
           pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);
       smContextUpdateError.setError(problem_details);
+      //TODO: need to verify with/without N1 SM
       refToBinaryData.setContentId(N1_SM_CONTENT_ID);
       smContextUpdateError.setN1SmMsg(refToBinaryData);
       //PDU Session Establishment Reject

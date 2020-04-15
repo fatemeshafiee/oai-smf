@@ -29,10 +29,25 @@
 
 #include <stdlib.h>
 #include "dynamic_memory_check.h"
+#include "assertions.h"
 
 //------------------------------------------------------------------------------
 void free_wrapper(void **ptr)
 {
-  free(*ptr);
-  *ptr = NULL;
+  // for debug only
+  AssertFatal(ptr, "Trying to free NULL ptr");
+  if (ptr) {
+    free(*ptr);
+    *ptr = NULL;
+  }
 }
+
+//------------------------------------------------------------------------------
+void bdestroy_wrapper(bstring *b)
+{
+  if ((b) && (*b)) {
+    bdestroy(*b);
+    *b = NULL;
+  }
+}
+

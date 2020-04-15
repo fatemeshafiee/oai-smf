@@ -32,11 +32,6 @@
  */
 
 #include "IndividualSMContextApi.h"
-#include "logger.hpp"
-#include "Helpers.h"
-extern "C" {
-#include "multipartparser.h"
-}
 
 #include <cassert>
 #include <cstring>
@@ -45,6 +40,13 @@ extern "C" {
 #include <list>
 #include <map>
 #include <string>
+
+#include "logger.hpp"
+#include "Helpers.h"
+extern "C" {
+#include "multipartparser.h"
+#include "dynamic_memory_check.h"
+}
 
 namespace oai {
 namespace smf_server {
@@ -128,11 +130,10 @@ void IndividualSMContextApi::release_sm_context_handler(
     //response.send(Pistache::Http::Code::Bad_Request, "");
     //return;
   }
-  free(data);
-  data = nullptr;
+
+  free_wrapper((void **) &data);
 
   uint8_t size = g_parts.size();
-
   Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
   part p0 = g_parts.front();
   g_parts.pop_front();
@@ -245,8 +246,8 @@ void IndividualSMContextApi::update_sm_context_handler(
     //response.send(Pistache::Http::Code::Bad_Request, "");
     //return;
   }
-  free(data);
-  data = nullptr;
+
+  free_wrapper((void **) &data);
 
   uint8_t size = g_parts.size();
 
@@ -280,7 +281,7 @@ void IndividualSMContextApi::update_sm_context_handler(
       if (smContextUpdateData.n1SmMsgIsSet()) {
         //N1 SM (for session modification, UE-initiated)
         Logger::smf_api_server().debug("N1 SM message is set");
-        smContextUpdateMessage.setBinaryDataN1SmMessage(p1.body.c_str());
+        smContextUpdateMessage.setBinaryDataN1SmMessage(p1.body);
       }
     }
     // Getting the path params

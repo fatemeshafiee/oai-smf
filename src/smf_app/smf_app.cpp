@@ -59,6 +59,7 @@
 
 extern "C" {
 #include "nas_message.h"
+#include "dynamic_memory_check.h"
 }
 
 using namespace smf;
@@ -732,9 +733,6 @@ void smf_app::handle_pdu_session_update_sm_context_request(
       "Handle a PDU Session Update SM Context Request from an AMF");
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = { };
   oai::smf_server::model::ProblemDetails problem_details = { };
-  oai::smf_server::model::RefToBinaryData refToBinaryData = { };
-  std::string n1_sm_message, n1_sm_message_hex;  //N1 SM container
-  smf_n1_n2 smf_n1_n2_inst = { };  //to encode Ngap IE
 
   //Step 1. get supi, dnn, nssai, pdu_session id from sm_context
   //SM Context ID - uint32_t in our case
@@ -742,22 +740,15 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   try {
     scid = std::stoi(smreq->scid);
   } catch (const std::exception &err) {
-    //TODO: send PDUSession_SMUpdateContext Response (including PDU Session EStablishment Reject) to AMF with CAUSE: invalid context
+    //TODO: send PDUSession_SMUpdateContext Response to AMF with CAUSE: invalid context
     Logger::smf_app().warn(
         "Received a PDU Session Update SM Context Request, couldn't retrieve the corresponding SMF context, ignore message!");
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
     smContextUpdateError.setError(problem_details);
-    refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-    smContextUpdateError.setN1SmMsg(refToBinaryData);
-    //PDU Session Establishment Reject
-    smf_n1_n2_inst.create_n1_sm_container(
-        smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-        cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden, n1_sm_message_hex);
+        Pistache::Http::Code::Forbidden);
     return;
   }
 
@@ -771,16 +762,9 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
     smContextUpdateError.setError(problem_details);
-    refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-    smContextUpdateError.setN1SmMsg(refToBinaryData);
-    //PDU Session Establishment Reject
-    smf_n1_n2_inst.create_n1_sm_container(
-        smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-        cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden, n1_sm_message_hex);
+        Pistache::Http::Code::Forbidden);
     return;
   }
 
@@ -805,25 +789,16 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
                             supi64);
   } else {
-    //send PDUSession_SMUpdateContext Response (including PDU Session EStablishment Reject) to AMF
+    //send PDUSession_SMUpdateContext Response to AMF
     Logger::smf_app().warn(
         "Received PDU Session Update SM Context Request with Supi " SUPI_64_FMT "couldn't retrieve the corresponding SMF context, ignore message!",
         supi64);
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
     smContextUpdateError.setError(problem_details);
-    refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-    smContextUpdateError.setN1SmMsg(refToBinaryData);
-    //Create N1 container
-    smf_n1_n2_inst.create_n1_sm_container(
-        context_req_msg,
-        PDU_SESSION_ESTABLISHMENT_REJECT,
-        n1_sm_message,
-        cause_value_5gsm_e::CAUSE_54_PDU_SESSION_DOES_NOT_EXIST);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden, n1_sm_message_hex);
+        Pistache::Http::Code::Forbidden);
     return;
   }
 
@@ -833,22 +808,15 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   if (!sc.get()->find_dnn_context(scf.get()->nssai, dnn, sd)) {
     if (nullptr == sd.get()) {
       //Error, DNN context doesn't exist
-      // send PDUSession_SMUpdateContext Response (including PDU Session EStablishment Reject) to AMF
+      // send PDUSession_SMUpdateContext Response to AMF
       Logger::smf_app().warn(
           "Received PDU Session Update SM Context Request, couldn't retrieve the corresponding SMF context, ignore message!");
       problem_details.setCause(
           pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
       smContextUpdateError.setError(problem_details);
-      refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-      smContextUpdateError.setN1SmMsg(refToBinaryData);
-      //Create N1 container
-      smf_n1_n2_inst.create_n1_sm_container(
-          context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-          cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN);
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       smf_n11_inst->send_pdu_session_update_sm_context_response(
           smreq->http_response, smContextUpdateError,
-          Pistache::Http::Code::Forbidden, n1_sm_message_hex);
+          Pistache::Http::Code::Forbidden);
       return;
     }
   }
@@ -981,6 +949,11 @@ void smf_app::convert_string_2_hex(std::string &input_str,
 
   output_str = reinterpret_cast<char*>(datahex);
   Logger::smf_app().debug("Output: \n %s ", output_str.c_str());
+
+  //free memory
+  free_wrapper((void**) &data);
+  free_wrapper((void**) &datahex);
+
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1000,6 +973,9 @@ unsigned char* smf_app::format_string_as_hex(std::string str) {
   for (int i = 0; i < str_len / 2; i++)
     printf(" %02x ", data_hex[i]);
   printf("\n");
+
+  //free memory
+  free_wrapper((void**) &data);
 
   return data_hex;
 
