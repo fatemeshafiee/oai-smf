@@ -63,6 +63,10 @@ class HtmlReport():
 		self.testBuildSummaryFooter()
 
 		self.sanityCheckSummaryHeader()
+		self.sanityCheckDeployRow()
+		self.sanityCheckConfigRow()
+		self.sanityCheckTestRow()
+		self.sanityCheckSummaryFooter()
 
 		self.testSummaryHeader()
 		self.testSummaryFooter()
@@ -863,9 +867,139 @@ class HtmlReport():
 
 	def sanityCheckSummaryHeader(self):
 		self.file.write('  <h2>Sanity Check Deployment Summary</h2>\n')
-		self.file.write('  <div class="alert alert-warning">\n')
-		self.file.write('	  <strong>Not performed yet. <span class="glyphicon glyphicon-warning-sign"></span></strong>\n')
-		self.file.write('  </div>\n')
+		self.file.write('  <table class="table-bordered" width = "100%" align = "center" border = "1">\n')
+		self.file.write('     <tr bgcolor="#33CCFF" >\n')
+		self.file.write('       <th>Stage Name</th>\n')
+		self.file.write('       <th>OAI SMF cNF</th>\n')
+		self.file.write('       <th>OAI SPGWU (as UPF) cNF</th>\n')
+		self.file.write('       <th>Test AMF-Server</th>\n')
+		self.file.write('       <th>Test UDM-Server</th>\n')
+		self.file.write('       <th>Test AMF-Client</th>\n')
+		self.file.write('     </tr>\n')
+
+	def sanityCheckSummaryFooter(self):
+		self.file.write('  </table>\n')
+		self.file.write('  <br>\n')
+
+	def sanityCheckDeployRow(self):
+		self.file.write('	 <tr>\n')
+		self.file.write('	   <td bgcolor="lightcyan" >Container Start</td>\n')
+		cwd = os.getcwd()
+		if os.path.isfile(cwd + '/archives/amf_server_config.log') and os.path.isfile(cwd + '/archives/umd_server_config.log') and os.path.isfile(cwd + '/archives/amf_client_config.log'):
+			cell_msg = '	   <td bgcolor="LimeGreen"><pre style="border:none; background-color:LimeGreen"><b>OK</b></pre></td>\n'
+			for x in range(0, 5):
+				self.file.write(cell_msg)
+		else:
+			cell_msg = '	   <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>KO?</b></pre></td>\n'
+			for x in range(0, 5):
+				self.file.write(cell_msg)
+		self.file.write('	 </tr>\n')
+
+	def sanityCheckTestRow(self):
+		self.file.write('	 <tr>\n')
+		self.file.write('	   <td bgcolor="lightcyan" >Local Test</td>\n')
+		cwd = os.getcwd()
+		if os.path.isfile(cwd + '/archives/smf_check_run.log'):
+			nb_sm_req_from_amf = 0
+			nb_pdu_create_smf_req = 0
+			nb_encode_pdu_establish_accept = 0
+			nb_pdu_session_pending = 0
+			nb_pdu_session_ue_establish_req = 0
+			nb_pdu_status_active = 0
+
+			with open(cwd + '/archives/smf_check_run.log', 'r') as logfile:
+				for line in logfile:
+					result = re.search('Received a SM context create request from AMF', line)
+					if result is not None:
+						nb_sm_req_from_amf += 1
+					result = re.search('PDU Session Create SM Context Request', line)
+					if result is not None:
+						nb_pdu_create_smf_req += 1
+					result = re.search('Encode PDU Session Establishment Accept', line)
+					if result is not None:
+						nb_encode_pdu_establish_accept += 1
+					result = re.search('Set PDU Session Status to PDU_SESSION_ESTABLISHMENT_PENDING', line)
+					if result is not None:
+						nb_pdu_session_pending += 1
+					result = re.search('PDU_SESSION_ESTABLISHMENT_UE_REQUESTED', line)
+					if result is not None:
+						nb_pdu_session_ue_establish_req += 1
+					result = re.search('Set PDU Session Status to PDU_SESSION_ACTIVE', line)
+					if result is not None:
+						nb_pdu_status_active += 1
+				logfile.close()
+
+			if nb_sm_req_from_amf > 0 and nb_pdu_create_smf_req > 0 and nb_encode_pdu_establish_accept > 0 and nb_pdu_session_pending > 0 and nb_pdu_session_ue_establish_req > 0 and nb_pdu_status_active > 0:
+				cell_msg = '	   <td colspan = "5" bgcolor="LimeGreen"><pre style="border:none; background-color:LimeGreen"><b>OK:\n'
+			else:
+				cell_msg = '	   <td colspan = "5" bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>KO:\n'
+			if nb_sm_req_from_amf > 0:
+				cell_msg += '  -- Received a SM context create request from AMF            : OK\n'
+			else:
+				cell_msg += '  -- Received a SM context create request from AMF            : KO\n'
+			if nb_pdu_create_smf_req > 0:
+				cell_msg += '  -- PDU Session Create SM Context Request                    : OK\n'
+			else:
+				cell_msg += '  -- PDU Session Create SM Context Request                    : KO\n'
+			if nb_encode_pdu_establish_accept > 0:
+				cell_msg += '  -- Encode PDU Session Establishment Accept                  : OK\n'
+			else:
+				cell_msg += '  -- Encode PDU Session Establishment Accept                  : KO\n'
+			if nb_pdu_session_pending > 0:
+				cell_msg += '  -- PDU Session Status to PDU_SESSION_ESTABLISHMENT_PENDING  : OK\n'
+			else:
+				cell_msg += '  -- PDU Session Status to PDU_SESSION_ESTABLISHMENT_PENDING  : KO\n'
+			if nb_pdu_session_ue_establish_req > 0:
+				cell_msg += '  -- PDU_SESSION_ESTABLISHMENT_UE_REQUESTED                   : OK\n'
+			else:
+				cell_msg += '  -- PDU_SESSION_ESTABLISHMENT_UE_REQUESTED                   : KO\n'
+			if nb_pdu_status_active > 0:
+				cell_msg += '  -- Set PDU Session Status to PDU_SESSION_ACTIVE             : OK\n'
+			else:
+				cell_msg += '  -- Set PDU Session Status to PDU_SESSION_ACTIVE             : KO\n'
+			cell_msg += '</b></pre></td>\n'
+		else:
+			cell_msg = '	   <td colspan = "5" bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>KO?</b></pre></td>\n'
+		self.file.write(cell_msg)
+		self.file.write('	 </tr>\n')
+
+	def sanityCheckConfigRow(self):
+		self.file.write('	 <tr>\n')
+		self.file.write('	   <td bgcolor="lightcyan" >Container Config</td>\n')
+		cwd = os.getcwd()
+
+		if os.path.isfile(cwd + '/archives/smf_config.log'):
+			cmd = 'grep -c OK ' + cwd + '/archives/smf_config.log'
+			try:
+				is_ok = subprocess.check_output(cmd, shell=True, universal_newlines=True)
+			except:
+				is_ok = '0'
+			if int(is_ok.strip()) == 0:
+				cell_msg = '	   <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>KO?</b></pre></td>\n'
+			else:
+				cell_msg = '	   <td bgcolor="LimeGreen"><pre style="border:none; background-color:LimeGreen"><b>OK</b></pre></td>\n'
+		else:
+			cell_msg = '	   <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>KO?</b></pre></td>\n'
+		self.file.write(cell_msg)
+
+		if os.path.isfile(cwd + '/archives/spgwu_config.log'):
+			cmd = 'grep -c OK ' + cwd + '/archives/spgwu_config.log'
+			try:
+				is_ok = subprocess.check_output(cmd, shell=True, universal_newlines=True)
+			except:
+				is_ok = '0'
+			if int(is_ok.strip()) == 0:
+				cell_msg = '	   <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>KO?</b></pre></td>\n'
+			else:
+				cell_msg = '	   <td bgcolor="LimeGreen"><pre style="border:none; background-color:LimeGreen"><b>OK</b></pre></td>\n'
+		else:
+			cell_msg = '	   <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>KO?</b></pre></td>\n'
+		self.file.write(cell_msg)
+
+		cell_msg = '	   <td bgcolor="LightGray"><pre style="border:none; background-color:LightGray">N/A</pre></td>\n'
+		for x in range(0, 3):
+			self.file.write(cell_msg)
+		self.file.write('	 </tr>\n')
 
 	def testSummaryHeader(self):
 		self.file.write('  <h2>Test Summary</h2>\n')

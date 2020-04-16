@@ -51,7 +51,8 @@ pipeline {
       "Code Formatting Checker",
       "Build AMF-server",
       "Build UDM-server",
-      "Build AMF-client"
+      "Build AMF-client",
+      "Local SMF test"
     ])
 
   }
@@ -374,6 +375,10 @@ pipeline {
               // N4 --> eth1
               myShCmd('docker network connect ci-n4 ci-oai-spgwu', new_host_flag, new_host_user, new_host)
 
+              sh "echo 'OAI-AMF-SERVER CONFIG: OK' >> archives/amf_server_config.log"
+              sh "echo 'OAI-UDM-SERVER CONFIG: OK' >> archives/umd_server_config.log"
+              sh "echo 'OAI-AMF-CLIENT CONFIG: OK' >> archives/amf_client_config.log"
+
               // Configure containers
               SMF_SBI_IP_ADDRESS=myShRetCmd('docker exec -it ci-oai-smf /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
               SMF_N4_IP_ADDRESS=myShRetCmd('docker exec -it ci-oai-smf /bin/bash -c "ifconfig eth2 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
@@ -385,54 +390,113 @@ pipeline {
               copyTo2ndServer('smf-cfg.sh', new_host_flag, new_host_user, new_host)
               myShCmd('docker cp ./smf-cfg.sh ci-oai-smf:/openair-smf', new_host_flag, new_host_user, new_host)
               myShCmd('docker exec -it ci-oai-smf /bin/bash -c "cd /openair-smf && chmod 777 smf-cfg.sh && ./smf-cfg.sh" >> archives/smf_config.log', new_host_flag, new_host_user, new_host)
+              myShCmd('docker cp ci-oai-smf:/openair-smf/etc/. archives/oai-smf-cfg', new_host_flag, new_host_user, new_host)
+              copyFrom2ndServer('archives/oai-smf-cfg/*.*', 'archives/oai-smf-cfg', new_host_flag, new_host_user, new_host)
+              copyFrom2ndServer('archives/smf_config.log', 'archives', new_host_flag, new_host_user, new_host)
 
               sh "wget --quiet https://raw.githubusercontent.com/OPENAIRINTERFACE/openair-spgwu-tiny/develop/ci-scripts/generateConfigFiles.py -O ci-scripts/generateSpgwuConfigFiles.py"
               sh "python3 ci-scripts/generateSpgwuConfigFiles.py --kind=SPGW-U --sxc_ip_addr=${SMF_N4_IP_ADDRESS} --sxu=eth1 --s1u=eth0 --from_docker_file"
               copyTo2ndServer('spgwu-cfg.sh', new_host_flag, new_host_user, new_host)
               myShCmd('docker cp ./spgwu-cfg.sh ci-oai-spgwu:/openair-spgwu-tiny', new_host_flag, new_host_user, new_host)
               myShCmd('docker exec -it ci-oai-spgwu /bin/bash -c "cd /openair-spgwu-tiny && chmod 777 spgwu-cfg.sh && ./spgwu-cfg.sh" >> archives/spgwu_config.log', new_host_flag, new_host_user, new_host)
+              copyFrom2ndServer('archives/spgwu_config.log', 'archives', new_host_flag, new_host_user, new_host)
+            }
+          }
+          post {
+            success {
+              sh "echo 'OAI-SMF CONFIG: OK' >> archives/smf_config.log"
+              sh "echo 'OAI-SPGW-U CONFIG: OK' >> archives/spgwu_config.log"
+            }
+            unsuccessful {
+              sh "echo 'OAI-SMF CONFIG: KO' >> archives/smf_config.log"
+              sh "echo 'OAI-SPGW-U CONFIG: KO' >> archives/spgwu_config.log"
             }
           }
         }
         stage ('Test') {
           steps {
             script {
-              SMF_SBI_IP_ADDRESS=myShRetCmd('docker exec -it ci-oai-smf /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
-              AMF_IP_ADDRESS=myShRetCmd('docker exec -it ci-test-amf-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
-              UDM_IP_ADDRESS=myShRetCmd('docker exec -it ci-test-udm-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+              gitlabCommitStatus(name: "Local SMF test") {
+                  SMF_SBI_IP_ADDRESS=myShRetCmd('docker exec -it ci-oai-smf /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+                  AMF_IP_ADDRESS=myShRetCmd('docker exec -it ci-test-amf-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+                  UDM_IP_ADDRESS=myShRetCmd('docker exec -it ci-test-udm-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
 
-              myShCmd('docker exec -d ci-oai-smf /bin/bash -c "nohup ./bin/oai_smf -c ./etc/smf.conf -o > smf_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
-              sh "sleep 2"
-              myShCmd('docker exec -d  ci-oai-spgwu /bin/bash -c "nohup ./bin/oai_spgwu -c ./etc/spgw_u.conf -o > spgwu_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
-              sh "sleep 2"
-              myShCmd('docker exec -d ci-test-udm-server /bin/bash -c "nohup ./bin/udm-server -i ' + UDM_IP_ADDRESS + ' > udm_server_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
-              sh "sleep 2"
-              myShCmd('docker exec -d ci-test-amf-server /bin/bash -c "nohup ./bin/amf-server -i ' + AMF_IP_ADDRESS + ' > amf_server_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
-              sh "sleep 2"
-              myShCmd('docker exec -it ci-test-amf-client /bin/bash -c "./bin/amf-client -i ' + SMF_SBI_IP_ADDRESS + ' > amf_client_check_run.log"', new_host_flag, new_host_user, new_host)
-              sh "sleep 30"
-              myShCmd('docker exec -it ci-oai-smf /bin/bash -c "killall --signal SIGINT oai_smf"', new_host_flag, new_host_user, new_host)
-              myShCmd('docker exec -it ci-oai-spgwu /bin/bash -c "killall --signal SIGINT oai_spgwu"', new_host_flag, new_host_user, new_host)
-              myShCmd('docker exec -it ci-test-amf-server /bin/bash -c "killall amf-server"', new_host_flag, new_host_user, new_host)
-              myShCmd('docker exec -it ci-test-udm-server /bin/bash -c "killall udm-server"', new_host_flag, new_host_user, new_host)
-              sh "sleep 5"
-              try {
-                myShCmd('docker exec -it ci-oai-smf /bin/bash -c "killall --signal SIGKILL oai_smf"', new_host_flag, new_host_user, new_host)
-              } catch (Exception e) {
-                echo "No residual oai_smf processes"
+                  myShCmd('docker exec -d ci-oai-smf /bin/bash -c "nohup ./bin/oai_smf -c ./etc/smf.conf -o > smf_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
+                  sh "sleep 2"
+                  myShCmd('docker exec -d  ci-oai-spgwu /bin/bash -c "nohup ./bin/oai_spgwu -c ./etc/spgw_u.conf -o > spgwu_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
+                  sh "sleep 2"
+                  myShCmd('docker exec -d ci-test-udm-server /bin/bash -c "nohup ./bin/udm-server -i ' + UDM_IP_ADDRESS + ' > udm_server_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
+                  sh "sleep 2"
+                  myShCmd('docker exec -d ci-test-amf-server /bin/bash -c "nohup ./bin/amf-server -i ' + AMF_IP_ADDRESS + ' > amf_server_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
+
+                  sh "sleep 30"
+                  myShCmd('docker exec -it ci-test-amf-client /bin/bash -c "./bin/amf-client -i ' + SMF_SBI_IP_ADDRESS + ' > amf_client_check_run.log"', new_host_flag, new_host_user, new_host)
+                  sh "sleep 30"
+
+                  myShCmd('docker exec -it ci-oai-smf /bin/bash -c "killall --signal SIGINT oai_smf"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec -it ci-oai-spgwu /bin/bash -c "killall --signal SIGINT oai_spgwu"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec -it ci-test-amf-server /bin/bash -c "killall amf-server"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec -it ci-test-udm-server /bin/bash -c "killall udm-server"', new_host_flag, new_host_user, new_host)
+                  sh "sleep 5"
+                  try {
+                    myShCmd('docker exec -it ci-oai-smf /bin/bash -c "killall --signal SIGKILL oai_smf"', new_host_flag, new_host_user, new_host)
+                  } catch (Exception e) {
+                    echo "No residual oai_smf processes"
+                  }
+                  try {
+                    myShCmd('docker exec -it ci-oai-spgwu /bin/bash -c "killall --signal SIGKILL oai_spgwu"', new_host_flag, new_host_user, new_host)
+                  } catch (Exception e) {
+                    echo "No residual oai_spgwu processes"
+                  }
+                  sh "sleep 5"
+
+                  // Retrieve all log files
+                  myShCmd('docker cp ci-oai-smf:/openair-smf/smf_check_run.log archives', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker cp ci-oai-spgwu:/openair-spgwu-tiny/spgwu_check_run.log archives', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker cp ci-test-amf-server:/test-amf-server/amf_server_check_run.log archives', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker cp ci-test-udm-server:/test-udm-server/udm_server_check_run.log archives', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker cp ci-test-amf-client:/test-amf-client/amf_client_check_run.log archives', new_host_flag, new_host_user, new_host)
+                  copyFrom2ndServer('archives/*_check_run.log', 'archives', new_host_flag, new_host_user, new_host)
+                  sh "python3 ./ci-scripts/verifySanityCheckDeployment.py --job_name=${JOB_NAME} --job_id=${BUILD_ID}"
+                  sh "python3 ./ci-scripts/verifySanityCheckDeployment.py --job_name=${JOB_NAME} --job_id=${BUILD_ID} --smf_pdu_check"
               }
-              try {
-                myShCmd('docker exec -it ci-oai-spgwu /bin/bash -c "killall --signal SIGKILL oai_spgwu"', new_host_flag, new_host_user, new_host)
-              } catch (Exception e) {
-                echo "No residual oai_spgwu processes"
+            }
+          }
+          post {
+            unsuccessful {
+              script {
+                // Retrieve all log files in case of failure
+                try {
+                  myShCmd('docker cp ci-oai-smf:/openair-smf/smf_check_run.log archives', new_host_flag, new_host_user, new_host)
+                } catch (Exception e) {
+                  echo "No smf run logs"
+                }
+                try {
+                  myShCmd('docker cp ci-oai-spgwu:/openair-spgwu-tiny/spgwu_check_run.log archives', new_host_flag, new_host_user, new_host)
+                } catch (Exception e) {
+                  echo "No spgwu run logs"
+                }
+                try {
+                  myShCmd('docker cp ci-test-amf-server:/test-amf-server/amf_server_check_run.log archives', new_host_flag, new_host_user, new_host)
+                } catch (Exception e) {
+                  echo "No amf run logs"
+                }
+                try {
+                  myShCmd('docker cp ci-test-udm-server:/test-udm-server/udm_server_check_run.log archives', new_host_flag, new_host_user, new_host)
+                } catch (Exception e) {
+                  echo "No udm run logs"
+                }
+                try {
+                  myShCmd('docker cp ci-test-amf-client:/test-amf-client/amf_client_check_run.log archives', new_host_flag, new_host_user, new_host)
+                } catch (Exception e) {
+                  echo "No amf-client run logs"
+                }
+                try {
+                  copyFrom2ndServer('archives/*_check_run.log', 'archives', new_host_flag, new_host_user, new_host)
+                } catch (Exception e) {
+                  echo "No run logs at all?"
+                }
               }
-              sh "sleep 5"
-              myShCmd('docker cp ci-oai-smf:/openair-smf/smf_check_run.log archives', new_host_flag, new_host_user, new_host)
-              myShCmd('docker cp ci-oai-spgwu:/openair-spgwu-tiny/spgwu_check_run.log archives', new_host_flag, new_host_user, new_host)
-              myShCmd('docker cp ci-test-amf-server:/test-amf-server/amf_server_check_run.log archives', new_host_flag, new_host_user, new_host)
-              myShCmd('docker cp ci-test-udm-server:/test-udm-server/udm_server_check_run.log archives', new_host_flag, new_host_user, new_host)
-              myShCmd('docker cp ci-test-amf-client:/test-amf-client/amf_client_check_run.log archives', new_host_flag, new_host_user, new_host)
-              copyFrom2ndServer('archives/*_check_run.log', 'archives', new_host_flag, new_host_user, new_host)
             }
           }
         }
