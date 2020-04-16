@@ -217,7 +217,7 @@ void smf_n11::send_n1n2_message_transfer_request(
     curl_easy_setopt(curl, CURLOPT_URL, context_res_msg.get_amf_url().c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
-    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:sn11"); //TODO: enable this only for testing in all-in-one scenario
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:smf"); //TODO: enable this only for testing in all-in-one scenario
 
     mime = curl_mime_init(curl);
     alt = curl_mime_init(curl);
@@ -251,7 +251,7 @@ void smf_n11::send_n1n2_message_transfer_request(
           "Add N2 SM Information (NGAP) into the message: %s (bytes %d)",
           n2_message.c_str(), n2_message.length() / 2);
       part = curl_mime_addpart(mime);
-      curl_mime_data(part, reinterpret_cast<const char*>(n2_msg_hex), n2_message.length()/2);  //TODO: ISSUE need to be solved
+      curl_mime_data(part, reinterpret_cast<const char*>(n2_msg_hex), 80);  //TODO: n2_message.length()/2 ISSUE need to be solved
       curl_mime_type(part, "application/vnd.3gpp.ngap");
       curl_mime_name(
           part,

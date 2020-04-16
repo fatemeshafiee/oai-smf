@@ -51,8 +51,6 @@ void send_pdu_session_establishment_request(std::string smf_ip_address)
   std::cout << "Buffer: "<<std::endl;
 
   //Fill Json part
-  //get supi and put into URL
-  std::string supi_str;
   std::string url = std::string("http://");
   url.append(smf_ip_address);
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts"));
@@ -71,9 +69,7 @@ void send_pdu_session_establishment_request(std::string smf_ip_address)
   pdu_session_establishment_request["servingNetwork"]["mnc"] = "067";
   pdu_session_establishment_request["anType"] = "3GPP_ACCESS";
   pdu_session_establishment_request["smContextStatusUri"] = "smContextStatusUri";
-
-  pdu_session_establishment_request["n1MessageContainer"]["n1MessageClass"] = "SM";
-  pdu_session_establishment_request["n1MessageContainer"]["n1MessageContent"]["contentId"] = "n1SmMsg"; // NAS
+  pdu_session_establishment_request["n1SmMsg"]["contentId"] = "n1SmMsg"; // NAS
 
 
   CURL *curl = curl_easy_init();
