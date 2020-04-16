@@ -885,7 +885,7 @@ class HtmlReport():
 		self.file.write('	 <tr>\n')
 		self.file.write('	   <td bgcolor="lightcyan" >Container Start</td>\n')
 		cwd = os.getcwd()
-		if os.path.isfile(cwd + '/archives/amf_server_config.log') and os.path.isfile(cwd + '/archives/umd_server_config.log') and os.path.isfile(cwd + '/archives/amf_client_config.log'):
+		if os.path.isfile(cwd + '/archives/amf_server_config.log') and os.path.isfile(cwd + '/archives/udm_server_config.log') and os.path.isfile(cwd + '/archives/amf_client_config.log'):
 			cell_msg = '	   <td bgcolor="LimeGreen"><pre style="border:none; background-color:LimeGreen"><b>OK</b></pre></td>\n'
 			for x in range(0, 5):
 				self.file.write(cell_msg)
