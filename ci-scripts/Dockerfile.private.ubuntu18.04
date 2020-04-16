@@ -77,6 +77,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DE
     net-tools \
     bc \
     tshark \
+    libasan4 \
     libgoogle-glog0v5 \
     libdouble-conversion1 \
     libconfig++9v5 \

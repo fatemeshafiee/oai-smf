@@ -57,6 +57,11 @@ class HtmlReport():
 		self.imageSizeRow()
 		self.buildSummaryFooter()
 
+		self.testBuildSummaryHeader()
+		self.testBuildCompileRows()
+		self.testImageSizeRow()
+		self.testBuildSummaryFooter()
+
 		self.sanityCheckSummaryHeader()
 
 		self.testSummaryHeader()
@@ -351,6 +356,20 @@ class HtmlReport():
 		self.file.write('  </table>\n')
 		self.file.write('  <br>\n')
 
+	def testBuildSummaryHeader(self):
+		self.file.write('  <h2>Test Images Build Summary</h2>\n')
+		self.file.write('  <table class="table-bordered" width = "100%" align = "center" border = "1">\n')
+		self.file.write('	  <tr bgcolor="#33CCFF" >\n')
+		self.file.write('		<th>Stage Name</th>\n')
+		self.file.write('		<th>Test AMF Server</th>\n')
+		self.file.write('		<th>Test AMF Client</th>\n')
+		self.file.write('		<th>Test UDM Server</th>\n')
+		self.file.write('	  </tr>\n')
+
+	def testBuildSummaryFooter(self):
+		self.file.write('  </table>\n')
+		self.file.write('  <br>\n')
+
 	def initialGitSetup(self):
 		self.file.write('	 <tr>\n')
 		self.file.write('	   <td bgcolor="lightcyan" >Initial Git Setup</td>\n')
@@ -512,26 +531,52 @@ class HtmlReport():
 	def buildCompileRows(self):
 		self.file.write('	 <tr>\n')
 		self.file.write('	   <td rowspan=2 bgcolor="lightcyan" >cNF Compile / Build</td>\n')
-		self.analyze_build_log('SMF')
+		self.analyze_build_log('SMF', True)
 		self.file.write('	 </tr>\n')
 		self.file.write('	 <tr>\n')
-		self.analyze_compile_log('SMF')
+		self.analyze_compile_log('SMF', True)
 		self.file.write('	 </tr>\n')
 
-	def analyze_build_log(self, nfType):
-		if nfType != 'SMF':
-			self.file.write('      <td>N/A</td>\n')
+	def analyze_build_log(self, nfType, imageKind):
+		if nfType != 'SMF' and nfType != 'AMF-Server' and nfType != 'AMF-Client' and nfType != 'UDM-Server':
+			if imageKind:
+				self.file.write('      <td>N/A</td>\n')
 			self.file.write('	   <td>Wrong NF Type for this Report</td>\n')
 			return
 
-		logFileName = 'smf_docker_image_build.log'
-		self.file.write('      <td>Builder Image</td>\n')
+		if nfType == 'SMF':
+			logFileName = 'smf_docker_image_build.log'
+		if nfType == 'AMF-Server':
+			logFileName = 'amf_server_docker_image_build.log'
+		if nfType == 'AMF-Client':
+			logFileName = 'amf_client_docker_image_build.log'
+		if nfType == 'UDM-Server':
+			logFileName = 'udm_server_docker_image_build.log'
+		if imageKind:
+			self.file.write('      <td>Builder Image</td>\n')
 
 		cwd = os.getcwd()
 		if os.path.isfile(cwd + '/archives/' + logFileName):
 			status = False
-			section_start_pattern = 'build_smf --clean --Verbose --build-type Release --jobs'
-			section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
+			if nfType == 'SMF':
+				section_start_pattern = 'build_smf --clean --Verbose --build-type Debug --jobs'
+				section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
+				pass_pattern = 'smf installed'
+			if nfType == 'AMF-Server':
+				section_start_pattern = 'mkdir build && cd build && cmake .. && make'
+				section_end_pattern = 'FROM ubuntu:bionic as test-amf-server$'
+				pass_pattern = 'Built target amf-server'
+				path_pattern = 'src/test/amf'
+			if nfType == 'AMF-Client':
+				section_start_pattern = 'mkdir build && cd build && cmake .. && make'
+				section_end_pattern = 'FROM ubuntu:bionic as test-amf-client$'
+				pass_pattern = 'Built target amf-client'
+				path_pattern = 'src/test/amf_client'
+			if nfType == 'UDM-Server':
+				section_start_pattern = 'mkdir build && cd build && cmake .. && make'
+				section_end_pattern = 'FROM ubuntu:bionic as test-udm-server$'
+				pass_pattern = 'Built target udm-server'
+				path_pattern = 'src/test/udm'
 			section_status = False
 			with open(cwd + '/archives/' + logFileName, 'r') as logfile:
 				for line in logfile:
@@ -542,7 +587,7 @@ class HtmlReport():
 					if result is not None:
 						section_status = False
 					if section_status:
-						result = re.search('smf installed', line)
+						result = re.search(pass_pattern, line)
 						if result is not None:
 							status = True
 				logfile.close()
@@ -552,29 +597,50 @@ class HtmlReport():
 			else:
 				cell_msg = '	  <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>'
 				cell_msg += 'KO:\n'
-			cell_msg += ' -- build_smf --clean --Verbose --build-type Release --jobs</b></pre></td>\n'
+			if nfType != 'SMF':
+				cell_msg += ' -- cd ' + path_pattern + '\n'
+			cell_msg += ' -- ' + section_start_pattern + '</b></pre></td>\n'
 		else:
 			cell_msg = '	  <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>'
 			cell_msg += 'KO: logfile (' + logFileName + ') not found</b></pre></td>\n'
 
 		self.file.write(cell_msg)
 
-	def analyze_compile_log(self, nfType):
-		if nfType != 'SMF':
-			self.file.write('      <td>N/A</td>\n')
+	def analyze_compile_log(self, nfType, imageKind):
+		if nfType != 'SMF' and nfType != 'AMF-Server' and nfType != 'AMF-Client' and nfType != 'UDM-Server':
+			if imageKind:
+				self.file.write('      <td>N/A</td>\n')
 			self.file.write('	   <td>Wrong NF Type for this Report</td>\n')
 			return
 
-		logFileName = 'smf_docker_image_build.log'
-		self.file.write('      <td>Builder Image</td>\n')
+		if nfType == 'SMF':
+			logFileName = 'smf_docker_image_build.log'
+		if nfType == 'AMF-Server':
+			logFileName = 'amf_server_docker_image_build.log'
+		if nfType == 'AMF-Client':
+			logFileName = 'amf_client_docker_image_build.log'
+		if nfType == 'UDM-Server':
+			logFileName = 'udm_server_docker_image_build.log'
+		if imageKind:
+			self.file.write('      <td>Builder Image</td>\n')
 
 		cwd = os.getcwd()
 		nb_errors = 0
 		nb_warnings = 0
 
 		if os.path.isfile(cwd + '/archives/' + logFileName):
-			section_start_pattern = 'build_smf --clean --Verbose --build-type Release --jobs'
-			section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
+			if nfType == 'SMF':
+				section_start_pattern = 'build_smf --clean --Verbose --build-type Debug --jobs'
+				section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
+			if nfType == 'AMF-Server':
+				section_start_pattern = 'mkdir build && cd build && cmake .. && make'
+				section_end_pattern = 'FROM ubuntu:bionic as test-amf-server$'
+			if nfType == 'AMF-Client':
+				section_start_pattern = 'mkdir build && cd build && cmake .. && make'
+				section_end_pattern = 'FROM ubuntu:bionic as test-amf-client$'
+			if nfType == 'UDM-Server':
+				section_start_pattern = 'mkdir build && cd build && cmake .. && make'
+				section_end_pattern = 'FROM ubuntu:bionic as test-udm-server$'
 			section_status = False
 			with open(cwd + '/archives/' + logFileName, 'r') as logfile:
 				for line in logfile:
@@ -698,22 +764,41 @@ class HtmlReport():
 	def imageSizeRow(self):
 		self.file.write('	 <tr>\n')
 		self.file.write('	   <td bgcolor="lightcyan" >Image Size</td>\n')
-		self.analyze_image_size_log('SMF')
+		self.analyze_image_size_log('SMF', True)
 		self.file.write('	 </tr>\n')
 
-	def analyze_image_size_log(self, nfType):
-		if nfType != 'SMF':
-			self.file.write('      <td>N/A</td>\n')
+	def analyze_image_size_log(self, nfType, imageKind):
+		if nfType != 'SMF' and nfType != 'AMF-Server' and nfType != 'AMF-Client' and nfType != 'UDM-Server':
+			if imageKind:
+				self.file.write('      <td>N/A</td>\n')
 			self.file.write('	   <td>Wrong NF Type for this Report</td>\n')
 			return
 
-		logFileName = 'smf_docker_image_build.log'
-		self.file.write('      <td>Target Image</td>\n')
+		if nfType == 'SMF':
+			logFileName = 'smf_docker_image_build.log'
+		if nfType == 'AMF-Server':
+			logFileName = 'amf_server_docker_image_build.log'
+		if nfType == 'AMF-Client':
+			logFileName = 'amf_client_docker_image_build.log'
+		if nfType == 'UDM-Server':
+			logFileName = 'udm_server_docker_image_build.log'
+		if imageKind:
+			self.file.write('      <td>Target Image</td>\n')
 
 		cwd = os.getcwd()
 		if os.path.isfile(cwd + '/archives/' + logFileName):
-			section_start_pattern = 'Successfully tagged oai-smf'
-			section_end_pattern = 'OAI-SMF DOCKER IMAGE BUILD'
+			if nfType == 'SMF':
+				section_start_pattern = 'Successfully tagged oai-smf'
+				section_end_pattern = 'OAI-SMF DOCKER IMAGE BUILD'
+			if nfType == 'AMF-Server':
+				section_start_pattern = 'Successfully tagged test-amf-server'
+				section_end_pattern = 'TEST-AMF-SERVER DOCKER IMAGE BUILD'
+			if nfType == 'AMF-Client':
+				section_start_pattern = 'Successfully tagged test-amf-client'
+				section_end_pattern = 'TEST-AMF-CLIENT DOCKER IMAGE BUILD'
+			if nfType == 'UDM-Server':
+				section_start_pattern = 'Successfully tagged test-udm-server'
+				section_end_pattern = 'TEST-UDM-SERVER DOCKER IMAGE BUILD'
 			section_status = False
 			status = False
 			with open(cwd + '/archives/' + logFileName, 'r') as logfile:
@@ -725,10 +810,17 @@ class HtmlReport():
 					if result is not None:
 						section_status = False
 					if section_status:
-						if self.git_pull_request:
-							result = re.search('oai-smf *ci-temp', line)
-						else:
-							result = re.search('oai-smf *develop', line)
+						if nfType == 'SMF':
+							if self.git_pull_request:
+								result = re.search('oai-smf *ci-temp', line)
+							else:
+								result = re.search('oai-smf *develop', line)
+						if nfType == 'AMF-Server':
+							result = re.search('test-amf-server *test-deploy', line)
+						if nfType == 'AMF-Client':
+							result = re.search('test-amf-client *test-deploy', line)
+						if nfType == 'UDM-Server':
+							result = re.search('test-udm-server *test-deploy', line)
 						if result is not None:
 							result = re.search('ago *([0-9A-Z]+)', line)
 							if result is not None:
@@ -747,6 +839,27 @@ class HtmlReport():
 			cell_msg += 'KO: logfile (' + logFileName + ') not found</b></pre></td>\n'
 
 		self.file.write(cell_msg)
+
+	def testBuildCompileRows(self):
+		self.file.write('	 <tr>\n')
+		self.file.write('	   <td rowspan=2 bgcolor="lightcyan" >cNF Compile / Build</td>\n')
+		self.analyze_build_log('AMF-Server', False)
+		self.analyze_build_log('AMF-Client', False)
+		self.analyze_build_log('UDM-Server', False)
+		self.file.write('	 </tr>\n')
+		self.file.write('	 <tr>\n')
+		self.analyze_compile_log('AMF-Server', False)
+		self.analyze_compile_log('AMF-Client', False)
+		self.analyze_compile_log('UDM-Server', False)
+		self.file.write('	 </tr>\n')
+
+	def testImageSizeRow(self):
+		self.file.write('	 <tr>\n')
+		self.file.write('	   <td bgcolor="lightcyan" >Image Size</td>\n')
+		self.analyze_image_size_log('AMF-Server', False)
+		self.analyze_image_size_log('AMF-Client', False)
+		self.analyze_image_size_log('UDM-Server', False)
+		self.file.write('	 </tr>\n')
 
 	def sanityCheckSummaryHeader(self):
 		self.file.write('  <h2>Sanity Check Deployment Summary</h2>\n')
