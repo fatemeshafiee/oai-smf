@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (argc == 1) {
-        amf_ip_address.append(std::string("172.16.1.102"));
+        amf_ip_address.append(std::string("192.168.28.3"));
     } else {
         int opt = 0;
         while ((opt = getopt(argc, argv, "i:")) != -1) {
