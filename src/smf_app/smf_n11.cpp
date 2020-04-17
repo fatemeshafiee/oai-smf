@@ -217,7 +217,7 @@ void smf_n11::send_n1n2_message_transfer_request(
     curl_easy_setopt(curl, CURLOPT_URL, context_res_msg.get_amf_url().c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:smf"); //TODO: enable this only for testing in all-in-one scenario
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
     mime = curl_mime_init(curl);
     alt = curl_mime_init(curl);
