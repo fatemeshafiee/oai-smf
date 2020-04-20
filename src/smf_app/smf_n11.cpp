@@ -47,10 +47,6 @@
 using namespace Pistache::Http;
 using namespace Pistache::Http::Mime;
 
-//TODO: move to a common file
-#define AMF_CURL_TIMEOUT_MS 100L
-#define AMF_NUMBER_RETRIES 3
-
 using namespace smf;
 using namespace std;
 using json = nlohmann::json;
@@ -61,7 +57,7 @@ extern smf::smf_app *smf_app_inst;
 extern smf_config smf_cfg;
 void smf_n11_task(void*);
 
-// To read content of the response from UDM
+// To read content of the response from AMF
 static std::size_t callback(const char *in, std::size_t size, std::size_t num,
                             std::string *out) {
   const std::size_t totalBytes(size * num);
@@ -221,7 +217,7 @@ void smf_n11::send_n1n2_message_transfer_request(
     curl_easy_setopt(curl, CURLOPT_URL, context_res_msg.get_amf_url().c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
-    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:sn11"); //Only for testing in all-in-one scenario
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
     mime = curl_mime_init(curl);
     alt = curl_mime_init(curl);
@@ -255,8 +251,7 @@ void smf_n11::send_n1n2_message_transfer_request(
           "Add N2 SM Information (NGAP) into the message: %s (bytes %d)",
           n2_message.c_str(), n2_message.length() / 2);
       part = curl_mime_addpart(mime);
-      //curl_mime_data(part, reinterpret_cast<const char*>(n2_msg_hex), context_res_msg.get_n2_sm_information().length()/2); //TODO: ISSUE need to be solved
-      curl_mime_data(part, reinterpret_cast<const char*>(n2_msg_hex), 80);  //TODO: ISSUE need to be solved
+      curl_mime_data(part, reinterpret_cast<const char*>(n2_msg_hex), 80);  //TODO: n2_message.length()/2 ISSUE need to be solved
       curl_mime_type(part, "application/vnd.3gpp.ngap");
       curl_mime_name(
           part,

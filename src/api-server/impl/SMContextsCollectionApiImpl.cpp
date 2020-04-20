@@ -66,8 +66,6 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
 
   SmContextCreateData smContextCreateData = smContextMessage.getJsonData();
   std::string n1_sm_msg = smContextMessage.getBinaryDataN1SmMessage();
-  std::string n1_sm_msg_hex;
-  m_smf_app->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
   Logger::smf_api_server().debug("smContextMessage, N1 SM message: %s",
                                  n1_sm_msg.c_str());
 
@@ -77,7 +75,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   smf::pdu_session_create_sm_context_request sm_context_req_msg = { };
 
   //set N1 SM Message
-  sm_context_req_msg.set_n1_sm_message(n1_sm_msg_hex);
+  sm_context_req_msg.set_n1_sm_message(n1_sm_msg);
   //set api root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(m_address + base + "/sm-contexts");
 

@@ -895,11 +895,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
    int ret = itti_inst->send_msg(itti_msg);
    */
 
-  //SHOULD BE REMOVED, FOR TESTING PURPOSE
-  //change value here to test the corresponding message
-  //session_procedure_type =
-  //    session_management_procedures_type_e::PDU_SESSION_TEST;
-
   nlohmann::json sm_context_updated_data = { };
   sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
   N1N2_MESSAGE_CLASS;
@@ -911,6 +906,11 @@ void session_update_sm_context_procedure::handle_itti_msg(
       n11_triggered_pending->res.get_pdu_session_id();
   sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
   N2_SM_CONTENT_ID;
+
+  //SHOULD BE REMOVED, FOR TESTING PURPOSE
+  //change value here to test the corresponding message
+  //session_procedure_type =
+  //    session_management_procedures_type_e::PDU_SESSION_TEST;
 
   switch (session_procedure_type) {
 

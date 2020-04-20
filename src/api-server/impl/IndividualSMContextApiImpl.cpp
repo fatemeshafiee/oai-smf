@@ -69,13 +69,10 @@ void IndividualSMContextApiImpl::release_sm_context(
     //N2 SM (for Session establishment)
     std::string n2_sm_information = smContextReleaseMessage
         .getBinaryDataN2SmInformation();
-    //std::string n2_sm_information = (smContextUpdateData.getN2SmInfo()).getContentId();
-    std::string n2_sm_msg_hex;
-    m_smf_app->convert_string_2_hex(n2_sm_information, n2_sm_msg_hex);
     Logger::smf_api_server().debug("smContextMessage, n2 sm information %s",
                                    n2_sm_information.c_str());
     std::string n2_sm_info_type = smContextReleaseData.getN2SmInfoType();
-    sm_context_req_msg.set_n2_sm_information(n2_sm_msg_hex);
+    sm_context_req_msg.set_n2_sm_information(n2_sm_information);
     sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
   }
   //Step 2. TODO: initialize necessary values for sm context req from smContextReleaseData

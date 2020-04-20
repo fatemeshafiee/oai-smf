@@ -73,10 +73,12 @@ char * (strtok) (char *s1, const char *s2) {
 	if (bsafeShouldExit) exit (-1);
 	return NULL;
 }
-
+/*
+//TODO: temporary solution for Release mode
 char * (strdup) (const char *s) {
 	(void) s;
 	fprintf (stderr, "bsafe error: strdup() is not safe, use bstrcpy.\n");
 	if (bsafeShouldExit) exit (-1);
 	return NULL;
 }
+*/

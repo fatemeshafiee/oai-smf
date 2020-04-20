@@ -55,6 +55,7 @@ extern "C" {
 #include "Ngap_UL-NGU-UP-TNLModifyItem.h"
 #include "Ngap_QosFlowAddOrModifyRequestItem.h"
 #include "Ngap_PDUSessionResourceReleaseCommandTransfer.h"
+#include "dynamic_memory_check.h"
 }
 
 #define BUF_LEN 512
@@ -340,6 +341,28 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           sm_msg->pdu_session_establishment_accept.dnn->slen);
       Logger::smf_app().debug("DNN: %s", dnn_str.c_str());
 
+      //Encode NAS message
+      bytes = nas_message_encode(data, &nas_msg,
+                                 sizeof(data)/*don't know the size*/, nullptr);
+
+      Logger::smf_app().debug("Buffer Data: ");
+      for (int i = 0; i < bytes; i++)
+        printf("%02x ", data[i]);
+      printf(" (bytes %d)\n", bytes);
+
+      std::string n1Message((char*) data, bytes);
+      nas_msg_str = n1Message;
+
+      //free memory
+      free_wrapper(
+          (void**) &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
+              .packetfilterlist.create_modifyandadd_modifyandreplace);
+      free_wrapper(
+          (void**) &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie);
+      free_wrapper(
+          (void**) &sm_msg->pdu_session_establishment_accept.qosflowdescriptions
+              .qosflowdescriptionscontents);
+
     }
       break;
 
@@ -418,6 +441,18 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
               .is_ssc3_allowed);
       //Logger::smf_app().debug("SM MSG, GPSR Timer3, unit: 0x%x, value: 0x%x",sm_msg->pdu_session_establishment_reject.gprstimer3.unit,sm_msg->pdu_session_establishment_reject.gprstimer3.timeValue);
       //Logger::smf_app().debug("SM MSG, 5G SM Congestion Re-attempt Indicator: 0x%x",sm_msg->pdu_session_establishment_reject._5gsmcongestionreattemptindicator.abo);
+
+      //Encode NAS message
+      bytes = nas_message_encode(data, &nas_msg,
+                                 sizeof(data)/*don't know the size*/, nullptr);
+
+      Logger::smf_app().debug("Buffer Data: ");
+      for (int i = 0; i < bytes; i++)
+        printf("%02x ", data[i]);
+      printf(" (bytes %d)\n", bytes);
+
+      std::string n1Message((char*) data, bytes);
+      nas_msg_str = n1Message;
 
     }
       break;
@@ -527,6 +562,29 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
                 .qosflowdescriptionscontents[0],
             sm_context_res.get_pdu_session_type());
       }
+
+      //Encode NAS message
+      bytes = nas_message_encode(data, &nas_msg,
+                                 sizeof(data)/*don't know the size*/, nullptr);
+
+      Logger::smf_app().debug("Buffer Data: ");
+      for (int i = 0; i < bytes; i++)
+        printf("%02x ", data[i]);
+      printf(" (bytes %d)\n", bytes);
+
+      std::string n1Message((char*) data, bytes);
+      nas_msg_str = n1Message;
+
+      //free memory
+      free_wrapper(
+          (void**) &sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
+              .packetfilterlist.create_modifyandadd_modifyandreplace);
+      free_wrapper(
+          (void**) &sm_msg->pdu_session_modification_command.qosrules.qosrulesie);
+      free_wrapper(
+          (void**) &sm_msg->pdu_session_modification_command.qosflowdescriptions
+              .qosflowdescriptionscontents);
+
     }
       break;
 
@@ -564,6 +622,14 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //_5GSMCongestionReattemptIndicator
       // ExtendedProtocolConfigurationOptions
 
+      Logger::smf_app().debug("Buffer Data: ");
+      for (int i = 0; i < bytes; i++)
+        printf("%02x ", data[i]);
+      printf(" (bytes %d)\n", bytes);
+
+      std::string n1Message((char*) data, bytes);
+      nas_msg_str = n1Message;
+
     }
       break;
 
@@ -572,19 +638,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //TODO:
     }
 
-  }    //end Switch
-
-  //Encode NAS message
-  bytes = nas_message_encode(data, &nas_msg,
-                             sizeof(data)/*don't know the size*/, nullptr);
-
-  Logger::smf_app().debug("Buffer Data: ");
-  for (int i = 0; i < bytes; i++)
-    printf("%02x ", data[i]);
-  printf(" (bytes %d)\n", bytes);
-
-  std::string n1Message((char*) data, bytes);
-  nas_msg_str = n1Message;
+  }      //end Switch
 
 }
 
@@ -664,6 +718,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
           Logger::smf_app().warn("Unknown message type: %d \n",
                                  msg.get_msg_type());
           //TODO:
+          free_wrapper((void**) &ngap_IEs);
           return;
       }
 
@@ -838,6 +893,29 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       printf(" (%d bytes)\n", (int) er.encoded);
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
+
+      //free memory
+      free_wrapper((void**) &pduSessionAggregateMaximumBitRate);
+      free_wrapper(
+          (void**) &upTransportLayerInformation->value.choice
+              .UPTransportLayerInformation.choice.gTPTunnel
+              ->transportLayerAddress.buf);
+      free_wrapper(
+          (void**) &upTransportLayerInformation->value.choice
+              .UPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf);
+      free_wrapper(
+          (void**) &upTransportLayerInformation->value.choice
+              .UPTransportLayerInformation.choice.gTPTunnel);
+      free_wrapper((void**) &upTransportLayerInformation);
+      free_wrapper((void**) &pduSessionType);
+      free_wrapper((void**) &qosFlowSetupRequestList);
+      free_wrapper(
+          (void**) &ngap_QosFlowSetupRequestItem->qosFlowLevelQosParameters
+              .qosCharacteristics.choice.nonDynamic5QI);
+      free_wrapper((void**) &ngap_QosFlowSetupRequestItem);
+      free_wrapper((void**) &ngap_IEs);
+      free_wrapper((void**) &buffer);
+
     }
       break;
 
@@ -1066,6 +1144,34 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       printf(" (%d bytes)\n", (int) er.encoded);
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
+
+      //free memory
+      free_wrapper((void**) &pduSessionAggregateMaximumBitRate);
+      free_wrapper(
+          (void**) &ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation
+              .choice.gTPTunnel->transportLayerAddress.buf);
+      free_wrapper(
+          (void**) &ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation
+              .choice.gTPTunnel->gTP_TEID.buf);
+      free_wrapper(
+          (void**) &ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation
+              .choice.gTPTunnel->transportLayerAddress.buf);
+      free_wrapper(
+          (void**) &ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation
+              .choice.gTPTunnel->gTP_TEID.buf);
+      free_wrapper((void**) &ngap_UL_NGU_UP_TNLModifyItem);
+      free_wrapper((void**) &ul_NGU_UP_TNLModifyList);
+      free_wrapper(
+          (void**) &ngap_QosFlowAddOrModifyRequestItem
+              ->qosFlowLevelQosParameters->qosCharacteristics.choice
+              .nonDynamic5QI);
+      free_wrapper(
+          (void**) &ngap_QosFlowAddOrModifyRequestItem
+              ->qosFlowLevelQosParameters);
+      free_wrapper((void**) &ngap_QosFlowAddOrModifyRequestItem);
+      free_wrapper((void**) &qosFlowAddOrModifyRequestList);
+      free_wrapper((void**) &ngap_IEs);
+      free_wrapper((void**) &buffer);
     }
       break;
 
@@ -1161,6 +1267,20 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
 
+      //free memory
+      free_wrapper(
+          (void**) &ngap_resource_response_transfer->dLQosFlowPerTNLInformation
+              .uPTransportLayerInformation.choice.gTPTunnel
+              ->transportLayerAddress.buf);
+      free_wrapper(
+          (void**) &ngap_resource_response_transfer->dLQosFlowPerTNLInformation
+              .uPTransportLayerInformation.choice.gTPTunnel->gTP_TEID.buf);
+      free_wrapper(
+          (void**) &ngap_resource_response_transfer->dLQosFlowPerTNLInformation
+              .uPTransportLayerInformation.choice.gTPTunnel);
+      free_wrapper((void**) &ngap_resource_response_transfer);
+      free_wrapper((void**) &qos_flow_item);
+      free_wrapper((void**) &buffer);
     }
       break;
 
@@ -1205,6 +1325,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       asn_enc_rval_t er = aper_encode_to_buffer(
           &asn_DEF_Ngap_PDUSessionResourceReleaseCommandTransfer, nullptr,
           ngap_resource_release_command_transfer, (void*) buffer, buffer_size);
+
       if (er.encoded < 0) {
         Logger::smf_app().warn(
             "[Create N2 SM Information] NGAP PDU Session Release Command encode failed, er.encoded: %d",
@@ -1219,6 +1340,10 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
 
+      //free memory
+      free_wrapper((void**) &ngap_resource_release_command_transfer);
+      free_wrapper((void**) &buffer);
+
     }
       break;
 
@@ -1230,7 +1355,6 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
 }
 
 //------------------------------------------------------------------------------
-//TODO: should be polished
 int smf_n1_n2::decode_n1_sm_container(nas_message_t &nas_msg,
                                       std::string &n1_sm_msg) {
   Logger::smf_app().info("Decode NAS message from N1 SM Container");
@@ -1239,21 +1363,20 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t &nas_msg,
   nas_message_decode_status_t decode_status = { 0 };
   int decoder_rc = RETURNok;
 
-  unsigned int msg_len = n1_sm_msg.length();
-  char *data = (char*) malloc(msg_len + 1);
-  memset(data, 0, msg_len + 1);
-  memcpy((void*) data, (void*) n1_sm_msg.c_str(), msg_len);
+  unsigned int data_len = n1_sm_msg.length();
+  unsigned char *data = (unsigned char*) malloc(data_len + 1);
+  memset(data, 0, data_len + 1);
+  memcpy((void*) data, (void*) n1_sm_msg.c_str(), data_len);
 
-  uint8_t *data_hex = (uint8_t*) malloc(msg_len / 2 + 1);
-  conv::ascii_to_hex(data_hex, (const char*) data);
   printf("Content: ");
-  for (int i = 0; i < msg_len / 2; i++)
-    printf(" %02x ", data_hex[i]);
+  for (int i = 0; i < data_len; i++)
+    printf(" %02x ", data[i]);
   printf("\n");
 
   //decode the NAS message (using NAS lib)
-  decoder_rc = nas_message_decode(data_hex, &nas_msg, msg_len / 2, nullptr,
+  decoder_rc = nas_message_decode(data, &nas_msg, data_len, nullptr,
                                   &decode_status);
+
   Logger::smf_app().debug("NAS message type 0x%x ",
                           nas_msg.plain.sm.header.message_type);
 
@@ -1269,6 +1392,9 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t &nas_msg,
       nas_msg.plain.sm.header.procedure_transaction_identity,
       nas_msg.plain.sm.header.message_type);
 
+  //free memory
+  free_wrapper((void**) &data);
+
   return decoder_rc;
 }
 
@@ -1283,11 +1409,20 @@ int smf_n1_n2::decode_n2_sm_information(
   memset(data, 0, data_len + 1);
   memcpy((void*) data, (void*) n2_sm_info.c_str(), data_len);
 
+  printf("Content: ");
+  for (int i = 0; i < data_len; i++)
+    printf(" %02x ", data[i]);
+  printf("\n");
+
   //PDUSessionResourceSetupResponseTransfer
   asn_dec_rval_t rc = asn_decode(
       nullptr, ATS_ALIGNED_CANONICAL_PER,
       &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, (void**) &ngap_IE,
       (void*) data, data_len);
+
+  //free memory
+  free_wrapper((void**) &data);
+
   if (rc.code != RC_OK) {
     Logger::smf_api_server().warn("asn_decode failed with code %d", rc.code);
     return RETURNerror ;
@@ -1313,8 +1448,13 @@ int smf_n1_n2::decode_n2_sm_information(
       nullptr, ATS_ALIGNED_CANONICAL_PER,
       &asn_DEF_Ngap_PDUSessionResourceModifyResponseTransfer, (void**) &ngap_IE,
       (void*) data, data_len);
+
+  //free memory
+  free_wrapper((void**) &data);
+
   if (rc.code != RC_OK) {
     Logger::smf_api_server().warn("asn_decode failed with code %d", rc.code);
+
     return RETURNerror ;
   }
   return RETURNok ;

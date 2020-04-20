@@ -32,11 +32,6 @@
  */
 
 #include "SMContextsCollectionApi.h"
-#include "logger.hpp"
-#include "Helpers.h"
-extern "C" {
-#include "multipartparser.h"
-}
 
 #include <cassert>
 #include <cstring>
@@ -45,6 +40,14 @@ extern "C" {
 #include <list>
 #include <map>
 #include <string>
+
+
+#include "logger.hpp"
+#include "Helpers.h"
+extern "C" {
+#include "multipartparser.h"
+#include "dynamic_memory_check.h"
+}
 
 namespace oai {
 namespace smf_server {
@@ -107,8 +110,15 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
   init_globals();
   multipartparser_init(&parser,
                        reinterpret_cast<const char*>(boundary_str.c_str()));
-  if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(),
-                               strlen(request.body().c_str()))
+
+  unsigned int str_len = request.body().length();
+  unsigned char *data = (unsigned char*) malloc(str_len + 1);
+  memset(data, 0, str_len + 1);
+  memcpy((void*) data, (void*) request.body().c_str(), str_len);
+
+  //if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
+  if ((multipartparser_execute(&parser, &g_callbacks,
+                               reinterpret_cast<const char*>(data), str_len)
       != strlen(request.body().c_str())) or (!g_body_begin_called)) {
     Logger::smf_api_server().warn(
         "The received message can not be parsed properly!");
@@ -117,6 +127,9 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
     //return;
   }
 
+  free_wrapper((void**) &data);
+
+  uint8_t size = g_parts.size();
   Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
   //at least 2 parts for Json data and N1 (+ N2)
   if (g_parts.size() < 2) {
@@ -142,7 +155,7 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
   try {
     nlohmann::json::parse(p0.body.c_str()).get_to(smContextCreateData);
     smContextMessage.setJsonData(smContextCreateData);
-    smContextMessage.setBinaryDataN1SmMessage(p1.body.c_str());
+    smContextMessage.setBinaryDataN1SmMessage(p1.body);
     this->post_sm_contexts(smContextMessage, response);
   } catch (nlohmann::detail::exception &e) {
     //send a 400 error
@@ -156,7 +169,6 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
     response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
     return;
   }
-
 }
 
 void SMContextsCollectionApi::sm_contexts_collection_api_default_handler(

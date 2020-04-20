@@ -45,7 +45,7 @@ void N1N2MessageCollectionDocumentApi::n1_n2_message_transfer_handler(const Pist
     // Getting the body param
     //N1N2MessageTransferReqData n1N2MessageTransferReqData;
     nlohmann::json response_data;
-    response_data["cause"] = "504 Gateway Timeout";
+    response_data["cause"] = "N1_N2_TRANSFER_INITIATED";
     response_data.dump().c_str();
     response.headers().add<Pistache::Http::Header::ContentType>(Pistache::Http::Mime::MediaType("application/json"));
     response.send(Pistache::Http::Code::Ok, response_data.dump().c_str());

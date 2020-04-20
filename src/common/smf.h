@@ -223,4 +223,8 @@ static const std::vector<std::string> multipart_related_content_part_e2str = {
 #define N1_SM_CONTENT_ID                              "n1SmMsg"
 #define N1N2_MESSAGE_CLASS                             "SM"
 #define N2_SM_CONTENT_ID                              "n2SmMsg"
+
+//for CURL
+#define AMF_CURL_TIMEOUT_MS 100L
+
 #endif
