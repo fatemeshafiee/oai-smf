@@ -91,7 +91,7 @@ void send_pdu_session_establishment_request(std::string smf_ip_address)
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
+    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
 
     mime = curl_mime_init(curl);
     alt = curl_mime_init(curl);
@@ -202,7 +202,7 @@ void send_pdu_session_update_sm_context_establishment(std::string smf_ip_address
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
+    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
 
 
     mime = curl_mime_init(curl);
@@ -304,7 +304,7 @@ void send_pdu_session_release_request(std::string smf_ip_address)
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
+    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
 
     mime = curl_mime_init(curl);
     alt = curl_mime_init(curl);
@@ -399,7 +399,7 @@ void send_pdu_session_release_resource_release_ack(std::string smf_ip_address)
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
+    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
 
     mime = curl_mime_init(curl);
     alt = curl_mime_init(curl);
@@ -506,7 +506,7 @@ void send_pdu_session_release_complete(std::string smf_ip_address)
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
+    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf"); //hardcoded
 
     mime = curl_mime_init(curl);
     alt = curl_mime_init(curl);
