@@ -75,7 +75,7 @@ mkdir build
 cd build
 cmake ..
 make
-sudo ./udm-server
+sudo ./udm-server -i 172.16.1.103
 
 ## Build and launch AMF server
 cd /oai-cn5g-smf/src/test/amf
@@ -83,7 +83,7 @@ mkdir build
 cd build
 cmake ..
 make
-sudo ./amf-server 
+sudo ./amf-server -i 172.16.1.102
 
 ## Build and launch AMF client
 cd /oai-cn5g-smf/src/test/amf_client
@@ -91,6 +91,6 @@ mkdir build
 cd build
 cmake ..
 make
-./amf-client
+./amf-client -i 172.16.1.101
 
 

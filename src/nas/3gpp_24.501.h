@@ -22,7 +22,7 @@
 /*
  *  This file contains NAS header bits format
  *  Refer TS24.007 TS24.501
- *  Auther: Puzyu Dukl
+ *  Author: Puzyu Dukl (BUPT), Tien-Thinh NGUYEN (EURECOM)
  *  Time:
  *  Email:
  */
@@ -246,64 +246,6 @@ enum class cause_value_5gsm_e {
   CAUSE_100_CONDITIONAL_IE_ERROR = 100,
   CAUSE_101_MESSAGE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 101,
   CAUSE_111_PROTOCOL_ERROR_UNSPECIFIED = 111
-/*
- Cause #8 – Operator Determined Barring
- Cause #26 – Insufficient resources
- Cause #27 – Missing or unknown DNN
- Cause #28 – Unknown PDU session type
- Cause #29 – User authentication or authorization failed
- Cause #31 – Request rejected, unspecified
- Cause #32 – Service option not supported
- Cause #33 – Requested service option not subscribed
- Cause #35 – PTI already in use
- Cause #36 – Regular deactivation
- Cause #38 – Network failure
- Cause #39 – Reactivation requested
- Cause #41 – Semantic error in the TFT operation
- Cause #42 – Syntactical error in the TFT operation
- Cause #43 –Invalid PDU session identity
- Cause #44 – Semantic errors in packet filter(s)
- Cause #45 – Syntactical error in packet filter(s)
- Cause #46 –Out of LADN service area
- Cause #47 –PTI mismatch
- Cause #50 – PDU session type IPv4 only allowed
- Cause #51 – PDU session type IPv6 only allowed
- Cause #54 –PDU session does not exist
- Cause #67 – Insufficient resources for specific slice and DNN
- Cause #68 – Not supported SSC mode
- Cause #69 –Insufficient resources for specific slice
- Cause #70 – Missing or unknown DNN in a slice
- Cause #81 – Invalid PTI value
- Cause #82 – Maximum data rate per UE for user-plane integrity protection is too low
- Cause #83 – Semantic error in the QoS operation
- Cause #84 – Syntactical error in the QoS operation
- Cause #85 – Invalid mapped EPS bearer identity
- //Protocol errors
- Cause #95 – Semantically incorrect message
- Cause #96 – Invalid mandatory information
- Cause #97 – Message type non-existent or not implemented
- Cause #98 – Message type not compatible with protocol state
- Cause #99 – Information element non-existent or not implemented
- Cause #100 – Conditional IE error
- Cause #101 – Message not compatible with protocol state
- Cause #111 – Protocol error, unspecified
- */
-
-};
-
-enum cause_value_protocol_errors_e {
-  CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE = 95
-/*
- Cause #95 – Semantically incorrect message
- Cause #96 – Invalid mandatory information
- Cause #97 – Message type non-existent or not implemented
- Cause #98 – Message type not compatible with protocol state
- Cause #99 – Information element non-existent or not implemented
- Cause #100 – Conditional IE error
- Cause #101 – Message not compatible with protocol state
- Cause #111 – Protocol error, unspecified
- */
-
 };
 
 //The 5GSM sublayer states for PDU session handling in the network
@@ -347,6 +289,49 @@ enum notification_control_e {
 
 static const std::vector<std::string> notification_control_e2str = { "ERROR",
     "REQUESTED", "NOT_REQUESTED" };
+
+//PDU Session Type value
+enum pdu_session_type_e {
+  PDU_SESSION_TYPE_E_UNKNOWN = 0,
+  PDU_SESSION_TYPE_E_IPV4 = 1,
+  PDU_SESSION_TYPE_E_IPV6 = 2,
+  PDU_SESSION_TYPE_E_IPV4V6 = 3,
+  PDU_SESSION_TYPE_E_UNSTRUCTURED = 4,
+  PDU_SESSION_TYPE_E_ETHERNET = 5,
+  PDU_SESSION_TYPE_E_RESERVED = 7,
+};
+
+static const std::vector<std::string> pdu_session_type_e2str = { "Error",
+    "IPV4", "IPV6", "IPV4V6", "UNSTRUCTURED", "ETHERNET", "IPV4V6", "RESERVED" };
+
+typedef struct pdu_session_type_s {
+  uint8_t pdu_session_type;
+  pdu_session_type_s()
+      :
+      pdu_session_type(PDU_SESSION_TYPE_E_IPV4) {
+  }
+  pdu_session_type_s(const uint8_t &p)
+      :
+      pdu_session_type(p) {
+  }
+  pdu_session_type_s(const struct pdu_session_type_s &p)
+      :
+      pdu_session_type(p.pdu_session_type) {
+  }
+  bool operator==(const struct pdu_session_type_s &p) const {
+    return (p.pdu_session_type == pdu_session_type);
+  }
+  //------------------------------------------------------------------------------
+  bool operator==(const pdu_session_type_e &p) const {
+    return (p == pdu_session_type);
+  }
+  //------------------------------------------------------------------------------
+  const std::string& toString() const {
+    return pdu_session_type_e2str.at(pdu_session_type);
+  }
+} pdu_session_type_t;
+
+
 
 #endif
 

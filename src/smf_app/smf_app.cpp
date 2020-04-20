@@ -516,7 +516,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         "NAS, pdu_session_type %d",
         decoded_nas_msg.plain.sm.pdu_session_establishment_request
             ._pdusessiontype.pdu_session_type_value);
-    smreq->req.set_pdu_session_type(decoded_nas_msg.plain.sm.pdu_session_establishment_request._pdusessiontype.pdu_session_type_value);
+    smreq->req.set_pdu_session_type(
+        decoded_nas_msg.plain.sm.pdu_session_establishment_request
+            ._pdusessiontype.pdu_session_type_value);
   }
 
   //Get necessary information
@@ -563,6 +565,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         smreq->http_response, smContextCreateError,
         Pistache::Http::Code::Forbidden, n1_sm_message_hex);
   }
+
+  context_req_msg.set_pti(pti);
 
   //check pdu session id
   if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED )

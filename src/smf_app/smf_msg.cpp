@@ -146,6 +146,18 @@ void pdu_session_msg::set_pdu_session_type(uint8_t const &pdu_session_type) {
 }
 
 //-----------------------------------------------------------------------------
+procedure_transaction_id_t pdu_session_msg::get_pti() const {
+  return m_pti;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_msg::set_pti(
+    procedure_transaction_id_t const &pti) {
+  m_pti = pti;
+}
+
+
+//-----------------------------------------------------------------------------
 extended_protocol_discriminator_t pdu_session_create_sm_context::get_epd() const {
   return m_epd;
 }
@@ -154,17 +166,6 @@ extended_protocol_discriminator_t pdu_session_create_sm_context::get_epd() const
 void pdu_session_create_sm_context::set_epd(
     extended_protocol_discriminator_t const &epd) {
   m_epd = epd;
-}
-
-//-----------------------------------------------------------------------------
-procedure_transaction_id_t pdu_session_create_sm_context::get_pti() const {
-  return m_pti;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_create_sm_context::set_pti(
-    procedure_transaction_id_t const &pti) {
-  m_pti = pti;
 }
 
 //-----------------------------------------------------------------------------
@@ -371,6 +372,12 @@ void pdu_session_update_sm_context_request::add_qfi(pfcp::qfi_t const &qfi) {
 }
 
 //-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::add_qfi(uint8_t const &q) {
+  pfcp::qfi_t qfi(q);
+  qfis.push_back(qfi);
+}
+
+//-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::get_qfis(
     std::vector<pfcp::qfi_t> &q) {
   for (auto qfi : qfis) {
@@ -410,17 +417,6 @@ void pdu_session_update_sm_context_request::set_rat_type(
 void pdu_session_update_sm_context_request::set_an_type(
     std::string const &value) {
   m_an_type = value;
-}
-
-//-----------------------------------------------------------------------------
-procedure_transaction_id_t pdu_session_update_sm_context_response::get_pti() const {
-  return m_pti;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_response::set_pti(
-    procedure_transaction_id_t const &pti) {
-  m_pti = pti;
 }
 
 //-----------------------------------------------------------------------------

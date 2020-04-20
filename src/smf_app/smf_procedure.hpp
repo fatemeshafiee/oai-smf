@@ -171,6 +171,43 @@ class session_update_sm_context_procedure : public smf_procedure {
 
 };
 
+
+//------------------------------------------------------------------------------
+class session_release_pdu_session_procedure : public smf_procedure {
+ public:
+  explicit session_release_pdu_session_procedure(
+      std::shared_ptr<smf_pdu_session> &sppc)
+      :
+      smf_procedure(),
+      ppc(sppc),
+      n4_triggered(),
+      n11_triggered_pending(),
+      n11_trigger(),
+      session_procedure_type() {
+  }
+
+  int run(std::shared_ptr<itti_n11_update_sm_context_request> req,
+          std::shared_ptr<itti_n11_update_sm_context_response> resp,
+          std::shared_ptr<smf::smf_context> sc);
+  /*
+   * Handle N4 modification response from UPF
+   * @param [itti_n4_session_modification_response] resp
+   * @param [std::shared_ptr<smf::smf_context>] sc smf context
+   * @return void
+   */
+  void handle_itti_msg(itti_n4_session_modification_response &resp,
+                       std::shared_ptr<smf::smf_context> sc);
+
+  std::shared_ptr<itti_n4_session_modification_request> n4_triggered;
+  std::shared_ptr<smf_pdu_session> ppc;
+  std::shared_ptr<smf::smf_context> pc;
+
+  std::shared_ptr<itti_n11_update_sm_context_request> n11_trigger;
+  std::shared_ptr<itti_n11_update_sm_context_response> n11_triggered_pending;
+  session_management_procedures_type_e session_procedure_type;
+
+};
+
 }
 #include "../smf_app/smf_context.hpp"
 
