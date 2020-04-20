@@ -341,7 +341,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
       break;
 
     case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
-      Logger::smf_n11().debug("PDU_SESSION_ESTABLISHMENT_UE_REQUESTED");
+      Logger::smf_n11().info("PDU_SESSION_ESTABLISHMENT_UE_REQUESTED");
       std::string json_part =
           sm_context_res->res.sm_context_updated_data.dump();
       sm_context_res->http_response.headers()
@@ -353,7 +353,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
       break;
 
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1: {
-      Logger::smf_n11().debug("PDU_SESSION_MODIFICATION_UE_INITIATED");
+      Logger::smf_n11().info("PDU_SESSION_MODIFICATION_UE_INITIATED");
 
       std::string boundary = "----Boundary";
       std::string json_part =
@@ -403,6 +403,26 @@ void smf_n11::send_pdu_session_update_sm_context_response(
       sm_context_res->http_response.send(Pistache::Http::Code::Ok,
                                          json_part.c_str());
 
+    }
+      break;
+
+    case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
+      Logger::smf_n11().debug("PDU_SESSION_RELEASE_UE_REQUESTED_STEP1");
+
+      std::string boundary = "----Boundary";
+      std::string json_part =
+          sm_context_res->res.sm_context_updated_data.dump();
+      std::string n1_message = sm_context_res->res.get_n1_sm_message();
+      std::string n2_message = sm_context_res->res.get_n2_sm_information();
+      std::string body;
+
+      create_multipart_related_content(body, json_part, boundary, n1_message,
+                                       n2_message);
+      sm_context_res->http_response.headers()
+          .add<Pistache::Http::Header::ContentType>(
+          Pistache::Http::Mime::MediaType(
+              "multipart/related; boundary=" + boundary));
+      sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
     }
       break;
 

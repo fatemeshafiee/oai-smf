@@ -62,32 +62,103 @@ extern smf::smf_n11 *smf_n11_inst;
 extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
+void smf_qos_flow::release_qos_flow() {
+  released = true;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_qos_flow::toString() const {
+  std::string s = { };
+  s.append("QoS Flow:\n");
+  s.append("\tFQI:\t\t\t\t").append(std::to_string((uint8_t) qfi.qfi)).append(
+      "\n");
+  s.append("\tUL FTEID:\t\t").append(ul_fteid.toString()).append("\n");
+  s.append("\tPDR ID UL:\t\t\t").append(std::to_string(pdr_id_ul.rule_id))
+      .append("\n");
+  s.append("\tPDR ID DL:\t\t\t").append(std::to_string(pdr_id_dl.rule_id))
+      .append("\n");
+  s.append("\tPRECEDENCE:\t\t\t").append(std::to_string(precedence.precedence))
+      .append("\n");
+  if (far_id_ul.first) {
+    s.append("\tFAR ID UL:\t\t\t").append(
+        std::to_string(far_id_ul.second.far_id)).append("\n");
+  }
+  if (far_id_dl.first) {
+    s.append("\tFAR ID DL:\t\t\t").append(
+        std::to_string(far_id_dl.second.far_id)).append("\n");
+  }
+  return s;
+}
+//------------------------------------------------------------------------------
+void smf_qos_flow::deallocate_ressources() {
+  clear();
+  Logger::smf_app().info(
+      "Resources associated with this QoS Flow (%d) have been released",
+      (uint8_t) qfi.qfi);
+}
+
+//------------------------------------------------------------------------------
 void smf_pdu_session::set(const paa_t &paa) {
   switch (paa.pdn_type.pdn_type) {
     case PDN_TYPE_E_IPV4:
       ipv4 = true;
       ipv6 = false;
       ipv4_address = paa.ipv4_address;
+      pdn_type.pdn_type = paa.pdn_type.pdn_type;
       break;
     case PDN_TYPE_E_IPV6:
       ipv4 = false;
       ipv6 = true;
       ipv6_address = paa.ipv6_address;
+      pdn_type.pdn_type = paa.pdn_type.pdn_type;
       break;
     case PDN_TYPE_E_IPV4V6:
       ipv4 = true;
       ipv6 = true;
       ipv4_address = paa.ipv4_address;
       ipv6_address = paa.ipv6_address;
+      pdn_type.pdn_type = paa.pdn_type.pdn_type;
+      break;
+    case PDN_TYPE_E_NON_IP:
+      ipv4 = false;
+      ipv6 = false;
+      pdn_type.pdn_type = paa.pdn_type.pdn_type;
+      break;
+    default:
+      Logger::smf_app().error("smf_pdu_session::set(paa_t) Unknown PDN type %d",
+                              paa.pdn_type.pdn_type);
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_paa(paa_t &paa) {
+  switch (pdn_type.pdn_type) {
+    case PDN_TYPE_E_IPV4:
+      ipv4 = true;
+      ipv6 = false;
+      paa.ipv4_address = ipv4_address;
+      break;
+    case PDN_TYPE_E_IPV6:
+      ipv4 = false;
+      ipv6 = true;
+      paa.ipv6_address = ipv6_address;
+      break;
+    case PDN_TYPE_E_IPV4V6:
+      ipv4 = true;
+      ipv6 = true;
+      paa.ipv4_address = ipv4_address;
+      paa.ipv6_address = ipv6_address;
       break;
     case PDN_TYPE_E_NON_IP:
       ipv4 = false;
       ipv6 = false;
       break;
     default:
-      Logger::smf_app().error("smf_pdu_session::set(paa_t) Unknown PDN type %d",
-                              paa.pdn_type.pdn_type);
+      Logger::smf_app().error(
+          "smf_pdu_session::get_paa (paa_t) Unknown PDN type %d",
+          pdn_type.pdn_type);
   }
+  paa.pdn_type.pdn_type = pdn_type.pdn_type;
 }
 
 //------------------------------------------------------------------------------
@@ -208,14 +279,19 @@ void smf_pdu_session::deallocate_ressources(const std::string &apn) {
 
   for (std::map<uint8_t, smf_qos_flow>::iterator it = qos_flows.begin();
       it != qos_flows.end(); ++it) {
+    //TODO: release FAR_ID, PDR_ID
+    //release_pdr_id(it->second.pdr_id_dl);
+    //release_pdr_id(it->second.pdr_id_ul);
+    //release_far_id(it->second.far_id_dl.second);
+    //release_far_id(it->second.far_id_ul.second);
     it->second.deallocate_ressources();
   }
-  qos_flows.clear();
   if (ipv4) {
     paa_dynamic::get_instance().release_paa(apn, ipv4_address);
   }
-  //smf_app_inst->free_s5s8_cp_fteid(pgw_fteid_s5_s8_cp);
-  clear();
+  clear(); //including qos_flows.clear()
+  Logger::smf_app().info(
+      "Resources associated with this PDU Session have been released");
 }
 
 //------------------------------------------------------------------------------
@@ -283,6 +359,10 @@ std::string smf_pdu_session::toString() const {
 //------------------------------------------------------------------------------
 void smf_pdu_session::set_pdu_session_status(
     const pdu_session_status_e &status) {
+  //TODO: Should consider congestion handling
+  Logger::smf_app().info(
+      "Set PDU Session Status to %s",
+      pdu_session_status_e2str[static_cast<int>(status)].c_str());
   pdu_session_status = status;
 }
 
@@ -299,6 +379,28 @@ void smf_pdu_session::set_upCnx_state(const upCnx_state_e &state) {
 //------------------------------------------------------------------------------
 upCnx_state_e smf_pdu_session::get_upCnx_state() const {
   return upCnx_state;
+}
+
+//------------------------------------------------------------------------------
+pdn_type_t smf_pdu_session::get_pdn_type() const {
+  return pdn_type;
+}
+
+//------------------------------------------------------------------------------
+void session_management_subscription::insert_dnn_configuration(
+    std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration) {
+  dnn_configurations.insert(
+      std::pair<std::string, std::shared_ptr<dnn_configuration_t>>(
+          dnn, dnn_configuration));
+}
+
+//------------------------------------------------------------------------------
+void session_management_subscription::find_dnn_configuration(
+    std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration) {
+  Logger::smf_app().info("find_dnn_configuration with dnn %s", dnn.c_str());
+  if (dnn_configurations.count(dnn) > 0) {
+    dnn_configuration = dnn_configurations.at(dnn);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -1219,7 +1321,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           // qos_rules_ie[0].segregation ;
           // qos_rules_ie[0].qosflowidentifer ;
         }
-        free_wrapper((void **) &qos_rules_ie);
+        free_wrapper((void**) &qos_rules_ie);
 
         //verify the PDU session ID
         if (smreq->req.get_pdu_session_id()
@@ -1298,6 +1400,10 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       case PDU_SESSION_MODIFICATION_COMPLETE: {
         //PDU Session Modification procedure (Section 4.3.3.2@3GPP TS 23.502)
         //TODO: should be verified since mentioned PDU_SESSION_MODIFICATION_COMMAND ACK in spec (see Step 11, section 4.3.3.2@3GPP TS 23.502)
+        Logger::smf_app().debug("PDU_SESSION_MODIFICATION_COMPLETE");
+        procedure_type =
+            session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3;
+
         //send response
 
         /* see section 6.3.2.3@3GPP TS 24.501 V16.1.0
@@ -1320,6 +1426,63 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //PDU Session Release UE-Initiated (Step 1)
       case PDU_SESSION_RELEASE_REQUEST: {
         //PDU Session Release procedure (Section 4.3.4@3GPP TS 23.502)
+        Logger::smf_app().debug("PDU_SESSION_RELEASE_REQUEST");
+        Logger::smf_app().info(
+            "PDU Session Release (UE-Initiated), processing N1 SM Information");
+        procedure_type =
+            session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1;
+        //verify PDU Session ID
+        if (sm_context_req_msg.get_pdu_session_id()
+            != decoded_nas_msg.plain.sm.header.pdu_session_identity) {
+          //TODO: PDU Session ID mismatch
+        }
+        //PTI
+        Logger::smf_app().info(
+            "PTI %d",
+            decoded_nas_msg.plain.sm.header.procedure_transaction_identity);
+        procedure_transaction_id_t pti = { .procedure_transaction_id =
+            decoded_nas_msg.plain.sm.header.procedure_transaction_identity };
+        n1_sm_context_resp->res.set_pti(pti);
+
+        //Message Type
+        //Presence
+        //5GSM Cause
+        //Extended Protocol Configuration Options
+
+        //Release the resources related to this PDU Session
+        //The SMF releases the IP address / Prefix(es) that were allocated to the PDU Session and releases the
+        //corresponding User Plane resources
+
+        //SMF releases the IP address / Prefix(es) that were allocated to the PDU Session
+
+        //find DNN context
+        std::shared_ptr<dnn_context> sd = { };
+
+        if ((!find_dnn_context(sm_context_req_msg.get_snssai(),
+                               sm_context_req_msg.get_dnn(), sd))
+            or (nullptr == sd.get())) {
+          //TODO: error cannot find the associated DNN context
+          return;
+        }
+
+        //find PDU Session
+        std::shared_ptr<smf_pdu_session> ss;
+        if ((!sd.get()->find_pdu_session(
+            sm_context_req_msg.get_pdu_session_id(), ss))
+            or (nullptr == ss.get())) {
+          //TODO: error cannot find the corresponding PDU Session
+        }
+
+        //get the associated QoS flows: to be used for PFCP Session Modification procedure
+        std::vector<smf_qos_flow> qos_flows;
+        ss.get()->get_qos_flows(qos_flows);
+        for (auto i : qos_flows) {
+          sm_context_req_msg.add_qfi(i.qfi.qfi);
+        }
+
+        //need to update UPF accordingly
+        update_upf = true;
+
         //TODO:
       }
         break;
@@ -1327,7 +1490,64 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //PDU Session Release UE-Initiated (Step 3)
       case PDU_SESSION_RELEASE_COMPLETE: {
         //PDU Session Release procedure
-        //TODO:
+        Logger::smf_app().debug("PDU_SESSION_RELEASE_COMPLETE");
+        Logger::smf_app().info(
+            "PDU Session Release Complete (UE-Initiated), processing N1 SM Information");
+        procedure_type =
+            session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP3;
+        //verify PDU Session ID
+        if (sm_context_req_msg.get_pdu_session_id()
+            != decoded_nas_msg.plain.sm.header.pdu_session_identity) {
+          //TODO: PDU Session ID mismatch
+        }
+        //PTI
+        Logger::smf_app().info(
+            "PTI %d",
+            decoded_nas_msg.plain.sm.header.procedure_transaction_identity);
+        procedure_transaction_id_t pti = { .procedure_transaction_id =
+            decoded_nas_msg.plain.sm.header.procedure_transaction_identity };
+
+        //Message Type
+        if (decoded_nas_msg.plain.sm.header.message_type
+            != PDU_SESSION_RELEASE_COMPLETE) {
+          //TODO: Message Type mismatch
+        }
+        //5GSM Cause
+        //Extended Protocol Configuration Options
+
+        //Update PDU Session status -> INACTIVE
+        sp.get()->set_pdu_session_status(
+            pdu_session_status_e::PDU_SESSION_INACTIVE);
+        //Stop timer T3592
+        itti_inst->timer_remove(sp.get()->timer_T3592);
+
+        //send response to AMF
+        //Verify, do we need this?
+        oai::smf_server::model::SmContextCreatedData smContextCreatedData;
+        smf_n11_inst->send_pdu_session_create_sm_context_response(
+            smreq->http_response, smContextCreatedData,
+            Pistache::Http::Code::Ok);
+
+        //TODO: SMF invokes Nsmf_PDUSession_SMContextStatusNotify to notify AMF that the SM context for this PDU Session is released
+        //TODO: if dynamic PCC applied, SMF invokes an SM Policy Association Termination
+        //TODO: SMF unsubscribes from Session Management Subscription data changes notification from UDM by invoking Numd_SDM_Unsubscribe
+        //find dnn context
+        std::shared_ptr<dnn_context> sd = { };
+        bool find_dnn = find_dnn_context(sm_context_req_msg.get_snssai(),
+                                         sm_context_req_msg.get_dnn(), sd);
+        //At this step, this context should be existed
+        if (nullptr == sd.get()) {
+          Logger::smf_app().debug(
+              "DNN context (dnn_in_use %s) is not existed yet!",
+              sm_context_req_msg.get_dnn().c_str());
+          //TODO:
+        }
+        if (sd.get()->get_number_pdu_sessions() == 0) {
+          Logger::smf_app().debug(
+              "Unsubscribe from Session Management Subscription data changes notification from UDM");
+          //TODO: unsubscribes from Session Management Subscription data changes notification from UDM
+        }
+        //TODO: Invoke Nudm_UECM_Deregistration
       }
         break;
 
@@ -1362,6 +1582,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       //UE-Requested PDU Session Establishment procedure (Section 4.3.2.2.1@3GPP TS 23.502)
       //or UE Triggered Service Request Procedure (step 2)
       case n2_sm_info_type_e::PDU_RES_SETUP_RSP: {
+        Logger::smf_app().info("PDU_RES_SETUP_RSP");
         Logger::smf_app().info(
             "PDU Session Establishment Request, processing N2 SM Information");
 
@@ -1453,6 +1674,10 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //PDU Session Modification procedure (UE-initiated, Section 4.3.3.2@3GPP TS 23.502 or SMF-Requested)(Step 2)
       case n2_sm_info_type_e::PDU_RES_MOD_RSP: {
+        Logger::smf_app().info("PDU_RES_MOD_RSP");
+        Logger::smf_app().info(
+            "PDU Session Modification, processing N2 SM Information");
+
         procedure_type =
             session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2;
 
@@ -1516,13 +1741,29 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //PDU Session Modification procedure
       case n2_sm_info_type_e::PDU_RES_MOD_FAIL: {
+        Logger::smf_app().info("PDU_RES_MOD_FAIL");
         //TODO:
       }
         break;
 
         //PDU Session Release procedure (UE-initiated, Section 4.3.4.2@3GPP TS 23.502 or SMF-Requested)(Step 2)
       case n2_sm_info_type_e::PDU_RES_REL_RSP: {
-        //TODO:
+        Logger::smf_app().info("PDU_RES_REL_RSP");
+        Logger::smf_app().info(
+            "PDU Session Release (UE-initiated), processing N2 SM Information");
+
+        procedure_type =
+            session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP2;
+        //TODO: SMF does nothing (Step 7, section 4.3.4.2@3GPP TS 23.502)
+        //SMF send response to AMF
+
+        //Verify, do we need this?
+        oai::smf_server::model::SmContextCreatedData smContextCreatedData;
+
+        smf_n11_inst->send_pdu_session_create_sm_context_response(
+            smreq->http_response, smContextCreatedData,
+            Pistache::Http::Code::Ok);
+
       }
         break;
 
@@ -1702,6 +1943,10 @@ void dnn_context::insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp) {
   pdu_sessions.push_back(sp);
 }
 
+size_t dnn_context::get_number_pdu_sessions() {
+  return pdu_sessions.size();
+}
+
 //------------------------------------------------------------------------------
 std::string dnn_context::toString() const {
   std::string s = { };
@@ -1714,57 +1959,5 @@ std::string dnn_context::toString() const {
     s.append(it->toString());
   }
   return s;
-}
-
-//------------------------------------------------------------------------------
-void session_management_subscription::insert_dnn_configuration(
-    std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration) {
-  dnn_configurations.insert(
-      std::pair<std::string, std::shared_ptr<dnn_configuration_t>>(
-          dnn, dnn_configuration));
-}
-
-//------------------------------------------------------------------------------
-void session_management_subscription::find_dnn_configuration(
-    std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration) {
-  Logger::smf_app().info("find_dnn_configuration with dnn %s", dnn.c_str());
-  if (dnn_configurations.count(dnn) > 0) {
-    dnn_configuration = dnn_configurations.at(dnn);
-  }
-}
-
-//------------------------------------------------------------------------------
-void smf_qos_flow::release_qos_flow() {
-  released = true;
-}
-
-//------------------------------------------------------------------------------
-std::string smf_qos_flow::toString() const {
-  std::string s = { };
-  s.append("QoS Flow:\n");
-  s.append("\tFQI:\t\t\t\t").append(std::to_string((uint8_t) qfi.qfi)).append(
-      "\n");
-  s.append("\tUL FTEID:\t\t").append(ul_fteid.toString()).append("\n");
-  s.append("\tPDR ID UL:\t\t\t").append(std::to_string(pdr_id_ul.rule_id))
-      .append("\n");
-  s.append("\tPDR ID DL:\t\t\t").append(std::to_string(pdr_id_dl.rule_id))
-      .append("\n");
-  s.append("\tPRECEDENCE:\t\t\t").append(std::to_string(precedence.precedence))
-      .append("\n");
-  if (far_id_ul.first) {
-    s.append("\tFAR ID UL:\t\t\t").append(
-        std::to_string(far_id_ul.second.far_id)).append("\n");
-  }
-  if (far_id_dl.first) {
-    s.append("\tFAR ID DL:\t\t\t").append(
-        std::to_string(far_id_dl.second.far_id)).append("\n");
-  }
-  return s;
-}
-//------------------------------------------------------------------------------
-void smf_qos_flow::deallocate_ressources() {
-  Logger::smf_app().info("smf_qos_flow::deallocate_ressources(%d)",
-                         (uint8_t) qfi.qfi);
-  clear();
 }
 

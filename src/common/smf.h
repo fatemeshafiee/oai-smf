@@ -82,47 +82,6 @@ typedef struct s_nssai  // section 28.4, TS23.003
 
 typedef uint8_t pdu_session_id;
 
-//should move to 24.501
-enum pdu_session_type_e {
-  PDU_SESSION_TYPE_E_UNKNOWN = 0,
-  PDU_SESSION_TYPE_E_IPV4 = 1,
-  PDU_SESSION_TYPE_E_IPV6 = 2,
-  PDU_SESSION_TYPE_E_IPV4V6 = 3,
-  PDU_SESSION_TYPE_E_UNSTRUCTURED = 4,
-  PDU_SESSION_TYPE_E_ETHERNET = 5,
-  PDU_SESSION_TYPE_E_RESERVED = 7,
-};
-
-static const std::vector<std::string> pdu_session_type_e2str = { "Error",
-    "IPV4", "IPV6", "IPV4V6", "UNSTRUCTURED", "ETHERNET", "IPV4V6", "RESERVED" };
-
-typedef struct pdu_session_type_s {
-  uint8_t pdu_session_type;
-  pdu_session_type_s()
-      :
-      pdu_session_type(PDU_SESSION_TYPE_E_IPV4) {
-  }
-  pdu_session_type_s(const uint8_t &p)
-      :
-      pdu_session_type(p) {
-  }
-  pdu_session_type_s(const struct pdu_session_type_s &p)
-      :
-      pdu_session_type(p.pdu_session_type) {
-  }
-  bool operator==(const struct pdu_session_type_s &p) const {
-    return (p.pdu_session_type == pdu_session_type);
-  }
-  //------------------------------------------------------------------------------
-  bool operator==(const pdu_session_type_e &p) const {
-    return (p == pdu_session_type);
-  }
-  //------------------------------------------------------------------------------
-  const std::string& toString() const {
-    return pdu_session_type_e2str.at(pdu_session_type);
-  }
-} pdu_session_type_t;
-
 //SMF + AMF + 3GPP TS 29.571 (Common data)
 enum class http_response_codes_e {
   HTTP_RESPONSE_CODE_OK = 200,

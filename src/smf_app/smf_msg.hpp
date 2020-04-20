@@ -133,6 +133,9 @@ class pdu_session_msg {
   uint8_t get_pdu_session_type() const;
   void set_pdu_session_type(uint8_t const &pdu_session_type);
 
+  procedure_transaction_id_t get_pti() const;
+  void set_pti(procedure_transaction_id_t const &pti);
+
  private:
   pdu_session_msg_type_t m_msg_type;
   std::string m_api_root;
@@ -142,6 +145,7 @@ class pdu_session_msg {
   std::string m_dnn;
   snssai_t m_snssai;
   uint8_t m_pdu_session_type;
+  procedure_transaction_id_t m_pti;
 };
 
 //---------------------------------------------------------------------------------------
@@ -174,15 +178,11 @@ class pdu_session_create_sm_context : public pdu_session_msg {
   extended_protocol_discriminator_t get_epd() const;
   void set_epd(extended_protocol_discriminator_t const &epd);
 
-  procedure_transaction_id_t get_pti() const;
-  void set_pti(procedure_transaction_id_t const &pti);
-
   uint8_t get_message_type() const;
   void set_message_type(uint8_t const &message_type);
 
  private:
   extended_protocol_discriminator_t m_epd;
-  procedure_transaction_id_t m_pti;
   uint8_t m_message_type;
 };
 
@@ -420,6 +420,7 @@ class pdu_session_update_sm_context_request : public pdu_session_msg {
   bool n1_sm_msg_is_set() const;
   bool n2_sm_info_is_set() const;
   void add_qfi(pfcp::qfi_t const &qfi);
+  void add_qfi(uint8_t const &qfi);
   void get_qfis(std::vector<pfcp::qfi_t> &q);
   void set_dl_fteid(fteid_t const &t);
   void get_dl_fteid(fteid_t &t);
@@ -487,7 +488,6 @@ class pdu_session_update_sm_context_response : public pdu_session_msg {
   pdu_session_update_sm_context_response()
       :
       pdu_session_msg(PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE) {
-    m_pti = { };
     m_cause = 0;
     m_n1_sm_msg_is_set = false;
     m_n2_sm_info_is_set = false;
@@ -514,11 +514,8 @@ class pdu_session_update_sm_context_response : public pdu_session_msg {
       std::map<uint8_t, qos_flow_context_updated> &all_flows);
   void remove_all_qos_flow_context_updateds();
   nlohmann::json sm_context_updated_data;  //N1N2MessageTransferReqData from oai::amf::model
-  procedure_transaction_id_t get_pti() const;
-  void set_pti(procedure_transaction_id_t const &pti);
 
  private:
-  procedure_transaction_id_t m_pti;
   uint8_t m_cause;
   std::string m_n1_sm_message;  //N1 SM after decoding
   bool m_n1_sm_msg_is_set;

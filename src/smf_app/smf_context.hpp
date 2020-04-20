@@ -131,11 +131,13 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     pdu_session_status = pdu_session_status_e::PDU_SESSION_INACTIVE;
     timer_T3590 = ITTI_INVALID_TIMER_ID;
     timer_T3591 = ITTI_INVALID_TIMER_ID;
+    timer_T3592 = ITTI_INVALID_TIMER_ID;
   }
 
   smf_pdu_session(smf_pdu_session &b) = delete;
 
   void set(const paa_t &paa);
+  void get_paa(paa_t &paa);
 
   bool get_qos_flow(const pfcp::pdr_id_t &pdr_id, smf_qos_flow &q);
   bool get_qos_flow(const pfcp::far_id_t &far_id, smf_qos_flow &q);
@@ -184,6 +186,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   void generate_qos_rule_id(uint8_t &rule_id);
   void release_qos_rule_id(const uint8_t &rule_id);
+  pdn_type_t get_pdn_type() const;
 
   bool ipv4;                  // IP Address(es): IPv4 address and/or IPv6 prefix
   bool ipv6;                  // IP Address(es): IPv4 address and/or IPv6 prefix
@@ -212,6 +215,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   pdu_session_status_e pdu_session_status;
   timer_id_t timer_T3590;
   timer_id_t timer_T3591;
+  timer_id_t timer_T3592;
   //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
   upCnx_state_e upCnx_state;
   //5GSM parameters and capabilities
@@ -272,6 +276,8 @@ class dnn_context {
 
   /* Insert a PDU Session into the DNN context */
   void insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp);
+  /* get number of pdu sessions associated with this context (dnn and Nssai) */
+  size_t get_number_pdu_sessions();
 
   std::string toString() const;
 
