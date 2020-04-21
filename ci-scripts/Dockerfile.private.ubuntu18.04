@@ -62,7 +62,7 @@ RUN /bin/bash -c "if [[ -v BUILD_FOR_CI ]]; then git merge --ff origin/$CI_DEST_
 # Installing and Building SMF
 WORKDIR /openair-smf/build/scripts
 RUN ./build_smf --install-deps --force
-RUN ./build_smf --clean --Verbose --build-type Debug --jobs
+RUN ./build_smf --clean --Verbose --build-type Release --jobs
 
 #---------------------------------------------------------------------
 # TARGET IMAGE
