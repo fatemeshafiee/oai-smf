@@ -880,6 +880,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   sm_context_resp->res.set_pdu_session_id(pdu_session_id);
   sm_context_resp->res.set_snssai(snssai);
   sm_context_resp->res.set_dnn(dnn);
+  sm_context_resp->res.set_pdu_session_type(sm_context_req_msg.get_pdu_session_type());
   sm_context_resp->set_scid(smreq->scid);
 
   //Step 3. find pdu_session
