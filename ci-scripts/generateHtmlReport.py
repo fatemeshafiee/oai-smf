@@ -563,7 +563,7 @@ class HtmlReport():
 		if os.path.isfile(cwd + '/archives/' + logFileName):
 			status = False
 			if nfType == 'SMF':
-				section_start_pattern = 'build_smf --clean --Verbose --build-type Debug --jobs'
+				section_start_pattern = 'build_smf --clean --Verbose --build-type Release --jobs'
 				section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
 				pass_pattern = 'smf installed'
 			if nfType == 'AMF-Server':
@@ -634,7 +634,7 @@ class HtmlReport():
 
 		if os.path.isfile(cwd + '/archives/' + logFileName):
 			if nfType == 'SMF':
-				section_start_pattern = 'build_smf --clean --Verbose --build-type Debug --jobs'
+				section_start_pattern = 'build_smf --clean --Verbose --build-type Release --jobs'
 				section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
 			if nfType == 'AMF-Server':
 				section_start_pattern = 'mkdir build && cd build && cmake .. && make'
