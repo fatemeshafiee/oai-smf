@@ -389,8 +389,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
     Logger::smf_app().debug(
         "Prepare a PDU Session Establishment Accept message and send to UE");
     smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res,
-    PDU_SESSION_ESTABLISHMENT_ACCEPT,
-                                          n1_sm_msg,
+    PDU_SESSION_ESTABLISHMENT_ACCEPT, n1_sm_msg,
                                           cause_value_5gsm_e::CAUSE_0_UNKNOWN);  //TODO: need cause?
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);

@@ -276,8 +276,8 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           .get_snssai().sST;
 
       try {
-        sm_msg->pdu_session_establishment_accept.snssai.sd = std::stoul(sm_context_res.get_snssai().sD, nullptr, 16);
-
+        sm_msg->pdu_session_establishment_accept.snssai.sd = std::stoul(
+            sm_context_res.get_snssai().sD, nullptr, 16);
       } catch (const std::exception &e) {
         Logger::smf_app().warn(
             "Error when converting from string to int for snssai.SD, error: %s",
@@ -388,7 +388,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           static_cast<uint8_t>(sm_cause);
       //Presence
       sm_msg->pdu_session_establishment_reject.presence =
-          PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_PRESENCE;  //Should be updated according to the following IEs
+      PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_PRESENCE;  //Should be updated according to the following IEs
       /*
        //GPRSTimer3
        sm_msg->pdu_session_establishment_reject.gprstimer3.unit =
@@ -455,7 +455,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       break;
 
     case PDU_SESSION_MODIFICATION_COMMAND: {
-      //PDU Session Modification Command is included in the following msgs:
+      //PDU Session Modification Command is included in the following messages:
       //1- PDU Session Update SM Context Response (PDU Session Modification UE-Initiated procedure - step 1)
       //2- N1N2MessageTransfer Request (PDU Session Modification SMF-Requested, step 1 (from SMF to AMF)) ​
 
@@ -469,11 +469,11 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           "PDU_SESSION_MODIFICATION_COMMAND, encode starting...");
 
       //Fill the content of PDU Session Establishment Request message with hardcoded values (to be completed)
-      //Message Type
-      sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
       //PTI
       sm_msg->header.procedure_transaction_identity = sm_context_res.get_pti()
           .procedure_transaction_id;
+      //Message Type
+      sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
       //PDU Session Type
       sm_msg->pdu_session_modification_command.messagetype = sm_context_res
           .get_msg_type();
@@ -482,6 +482,22 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //5GSMCause
       sm_msg->pdu_session_modification_command._5gsmcause =
           static_cast<uint8_t>(sm_cause);  //sm_context_res.get_cause();
+
+      /*
+       ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+       PDUSessionIdentity pdusessionidentity;
+       ProcedureTransactionIdentity proceduretransactionidentity;
+       MessageType messagetype;
+       uint8_t presence;
+       _5GSMCause _5gsmcause;
+       SessionAMBR sessionambr;
+       GPRSTimer gprstimer;
+       AlwaysonPDUSessionIndication alwaysonpdusessionindication;
+       QOSRules qosrules;
+       MappedEPSBearerContexts mappedepsbearercontexts;
+       QOSFlowDescriptions qosflowdescriptions;
+       ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
+       */
 
       //SessionAMBR
       //TODO: get from subscription DB
