@@ -880,8 +880,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   sm_context_resp->res.set_pdu_session_id(pdu_session_id);
   sm_context_resp->res.set_snssai(snssai);
   sm_context_resp->res.set_dnn(dnn);
-  sm_context_resp->res.set_pdu_session_type(
-      smreq->req.get_pdu_session_type());
+  sm_context_resp->res.set_pdu_session_type(smreq->req.get_pdu_session_type());
   sm_context_resp->res.set_pti(smreq->req.get_pti());
   sm_context_resp->set_scid(smreq->scid);
 
@@ -1051,8 +1050,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     //	std::string smContextRef = sm_context_req_msg.get_supi_prefix() + "-" + smf_supi_to_string(sm_context_req_msg.get_supi());
     std::string smContextRef = std::to_string(smreq->scid);
     //headers: Location: contains the URI of the newly created resource, according to the structure: {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
-    std::string uri = smreq->req.get_api_root() + "/"
-        + smContextRef.c_str();
+    std::string uri = smreq->req.get_api_root() + "/" + smContextRef.c_str();
 
     sm_context_resp->http_response.headers()
         .add<Pistache::Http::Header::Location>(uri);
@@ -1278,10 +1276,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //See section 6.4.2 - UE-requested PDU Session modification procedure@ 3GPP TS 24.501
         //PDU Session Identity
         //check if the PDU Session Release Command is already sent for this message (see section 6.3.3.5 @3GPP TS 24.501)
-        if (sp.get()->get_pdu_session_status() == pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING) {
+        if (sp.get()->get_pdu_session_status()
+            == pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING) {
           //Ignore the message
-          Logger::smf_app().info("A PDU Session Release Command has been sent for this session (session ID %d), ignore the message!",
-                      decoded_nas_msg.plain.sm.header.pdu_session_identity);
+          Logger::smf_app().info(
+              "A PDU Session Release Command has been sent for this session (session ID %d), ignore the message!",
+              decoded_nas_msg.plain.sm.header.pdu_session_identity);
           return;
         }
 
@@ -1446,10 +1446,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           //TODO: PDU Session ID mismatch
         }
         //Abnormal cases in network side (see section 6.4.3.6 @3GPP TS 24.501)
-        if (sp.get()->get_pdu_session_status() == pdu_session_status_e::PDU_SESSION_INACTIVE) {
-          Logger::smf_app().warn("PDU Session status: INACTIVE, send PDU Session Release Reject to UE!");
+        if (sp.get()->get_pdu_session_status()
+            == pdu_session_status_e::PDU_SESSION_INACTIVE) {
+          Logger::smf_app().warn(
+              "PDU Session status: INACTIVE, send PDU Session Release Reject to UE!");
           problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]); //TODO: which cause?
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);  //TODO: which cause?
           smContextUpdateError.setError(problem_details);
           refToBinaryData.setContentId(N1_SM_CONTENT_ID);
           smContextUpdateError.setN1SmMsg(refToBinaryData);
@@ -1462,10 +1464,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
         }
         //Abnormal cases in network side (see section 6.3.3.5 @3GPP TS 24.501)
-        if (sp.get()->get_pdu_session_status() == pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING) {
+        if (sp.get()->get_pdu_session_status()
+            == pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING) {
           //Ignore the message
-          Logger::smf_app().info("A PDU Session Release Command has been sent for this session (session ID %d), ignore the message!",
-                      decoded_nas_msg.plain.sm.header.pdu_session_identity);
+          Logger::smf_app().info(
+              "A PDU Session Release Command has been sent for this session (session ID %d), ignore the message!",
+              decoded_nas_msg.plain.sm.header.pdu_session_identity);
           return;
         }
 
@@ -1489,7 +1493,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         if ((!find_dnn_context(sm_context_req_msg.get_snssai(),
                                sm_context_req_msg.get_dnn(), sd))
             or (nullptr == sd.get())) {
-          Logger::smf_app().warn("Could not find the context for this PDU session");
+          Logger::smf_app().warn(
+              "Could not find the context for this PDU session");
           //create PDU Session Release Reject and send to UE
           problem_details.setCause(
               pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
@@ -1511,7 +1516,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         if ((!sd.get()->find_pdu_session(
             sm_context_req_msg.get_pdu_session_id(), ss))
             or (nullptr == ss.get())) {
-          Logger::smf_app().warn("Could not find the context for this PDU session");
+          Logger::smf_app().warn(
+              "Could not find the context for this PDU session");
           //create PDU Session Release Reject and send to UE
           problem_details.setCause(
               pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
@@ -1575,7 +1581,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         itti_inst->timer_remove(sp.get()->timer_T3592);
 
         //send response to AMF
-        oai::smf_server::model::SmContextCreatedData smContextCreatedData; //Verify, do we need this?
+        oai::smf_server::model::SmContextCreatedData smContextCreatedData;  //Verify, do we need this?
         smf_n11_inst->send_pdu_session_create_sm_context_response(
             smreq->http_response, smContextCreatedData,
             Pistache::Http::Code::Ok);
