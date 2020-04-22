@@ -117,7 +117,6 @@ int main(int argc, char* argv[]) {
     opts.flags(Pistache::Tcp::Options::ReuseAddr);
     opts.maxPayload(PISTACHE_SERVER_MAX_PAYLOAD);
     httpEndpoint->init(opts);
-
     
     AccessAndMobilitySubscriptionDataRetrievalApiImpl AccessAndMobilitySubscriptionDataRetrievalApiserver(router);
     AccessAndMobilitySubscriptionDataRetrievalApiserver.init();
@@ -160,8 +159,11 @@ int main(int argc, char* argv[]) {
     UEContextInSMSFDataRetrievalApiImpl UEContextInSMSFDataRetrievalApiserver(router);
     UEContextInSMSFDataRetrievalApiserver.init();
 
+    std::cout  << "UDM is listening on address: " << udm_ip_address.c_str() << std::endl;
+
     httpEndpoint->setHandler(router->handler());
     httpEndpoint->serve();
+
 
     httpEndpoint->shutdown();
 

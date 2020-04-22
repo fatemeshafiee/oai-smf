@@ -103,7 +103,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
       smContextCreateData.getSNssai().getSst(),
       smContextCreateData.getSNssai().getSd().c_str());
   snssai_t snssai(smContextCreateData.getSNssai().getSst(),
-                  smContextCreateData.getSNssai().getSd().c_str());
+                  smContextCreateData.getSNssai().getSd());
   sm_context_req_msg.set_snssai(snssai);
 
   //PDU session ID

@@ -192,7 +192,7 @@ void smf_n11::send_n1n2_message_transfer_request(
     try {
       response_data = json::parse(*httpData.get());
     } catch (json::exception &e) {
-      Logger::smf_n11().error("Could not get the cause from the response");
+      Logger::smf_n11().warn("Could not get the cause from the response");
       //Set the default Cause
       response_data["cause"] = "504 Gateway Timeout";
     }

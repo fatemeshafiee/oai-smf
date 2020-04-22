@@ -46,7 +46,7 @@ void SessionManagementSubscriptionDataRetrievalApiImpl::get_sm_data(const std::s
 	jsonData["singleNssai"]["sd"] = 123;
 	jsonData["dnnConfigurations"]["default"]["pduSessionTypes"]["defaultSessionType"] = "IPV4";
 	jsonData["dnnConfigurations"]["default"]["sscModes"]["defaultSscMode"] = "SSC_MODE_1";
-	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["5qi"] = 61;
+	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["5qi"] = 60;
 	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["arp"]["priorityLevel"] = 1;
 	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["arp"]["preemptCap"] = "NOT_PREEMPT";
 	jsonData["dnnConfigurations"]["default"]["5gQosProfile"]["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";
@@ -55,7 +55,7 @@ void SessionManagementSubscriptionDataRetrievalApiImpl::get_sm_data(const std::s
 
   jsonData["dnnConfigurations"]["carrier.com"]["pduSessionTypes"]["defaultSessionType"] = "IPV4";
   jsonData["dnnConfigurations"]["carrier.com"]["sscModes"]["defaultSscMode"] = "SSC_MODE_1";
-  jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["5qi"] = 60;
+  jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["5qi"] = 61;
   jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["arp"]["priorityLevel"] = 1;
   jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["arp"]["preemptCap"] = "NOT_PREEMPT";
   jsonData["dnnConfigurations"]["carrier.com"]["5gQosProfile"]["arp"]["preemptVuln"] = "NOT_PREEMPTABLE";

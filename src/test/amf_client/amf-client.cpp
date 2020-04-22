@@ -77,6 +77,7 @@ enum class multipart_related_content_part_e {
   NGAP = 2
 };
 
+//------------------------------------------------------------------------------
 unsigned char* format_string_as_hex(std::string str) {
   unsigned int str_len = str.length();
   char *data = (char*) malloc(str_len + 1);
@@ -108,8 +109,8 @@ void create_multipart_related_content(std::string &body, std::string &json_part,
                                       std::string &n2_message) {
 
   //format string as hex
-  unsigned char *n1_msg_hex = format_string_as_hex(n1_message);
-  unsigned char *n2_msg_hex = format_string_as_hex(n2_message);
+  //unsigned char *n1_msg_hex = format_string_as_hex(n1_message);
+  //unsigned char *n2_msg_hex = format_string_as_hex(n2_message);
 
   std::string CRLF = "\r\n";
   body.append("--" + boundary + CRLF);
@@ -122,15 +123,16 @@ void create_multipart_related_content(std::string &body, std::string &json_part,
       "Content-Type: application/vnd.3gpp.5gnas" + CRLF + "Content-Id: n1SmMsg"
           + CRLF);
   body.append(CRLF);
-  body.append(std::string((char*) n1_msg_hex, n1_message.length() / 2) + CRLF);
-  //body.append(n1_message + CRLF);
+  //body.append(std::string((char*) n1_msg_hex, n1_message.length() / 2) + CRLF);
+  body.append(n1_message + CRLF);
 
   body.append("--" + boundary + CRLF);
   body.append(
       "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg"
           + CRLF);
   body.append(CRLF);
-  body.append(std::string((char*) n2_msg_hex, n2_message.length() / 2) + CRLF);
+  //body.append(std::string((char*) n2_msg_hex, n2_message.length() / 2) + CRLF);
+  body.append(n2_message + CRLF);
   body.append("--" + boundary + "--" + CRLF);
 }
 
@@ -164,6 +166,7 @@ void create_multipart_related_content(
   body.append("--" + boundary + "--" + CRLF);
 }
 
+//------------------------------------------------------------------------------
 void send_pdu_session_establishment_request(std::string smf_ip_address) {
   std::cout << "[AMF N11] PDU Session Establishment Request (SM Context Create)"
             << std::endl;
@@ -270,6 +273,7 @@ void send_pdu_session_establishment_request(std::string smf_ip_address) {
   free(buffer);
 }
 
+//------------------------------------------------------------------------------
 void send_pdu_session_update_sm_context_establishment(
     std::string smf_ip_address) {
   std::cout << "[AMF N11] PDU Session Establishment Request (SM Context Update)"
@@ -379,6 +383,7 @@ void send_pdu_session_update_sm_context_establishment(
   free(buffer);
 }
 
+//------------------------------------------------------------------------------
 void send_pdu_session_release_request(std::string smf_ip_address) {
 
   std::cout << "[AMF N11] PDU Session Release Request (SM Context Update)"
@@ -471,6 +476,7 @@ void send_pdu_session_release_request(std::string smf_ip_address) {
   free(buffer);
 }
 
+//------------------------------------------------------------------------------
 void send_pdu_session_release_resource_release_ack(
     std::string smf_ip_address) {
 
@@ -559,6 +565,7 @@ void send_pdu_session_release_resource_release_ack(
   free(buffer);
 }
 
+//------------------------------------------------------------------------------
 void send_pdu_session_release_complete(std::string smf_ip_address) {
 
   std::cout
@@ -653,6 +660,7 @@ void send_pdu_session_release_complete(std::string smf_ip_address) {
   free(buffer);
 }
 
+//------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
   std::string smf_ip_address;
 
