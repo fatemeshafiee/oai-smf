@@ -1100,6 +1100,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
           cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);  //TODO: check Cause
       smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
+
       //N2 SM Information
       smf_n1_n2_inst.create_n2_sm_information(
           n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_REL_CMD,

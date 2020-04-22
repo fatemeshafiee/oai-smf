@@ -566,7 +566,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         Pistache::Http::Code::Forbidden, n1_sm_message_hex);
   }
 
-  context_req_msg.set_pti(pti);
+  smreq->req.set_pti(pti);
 
   //check pdu session id
   if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED )

@@ -47,6 +47,7 @@
 extern "C" {
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
 #include "Ngap_PDUSessionResourceModifyResponseTransfer.h"
+#include "Ngap_PDUSessionResourceReleaseResponseTransfer.h"
 #include "Ngap_GTPTunnel.h"
 #include "Ngap_AssociatedQosFlowItem.h"
 #include "Ngap_QosFlowAddOrModifyResponseList.h"
@@ -289,7 +290,7 @@ void smf_pdu_session::deallocate_ressources(const std::string &apn) {
   if (ipv4) {
     paa_dynamic::get_instance().release_paa(apn, ipv4_address);
   }
-  clear(); //including qos_flows.clear()
+  clear();  //including qos_flows.clear()
   Logger::smf_app().info(
       "Resources associated with this PDU Session have been released");
 }
@@ -880,7 +881,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   sm_context_resp->res.set_pdu_session_id(pdu_session_id);
   sm_context_resp->res.set_snssai(snssai);
   sm_context_resp->res.set_dnn(dnn);
-  sm_context_resp->res.set_pdu_session_type(sm_context_req_msg.get_pdu_session_type());
+  sm_context_resp->res.set_pdu_session_type(
+      sm_context_req_msg.get_pdu_session_type());
+  sm_context_resp->res.set_pti(smreq->req.get_pti());
   sm_context_resp->set_scid(smreq->scid);
 
   //Step 3. find pdu_session
@@ -1450,11 +1453,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //5GSM Cause
         //Extended Protocol Configuration Options
 
-        //Release the resources related to this PDU Session
-        //The SMF releases the IP address / Prefix(es) that were allocated to the PDU Session and releases the
-        //corresponding User Plane resources
-
-        //SMF releases the IP address / Prefix(es) that were allocated to the PDU Session
+        //Release the resources related to this PDU Session (in Procedure)
 
         //find DNN context
         std::shared_ptr<dnn_context> sd = { };
@@ -1523,8 +1522,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         itti_inst->timer_remove(sp.get()->timer_T3592);
 
         //send response to AMF
-        //Verify, do we need this?
-        oai::smf_server::model::SmContextCreatedData smContextCreatedData;
+        oai::smf_server::model::SmContextCreatedData smContextCreatedData; //Verify, do we need this?
         smf_n11_inst->send_pdu_session_create_sm_context_response(
             smreq->http_response, smContextCreatedData,
             Pistache::Http::Code::Ok);
@@ -1756,15 +1754,30 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         procedure_type =
             session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP2;
         //TODO: SMF does nothing (Step 7, section 4.3.4.2@3GPP TS 23.502)
+        //Ngap_PDUSessionResourceReleaseResponseTransfer
+        std::shared_ptr<Ngap_PDUSessionResourceReleaseResponseTransfer_t> decoded_msg =
+            std::make_shared<Ngap_PDUSessionResourceReleaseResponseTransfer_t>();
+        int decode_status = smf_n1_n2_inst.decode_n2_sm_information(
+            decoded_msg, n2_sm_information);
+        if (decode_status == RETURNerror) {
+          Logger::smf_api_server().warn("asn_decode failed");
+          //send error to AMF
+          Logger::smf_app().warn(
+              "Decode N2 SM (Ngap_PDUSessionResourceReleaseResponseTransfer) failed!");
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
+          smContextUpdateError.setError(problem_details);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden);
+          return;
+        }
+
         //SMF send response to AMF
-
-        //Verify, do we need this?
-        oai::smf_server::model::SmContextCreatedData smContextCreatedData;
-
+        oai::smf_server::model::SmContextCreatedData smContextCreatedData;  //Verify, do we need this?
         smf_n11_inst->send_pdu_session_create_sm_context_response(
             smreq->http_response, smContextCreatedData,
             Pistache::Http::Code::Ok);
-
       }
         break;
 
