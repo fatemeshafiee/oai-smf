@@ -198,7 +198,7 @@ void send_pdu_session_establishment_request(std::string smf_ip_address) {
   pdu_session_establishment_request["supi"] = "imsi-200000000000001";
   pdu_session_establishment_request["pei"] = "imei-200000000000001";
   pdu_session_establishment_request["gpsi"] = "msisdn-200000000001";
-  pdu_session_establishment_request["dnn"] = "carrier.com";
+  pdu_session_establishment_request["dnn"] = "default";
   pdu_session_establishment_request["sNssai"]["sst"] = 222;
   pdu_session_establishment_request["sNssai"]["sd"] = "0000D4";
   pdu_session_establishment_request["pduSessionId"] = 1;
