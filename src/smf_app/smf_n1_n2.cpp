@@ -109,7 +109,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
   //Extended Protocol Discriminator
   sm_msg->header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
-  //Message Type
+  //PDU Session Identity
   sm_msg->header.pdu_session_identity = msg.get_pdu_session_id();
 
   switch (n1_msg_type) {
@@ -131,7 +131,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //get default QoS value
       qos_flow_context_updated qos_flow = { };
       qos_flow = sm_context_res.get_qos_flow_context();
-
       //TODO: to be completed
       //get the default QoS profile and assign to the NAS message
 
@@ -156,7 +155,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           sm_msg->header.procedure_transaction_identity,
           sm_msg->header.message_type);
 
-      //Fill the content of PDU Session Establishment Request message
+      //Fill the content of PDU Session Establishment Accept message
       //PDU Session Type
       sm_msg->pdu_session_establishment_accept._pdusessiontype
           .pdu_session_type_value = sm_context_res.get_pdu_session_type();
@@ -277,10 +276,12 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           .get_snssai().sST;
 
       try {
-        sm_msg->pdu_session_establishment_accept.snssai.sd = std::stoi(
-            sm_context_res.get_snssai().sD);
+        sm_msg->pdu_session_establishment_accept.snssai.sd = std::stoul(
+            sm_context_res.get_snssai().sD, nullptr, 16);
       } catch (const std::exception &e) {
-        Logger::smf_app().warn("Error when converting from string to int for snssai.SD, error: %s", e.what());
+        Logger::smf_app().warn(
+            "Error when converting from string to int for snssai.SD, error: %s",
+            e.what());
         //"no SD value associated with the SST"
         sm_msg->pdu_session_establishment_accept.snssai.sd = 0xFFFFFF;
       }
@@ -358,7 +359,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //1 - PDU Session Create SM Context Response (PDU Session Establishment procedure - reject)
       //2 - N1N2MessageTransfer Request (PDU Session Establishment procedure - reject)
       //3-  PDU Session Update SM Context Response (PDU Session Establishment procedure - reject)​
-      //PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE or  PDU_SESSION_CREATE_SM_CONTEXT_REQUEST
+      //PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE or PDU_SESSION_CREATE_SM_CONTEXT_REQUEST
 
       Logger::smf_app().info(
           "PDU_SESSION_ESTABLISHMENT_REJECT, encode starting...");
@@ -386,7 +387,8 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       sm_msg->pdu_session_establishment_reject._5gsmcause =
           static_cast<uint8_t>(sm_cause);
       //Presence
-      sm_msg->pdu_session_establishment_reject.presence = 0x00;
+      sm_msg->pdu_session_establishment_reject.presence =
+      PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_PRESENCE;  //Should be updated according to the following IEs
       /*
        //GPRSTimer3
        sm_msg->pdu_session_establishment_reject.gprstimer3.unit =
@@ -436,8 +438,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
               .is_ssc2_allowed,
           sm_msg->pdu_session_establishment_reject.allowedsscmode
               .is_ssc3_allowed);
-      //Logger::smf_app().debug("SM MSG, GPSR Timer3, unit: 0x%x, value: 0x%x",sm_msg->pdu_session_establishment_reject.gprstimer3.unit,sm_msg->pdu_session_establishment_reject.gprstimer3.timeValue);
-      //Logger::smf_app().debug("SM MSG, 5G SM Congestion Re-attempt Indicator: 0x%x",sm_msg->pdu_session_establishment_reject._5gsmcongestionreattemptindicator.abo);
 
       //Encode NAS message
       bytes = nas_message_encode(data, &nas_msg,
@@ -455,7 +455,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       break;
 
     case PDU_SESSION_MODIFICATION_COMMAND: {
-      //PDU Session Modification Command is included in the following msgs:
+      //PDU Session Modification Command is included in the following messages:
       //1- PDU Session Update SM Context Response (PDU Session Modification UE-Initiated procedure - step 1)
       //2- N1N2MessageTransfer Request (PDU Session Modification SMF-Requested, step 1 (from SMF to AMF)) ​
 
@@ -469,19 +469,35 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           "PDU_SESSION_MODIFICATION_COMMAND, encode starting...");
 
       //Fill the content of PDU Session Establishment Request message with hardcoded values (to be completed)
-      //Message Type
-      sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
       //PTI
       sm_msg->header.procedure_transaction_identity = sm_context_res.get_pti()
           .procedure_transaction_id;
+      //Message Type
+      sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
       //PDU Session Type
       sm_msg->pdu_session_modification_command.messagetype = sm_context_res
           .get_msg_type();
       //Presence
       sm_msg->pdu_session_modification_command.presence = 0xff;  //TODO: to be updated
       //5GSMCause
-      sm_msg->pdu_session_modification_command._5gsmcause = sm_context_res
-          .get_cause();
+      sm_msg->pdu_session_modification_command._5gsmcause =
+          static_cast<uint8_t>(sm_cause);  //sm_context_res.get_cause();
+
+      /*
+       ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+       PDUSessionIdentity pdusessionidentity;
+       ProcedureTransactionIdentity proceduretransactionidentity;
+       MessageType messagetype;
+       uint8_t presence;
+       _5GSMCause _5gsmcause;
+       SessionAMBR sessionambr;
+       GPRSTimer gprstimer;
+       AlwaysonPDUSessionIndication alwaysonpdusessionindication;
+       QOSRules qosrules;
+       MappedEPSBearerContexts mappedepsbearercontexts;
+       QOSFlowDescriptions qosflowdescriptions;
+       ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
+       */
 
       //SessionAMBR
       //TODO: get from subscription DB
@@ -590,7 +606,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //this IE is included in the following message
       //1 - PDU Session Update SM Context Response (PDU Session Release UE-Initiated, step 1)
       //2 - N1N2MessageTransfer Request (PDU Session Release SMF-Requested, step 1)
-      //TODO: to be completed
 
       Logger::smf_app().debug(
           "[Create N1 SM Message] PDU Session Release Command");
@@ -599,25 +614,67 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           static_cast<pdu_session_update_sm_context_response&>(msg);
 
       Logger::smf_app().info("PDU_SESSION_RELEASE_COMMAND, encode starting...");
-      //Fill the content of PDU Session Release Command (with hardcoded values)
-      //Message Type
-      sm_msg->header.message_type = PDU_SESSION_RELEASE_COMMAND;
+      //Fill the content of PDU Session Release Command
+      //PDU Session ID
+      sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
       //PTI
       sm_msg->header.procedure_transaction_identity = sm_context_res.get_pti()
           .procedure_transaction_id;
-      //PDU Session Type
-      sm_msg->pdu_session_release_command.messagetype = sm_context_res
-          .get_msg_type();
+      //Message Type
+      sm_msg->header.message_type = PDU_SESSION_RELEASE_COMMAND;
       //5GSMCause
       sm_msg->pdu_session_release_command._5gsmcause =
-          sm_context_res.get_cause();
+          static_cast<uint8_t>(sm_cause);  //sm_context_res.get_cause();
       //Presence
-      sm_msg->pdu_session_modification_command.presence = 0x00;  //TODO: to be updated
-
+      sm_msg->pdu_session_release_command.presence = 0x00;  //TODO: to be updated when adding the following IEs
       //GPRSTimer3
       //EAPMessage
       //_5GSMCongestionReattemptIndicator
       // ExtendedProtocolConfigurationOptions
+
+      Logger::smf_app().debug("SM MSG, 5GSM Cause: 0x%x, %d",
+                              sm_msg->pdu_session_release_command._5gsmcause,
+                              static_cast<uint8_t>(sm_cause));
+
+      //Encode NAS message
+      bytes = nas_message_encode(data, &nas_msg,
+                                 sizeof(data)/*don't know the size*/, nullptr);
+
+      Logger::smf_app().debug("Buffer Data: ");
+      for (int i = 0; i < bytes; i++)
+        printf("%02x ", data[i]);
+      printf(" (bytes %d)\n", bytes);
+
+      std::string n1Message((char*) data, bytes);
+      nas_msg_str = n1Message;
+
+    }
+      break;
+
+    case PDU_SESSION_RELEASE_REJECT: {
+      //This IE is included in the PDU Session Update SM Context Response (PDU Session Release UE-Initiated, step 1)
+
+      Logger::smf_app().debug(
+          "[Create N1 SM Message] PDU Session Release Reject");
+      Logger::smf_app().info("PDU_SESSION_RELEASE_REJECT, encode starting...");
+      pdu_session_update_sm_context_response &sm_context_res =
+          static_cast<pdu_session_update_sm_context_response&>(msg);
+
+      //Fill the content of PDU Session Release Reject
+      //PDU Session ID
+      sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
+      //PTI
+      sm_msg->header.procedure_transaction_identity = sm_context_res.get_pti()
+          .procedure_transaction_id;
+      //Message Type
+      sm_msg->header.message_type = PDU_SESSION_RELEASE_REJECT;
+      //5GSMCause
+      sm_msg->pdu_session_release_reject._5gsmcause =
+          static_cast<uint8_t>(sm_cause);  //sm_context_res.get_cause();
+
+      //Presence
+      sm_msg->pdu_session_release_command.presence = 0x00;  //TODO: to be updated when adding the following IE
+      //Extended protocol configuration options
 
       //Encode NAS message
       bytes = nas_message_encode(data, &nas_msg,
@@ -1492,6 +1549,36 @@ int smf_n1_n2::decode_n2_sm_information(
       nullptr, ATS_ALIGNED_CANONICAL_PER,
       &asn_DEF_Ngap_PDUSessionResourceModifyResponseTransfer, (void**) &ngap_IE,
       (void*) data, data_len);
+
+  //free memory
+  free_wrapper((void**) &data);
+
+  if (rc.code != RC_OK) {
+    Logger::smf_api_server().warn("asn_decode failed with code %d", rc.code);
+
+    return RETURNerror ;
+  }
+  return RETURNok ;
+
+}
+
+//---------------------------------------------------------------------------------------------
+int smf_n1_n2::decode_n2_sm_information(
+    std::shared_ptr<Ngap_PDUSessionResourceReleaseResponseTransfer_t> &ngap_IE,
+    std::string &n2_sm_info) {
+  Logger::smf_app().info(
+      "Decode NGAP message (Ngap_PDUSessionResourceReleaseResponseTransfer) from N2 SM Information");
+
+  unsigned int data_len = n2_sm_info.length();
+  unsigned char *data = (unsigned char*) malloc(data_len + 1);
+  memset(data, 0, data_len + 1);
+  memcpy((void*) data, (void*) n2_sm_info.c_str(), data_len);
+
+  //Ngap_PDUSessionResourceModifyResponseTransfer
+  asn_dec_rval_t rc = asn_decode(
+      nullptr, ATS_ALIGNED_CANONICAL_PER,
+      &asn_DEF_Ngap_PDUSessionResourceReleaseResponseTransfer,
+      (void**) &ngap_IE, (void*) data, data_len);
 
   //free memory
   free_wrapper((void**) &data);

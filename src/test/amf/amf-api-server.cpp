@@ -127,6 +127,8 @@ int main(int argc, char* argv[]) {
     SubscriptionsCollectionDocumentApiImpl SubscriptionsCollectionDocumentApiserver(router);
     SubscriptionsCollectionDocumentApiserver.init();
 
+    std::cout  << "AMF server is listening on address: " << amf_ip_address.c_str() << std::endl;
+
     httpEndpoint->setHandler(router->handler());
     httpEndpoint->serve();
 

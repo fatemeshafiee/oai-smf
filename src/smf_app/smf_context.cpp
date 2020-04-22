@@ -47,6 +47,7 @@
 extern "C" {
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
 #include "Ngap_PDUSessionResourceModifyResponseTransfer.h"
+#include "Ngap_PDUSessionResourceReleaseResponseTransfer.h"
 #include "Ngap_GTPTunnel.h"
 #include "Ngap_AssociatedQosFlowItem.h"
 #include "Ngap_QosFlowAddOrModifyResponseList.h"
@@ -289,7 +290,7 @@ void smf_pdu_session::deallocate_ressources(const std::string &apn) {
   if (ipv4) {
     paa_dynamic::get_instance().release_paa(apn, ipv4_address);
   }
-  clear(); //including qos_flows.clear()
+  clear();  //including qos_flows.clear()
   Logger::smf_app().info(
       "Resources associated with this PDU Session have been released");
 }
@@ -826,7 +827,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     std::shared_ptr<itti_n11_create_sm_context_request> smreq) {
   Logger::smf_app().info(
       "Handle a PDU Session Create SM Context Request message from AMF");
-  pdu_session_create_sm_context_request sm_context_req_msg = smreq->req;
+
   oai::smf_server::model::SmContextCreateError smContextCreateError = { };
   oai::smf_server::model::ProblemDetails problem_details = { };
   oai::smf_server::model::RefToBinaryData refToBinaryData = { };
@@ -835,12 +836,12 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   bool request_accepted = true;
 
   //Step 1. get necessary information
-  std::string dnn = sm_context_req_msg.get_dnn();
-  snssai_t snssai = sm_context_req_msg.get_snssai();
-  std::string request_type = sm_context_req_msg.get_request_type();
-  supi_t supi = sm_context_req_msg.get_supi();
+  std::string dnn = smreq->req.get_dnn();
+  snssai_t snssai = smreq->req.get_snssai();
+  std::string request_type = smreq->req.get_request_type();
+  supi_t supi = smreq->req.get_supi();
   supi64_t supi64 = smf_supi_to_u64(supi);
-  uint32_t pdu_session_id = sm_context_req_msg.get_pdu_session_id();
+  uint32_t pdu_session_id = smreq->req.get_pdu_session_id();
 
   //Step 2. check the validity of the UE request, if valid send PDU Session Accept, otherwise send PDU Session Reject to AMF
   if (!verify_sm_context_request(smreq)) {
@@ -852,9 +853,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
-    //PDU Session Establishment Reject
     smf_n1_n2_inst.create_n1_sm_container(
-        sm_context_req_msg,
+        smreq->req,
         PDU_SESSION_ESTABLISHMENT_REJECT,
         n1_sm_message,
         cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
@@ -875,11 +875,14 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending =
       std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
   sm_context_resp->res.set_supi(supi);
-  sm_context_resp->res.set_supi_prefix(sm_context_req_msg.get_supi_prefix());
+  sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
   sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
   sm_context_resp->res.set_pdu_session_id(pdu_session_id);
   sm_context_resp->res.set_snssai(snssai);
   sm_context_resp->res.set_dnn(dnn);
+  sm_context_resp->res.set_pdu_session_type(
+      smreq->req.get_pdu_session_type());
+  sm_context_resp->res.set_pti(smreq->req.get_pti());
   sm_context_resp->set_scid(smreq->scid);
 
   //Step 3. find pdu_session
@@ -908,11 +911,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
   if (nullptr == sp.get()) {
     Logger::smf_app().debug("Create a new PDN connection!");
-    //create a new pdu session
     sp = std::shared_ptr<smf_pdu_session>(new smf_pdu_session());
-    sp.get()->pdn_type.pdn_type = sm_context_req_msg.get_pdu_session_type();
+    sp.get()->pdn_type.pdn_type = smreq->req.get_pdu_session_type();
     sp.get()->pdu_session_id = pdu_session_id;
-    sp.get()->amf_id = sm_context_req_msg.get_serving_nf_id();  //amf id
+    sp.get()->amf_id = smreq->req.get_serving_nf_id();  //amf id
     sd->insert_pdu_session(sp);
   } else {
     Logger::smf_app().debug("PDN connection is already existed!");
@@ -948,7 +950,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           .ci_ip_address_allocation_via_nas_signalling = 0,
           .ci_ipv4_address_allocation_via_dhcpv4 = 0,
           .ci_ipv4_link_mtu_request = 0 };
-
   //smf_app_inst->process_pco_request(extended_protocol_options, pco_resp, pco_ids);
 
   //Step 7. Address allocation based on PDN type
@@ -1014,7 +1015,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       smContextCreateError.setN1SmMsg(refToBinaryData);
       //PDU Session Establishment Reject
       smf_n1_n2_inst.create_n1_sm_container(
-          sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
+          smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
           cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE);
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
       smf_n11_inst->send_pdu_session_create_sm_context_response(
@@ -1050,10 +1051,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     //	std::string smContextRef = sm_context_req_msg.get_supi_prefix() + "-" + smf_supi_to_string(sm_context_req_msg.get_supi());
     std::string smContextRef = std::to_string(smreq->scid);
     //headers: Location: contains the URI of the newly created resource, according to the structure: {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
-    std::string uri = sm_context_req_msg.get_api_root() + "/"
+    std::string uri = smreq->req.get_api_root() + "/"
         + smContextRef.c_str();
 
-    //TODO: disable two following lines to test PDU SESSION ESTABLISHMENT ACCEPT
     sm_context_resp->http_response.headers()
         .add<Pistache::Http::Header::Location>(uri);
     smf_n11_inst->send_pdu_session_create_sm_context_response(
@@ -1276,6 +1276,15 @@ void smf_context::handle_pdu_session_update_sm_context_request(
          */
 
         //See section 6.4.2 - UE-requested PDU Session modification procedure@ 3GPP TS 24.501
+        //PDU Session Identity
+        //check if the PDU Session Release Command is already sent for this message (see section 6.3.3.5 @3GPP TS 24.501)
+        if (sp.get()->get_pdu_session_status() == pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING) {
+          //Ignore the message
+          Logger::smf_app().info("A PDU Session Release Command has been sent for this session (session ID %d), ignore the message!",
+                      decoded_nas_msg.plain.sm.header.pdu_session_identity);
+          return;
+        }
+
         //PTI
         Logger::smf_app().info(
             "PTI %d",
@@ -1436,6 +1445,30 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             != decoded_nas_msg.plain.sm.header.pdu_session_identity) {
           //TODO: PDU Session ID mismatch
         }
+        //Abnormal cases in network side (see section 6.4.3.6 @3GPP TS 24.501)
+        if (sp.get()->get_pdu_session_status() == pdu_session_status_e::PDU_SESSION_INACTIVE) {
+          Logger::smf_app().warn("PDU Session status: INACTIVE, send PDU Session Release Reject to UE!");
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]); //TODO: which cause?
+          smContextUpdateError.setError(problem_details);
+          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+          smContextUpdateError.setN1SmMsg(refToBinaryData);
+          smf_n1_n2_inst.create_n1_sm_container(
+              sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
+              cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY);
+          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+        }
+        //Abnormal cases in network side (see section 6.3.3.5 @3GPP TS 24.501)
+        if (sp.get()->get_pdu_session_status() == pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING) {
+          //Ignore the message
+          Logger::smf_app().info("A PDU Session Release Command has been sent for this session (session ID %d), ignore the message!",
+                      decoded_nas_msg.plain.sm.header.pdu_session_identity);
+          return;
+        }
+
         //PTI
         Logger::smf_app().info(
             "PTI %d",
@@ -1449,19 +1482,27 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //5GSM Cause
         //Extended Protocol Configuration Options
 
-        //Release the resources related to this PDU Session
-        //The SMF releases the IP address / Prefix(es) that were allocated to the PDU Session and releases the
-        //corresponding User Plane resources
-
-        //SMF releases the IP address / Prefix(es) that were allocated to the PDU Session
+        //Release the resources related to this PDU Session (in Procedure)
 
         //find DNN context
         std::shared_ptr<dnn_context> sd = { };
-
         if ((!find_dnn_context(sm_context_req_msg.get_snssai(),
                                sm_context_req_msg.get_dnn(), sd))
             or (nullptr == sd.get())) {
-          //TODO: error cannot find the associated DNN context
+          Logger::smf_app().warn("Could not find the context for this PDU session");
+          //create PDU Session Release Reject and send to UE
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
+          smContextUpdateError.setError(problem_details);
+          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+          smContextUpdateError.setN1SmMsg(refToBinaryData);
+          smf_n1_n2_inst.create_n1_sm_container(
+              sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
+              cause_value_5gsm_e::CAUSE_111_PROTOCOL_ERROR_UNSPECIFIED);
+          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
           return;
         }
 
@@ -1470,7 +1511,21 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         if ((!sd.get()->find_pdu_session(
             sm_context_req_msg.get_pdu_session_id(), ss))
             or (nullptr == ss.get())) {
-          //TODO: error cannot find the corresponding PDU Session
+          Logger::smf_app().warn("Could not find the context for this PDU session");
+          //create PDU Session Release Reject and send to UE
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
+          smContextUpdateError.setError(problem_details);
+          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+          smContextUpdateError.setN1SmMsg(refToBinaryData);
+          smf_n1_n2_inst.create_n1_sm_container(
+              sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
+              cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY);
+          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+          return;
         }
 
         //get the associated QoS flows: to be used for PFCP Session Modification procedure
@@ -1482,8 +1537,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //need to update UPF accordingly
         update_upf = true;
-
-        //TODO:
       }
         break;
 
@@ -1522,8 +1575,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         itti_inst->timer_remove(sp.get()->timer_T3592);
 
         //send response to AMF
-        //Verify, do we need this?
-        oai::smf_server::model::SmContextCreatedData smContextCreatedData;
+        oai::smf_server::model::SmContextCreatedData smContextCreatedData; //Verify, do we need this?
         smf_n11_inst->send_pdu_session_create_sm_context_response(
             smreq->http_response, smContextCreatedData,
             Pistache::Http::Code::Ok);
@@ -1755,15 +1807,30 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         procedure_type =
             session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP2;
         //TODO: SMF does nothing (Step 7, section 4.3.4.2@3GPP TS 23.502)
+        //Ngap_PDUSessionResourceReleaseResponseTransfer
+        std::shared_ptr<Ngap_PDUSessionResourceReleaseResponseTransfer_t> decoded_msg =
+            std::make_shared<Ngap_PDUSessionResourceReleaseResponseTransfer_t>();
+        int decode_status = smf_n1_n2_inst.decode_n2_sm_information(
+            decoded_msg, n2_sm_information);
+        if (decode_status == RETURNerror) {
+          Logger::smf_api_server().warn("asn_decode failed");
+          //send error to AMF
+          Logger::smf_app().warn(
+              "Decode N2 SM (Ngap_PDUSessionResourceReleaseResponseTransfer) failed!");
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
+          smContextUpdateError.setError(problem_details);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden);
+          return;
+        }
+
         //SMF send response to AMF
-
-        //Verify, do we need this?
-        oai::smf_server::model::SmContextCreatedData smContextCreatedData;
-
+        oai::smf_server::model::SmContextCreatedData smContextCreatedData;  //Verify, do we need this?
         smf_n11_inst->send_pdu_session_create_sm_context_response(
             smreq->http_response, smContextCreatedData,
             Pistache::Http::Code::Ok);
-
       }
         break;
 
@@ -1823,7 +1890,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       smf_n11_inst->send_pdu_session_update_sm_context_response(
           smreq->http_response, smContextUpdateError,
-          Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+          Pistache::Http::Code::Forbidden);
       return;
 
     }
