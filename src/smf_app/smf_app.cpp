@@ -419,7 +419,8 @@ void smf_app::handle_itti_msg(
   Logger::smf_app().info("Process N1N2MessageTransfer Response");
   //Update PDU Session accordingly
   //TODO: to be completed (process cause)
-  pdu_session_status_e status;
+  pdu_session_status_e status = {pdu_session_status_e::PDU_SESSION_INACTIVE};
+  upCnx_state_e state = {upCnx_state_e::UPCNX_STATE_DEACTIVATED};
   if ((static_cast<http_response_codes_e>(m.response_code)
       == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
       or (static_cast<http_response_codes_e>(m.response_code)
@@ -428,8 +429,10 @@ void smf_app::handle_itti_msg(
       status = pdu_session_status_e::PDU_SESSION_INACTIVE;
     } else if (m.msg_type == PDU_SESSION_ESTABLISHMENT_ACCEPT) {
       status = pdu_session_status_e::PDU_SESSION_ESTABLISHMENT_PENDING;
+      state = upCnx_state_e::UPCNX_STATE_ACTIVATING;
     }
     update_pdu_session_status(m.scid, status);
+    update_pdu_session_upCnx_state(m.scid, state);
     Logger::smf_app().debug(
         "Got successful response from AMF (Response code %d), set session status to %s",
         m.response_code,
@@ -1016,6 +1019,62 @@ void smf_app::update_pdu_session_status(const scid_t scid,
       pdu_session_status_e2str[static_cast<int>(status)].c_str());
 }
 
+
+//---------------------------------------------------------------------------------------------
+void smf_app::update_pdu_session_upCnx_state(const scid_t scid,
+                                        const upCnx_state_e state) {
+  Logger::smf_app().info("Update UpCnx_State");
+
+  //get the smf context
+  std::shared_ptr<smf_context_ref> scf = { };
+
+  if (is_scid_2_smf_context(scid)) {
+    scf = scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+  }
+
+  supi_t supi = scf.get()->supi;
+  supi64_t supi64 = smf_supi_to_u64(supi);
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
+
+  std::shared_ptr<smf_context> sc = { };
+
+  if (is_supi_2_smf_context(supi64)) {
+    sc = supi_2_smf_context(supi64);
+    Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
+                            supi64);
+  } else {
+    Logger::smf_app().error(
+        "Could not retrieve the corresponding SMF context with Supi " SUPI_64_FMT "!",
+        supi64);
+    //TODO:
+  }
+
+  //get dnn context
+  std::shared_ptr<dnn_context> sd = { };
+
+  if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
+    if (nullptr == sd.get()) {
+      //Error, DNN context doesn't exist
+      Logger::smf_app().warn(
+          "Could not retrieve the corresponding DNN context!");
+    }
+  }
+  //get smd_pdu_session
+  std::shared_ptr<smf_pdu_session> sp = { };
+  bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
+
+  if (nullptr == sp.get()) {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF PDU Session context!");
+  }
+  sp.get()->set_upCnx_state(state);
+  Logger::smf_app().info(
+      "Set PDU Session UpCnxState to %s",
+      upCnx_state_e2str[static_cast<int>(state)].c_str());
+}
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
   //TODO: send session modification request again...

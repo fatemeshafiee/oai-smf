@@ -1009,6 +1009,10 @@ void session_update_sm_context_procedure::handle_itti_msg(
       //Update PDU session status to ACTIVE
       ppc->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_ACTIVE);
 
+      //set UpCnxState to DEACTIVATED
+      ppc->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
+
+
     }
       break;
 
@@ -1100,22 +1104,35 @@ void session_update_sm_context_procedure::handle_itti_msg(
       smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
-      //N2 SM Information
-      smf_n1_n2_inst.create_n2_sm_information(
-          n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_REL_CMD,
-          n2_sm_info);
-      smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
+      //include N2 SM Resource Release Request only when User Plane connection is activated
+      if (ppc->get_upCnx_state() == upCnx_state_e::UPCNX_STATE_ACTIVATED) {
+        //N2 SM Information
+        smf_n1_n2_inst.create_n2_sm_information(
+            n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_REL_CMD,
+            n2_sm_info);
+        smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+        n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
-      //fill the content of SmContextUpdatedData
-      n11_triggered_pending->res.sm_context_updated_data =
-          sm_context_updated_data;
-      n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PDU_RES_REL_CMD";  //NGAP message
+        //fill the content of SmContextUpdatedData
+        n11_triggered_pending->res.sm_context_updated_data =
+            sm_context_updated_data;
+        n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+            "PDU_RES_REL_CMD";  //NGAP message
+      } else {
+        //fill the content of SmContextUpdatedData
+        n11_triggered_pending->res.sm_context_updated_data = {};
+                n11_triggered_pending->res.sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
+                    N1N2_MESSAGE_CLASS;
+                n11_triggered_pending->res.sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
+                N1_SM_CONTENT_ID;
+      }
 
       //Update PDU session status to PDU_SESSION_INACTIVE_PENDING
       ppc->set_pdu_session_status(
           pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING);
+
+      //set UpCnxState to DEACTIVATED
+      ppc->set_upCnx_state(upCnx_state_e::UPCNX_STATE_DEACTIVATED);
 
       //TODO: To be completed
       //TODO: start timer T3592 (see Section 6.3.3@3GPP TS 24.501)
