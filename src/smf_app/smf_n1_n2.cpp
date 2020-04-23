@@ -298,6 +298,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //EAPMessage
 
       //authorized QoS flow descriptions IE: QoSFlowDescritions
+      //TODO: we may not need this IE (see section 6.4.1.3 @3GPP TS 24.501)
       if (smf_app_inst->is_supi_2_smf_context(supi64)) {
         Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "",
                                 supi64);

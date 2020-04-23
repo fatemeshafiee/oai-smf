@@ -301,6 +301,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
       "session_create_sm_context_procedure handle itti_n4_session_establishment_response: pdu-session-id %d",
       n11_trigger.get()->req.get_pdu_session_id());
 
+  cause_value_5gsm_e cause_n1 = { cause_value_5gsm_e::CAUSE_0_UNKNOWN };
   pfcp::cause_t cause = { };
   resp.pfcp_ies.get(cause);
   if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
@@ -378,19 +379,36 @@ void session_create_sm_context_procedure::handle_itti_msg(
   if (n11_triggered_pending->res.get_cause() != REQUEST_ACCEPTED) {  //PDU Session Establishment Reject
     Logger::smf_app().debug(
         "Prepare a PDU Session Establishment Reject message and send to UE");
-    smf_n1_n2_inst.create_n1_sm_container(
-        n11_triggered_pending->res,
-        PDU_SESSION_ESTABLISHMENT_REJECT,
-        n1_sm_msg, cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE);
+    cause_n1 = cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE;
+    //TODO: Support IPv4 only for now
+    if (n11_triggered_pending->res.get_pdu_session_type()
+        == PDU_SESSION_TYPE_E_IPV6) {
+      n11_triggered_pending->res.set_pdu_session_type(PDU_SESSION_TYPE_E_IPV4);
+      cause_n1 =
+          cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
+    }
+
+    smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res,
+    PDU_SESSION_ESTABLISHMENT_REJECT,
+                                          n1_sm_msg, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
   } else {  //PDU Session Establishment Accept
     Logger::smf_app().debug(
         "Prepare a PDU Session Establishment Accept message and send to UE");
+
+    //TODO: Support IPv4 only for now
+    if (n11_triggered_pending->res.get_pdu_session_type()
+        == PDU_SESSION_TYPE_E_IPV4V6) {
+      n11_triggered_pending->res.set_pdu_session_type(PDU_SESSION_TYPE_E_IPV4);
+      cause_n1 =
+          cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
+    }
+
     smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res,
-    PDU_SESSION_ESTABLISHMENT_ACCEPT, n1_sm_msg,
-                                          cause_value_5gsm_e::CAUSE_0_UNKNOWN);  //TODO: need cause?
+    PDU_SESSION_ESTABLISHMENT_ACCEPT,
+                                          n1_sm_msg, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
     //N2 SM Information (Step 11, section 4.3.2.2.1 @ 3GPP TS 23.502): PDUSessionRessourceSetupRequestTransfer IE
@@ -1012,7 +1030,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
       //set UpCnxState to DEACTIVATED
       ppc->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
 
-
     }
       break;
 
@@ -1120,11 +1137,11 @@ void session_update_sm_context_procedure::handle_itti_msg(
             "PDU_RES_REL_CMD";  //NGAP message
       } else {
         //fill the content of SmContextUpdatedData
-        n11_triggered_pending->res.sm_context_updated_data = {};
-                n11_triggered_pending->res.sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
-                    N1N2_MESSAGE_CLASS;
-                n11_triggered_pending->res.sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
-                N1_SM_CONTENT_ID;
+        n11_triggered_pending->res.sm_context_updated_data = { };
+        n11_triggered_pending->res.sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
+        N1N2_MESSAGE_CLASS;
+        n11_triggered_pending->res.sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
+        N1_SM_CONTENT_ID;
       }
 
       //Update PDU session status to PDU_SESSION_INACTIVE_PENDING

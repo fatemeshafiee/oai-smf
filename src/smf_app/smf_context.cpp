@@ -1073,7 +1073,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           "PDU Session Establishment Request: Create SM Context Request procedure failed");
       remove_procedure(proc);
       //Set cause to error to trigger PDU session establishment reject (step 10)
-      sm_context_resp->res.set_cause(UNKNOWN_ERROR);
+      //sm_context_resp->res.set_cause(UNKNOWN_ERROR);
     }
 
   } else {  //if request is rejected
@@ -1119,9 +1119,14 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     //Create PDU Session Establishment Reject and embedded in Namf_Communication_N1N2MessageTransfer Request
     Logger::smf_app().debug("Create PDU Session Establishment Reject");
+    //TODO: Should check Cause for other cases
+    cause_value_5gsm_e cause_n1 = { cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE };
+    if (sm_context_resp->res.get_cause() == NO_RESOURCES_AVAILABLE) {
+       cause_n1 = cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES;
+    }
     smf_n1_n2_inst.create_n1_sm_container(
         sm_context_resp_pending->res, PDU_SESSION_ESTABLISHMENT_REJECT,
-        n1_sm_message, cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);
+        n1_sm_message, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
     sm_context_resp_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
