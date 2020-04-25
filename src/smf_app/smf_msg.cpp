@@ -420,6 +420,17 @@ void pdu_session_update_sm_context_request::set_an_type(
 }
 
 //-----------------------------------------------------------------------------
+bool pdu_session_update_sm_context_request::release_is_set() const {
+  return m_release_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::set_release(bool const value) {
+   m_release = value;
+   m_release_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_response::set_cause(uint8_t cause) {
   m_cause = cause;
 }

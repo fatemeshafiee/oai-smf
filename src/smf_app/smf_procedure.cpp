@@ -714,7 +714,7 @@ int session_update_sm_context_procedure::run(
     }
       break;
 
-    case session_management_procedures_type_e::PDU_SESSION_RELEASE_NETWORK_REQUESTED:
+    case session_management_procedures_type_e::PDU_SESSION_RELEASE_AMF_INITIATED:
     case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
 
       for (auto qfi : list_of_qfis_to_be_modified) {
@@ -946,7 +946,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
     }
       break;
 
-    case session_management_procedures_type_e::PDU_SESSION_RELEASE_NETWORK_REQUESTED:
+    case session_management_procedures_type_e::PDU_SESSION_RELEASE_AMF_INITIATED:
     case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
 
       if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {

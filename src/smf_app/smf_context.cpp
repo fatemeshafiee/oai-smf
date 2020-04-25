@@ -1120,13 +1120,14 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     //Create PDU Session Establishment Reject and embedded in Namf_Communication_N1N2MessageTransfer Request
     Logger::smf_app().debug("Create PDU Session Establishment Reject");
     //TODO: Should check Cause for other cases
-    cause_value_5gsm_e cause_n1 = { cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE };
+    cause_value_5gsm_e cause_n1 =
+        { cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE };
     if (sm_context_resp->res.get_cause() == NO_RESOURCES_AVAILABLE) {
-       cause_n1 = cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES;
+      cause_n1 = cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES;
     }
-    smf_n1_n2_inst.create_n1_sm_container(
-        sm_context_resp_pending->res, PDU_SESSION_ESTABLISHMENT_REJECT,
-        n1_sm_message, cause_n1);
+    smf_n1_n2_inst.create_n1_sm_container(sm_context_resp_pending->res,
+    PDU_SESSION_ESTABLISHMENT_REJECT,
+                                          n1_sm_message, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
     sm_context_resp_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
@@ -1861,8 +1862,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     //if request accepted-> set unCnxState to ACTIVATING
     //Update upCnxState
     sp.get()->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATING);
-    //need update UPF
-    update_upf = true;
 
     //get QFIs associated with PDU session ID
     std::vector<smf_qos_flow> qos_flows = { };
@@ -1870,11 +1869,27 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     for (auto i : qos_flows) {
       sm_context_req_msg.add_qfi(i.qfi.qfi);
     }
+    //need update UPF
+    update_upf = true;
     //TODO: to be completed
 
   }
 
-  //Step 4. Create a procedure for update sm context and let the procedure handle the request if necessary
+  //Step 4. For AMF-initiated Session Release (with release indication)
+  if (sm_context_req_msg.release_is_set()) {
+    procedure_type =
+        session_management_procedures_type_e::PDU_SESSION_RELEASE_AMF_INITIATED;
+    //get QFIs associated with PDU session ID
+    std::vector<smf_qos_flow> qos_flows = { };
+    sp.get()->get_qos_flows(qos_flows);
+    for (auto i : qos_flows) {
+      sm_context_req_msg.add_qfi(i.qfi.qfi);
+    }
+    //need update UPF
+    update_upf = true;
+  }
+
+  //Step 5. Create a procedure for update sm context and let the procedure handle the request if necessary
   if (update_upf) {
     session_update_sm_context_procedure *proc =
         new session_update_sm_context_procedure(sp);
