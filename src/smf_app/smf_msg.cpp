@@ -411,13 +411,26 @@ bool pdu_session_update_sm_context_request::upCnx_state_is_set() const {
 void pdu_session_update_sm_context_request::set_rat_type(
     std::string const &value) {
   m_rat_type = value;
+  m_rat_type_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_update_sm_context_request::rat_type_is_set() const {
+  return m_rat_type_is_set;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::set_an_type(
     std::string const &value) {
   m_an_type = value;
+  m_an_type_is_set = true;
 }
+
+//-----------------------------------------------------------------------------
+bool pdu_session_update_sm_context_request::an_type_is_set() const {
+  return m_an_type_is_set;
+}
+
 
 //-----------------------------------------------------------------------------
 bool pdu_session_update_sm_context_request::release_is_set() const {

@@ -257,6 +257,7 @@ smf_app::smf_app(const std::string &config_file)
 
   supi2smf_context = { };
   set_seid_n4 = { };
+  seid_n4_generator = 0;
 
   apply_config(smf_cfg);
 
@@ -771,7 +772,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     smContextUpdateError.setError(problem_details);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden);
+        Pistache::Http::Code::Not_Found);
     return;
   }
 
@@ -787,7 +788,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     smContextUpdateError.setError(problem_details);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden);
+        Pistache::Http::Code::Not_Found);
     return;
   }
 
@@ -814,7 +815,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     smContextUpdateError.setError(problem_details);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden);
+        Pistache::Http::Code::Not_Found);
     return;
   }
 
@@ -831,7 +832,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
       smContextUpdateError.setError(problem_details);
       smf_n11_inst->send_pdu_session_update_sm_context_response(
           smreq->http_response, smContextUpdateError,
-          Pistache::Http::Code::Forbidden);
+          Pistache::Http::Code::Not_Found);
       return;
     }
   }

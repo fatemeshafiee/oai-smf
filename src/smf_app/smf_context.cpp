@@ -1513,7 +1513,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
           smf_n11_inst->send_pdu_session_update_sm_context_response(
               smreq->http_response, smContextUpdateError,
-              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+              Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
           return;
         }
 
@@ -1536,7 +1536,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
           smf_n11_inst->send_pdu_session_update_sm_context_response(
               smreq->http_response, smContextUpdateError,
-              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+              Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
           return;
         }
 
@@ -1643,17 +1643,23 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     //decode N2 SM Info
     switch (n2_sm_info_type) {
 
-      //UE-Requested PDU Session Establishment procedure (Section 4.3.2.2.1@3GPP TS 23.502)
-      //or UE Triggered Service Request Procedure (step 2)
       case n2_sm_info_type_e::PDU_RES_SETUP_RSP: {
+        //PDU Session Resource Setup Response Transfer is included in the following procedures:
+        //1 - UE-Requested PDU Session Establishment procedure (Section 4.3.2.2.1@3GPP TS 23.502)
+        //2 - UE Triggered Service Request Procedure (step 2)
+
         Logger::smf_app().info("PDU_RES_SETUP_RSP");
         Logger::smf_app().info(
             "PDU Session Establishment Request, processing N2 SM Information");
 
-        //PDU_SESSION_ESTABLISHMENT_UE_REQUESTED & SERVICE_REQUEST_UE_TRIGGERED
         procedure_type =
             session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED;
-        //procedure_type = session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2;
+
+        if (sm_context_req_msg.rat_type_is_set()
+            and sm_context_req_msg.an_type_is_set()) {
+          procedure_type =
+              session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2;
+        }
 
         //Ngap_PDUSessionResourceSetupResponseTransfer
         std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t> decoded_msg =
@@ -1857,6 +1863,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
   if (!sm_context_req_msg.n1_sm_msg_is_set()
       and !sm_context_req_msg.n2_sm_info_is_set()
       and sm_context_req_msg.upCnx_state_is_set()) {
+    Logger::smf_app().info("SERVICE_REQUEST_UE_TRIGGERED_STEP1");
+    Logger::smf_app().info("Service Request (UE-triggered)");
+
     procedure_type =
         session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1;
     //if request accepted-> set unCnxState to ACTIVATING
@@ -1871,7 +1880,13 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     }
     //need update UPF
     update_upf = true;
-    //TODO: to be completed
+
+    //Accept the activation of UP connection and continue to using the current UPF
+    //TODO: Accept the activation of UP connection and select a new UPF
+    //Reject the activation of UP connection
+    //SMF fails to find a suitable I-UPF: i) trigger re-establishment of PDU Session;
+    //or ii) keep PDU session but reject the activation of UP connection;
+    //or iii) release PDU session
 
   }
 
@@ -1900,29 +1915,64 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     insert_procedure(sproc);
     if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
       // error !
-      Logger::smf_app().info("PDU Update SM Context Request procedure failed");
+      Logger::smf_app().info(
+          "PDU Update SM Context Request procedure failed (session procedure type %s)",
+          session_management_procedures_type_e2str[static_cast<int>(procedure_type)]
+              .c_str());
       remove_procedure(proc);
-      //send error to AMF
-      problem_details.setCause(
-          pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);
-      smContextUpdateError.setError(problem_details);
-      //TODO: need to verify with/without N1 SM
-      refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-      smContextUpdateError.setN1SmMsg(refToBinaryData);
-      //PDU Session Establishment Reject
-      smf_n1_n2_inst.create_n1_sm_container(
-          sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-          cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE);
-      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-      smf_n11_inst->send_pdu_session_update_sm_context_response(
-          smreq->http_response, smContextUpdateError,
-          Pistache::Http::Code::Forbidden);
+
+      //send error to AMF according to the procedure
+      switch (procedure_type) {
+        case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING]);
+          smContextUpdateError.setError(problem_details);
+          //TODO: need to verify with/without N1 SM
+          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+          smContextUpdateError.setN1SmMsg(refToBinaryData);
+          //PDU Session Establishment Reject
+          smf_n1_n2_inst.create_n1_sm_container(
+              sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
+              cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE);
+          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden);
+        }
+          break;
+
+        case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1:
+        case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_SMF_REQUESTED:
+        case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_AN_REQUESTED:
+        case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2:
+        case session_management_procedures_type_e::PDU_SESSION_RELEASE_AMF_INITIATED:
+        case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING]);
+          smContextUpdateError.setError(problem_details);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden);
+        }
+          break;
+
+        default: {
+          //TODO: to be updated
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING]);
+          smContextUpdateError.setError(problem_details);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden);
+        }
+      }
+
       return;
 
     }
   }
 
-  //TODO, Step 5.
+  //TODO, Step 6
   /*  If the PDU Session establishment is not successful, the SMF informs the AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The SMF also releases any N4
    session(s) created, any PDU Session address if allocated (e.g. IP address) and releases the association with PCF,
    if any. In this case, step 19 is skipped.

@@ -31,7 +31,7 @@ void PDUSessionsCollectionApiImpl::post_pdu_sessions(
     const PduSessionCreateData &pduSessionCreateData,
     Pistache::Http::ResponseWriter &response) {
   Logger::smf_api_server().info("post_pdu_sessions...");
-  response.send(Pistache::Http::Code::Ok,
+  response.send(Pistache::Http::Code::Not_Implemented,
                 "Post_pdu_sessions API has not been implemented yet!\n");
 
 }

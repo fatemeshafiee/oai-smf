@@ -90,7 +90,7 @@ void IndividualSMContextApiImpl::retrieve_sm_context(
     const SmContextRetrieveData &smContextRetrieveData,
     Pistache::Http::ResponseWriter &response) {
   Logger::smf_api_server().info("retrieve_sm_context...");
-  response.send(Pistache::Http::Code::Ok,
+  response.send(Pistache::Http::Code::Not_Implemented,
                 "Retrieve_sm_context API has not been implemented yet!\n");
 }
 
@@ -130,13 +130,13 @@ void IndividualSMContextApiImpl::update_sm_context(
   /* UE-initiated Service Request Operation, section 4.2.3.2@3GPP TS 23.502 */
   //Step 4: PDU Session IDs, Operation Type, UE location Info, Access Type, RAT Type, UE presence in LADN service area, Indication of Access Type can be changed
   //PDU Session IDs
-  //UpCnxState, for activation of user plane (see 5.2.2.3.2.2@3GPP TS 29.502)
+  //UpCnxState, for activation of user plane (see 5.2.2.3.2.2@3GPP TS 29.502, step 1)
   if (smContextUpdateData.upCnxStateIsSet())
     sm_context_req_msg.set_upCnx_state(smContextUpdateData.getUpCnxState());
-  //Access Type
+  //Access Type (step 1 and 2)
   if (smContextUpdateData.anTypeIsSet())
     sm_context_req_msg.set_an_type(smContextUpdateData.getAnType());
-  //RAT Type
+  //RAT Type (step 1 and 2)
   if (smContextUpdateData.ratTypeIsSet())
     sm_context_req_msg.set_rat_type(smContextUpdateData.getRatType());
   //TODO:
