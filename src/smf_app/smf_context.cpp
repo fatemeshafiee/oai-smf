@@ -1649,16 +1649,17 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //2 - UE Triggered Service Request Procedure (step 2)
 
         Logger::smf_app().info("PDU_RES_SETUP_RSP");
-        Logger::smf_app().info(
-            "PDU Session Establishment Request, processing N2 SM Information");
-
-        procedure_type =
-            session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED;
-
         if (sm_context_req_msg.rat_type_is_set()
             and sm_context_req_msg.an_type_is_set()) {
           procedure_type =
               session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2;
+          Logger::smf_app().info(
+              "UE Triggered Service Request, processing N2 SM Information");
+        } else {
+          procedure_type =
+                      session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED;
+          Logger::smf_app().info(
+              "PDU Session Establishment Request, processing N2 SM Information");
         }
 
         //Ngap_PDUSessionResourceSetupResponseTransfer

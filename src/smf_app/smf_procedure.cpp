@@ -940,6 +940,15 @@ void session_update_sm_context_procedure::handle_itti_msg(
           // Update QoS Flow
           smf_qos_flow qos_flow2 = qos_flow;
           ppc->add_qos_flow(qos_flow2);
+
+          qos_flow_context_updated qcu = { };
+          qcu.set_cause(REQUEST_ACCEPTED);
+
+          qcu.set_qfi(pfcp::qfi_t(it.first));
+          qcu.set_ul_fteid(qos_flow.ul_fteid);
+          qcu.set_qos_profile(qos_flow.qos_profile);
+          n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
+
         }
       }
     }
@@ -1082,6 +1091,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
    int ret = itti_inst->send_msg(itti_msg);
    */
 
+  //Prepare response to send to AMF (N1N2MessageTransfer or PDUSession_UpdateSMContextResponse)
   nlohmann::json sm_context_updated_data = { };
   sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
   N1N2_MESSAGE_CLASS;
