@@ -1341,9 +1341,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         sm_context_resp_pending->session_procedure_type =
             session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1;
 
-        //step 1. assign the necessary information from pdu_session_modification_request
-        //to sm_context_req_msg to be used to create N1 SM, N2 SM information
-
         //check if the PDU Session Release Command is already sent for this message (see section 6.3.3.5 @3GPP TS 24.501)
         if (sp.get()->get_pdu_session_status()
             == pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING) {
@@ -1391,8 +1388,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //TODO: IntergrityProtectionMaximumDataRate
 
         //Process QoS rules and Qos Flow descriptions
-        uint8_t number_of_rules = decoded_nas_msg.plain.sm
+        uint16_t length_of_rule_ie = decoded_nas_msg.plain.sm
             .pdu_session_modification_request.qosrules.lengthofqosrulesie;
+
         QOSRulesIE *qos_rules_ie = (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
         qos_rules_ie = decoded_nas_msg.plain.sm.pdu_session_modification_request
             .qosrules.qosrulesie;
@@ -1426,11 +1424,16 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           }
         }
 
-        for (int i = 0; i < number_of_rules; i++) {
+        int i = 0;
+        int length_of_rule = 0;
+        while (length_of_rule_ie > 0) {
+          //for (int i = 0; i < number_of_rules; i++) {
           uint8_t rule_id = { 0 };
           QOSRulesIE qos_rule = { };
           pfcp::qfi_t qfi = { };
           smf_qos_flow qos_flow = { };
+
+          length_of_rule = qos_rules_ie[i].LengthofQoSrule;
 
           //If UE requested a new GBR flow
           if ((qos_rules_ie[i].ruleoperationcode == CREATE_NEW_QOS_RULE)
@@ -1498,17 +1501,33 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             //Add new QoS flow
             sp.get()->add_qos_flow(qos_flow);
 
+            //ADD QoS Flow to be updated
+            qos_flow_context_updated qcu = { };
+            qcu.set_qfi(pfcp::qfi_t(qos_flow.qfi));
+            //qcu.set_ul_fteid(flow.ul_fteid);
+            //qcu.set_dl_fteid(flow.dl_fteid);
+            qcu.set_qos_profile(qos_flow.qos_profile);
+            sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
+
           } else {
             qfi.qfi = qos_rules_ie[i].qosflowidentifer;
             sp.get()->get_qos_flow(qfi, qos_flow);
             qos_flow.update_qos_rule(qos_rules_ie[i]);
             //update QoS flow
             sp.get()->add_qos_flow(qos_flow);
+
+            //ADD QoS Flow to be updated
+            qos_flow_context_updated qcu = { };
+            qcu.set_qfi(pfcp::qfi_t(qos_flow.qfi));
+            //qcu.set_ul_fteid(flow.ul_fteid);
+            //qcu.set_dl_fteid(flow.dl_fteid);
+            qcu.set_qos_profile(qos_flow.qos_profile);
+            sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
+
           }
+          length_of_rule_ie -= (length_of_rule + 3);
 
         }
-        free_wrapper((void**) &qos_rules_ie);
-        free_wrapper((void**) &qos_flow_description);
 
         //TODO: MappedEPSBearerContexts
         //TODO: ExtendedProtocolConfigurationOptions
@@ -1544,16 +1563,18 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //Fill the json part
         //N1SM
-        n11_sm_context_resp->res.sm_context_updated_data["n1SmMsg"]["n1MessageClass"] =
+        n11_sm_context_resp->res.sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
         N1N2_MESSAGE_CLASS;
-        n11_sm_context_resp->res.sm_context_updated_data["n1SmMsg"]["n1MessageContent"]["contentId"] =
+        n11_sm_context_resp->res.sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
         N1_SM_CONTENT_ID;  //part 2
-        n11_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InformationClass"] =
+        n11_sm_context_resp->res.sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] =
         N1N2_MESSAGE_CLASS;
-        n11_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InfoContent"]["ngapIeType"] =
+        n11_sm_context_resp->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
             "PDU_RES_MOD_REQ";  //NGAP message
-        n11_sm_context_resp->res.sm_context_updated_data["n2SmInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
+        n11_sm_context_resp->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
         N2_SM_CONTENT_ID;  //part 3
+        n11_sm_context_resp->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+            n11_sm_context_resp->res.get_pdu_session_id();
 
         //Update PDU Session status
         sp.get()->set_pdu_session_status(
@@ -1575,6 +1596,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               "Could not send ITTI message %s to task TASK_SMF_N11",
               sm_context_resp_pending->get_msg_name());
         }
+
+        free_wrapper((void**) &qos_rules_ie);
+        free_wrapper((void**) &qos_flow_description);
       }
         break;
 
@@ -1602,16 +1626,15 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //stop T3591
         itti_inst->timer_remove(sp.get()->timer_T3591);
 
-
-/*        //Send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
-        Logger::smf_app().info(
-            "PDU Session Modification UE-initiated (Step 3)");
-        smContextUpdatedData = { };
-        smf_n11_inst->send_pdu_session_update_sm_context_response(
-            n11_sm_context_resp->http_response, smContextUpdatedData,
-            Pistache::Http::Code::No_Content);
-*/
+        /*        //Send PDUSession_UpdateSMContext Response to AMF
+         //No need to create N1/N2 Container
+         Logger::smf_app().info(
+         "PDU Session Modification UE-initiated (Step 3)");
+         smContextUpdatedData = { };
+         smf_n11_inst->send_pdu_session_update_sm_context_response(
+         n11_sm_context_resp->http_response, smContextUpdatedData,
+         Pistache::Http::Code::No_Content);
+         */
 
         //don't need to create a procedure to update UPF
         //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
@@ -1671,15 +1694,15 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //stop T3591
         itti_inst->timer_remove(sp.get()->timer_T3591);
 
-/*        //Send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
-        Logger::smf_app().info(
-            "PDU Session Modification UE-initiated (Step 3)");
-        smContextUpdatedData = { };
-        smf_n11_inst->send_pdu_session_update_sm_context_response(
-            n11_sm_context_resp->http_response, smContextUpdatedData,
-            Pistache::Http::Code::No_Content);
-            */
+        /*        //Send PDUSession_UpdateSMContext Response to AMF
+         //No need to create N1/N2 Container
+         Logger::smf_app().info(
+         "PDU Session Modification UE-initiated (Step 3)");
+         smContextUpdatedData = { };
+         smf_n11_inst->send_pdu_session_update_sm_context_response(
+         n11_sm_context_resp->http_response, smContextUpdatedData,
+         Pistache::Http::Code::No_Content);
+         */
 
         //don't need to create a procedure to update UPF
         //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
@@ -1755,51 +1778,51 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //Release the resources related to this PDU Session (in Procedure)
 
         //find DNN context
- /*       std::shared_ptr<dnn_context> sd = { };
-        if ((!find_dnn_context(sm_context_req_msg.get_snssai(),
-                               sm_context_req_msg.get_dnn(), sd))
-            or (nullptr == sd.get())) {
-          Logger::smf_app().warn(
-              "Could not find the context for this PDU session");
-          //create PDU Session Release Reject and send to UE
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
-          smContextUpdateError.setError(problem_details);
-          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-          smContextUpdateError.setN1SmMsg(refToBinaryData);
-          smf_n1_n2_inst.create_n1_sm_container(
-              sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_111_PROTOCOL_ERROR_UNSPECIFIED);
-          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-          smf_n11_inst->send_pdu_session_update_sm_context_response(
-              smreq->http_response, smContextUpdateError,
-              Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
-          return;
-        }
+        /*       std::shared_ptr<dnn_context> sd = { };
+         if ((!find_dnn_context(sm_context_req_msg.get_snssai(),
+         sm_context_req_msg.get_dnn(), sd))
+         or (nullptr == sd.get())) {
+         Logger::smf_app().warn(
+         "Could not find the context for this PDU session");
+         //create PDU Session Release Reject and send to UE
+         problem_details.setCause(
+         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
+         smContextUpdateError.setError(problem_details);
+         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+         smContextUpdateError.setN1SmMsg(refToBinaryData);
+         smf_n1_n2_inst.create_n1_sm_container(
+         sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
+         cause_value_5gsm_e::CAUSE_111_PROTOCOL_ERROR_UNSPECIFIED);
+         smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+         smf_n11_inst->send_pdu_session_update_sm_context_response(
+         smreq->http_response, smContextUpdateError,
+         Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
+         return;
+         }
 
-        //find PDU Session
-        std::shared_ptr<smf_pdu_session> sp;
-        if ((!sd.get()->find_pdu_session(
-            sm_context_req_msg.get_pdu_session_id(), sp))
-            or (nullptr == sp.get())) {
-          Logger::smf_app().warn(
-              "Could not find the context for this PDU session");
-          //create PDU Session Release Reject and send to UE
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
-          smContextUpdateError.setError(problem_details);
-          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-          smContextUpdateError.setN1SmMsg(refToBinaryData);
-          smf_n1_n2_inst.create_n1_sm_container(
-              sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY);
-          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-          smf_n11_inst->send_pdu_session_update_sm_context_response(
-              smreq->http_response, smContextUpdateError,
-              Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
-          return;
-        }
-*/
+         //find PDU Session
+         std::shared_ptr<smf_pdu_session> sp;
+         if ((!sd.get()->find_pdu_session(
+         sm_context_req_msg.get_pdu_session_id(), sp))
+         or (nullptr == sp.get())) {
+         Logger::smf_app().warn(
+         "Could not find the context for this PDU session");
+         //create PDU Session Release Reject and send to UE
+         problem_details.setCause(
+         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
+         smContextUpdateError.setError(problem_details);
+         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+         smContextUpdateError.setN1SmMsg(refToBinaryData);
+         smf_n1_n2_inst.create_n1_sm_container(
+         sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
+         cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY);
+         smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+         smf_n11_inst->send_pdu_session_update_sm_context_response(
+         smreq->http_response, smContextUpdateError,
+         Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
+         return;
+         }
+         */
         //get the associated QoS flows: to be used for PFCP Session Modification procedure
         std::vector<smf_qos_flow> qos_flows;
         sp.get()->get_qos_flows(qos_flows);
@@ -1846,11 +1869,11 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //Stop timer T3592
         itti_inst->timer_remove(sp.get()->timer_T3592);
 
-/*        //send response to AMF
-        smf_n11_inst->send_pdu_session_update_sm_context_response(
-            smreq->http_response, smContextUpdatedData,
-            Pistache::Http::Code::No_Content);
-*/
+        /*        //send response to AMF
+         smf_n11_inst->send_pdu_session_update_sm_context_response(
+         smreq->http_response, smContextUpdatedData,
+         Pistache::Http::Code::No_Content);
+         */
 
         //don't need to create a procedure to update UPF
         //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
@@ -1865,22 +1888,21 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               sm_context_resp_pending->get_msg_name());
         }
 
-
         //TODO: SMF invokes Nsmf_PDUSession_SMContextStatusNotify to notify AMF that the SM context for this PDU Session is released
         //TODO: if dynamic PCC applied, SMF invokes an SM Policy Association Termination
         //TODO: SMF unsubscribes from Session Management Subscription data changes notification from UDM by invoking Numd_SDM_Unsubscribe
         //find dnn context
-/*        std::shared_ptr<dnn_context> sd = { };
-        bool find_dnn = find_dnn_context(sm_context_req_msg.get_snssai(),
-                                         sm_context_req_msg.get_dnn(), sd);
-        //At this step, this context should be existed
-        if (nullptr == sd.get()) {
-          Logger::smf_app().debug(
-              "DNN context (dnn_in_use %s) is not existed yet!",
-              sm_context_req_msg.get_dnn().c_str());
-          //TODO:
-        }
-  */
+        /*        std::shared_ptr<dnn_context> sd = { };
+         bool find_dnn = find_dnn_context(sm_context_req_msg.get_snssai(),
+         sm_context_req_msg.get_dnn(), sd);
+         //At this step, this context should be existed
+         if (nullptr == sd.get()) {
+         Logger::smf_app().debug(
+         "DNN context (dnn_in_use %s) is not existed yet!",
+         sm_context_req_msg.get_dnn().c_str());
+         //TODO:
+         }
+         */
         if (sd.get()->get_number_pdu_sessions() == 0) {
           Logger::smf_app().debug(
               "Unsubscribe from Session Management Subscription data changes notification from UDM");
@@ -2120,12 +2142,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           return;
         }
 
-/*        //SMF send response to AMF
-        oai::smf_server::model::SmContextCreatedData smContextCreatedData;  //Verify, do we need this?
-        smf_n11_inst->send_pdu_session_create_sm_context_response(
-            smreq->http_response, smContextCreatedData,
-            Pistache::Http::Code::Ok);
-  */
+        /*        //SMF send response to AMF
+         oai::smf_server::model::SmContextCreatedData smContextCreatedData;  //Verify, do we need this?
+         smf_n11_inst->send_pdu_session_create_sm_context_response(
+         smreq->http_response, smContextCreatedData,
+         Pistache::Http::Code::Ok);
+         */
         //don't need to create a procedure to update UPF
         //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
         //No need to create N1/N2 Container
@@ -2138,7 +2160,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               "Could not send ITTI message %s to task TASK_SMF_N11",
               sm_context_resp_pending->get_msg_name());
         }
-
 
       }
         break;
@@ -2262,88 +2283,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
     }
   }
-  /* else {
-   //TODO: send PDUSession_UpdateSMContextResponse
 
-   //Prepare response to send to AMF (N1N2MessageTransfer or PDUSession_UpdateSMContextResponse)
-   nlohmann::json sm_context_updated_data = { };
-   sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
-   N1N2_MESSAGE_CLASS;
-   sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
-   N1_SM_CONTENT_ID;
-   sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] =
-   N1N2_MESSAGE_CLASS;
-   sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-   n11_sm_context_resp->res.get_pdu_session_id();
-   sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
-   N2_SM_CONTENT_ID;
-
-   switch (procedure_type) {
-
-   //PDU Session Modification UE-initiated (Step 1)
-   case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1: {
-   //N1 SM: PDU Session Modification Command
-   //N2 SM: PDU Session Resource Modify Request Transfer IE
-
-   //N1 SM
-   smf_n1_n2_inst.create_n1_sm_container(
-   n11_sm_context_resp->res, PDU_SESSION_MODIFICATION_COMMAND,
-   n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN);  //TODO: need cause?
-   smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-   n11_sm_context_resp->res.set_n1_sm_message(n1_sm_msg_hex);
-   //N2 SM Information
-   smf_n1_n2_inst.create_n2_sm_information(
-   n11_sm_context_resp->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ,
-   n2_sm_info);
-   smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-   n11_sm_context_resp->res.set_n2_sm_information(n2_sm_info_hex);
-
-   //fill the content of SmContextUpdatedData
-   n11_sm_context_resp->res.sm_context_updated_data =
-   sm_context_updated_data;
-   n11_sm_context_resp->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-   "PDU_RES_MOD_REQ";  //NGAP message
-   }
-   break;
-
-   //PDU Session Release UE-initiated (Step 2)
-   case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP2: {
-   //No need to create N1/N2 Container
-   Logger::smf_app().info("PDU Session Release UE-initiated (Step 2)");
-   //TODO:
-   }
-   break;
-
-
-   //PDU Session Release UE-initiated (Step 3)
-   case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP3: {
-   //No need to create N1/N2 Container
-   Logger::smf_app().info("PDU Session Release UE-initiated (Step 3)");
-   //TODO: To be completed
-   }
-   break;
-
-   default: {
-   Logger::smf_app().info("Unknown session procedure type %d",
-   procedure_type);
-   }
-   }
-
-   //send ITTI message to N11 interface to trigger SessionUpdateSMContextResponse towards AMFs
-   Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-   sm_context_resp_pending->get_msg_name());
-   sm_context_resp_pending->session_procedure_type = procedure_type;
-   int ret = itti_inst->send_msg(sm_context_resp_pending);
-   if (RETURNok != ret) {
-   Logger::smf_app().error(
-   "Could not send ITTI message %s to task TASK_SMF_N11",
-   sm_context_resp_pending->get_msg_name());
-   }
-
-
-   }
-
-   */
   //TODO, Step 6
   /*  If the PDU Session establishment is not successful, the SMF informs the AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The SMF also releases any N4
    session(s) created, any PDU Session address if allocated (e.g. IP address) and releases the association with PCF,

@@ -1123,13 +1123,13 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
       //N1 SM
       smf_n1_n2_inst.create_n1_sm_container(
-          n11_triggered_pending->res, PDU_SESSION_MODIFICATION_COMMAND,
+          n11_triggered_pending->res, PDU_SESSION_MODIFICATION_REQUEST,
           n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN);
       smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
       //N2 SM Information
       smf_n1_n2_inst.create_n2_sm_information(
-          n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_REL_RSP,
+          n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ,
           n2_sm_info);
       smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
@@ -1138,7 +1138,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
       n11_triggered_pending->res.sm_context_updated_data =
           sm_context_updated_data;
       n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PDU_RES_REL_RSP";  //NGAP message
+          "PDU_RES_MOD_REQ";  //NGAP message
     }
       break;
 
