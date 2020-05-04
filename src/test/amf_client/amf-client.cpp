@@ -408,41 +408,22 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
   ENCODE_U8(buffer + size, 0x00, size);  //_5GSMCapability
   ENCODE_U8(buffer + size, 0x59, size);  //_5GSMCause
    ENCODE_U8(buffer + size, 0x00, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x7a, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x00, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x09, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x01, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x00, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x06, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x31, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x31, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x01, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x01, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x01, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x3c, size);  //_5GSMCause
-
+   ENCODE_U8(buffer + size, 0x7a, size);  //QoS Rules IE
+   ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules length
+   ENCODE_U8(buffer + size, 0x09, size);  //QoS Rules length
+   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules rule id
+   ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules rule length
+   ENCODE_U8(buffer + size, 0x06, size);  //QoS Rules rule length
+   ENCODE_U8(buffer + size, 0x31, size);  //QoS Rules
+   ENCODE_U8(buffer + size, 0x31, size);  //QoS Rules
+   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules filter 1 length
+   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
+   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
+   ENCODE_U8(buffer + size, 0x3c, size);  //QoS Rules
 
 //  ENCODE_U8(buffer + size, 0x00, size);  //MaximumNumberOfSupportedPacketFilters
 //  ENCODE_U8(buffer + size, 0x01, size);  //MaximumNumberOfSupportedPacketFilters
 
-
-
-  /*
-  ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-  PDUSessionIdentity pdusessionidentity;
-  ProcedureTransactionIdentity proceduretransactionidentity;
-  MessageType messagetype;
-  uint16_t presence;
-  _5GSMCapability _5gsmcapability;
-  _5GSMCause _5gsmcause;
-  MaximumNumberOfSupportedPacketFilters maximumnumberofsupportedpacketfilters;
-  AlwaysonPDUSessionRequested alwaysonpdusessionrequested;
-  IntergrityProtectionMaximumDataRate intergrityprotectionmaximumdatarate;
-  QOSRules qosrules;
-  QOSFlowDescriptions qosflowdescriptions;
-  MappedEPSBearerContexts mappedepsbearercontexts;
-  ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-  */
 
   std::cout << "Buffer: " << std::endl;
   for (int i = 0; i < size; i++) {
@@ -1015,22 +996,20 @@ int main(int argc, char *argv[]) {
   usleep(100000);
   send_pdu_session_update_sm_context_establishment(smf_ip_address);
   usleep(200000);
-/*  //UE-initiated Service Request
+  //UE-initiated Service Request
   send_pdu_session_update_sm_context_ue_service_request(smf_ip_address);
   usleep(200000);
   send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address);
   usleep(200000);
-*/
   //PDU Session Modification
   send_pdu_session_modification_request_step1(smf_ip_address);
   //PDU Session Release procedure
-/*  send_pdu_session_release_request(smf_ip_address);
+  send_pdu_session_release_request(smf_ip_address);
   usleep(200000);
   send_pdu_session_release_resource_release_ack(smf_ip_address);
   usleep(200000);
   send_pdu_session_release_complete(smf_ip_address);
   usleep(200000);
-*/
   return 0;
 }
 

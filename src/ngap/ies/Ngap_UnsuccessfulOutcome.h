@@ -95,6 +95,8 @@
 #include "Ngap_UplinkRANConfigurationTransfer.h"
 #include "Ngap_UplinkRANStatusTransfer.h"
 #include "Ngap_UplinkUEAssociatedNRPPaTransport.h"
+#include "Ngap_UplinkRIMInformationTransfer.h"
+#include "Ngap_DownlinkRIMInformationTransfer.h"
 #include <OPEN_TYPE.h>
 #include <constr_CHOICE.h>
 #include <constr_SEQUENCE.h>

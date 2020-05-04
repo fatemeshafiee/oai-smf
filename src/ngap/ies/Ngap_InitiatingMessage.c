@@ -113,6 +113,10 @@ static const long asn_VAL_52_Ngap_id_UplinkRANStatusTransfer = 49;
 static const long asn_VAL_52_Ngap_ignore = 1;
 static const long asn_VAL_53_Ngap_id_UplinkUEAssociatedNRPPaTransport = 50;
 static const long asn_VAL_53_Ngap_ignore = 1;
+static const long asn_VAL_54_Ngap_id_UplinkRIMInformationTransfer = 53;
+static const long asn_VAL_54_Ngap_ignore = 1;
+static const long asn_VAL_55_Ngap_id_DownlinkRIMInformationTransfer = 54;
+static const long asn_VAL_55_Ngap_ignore = 1;
 static const asn_ioc_cell_t asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1_rows[] = {
 	{ "&InitiatingMessage", aioc__type, &asn_DEF_Ngap_AMFConfigurationUpdate },
 	{ "&SuccessfulOutcome", aioc__type, &asn_DEF_Ngap_AMFConfigurationUpdateAcknowledge },
@@ -378,10 +382,20 @@ static const asn_ioc_cell_t asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1_rows[] = {
 	{ "&SuccessfulOutcome",  },
 	{ "&UnsuccessfulOutcome",  },
 	{ "&procedureCode", aioc__value, &asn_DEF_Ngap_ProcedureCode, &asn_VAL_53_Ngap_id_UplinkUEAssociatedNRPPaTransport },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_53_Ngap_ignore }
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_53_Ngap_ignore },
+	{ "&InitiatingMessage", aioc__type, &asn_DEF_Ngap_UplinkRIMInformationTransfer },
+	{ "&SuccessfulOutcome",  },
+	{ "&UnsuccessfulOutcome",  },
+	{ "&procedureCode", aioc__value, &asn_DEF_Ngap_ProcedureCode, &asn_VAL_54_Ngap_id_UplinkRIMInformationTransfer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_54_Ngap_ignore },
+	{ "&InitiatingMessage", aioc__type, &asn_DEF_Ngap_DownlinkRIMInformationTransfer },
+	{ "&SuccessfulOutcome",  },
+	{ "&UnsuccessfulOutcome",  },
+	{ "&procedureCode", aioc__value, &asn_DEF_Ngap_ProcedureCode, &asn_VAL_55_Ngap_id_DownlinkRIMInformationTransfer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_55_Ngap_ignore }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1[] = {
-	{ 53, 5, asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1_rows }
+	{ 55, 5, asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1_rows }
 };
 static int
 memb_Ngap_procedureCode_constraint_1(const asn_TYPE_descriptor_t *td, const void *sptr,
@@ -1002,61 +1016,81 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_4[] = {
 		0, 0, /* No default value */
 		"UplinkUEAssociatedNRPPaTransport"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_InitiatingMessage__value, choice.UplinkRIMInformationTransfer),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_UplinkRIMInformationTransfer,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"UplinkRIMInformationTransfer"
+		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_InitiatingMessage__value, choice.DownlinkRIMInformationTransfer),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_DownlinkRIMInformationTransfer,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"DownlinkRIMInformationTransfer"
+		},
 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_4[] = {
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0, 52 }, /* AMFConfigurationUpdate */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 1, -1, 51 }, /* HandoverCancel */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 2, -2, 50 }, /* HandoverRequired */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, -3, 49 }, /* HandoverRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, -4, 48 }, /* InitialContextSetupRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -5, 47 }, /* NGReset */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -6, 46 }, /* NGSetupRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -7, 45 }, /* PathSwitchRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -8, 44 }, /* PDUSessionResourceModifyRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 9, -9, 43 }, /* PDUSessionResourceModifyIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 10, -10, 42 }, /* PDUSessionResourceReleaseCommand */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 11, -11, 41 }, /* PDUSessionResourceSetupRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 12, -12, 40 }, /* PWSCancelRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 13, -13, 39 }, /* RANConfigurationUpdate */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 14, -14, 38 }, /* UEContextModificationRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 15, -15, 37 }, /* UEContextReleaseCommand */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 16, -16, 36 }, /* UERadioCapabilityCheckRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 17, -17, 35 }, /* WriteReplaceWarningRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 18, -18, 34 }, /* AMFStatusIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 19, -19, 33 }, /* CellTrafficTrace */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 20, -20, 32 }, /* DeactivateTrace */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 21, -21, 31 }, /* DownlinkNASTransport */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 22, -22, 30 }, /* DownlinkNonUEAssociatedNRPPaTransport */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 23, -23, 29 }, /* DownlinkRANConfigurationTransfer */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 24, -24, 28 }, /* DownlinkRANStatusTransfer */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 25, -25, 27 }, /* DownlinkUEAssociatedNRPPaTransport */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 26, -26, 26 }, /* ErrorIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 27, -27, 25 }, /* HandoverNotify */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 28, -28, 24 }, /* InitialUEMessage */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 29, -29, 23 }, /* LocationReport */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 30, -30, 22 }, /* LocationReportingControl */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 31, -31, 21 }, /* LocationReportingFailureIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 32, -32, 20 }, /* NASNonDeliveryIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 33, -33, 19 }, /* OverloadStart */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 34, -34, 18 }, /* OverloadStop */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 35, -35, 17 }, /* Paging */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 36, -36, 16 }, /* PDUSessionResourceNotify */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 37, -37, 15 }, /* PrivateMessage */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 38, -38, 14 }, /* PWSFailureIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 39, -39, 13 }, /* PWSRestartIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 40, -40, 12 }, /* RerouteNASRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 41, -41, 11 }, /* RRCInactiveTransitionReport */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 42, -42, 10 }, /* SecondaryRATDataUsageReport */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 43, -43, 9 }, /* TraceFailureIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 44, -44, 8 }, /* TraceStart */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 45, -45, 7 }, /* UEContextReleaseRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 46, -46, 6 }, /* UERadioCapabilityInfoIndication */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 47, -47, 5 }, /* UETNLABindingReleaseRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 48, -48, 4 }, /* UplinkNASTransport */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 49, -49, 3 }, /* UplinkNonUEAssociatedNRPPaTransport */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 50, -50, 2 }, /* UplinkRANConfigurationTransfer */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 51, -51, 1 }, /* UplinkRANStatusTransfer */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 52, -52, 0 } /* UplinkUEAssociatedNRPPaTransport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0, 54 }, /* AMFConfigurationUpdate */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 1, -1, 53 }, /* HandoverCancel */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 2, -2, 52 }, /* HandoverRequired */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, -3, 51 }, /* HandoverRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, -4, 50 }, /* InitialContextSetupRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -5, 49 }, /* NGReset */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -6, 48 }, /* NGSetupRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -7, 47 }, /* PathSwitchRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -8, 46 }, /* PDUSessionResourceModifyRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 9, -9, 45 }, /* PDUSessionResourceModifyIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 10, -10, 44 }, /* PDUSessionResourceReleaseCommand */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 11, -11, 43 }, /* PDUSessionResourceSetupRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 12, -12, 42 }, /* PWSCancelRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 13, -13, 41 }, /* RANConfigurationUpdate */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 14, -14, 40 }, /* UEContextModificationRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 15, -15, 39 }, /* UEContextReleaseCommand */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 16, -16, 38 }, /* UERadioCapabilityCheckRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 17, -17, 37 }, /* WriteReplaceWarningRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 18, -18, 36 }, /* AMFStatusIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 19, -19, 35 }, /* CellTrafficTrace */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 20, -20, 34 }, /* DeactivateTrace */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 21, -21, 33 }, /* DownlinkNASTransport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 22, -22, 32 }, /* DownlinkNonUEAssociatedNRPPaTransport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 23, -23, 31 }, /* DownlinkRANConfigurationTransfer */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 24, -24, 30 }, /* DownlinkRANStatusTransfer */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 25, -25, 29 }, /* DownlinkUEAssociatedNRPPaTransport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 26, -26, 28 }, /* ErrorIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 27, -27, 27 }, /* HandoverNotify */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 28, -28, 26 }, /* InitialUEMessage */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 29, -29, 25 }, /* LocationReport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 30, -30, 24 }, /* LocationReportingControl */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 31, -31, 23 }, /* LocationReportingFailureIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 32, -32, 22 }, /* NASNonDeliveryIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 33, -33, 21 }, /* OverloadStart */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 34, -34, 20 }, /* OverloadStop */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 35, -35, 19 }, /* Paging */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 36, -36, 18 }, /* PDUSessionResourceNotify */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 37, -37, 17 }, /* PrivateMessage */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 38, -38, 16 }, /* PWSFailureIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 39, -39, 15 }, /* PWSRestartIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 40, -40, 14 }, /* RerouteNASRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 41, -41, 13 }, /* RRCInactiveTransitionReport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 42, -42, 12 }, /* SecondaryRATDataUsageReport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 43, -43, 11 }, /* TraceFailureIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 44, -44, 10 }, /* TraceStart */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 45, -45, 9 }, /* UEContextReleaseRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 46, -46, 8 }, /* UERadioCapabilityInfoIndication */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 47, -47, 7 }, /* UETNLABindingReleaseRequest */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 48, -48, 6 }, /* UplinkNASTransport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 49, -49, 5 }, /* UplinkNonUEAssociatedNRPPaTransport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 50, -50, 4 }, /* UplinkRANConfigurationTransfer */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 51, -51, 3 }, /* UplinkRANStatusTransfer */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 52, -52, 2 }, /* UplinkUEAssociatedNRPPaTransport */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 53, -53, 1 }, /* UplinkRIMInformationTransfer */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 54, -54, 0 } /* DownlinkRIMInformationTransfer */
 };
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_4 = {
 	sizeof(struct Ngap_InitiatingMessage__value),
@@ -1064,7 +1098,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_4 = {
 	offsetof(struct Ngap_InitiatingMessage__value, present),
 	sizeof(((struct Ngap_InitiatingMessage__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_4,
-	53,	/* Count of tags in the map */
+	55,	/* Count of tags in the map */
 	0, 0,
 	-1	/* Extensions start */
 };
@@ -1079,7 +1113,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_4 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_4,
-	53,	/* Elements count */
+	55,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_4	/* Additional specs */
 };
 

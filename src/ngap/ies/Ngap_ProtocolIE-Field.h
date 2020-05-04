@@ -19,18 +19,21 @@
 #include <OPEN_TYPE.h>
 #include <constr_CHOICE.h>
 #include <constr_SEQUENCE.h>
-#include "Ngap_PDUSessionAggregateMaximumBitRate.h"
+#include "Ngap_EndpointIPAddressAndPort.h"
 #include "Ngap_Presence.h"
+#include "Ngap_PDUSessionAggregateMaximumBitRate.h"
 #include "Ngap_UL-NGU-UP-TNLModifyList.h"
 #include "Ngap_NetworkInstance.h"
 #include "Ngap_QosFlowAddOrModifyRequestList.h"
 #include "Ngap_QosFlowListWithCause.h"
 #include "Ngap_UPTransportLayerInformationList.h"
+#include "Ngap_CommonNetworkInstance.h"
 #include "Ngap_UPTransportLayerInformation.h"
 #include "Ngap_DataForwardingNotPossible.h"
 #include "Ngap_PDUSessionType.h"
 #include "Ngap_SecurityIndication.h"
 #include "Ngap_QosFlowSetupRequestList.h"
+#include "Ngap_DirectForwardingPathAvailability.h"
 #include "Ngap_AMF-UE-NGAP-ID.h"
 #include "Ngap_RAN-UE-NGAP-ID.h"
 #include "Ngap_RANPagingPriority.h"
@@ -52,7 +55,7 @@
 #include "Ngap_PDUSessionResourceModifyListModCfm.h"
 #include "Ngap_PDUSessionResourceFailedToModifyListModCfm.h"
 #include "Ngap_AMFName.h"
-#include "Ngap_CoreNetworkAssistanceInformation.h"
+#include "Ngap_CoreNetworkAssistanceInformationForInactive.h"
 #include "Ngap_GUAMI.h"
 #include "Ngap_PDUSessionResourceSetupListCxtReq.h"
 #include "Ngap_AllowedNSSAI.h"
@@ -67,6 +70,8 @@
 #include "Ngap_RRCInactiveTransitionReportRequest.h"
 #include "Ngap_UERadioCapabilityForPaging.h"
 #include "Ngap_RedirectionVoiceFallback.h"
+#include "Ngap_LocationReportingRequestType.h"
+#include "Ngap_CNAssistedRANTuning.h"
 #include "Ngap_PDUSessionResourceSetupListCxtRes.h"
 #include "Ngap_PDUSessionResourceFailedToSetupListCxtRes.h"
 #include "Ngap_PDUSessionResourceFailedToSetupListCxtFail.h"
@@ -78,7 +83,6 @@
 #include "Ngap_RRCState.h"
 #include "Ngap_HandoverType.h"
 #include "Ngap_TargetID.h"
-#include "Ngap_DirectForwardingPathAvailability.h"
 #include "Ngap_PDUSessionResourceListHORqd.h"
 #include "Ngap_SourceToTarget-TransparentContainer.h"
 #include "Ngap_NASSecurityParametersFromNGRAN.h"
@@ -88,7 +92,6 @@
 #include "Ngap_SecurityContext.h"
 #include "Ngap_NewSecurityContextInd.h"
 #include "Ngap_PDUSessionResourceSetupListHOReq.h"
-#include "Ngap_LocationReportingRequestType.h"
 #include "Ngap_PDUSessionResourceAdmittedList.h"
 #include "Ngap_PDUSessionResourceFailedToSetupListHOAck.h"
 #include "Ngap_PDUSessionResourceToBeSwitchedDLList.h"
@@ -107,6 +110,7 @@
 #include "Ngap_FiveG-S-TMSI.h"
 #include "Ngap_AMFSetID.h"
 #include "Ngap_UEContextRequest.h"
+#include "Ngap_SourceToTarget-AMFInformationReroute.h"
 #include <OCTET_STRING.h>
 #include "Ngap_GlobalRANNodeID.h"
 #include "Ngap_RANNodeName.h"
@@ -116,6 +120,7 @@
 #include "Ngap_RelativeAMFCapacity.h"
 #include "Ngap_PLMNSupportList.h"
 #include "Ngap_TimeToWait.h"
+#include "Ngap_NGRAN-TNLAssociationToRemoveList.h"
 #include "Ngap_AMF-TNLAssociationToAddList.h"
 #include "Ngap_AMF-TNLAssociationToRemoveList.h"
 #include "Ngap_AMF-TNLAssociationToUpdateList.h"
@@ -156,6 +161,7 @@
 #include "Ngap_IMSVoiceSupportIndicator.h"
 #include "Ngap_PDUSessionResourceSecondaryRATUsageList.h"
 #include "Ngap_HandoverFlag.h"
+#include "Ngap_RIMInformationTransfer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -183,8 +189,8 @@ typedef enum Ngap_CellIDListForRestart_ExtIEs__value_PR {
 	
 } Ngap_CellIDListForRestart_ExtIEs__value_PR;
 typedef enum Ngap_CPTransportLayerInformation_ExtIEs__value_PR {
-	Ngap_CPTransportLayerInformation_ExtIEs__value_PR_NOTHING	/* No components present */
-	
+	Ngap_CPTransportLayerInformation_ExtIEs__value_PR_NOTHING,	/* No components present */
+	Ngap_CPTransportLayerInformation_ExtIEs__value_PR_EndpointIPAddressAndPort
 } Ngap_CPTransportLayerInformation_ExtIEs__value_PR;
 typedef enum Ngap_DRBStatusDL_ExtIEs__value_PR {
 	Ngap_DRBStatusDL_ExtIEs__value_PR_NOTHING	/* No components present */
@@ -273,7 +279,8 @@ typedef enum Ngap_PDUSessionResourceModifyRequestTransferIEs__value_PR {
 	Ngap_PDUSessionResourceModifyRequestTransferIEs__value_PR_NetworkInstance,
 	Ngap_PDUSessionResourceModifyRequestTransferIEs__value_PR_QosFlowAddOrModifyRequestList,
 	Ngap_PDUSessionResourceModifyRequestTransferIEs__value_PR_QosFlowListWithCause,
-	Ngap_PDUSessionResourceModifyRequestTransferIEs__value_PR_UPTransportLayerInformationList
+	Ngap_PDUSessionResourceModifyRequestTransferIEs__value_PR_UPTransportLayerInformationList,
+	Ngap_PDUSessionResourceModifyRequestTransferIEs__value_PR_CommonNetworkInstance
 } Ngap_PDUSessionResourceModifyRequestTransferIEs__value_PR;
 typedef enum Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR {
 	Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_NOTHING,	/* No components present */
@@ -284,7 +291,9 @@ typedef enum Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR {
 	Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_PDUSessionType,
 	Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_SecurityIndication,
 	Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_NetworkInstance,
-	Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_QosFlowSetupRequestList
+	Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_QosFlowSetupRequestList,
+	Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_CommonNetworkInstance,
+	Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_DirectForwardingPathAvailability
 } Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR;
 typedef enum Ngap_PDUSessionResourceSetupRequestIEs__value_PR {
 	Ngap_PDUSessionResourceSetupRequestIEs__value_PR_NOTHING,	/* No components present */
@@ -363,7 +372,7 @@ typedef enum Ngap_InitialContextSetupRequestIEs__value_PR {
 	Ngap_InitialContextSetupRequestIEs__value_PR_RAN_UE_NGAP_ID,
 	Ngap_InitialContextSetupRequestIEs__value_PR_AMFName,
 	Ngap_InitialContextSetupRequestIEs__value_PR_UEAggregateMaximumBitRate,
-	Ngap_InitialContextSetupRequestIEs__value_PR_CoreNetworkAssistanceInformation,
+	Ngap_InitialContextSetupRequestIEs__value_PR_CoreNetworkAssistanceInformationForInactive,
 	Ngap_InitialContextSetupRequestIEs__value_PR_GUAMI,
 	Ngap_InitialContextSetupRequestIEs__value_PR_PDUSessionResourceSetupListCxtReq,
 	Ngap_InitialContextSetupRequestIEs__value_PR_AllowedNSSAI,
@@ -378,7 +387,9 @@ typedef enum Ngap_InitialContextSetupRequestIEs__value_PR {
 	Ngap_InitialContextSetupRequestIEs__value_PR_EmergencyFallbackIndicator,
 	Ngap_InitialContextSetupRequestIEs__value_PR_RRCInactiveTransitionReportRequest,
 	Ngap_InitialContextSetupRequestIEs__value_PR_UERadioCapabilityForPaging,
-	Ngap_InitialContextSetupRequestIEs__value_PR_RedirectionVoiceFallback
+	Ngap_InitialContextSetupRequestIEs__value_PR_RedirectionVoiceFallback,
+	Ngap_InitialContextSetupRequestIEs__value_PR_LocationReportingRequestType,
+	Ngap_InitialContextSetupRequestIEs__value_PR_CNAssistedRANTuning
 } Ngap_InitialContextSetupRequestIEs__value_PR;
 typedef enum Ngap_InitialContextSetupResponseIEs__value_PR {
 	Ngap_InitialContextSetupResponseIEs__value_PR_NOTHING,	/* No components present */
@@ -426,10 +437,12 @@ typedef enum Ngap_UEContextModificationRequestIEs__value_PR {
 	Ngap_UEContextModificationRequestIEs__value_PR_IndexToRFSP,
 	Ngap_UEContextModificationRequestIEs__value_PR_UEAggregateMaximumBitRate,
 	Ngap_UEContextModificationRequestIEs__value_PR_UESecurityCapabilities,
-	Ngap_UEContextModificationRequestIEs__value_PR_CoreNetworkAssistanceInformation,
+	Ngap_UEContextModificationRequestIEs__value_PR_CoreNetworkAssistanceInformationForInactive,
 	Ngap_UEContextModificationRequestIEs__value_PR_EmergencyFallbackIndicator,
 	Ngap_UEContextModificationRequestIEs__value_PR_AMF_UE_NGAP_ID_1,
-	Ngap_UEContextModificationRequestIEs__value_PR_RRCInactiveTransitionReportRequest
+	Ngap_UEContextModificationRequestIEs__value_PR_RRCInactiveTransitionReportRequest,
+	Ngap_UEContextModificationRequestIEs__value_PR_GUAMI,
+	Ngap_UEContextModificationRequestIEs__value_PR_CNAssistedRANTuning
 } Ngap_UEContextModificationRequestIEs__value_PR;
 typedef enum Ngap_UEContextModificationResponseIEs__value_PR {
 	Ngap_UEContextModificationResponseIEs__value_PR_NOTHING,	/* No components present */
@@ -488,7 +501,7 @@ typedef enum Ngap_HandoverRequestIEs__value_PR {
 	Ngap_HandoverRequestIEs__value_PR_HandoverType,
 	Ngap_HandoverRequestIEs__value_PR_Cause,
 	Ngap_HandoverRequestIEs__value_PR_UEAggregateMaximumBitRate,
-	Ngap_HandoverRequestIEs__value_PR_CoreNetworkAssistanceInformation,
+	Ngap_HandoverRequestIEs__value_PR_CoreNetworkAssistanceInformationForInactive,
 	Ngap_HandoverRequestIEs__value_PR_UESecurityCapabilities,
 	Ngap_HandoverRequestIEs__value_PR_SecurityContext,
 	Ngap_HandoverRequestIEs__value_PR_NewSecurityContextInd,
@@ -502,7 +515,8 @@ typedef enum Ngap_HandoverRequestIEs__value_PR {
 	Ngap_HandoverRequestIEs__value_PR_LocationReportingRequestType,
 	Ngap_HandoverRequestIEs__value_PR_RRCInactiveTransitionReportRequest,
 	Ngap_HandoverRequestIEs__value_PR_GUAMI,
-	Ngap_HandoverRequestIEs__value_PR_RedirectionVoiceFallback
+	Ngap_HandoverRequestIEs__value_PR_RedirectionVoiceFallback,
+	Ngap_HandoverRequestIEs__value_PR_CNAssistedRANTuning
 } Ngap_HandoverRequestIEs__value_PR;
 typedef enum Ngap_HandoverRequestAcknowledgeIEs__value_PR {
 	Ngap_HandoverRequestAcknowledgeIEs__value_PR_NOTHING,	/* No components present */
@@ -544,10 +558,11 @@ typedef enum Ngap_PathSwitchRequestAcknowledgeIEs__value_PR {
 	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_PDUSessionResourceSwitchedList,
 	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_PDUSessionResourceReleasedListPSAck,
 	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_AllowedNSSAI,
-	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_CoreNetworkAssistanceInformation,
+	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_CoreNetworkAssistanceInformationForInactive,
 	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_RRCInactiveTransitionReportRequest,
 	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_CriticalityDiagnostics,
-	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_RedirectionVoiceFallback
+	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_RedirectionVoiceFallback,
+	Ngap_PathSwitchRequestAcknowledgeIEs__value_PR_CNAssistedRANTuning
 } Ngap_PathSwitchRequestAcknowledgeIEs__value_PR;
 typedef enum Ngap_PathSwitchRequestFailureIEs__value_PR {
 	Ngap_PathSwitchRequestFailureIEs__value_PR_NOTHING,	/* No components present */
@@ -599,7 +614,8 @@ typedef enum Ngap_InitialUEMessage_IEs__value_PR {
 	Ngap_InitialUEMessage_IEs__value_PR_FiveG_S_TMSI,
 	Ngap_InitialUEMessage_IEs__value_PR_AMFSetID,
 	Ngap_InitialUEMessage_IEs__value_PR_UEContextRequest,
-	Ngap_InitialUEMessage_IEs__value_PR_AllowedNSSAI
+	Ngap_InitialUEMessage_IEs__value_PR_AllowedNSSAI,
+	Ngap_InitialUEMessage_IEs__value_PR_SourceToTarget_AMFInformationReroute
 } Ngap_InitialUEMessage_IEs__value_PR;
 typedef enum Ngap_DownlinkNASTransport_IEs__value_PR {
 	Ngap_DownlinkNASTransport_IEs__value_PR_NOTHING,	/* No components present */
@@ -633,7 +649,8 @@ typedef enum Ngap_RerouteNASRequest_IEs__value_PR {
 	Ngap_RerouteNASRequest_IEs__value_PR_AMF_UE_NGAP_ID,
 	Ngap_RerouteNASRequest_IEs__value_PR_OCTET_STRING,
 	Ngap_RerouteNASRequest_IEs__value_PR_AMFSetID,
-	Ngap_RerouteNASRequest_IEs__value_PR_AllowedNSSAI
+	Ngap_RerouteNASRequest_IEs__value_PR_AllowedNSSAI,
+	Ngap_RerouteNASRequest_IEs__value_PR_SourceToTarget_AMFInformationReroute
 } Ngap_RerouteNASRequest_IEs__value_PR;
 typedef enum Ngap_NGSetupRequestIEs__value_PR {
 	Ngap_NGSetupRequestIEs__value_PR_NOTHING,	/* No components present */
@@ -663,7 +680,8 @@ typedef enum Ngap_RANConfigurationUpdateIEs__value_PR {
 	Ngap_RANConfigurationUpdateIEs__value_PR_RANNodeName,
 	Ngap_RANConfigurationUpdateIEs__value_PR_SupportedTAList,
 	Ngap_RANConfigurationUpdateIEs__value_PR_PagingDRX,
-	Ngap_RANConfigurationUpdateIEs__value_PR_GlobalRANNodeID
+	Ngap_RANConfigurationUpdateIEs__value_PR_GlobalRANNodeID,
+	Ngap_RANConfigurationUpdateIEs__value_PR_NGRAN_TNLAssociationToRemoveList
 } Ngap_RANConfigurationUpdateIEs__value_PR;
 typedef enum Ngap_RANConfigurationUpdateAcknowledgeIEs__value_PR {
 	Ngap_RANConfigurationUpdateAcknowledgeIEs__value_PR_NOTHING,	/* No components present */
@@ -854,8 +872,7 @@ typedef enum Ngap_LocationReportIEs__value_PR {
 	Ngap_LocationReportIEs__value_PR_RAN_UE_NGAP_ID,
 	Ngap_LocationReportIEs__value_PR_UserLocationInformation,
 	Ngap_LocationReportIEs__value_PR_UEPresenceInAreaOfInterestList,
-	Ngap_LocationReportIEs__value_PR_LocationReportingRequestType,
-	Ngap_LocationReportIEs__value_PR_NGRAN_CGI
+	Ngap_LocationReportIEs__value_PR_LocationReportingRequestType
 } Ngap_LocationReportIEs__value_PR;
 typedef enum Ngap_UETNLABindingReleaseRequestIEs__value_PR {
 	Ngap_UETNLABindingReleaseRequestIEs__value_PR_NOTHING,	/* No components present */
@@ -887,8 +904,17 @@ typedef enum Ngap_SecondaryRATDataUsageReportIEs__value_PR {
 	Ngap_SecondaryRATDataUsageReportIEs__value_PR_AMF_UE_NGAP_ID,
 	Ngap_SecondaryRATDataUsageReportIEs__value_PR_RAN_UE_NGAP_ID,
 	Ngap_SecondaryRATDataUsageReportIEs__value_PR_PDUSessionResourceSecondaryRATUsageList,
-	Ngap_SecondaryRATDataUsageReportIEs__value_PR_HandoverFlag
+	Ngap_SecondaryRATDataUsageReportIEs__value_PR_HandoverFlag,
+	Ngap_SecondaryRATDataUsageReportIEs__value_PR_UserLocationInformation
 } Ngap_SecondaryRATDataUsageReportIEs__value_PR;
+typedef enum Ngap_UplinkRIMInformationTransferIEs__value_PR {
+	Ngap_UplinkRIMInformationTransferIEs__value_PR_NOTHING,	/* No components present */
+	Ngap_UplinkRIMInformationTransferIEs__value_PR_RIMInformationTransfer
+} Ngap_UplinkRIMInformationTransferIEs__value_PR;
+typedef enum Ngap_DownlinkRIMInformationTransferIEs__value_PR {
+	Ngap_DownlinkRIMInformationTransferIEs__value_PR_NOTHING,	/* No components present */
+	Ngap_DownlinkRIMInformationTransferIEs__value_PR_RIMInformationTransfer
+} Ngap_DownlinkRIMInformationTransferIEs__value_PR;
 
 /* Ngap_ProtocolIE-Field */
 typedef struct Ngap_AMFPagingTarget_ExtIEs {
@@ -972,6 +998,7 @@ typedef struct Ngap_CPTransportLayerInformation_ExtIEs {
 	struct Ngap_CPTransportLayerInformation_ExtIEs__value {
 		Ngap_CPTransportLayerInformation_ExtIEs__value_PR present;
 		union Ngap_CPTransportLayerInformation_ExtIEs__Ngap_value_u {
+			Ngap_EndpointIPAddressAndPort_t	 EndpointIPAddressAndPort;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -1293,6 +1320,7 @@ typedef struct Ngap_PDUSessionResourceModifyRequestTransferIEs {
 			Ngap_QosFlowAddOrModifyRequestList_t	 QosFlowAddOrModifyRequestList;
 			Ngap_QosFlowListWithCause_t	 QosFlowListWithCause;
 			Ngap_UPTransportLayerInformationList_t	 UPTransportLayerInformationList;
+			Ngap_CommonNetworkInstance_t	 CommonNetworkInstance;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -1316,6 +1344,8 @@ typedef struct Ngap_PDUSessionResourceSetupRequestTransferIEs {
 			Ngap_SecurityIndication_t	 SecurityIndication;
 			Ngap_NetworkInstance_t	 NetworkInstance;
 			Ngap_QosFlowSetupRequestList_t	 QosFlowSetupRequestList;
+			Ngap_CommonNetworkInstance_t	 CommonNetworkInstance;
+			Ngap_DirectForwardingPathAvailability_t	 DirectForwardingPathAvailability;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -1514,7 +1544,7 @@ typedef struct Ngap_InitialContextSetupRequestIEs {
 			Ngap_RAN_UE_NGAP_ID_t	 RAN_UE_NGAP_ID;
 			Ngap_AMFName_t	 AMFName;
 			Ngap_UEAggregateMaximumBitRate_t	 UEAggregateMaximumBitRate;
-			Ngap_CoreNetworkAssistanceInformation_t	 CoreNetworkAssistanceInformation;
+			Ngap_CoreNetworkAssistanceInformationForInactive_t	 CoreNetworkAssistanceInformationForInactive;
 			Ngap_GUAMI_t	 GUAMI;
 			Ngap_PDUSessionResourceSetupListCxtReq_t	 PDUSessionResourceSetupListCxtReq;
 			Ngap_AllowedNSSAI_t	 AllowedNSSAI;
@@ -1530,6 +1560,8 @@ typedef struct Ngap_InitialContextSetupRequestIEs {
 			Ngap_RRCInactiveTransitionReportRequest_t	 RRCInactiveTransitionReportRequest;
 			Ngap_UERadioCapabilityForPaging_t	 UERadioCapabilityForPaging;
 			Ngap_RedirectionVoiceFallback_t	 RedirectionVoiceFallback;
+			Ngap_LocationReportingRequestType_t	 LocationReportingRequestType;
+			Ngap_CNAssistedRANTuning_t	 CNAssistedRANTuning;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -1649,10 +1681,12 @@ typedef struct Ngap_UEContextModificationRequestIEs {
 			Ngap_IndexToRFSP_t	 IndexToRFSP;
 			Ngap_UEAggregateMaximumBitRate_t	 UEAggregateMaximumBitRate;
 			Ngap_UESecurityCapabilities_t	 UESecurityCapabilities;
-			Ngap_CoreNetworkAssistanceInformation_t	 CoreNetworkAssistanceInformation;
+			Ngap_CoreNetworkAssistanceInformationForInactive_t	 CoreNetworkAssistanceInformationForInactive;
 			Ngap_EmergencyFallbackIndicator_t	 EmergencyFallbackIndicator;
 			Ngap_AMF_UE_NGAP_ID_t	 AMF_UE_NGAP_ID_1;
 			Ngap_RRCInactiveTransitionReportRequest_t	 RRCInactiveTransitionReportRequest;
+			Ngap_GUAMI_t	 GUAMI;
+			Ngap_CNAssistedRANTuning_t	 CNAssistedRANTuning;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -1795,7 +1829,7 @@ typedef struct Ngap_HandoverRequestIEs {
 			Ngap_HandoverType_t	 HandoverType;
 			Ngap_Cause_t	 Cause;
 			Ngap_UEAggregateMaximumBitRate_t	 UEAggregateMaximumBitRate;
-			Ngap_CoreNetworkAssistanceInformation_t	 CoreNetworkAssistanceInformation;
+			Ngap_CoreNetworkAssistanceInformationForInactive_t	 CoreNetworkAssistanceInformationForInactive;
 			Ngap_UESecurityCapabilities_t	 UESecurityCapabilities;
 			Ngap_SecurityContext_t	 SecurityContext;
 			Ngap_NewSecurityContextInd_t	 NewSecurityContextInd;
@@ -1810,6 +1844,7 @@ typedef struct Ngap_HandoverRequestIEs {
 			Ngap_RRCInactiveTransitionReportRequest_t	 RRCInactiveTransitionReportRequest;
 			Ngap_GUAMI_t	 GUAMI;
 			Ngap_RedirectionVoiceFallback_t	 RedirectionVoiceFallback;
+			Ngap_CNAssistedRANTuning_t	 CNAssistedRANTuning;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -1911,10 +1946,11 @@ typedef struct Ngap_PathSwitchRequestAcknowledgeIEs {
 			Ngap_PDUSessionResourceSwitchedList_t	 PDUSessionResourceSwitchedList;
 			Ngap_PDUSessionResourceReleasedListPSAck_t	 PDUSessionResourceReleasedListPSAck;
 			Ngap_AllowedNSSAI_t	 AllowedNSSAI;
-			Ngap_CoreNetworkAssistanceInformation_t	 CoreNetworkAssistanceInformation;
+			Ngap_CoreNetworkAssistanceInformationForInactive_t	 CoreNetworkAssistanceInformationForInactive;
 			Ngap_RRCInactiveTransitionReportRequest_t	 RRCInactiveTransitionReportRequest;
 			Ngap_CriticalityDiagnostics_t	 CriticalityDiagnostics;
 			Ngap_RedirectionVoiceFallback_t	 RedirectionVoiceFallback;
+			Ngap_CNAssistedRANTuning_t	 CNAssistedRANTuning;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -2051,6 +2087,7 @@ typedef struct Ngap_InitialUEMessage_IEs {
 			Ngap_AMFSetID_t	 AMFSetID;
 			Ngap_UEContextRequest_t	 UEContextRequest;
 			Ngap_AllowedNSSAI_t	 AllowedNSSAI;
+			Ngap_SourceToTarget_AMFInformationReroute_t	 SourceToTarget_AMFInformationReroute;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -2133,6 +2170,7 @@ typedef struct Ngap_RerouteNASRequest_IEs {
 			OCTET_STRING_t	 OCTET_STRING;
 			Ngap_AMFSetID_t	 AMFSetID;
 			Ngap_AllowedNSSAI_t	 AllowedNSSAI;
+			Ngap_SourceToTarget_AMFInformationReroute_t	 SourceToTarget_AMFInformationReroute;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -2211,6 +2249,7 @@ typedef struct Ngap_RANConfigurationUpdateIEs {
 			Ngap_SupportedTAList_t	 SupportedTAList;
 			Ngap_PagingDRX_t	 PagingDRX;
 			Ngap_GlobalRANNodeID_t	 GlobalRANNodeID;
+			Ngap_NGRAN_TNLAssociationToRemoveList_t	 NGRAN_TNLAssociationToRemoveList;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -2761,7 +2800,6 @@ typedef struct Ngap_LocationReportIEs {
 			Ngap_UserLocationInformation_t	 UserLocationInformation;
 			Ngap_UEPresenceInAreaOfInterestList_t	 UEPresenceInAreaOfInterestList;
 			Ngap_LocationReportingRequestType_t	 LocationReportingRequestType;
-			Ngap_NGRAN_CGI_t	 NGRAN_CGI;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -2854,6 +2892,7 @@ typedef struct Ngap_SecondaryRATDataUsageReportIEs {
 			Ngap_RAN_UE_NGAP_ID_t	 RAN_UE_NGAP_ID;
 			Ngap_PDUSessionResourceSecondaryRATUsageList_t	 PDUSessionResourceSecondaryRATUsageList;
 			Ngap_HandoverFlag_t	 HandoverFlag;
+			Ngap_UserLocationInformation_t	 UserLocationInformation;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */
@@ -2863,6 +2902,38 @@ typedef struct Ngap_SecondaryRATDataUsageReportIEs {
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;
 } Ngap_SecondaryRATDataUsageReportIEs_t;
+typedef struct Ngap_UplinkRIMInformationTransferIEs {
+	Ngap_ProtocolIE_ID_t	 id;
+	Ngap_Criticality_t	 criticality;
+	struct Ngap_UplinkRIMInformationTransferIEs__value {
+		Ngap_UplinkRIMInformationTransferIEs__value_PR present;
+		union Ngap_UplinkRIMInformationTransferIEs__Ngap_value_u {
+			Ngap_RIMInformationTransfer_t	 RIMInformationTransfer;
+		} choice;
+		
+		/* Context for parsing across buffer boundaries */
+		asn_struct_ctx_t _asn_ctx;
+	} value;
+	
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} Ngap_UplinkRIMInformationTransferIEs_t;
+typedef struct Ngap_DownlinkRIMInformationTransferIEs {
+	Ngap_ProtocolIE_ID_t	 id;
+	Ngap_Criticality_t	 criticality;
+	struct Ngap_DownlinkRIMInformationTransferIEs__value {
+		Ngap_DownlinkRIMInformationTransferIEs__value_PR present;
+		union Ngap_DownlinkRIMInformationTransferIEs__Ngap_value_u {
+			Ngap_RIMInformationTransfer_t	 RIMInformationTransfer;
+		} choice;
+		
+		/* Context for parsing across buffer boundaries */
+		asn_struct_ctx_t _asn_ctx;
+	} value;
+	
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} Ngap_DownlinkRIMInformationTransferIEs_t;
 
 /* Implementation */
 extern asn_TYPE_descriptor_t asn_DEF_Ngap_AMFPagingTarget_ExtIEs;
@@ -3183,6 +3254,12 @@ extern asn_TYPE_member_t asn_MBR_Ngap_UERadioCapabilityCheckResponseIEs_417[3];
 extern asn_TYPE_descriptor_t asn_DEF_Ngap_SecondaryRATDataUsageReportIEs;
 extern asn_SEQUENCE_specifics_t asn_SPC_Ngap_SecondaryRATDataUsageReportIEs_specs_421;
 extern asn_TYPE_member_t asn_MBR_Ngap_SecondaryRATDataUsageReportIEs_421[3];
+extern asn_TYPE_descriptor_t asn_DEF_Ngap_UplinkRIMInformationTransferIEs;
+extern asn_SEQUENCE_specifics_t asn_SPC_Ngap_UplinkRIMInformationTransferIEs_specs_425;
+extern asn_TYPE_member_t asn_MBR_Ngap_UplinkRIMInformationTransferIEs_425[3];
+extern asn_TYPE_descriptor_t asn_DEF_Ngap_DownlinkRIMInformationTransferIEs;
+extern asn_SEQUENCE_specifics_t asn_SPC_Ngap_DownlinkRIMInformationTransferIEs_specs_429;
+extern asn_TYPE_member_t asn_MBR_Ngap_DownlinkRIMInformationTransferIEs_429[3];
 
 #ifdef __cplusplus
 }
