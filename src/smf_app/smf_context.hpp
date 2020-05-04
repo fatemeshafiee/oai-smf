@@ -78,6 +78,9 @@ class smf_qos_flow {
     far_id_ul = { };
     far_id_dl = { };
     released = false;
+    qos_rules_to_be_synchronised = {};
+    qos_rules = {};
+    qos_profile = {};
   }
 
   void deallocate_ressources();
@@ -100,10 +103,16 @@ class smf_qos_flow {
   std::pair<bool, pfcp::far_id_t> far_id_dl;
   bool released;  // finally seems necessary, TODO try to find heuristic ?
 
+  void get_default_qos_rule(QOSRulesIE &qos_rule) const;
+  void get_qos_rule(uint8_t rule_id, QOSRulesIE &qos_rule) const;
+  void update_qos_rule(QOSRulesIE qos_rule);
+  void add_qos_rule(QOSRulesIE qos_rule);
   pdu_session_id_t pdu_session_id;
 
-  //qos_rules[0]: default rule
-  std::vector<QOSRulesIE> qos_rules;
+  //rule_id <-> qos_rule
+  std::map<uint8_t, QOSRulesIE> qos_rules;
+  //std::vector<QOSRulesIE> qos_rules;
+  std::vector<uint8_t> qos_rules_to_be_synchronised;
   //QoS profile
   qos_profile_t qos_profile;
   //cause
@@ -187,6 +196,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   void generate_qos_rule_id(uint8_t &rule_id);
   void release_qos_rule_id(const uint8_t &rule_id);
   pdn_type_t get_pdn_type() const;
+
+  void get_qos_rules_to_be_synchronised(std::vector<QOSRulesIE> &qos_rules) const;
+
 
   bool ipv4;                  // IP Address(es): IPv4 address and/or IPv6 prefix
   bool ipv6;                  // IP Address(es): IPv4 address and/or IPv6 prefix
@@ -272,7 +284,10 @@ class dnn_context {
 
   /* Find the PDU Session */
   bool find_pdu_session(const uint32_t pdu_session_id,
-                        std::shared_ptr<smf_pdu_session> &pdn);
+                        std::shared_ptr<smf_pdu_session> &pdu_session);
+
+  //void create_or_update_qos_rule(QOSRulesIE &qos_rule, pfcp::qfi_t qfi,
+  //                                            pdu_session_id_t pdu_id);
 
   /* Insert a PDU Session into the DNN context */
   void insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp);

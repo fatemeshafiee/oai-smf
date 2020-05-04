@@ -36,6 +36,7 @@
 #include "3gpp_29.503.h"
 #include "smf_context.hpp"
 #include "SmContextCreatedData.h"
+#include "SmContextUpdatedData.h"
 #include "SmContextUpdateError.h"
 
 namespace smf {
@@ -87,6 +88,18 @@ class smf_n11 {
   void send_pdu_session_update_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
       oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+      Pistache::Http::Code code);
+
+  /*
+   * Send Update session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [ oai::smf_server::model::SmContextUpdatedData] smContextUpdatedData
+   * @param [Pistache::Http::Code] code, response code
+   *
+   */
+  void send_pdu_session_update_sm_context_response(
+      Pistache::Http::ResponseWriter &httpResponse,
+      oai::smf_server::model::SmContextUpdatedData &smContextUpdatedData,
       Pistache::Http::Code code);
 
   /*

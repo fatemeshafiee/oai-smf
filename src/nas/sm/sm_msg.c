@@ -106,7 +106,7 @@ int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
       decode_result = decode_pdu_session_modification_complete(
           &msg->pdu_session_modification_complete, buffer, len);
       break;
-    case PDU_SESSION_MODIFICATION_COMMANDREJECT:
+    case PDU_SESSION_MODIFICATION_COMMAND_REJECT:
       decode_result = decode_pdu_session_modification_command_reject(
           &msg->pdu_session_modification_command_reject, buffer, len);
       break;
@@ -218,7 +218,7 @@ int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
       encode_result = encode_pdu_session_modification_complete(
           &msg->pdu_session_modification_complete, buffer, len);
       break;
-    case PDU_SESSION_MODIFICATION_COMMANDREJECT:
+    case PDU_SESSION_MODIFICATION_COMMAND_REJECT:
       encode_result = encode_pdu_session_modification_command_reject(
           &msg->pdu_session_modification_command_reject, buffer, len);
       break;

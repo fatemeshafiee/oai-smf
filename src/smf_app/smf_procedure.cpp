@@ -270,9 +270,11 @@ int session_create_sm_context_procedure::run(
   QOSRulesIE qos_rule = { };
   pc.get()->get_default_qos_rule(qos_rule,
                                  sm_context_req->req.get_pdu_session_type());
-  q.qos_rules.push_back(qos_rule);
-  ppc->generate_qos_rule_id(q.qos_rules[0].qosruleidentifer);
-  q.qos_rules[0].qosflowidentifer = q.qfi.qfi;
+  uint8_t rule_id = {0};
+  ppc->generate_qos_rule_id(rule_id);
+  qos_rule.qosruleidentifer = rule_id;
+  qos_rule.qosflowidentifer = q.qfi.qfi;
+  q.add_qos_rule(qos_rule);
 
   smf_qos_flow q2 = q;
   ppc->add_qos_flow(q2);
@@ -344,6 +346,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
   //TODO:	how about pdu_session_id??
   smf_qos_flow q = { };
+  QOSRulesIE qos_rule = {};
   qos_flow_context_updated qos_flow = { };  //default flow, so Non-GBR, TODO: //we can use smf_qos_flow instead!
   qos_flow.set_cause(REQUEST_ACCEPTED);
   if (not ppc->get_qos_flow(qfi, q)) {
@@ -354,7 +357,8 @@ void session_create_sm_context_procedure::handle_itti_msg(
     } else {
       qos_flow.set_ul_fteid(q.ul_fteid);  //tunnel info
     }
-    qos_flow.set_qos_rule(q.qos_rules[0]);  //set default QoS rule
+    q.get_default_qos_rule(qos_rule);
+    qos_flow.set_qos_rule(qos_rule);  //set default QoS rule
   }
   qos_flow.set_qfi(qfi);
   qos_profile_t profile = { };
@@ -1321,7 +1325,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
   //send ITTI message to N11 interface to trigger SessionUpdateSMContextResponse towards AMFs
   Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
                          n11_triggered_pending->get_msg_name());
-  n11_triggered_pending->session_procedure_type = session_procedure_type;  //session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED;
+  n11_triggered_pending->session_procedure_type = session_procedure_type;
   int ret = itti_inst->send_msg(n11_triggered_pending);
   if (RETURNok != ret) {
     Logger::smf_app().error(

@@ -537,6 +537,25 @@ void smf_n11::send_pdu_session_create_sm_context_response(
 }
 
 //------------------------------------------------------------------------------
+void smf_n11::send_pdu_session_update_sm_context_response(
+    Pistache::Http::ResponseWriter &httpResponse,
+    oai::smf_server::model::SmContextUpdatedData &smContextUpdatedData,
+    Pistache::Http::Code code) {
+  Logger::smf_n11().debug(
+      "[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
+  nlohmann::json json_data = { };
+  to_json(json_data, smContextUpdatedData);
+  if (!json_data.empty()) {
+    httpResponse.headers().add<Pistache::Http::Header::ContentType>(
+        Pistache::Http::Mime::MediaType("application/json"));
+    httpResponse.send(code, json_data.dump().c_str());
+  } else {
+    httpResponse.send(code);
+  }
+
+}
+
+//------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_create_sm_context_response(
     Pistache::Http::ResponseWriter &httpResponse,
     oai::smf_server::model::SmContextCreatedData &smContextCreatedData,

@@ -879,16 +879,16 @@ int main(int argc, char *argv[]) {
   usleep(100000);
   send_pdu_session_update_sm_context_establishment(smf_ip_address);
   usleep(200000);
+  //UE-initiated Service Request
+  send_pdu_session_update_sm_context_ue_service_request(smf_ip_address);
+  usleep(200000);
+  send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address);
   //PDU Session Release procedure
-/*  send_pdu_session_release_request(smf_ip_address);
+  send_pdu_session_release_request(smf_ip_address);
   usleep(200000);
   send_pdu_session_release_resource_release_ack(smf_ip_address);
   usleep(200000);
   send_pdu_session_release_complete(smf_ip_address);
-*/
-  send_pdu_session_update_sm_context_ue_service_request(smf_ip_address);
-  usleep(200000);
-  send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address);
   return 0;
 }
 

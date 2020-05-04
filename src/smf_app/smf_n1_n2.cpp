@@ -112,6 +112,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
   //PDU Session Identity
   sm_msg->header.pdu_session_identity = msg.get_pdu_session_id();
 
+
   switch (n1_msg_type) {
 
     //PDU Session Establishment Accept
@@ -469,98 +470,75 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       Logger::smf_app().info(
           "PDU_SESSION_MODIFICATION_COMMAND, encode starting...");
 
-      //Fill the content of PDU Session Establishment Request message with hardcoded values (to be completed)
-      //PTI
-      sm_msg->header.procedure_transaction_identity = sm_context_res.get_pti()
-          .procedure_transaction_id;
-      //Message Type
-      sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
-      //PDU Session Type
-      sm_msg->pdu_session_modification_command.messagetype = sm_context_res
-          .get_msg_type();
-      //Presence
-      sm_msg->pdu_session_modification_command.presence = 0xff;  //TODO: to be updated
-      //5GSMCause
-      sm_msg->pdu_session_modification_command._5gsmcause =
-          static_cast<uint8_t>(sm_cause);  //sm_context_res.get_cause();
-
-      /*
-       ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-       PDUSessionIdentity pdusessionidentity;
-       ProcedureTransactionIdentity proceduretransactionidentity;
-       MessageType messagetype;
-       uint8_t presence;
-       _5GSMCause _5gsmcause;
-       SessionAMBR sessionambr;
-       GPRSTimer gprstimer;
-       AlwaysonPDUSessionIndication alwaysonpdusessionindication;
-       QOSRules qosrules;
-       MappedEPSBearerContexts mappedepsbearercontexts;
-       QOSFlowDescriptions qosflowdescriptions;
-       ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-       */
-
-      //SessionAMBR
-      //TODO: get from subscription DB
+      //Get the SMF_PDU_Session
+      std::shared_ptr<smf_context> sc = { };
+      std::shared_ptr<dnn_context> sd = { };
+      std::shared_ptr<smf_pdu_session> sp = { };
       supi_t supi = sm_context_res.get_supi();
       supi64_t supi64 = smf_supi_to_u64(supi);
-      std::shared_ptr<smf_context> sc = { };
+
       if (smf_app_inst->is_supi_2_smf_context(supi64)) {
         Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "",
                                 supi64);
         sc = smf_app_inst->supi_2_smf_context(supi64);
-        sc.get()->get_session_ambr(
-            sm_msg->pdu_session_modification_command.sessionambr,
-            sm_context_res.get_snssai(), sm_context_res.get_dnn());
       } else {
         Logger::smf_app().warn(
             "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
         //TODO:
       }
 
-      //GPRSTimer
-      //TODO:
-      //AlwaysonPDUSessionIndication
-      //TODO:
+      bool find_dnn = sc.get()->find_dnn_context(sm_context_res.get_snssai(),
+                                                 sm_context_res.get_dnn(), sd);
+      bool find_pdu = false;
+      if (find_dnn) {
+        find_pdu = sd.get()->find_pdu_session(
+            sm_context_res.get_pdu_session_id(), sp);
+      }
+      if (!find_dnn or !find_pdu) {
+        //error
+        Logger::smf_app().warn("DNN or PDU session context does not exist!");
+        //TODO:
+        return;
+      }
+
+      //Fill the content of PDU Session Establishment Request message with hardcoded values (to be completed)
+      //PTI
+      sm_msg->header.procedure_transaction_identity = sm_context_res.get_pti()
+          .procedure_transaction_id;
+      //Message Type
+      sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
+      //Presence
+      sm_msg->pdu_session_modification_command.presence = 0xff;  //TODO: to be updated
+      //5GSMCause
+      sm_msg->pdu_session_modification_command._5gsmcause =
+          static_cast<uint8_t>(sm_cause);
+
+      //SessionAMBR (default)
+      sc.get()->get_session_ambr(
+          sm_msg->pdu_session_modification_command.sessionambr,
+          sm_context_res.get_snssai(), sm_context_res.get_dnn());
+
+      //TODO: GPRSTimer
+      //TODO: AlwaysonPDUSessionIndication
 
       //QOSRules
-      sm_msg->pdu_session_modification_command.qosrules.lengthofqosrulesie = 1;
+      //Get the authorized QoS Rules
+      std::vector<QOSRulesIE> qos_rules;
+      sp.get()->get_qos_rules_to_be_synchronised(qos_rules);
+
+      sm_msg->pdu_session_modification_command.qosrules.lengthofqosrulesie =
+          qos_rules.size();
       sm_msg->pdu_session_modification_command.qosrules.qosrulesie =
           (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .qosruleidentifer = 0x01;
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .ruleoperationcode = CREATE_NEW_QOS_RULE;
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0].dqrbit =
-      THE_QOS_RULE_IS_DEFAULT_QOS_RULE;
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .numberofpacketfilters = 1;
-      //1st rule
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace =
-          (Create_ModifyAndAdd_ModifyAndReplace*) calloc(
-              1, sizeof(Create_ModifyAndAdd_ModifyAndReplace));
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfilterdirection = 0b01;
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfilteridentifier = 1;
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .qosruleprecedence = 1;
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .segregation = SEGREGATION_NOT_REQUESTED;
-      sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-          .qosflowidentifer = 60;
+      for (int i = 0; i < qos_rules.size(); i++) {
+        sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i] =
+            qos_rules[i];
+      }
 
       //MappedEPSBearerContexts
       //TODO:
 
-      //QOSFlowDescriptions
-      //authorized QoS flow descriptions IE: QoSFlowDescritions
+      //QOSFlowDescriptions, TODO: get authorized QoS flow descriptions IE
       if (smf_app_inst->is_supi_2_smf_context(supi64)) {
         Logger::smf_app().debug("Get SMF context with SUPI " SUPI_64_FMT "",
                                 supi64);

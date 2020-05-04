@@ -166,10 +166,10 @@ typedef struct qos_profile_s {
   arp_5gc_t arp;
   uint8_t priority_level;
   qos_profile_type_e profile_type;
-  union parameter {
+  union {
     reflective_qos_attribute_e rqa;  //Reflective QoS Attribute (RQA)
     qos_profile_gbr_t qos_profile_gbr;  //Attributes for GBR
-  };
+  } parameter;
 } qos_profile_t;
 
 enum class multipart_related_content_part_e {
