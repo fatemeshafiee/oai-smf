@@ -1207,7 +1207,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
       //No need to create N1/N2 Container
       Logger::smf_app().info("PDU Session Modification UE-initiated (Step 2)");
-      //TODO: To be completed
     }
       break;
 

@@ -56,9 +56,20 @@ typedef enum {
 
 namespace smf {
 
-//QoS flow created or modified
+//QoS flow to be created/modified/removed
 class qos_flow_context_updated {
  public:
+  qos_flow_context_updated()
+      :
+      cause_value(),
+      qfi(),
+      ul_fteid(),
+      dl_fteid(),
+      qos_rule(),
+      qos_profile(),
+      to_be_removed(false) {
+  }
+
   void set_cause(const uint8_t cause);
   void set_qfi(const pfcp::qfi_t &q);
   void set_ul_fteid(const fteid_t &teid);
@@ -72,6 +83,7 @@ class qos_flow_context_updated {
   fteid_t dl_fteid;
   QOSRulesIE qos_rule;
   qos_profile_t qos_profile;
+  bool to_be_removed;
 };
 
 //---------------------------------------------------------------------------------------

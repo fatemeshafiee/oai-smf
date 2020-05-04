@@ -389,7 +389,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
       break;
 
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1: {
-      Logger::smf_n11().info("PDU_SESSION_MODIFICATION_UE_INITIATED");
+      Logger::smf_n11().info("PDU_SESSION_MODIFICATION_UE_INITIATED (step 1)");
 
       std::string boundary = "----Boundary";
       std::string json_part =
@@ -409,8 +409,20 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     }
       break;
 
+    case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
+      Logger::smf_n11().info("PDU_SESSION_MODIFICATION_UE_INITIATED (step 2)");
+      sm_context_res->http_response.send(Pistache::Http::Code::No_Content);
+    }
+      break;
+
+    case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3: {
+      Logger::smf_n11().info("PDU_SESSION_MODIFICATION_UE_INITIATED (step 3)");
+      sm_context_res->http_response.send(Pistache::Http::Code::No_Content);
+    }
+      break;
+
     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
-      Logger::smf_n11().debug("SERVICE_REQUEST_UE_TRIGGERED Step 1");
+      Logger::smf_n11().info("SERVICE_REQUEST_UE_TRIGGERED (step 1)");
 
       std::string boundary = "----Boundary";
       std::string json_part =
@@ -430,7 +442,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
       break;
 
     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2: {
-      Logger::smf_n11().debug("SERVICE_REQUEST_UE_TRIGGERED Step2");
+      Logger::smf_n11().info("SERVICE_REQUEST_UE_TRIGGERED (step 2)");
       std::string json_part =
           sm_context_res->res.sm_context_updated_data.dump();
       sm_context_res->http_response.headers()
@@ -443,7 +455,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
       break;
 
     case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-      Logger::smf_n11().debug("PDU_SESSION_RELEASE_UE_REQUESTED_STEP1");
+      Logger::smf_n11().info("PDU_SESSION_RELEASE_UE_REQUESTED (step 1)");
 
       std::string boundary = "----Boundary";
       std::string json_part =

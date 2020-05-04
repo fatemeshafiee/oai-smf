@@ -1495,6 +1495,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               }
             }
 
+            Logger::smf_app().debug("Add new QoS Flow with new QRI");
             //mark this rule to be synchronised with the UE
             qos_flow.update_qos_rule(qos_rules_ie[i]);
             //Add new QoS flow
@@ -1508,7 +1509,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             qcu.set_qos_profile(qos_flow.qos_profile);
             sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
 
-          } else { //update existing QRI
+          } else {  //update existing QRI
+            Logger::smf_app().debug("Update existing QRI");
             qfi.qfi = qos_rules_ie[i].qosflowidentifer;
             sp.get()->get_qos_flow(qfi, qos_flow);
             qos_flow.update_qos_rule(qos_rules_ie[i]);
@@ -1611,6 +1613,14 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         procedure_type =
             session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3;
 
+        /* ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+        PDUSessionIdentity pdusessionidentity;
+        ProcedureTransactionIdentity proceduretransactionidentity;
+        MessageType messagetype;
+        uint8_t presence;
+        ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
+        */
+
         /* see section 6.3.2.3@3GPP TS 24.501 V16.1.0
          Upon receipt of a PDU SESSION MODIFICATION COMPLETE message, the SMF shall stop timer T3591 and shall
          consider the PDU session as modified. If the selected SSC mode of the PDU session is "SSC mode 3" and the PDU
@@ -1674,7 +1684,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           sp.get()->set_pdu_session_status(
               pdu_session_status_e::PDU_SESSION_INACTIVE);
           //TODO: Release locally the existing PDU Session (see section 6.3.2.5@3GPP TS 24.501)
-        } else {
+        } else if (sp.get()->get_pdu_session_status() == pdu_session_status_e::PDU_SESSION_MODIFICATION_PENDING){
           //Update PDU Session status -> ACTIVE
           sp.get()->set_pdu_session_status(
               pdu_session_status_e::PDU_SESSION_ACTIVE);
@@ -1806,7 +1816,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         std::vector<smf_qos_flow> qos_flows;
         sp.get()->get_qos_flows(qos_flows);
         for (auto i : qos_flows) {
-          sm_context_req_msg.add_qfi(i.qfi.qfi);
+          smreq->req.add_qfi(i.qfi.qfi);
         }
 
         //need to update UPF accordingly
@@ -1982,7 +1992,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         Logger::smf_app().debug("uPTransportLayerInformation IP Addr %s",
                                 conv::toString(dl_teid.ipv4_address).c_str());
 
-        sm_context_req_msg.set_dl_fteid(dl_teid);
+        smreq->req.set_dl_fteid(dl_teid);
 
         for (int i = 0;
             i
@@ -1991,7 +2001,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           pfcp::qfi_t qfi(
               (uint8_t) (decoded_msg->dLQosFlowPerTNLInformation
                   .associatedQosFlowList.list.array[i])->qosFlowIdentifier);
-          sm_context_req_msg.add_qfi(qfi);
+          smreq->req.add_qfi(qfi);
           Logger::smf_app().debug(
               "QoSFlowPerTNLInformation, AssociatedQosFlowList, QFI %d",
               (decoded_msg->dLQosFlowPerTNLInformation.associatedQosFlowList
@@ -2040,7 +2050,16 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         }
 
-        //if dL_NGU_UP_TNLInformation is included, it shall be considered as the new DL transfort layer addr for the PDU session (should be verified)
+        /*
+         struct Ngap_UPTransportLayerInformation *dL_NGU_UP_TNLInformation;
+         struct Ngap_UPTransportLayerInformation *uL_NGU_UP_TNLInformation;
+         struct Ngap_QosFlowAddOrModifyResponseList  *qosFlowAddOrModifyResponseList;
+         struct Ngap_QosFlowPerTNLInformationList  *additionalDLQosFlowPerTNLInformation;
+         struct Ngap_QosFlowListWithCause  *qosFlowFailedToAddOrModifyList;
+         struct Ngap_ProtocolExtensionContainer  *iE_Extensions;
+         */
+        //see section 8.2.3 (PDU Session Resource Modify) @3GPP TS 38.413
+        //if dL_NGU_UP_TNLInformation is included, it shall be considered as the new DL transport layer addr for the PDU session (should be verified)
         fteid_t dl_teid;
         memcpy(
             &dl_teid.ipv4_address,
@@ -2052,11 +2071,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel
                 ->transportLayerAddress.buf,
             4);
-        sm_context_req_msg.set_dl_fteid(dl_teid);
+        smreq->req.set_dl_fteid(dl_teid);
+
         //list of Qos Flows which have been successfully setup or modified
         for (int i = 0;
             i < decoded_msg->qosFlowAddOrModifyResponseList->list.count; i++) {
-          sm_context_req_msg.add_qfi(
+          smreq->req.add_qfi(
               (decoded_msg->qosFlowAddOrModifyResponseList->list.array[i])
                   ->qosFlowIdentifier);
         }
@@ -2144,7 +2164,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     std::vector<smf_qos_flow> qos_flows = { };
     sp.get()->get_qos_flows(qos_flows);
     for (auto i : qos_flows) {
-      sm_context_req_msg.add_qfi(i.qfi.qfi);
+      smreq->req.add_qfi(i.qfi.qfi);
     }
     //need update UPF
     update_upf = true;
@@ -2166,7 +2186,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     std::vector<smf_qos_flow> qos_flows = { };
     sp.get()->get_qos_flows(qos_flows);
     for (auto i : qos_flows) {
-      sm_context_req_msg.add_qfi(i.qfi.qfi);
+      smreq->req.add_qfi(i.qfi.qfi);
     }
     //need update UPF
     update_upf = true;
@@ -2179,7 +2199,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
     proc->session_procedure_type = procedure_type;
 
-    smreq->req = sm_context_req_msg;
+    //smreq->req = sm_context_req_msg;
     insert_procedure(sproc);
     if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
       // error !
