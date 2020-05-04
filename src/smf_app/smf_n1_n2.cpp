@@ -692,7 +692,6 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
   switch (ngap_ie_type) {
 
     //PDU Session Resource Setup Request Transfer
-    //need to be verified with Wireshark (case 1)
     case n2_sm_info_type_e::PDU_RES_SETUP_REQ: {
       //PDU Session Resource Setup Request Transfer
       //This IE is included in the following messages:
@@ -991,6 +990,15 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       ngap_IEs = (Ngap_PDUSessionResourceModifyRequestTransfer_t*) calloc(
           1, sizeof(Ngap_PDUSessionResourceModifyRequestTransfer_t));
 
+      /*
+      Ngap_PDUSessionAggregateMaximumBitRate_t   PDUSessionAggregateMaximumBitRate;
+      Ngap_UL_NGU_UP_TNLModifyList_t   UL_NGU_UP_TNLModifyList;
+      Ngap_NetworkInstance_t   NetworkInstance;
+      Ngap_QosFlowAddOrModifyRequestList_t   QosFlowAddOrModifyRequestList;
+      Ngap_QosFlowListWithCause_t  QosFlowListWithCause;
+      Ngap_UPTransportLayerInformationList_t   UPTransportLayerInformationList;
+      */
+
       //PDUSessionAggregateMaximumBitRate
       Ngap_PDUSessionResourceModifyRequestTransferIEs_t *pduSessionAggregateMaximumBitRate =
           nullptr;
@@ -1022,7 +1030,8 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list,
                        pduSessionAggregateMaximumBitRate);
 
-      //Ngap_UL_NGU_UP_TNLModifyList_t
+      //Ngap_UL_NGU_UP_TNLModifyList_t (included if the PDU Session modification was requested by the UE for a
+      //PDU Session that has no established User Plane resources)
       Ngap_PDUSessionResourceModifyRequestTransferIEs_t *ul_NGU_UP_TNLModifyList =
           nullptr;
       ul_NGU_UP_TNLModifyList =

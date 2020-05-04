@@ -1427,7 +1427,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         int i = 0;
         int length_of_rule = 0;
         while (length_of_rule_ie > 0) {
-          //for (int i = 0; i < number_of_rules; i++) {
           uint8_t rule_id = { 0 };
           QOSRulesIE qos_rule = { };
           pfcp::qfi_t qfi = { };
@@ -1509,7 +1508,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             qcu.set_qos_profile(qos_flow.qos_profile);
             sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
 
-          } else {
+          } else { //update existing QRI
             qfi.qfi = qos_rules_ie[i].qosflowidentifer;
             sp.get()->get_qos_flow(qfi, qos_flow);
             qos_flow.update_qos_rule(qos_rules_ie[i]);
@@ -1525,7 +1524,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
 
           }
-          length_of_rule_ie -= (length_of_rule + 3);
+          length_of_rule_ie -= (length_of_rule + 3);  // 2 for Length of QoS rules IE and 1 for QoS rule identifier
 
         }
 
@@ -1626,16 +1625,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //stop T3591
         itti_inst->timer_remove(sp.get()->timer_T3591);
 
-        /*        //Send PDUSession_UpdateSMContext Response to AMF
-         //No need to create N1/N2 Container
-         Logger::smf_app().info(
-         "PDU Session Modification UE-initiated (Step 3)");
-         smContextUpdatedData = { };
-         smf_n11_inst->send_pdu_session_update_sm_context_response(
-         n11_sm_context_resp->http_response, smContextUpdatedData,
-         Pistache::Http::Code::No_Content);
-         */
-
         //don't need to create a procedure to update UPF
         //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
         //No need to create N1/N2 Container
@@ -1693,16 +1682,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //stop T3591
         itti_inst->timer_remove(sp.get()->timer_T3591);
-
-        /*        //Send PDUSession_UpdateSMContext Response to AMF
-         //No need to create N1/N2 Container
-         Logger::smf_app().info(
-         "PDU Session Modification UE-initiated (Step 3)");
-         smContextUpdatedData = { };
-         smf_n11_inst->send_pdu_session_update_sm_context_response(
-         n11_sm_context_resp->http_response, smContextUpdatedData,
-         Pistache::Http::Code::No_Content);
-         */
 
         //don't need to create a procedure to update UPF
         //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
@@ -1869,12 +1848,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //Stop timer T3592
         itti_inst->timer_remove(sp.get()->timer_T3592);
 
-        /*        //send response to AMF
-         smf_n11_inst->send_pdu_session_update_sm_context_response(
-         smreq->http_response, smContextUpdatedData,
-         Pistache::Http::Code::No_Content);
-         */
-
         //don't need to create a procedure to update UPF
         //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
         //No need to create N1/N2 Container
@@ -1891,18 +1864,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //TODO: SMF invokes Nsmf_PDUSession_SMContextStatusNotify to notify AMF that the SM context for this PDU Session is released
         //TODO: if dynamic PCC applied, SMF invokes an SM Policy Association Termination
         //TODO: SMF unsubscribes from Session Management Subscription data changes notification from UDM by invoking Numd_SDM_Unsubscribe
-        //find dnn context
-        /*        std::shared_ptr<dnn_context> sd = { };
-         bool find_dnn = find_dnn_context(sm_context_req_msg.get_snssai(),
-         sm_context_req_msg.get_dnn(), sd);
-         //At this step, this context should be existed
-         if (nullptr == sd.get()) {
-         Logger::smf_app().debug(
-         "DNN context (dnn_in_use %s) is not existed yet!",
-         sm_context_req_msg.get_dnn().c_str());
-         //TODO:
-         }
-         */
+
         if (sd.get()->get_number_pdu_sessions() == 0) {
           Logger::smf_app().debug(
               "Unsubscribe from Session Management Subscription data changes notification from UDM");
@@ -2142,12 +2104,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           return;
         }
 
-        /*        //SMF send response to AMF
-         oai::smf_server::model::SmContextCreatedData smContextCreatedData;  //Verify, do we need this?
-         smf_n11_inst->send_pdu_session_create_sm_context_response(
-         smreq->http_response, smContextCreatedData,
-         Pistache::Http::Code::Ok);
-         */
         //don't need to create a procedure to update UPF
         //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
         //No need to create N1/N2 Container

@@ -270,7 +270,7 @@ int session_create_sm_context_procedure::run(
   QOSRulesIE qos_rule = { };
   pc.get()->get_default_qos_rule(qos_rule,
                                  sm_context_req->req.get_pdu_session_type());
-  uint8_t rule_id = {0};
+  uint8_t rule_id = { 0 };
   ppc->generate_qos_rule_id(rule_id);
   qos_rule.qosruleidentifer = rule_id;
   qos_rule.qosflowidentifer = q.qfi.qfi;
@@ -346,7 +346,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
   //TODO:	how about pdu_session_id??
   smf_qos_flow q = { };
-  QOSRulesIE qos_rule = {};
+  QOSRulesIE qos_rule = { };
   qos_flow_context_updated qos_flow = { };  //default flow, so Non-GBR, TODO: //we can use smf_qos_flow instead!
   qos_flow.set_cause(REQUEST_ACCEPTED);
   if (not ppc->get_qos_flow(qfi, q)) {
@@ -549,7 +549,8 @@ int session_update_sm_context_procedure::run(
         pfcp::pdr_id_t pdr_id = { };
         //if FAR DL exist -> remove it
         if ((qos_flow.far_id_dl.first) && (qos_flow.far_id_dl.second.far_id)) {
-          Logger::smf_app().debug("Update SM Context procedure: send a request to remove FAR DL at UPF");
+          Logger::smf_app().debug(
+              "Update SM Context procedure: send a request to remove FAR DL at UPF");
           // Remove FAR
           far_id.far_id = qos_flow.far_id_dl.second.far_id;
           pfcp::remove_far remove_far = { };
@@ -561,7 +562,8 @@ int session_update_sm_context_procedure::run(
         }
         //remove PDR DL if exist
         if (qos_flow.pdr_id_dl.rule_id) {
-          Logger::smf_app().debug("Update SM Context procedure: send a request to remove PDR DL at UPF");
+          Logger::smf_app().debug(
+              "Update SM Context procedure: send a request to remove PDR DL at UPF");
           //Remove PDR DL
           pdr_id.rule_id = qos_flow.pdr_id_dl.rule_id;
           pfcp::remove_pdr remove_pdr = { };
@@ -931,14 +933,16 @@ void session_update_sm_context_procedure::handle_itti_msg(
           if ((qos_flow.far_id_dl.first)
               && (qos_flow.far_id_dl.second.far_id)) {
             Logger::smf_app().debug(
-                "Update SM Context procedure: FAR DL %d has been removed", qos_flow.far_id_dl.second.far_id);
+                "Update SM Context procedure: FAR DL %d has been removed",
+                qos_flow.far_id_dl.second.far_id);
             qos_flow.far_id_dl.first = false;
             qos_flow.far_id_dl.second.far_id = 0;
           }
           //remove PDR DL if exist
           if (qos_flow.pdr_id_dl.rule_id) {
             Logger::smf_app().debug(
-                "Update SM Context procedure: PDR DL %d has been removed", qos_flow.pdr_id_dl.rule_id);
+                "Update SM Context procedure: PDR DL %d has been removed",
+                qos_flow.pdr_id_dl.rule_id);
             qos_flow.pdr_id_dl.rule_id = 0;
           }
           // Update QoS Flow
@@ -1180,7 +1184,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
       N2_SM_CONTENT_ID;
       n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
           "PDU_RES_SETUP_REQ";  //NGAP message
-      n11_triggered_pending->res.sm_context_updated_data["upCnxState"] = "ACTIVATING";
+      n11_triggered_pending->res.sm_context_updated_data["upCnxState"] =
+          "ACTIVATING";
       //TODO: verify whether cause is needed (as in 23.502 but not in 3GPP TS 29.502)
 
       //Update upCnxState to ACTIVATING
@@ -1195,37 +1200,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
       Logger::smf_app().info("UE Triggered Service Request (Step 2)");
       n11_triggered_pending->res.sm_context_updated_data["cause"] =
           n11_triggered_pending->res.get_cause();
-    }
-      break;
-
-      //PDU Session Modification UE-initiated (Step 1)
-    case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1: {
-      //N1 SM: PDU Session Modification Command​
-      //N2 SM: PDU Session Resource Modify Request Transfer IE
-
-      //N1 SM
-      smf_n1_n2_inst.create_n1_sm_container(
-          n11_triggered_pending->res, PDU_SESSION_MODIFICATION_COMMAND,
-          n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN);  //TODO: need cause?
-      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-      n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
-      //N2 SM Information
-      smf_n1_n2_inst.create_n2_sm_information(
-          n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ,
-          n2_sm_info);
-      smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
-
-      //fill the content of SmContextUpdatedData
-      n11_triggered_pending->res.sm_context_updated_data =
-          sm_context_updated_data;
-      n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PDU_RES_MOD_REQ";  //NGAP message
-
-      //Update PDU session status to PDU_SESSION_MODIFICATION_PENDING
-      ppc->set_pdu_session_status(
-          pdu_session_status_e::PDU_SESSION_MODIFICATION_PENDING);
-
     }
       break;
 
