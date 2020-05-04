@@ -113,6 +113,10 @@ static const long asn_VAL_52_Ngap_id_UplinkRANStatusTransfer = 49;
 static const long asn_VAL_52_Ngap_ignore = 1;
 static const long asn_VAL_53_Ngap_id_UplinkUEAssociatedNRPPaTransport = 50;
 static const long asn_VAL_53_Ngap_ignore = 1;
+static const long asn_VAL_54_Ngap_id_UplinkRIMInformationTransfer = 53;
+static const long asn_VAL_54_Ngap_ignore = 1;
+static const long asn_VAL_55_Ngap_id_DownlinkRIMInformationTransfer = 54;
+static const long asn_VAL_55_Ngap_ignore = 1;
 static const asn_ioc_cell_t asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1_rows[] = {
 	{ "&InitiatingMessage", aioc__type, &asn_DEF_Ngap_AMFConfigurationUpdate },
 	{ "&SuccessfulOutcome", aioc__type, &asn_DEF_Ngap_AMFConfigurationUpdateAcknowledge },
@@ -378,10 +382,20 @@ static const asn_ioc_cell_t asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1_rows[] = {
 	{ "&SuccessfulOutcome",  },
 	{ "&UnsuccessfulOutcome",  },
 	{ "&procedureCode", aioc__value, &asn_DEF_Ngap_ProcedureCode, &asn_VAL_53_Ngap_id_UplinkUEAssociatedNRPPaTransport },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_53_Ngap_ignore }
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_53_Ngap_ignore },
+	{ "&InitiatingMessage", aioc__type, &asn_DEF_Ngap_UplinkRIMInformationTransfer },
+	{ "&SuccessfulOutcome",  },
+	{ "&UnsuccessfulOutcome",  },
+	{ "&procedureCode", aioc__value, &asn_DEF_Ngap_ProcedureCode, &asn_VAL_54_Ngap_id_UplinkRIMInformationTransfer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_54_Ngap_ignore },
+	{ "&InitiatingMessage", aioc__type, &asn_DEF_Ngap_DownlinkRIMInformationTransfer },
+	{ "&SuccessfulOutcome",  },
+	{ "&UnsuccessfulOutcome",  },
+	{ "&procedureCode", aioc__value, &asn_DEF_Ngap_ProcedureCode, &asn_VAL_55_Ngap_id_DownlinkRIMInformationTransfer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_55_Ngap_ignore }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1[] = {
-	{ 53, 5, asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1_rows }
+	{ 55, 5, asn_IOS_Ngap_NGAP_ELEMENTARY_PROCEDURES_1_rows }
 };
 static int
 memb_Ngap_procedureCode_constraint_1(const asn_TYPE_descriptor_t *td, const void *sptr,

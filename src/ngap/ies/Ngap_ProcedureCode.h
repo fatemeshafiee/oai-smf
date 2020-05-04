@@ -90,6 +90,8 @@ per_type_encoder_f Ngap_ProcedureCode_encode_aper;
 #define Ngap_ProcedureCode_id_UplinkUEAssociatedNRPPaTransport	((Ngap_ProcedureCode_t)50)
 #define Ngap_ProcedureCode_id_WriteReplaceWarning	((Ngap_ProcedureCode_t)51)
 #define Ngap_ProcedureCode_id_SecondaryRATDataUsageReport	((Ngap_ProcedureCode_t)52)
+#define Ngap_ProcedureCode_id_UplinkRIMInformationTransfer	((Ngap_ProcedureCode_t)53)
+#define Ngap_ProcedureCode_id_DownlinkRIMInformationTransfer	((Ngap_ProcedureCode_t)54)
 
 #ifdef __cplusplus
 }

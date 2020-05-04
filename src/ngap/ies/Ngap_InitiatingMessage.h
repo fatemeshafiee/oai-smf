@@ -95,6 +95,8 @@
 #include "Ngap_UplinkRANConfigurationTransfer.h"
 #include "Ngap_UplinkRANStatusTransfer.h"
 #include "Ngap_UplinkUEAssociatedNRPPaTransport.h"
+#include "Ngap_UplinkRIMInformationTransfer.h"
+#include "Ngap_DownlinkRIMInformationTransfer.h"
 #include <OPEN_TYPE.h>
 #include <constr_CHOICE.h>
 #include <constr_SEQUENCE.h>
@@ -158,7 +160,9 @@ typedef enum Ngap_InitiatingMessage__value_PR {
 	Ngap_InitiatingMessage__value_PR_UplinkNonUEAssociatedNRPPaTransport,
 	Ngap_InitiatingMessage__value_PR_UplinkRANConfigurationTransfer,
 	Ngap_InitiatingMessage__value_PR_UplinkRANStatusTransfer,
-	Ngap_InitiatingMessage__value_PR_UplinkUEAssociatedNRPPaTransport
+	Ngap_InitiatingMessage__value_PR_UplinkUEAssociatedNRPPaTransport,
+	Ngap_InitiatingMessage__value_PR_UplinkRIMInformationTransfer,
+	Ngap_InitiatingMessage__value_PR_DownlinkRIMInformationTransfer
 } Ngap_InitiatingMessage__value_PR;
 
 /* Ngap_InitiatingMessage */
@@ -221,6 +225,8 @@ typedef struct Ngap_InitiatingMessage {
 			Ngap_UplinkRANConfigurationTransfer_t	 UplinkRANConfigurationTransfer;
 			Ngap_UplinkRANStatusTransfer_t	 UplinkRANStatusTransfer;
 			Ngap_UplinkUEAssociatedNRPPaTransport_t	 UplinkUEAssociatedNRPPaTransport;
+			Ngap_UplinkRIMInformationTransfer_t	 UplinkRIMInformationTransfer;
+			Ngap_DownlinkRIMInformationTransfer_t	 DownlinkRIMInformationTransfer;
 		} choice;
 		
 		/* Context for parsing across buffer boundaries */

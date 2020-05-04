@@ -257,6 +257,7 @@ smf_app::smf_app(const std::string &config_file)
 
   supi2smf_context = { };
   set_seid_n4 = { };
+  seid_n4_generator = 0;
 
   apply_config(smf_cfg);
 
@@ -419,7 +420,8 @@ void smf_app::handle_itti_msg(
   Logger::smf_app().info("Process N1N2MessageTransfer Response");
   //Update PDU Session accordingly
   //TODO: to be completed (process cause)
-  pdu_session_status_e status;
+  pdu_session_status_e status = { pdu_session_status_e::PDU_SESSION_INACTIVE };
+  upCnx_state_e state = { upCnx_state_e::UPCNX_STATE_DEACTIVATED };
   if ((static_cast<http_response_codes_e>(m.response_code)
       == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
       or (static_cast<http_response_codes_e>(m.response_code)
@@ -428,8 +430,10 @@ void smf_app::handle_itti_msg(
       status = pdu_session_status_e::PDU_SESSION_INACTIVE;
     } else if (m.msg_type == PDU_SESSION_ESTABLISHMENT_ACCEPT) {
       status = pdu_session_status_e::PDU_SESSION_ESTABLISHMENT_PENDING;
+      state = upCnx_state_e::UPCNX_STATE_ACTIVATING;
     }
     update_pdu_session_status(m.scid, status);
+    update_pdu_session_upCnx_state(m.scid, state);
     Logger::smf_app().debug(
         "Got successful response from AMF (Response code %d), set session status to %s",
         m.response_code,
@@ -462,6 +466,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   std::string n1_sm_message, n1_sm_message_hex;
   smf_n1_n2 smf_n1_n2_inst = { };
   nas_message_t decoded_nas_msg = { };
+  cause_value_5gsm_e cause_n1 = { cause_value_5gsm_e::CAUSE_0_UNKNOWN };
+  pdu_session_type_t pdu_session_type = { .pdu_session_type =
+      PDU_SESSION_TYPE_E_IPV4 };
 
   //Step 1. Decode NAS and get the necessary information
   std::string n1_sm_msg = smreq->req.get_n1_sm_message();
@@ -495,11 +502,17 @@ void smf_app::handle_pdu_session_create_sm_context_request(
 
   //Extended protocol discriminator (Mandatory)
   smreq->req.set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
+  //PDUSessionIdentity
+  pdu_session_id_t pdu_session_id = decoded_nas_msg.plain.sm.header
+      .pdu_session_identity;
+  //ProcedureTransactionIdentity
+  procedure_transaction_id_t pti = { .procedure_transaction_id = decoded_nas_msg
+      .plain.sm.header.procedure_transaction_identity };
   //Message type (Mandatory)
   smreq->req.set_message_type(decoded_nas_msg.plain.sm.header.message_type);
   //TODO: Integrity protection maximum data rate (Mandatory)
+
   //PDU session type (Optional)
-  smreq->req.set_pdu_session_type(PDU_SESSION_TYPE_E_IPV4);  //set default value
   if (decoded_nas_msg.plain.sm.header.message_type
       == PDU_SESSION_ESTABLISHMENT_REQUEST) {
     //TODO: Disable this command temporarily since can't get this info from tester
@@ -507,22 +520,48 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         "NAS, pdu_session_type %d",
         decoded_nas_msg.plain.sm.pdu_session_establishment_request
             ._pdusessiontype.pdu_session_type_value);
-    smreq->req.set_pdu_session_type(
-        decoded_nas_msg.plain.sm.pdu_session_establishment_request
-            ._pdusessiontype.pdu_session_type_value);
+    pdu_session_type.pdu_session_type = decoded_nas_msg.plain.sm
+        .pdu_session_establishment_request._pdusessiontype
+        .pdu_session_type_value;
   }
+
+  smreq->req.set_pdu_session_type(pdu_session_type.pdu_session_type);
+
+  //TODO: Support IPv4 only for now
+  if (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
+    cause_n1 = cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
+  } else if ((pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_ETHERNET)
+      or (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_UNSTRUCTURED)) {
+    cause_n1 = cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE;
+  }
+  if (pdu_session_type.pdu_session_type != PDU_SESSION_TYPE_E_IPV4) {
+    problem_details.setCause(
+        pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PDUTYPE_DENIED]);
+    smContextCreateError.setError(problem_details);
+    refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+    smContextCreateError.setN1SmMsg(refToBinaryData);
+    //PDU Session Establishment Reject
+    smf_n1_n2_inst.create_n1_sm_container(smreq->req,
+                                          PDU_SESSION_ESTABLISHMENT_REJECT,
+                                          n1_sm_message, cause_n1);
+    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+    smf_n11_inst->send_pdu_session_create_sm_context_response(
+        smreq->http_response, smContextCreateError,
+        Pistache::Http::Code::Forbidden, n1_sm_message_hex);
+  }
+
+  //TODO: SSCMode
+  //TODO: store UE 5GSM Capability
+  //TODO: MaximumNumberOfSupportedPacketFilters
+  //TODO: AlwaysonPDUSessionRequested
+  //TODO: SMPDUDNRequestContainer
+  //TODO: ExtendedProtocolConfigurationOptions
 
   //Get necessary information
   supi_t supi = smreq->req.get_supi();
   supi64_t supi64 = smf_supi_to_u64(supi);
   std::string dnn = smreq->req.get_dnn();
   snssai_t snssai = smreq->req.get_snssai();
-  procedure_transaction_id_t pti = { .procedure_transaction_id = decoded_nas_msg
-      .plain.sm.header.procedure_transaction_identity };
-  pdu_session_type_t pdu_session_type = { .pdu_session_type = smreq->req
-      .get_pdu_session_type() };
-  pdu_session_id_t pdu_session_id = decoded_nas_msg.plain.sm.header
-      .pdu_session_identity;
   uint8_t message_type = decoded_nas_msg.plain.sm.header.message_type;
   std::string request_type = smreq->req.get_request_type();
   Logger::smf_app().info(
@@ -595,8 +634,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     //TODO:
     //return
   }
-
-  //TODO: store UE 5GSM Capability
 
   //TODO: For the moment, not support PDU session authentication and authorization by the external DN
 
@@ -735,7 +772,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     smContextUpdateError.setError(problem_details);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden);
+        Pistache::Http::Code::Not_Found);
     return;
   }
 
@@ -751,7 +788,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     smContextUpdateError.setError(problem_details);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden);
+        Pistache::Http::Code::Not_Found);
     return;
   }
 
@@ -778,7 +815,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     smContextUpdateError.setError(problem_details);
     smf_n11_inst->send_pdu_session_update_sm_context_response(
         smreq->http_response, smContextUpdateError,
-        Pistache::Http::Code::Forbidden);
+        Pistache::Http::Code::Not_Found);
     return;
   }
 
@@ -795,7 +832,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
       smContextUpdateError.setError(problem_details);
       smf_n11_inst->send_pdu_session_update_sm_context_response(
           smreq->http_response, smContextUpdateError,
-          Pistache::Http::Code::Forbidden);
+          Pistache::Http::Code::Not_Found);
       return;
     }
   }
@@ -1016,6 +1053,60 @@ void smf_app::update_pdu_session_status(const scid_t scid,
       pdu_session_status_e2str[static_cast<int>(status)].c_str());
 }
 
+//---------------------------------------------------------------------------------------------
+void smf_app::update_pdu_session_upCnx_state(const scid_t scid,
+                                             const upCnx_state_e state) {
+  Logger::smf_app().info("Update UpCnx_State");
+
+  //get the smf context
+  std::shared_ptr<smf_context_ref> scf = { };
+
+  if (is_scid_2_smf_context(scid)) {
+    scf = scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+  }
+
+  supi_t supi = scf.get()->supi;
+  supi64_t supi64 = smf_supi_to_u64(supi);
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
+
+  std::shared_ptr<smf_context> sc = { };
+
+  if (is_supi_2_smf_context(supi64)) {
+    sc = supi_2_smf_context(supi64);
+    Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
+                            supi64);
+  } else {
+    Logger::smf_app().error(
+        "Could not retrieve the corresponding SMF context with Supi " SUPI_64_FMT "!",
+        supi64);
+    //TODO:
+  }
+
+  //get dnn context
+  std::shared_ptr<dnn_context> sd = { };
+
+  if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
+    if (nullptr == sd.get()) {
+      //Error, DNN context doesn't exist
+      Logger::smf_app().warn(
+          "Could not retrieve the corresponding DNN context!");
+    }
+  }
+  //get smd_pdu_session
+  std::shared_ptr<smf_pdu_session> sp = { };
+  bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
+
+  if (nullptr == sp.get()) {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF PDU Session context!");
+  }
+  sp.get()->set_upCnx_state(state);
+  Logger::smf_app().info("Set PDU Session UpCnxState to %s",
+                         upCnx_state_e2str[static_cast<int>(state)].c_str());
+}
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
   //TODO: send session modification request again...

@@ -407,6 +407,10 @@ class pdu_session_update_sm_context_request : public pdu_session_msg {
     m_upCnx_state_is_set = false;
     qfis = { };
     dl_fteid = { };
+    m_release = false;
+    m_release_is_set = false;
+    m_an_type_is_set = false;
+    m_rat_type_is_set = false;
 //    m_eps_bearer_setup = {};
 //    m_revoke_ebi_list = {};
   }
@@ -427,7 +431,11 @@ class pdu_session_update_sm_context_request : public pdu_session_msg {
   void set_upCnx_state(std::string const &value);
   bool upCnx_state_is_set() const;
   void set_rat_type(std::string const &value);
+  bool rat_type_is_set() const;
   void set_an_type(std::string const &value);
+  bool an_type_is_set() const;
+  bool release_is_set() const;
+  void set_release(bool const value);
 
  private:
 
@@ -440,7 +448,9 @@ class pdu_session_update_sm_context_request : public pdu_session_msg {
   std::string m_n2_sm_info_type;
   std::string m_nf_instanceId;
   std::string m_an_type;
+  bool m_an_type_is_set;
   std::string m_rat_type;
+  bool m_rat_type_is_set;
   std::string m_upCnx_state;
   bool m_upCnx_state_is_set;
   std::string m_target_serving_nfId;
@@ -449,6 +459,8 @@ class pdu_session_update_sm_context_request : public pdu_session_msg {
 //  std::vector<std::string> m_eps_bearer_setup;
 //  std::vector<int> m_revoke_ebi_list;
   uint8_t m_5gMm_cause_value;
+  bool m_release_is_set;
+  bool m_release;
 
   //oai::smf_server::model::NgRanTargetId m_target_id;
   //oai::smf_server::model::Guami m_guami;
@@ -466,17 +478,16 @@ class pdu_session_update_sm_context_request : public pdu_session_msg {
    hoState
    toBeSwitched
    failedToBeSwitched
-   sNssai:
-   EpsBearerId:
-   release:
-   cause:
-   traceData:
-   epsInterworkingInd:
-   anTypeCanBeChanged:
-   n2SmInfoExt1:
-   n2SmInfoTypeExt1:
-   maReleaseInd:
-   exemptionInd:
+   sNssai
+   EpsBearerId
+   cause
+   traceData
+   epsInterworkingInd
+   anTypeCanBeChanged
+   n2SmInfoExt1
+   n2SmInfoTypeExt1
+   maReleaseInd
+   exemptionInd
    */
 
 };

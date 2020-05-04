@@ -122,8 +122,10 @@ enum class session_management_procedures_type_e {
   PDU_SESSION_RELEASE_UE_REQUESTED_STEP1 = 9,
   PDU_SESSION_RELEASE_UE_REQUESTED_STEP2 = 10,
   PDU_SESSION_RELEASE_UE_REQUESTED_STEP3 = 11,
-  PDU_SESSION_RELEASE_NETWORK_REQUESTED = 12,
-  PDU_SESSION_TEST = 13
+  PDU_SESSION_RELEASE_SMF_INITIATED = 12,
+  PDU_SESSION_RELEASE_AMF_INITIATED = 13,
+  PDU_SESSION_RELEASE_AN_INITIATED = 14,
+  PDU_SESSION_TEST = 15
 };
 
 static const std::vector<std::string> session_management_procedures_type_e2str =
@@ -139,7 +141,9 @@ static const std::vector<std::string> session_management_procedures_type_e2str =
         "PDU_SESSION_RELEASE_UE_REQUESTED_STEP1",
         "PDU_SESSION_RELEASE_UE_REQUESTED_STEP2",
         "PDU_SESSION_RELEASE_UE_REQUESTED_STEP3",
-        "PDU_SESSION_RELEASE_NETWORK_REQUESTED",
+        "PDU_SESSION_RELEASE_SMF_INITIATED",
+        "PDU_SESSION_RELEASE_AMF_INITIATED",
+        "PDU_SESSION_RELEASE_AN_INITIATED",
         "PDU_SESSION_TEST"
 
     };
@@ -162,10 +166,10 @@ typedef struct qos_profile_s {
   arp_5gc_t arp;
   uint8_t priority_level;
   qos_profile_type_e profile_type;
-  union parameter {
+  union {
     reflective_qos_attribute_e rqa;  //Reflective QoS Attribute (RQA)
     qos_profile_gbr_t qos_profile_gbr;  //Attributes for GBR
-  };
+  } parameter;
 } qos_profile_t;
 
 enum class multipart_related_content_part_e {

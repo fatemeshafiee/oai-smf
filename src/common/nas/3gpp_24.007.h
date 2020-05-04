@@ -48,7 +48,8 @@ typedef uint8_t pdu_session_id_t;
 
 /* QFI */
 // type: integer,  minimum: 0, maximum: 63
-#define QOS_FLOW_IDENTIFIER_FIRST        (uint8_t)0
+#define NO_QOS_FLOW_IDENTIFIER_ASSIGNED (uint8_t)0
+#define QOS_FLOW_IDENTIFIER_FIRST        (uint8_t)1
 #define QOS_FLOW_IDENTIFIER_LAST         (uint8_t)63
 
 /*
@@ -63,6 +64,12 @@ typedef uint8_t pdu_session_id_t;
  inline bool operator!=(const struct smf_qfi_s& rhs) const { return !(qfi == rhs.qfi); }
  } smf_qfi_t;
  */
+
+//QoS Rule
+#define NO_QOS_RULE_IDENTIFIER_ASSIGNED (uint8_t)0
+#define QOS_RULE_IDENTIFIER_FIRST        (uint8_t)1
+#define QOS_RULE_IDENTIFIER_LAST         (uint8_t)255
+
 
 // Integrity protection maximum data rate
 typedef struct ipmdr_s {

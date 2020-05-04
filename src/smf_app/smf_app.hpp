@@ -285,6 +285,15 @@ class smf_app {
   void update_pdu_session_status(const scid_t id,
                                  const pdu_session_status_e status);
 
+  /*
+   * Update PDU session UpCnxState
+   * @param [const scid_t] id SM Context ID
+   * @param [const upCnx_state_e] status PDU Session UpCnxState
+   * @return void
+   */
+  void update_pdu_session_upCnx_state(const scid_t scid,
+                                          const upCnx_state_e state);
+
   void timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user);
   n2_sm_info_type_e n2_sm_info_type_str2e(std::string n2_info_type);
 

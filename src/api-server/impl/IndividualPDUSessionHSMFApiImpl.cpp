@@ -31,14 +31,14 @@ void IndividualPDUSessionHSMFApiImpl::release_pdu_session(
     const std::string &pduSessionRef, const ReleaseData &releaseData,
     Pistache::Http::ResponseWriter &response) {
   Logger::smf_api_server().info("release_pdu_session...");
-  response.send(Pistache::Http::Code::Ok,
+  response.send(Pistache::Http::Code::Not_Implemented,
                 "Release_pdu_session API has not been implemented yet!\n");
 }
 void IndividualPDUSessionHSMFApiImpl::update_pdu_session(
     const std::string &pduSessionRef, const HsmfUpdateData &hsmfUpdateData,
     Pistache::Http::ResponseWriter &response) {
   Logger::smf_api_server().info("update_pdu_session...");
-  response.send(Pistache::Http::Code::Ok,
+  response.send(Pistache::Http::Code::Not_Implemented,
                 "Update_pdu_session API has not been implemented yet!\n");
 }
 

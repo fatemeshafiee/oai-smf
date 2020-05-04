@@ -55,20 +55,6 @@ cd /oai-cn5g-smf/build/scripts
 cd /oai-cn5g-smf/build/scripts
 ./smf_conf.sh
 
-## launch SMF
-sudo smf -c /usr/local/etc/oai/smf.conf -o 
-
-## Build UPF (SPGWU) and Launch UPF (SPGWU)
-git clone https://github.com/OPENAIRINTERFACE/openair-cn-cups/
-cd /openair-cn-cups/build/scripts
-./build_spgwu -I -f
-./build_spgwu -c -V -b Debug -j
-
-#configure SPGWU using an example configure file (spgw_u.conf)
-cd /oai-cn5g-smf/src/test/upf/
-./spgwu_conf.sh
-sudo spgwu -c /usr/local/etc/oai/spgw_u.conf  -o
-
 ## Build and launch UDM
 cd /oai-cn5g-smf/src/test/udm
 mkdir build
@@ -84,6 +70,22 @@ cd build
 cmake ..
 make
 sudo ./amf-server -i 172.16.1.102
+
+
+## launch SMF
+sudo smf -c /usr/local/etc/oai/smf.conf -o 
+
+## Build UPF (SPGWU) and Launch UPF (SPGWU)
+git clone https://github.com/OPENAIRINTERFACE/openair-cn-cups/
+cd /openair-cn-cups/build/scripts
+./build_spgwu -I -f
+./build_spgwu -c -V -b Debug -j
+
+#configure SPGWU using an example configure file (spgw_u.conf)
+cd /oai-cn5g-smf/src/test/upf/
+./spgwu_conf.sh
+sudo spgwu -c /usr/local/etc/oai/spgw_u.conf  -o
+
 
 ## Build and launch AMF client
 cd /oai-cn5g-smf/src/test/amf_client

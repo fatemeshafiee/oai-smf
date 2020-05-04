@@ -109,7 +109,7 @@ extern "C" {
 #define PDU_SESSION_MODIFICATION_REJECT         0b11001010
 #define PDU_SESSION_MODIFICATION_COMMAND        0b11001011
 #define PDU_SESSION_MODIFICATION_COMPLETE       0b11001100
-#define PDU_SESSION_MODIFICATION_COMMANDREJECT  0b11001101
+#define PDU_SESSION_MODIFICATION_COMMAND_REJECT  0b11001101
 
 #define PDU_SESSION_RELEASE_REQUEST             0b11010001
 #define PDU_SESSION_RELEASE_REJECT              0b11010010
@@ -117,6 +117,7 @@ extern "C" {
 #define PDU_SESSION_RELEASE_COMPLETE            0b11010100
 
 #define _5GSM_STATUS                            0b11010110
+
 
 // 9.11.3.47 Request type
 //typedef std::string request_type_t;
@@ -226,7 +227,7 @@ enum class cause_value_5gsm_e {
   CAUSE_46_OUT_OF_LAND_SERVICE_AREA = 46,
   CAUSE_47_PTI_MISMATCH = 47,
   CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED = 50,
-  CAUSE_51_PDU_SESSION_TYPE_IPV6_ONLY_ALLOWED = 50,
+  CAUSE_51_PDU_SESSION_TYPE_IPV6_ONLY_ALLOWED = 51,
   CAUSE_54_PDU_SESSION_DOES_NOT_EXIST = 54,
   CAUSE_67_INSUFFICIENT_RESOURCES_FOR_SPECIFIC_SLICE_AND_DNN = 67,
   CAUSE_68_NOT_SUPPORTED_SSC_MODE = 68,
@@ -330,7 +331,6 @@ typedef struct pdu_session_type_s {
     return pdu_session_type_e2str.at(pdu_session_type);
   }
 } pdu_session_type_t;
-
 
 
 #endif

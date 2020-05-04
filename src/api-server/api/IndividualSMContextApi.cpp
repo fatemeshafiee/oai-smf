@@ -131,7 +131,7 @@ void IndividualSMContextApi::release_sm_context_handler(
     //return;
   }
 
-  free_wrapper((void **) &data);
+  free_wrapper((void**) &data);
 
   uint8_t size = g_parts.size();
   Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
@@ -204,6 +204,7 @@ void IndividualSMContextApi::update_sm_context_handler(
     const Pistache::Rest::Request &request,
     Pistache::Http::ResponseWriter response) {
 
+  Logger::smf_api_server().debug("");
   Logger::smf_api_server().info(
       "Received a SM context update request from AMF");
   Logger::smf_api_server().debug("Request body: %s\n", request.body().c_str());
@@ -247,15 +248,18 @@ void IndividualSMContextApi::update_sm_context_handler(
     //return;
   }
 
-  free_wrapper((void **) &data);
+  free_wrapper((void**) &data);
 
   uint8_t size = g_parts.size();
-
   Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
-  part p0 = g_parts.front();
-  g_parts.pop_front();
-  Logger::smf_api_server().debug("Request body, part 1: %s", p0.body.c_str());
+  part p0 = { };
   part p1 = { };
+
+  if (size > 0) {
+    p0 = g_parts.front();
+    g_parts.pop_front();
+    Logger::smf_api_server().debug("Request body, part 1: %s", p0.body.c_str());
+  }
 
   if (size > 1) {
     p1 = g_parts.front();
@@ -269,7 +273,12 @@ void IndividualSMContextApi::update_sm_context_handler(
   // Getting the body param
   SmContextUpdateData smContextUpdateData = { };
   try {
-    nlohmann::json::parse(p0.body.c_str()).get_to(smContextUpdateData);
+    if (size > 0) {
+      nlohmann::json::parse(p0.body.c_str()).get_to(smContextUpdateData);
+    } else {
+      nlohmann::json::parse(request.body().c_str()).get_to(smContextUpdateData);
+    }
+
     smContextUpdateMessage.setJsonData(smContextUpdateData);
 
     if (size > 1) {

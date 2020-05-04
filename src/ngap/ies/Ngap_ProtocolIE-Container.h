@@ -100,6 +100,8 @@ struct Ngap_UERadioCapabilityInfoIndicationIEs;
 struct Ngap_UERadioCapabilityCheckRequestIEs;
 struct Ngap_UERadioCapabilityCheckResponseIEs;
 struct Ngap_SecondaryRATDataUsageReportIEs;
+struct Ngap_UplinkRIMInformationTransferIEs;
+struct Ngap_DownlinkRIMInformationTransferIEs;
 
 /* Ngap_ProtocolIE-Container */
 typedef struct Ngap_ProtocolIE_Container_124P0 {
@@ -582,6 +584,18 @@ typedef struct Ngap_ProtocolIE_Container_124P79 {
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;
 } Ngap_ProtocolIE_Container_124P79_t;
+typedef struct Ngap_ProtocolIE_Container_124P80 {
+	A_SEQUENCE_OF(struct Ngap_UplinkRIMInformationTransferIEs) list;
+	
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} Ngap_ProtocolIE_Container_124P80_t;
+typedef struct Ngap_ProtocolIE_Container_124P81 {
+	A_SEQUENCE_OF(struct Ngap_DownlinkRIMInformationTransferIEs) list;
+	
+	/* Context for parsing across buffer boundaries */
+	asn_struct_ctx_t _asn_ctx;
+} Ngap_ProtocolIE_Container_124P81_t;
 
 /* Implementation */
 extern asn_TYPE_descriptor_t asn_DEF_Ngap_ProtocolIE_Container_124P0;
@@ -904,6 +918,14 @@ extern asn_TYPE_descriptor_t asn_DEF_Ngap_ProtocolIE_Container_124P79;
 extern asn_SET_OF_specifics_t asn_SPC_Ngap_ProtocolIE_Container_124P79_specs_159;
 extern asn_TYPE_member_t asn_MBR_Ngap_ProtocolIE_Container_124P79_159[1];
 extern asn_per_constraints_t asn_PER_type_Ngap_ProtocolIE_Container_124P79_constr_159;
+extern asn_TYPE_descriptor_t asn_DEF_Ngap_ProtocolIE_Container_124P80;
+extern asn_SET_OF_specifics_t asn_SPC_Ngap_ProtocolIE_Container_124P80_specs_161;
+extern asn_TYPE_member_t asn_MBR_Ngap_ProtocolIE_Container_124P80_161[1];
+extern asn_per_constraints_t asn_PER_type_Ngap_ProtocolIE_Container_124P80_constr_161;
+extern asn_TYPE_descriptor_t asn_DEF_Ngap_ProtocolIE_Container_124P81;
+extern asn_SET_OF_specifics_t asn_SPC_Ngap_ProtocolIE_Container_124P81_specs_163;
+extern asn_TYPE_member_t asn_MBR_Ngap_ProtocolIE_Container_124P81_163[1];
+extern asn_per_constraints_t asn_PER_type_Ngap_ProtocolIE_Container_124P81_constr_163;
 
 #ifdef __cplusplus
 }

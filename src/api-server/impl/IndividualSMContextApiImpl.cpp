@@ -90,7 +90,7 @@ void IndividualSMContextApiImpl::retrieve_sm_context(
     const SmContextRetrieveData &smContextRetrieveData,
     Pistache::Http::ResponseWriter &response) {
   Logger::smf_api_server().info("retrieve_sm_context...");
-  response.send(Pistache::Http::Code::Ok,
+  response.send(Pistache::Http::Code::Not_Implemented,
                 "Retrieve_sm_context API has not been implemented yet!\n");
 }
 
@@ -130,13 +130,13 @@ void IndividualSMContextApiImpl::update_sm_context(
   /* UE-initiated Service Request Operation, section 4.2.3.2@3GPP TS 23.502 */
   //Step 4: PDU Session IDs, Operation Type, UE location Info, Access Type, RAT Type, UE presence in LADN service area, Indication of Access Type can be changed
   //PDU Session IDs
-  //UpCnxState, for activation of user plane (see 5.2.2.3.2.2@3GPP TS 29.502)
+  //UpCnxState, for activation of user plane (see 5.2.2.3.2.2@3GPP TS 29.502, step 1)
   if (smContextUpdateData.upCnxStateIsSet())
     sm_context_req_msg.set_upCnx_state(smContextUpdateData.getUpCnxState());
-  //Access Type
+  //Access Type (step 1 and 2)
   if (smContextUpdateData.anTypeIsSet())
     sm_context_req_msg.set_an_type(smContextUpdateData.getAnType());
-  //RAT Type
+  //RAT Type (step 1 and 2)
   if (smContextUpdateData.ratTypeIsSet())
     sm_context_req_msg.set_rat_type(smContextUpdateData.getRatType());
   //TODO:
@@ -150,6 +150,12 @@ void IndividualSMContextApiImpl::update_sm_context(
   //TODO: Existing PDU session, step 3, SUPI, DNN, S-NSSAIs, SM Context ID, AMF ID, Request Type, N1 SM Container (PDU Session Establishment Request), User location, Access Type, RAT Type, PEI
   //step 15. (SM Context ID -> SCID, N2 SM, Request Type)(Initial Request)
   //TODO: verify why Request Type is not define in smContextUpdateData
+
+  /* AMF-initiated with a release indication to request the release of the PDU Session  (step 3.d, section 4.3.4.2@3GPP TS 23.502)*/
+  if (smContextUpdateData.releaseIsSet()) {
+    sm_context_req_msg.set_release(smContextUpdateData.isRelease());
+  }
+
   /* PDU Session Modification (SM Context ID -> SCID, N1/N2), section 4.3.3.2@3GPP TS 23.502: */
   //step 1.a,UE-initiated: SM Context ID + N1 (PDU Session Modification Request)
   //step 1.e (AN initiated modification): SM Context ID, N2 SM information (QFI, User location Information and an indication that the QoS Flow is released)

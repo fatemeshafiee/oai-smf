@@ -648,6 +648,22 @@ asn_per_constraints_t asn_PER_type_Ngap_ProtocolIE_Container_124P79_constr_159 C
 	{ APC_CONSTRAINED,	 16,  16,  0,  65535 }	/* (SIZE(0..65535)) */,
 	0, 0	/* No PER value map */
 };
+static asn_oer_constraints_t asn_OER_type_Ngap_ProtocolIE_Container_124P80_constr_161 CC_NOTUSED = {
+	{ 0, 0 },
+	-1	/* (SIZE(0..65535)) */};
+asn_per_constraints_t asn_PER_type_Ngap_ProtocolIE_Container_124P80_constr_161 CC_NOTUSED = {
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	{ APC_CONSTRAINED,	 16,  16,  0,  65535 }	/* (SIZE(0..65535)) */,
+	0, 0	/* No PER value map */
+};
+static asn_oer_constraints_t asn_OER_type_Ngap_ProtocolIE_Container_124P81_constr_163 CC_NOTUSED = {
+	{ 0, 0 },
+	-1	/* (SIZE(0..65535)) */};
+asn_per_constraints_t asn_PER_type_Ngap_ProtocolIE_Container_124P81_constr_163 CC_NOTUSED = {
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	{ APC_CONSTRAINED,	 16,  16,  0,  65535 }	/* (SIZE(0..65535)) */,
+	0, 0	/* No PER value map */
+};
 asn_TYPE_member_t asn_MBR_Ngap_ProtocolIE_Container_124P0_1[] = {
 	{ ATF_POINTER, 0, 0,
 		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
@@ -3446,5 +3462,75 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_ProtocolIE_Container_124P79 = {
 	asn_MBR_Ngap_ProtocolIE_Container_124P79_159,
 	1,	/* Single element */
 	&asn_SPC_Ngap_ProtocolIE_Container_124P79_specs_159	/* Additional specs */
+};
+
+asn_TYPE_member_t asn_MBR_Ngap_ProtocolIE_Container_124P80_161[] = {
+	{ ATF_POINTER, 0, 0,
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_UplinkRIMInformationTransferIEs,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		""
+		},
+};
+static const ber_tlv_tag_t asn_DEF_Ngap_ProtocolIE_Container_124P80_tags_161[] = {
+	(ASN_TAG_CLASS_UNIVERSAL | (16 << 2))
+};
+asn_SET_OF_specifics_t asn_SPC_Ngap_ProtocolIE_Container_124P80_specs_161 = {
+	sizeof(struct Ngap_ProtocolIE_Container_124P80),
+	offsetof(struct Ngap_ProtocolIE_Container_124P80, _asn_ctx),
+	0,	/* XER encoding is XMLDelimitedItemList */
+};
+asn_TYPE_descriptor_t asn_DEF_Ngap_ProtocolIE_Container_124P80 = {
+	"ProtocolIE-Container",
+	"ProtocolIE-Container",
+	&asn_OP_SEQUENCE_OF,
+	asn_DEF_Ngap_ProtocolIE_Container_124P80_tags_161,
+	sizeof(asn_DEF_Ngap_ProtocolIE_Container_124P80_tags_161)
+		/sizeof(asn_DEF_Ngap_ProtocolIE_Container_124P80_tags_161[0]), /* 1 */
+	asn_DEF_Ngap_ProtocolIE_Container_124P80_tags_161,	/* Same as above */
+	sizeof(asn_DEF_Ngap_ProtocolIE_Container_124P80_tags_161)
+		/sizeof(asn_DEF_Ngap_ProtocolIE_Container_124P80_tags_161[0]), /* 1 */
+	{ &asn_OER_type_Ngap_ProtocolIE_Container_124P80_constr_161, &asn_PER_type_Ngap_ProtocolIE_Container_124P80_constr_161, SEQUENCE_OF_constraint },
+	asn_MBR_Ngap_ProtocolIE_Container_124P80_161,
+	1,	/* Single element */
+	&asn_SPC_Ngap_ProtocolIE_Container_124P80_specs_161	/* Additional specs */
+};
+
+asn_TYPE_member_t asn_MBR_Ngap_ProtocolIE_Container_124P81_163[] = {
+	{ ATF_POINTER, 0, 0,
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_DownlinkRIMInformationTransferIEs,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		""
+		},
+};
+static const ber_tlv_tag_t asn_DEF_Ngap_ProtocolIE_Container_124P81_tags_163[] = {
+	(ASN_TAG_CLASS_UNIVERSAL | (16 << 2))
+};
+asn_SET_OF_specifics_t asn_SPC_Ngap_ProtocolIE_Container_124P81_specs_163 = {
+	sizeof(struct Ngap_ProtocolIE_Container_124P81),
+	offsetof(struct Ngap_ProtocolIE_Container_124P81, _asn_ctx),
+	0,	/* XER encoding is XMLDelimitedItemList */
+};
+asn_TYPE_descriptor_t asn_DEF_Ngap_ProtocolIE_Container_124P81 = {
+	"ProtocolIE-Container",
+	"ProtocolIE-Container",
+	&asn_OP_SEQUENCE_OF,
+	asn_DEF_Ngap_ProtocolIE_Container_124P81_tags_163,
+	sizeof(asn_DEF_Ngap_ProtocolIE_Container_124P81_tags_163)
+		/sizeof(asn_DEF_Ngap_ProtocolIE_Container_124P81_tags_163[0]), /* 1 */
+	asn_DEF_Ngap_ProtocolIE_Container_124P81_tags_163,	/* Same as above */
+	sizeof(asn_DEF_Ngap_ProtocolIE_Container_124P81_tags_163)
+		/sizeof(asn_DEF_Ngap_ProtocolIE_Container_124P81_tags_163[0]), /* 1 */
+	{ &asn_OER_type_Ngap_ProtocolIE_Container_124P81_constr_163, &asn_PER_type_Ngap_ProtocolIE_Container_124P81_constr_163, SEQUENCE_OF_constraint },
+	asn_MBR_Ngap_ProtocolIE_Container_124P81_163,
+	1,	/* Single element */
+	&asn_SPC_Ngap_ProtocolIE_Container_124P81_specs_163	/* Additional specs */
 };
 

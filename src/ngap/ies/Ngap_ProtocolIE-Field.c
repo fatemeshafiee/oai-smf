@@ -7,1039 +7,1039 @@
 
 #include "Ngap_ProtocolIE-Field.h"
 
-static const long asn_VAL_1_Ngap_id_PDUSessionAggregateMaximumBitRate = 130;
+static const long asn_VAL_1_Ngap_id_EndpointIPAddressAndPort = 169;
 static const long asn_VAL_1_Ngap_reject = 0;
-static const long asn_VAL_1_Ngap_optional = 0;
-static const long asn_VAL_2_Ngap_id_UL_NGU_UP_TNLModifyList = 140;
+static const long asn_VAL_1_Ngap_mandatory = 2;
+static const asn_ioc_cell_t asn_IOS_Ngap_CPTransportLayerInformation_ExtIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_1_Ngap_id_EndpointIPAddressAndPort },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_1_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_EndpointIPAddressAndPort },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_1_Ngap_mandatory }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_CPTransportLayerInformation_ExtIEs_1[] = {
+	{ 1, 4, asn_IOS_Ngap_CPTransportLayerInformation_ExtIEs_1_rows }
+};
+static const long asn_VAL_2_Ngap_id_PDUSessionAggregateMaximumBitRate = 130;
 static const long asn_VAL_2_Ngap_reject = 0;
 static const long asn_VAL_2_Ngap_optional = 0;
-static const long asn_VAL_3_Ngap_id_NetworkInstance = 129;
+static const long asn_VAL_3_Ngap_id_UL_NGU_UP_TNLModifyList = 140;
 static const long asn_VAL_3_Ngap_reject = 0;
 static const long asn_VAL_3_Ngap_optional = 0;
-static const long asn_VAL_4_Ngap_id_QosFlowAddOrModifyRequestList = 135;
+static const long asn_VAL_4_Ngap_id_NetworkInstance = 129;
 static const long asn_VAL_4_Ngap_reject = 0;
 static const long asn_VAL_4_Ngap_optional = 0;
-static const long asn_VAL_5_Ngap_id_QosFlowToReleaseList = 137;
+static const long asn_VAL_5_Ngap_id_QosFlowAddOrModifyRequestList = 135;
 static const long asn_VAL_5_Ngap_reject = 0;
 static const long asn_VAL_5_Ngap_optional = 0;
-static const long asn_VAL_6_Ngap_id_AdditionalUL_NGU_UP_TNLInformation = 126;
+static const long asn_VAL_6_Ngap_id_QosFlowToReleaseList = 137;
 static const long asn_VAL_6_Ngap_reject = 0;
 static const long asn_VAL_6_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceModifyRequestTransferIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_1_Ngap_id_PDUSessionAggregateMaximumBitRate },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_1_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionAggregateMaximumBitRate },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_1_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_2_Ngap_id_UL_NGU_UP_TNLModifyList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_2_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UL_NGU_UP_TNLModifyList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_2_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_3_Ngap_id_NetworkInstance },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_3_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NetworkInstance },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_3_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_4_Ngap_id_QosFlowAddOrModifyRequestList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_4_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_QosFlowAddOrModifyRequestList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_4_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_5_Ngap_id_QosFlowToReleaseList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_5_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_QosFlowListWithCause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_5_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_6_Ngap_id_AdditionalUL_NGU_UP_TNLInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_6_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UPTransportLayerInformationList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_6_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceModifyRequestTransferIEs_1[] = {
-	{ 6, 4, asn_IOS_Ngap_PDUSessionResourceModifyRequestTransferIEs_1_rows }
-};
-static const long asn_VAL_7_Ngap_id_PDUSessionAggregateMaximumBitRate = 130;
+static const long asn_VAL_7_Ngap_id_AdditionalUL_NGU_UP_TNLInformation = 126;
 static const long asn_VAL_7_Ngap_reject = 0;
 static const long asn_VAL_7_Ngap_optional = 0;
-static const long asn_VAL_8_Ngap_id_UL_NGU_UP_TNLInformation = 139;
-static const long asn_VAL_8_Ngap_reject = 0;
-static const long asn_VAL_8_Ngap_mandatory = 2;
-static const long asn_VAL_9_Ngap_id_AdditionalUL_NGU_UP_TNLInformation = 126;
+static const long asn_VAL_8_Ngap_id_CommonNetworkInstance = 166;
+static const long asn_VAL_8_Ngap_ignore = 1;
+static const long asn_VAL_8_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceModifyRequestTransferIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_2_Ngap_id_PDUSessionAggregateMaximumBitRate },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_2_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionAggregateMaximumBitRate },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_2_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_3_Ngap_id_UL_NGU_UP_TNLModifyList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_3_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UL_NGU_UP_TNLModifyList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_3_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_4_Ngap_id_NetworkInstance },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_4_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NetworkInstance },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_4_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_5_Ngap_id_QosFlowAddOrModifyRequestList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_5_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_QosFlowAddOrModifyRequestList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_5_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_6_Ngap_id_QosFlowToReleaseList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_6_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_QosFlowListWithCause },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_6_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_7_Ngap_id_AdditionalUL_NGU_UP_TNLInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_7_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UPTransportLayerInformationList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_7_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_8_Ngap_id_CommonNetworkInstance },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_8_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CommonNetworkInstance },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_8_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceModifyRequestTransferIEs_1[] = {
+	{ 7, 4, asn_IOS_Ngap_PDUSessionResourceModifyRequestTransferIEs_1_rows }
+};
+static const long asn_VAL_9_Ngap_id_PDUSessionAggregateMaximumBitRate = 130;
 static const long asn_VAL_9_Ngap_reject = 0;
 static const long asn_VAL_9_Ngap_optional = 0;
-static const long asn_VAL_10_Ngap_id_DataForwardingNotPossible = 127;
+static const long asn_VAL_10_Ngap_id_UL_NGU_UP_TNLInformation = 139;
 static const long asn_VAL_10_Ngap_reject = 0;
-static const long asn_VAL_10_Ngap_optional = 0;
-static const long asn_VAL_11_Ngap_id_PDUSessionType = 134;
+static const long asn_VAL_10_Ngap_mandatory = 2;
+static const long asn_VAL_11_Ngap_id_AdditionalUL_NGU_UP_TNLInformation = 126;
 static const long asn_VAL_11_Ngap_reject = 0;
-static const long asn_VAL_11_Ngap_mandatory = 2;
-static const long asn_VAL_12_Ngap_id_SecurityIndication = 138;
+static const long asn_VAL_11_Ngap_optional = 0;
+static const long asn_VAL_12_Ngap_id_DataForwardingNotPossible = 127;
 static const long asn_VAL_12_Ngap_reject = 0;
 static const long asn_VAL_12_Ngap_optional = 0;
-static const long asn_VAL_13_Ngap_id_NetworkInstance = 129;
+static const long asn_VAL_13_Ngap_id_PDUSessionType = 134;
 static const long asn_VAL_13_Ngap_reject = 0;
-static const long asn_VAL_13_Ngap_optional = 0;
-static const long asn_VAL_14_Ngap_id_QosFlowSetupRequestList = 136;
+static const long asn_VAL_13_Ngap_mandatory = 2;
+static const long asn_VAL_14_Ngap_id_SecurityIndication = 138;
 static const long asn_VAL_14_Ngap_reject = 0;
-static const long asn_VAL_14_Ngap_mandatory = 2;
-static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceSetupRequestTransferIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_7_Ngap_id_PDUSessionAggregateMaximumBitRate },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_7_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionAggregateMaximumBitRate },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_7_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_8_Ngap_id_UL_NGU_UP_TNLInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_8_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UPTransportLayerInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_8_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_9_Ngap_id_AdditionalUL_NGU_UP_TNLInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_9_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UPTransportLayerInformationList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_9_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_10_Ngap_id_DataForwardingNotPossible },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_10_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_DataForwardingNotPossible },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_10_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_11_Ngap_id_PDUSessionType },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_11_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionType },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_11_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_12_Ngap_id_SecurityIndication },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_12_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityIndication },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_12_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_13_Ngap_id_NetworkInstance },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_13_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NetworkInstance },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_13_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_14_Ngap_id_QosFlowSetupRequestList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_14_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_QosFlowSetupRequestList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_14_Ngap_mandatory }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceSetupRequestTransferIEs_1[] = {
-	{ 8, 4, asn_IOS_Ngap_PDUSessionResourceSetupRequestTransferIEs_1_rows }
-};
-static const long asn_VAL_15_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_14_Ngap_optional = 0;
+static const long asn_VAL_15_Ngap_id_NetworkInstance = 129;
 static const long asn_VAL_15_Ngap_reject = 0;
-static const long asn_VAL_15_Ngap_mandatory = 2;
-static const long asn_VAL_16_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_15_Ngap_optional = 0;
+static const long asn_VAL_16_Ngap_id_QosFlowSetupRequestList = 136;
 static const long asn_VAL_16_Ngap_reject = 0;
 static const long asn_VAL_16_Ngap_mandatory = 2;
-static const long asn_VAL_17_Ngap_id_RANPagingPriority = 83;
+static const long asn_VAL_17_Ngap_id_CommonNetworkInstance = 166;
 static const long asn_VAL_17_Ngap_ignore = 1;
 static const long asn_VAL_17_Ngap_optional = 0;
-static const long asn_VAL_18_Ngap_id_NAS_PDU = 38;
-static const long asn_VAL_18_Ngap_reject = 0;
+static const long asn_VAL_18_Ngap_id_DirectForwardingPathAvailability = 22;
+static const long asn_VAL_18_Ngap_ignore = 1;
 static const long asn_VAL_18_Ngap_optional = 0;
-static const long asn_VAL_19_Ngap_id_PDUSessionResourceSetupListSUReq = 74;
+static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceSetupRequestTransferIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_9_Ngap_id_PDUSessionAggregateMaximumBitRate },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_9_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionAggregateMaximumBitRate },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_9_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_10_Ngap_id_UL_NGU_UP_TNLInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_10_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UPTransportLayerInformation },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_10_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_11_Ngap_id_AdditionalUL_NGU_UP_TNLInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_11_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UPTransportLayerInformationList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_11_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_12_Ngap_id_DataForwardingNotPossible },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_12_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_DataForwardingNotPossible },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_12_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_13_Ngap_id_PDUSessionType },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_13_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionType },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_13_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_14_Ngap_id_SecurityIndication },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_14_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityIndication },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_14_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_15_Ngap_id_NetworkInstance },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_15_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NetworkInstance },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_15_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_16_Ngap_id_QosFlowSetupRequestList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_16_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_QosFlowSetupRequestList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_16_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_17_Ngap_id_CommonNetworkInstance },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_17_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CommonNetworkInstance },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_17_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_18_Ngap_id_DirectForwardingPathAvailability },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_18_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_DirectForwardingPathAvailability },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_18_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceSetupRequestTransferIEs_1[] = {
+	{ 10, 4, asn_IOS_Ngap_PDUSessionResourceSetupRequestTransferIEs_1_rows }
+};
+static const long asn_VAL_19_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_19_Ngap_reject = 0;
 static const long asn_VAL_19_Ngap_mandatory = 2;
-static const long asn_VAL_20_Ngap_id_UEAggregateMaximumBitRate = 110;
-static const long asn_VAL_20_Ngap_ignore = 1;
-static const long asn_VAL_20_Ngap_optional = 0;
+static const long asn_VAL_20_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_20_Ngap_reject = 0;
+static const long asn_VAL_20_Ngap_mandatory = 2;
+static const long asn_VAL_21_Ngap_id_RANPagingPriority = 83;
+static const long asn_VAL_21_Ngap_ignore = 1;
+static const long asn_VAL_21_Ngap_optional = 0;
+static const long asn_VAL_22_Ngap_id_NAS_PDU = 38;
+static const long asn_VAL_22_Ngap_reject = 0;
+static const long asn_VAL_22_Ngap_optional = 0;
+static const long asn_VAL_23_Ngap_id_PDUSessionResourceSetupListSUReq = 74;
+static const long asn_VAL_23_Ngap_reject = 0;
+static const long asn_VAL_23_Ngap_mandatory = 2;
+static const long asn_VAL_24_Ngap_id_UEAggregateMaximumBitRate = 110;
+static const long asn_VAL_24_Ngap_ignore = 1;
+static const long asn_VAL_24_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceSetupRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_15_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_15_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_15_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_16_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_16_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_16_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_17_Ngap_id_RANPagingPriority },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_17_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_17_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_18_Ngap_id_NAS_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_18_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_18_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_19_Ngap_id_PDUSessionResourceSetupListSUReq },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_19_Ngap_id_AMF_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_19_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListSUReq },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_19_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_20_Ngap_id_UEAggregateMaximumBitRate },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_20_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_20_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_20_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_20_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_21_Ngap_id_RANPagingPriority },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_21_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_21_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_22_Ngap_id_NAS_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_22_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_22_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_23_Ngap_id_PDUSessionResourceSetupListSUReq },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_23_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListSUReq },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_23_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_24_Ngap_id_UEAggregateMaximumBitRate },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_24_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_20_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_24_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceSetupRequestIEs_1[] = {
 	{ 6, 4, asn_IOS_Ngap_PDUSessionResourceSetupRequestIEs_1_rows }
 };
-static const long asn_VAL_21_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_21_Ngap_ignore = 1;
-static const long asn_VAL_21_Ngap_mandatory = 2;
-static const long asn_VAL_22_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_22_Ngap_ignore = 1;
-static const long asn_VAL_22_Ngap_mandatory = 2;
-static const long asn_VAL_23_Ngap_id_PDUSessionResourceSetupListSURes = 75;
-static const long asn_VAL_23_Ngap_ignore = 1;
-static const long asn_VAL_23_Ngap_optional = 0;
-static const long asn_VAL_24_Ngap_id_PDUSessionResourceFailedToSetupListSURes = 58;
-static const long asn_VAL_24_Ngap_ignore = 1;
-static const long asn_VAL_24_Ngap_optional = 0;
-static const long asn_VAL_25_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_25_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_25_Ngap_ignore = 1;
-static const long asn_VAL_25_Ngap_optional = 0;
+static const long asn_VAL_25_Ngap_mandatory = 2;
+static const long asn_VAL_26_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_26_Ngap_ignore = 1;
+static const long asn_VAL_26_Ngap_mandatory = 2;
+static const long asn_VAL_27_Ngap_id_PDUSessionResourceSetupListSURes = 75;
+static const long asn_VAL_27_Ngap_ignore = 1;
+static const long asn_VAL_27_Ngap_optional = 0;
+static const long asn_VAL_28_Ngap_id_PDUSessionResourceFailedToSetupListSURes = 58;
+static const long asn_VAL_28_Ngap_ignore = 1;
+static const long asn_VAL_28_Ngap_optional = 0;
+static const long asn_VAL_29_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_29_Ngap_ignore = 1;
+static const long asn_VAL_29_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceSetupResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_21_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_21_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_21_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_22_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_22_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_22_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_23_Ngap_id_PDUSessionResourceSetupListSURes },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_23_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListSURes },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_23_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_24_Ngap_id_PDUSessionResourceFailedToSetupListSURes },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_24_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToSetupListSURes },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_24_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_25_Ngap_id_CriticalityDiagnostics },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_25_Ngap_id_AMF_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_25_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_25_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_26_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_26_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_26_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_27_Ngap_id_PDUSessionResourceSetupListSURes },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_27_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListSURes },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_27_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_28_Ngap_id_PDUSessionResourceFailedToSetupListSURes },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_28_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToSetupListSURes },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_28_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_29_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_29_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_25_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_29_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceSetupResponseIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_PDUSessionResourceSetupResponseIEs_1_rows }
 };
-static const long asn_VAL_26_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_26_Ngap_reject = 0;
-static const long asn_VAL_26_Ngap_mandatory = 2;
-static const long asn_VAL_27_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_27_Ngap_reject = 0;
-static const long asn_VAL_27_Ngap_mandatory = 2;
-static const long asn_VAL_28_Ngap_id_RANPagingPriority = 83;
-static const long asn_VAL_28_Ngap_ignore = 1;
-static const long asn_VAL_28_Ngap_optional = 0;
-static const long asn_VAL_29_Ngap_id_NAS_PDU = 38;
-static const long asn_VAL_29_Ngap_ignore = 1;
-static const long asn_VAL_29_Ngap_optional = 0;
-static const long asn_VAL_30_Ngap_id_PDUSessionResourceToReleaseListRelCmd = 79;
+static const long asn_VAL_30_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_30_Ngap_reject = 0;
 static const long asn_VAL_30_Ngap_mandatory = 2;
+static const long asn_VAL_31_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_31_Ngap_reject = 0;
+static const long asn_VAL_31_Ngap_mandatory = 2;
+static const long asn_VAL_32_Ngap_id_RANPagingPriority = 83;
+static const long asn_VAL_32_Ngap_ignore = 1;
+static const long asn_VAL_32_Ngap_optional = 0;
+static const long asn_VAL_33_Ngap_id_NAS_PDU = 38;
+static const long asn_VAL_33_Ngap_ignore = 1;
+static const long asn_VAL_33_Ngap_optional = 0;
+static const long asn_VAL_34_Ngap_id_PDUSessionResourceToReleaseListRelCmd = 79;
+static const long asn_VAL_34_Ngap_reject = 0;
+static const long asn_VAL_34_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceReleaseCommandIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_26_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_26_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_26_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_27_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_27_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_27_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_28_Ngap_id_RANPagingPriority },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_28_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_28_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_29_Ngap_id_NAS_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_29_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_29_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_30_Ngap_id_PDUSessionResourceToReleaseListRelCmd },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_30_Ngap_id_AMF_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_30_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_30_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_31_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_31_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_31_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_32_Ngap_id_RANPagingPriority },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_32_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_32_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_33_Ngap_id_NAS_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_33_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_33_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_34_Ngap_id_PDUSessionResourceToReleaseListRelCmd },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_34_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceToReleaseListRelCmd },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_30_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_34_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceReleaseCommandIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_PDUSessionResourceReleaseCommandIEs_1_rows }
 };
-static const long asn_VAL_31_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_31_Ngap_ignore = 1;
-static const long asn_VAL_31_Ngap_mandatory = 2;
-static const long asn_VAL_32_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_32_Ngap_ignore = 1;
-static const long asn_VAL_32_Ngap_mandatory = 2;
-static const long asn_VAL_33_Ngap_id_PDUSessionResourceReleasedListRelRes = 70;
-static const long asn_VAL_33_Ngap_ignore = 1;
-static const long asn_VAL_33_Ngap_mandatory = 2;
-static const long asn_VAL_34_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_34_Ngap_ignore = 1;
-static const long asn_VAL_34_Ngap_optional = 0;
-static const long asn_VAL_35_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_35_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_35_Ngap_ignore = 1;
-static const long asn_VAL_35_Ngap_optional = 0;
+static const long asn_VAL_35_Ngap_mandatory = 2;
+static const long asn_VAL_36_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_36_Ngap_ignore = 1;
+static const long asn_VAL_36_Ngap_mandatory = 2;
+static const long asn_VAL_37_Ngap_id_PDUSessionResourceReleasedListRelRes = 70;
+static const long asn_VAL_37_Ngap_ignore = 1;
+static const long asn_VAL_37_Ngap_mandatory = 2;
+static const long asn_VAL_38_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_38_Ngap_ignore = 1;
+static const long asn_VAL_38_Ngap_optional = 0;
+static const long asn_VAL_39_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_39_Ngap_ignore = 1;
+static const long asn_VAL_39_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceReleaseResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_31_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_31_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_31_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_32_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_32_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_32_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_33_Ngap_id_PDUSessionResourceReleasedListRelRes },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_33_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceReleasedListRelRes },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_33_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_34_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_34_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_34_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_35_Ngap_id_CriticalityDiagnostics },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_35_Ngap_id_AMF_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_35_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_35_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_36_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_36_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_36_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_37_Ngap_id_PDUSessionResourceReleasedListRelRes },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_37_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceReleasedListRelRes },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_37_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_38_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_38_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_38_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_39_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_39_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_35_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_39_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceReleaseResponseIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_PDUSessionResourceReleaseResponseIEs_1_rows }
 };
-static const long asn_VAL_36_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_36_Ngap_reject = 0;
-static const long asn_VAL_36_Ngap_mandatory = 2;
-static const long asn_VAL_37_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_37_Ngap_reject = 0;
-static const long asn_VAL_37_Ngap_mandatory = 2;
-static const long asn_VAL_38_Ngap_id_RANPagingPriority = 83;
-static const long asn_VAL_38_Ngap_ignore = 1;
-static const long asn_VAL_38_Ngap_optional = 0;
-static const long asn_VAL_39_Ngap_id_PDUSessionResourceModifyListModReq = 64;
-static const long asn_VAL_39_Ngap_reject = 0;
-static const long asn_VAL_39_Ngap_mandatory = 2;
+static const long asn_VAL_40_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_40_Ngap_reject = 0;
+static const long asn_VAL_40_Ngap_mandatory = 2;
+static const long asn_VAL_41_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_41_Ngap_reject = 0;
+static const long asn_VAL_41_Ngap_mandatory = 2;
+static const long asn_VAL_42_Ngap_id_RANPagingPriority = 83;
+static const long asn_VAL_42_Ngap_ignore = 1;
+static const long asn_VAL_42_Ngap_optional = 0;
+static const long asn_VAL_43_Ngap_id_PDUSessionResourceModifyListModReq = 64;
+static const long asn_VAL_43_Ngap_reject = 0;
+static const long asn_VAL_43_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceModifyRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_36_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_36_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_40_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_40_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_36_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_37_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_37_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_40_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_41_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_41_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_37_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_38_Ngap_id_RANPagingPriority },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_38_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_41_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_42_Ngap_id_RANPagingPriority },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_42_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_38_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_39_Ngap_id_PDUSessionResourceModifyListModReq },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_39_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_42_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_43_Ngap_id_PDUSessionResourceModifyListModReq },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_43_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceModifyListModReq },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_39_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_43_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceModifyRequestIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_PDUSessionResourceModifyRequestIEs_1_rows }
 };
-static const long asn_VAL_40_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_40_Ngap_ignore = 1;
-static const long asn_VAL_40_Ngap_mandatory = 2;
-static const long asn_VAL_41_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_41_Ngap_ignore = 1;
-static const long asn_VAL_41_Ngap_mandatory = 2;
-static const long asn_VAL_42_Ngap_id_PDUSessionResourceModifyListModRes = 65;
-static const long asn_VAL_42_Ngap_ignore = 1;
-static const long asn_VAL_42_Ngap_optional = 0;
-static const long asn_VAL_43_Ngap_id_PDUSessionResourceFailedToModifyListModRes = 54;
-static const long asn_VAL_43_Ngap_ignore = 1;
-static const long asn_VAL_43_Ngap_optional = 0;
-static const long asn_VAL_44_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_44_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_44_Ngap_ignore = 1;
-static const long asn_VAL_44_Ngap_optional = 0;
-static const long asn_VAL_45_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_44_Ngap_mandatory = 2;
+static const long asn_VAL_45_Ngap_id_RAN_UE_NGAP_ID = 85;
 static const long asn_VAL_45_Ngap_ignore = 1;
-static const long asn_VAL_45_Ngap_optional = 0;
+static const long asn_VAL_45_Ngap_mandatory = 2;
+static const long asn_VAL_46_Ngap_id_PDUSessionResourceModifyListModRes = 65;
+static const long asn_VAL_46_Ngap_ignore = 1;
+static const long asn_VAL_46_Ngap_optional = 0;
+static const long asn_VAL_47_Ngap_id_PDUSessionResourceFailedToModifyListModRes = 54;
+static const long asn_VAL_47_Ngap_ignore = 1;
+static const long asn_VAL_47_Ngap_optional = 0;
+static const long asn_VAL_48_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_48_Ngap_ignore = 1;
+static const long asn_VAL_48_Ngap_optional = 0;
+static const long asn_VAL_49_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_49_Ngap_ignore = 1;
+static const long asn_VAL_49_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceModifyResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_40_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_40_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_40_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_41_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_41_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_41_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_42_Ngap_id_PDUSessionResourceModifyListModRes },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_42_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceModifyListModRes },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_42_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_43_Ngap_id_PDUSessionResourceFailedToModifyListModRes },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_43_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToModifyListModRes },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_43_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_44_Ngap_id_UserLocationInformation },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_44_Ngap_id_AMF_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_44_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_44_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_45_Ngap_id_CriticalityDiagnostics },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_44_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_45_Ngap_id_RAN_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_45_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_45_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_46_Ngap_id_PDUSessionResourceModifyListModRes },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_46_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceModifyListModRes },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_46_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_47_Ngap_id_PDUSessionResourceFailedToModifyListModRes },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_47_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToModifyListModRes },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_47_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_48_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_48_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_48_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_49_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_49_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_45_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_49_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceModifyResponseIEs_1[] = {
 	{ 6, 4, asn_IOS_Ngap_PDUSessionResourceModifyResponseIEs_1_rows }
 };
-static const long asn_VAL_46_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_46_Ngap_reject = 0;
-static const long asn_VAL_46_Ngap_mandatory = 2;
-static const long asn_VAL_47_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_47_Ngap_reject = 0;
-static const long asn_VAL_47_Ngap_mandatory = 2;
-static const long asn_VAL_48_Ngap_id_PDUSessionResourceNotifyList = 66;
-static const long asn_VAL_48_Ngap_reject = 0;
-static const long asn_VAL_48_Ngap_optional = 0;
-static const long asn_VAL_49_Ngap_id_PDUSessionResourceReleasedListNot = 67;
-static const long asn_VAL_49_Ngap_ignore = 1;
-static const long asn_VAL_49_Ngap_optional = 0;
-static const long asn_VAL_50_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_50_Ngap_ignore = 1;
-static const long asn_VAL_50_Ngap_optional = 0;
+static const long asn_VAL_50_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_50_Ngap_reject = 0;
+static const long asn_VAL_50_Ngap_mandatory = 2;
+static const long asn_VAL_51_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_51_Ngap_reject = 0;
+static const long asn_VAL_51_Ngap_mandatory = 2;
+static const long asn_VAL_52_Ngap_id_PDUSessionResourceNotifyList = 66;
+static const long asn_VAL_52_Ngap_reject = 0;
+static const long asn_VAL_52_Ngap_optional = 0;
+static const long asn_VAL_53_Ngap_id_PDUSessionResourceReleasedListNot = 67;
+static const long asn_VAL_53_Ngap_ignore = 1;
+static const long asn_VAL_53_Ngap_optional = 0;
+static const long asn_VAL_54_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_54_Ngap_ignore = 1;
+static const long asn_VAL_54_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceNotifyIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_46_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_46_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_50_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_50_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_46_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_47_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_47_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_50_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_51_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_51_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_47_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_48_Ngap_id_PDUSessionResourceNotifyList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_48_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_51_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_52_Ngap_id_PDUSessionResourceNotifyList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_52_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceNotifyList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_48_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_49_Ngap_id_PDUSessionResourceReleasedListNot },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_49_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_52_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_53_Ngap_id_PDUSessionResourceReleasedListNot },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_53_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceReleasedListNot },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_49_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_50_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_50_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_53_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_54_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_54_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_50_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_54_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceNotifyIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_PDUSessionResourceNotifyIEs_1_rows }
 };
-static const long asn_VAL_51_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_51_Ngap_reject = 0;
-static const long asn_VAL_51_Ngap_mandatory = 2;
-static const long asn_VAL_52_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_52_Ngap_reject = 0;
-static const long asn_VAL_52_Ngap_mandatory = 2;
-static const long asn_VAL_53_Ngap_id_PDUSessionResourceModifyListModInd = 63;
-static const long asn_VAL_53_Ngap_reject = 0;
-static const long asn_VAL_53_Ngap_mandatory = 2;
+static const long asn_VAL_55_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_55_Ngap_reject = 0;
+static const long asn_VAL_55_Ngap_mandatory = 2;
+static const long asn_VAL_56_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_56_Ngap_reject = 0;
+static const long asn_VAL_56_Ngap_mandatory = 2;
+static const long asn_VAL_57_Ngap_id_PDUSessionResourceModifyListModInd = 63;
+static const long asn_VAL_57_Ngap_reject = 0;
+static const long asn_VAL_57_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceModifyIndicationIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_51_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_51_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_55_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_55_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_51_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_52_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_52_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_55_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_56_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_56_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_52_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_53_Ngap_id_PDUSessionResourceModifyListModInd },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_53_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_56_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_57_Ngap_id_PDUSessionResourceModifyListModInd },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_57_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceModifyListModInd },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_53_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_57_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceModifyIndicationIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_PDUSessionResourceModifyIndicationIEs_1_rows }
 };
-static const long asn_VAL_54_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_54_Ngap_ignore = 1;
-static const long asn_VAL_54_Ngap_mandatory = 2;
-static const long asn_VAL_55_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_55_Ngap_ignore = 1;
-static const long asn_VAL_55_Ngap_mandatory = 2;
-static const long asn_VAL_56_Ngap_id_PDUSessionResourceModifyListModCfm = 62;
-static const long asn_VAL_56_Ngap_ignore = 1;
-static const long asn_VAL_56_Ngap_mandatory = 2;
-static const long asn_VAL_57_Ngap_id_PDUSessionResourceFailedToModifyListModCfm = 131;
-static const long asn_VAL_57_Ngap_ignore = 1;
-static const long asn_VAL_57_Ngap_optional = 0;
-static const long asn_VAL_58_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_58_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_58_Ngap_ignore = 1;
-static const long asn_VAL_58_Ngap_optional = 0;
+static const long asn_VAL_58_Ngap_mandatory = 2;
+static const long asn_VAL_59_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_59_Ngap_ignore = 1;
+static const long asn_VAL_59_Ngap_mandatory = 2;
+static const long asn_VAL_60_Ngap_id_PDUSessionResourceModifyListModCfm = 62;
+static const long asn_VAL_60_Ngap_ignore = 1;
+static const long asn_VAL_60_Ngap_mandatory = 2;
+static const long asn_VAL_61_Ngap_id_PDUSessionResourceFailedToModifyListModCfm = 131;
+static const long asn_VAL_61_Ngap_ignore = 1;
+static const long asn_VAL_61_Ngap_optional = 0;
+static const long asn_VAL_62_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_62_Ngap_ignore = 1;
+static const long asn_VAL_62_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PDUSessionResourceModifyConfirmIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_54_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_54_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_54_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_55_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_55_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_55_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_56_Ngap_id_PDUSessionResourceModifyListModCfm },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_56_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceModifyListModCfm },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_56_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_57_Ngap_id_PDUSessionResourceFailedToModifyListModCfm },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_57_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToModifyListModCfm },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_57_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_58_Ngap_id_CriticalityDiagnostics },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_58_Ngap_id_AMF_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_58_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_58_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_59_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_59_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_59_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_60_Ngap_id_PDUSessionResourceModifyListModCfm },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_60_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceModifyListModCfm },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_60_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_61_Ngap_id_PDUSessionResourceFailedToModifyListModCfm },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_61_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToModifyListModCfm },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_61_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_62_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_62_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_58_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_62_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PDUSessionResourceModifyConfirmIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_PDUSessionResourceModifyConfirmIEs_1_rows }
 };
-static const long asn_VAL_59_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_59_Ngap_reject = 0;
-static const long asn_VAL_59_Ngap_mandatory = 2;
-static const long asn_VAL_60_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_60_Ngap_reject = 0;
-static const long asn_VAL_60_Ngap_mandatory = 2;
-static const long asn_VAL_61_Ngap_id_OldAMF = 48;
-static const long asn_VAL_61_Ngap_reject = 0;
-static const long asn_VAL_61_Ngap_optional = 0;
-static const long asn_VAL_62_Ngap_id_UEAggregateMaximumBitRate = 110;
-static const long asn_VAL_62_Ngap_reject = 0;
-static const long asn_VAL_62_Ngap_conditional = 1;
-static const long asn_VAL_63_Ngap_id_CoreNetworkAssistanceInformation = 18;
-static const long asn_VAL_63_Ngap_ignore = 1;
-static const long asn_VAL_63_Ngap_optional = 0;
-static const long asn_VAL_64_Ngap_id_GUAMI = 28;
+static const long asn_VAL_63_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_63_Ngap_reject = 0;
+static const long asn_VAL_63_Ngap_mandatory = 2;
+static const long asn_VAL_64_Ngap_id_RAN_UE_NGAP_ID = 85;
 static const long asn_VAL_64_Ngap_reject = 0;
 static const long asn_VAL_64_Ngap_mandatory = 2;
-static const long asn_VAL_65_Ngap_id_PDUSessionResourceSetupListCxtReq = 71;
+static const long asn_VAL_65_Ngap_id_OldAMF = 48;
 static const long asn_VAL_65_Ngap_reject = 0;
 static const long asn_VAL_65_Ngap_optional = 0;
-static const long asn_VAL_66_Ngap_id_AllowedNSSAI = 0;
+static const long asn_VAL_66_Ngap_id_UEAggregateMaximumBitRate = 110;
 static const long asn_VAL_66_Ngap_reject = 0;
-static const long asn_VAL_66_Ngap_mandatory = 2;
-static const long asn_VAL_67_Ngap_id_UESecurityCapabilities = 119;
-static const long asn_VAL_67_Ngap_reject = 0;
-static const long asn_VAL_67_Ngap_mandatory = 2;
-static const long asn_VAL_68_Ngap_id_SecurityKey = 94;
+static const long asn_VAL_66_Ngap_conditional = 1;
+static const long asn_VAL_67_Ngap_id_CoreNetworkAssistanceInformationForInactive = 18;
+static const long asn_VAL_67_Ngap_ignore = 1;
+static const long asn_VAL_67_Ngap_optional = 0;
+static const long asn_VAL_68_Ngap_id_GUAMI = 28;
 static const long asn_VAL_68_Ngap_reject = 0;
 static const long asn_VAL_68_Ngap_mandatory = 2;
-static const long asn_VAL_69_Ngap_id_TraceActivation = 108;
-static const long asn_VAL_69_Ngap_ignore = 1;
+static const long asn_VAL_69_Ngap_id_PDUSessionResourceSetupListCxtReq = 71;
+static const long asn_VAL_69_Ngap_reject = 0;
 static const long asn_VAL_69_Ngap_optional = 0;
-static const long asn_VAL_70_Ngap_id_MobilityRestrictionList = 36;
-static const long asn_VAL_70_Ngap_ignore = 1;
-static const long asn_VAL_70_Ngap_optional = 0;
-static const long asn_VAL_71_Ngap_id_UERadioCapability = 117;
-static const long asn_VAL_71_Ngap_ignore = 1;
-static const long asn_VAL_71_Ngap_optional = 0;
-static const long asn_VAL_72_Ngap_id_IndexToRFSP = 31;
-static const long asn_VAL_72_Ngap_ignore = 1;
-static const long asn_VAL_72_Ngap_optional = 0;
-static const long asn_VAL_73_Ngap_id_MaskedIMEISV = 34;
+static const long asn_VAL_70_Ngap_id_AllowedNSSAI = 0;
+static const long asn_VAL_70_Ngap_reject = 0;
+static const long asn_VAL_70_Ngap_mandatory = 2;
+static const long asn_VAL_71_Ngap_id_UESecurityCapabilities = 119;
+static const long asn_VAL_71_Ngap_reject = 0;
+static const long asn_VAL_71_Ngap_mandatory = 2;
+static const long asn_VAL_72_Ngap_id_SecurityKey = 94;
+static const long asn_VAL_72_Ngap_reject = 0;
+static const long asn_VAL_72_Ngap_mandatory = 2;
+static const long asn_VAL_73_Ngap_id_TraceActivation = 108;
 static const long asn_VAL_73_Ngap_ignore = 1;
 static const long asn_VAL_73_Ngap_optional = 0;
-static const long asn_VAL_74_Ngap_id_NAS_PDU = 38;
+static const long asn_VAL_74_Ngap_id_MobilityRestrictionList = 36;
 static const long asn_VAL_74_Ngap_ignore = 1;
 static const long asn_VAL_74_Ngap_optional = 0;
-static const long asn_VAL_75_Ngap_id_EmergencyFallbackIndicator = 24;
-static const long asn_VAL_75_Ngap_reject = 0;
+static const long asn_VAL_75_Ngap_id_UERadioCapability = 117;
+static const long asn_VAL_75_Ngap_ignore = 1;
 static const long asn_VAL_75_Ngap_optional = 0;
-static const long asn_VAL_76_Ngap_id_RRCInactiveTransitionReportRequest = 91;
+static const long asn_VAL_76_Ngap_id_IndexToRFSP = 31;
 static const long asn_VAL_76_Ngap_ignore = 1;
 static const long asn_VAL_76_Ngap_optional = 0;
-static const long asn_VAL_77_Ngap_id_UERadioCapabilityForPaging = 118;
+static const long asn_VAL_77_Ngap_id_MaskedIMEISV = 34;
 static const long asn_VAL_77_Ngap_ignore = 1;
 static const long asn_VAL_77_Ngap_optional = 0;
-static const long asn_VAL_78_Ngap_id_RedirectionVoiceFallback = 146;
+static const long asn_VAL_78_Ngap_id_NAS_PDU = 38;
 static const long asn_VAL_78_Ngap_ignore = 1;
 static const long asn_VAL_78_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_InitialContextSetupRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_59_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_59_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_59_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_60_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_60_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_60_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_61_Ngap_id_OldAMF },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_61_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFName },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_61_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_62_Ngap_id_UEAggregateMaximumBitRate },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_62_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_62_Ngap_conditional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_63_Ngap_id_CoreNetworkAssistanceInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_63_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_CoreNetworkAssistanceInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_63_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_64_Ngap_id_GUAMI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_64_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_GUAMI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_64_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_65_Ngap_id_PDUSessionResourceSetupListCxtReq },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_65_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListCxtReq },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_65_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_66_Ngap_id_AllowedNSSAI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_66_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_66_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_67_Ngap_id_UESecurityCapabilities },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_67_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_67_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_68_Ngap_id_SecurityKey },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_68_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityKey },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_68_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_69_Ngap_id_TraceActivation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_69_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_TraceActivation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_69_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_70_Ngap_id_MobilityRestrictionList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_70_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_MobilityRestrictionList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_70_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_71_Ngap_id_UERadioCapability },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_71_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UERadioCapability },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_71_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_72_Ngap_id_IndexToRFSP },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_72_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_IndexToRFSP },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_72_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_73_Ngap_id_MaskedIMEISV },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_73_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_MaskedIMEISV },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_73_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_74_Ngap_id_NAS_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_74_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_74_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_75_Ngap_id_EmergencyFallbackIndicator },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_75_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_EmergencyFallbackIndicator },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_75_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_76_Ngap_id_RRCInactiveTransitionReportRequest },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_76_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCInactiveTransitionReportRequest },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_76_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_77_Ngap_id_UERadioCapabilityForPaging },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_77_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UERadioCapabilityForPaging },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_77_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_78_Ngap_id_RedirectionVoiceFallback },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_78_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RedirectionVoiceFallback },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_78_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_InitialContextSetupRequestIEs_1[] = {
-	{ 20, 4, asn_IOS_Ngap_InitialContextSetupRequestIEs_1_rows }
-};
-static const long asn_VAL_79_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_79_Ngap_ignore = 1;
-static const long asn_VAL_79_Ngap_mandatory = 2;
-static const long asn_VAL_80_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_79_Ngap_id_EmergencyFallbackIndicator = 24;
+static const long asn_VAL_79_Ngap_reject = 0;
+static const long asn_VAL_79_Ngap_optional = 0;
+static const long asn_VAL_80_Ngap_id_RRCInactiveTransitionReportRequest = 91;
 static const long asn_VAL_80_Ngap_ignore = 1;
-static const long asn_VAL_80_Ngap_mandatory = 2;
-static const long asn_VAL_81_Ngap_id_PDUSessionResourceSetupListCxtRes = 72;
+static const long asn_VAL_80_Ngap_optional = 0;
+static const long asn_VAL_81_Ngap_id_UERadioCapabilityForPaging = 118;
 static const long asn_VAL_81_Ngap_ignore = 1;
 static const long asn_VAL_81_Ngap_optional = 0;
-static const long asn_VAL_82_Ngap_id_PDUSessionResourceFailedToSetupListCxtRes = 55;
+static const long asn_VAL_82_Ngap_id_RedirectionVoiceFallback = 146;
 static const long asn_VAL_82_Ngap_ignore = 1;
 static const long asn_VAL_82_Ngap_optional = 0;
-static const long asn_VAL_83_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_83_Ngap_id_LocationReportingRequestType = 33;
 static const long asn_VAL_83_Ngap_ignore = 1;
 static const long asn_VAL_83_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_InitialContextSetupResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_79_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_79_Ngap_ignore },
+static const long asn_VAL_84_Ngap_id_CNAssistedRANTuning = 165;
+static const long asn_VAL_84_Ngap_ignore = 1;
+static const long asn_VAL_84_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_InitialContextSetupRequestIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_63_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_63_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_79_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_80_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_80_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_63_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_64_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_64_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_80_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_81_Ngap_id_PDUSessionResourceSetupListCxtRes },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_64_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_65_Ngap_id_OldAMF },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_65_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFName },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_65_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_66_Ngap_id_UEAggregateMaximumBitRate },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_66_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_66_Ngap_conditional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_67_Ngap_id_CoreNetworkAssistanceInformationForInactive },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_67_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CoreNetworkAssistanceInformationForInactive },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_67_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_68_Ngap_id_GUAMI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_68_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_GUAMI },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_68_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_69_Ngap_id_PDUSessionResourceSetupListCxtReq },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_69_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListCxtReq },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_69_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_70_Ngap_id_AllowedNSSAI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_70_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_70_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_71_Ngap_id_UESecurityCapabilities },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_71_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_71_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_72_Ngap_id_SecurityKey },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_72_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityKey },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_72_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_73_Ngap_id_TraceActivation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_73_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_TraceActivation },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_73_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_74_Ngap_id_MobilityRestrictionList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_74_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_MobilityRestrictionList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_74_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_75_Ngap_id_UERadioCapability },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_75_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UERadioCapability },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_75_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_76_Ngap_id_IndexToRFSP },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_76_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_IndexToRFSP },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_76_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_77_Ngap_id_MaskedIMEISV },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_77_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_MaskedIMEISV },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_77_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_78_Ngap_id_NAS_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_78_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_78_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_79_Ngap_id_EmergencyFallbackIndicator },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_79_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_EmergencyFallbackIndicator },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_79_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_80_Ngap_id_RRCInactiveTransitionReportRequest },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_80_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCInactiveTransitionReportRequest },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_80_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_81_Ngap_id_UERadioCapabilityForPaging },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_81_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListCxtRes },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UERadioCapabilityForPaging },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_81_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_82_Ngap_id_PDUSessionResourceFailedToSetupListCxtRes },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_82_Ngap_id_RedirectionVoiceFallback },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_82_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToSetupListCxtRes },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RedirectionVoiceFallback },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_82_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_83_Ngap_id_CriticalityDiagnostics },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_83_Ngap_id_LocationReportingRequestType },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_83_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_LocationReportingRequestType },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_83_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_84_Ngap_id_CNAssistedRANTuning },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_84_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CNAssistedRANTuning },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_84_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_InitialContextSetupRequestIEs_1[] = {
+	{ 22, 4, asn_IOS_Ngap_InitialContextSetupRequestIEs_1_rows }
+};
+static const long asn_VAL_85_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_85_Ngap_ignore = 1;
+static const long asn_VAL_85_Ngap_mandatory = 2;
+static const long asn_VAL_86_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_86_Ngap_ignore = 1;
+static const long asn_VAL_86_Ngap_mandatory = 2;
+static const long asn_VAL_87_Ngap_id_PDUSessionResourceSetupListCxtRes = 72;
+static const long asn_VAL_87_Ngap_ignore = 1;
+static const long asn_VAL_87_Ngap_optional = 0;
+static const long asn_VAL_88_Ngap_id_PDUSessionResourceFailedToSetupListCxtRes = 55;
+static const long asn_VAL_88_Ngap_ignore = 1;
+static const long asn_VAL_88_Ngap_optional = 0;
+static const long asn_VAL_89_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_89_Ngap_ignore = 1;
+static const long asn_VAL_89_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_InitialContextSetupResponseIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_85_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_85_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_85_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_86_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_86_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_86_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_87_Ngap_id_PDUSessionResourceSetupListCxtRes },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_87_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListCxtRes },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_87_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_88_Ngap_id_PDUSessionResourceFailedToSetupListCxtRes },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_88_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToSetupListCxtRes },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_88_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_89_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_89_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_83_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_89_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_InitialContextSetupResponseIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_InitialContextSetupResponseIEs_1_rows }
 };
-static const long asn_VAL_84_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_84_Ngap_ignore = 1;
-static const long asn_VAL_84_Ngap_mandatory = 2;
-static const long asn_VAL_85_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_85_Ngap_ignore = 1;
-static const long asn_VAL_85_Ngap_mandatory = 2;
-static const long asn_VAL_86_Ngap_id_PDUSessionResourceFailedToSetupListCxtFail = 132;
-static const long asn_VAL_86_Ngap_ignore = 1;
-static const long asn_VAL_86_Ngap_optional = 0;
-static const long asn_VAL_87_Ngap_id_Cause = 15;
-static const long asn_VAL_87_Ngap_ignore = 1;
-static const long asn_VAL_87_Ngap_mandatory = 2;
-static const long asn_VAL_88_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_88_Ngap_ignore = 1;
-static const long asn_VAL_88_Ngap_optional = 0;
+static const long asn_VAL_90_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_90_Ngap_ignore = 1;
+static const long asn_VAL_90_Ngap_mandatory = 2;
+static const long asn_VAL_91_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_91_Ngap_ignore = 1;
+static const long asn_VAL_91_Ngap_mandatory = 2;
+static const long asn_VAL_92_Ngap_id_PDUSessionResourceFailedToSetupListCxtFail = 132;
+static const long asn_VAL_92_Ngap_ignore = 1;
+static const long asn_VAL_92_Ngap_optional = 0;
+static const long asn_VAL_93_Ngap_id_Cause = 15;
+static const long asn_VAL_93_Ngap_ignore = 1;
+static const long asn_VAL_93_Ngap_mandatory = 2;
+static const long asn_VAL_94_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_94_Ngap_ignore = 1;
+static const long asn_VAL_94_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_InitialContextSetupFailureIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_84_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_84_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_90_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_90_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_84_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_85_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_85_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_90_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_91_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_91_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_85_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_86_Ngap_id_PDUSessionResourceFailedToSetupListCxtFail },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_86_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_91_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_92_Ngap_id_PDUSessionResourceFailedToSetupListCxtFail },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_92_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToSetupListCxtFail },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_86_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_87_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_87_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_92_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_93_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_93_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_87_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_88_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_88_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_93_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_94_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_94_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_88_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_94_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_InitialContextSetupFailureIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_InitialContextSetupFailureIEs_1_rows }
 };
-static const long asn_VAL_89_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_89_Ngap_reject = 0;
-static const long asn_VAL_89_Ngap_mandatory = 2;
-static const long asn_VAL_90_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_90_Ngap_reject = 0;
-static const long asn_VAL_90_Ngap_mandatory = 2;
-static const long asn_VAL_91_Ngap_id_PDUSessionResourceListCxtRelReq = 133;
-static const long asn_VAL_91_Ngap_reject = 0;
-static const long asn_VAL_91_Ngap_optional = 0;
-static const long asn_VAL_92_Ngap_id_Cause = 15;
-static const long asn_VAL_92_Ngap_ignore = 1;
-static const long asn_VAL_92_Ngap_mandatory = 2;
+static const long asn_VAL_95_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_95_Ngap_reject = 0;
+static const long asn_VAL_95_Ngap_mandatory = 2;
+static const long asn_VAL_96_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_96_Ngap_reject = 0;
+static const long asn_VAL_96_Ngap_mandatory = 2;
+static const long asn_VAL_97_Ngap_id_PDUSessionResourceListCxtRelReq = 133;
+static const long asn_VAL_97_Ngap_reject = 0;
+static const long asn_VAL_97_Ngap_optional = 0;
+static const long asn_VAL_98_Ngap_id_Cause = 15;
+static const long asn_VAL_98_Ngap_ignore = 1;
+static const long asn_VAL_98_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_UEContextReleaseRequest_IEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_89_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_89_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_95_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_95_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_89_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_90_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_90_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_95_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_96_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_96_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_90_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_91_Ngap_id_PDUSessionResourceListCxtRelReq },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_91_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_96_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_97_Ngap_id_PDUSessionResourceListCxtRelReq },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_97_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceListCxtRelReq },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_91_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_92_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_92_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_97_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_98_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_98_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_92_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_98_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UEContextReleaseRequest_IEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_UEContextReleaseRequest_IEs_1_rows }
 };
-static const long asn_VAL_93_Ngap_id_UE_NGAP_IDs = 114;
-static const long asn_VAL_93_Ngap_reject = 0;
-static const long asn_VAL_93_Ngap_mandatory = 2;
-static const long asn_VAL_94_Ngap_id_Cause = 15;
-static const long asn_VAL_94_Ngap_ignore = 1;
-static const long asn_VAL_94_Ngap_mandatory = 2;
+static const long asn_VAL_99_Ngap_id_UE_NGAP_IDs = 114;
+static const long asn_VAL_99_Ngap_reject = 0;
+static const long asn_VAL_99_Ngap_mandatory = 2;
+static const long asn_VAL_100_Ngap_id_Cause = 15;
+static const long asn_VAL_100_Ngap_ignore = 1;
+static const long asn_VAL_100_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_UEContextReleaseCommand_IEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_93_Ngap_id_UE_NGAP_IDs },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_93_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_99_Ngap_id_UE_NGAP_IDs },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_99_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UE_NGAP_IDs },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_93_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_94_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_94_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_99_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_100_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_100_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_94_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_100_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UEContextReleaseCommand_IEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_UEContextReleaseCommand_IEs_1_rows }
 };
-static const long asn_VAL_95_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_95_Ngap_ignore = 1;
-static const long asn_VAL_95_Ngap_mandatory = 2;
-static const long asn_VAL_96_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_96_Ngap_ignore = 1;
-static const long asn_VAL_96_Ngap_mandatory = 2;
-static const long asn_VAL_97_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_97_Ngap_ignore = 1;
-static const long asn_VAL_97_Ngap_optional = 0;
-static const long asn_VAL_98_Ngap_id_InfoOnRecommendedCellsAndRANNodesForPaging = 32;
-static const long asn_VAL_98_Ngap_ignore = 1;
-static const long asn_VAL_98_Ngap_optional = 0;
-static const long asn_VAL_99_Ngap_id_PDUSessionResourceListCxtRelCpl = 60;
-static const long asn_VAL_99_Ngap_reject = 0;
-static const long asn_VAL_99_Ngap_optional = 0;
-static const long asn_VAL_100_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_100_Ngap_ignore = 1;
-static const long asn_VAL_100_Ngap_optional = 0;
+static const long asn_VAL_101_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_101_Ngap_ignore = 1;
+static const long asn_VAL_101_Ngap_mandatory = 2;
+static const long asn_VAL_102_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_102_Ngap_ignore = 1;
+static const long asn_VAL_102_Ngap_mandatory = 2;
+static const long asn_VAL_103_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_103_Ngap_ignore = 1;
+static const long asn_VAL_103_Ngap_optional = 0;
+static const long asn_VAL_104_Ngap_id_InfoOnRecommendedCellsAndRANNodesForPaging = 32;
+static const long asn_VAL_104_Ngap_ignore = 1;
+static const long asn_VAL_104_Ngap_optional = 0;
+static const long asn_VAL_105_Ngap_id_PDUSessionResourceListCxtRelCpl = 60;
+static const long asn_VAL_105_Ngap_reject = 0;
+static const long asn_VAL_105_Ngap_optional = 0;
+static const long asn_VAL_106_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_106_Ngap_ignore = 1;
+static const long asn_VAL_106_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_UEContextReleaseComplete_IEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_95_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_95_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_101_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_101_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_95_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_96_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_96_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_101_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_102_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_102_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_96_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_97_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_97_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_102_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_103_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_103_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_97_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_98_Ngap_id_InfoOnRecommendedCellsAndRANNodesForPaging },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_98_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_103_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_104_Ngap_id_InfoOnRecommendedCellsAndRANNodesForPaging },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_104_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_InfoOnRecommendedCellsAndRANNodesForPaging },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_98_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_99_Ngap_id_PDUSessionResourceListCxtRelCpl },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_99_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_104_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_105_Ngap_id_PDUSessionResourceListCxtRelCpl },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_105_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceListCxtRelCpl },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_99_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_100_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_100_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_105_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_106_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_106_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_100_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_106_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UEContextReleaseComplete_IEs_1[] = {
 	{ 6, 4, asn_IOS_Ngap_UEContextReleaseComplete_IEs_1_rows }
 };
-static const long asn_VAL_101_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_101_Ngap_reject = 0;
-static const long asn_VAL_101_Ngap_mandatory = 2;
-static const long asn_VAL_102_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_102_Ngap_reject = 0;
-static const long asn_VAL_102_Ngap_mandatory = 2;
-static const long asn_VAL_103_Ngap_id_RANPagingPriority = 83;
-static const long asn_VAL_103_Ngap_ignore = 1;
-static const long asn_VAL_103_Ngap_optional = 0;
-static const long asn_VAL_104_Ngap_id_SecurityKey = 94;
-static const long asn_VAL_104_Ngap_reject = 0;
-static const long asn_VAL_104_Ngap_optional = 0;
-static const long asn_VAL_105_Ngap_id_IndexToRFSP = 31;
-static const long asn_VAL_105_Ngap_ignore = 1;
-static const long asn_VAL_105_Ngap_optional = 0;
-static const long asn_VAL_106_Ngap_id_UEAggregateMaximumBitRate = 110;
-static const long asn_VAL_106_Ngap_ignore = 1;
-static const long asn_VAL_106_Ngap_optional = 0;
-static const long asn_VAL_107_Ngap_id_UESecurityCapabilities = 119;
+static const long asn_VAL_107_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_107_Ngap_reject = 0;
-static const long asn_VAL_107_Ngap_optional = 0;
-static const long asn_VAL_108_Ngap_id_CoreNetworkAssistanceInformation = 18;
-static const long asn_VAL_108_Ngap_ignore = 1;
-static const long asn_VAL_108_Ngap_optional = 0;
-static const long asn_VAL_109_Ngap_id_EmergencyFallbackIndicator = 24;
-static const long asn_VAL_109_Ngap_reject = 0;
+static const long asn_VAL_107_Ngap_mandatory = 2;
+static const long asn_VAL_108_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_108_Ngap_reject = 0;
+static const long asn_VAL_108_Ngap_mandatory = 2;
+static const long asn_VAL_109_Ngap_id_RANPagingPriority = 83;
+static const long asn_VAL_109_Ngap_ignore = 1;
 static const long asn_VAL_109_Ngap_optional = 0;
-static const long asn_VAL_110_Ngap_id_NewAMF_UE_NGAP_ID = 40;
-static const long asn_VAL_110_Ngap_ignore = 1;
+static const long asn_VAL_110_Ngap_id_SecurityKey = 94;
+static const long asn_VAL_110_Ngap_reject = 0;
 static const long asn_VAL_110_Ngap_optional = 0;
-static const long asn_VAL_111_Ngap_id_RRCInactiveTransitionReportRequest = 91;
+static const long asn_VAL_111_Ngap_id_IndexToRFSP = 31;
 static const long asn_VAL_111_Ngap_ignore = 1;
 static const long asn_VAL_111_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_UEContextModificationRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_101_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_101_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_101_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_102_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_102_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_102_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_103_Ngap_id_RANPagingPriority },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_103_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_103_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_104_Ngap_id_SecurityKey },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_104_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityKey },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_104_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_105_Ngap_id_IndexToRFSP },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_105_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_IndexToRFSP },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_105_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_106_Ngap_id_UEAggregateMaximumBitRate },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_106_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_106_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_107_Ngap_id_UESecurityCapabilities },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_107_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_107_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_108_Ngap_id_CoreNetworkAssistanceInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_108_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_CoreNetworkAssistanceInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_108_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_109_Ngap_id_EmergencyFallbackIndicator },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_109_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_EmergencyFallbackIndicator },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_109_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_110_Ngap_id_NewAMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_110_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_110_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_111_Ngap_id_RRCInactiveTransitionReportRequest },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_111_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCInactiveTransitionReportRequest },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_111_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_UEContextModificationRequestIEs_1[] = {
-	{ 11, 4, asn_IOS_Ngap_UEContextModificationRequestIEs_1_rows }
-};
-static const long asn_VAL_112_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_112_Ngap_id_UEAggregateMaximumBitRate = 110;
 static const long asn_VAL_112_Ngap_ignore = 1;
-static const long asn_VAL_112_Ngap_mandatory = 2;
-static const long asn_VAL_113_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_113_Ngap_ignore = 1;
-static const long asn_VAL_113_Ngap_mandatory = 2;
-static const long asn_VAL_114_Ngap_id_RRCState = 92;
+static const long asn_VAL_112_Ngap_optional = 0;
+static const long asn_VAL_113_Ngap_id_UESecurityCapabilities = 119;
+static const long asn_VAL_113_Ngap_reject = 0;
+static const long asn_VAL_113_Ngap_optional = 0;
+static const long asn_VAL_114_Ngap_id_CoreNetworkAssistanceInformationForInactive = 18;
 static const long asn_VAL_114_Ngap_ignore = 1;
 static const long asn_VAL_114_Ngap_optional = 0;
-static const long asn_VAL_115_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_115_Ngap_ignore = 1;
+static const long asn_VAL_115_Ngap_id_EmergencyFallbackIndicator = 24;
+static const long asn_VAL_115_Ngap_reject = 0;
 static const long asn_VAL_115_Ngap_optional = 0;
-static const long asn_VAL_116_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_116_Ngap_ignore = 1;
+static const long asn_VAL_116_Ngap_id_NewAMF_UE_NGAP_ID = 40;
+static const long asn_VAL_116_Ngap_reject = 0;
 static const long asn_VAL_116_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_UEContextModificationResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_112_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_112_Ngap_ignore },
+static const long asn_VAL_117_Ngap_id_RRCInactiveTransitionReportRequest = 91;
+static const long asn_VAL_117_Ngap_ignore = 1;
+static const long asn_VAL_117_Ngap_optional = 0;
+static const long asn_VAL_118_Ngap_id_NewGUAMI = 162;
+static const long asn_VAL_118_Ngap_reject = 0;
+static const long asn_VAL_118_Ngap_optional = 0;
+static const long asn_VAL_119_Ngap_id_CNAssistedRANTuning = 165;
+static const long asn_VAL_119_Ngap_ignore = 1;
+static const long asn_VAL_119_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_UEContextModificationRequestIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_107_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_107_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_112_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_113_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_113_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_107_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_108_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_108_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_113_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_114_Ngap_id_RRCState },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_108_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_109_Ngap_id_RANPagingPriority },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_109_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_109_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_110_Ngap_id_SecurityKey },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_110_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityKey },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_110_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_111_Ngap_id_IndexToRFSP },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_111_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_IndexToRFSP },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_111_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_112_Ngap_id_UEAggregateMaximumBitRate },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_112_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_112_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_113_Ngap_id_UESecurityCapabilities },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_113_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_113_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_114_Ngap_id_CoreNetworkAssistanceInformationForInactive },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_114_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCState },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CoreNetworkAssistanceInformationForInactive },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_114_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_115_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_115_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_115_Ngap_id_EmergencyFallbackIndicator },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_115_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_EmergencyFallbackIndicator },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_115_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_116_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_116_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_116_Ngap_id_NewAMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_116_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_116_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_117_Ngap_id_RRCInactiveTransitionReportRequest },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_117_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCInactiveTransitionReportRequest },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_117_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_118_Ngap_id_NewGUAMI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_118_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_GUAMI },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_118_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_119_Ngap_id_CNAssistedRANTuning },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_119_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CNAssistedRANTuning },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_119_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_UEContextModificationRequestIEs_1[] = {
+	{ 13, 4, asn_IOS_Ngap_UEContextModificationRequestIEs_1_rows }
+};
+static const long asn_VAL_120_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_120_Ngap_ignore = 1;
+static const long asn_VAL_120_Ngap_mandatory = 2;
+static const long asn_VAL_121_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_121_Ngap_ignore = 1;
+static const long asn_VAL_121_Ngap_mandatory = 2;
+static const long asn_VAL_122_Ngap_id_RRCState = 92;
+static const long asn_VAL_122_Ngap_ignore = 1;
+static const long asn_VAL_122_Ngap_optional = 0;
+static const long asn_VAL_123_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_123_Ngap_ignore = 1;
+static const long asn_VAL_123_Ngap_optional = 0;
+static const long asn_VAL_124_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_124_Ngap_ignore = 1;
+static const long asn_VAL_124_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_UEContextModificationResponseIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_120_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_120_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_120_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_121_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_121_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_121_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_122_Ngap_id_RRCState },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_122_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCState },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_122_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_123_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_123_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_123_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_124_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_124_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_116_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_124_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UEContextModificationResponseIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_UEContextModificationResponseIEs_1_rows }
 };
-static const long asn_VAL_117_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_117_Ngap_ignore = 1;
-static const long asn_VAL_117_Ngap_mandatory = 2;
-static const long asn_VAL_118_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_118_Ngap_ignore = 1;
-static const long asn_VAL_118_Ngap_mandatory = 2;
-static const long asn_VAL_119_Ngap_id_Cause = 15;
-static const long asn_VAL_119_Ngap_ignore = 1;
-static const long asn_VAL_119_Ngap_mandatory = 2;
-static const long asn_VAL_120_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_120_Ngap_ignore = 1;
-static const long asn_VAL_120_Ngap_optional = 0;
+static const long asn_VAL_125_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_125_Ngap_ignore = 1;
+static const long asn_VAL_125_Ngap_mandatory = 2;
+static const long asn_VAL_126_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_126_Ngap_ignore = 1;
+static const long asn_VAL_126_Ngap_mandatory = 2;
+static const long asn_VAL_127_Ngap_id_Cause = 15;
+static const long asn_VAL_127_Ngap_ignore = 1;
+static const long asn_VAL_127_Ngap_mandatory = 2;
+static const long asn_VAL_128_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_128_Ngap_ignore = 1;
+static const long asn_VAL_128_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_UEContextModificationFailureIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_117_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_117_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_125_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_125_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_117_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_118_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_118_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_125_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_126_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_126_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_118_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_119_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_119_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_126_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_127_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_127_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_119_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_120_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_120_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_127_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_128_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_128_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_120_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_128_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UEContextModificationFailureIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_UEContextModificationFailureIEs_1_rows }
 };
-static const long asn_VAL_121_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_121_Ngap_reject = 0;
-static const long asn_VAL_121_Ngap_mandatory = 2;
-static const long asn_VAL_122_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_122_Ngap_reject = 0;
-static const long asn_VAL_122_Ngap_mandatory = 2;
-static const long asn_VAL_123_Ngap_id_RRCState = 92;
-static const long asn_VAL_123_Ngap_ignore = 1;
-static const long asn_VAL_123_Ngap_mandatory = 2;
-static const long asn_VAL_124_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_124_Ngap_ignore = 1;
-static const long asn_VAL_124_Ngap_mandatory = 2;
+static const long asn_VAL_129_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_129_Ngap_reject = 0;
+static const long asn_VAL_129_Ngap_mandatory = 2;
+static const long asn_VAL_130_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_130_Ngap_reject = 0;
+static const long asn_VAL_130_Ngap_mandatory = 2;
+static const long asn_VAL_131_Ngap_id_RRCState = 92;
+static const long asn_VAL_131_Ngap_ignore = 1;
+static const long asn_VAL_131_Ngap_mandatory = 2;
+static const long asn_VAL_132_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_132_Ngap_ignore = 1;
+static const long asn_VAL_132_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_RRCInactiveTransitionReportIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_121_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_121_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_129_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_129_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_121_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_122_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_122_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_129_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_130_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_130_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_122_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_123_Ngap_id_RRCState },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_123_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_130_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_131_Ngap_id_RRCState },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_131_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCState },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_123_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_124_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_124_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_131_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_132_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_132_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_124_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_132_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_RRCInactiveTransitionReportIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_RRCInactiveTransitionReportIEs_1_rows }
-};
-static const long asn_VAL_125_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_125_Ngap_reject = 0;
-static const long asn_VAL_125_Ngap_mandatory = 2;
-static const long asn_VAL_126_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_126_Ngap_reject = 0;
-static const long asn_VAL_126_Ngap_mandatory = 2;
-static const long asn_VAL_127_Ngap_id_HandoverType = 29;
-static const long asn_VAL_127_Ngap_reject = 0;
-static const long asn_VAL_127_Ngap_mandatory = 2;
-static const long asn_VAL_128_Ngap_id_Cause = 15;
-static const long asn_VAL_128_Ngap_ignore = 1;
-static const long asn_VAL_128_Ngap_mandatory = 2;
-static const long asn_VAL_129_Ngap_id_TargetID = 105;
-static const long asn_VAL_129_Ngap_reject = 0;
-static const long asn_VAL_129_Ngap_mandatory = 2;
-static const long asn_VAL_130_Ngap_id_DirectForwardingPathAvailability = 22;
-static const long asn_VAL_130_Ngap_ignore = 1;
-static const long asn_VAL_130_Ngap_optional = 0;
-static const long asn_VAL_131_Ngap_id_PDUSessionResourceListHORqd = 61;
-static const long asn_VAL_131_Ngap_reject = 0;
-static const long asn_VAL_131_Ngap_mandatory = 2;
-static const long asn_VAL_132_Ngap_id_SourceToTarget_TransparentContainer = 101;
-static const long asn_VAL_132_Ngap_reject = 0;
-static const long asn_VAL_132_Ngap_mandatory = 2;
-static const asn_ioc_cell_t asn_IOS_Ngap_HandoverRequiredIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_125_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_125_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_125_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_126_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_126_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_126_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_127_Ngap_id_HandoverType },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_127_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_HandoverType },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_127_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_128_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_128_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_128_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_129_Ngap_id_TargetID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_129_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_TargetID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_129_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_130_Ngap_id_DirectForwardingPathAvailability },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_130_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_DirectForwardingPathAvailability },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_130_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_131_Ngap_id_PDUSessionResourceListHORqd },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_131_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceListHORqd },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_131_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_132_Ngap_id_SourceToTarget_TransparentContainer },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_132_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_SourceToTarget_TransparentContainer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_132_Ngap_mandatory }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_HandoverRequiredIEs_1[] = {
-	{ 8, 4, asn_IOS_Ngap_HandoverRequiredIEs_1_rows }
 };
 static const long asn_VAL_133_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_133_Ngap_reject = 0;
@@ -1050,22 +1050,22 @@ static const long asn_VAL_134_Ngap_mandatory = 2;
 static const long asn_VAL_135_Ngap_id_HandoverType = 29;
 static const long asn_VAL_135_Ngap_reject = 0;
 static const long asn_VAL_135_Ngap_mandatory = 2;
-static const long asn_VAL_136_Ngap_id_NASSecurityParametersFromNGRAN = 39;
-static const long asn_VAL_136_Ngap_reject = 0;
-static const long asn_VAL_136_Ngap_conditional = 1;
-static const long asn_VAL_137_Ngap_id_PDUSessionResourceHandoverList = 59;
-static const long asn_VAL_137_Ngap_ignore = 1;
+static const long asn_VAL_136_Ngap_id_Cause = 15;
+static const long asn_VAL_136_Ngap_ignore = 1;
+static const long asn_VAL_136_Ngap_mandatory = 2;
+static const long asn_VAL_137_Ngap_id_TargetID = 105;
+static const long asn_VAL_137_Ngap_reject = 0;
 static const long asn_VAL_137_Ngap_mandatory = 2;
-static const long asn_VAL_138_Ngap_id_PDUSessionResourceToReleaseListHOCmd = 78;
+static const long asn_VAL_138_Ngap_id_DirectForwardingPathAvailability = 22;
 static const long asn_VAL_138_Ngap_ignore = 1;
 static const long asn_VAL_138_Ngap_optional = 0;
-static const long asn_VAL_139_Ngap_id_TargetToSource_TransparentContainer = 106;
+static const long asn_VAL_139_Ngap_id_PDUSessionResourceListHORqd = 61;
 static const long asn_VAL_139_Ngap_reject = 0;
 static const long asn_VAL_139_Ngap_mandatory = 2;
-static const long asn_VAL_140_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_140_Ngap_ignore = 1;
-static const long asn_VAL_140_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_HandoverCommandIEs_1_rows[] = {
+static const long asn_VAL_140_Ngap_id_SourceToTarget_TransparentContainer = 101;
+static const long asn_VAL_140_Ngap_reject = 0;
+static const long asn_VAL_140_Ngap_mandatory = 2;
+static const asn_ioc_cell_t asn_IOS_Ngap_HandoverRequiredIEs_1_rows[] = {
 	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_133_Ngap_id_AMF_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_133_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
@@ -1078,1125 +1078,1115 @@ static const asn_ioc_cell_t asn_IOS_Ngap_HandoverCommandIEs_1_rows[] = {
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_135_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_HandoverType },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_135_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_136_Ngap_id_NASSecurityParametersFromNGRAN },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_136_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NASSecurityParametersFromNGRAN },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_136_Ngap_conditional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_137_Ngap_id_PDUSessionResourceHandoverList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_137_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceHandoverList },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_136_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_136_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_136_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_137_Ngap_id_TargetID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_137_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_TargetID },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_137_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_138_Ngap_id_PDUSessionResourceToReleaseListHOCmd },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_138_Ngap_id_DirectForwardingPathAvailability },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_138_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceToReleaseListHOCmd },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_DirectForwardingPathAvailability },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_138_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_139_Ngap_id_TargetToSource_TransparentContainer },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_139_Ngap_id_PDUSessionResourceListHORqd },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_139_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_TargetToSource_TransparentContainer },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceListHORqd },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_139_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_140_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_140_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_140_Ngap_id_SourceToTarget_TransparentContainer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_140_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SourceToTarget_TransparentContainer },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_140_Ngap_mandatory }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_HandoverRequiredIEs_1[] = {
+	{ 8, 4, asn_IOS_Ngap_HandoverRequiredIEs_1_rows }
+};
+static const long asn_VAL_141_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_141_Ngap_reject = 0;
+static const long asn_VAL_141_Ngap_mandatory = 2;
+static const long asn_VAL_142_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_142_Ngap_reject = 0;
+static const long asn_VAL_142_Ngap_mandatory = 2;
+static const long asn_VAL_143_Ngap_id_HandoverType = 29;
+static const long asn_VAL_143_Ngap_reject = 0;
+static const long asn_VAL_143_Ngap_mandatory = 2;
+static const long asn_VAL_144_Ngap_id_NASSecurityParametersFromNGRAN = 39;
+static const long asn_VAL_144_Ngap_reject = 0;
+static const long asn_VAL_144_Ngap_conditional = 1;
+static const long asn_VAL_145_Ngap_id_PDUSessionResourceHandoverList = 59;
+static const long asn_VAL_145_Ngap_ignore = 1;
+static const long asn_VAL_145_Ngap_optional = 0;
+static const long asn_VAL_146_Ngap_id_PDUSessionResourceToReleaseListHOCmd = 78;
+static const long asn_VAL_146_Ngap_ignore = 1;
+static const long asn_VAL_146_Ngap_optional = 0;
+static const long asn_VAL_147_Ngap_id_TargetToSource_TransparentContainer = 106;
+static const long asn_VAL_147_Ngap_reject = 0;
+static const long asn_VAL_147_Ngap_mandatory = 2;
+static const long asn_VAL_148_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_148_Ngap_ignore = 1;
+static const long asn_VAL_148_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_HandoverCommandIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_141_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_141_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_141_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_142_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_142_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_142_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_143_Ngap_id_HandoverType },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_143_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_HandoverType },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_143_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_144_Ngap_id_NASSecurityParametersFromNGRAN },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_144_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NASSecurityParametersFromNGRAN },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_144_Ngap_conditional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_145_Ngap_id_PDUSessionResourceHandoverList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_145_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceHandoverList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_145_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_146_Ngap_id_PDUSessionResourceToReleaseListHOCmd },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_146_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceToReleaseListHOCmd },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_146_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_147_Ngap_id_TargetToSource_TransparentContainer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_147_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_TargetToSource_TransparentContainer },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_147_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_148_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_148_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_140_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_148_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_HandoverCommandIEs_1[] = {
 	{ 8, 4, asn_IOS_Ngap_HandoverCommandIEs_1_rows }
 };
-static const long asn_VAL_141_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_141_Ngap_ignore = 1;
-static const long asn_VAL_141_Ngap_mandatory = 2;
-static const long asn_VAL_142_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_142_Ngap_ignore = 1;
-static const long asn_VAL_142_Ngap_mandatory = 2;
-static const long asn_VAL_143_Ngap_id_Cause = 15;
-static const long asn_VAL_143_Ngap_ignore = 1;
-static const long asn_VAL_143_Ngap_mandatory = 2;
-static const long asn_VAL_144_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_144_Ngap_ignore = 1;
-static const long asn_VAL_144_Ngap_optional = 0;
+static const long asn_VAL_149_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_149_Ngap_ignore = 1;
+static const long asn_VAL_149_Ngap_mandatory = 2;
+static const long asn_VAL_150_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_150_Ngap_ignore = 1;
+static const long asn_VAL_150_Ngap_mandatory = 2;
+static const long asn_VAL_151_Ngap_id_Cause = 15;
+static const long asn_VAL_151_Ngap_ignore = 1;
+static const long asn_VAL_151_Ngap_mandatory = 2;
+static const long asn_VAL_152_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_152_Ngap_ignore = 1;
+static const long asn_VAL_152_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_HandoverPreparationFailureIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_141_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_141_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_149_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_149_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_141_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_142_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_142_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_149_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_150_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_150_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_142_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_143_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_143_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_150_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_151_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_151_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_143_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_144_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_144_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_151_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_152_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_152_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_144_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_152_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_HandoverPreparationFailureIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_HandoverPreparationFailureIEs_1_rows }
 };
-static const long asn_VAL_145_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_145_Ngap_reject = 0;
-static const long asn_VAL_145_Ngap_mandatory = 2;
-static const long asn_VAL_146_Ngap_id_HandoverType = 29;
-static const long asn_VAL_146_Ngap_reject = 0;
-static const long asn_VAL_146_Ngap_mandatory = 2;
-static const long asn_VAL_147_Ngap_id_Cause = 15;
-static const long asn_VAL_147_Ngap_ignore = 1;
-static const long asn_VAL_147_Ngap_mandatory = 2;
-static const long asn_VAL_148_Ngap_id_UEAggregateMaximumBitRate = 110;
-static const long asn_VAL_148_Ngap_reject = 0;
-static const long asn_VAL_148_Ngap_mandatory = 2;
-static const long asn_VAL_149_Ngap_id_CoreNetworkAssistanceInformation = 18;
-static const long asn_VAL_149_Ngap_ignore = 1;
-static const long asn_VAL_149_Ngap_optional = 0;
-static const long asn_VAL_150_Ngap_id_UESecurityCapabilities = 119;
-static const long asn_VAL_150_Ngap_reject = 0;
-static const long asn_VAL_150_Ngap_mandatory = 2;
-static const long asn_VAL_151_Ngap_id_SecurityContext = 93;
-static const long asn_VAL_151_Ngap_reject = 0;
-static const long asn_VAL_151_Ngap_mandatory = 2;
-static const long asn_VAL_152_Ngap_id_NewSecurityContextInd = 41;
-static const long asn_VAL_152_Ngap_reject = 0;
-static const long asn_VAL_152_Ngap_optional = 0;
-static const long asn_VAL_153_Ngap_id_NASC = 37;
+static const long asn_VAL_153_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_153_Ngap_reject = 0;
-static const long asn_VAL_153_Ngap_optional = 0;
-static const long asn_VAL_154_Ngap_id_PDUSessionResourceSetupListHOReq = 73;
+static const long asn_VAL_153_Ngap_mandatory = 2;
+static const long asn_VAL_154_Ngap_id_HandoverType = 29;
 static const long asn_VAL_154_Ngap_reject = 0;
 static const long asn_VAL_154_Ngap_mandatory = 2;
-static const long asn_VAL_155_Ngap_id_AllowedNSSAI = 0;
-static const long asn_VAL_155_Ngap_reject = 0;
+static const long asn_VAL_155_Ngap_id_Cause = 15;
+static const long asn_VAL_155_Ngap_ignore = 1;
 static const long asn_VAL_155_Ngap_mandatory = 2;
-static const long asn_VAL_156_Ngap_id_TraceActivation = 108;
-static const long asn_VAL_156_Ngap_ignore = 1;
-static const long asn_VAL_156_Ngap_optional = 0;
-static const long asn_VAL_157_Ngap_id_MaskedIMEISV = 34;
+static const long asn_VAL_156_Ngap_id_UEAggregateMaximumBitRate = 110;
+static const long asn_VAL_156_Ngap_reject = 0;
+static const long asn_VAL_156_Ngap_mandatory = 2;
+static const long asn_VAL_157_Ngap_id_CoreNetworkAssistanceInformationForInactive = 18;
 static const long asn_VAL_157_Ngap_ignore = 1;
 static const long asn_VAL_157_Ngap_optional = 0;
-static const long asn_VAL_158_Ngap_id_SourceToTarget_TransparentContainer = 101;
+static const long asn_VAL_158_Ngap_id_UESecurityCapabilities = 119;
 static const long asn_VAL_158_Ngap_reject = 0;
 static const long asn_VAL_158_Ngap_mandatory = 2;
-static const long asn_VAL_159_Ngap_id_MobilityRestrictionList = 36;
-static const long asn_VAL_159_Ngap_ignore = 1;
-static const long asn_VAL_159_Ngap_optional = 0;
-static const long asn_VAL_160_Ngap_id_LocationReportingRequestType = 33;
-static const long asn_VAL_160_Ngap_ignore = 1;
+static const long asn_VAL_159_Ngap_id_SecurityContext = 93;
+static const long asn_VAL_159_Ngap_reject = 0;
+static const long asn_VAL_159_Ngap_mandatory = 2;
+static const long asn_VAL_160_Ngap_id_NewSecurityContextInd = 41;
+static const long asn_VAL_160_Ngap_reject = 0;
 static const long asn_VAL_160_Ngap_optional = 0;
-static const long asn_VAL_161_Ngap_id_RRCInactiveTransitionReportRequest = 91;
-static const long asn_VAL_161_Ngap_ignore = 1;
+static const long asn_VAL_161_Ngap_id_NASC = 37;
+static const long asn_VAL_161_Ngap_reject = 0;
 static const long asn_VAL_161_Ngap_optional = 0;
-static const long asn_VAL_162_Ngap_id_GUAMI = 28;
+static const long asn_VAL_162_Ngap_id_PDUSessionResourceSetupListHOReq = 73;
 static const long asn_VAL_162_Ngap_reject = 0;
 static const long asn_VAL_162_Ngap_mandatory = 2;
-static const long asn_VAL_163_Ngap_id_RedirectionVoiceFallback = 146;
-static const long asn_VAL_163_Ngap_ignore = 1;
-static const long asn_VAL_163_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_HandoverRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_145_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_145_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_145_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_146_Ngap_id_HandoverType },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_146_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_HandoverType },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_146_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_147_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_147_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_147_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_148_Ngap_id_UEAggregateMaximumBitRate },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_148_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_148_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_149_Ngap_id_CoreNetworkAssistanceInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_149_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_CoreNetworkAssistanceInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_149_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_150_Ngap_id_UESecurityCapabilities },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_150_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_150_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_151_Ngap_id_SecurityContext },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_151_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityContext },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_151_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_152_Ngap_id_NewSecurityContextInd },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_152_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NewSecurityContextInd },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_152_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_153_Ngap_id_NASC },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_153_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_153_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_154_Ngap_id_PDUSessionResourceSetupListHOReq },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_154_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListHOReq },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_154_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_155_Ngap_id_AllowedNSSAI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_155_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_155_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_156_Ngap_id_TraceActivation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_156_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_TraceActivation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_156_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_157_Ngap_id_MaskedIMEISV },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_157_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_MaskedIMEISV },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_157_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_158_Ngap_id_SourceToTarget_TransparentContainer },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_158_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_SourceToTarget_TransparentContainer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_158_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_159_Ngap_id_MobilityRestrictionList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_159_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_MobilityRestrictionList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_159_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_160_Ngap_id_LocationReportingRequestType },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_160_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_LocationReportingRequestType },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_160_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_161_Ngap_id_RRCInactiveTransitionReportRequest },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_161_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCInactiveTransitionReportRequest },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_161_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_162_Ngap_id_GUAMI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_162_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_GUAMI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_162_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_163_Ngap_id_RedirectionVoiceFallback },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_163_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RedirectionVoiceFallback },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_163_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_HandoverRequestIEs_1[] = {
-	{ 19, 4, asn_IOS_Ngap_HandoverRequestIEs_1_rows }
-};
-static const long asn_VAL_164_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_163_Ngap_id_AllowedNSSAI = 0;
+static const long asn_VAL_163_Ngap_reject = 0;
+static const long asn_VAL_163_Ngap_mandatory = 2;
+static const long asn_VAL_164_Ngap_id_TraceActivation = 108;
 static const long asn_VAL_164_Ngap_ignore = 1;
-static const long asn_VAL_164_Ngap_mandatory = 2;
-static const long asn_VAL_165_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_164_Ngap_optional = 0;
+static const long asn_VAL_165_Ngap_id_MaskedIMEISV = 34;
 static const long asn_VAL_165_Ngap_ignore = 1;
-static const long asn_VAL_165_Ngap_mandatory = 2;
-static const long asn_VAL_166_Ngap_id_PDUSessionResourceAdmittedList = 53;
-static const long asn_VAL_166_Ngap_ignore = 1;
+static const long asn_VAL_165_Ngap_optional = 0;
+static const long asn_VAL_166_Ngap_id_SourceToTarget_TransparentContainer = 101;
+static const long asn_VAL_166_Ngap_reject = 0;
 static const long asn_VAL_166_Ngap_mandatory = 2;
-static const long asn_VAL_167_Ngap_id_PDUSessionResourceFailedToSetupListHOAck = 56;
+static const long asn_VAL_167_Ngap_id_MobilityRestrictionList = 36;
 static const long asn_VAL_167_Ngap_ignore = 1;
 static const long asn_VAL_167_Ngap_optional = 0;
-static const long asn_VAL_168_Ngap_id_TargetToSource_TransparentContainer = 106;
-static const long asn_VAL_168_Ngap_reject = 0;
-static const long asn_VAL_168_Ngap_mandatory = 2;
-static const long asn_VAL_169_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_168_Ngap_id_LocationReportingRequestType = 33;
+static const long asn_VAL_168_Ngap_ignore = 1;
+static const long asn_VAL_168_Ngap_optional = 0;
+static const long asn_VAL_169_Ngap_id_RRCInactiveTransitionReportRequest = 91;
 static const long asn_VAL_169_Ngap_ignore = 1;
 static const long asn_VAL_169_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_HandoverRequestAcknowledgeIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_164_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_164_Ngap_ignore },
+static const long asn_VAL_170_Ngap_id_GUAMI = 28;
+static const long asn_VAL_170_Ngap_reject = 0;
+static const long asn_VAL_170_Ngap_mandatory = 2;
+static const long asn_VAL_171_Ngap_id_RedirectionVoiceFallback = 146;
+static const long asn_VAL_171_Ngap_ignore = 1;
+static const long asn_VAL_171_Ngap_optional = 0;
+static const long asn_VAL_172_Ngap_id_CNAssistedRANTuning = 165;
+static const long asn_VAL_172_Ngap_ignore = 1;
+static const long asn_VAL_172_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_HandoverRequestIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_153_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_153_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_164_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_165_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_153_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_154_Ngap_id_HandoverType },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_154_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_HandoverType },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_154_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_155_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_155_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_155_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_156_Ngap_id_UEAggregateMaximumBitRate },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_156_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_156_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_157_Ngap_id_CoreNetworkAssistanceInformationForInactive },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_157_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CoreNetworkAssistanceInformationForInactive },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_157_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_158_Ngap_id_UESecurityCapabilities },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_158_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_158_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_159_Ngap_id_SecurityContext },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_159_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityContext },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_159_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_160_Ngap_id_NewSecurityContextInd },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_160_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NewSecurityContextInd },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_160_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_161_Ngap_id_NASC },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_161_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_161_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_162_Ngap_id_PDUSessionResourceSetupListHOReq },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_162_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSetupListHOReq },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_162_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_163_Ngap_id_AllowedNSSAI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_163_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_163_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_164_Ngap_id_TraceActivation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_164_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_TraceActivation },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_164_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_165_Ngap_id_MaskedIMEISV },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_165_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_165_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_166_Ngap_id_PDUSessionResourceAdmittedList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_166_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceAdmittedList },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_MaskedIMEISV },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_165_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_166_Ngap_id_SourceToTarget_TransparentContainer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_166_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SourceToTarget_TransparentContainer },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_166_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_167_Ngap_id_PDUSessionResourceFailedToSetupListHOAck },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_167_Ngap_id_MobilityRestrictionList },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_167_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToSetupListHOAck },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_MobilityRestrictionList },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_167_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_168_Ngap_id_TargetToSource_TransparentContainer },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_168_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_TargetToSource_TransparentContainer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_168_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_169_Ngap_id_CriticalityDiagnostics },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_168_Ngap_id_LocationReportingRequestType },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_168_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_LocationReportingRequestType },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_168_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_169_Ngap_id_RRCInactiveTransitionReportRequest },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_169_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCInactiveTransitionReportRequest },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_169_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_170_Ngap_id_GUAMI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_170_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_GUAMI },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_170_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_171_Ngap_id_RedirectionVoiceFallback },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_171_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RedirectionVoiceFallback },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_171_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_172_Ngap_id_CNAssistedRANTuning },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_172_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CNAssistedRANTuning },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_172_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_HandoverRequestIEs_1[] = {
+	{ 20, 4, asn_IOS_Ngap_HandoverRequestIEs_1_rows }
+};
+static const long asn_VAL_173_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_173_Ngap_ignore = 1;
+static const long asn_VAL_173_Ngap_mandatory = 2;
+static const long asn_VAL_174_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_174_Ngap_ignore = 1;
+static const long asn_VAL_174_Ngap_mandatory = 2;
+static const long asn_VAL_175_Ngap_id_PDUSessionResourceAdmittedList = 53;
+static const long asn_VAL_175_Ngap_ignore = 1;
+static const long asn_VAL_175_Ngap_mandatory = 2;
+static const long asn_VAL_176_Ngap_id_PDUSessionResourceFailedToSetupListHOAck = 56;
+static const long asn_VAL_176_Ngap_ignore = 1;
+static const long asn_VAL_176_Ngap_optional = 0;
+static const long asn_VAL_177_Ngap_id_TargetToSource_TransparentContainer = 106;
+static const long asn_VAL_177_Ngap_reject = 0;
+static const long asn_VAL_177_Ngap_mandatory = 2;
+static const long asn_VAL_178_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_178_Ngap_ignore = 1;
+static const long asn_VAL_178_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_HandoverRequestAcknowledgeIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_173_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_173_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_173_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_174_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_174_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_174_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_175_Ngap_id_PDUSessionResourceAdmittedList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_175_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceAdmittedList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_175_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_176_Ngap_id_PDUSessionResourceFailedToSetupListHOAck },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_176_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToSetupListHOAck },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_176_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_177_Ngap_id_TargetToSource_TransparentContainer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_177_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_TargetToSource_TransparentContainer },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_177_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_178_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_178_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_169_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_178_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_HandoverRequestAcknowledgeIEs_1[] = {
 	{ 6, 4, asn_IOS_Ngap_HandoverRequestAcknowledgeIEs_1_rows }
 };
-static const long asn_VAL_170_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_170_Ngap_ignore = 1;
-static const long asn_VAL_170_Ngap_mandatory = 2;
-static const long asn_VAL_171_Ngap_id_Cause = 15;
-static const long asn_VAL_171_Ngap_ignore = 1;
-static const long asn_VAL_171_Ngap_mandatory = 2;
-static const long asn_VAL_172_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_172_Ngap_ignore = 1;
-static const long asn_VAL_172_Ngap_optional = 0;
+static const long asn_VAL_179_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_179_Ngap_ignore = 1;
+static const long asn_VAL_179_Ngap_mandatory = 2;
+static const long asn_VAL_180_Ngap_id_Cause = 15;
+static const long asn_VAL_180_Ngap_ignore = 1;
+static const long asn_VAL_180_Ngap_mandatory = 2;
+static const long asn_VAL_181_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_181_Ngap_ignore = 1;
+static const long asn_VAL_181_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_HandoverFailureIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_170_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_170_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_179_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_179_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_170_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_171_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_171_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_179_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_180_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_180_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_171_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_172_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_172_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_180_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_181_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_181_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_172_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_181_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_HandoverFailureIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_HandoverFailureIEs_1_rows }
 };
-static const long asn_VAL_173_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_173_Ngap_reject = 0;
-static const long asn_VAL_173_Ngap_mandatory = 2;
-static const long asn_VAL_174_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_174_Ngap_reject = 0;
-static const long asn_VAL_174_Ngap_mandatory = 2;
-static const long asn_VAL_175_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_175_Ngap_ignore = 1;
-static const long asn_VAL_175_Ngap_mandatory = 2;
+static const long asn_VAL_182_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_182_Ngap_reject = 0;
+static const long asn_VAL_182_Ngap_mandatory = 2;
+static const long asn_VAL_183_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_183_Ngap_reject = 0;
+static const long asn_VAL_183_Ngap_mandatory = 2;
+static const long asn_VAL_184_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_184_Ngap_ignore = 1;
+static const long asn_VAL_184_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_HandoverNotifyIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_173_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_173_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_182_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_182_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_173_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_174_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_174_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_182_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_183_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_183_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_174_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_175_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_175_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_183_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_184_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_184_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_175_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_184_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_HandoverNotifyIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_HandoverNotifyIEs_1_rows }
 };
-static const long asn_VAL_176_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_176_Ngap_reject = 0;
-static const long asn_VAL_176_Ngap_mandatory = 2;
-static const long asn_VAL_177_Ngap_id_SourceAMF_UE_NGAP_ID = 100;
-static const long asn_VAL_177_Ngap_reject = 0;
-static const long asn_VAL_177_Ngap_mandatory = 2;
-static const long asn_VAL_178_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_178_Ngap_ignore = 1;
-static const long asn_VAL_178_Ngap_mandatory = 2;
-static const long asn_VAL_179_Ngap_id_UESecurityCapabilities = 119;
-static const long asn_VAL_179_Ngap_ignore = 1;
-static const long asn_VAL_179_Ngap_mandatory = 2;
-static const long asn_VAL_180_Ngap_id_PDUSessionResourceToBeSwitchedDLList = 76;
-static const long asn_VAL_180_Ngap_reject = 0;
-static const long asn_VAL_180_Ngap_mandatory = 2;
-static const long asn_VAL_181_Ngap_id_PDUSessionResourceFailedToSetupListPSReq = 57;
-static const long asn_VAL_181_Ngap_ignore = 1;
-static const long asn_VAL_181_Ngap_optional = 0;
+static const long asn_VAL_185_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_185_Ngap_reject = 0;
+static const long asn_VAL_185_Ngap_mandatory = 2;
+static const long asn_VAL_186_Ngap_id_SourceAMF_UE_NGAP_ID = 100;
+static const long asn_VAL_186_Ngap_reject = 0;
+static const long asn_VAL_186_Ngap_mandatory = 2;
+static const long asn_VAL_187_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_187_Ngap_ignore = 1;
+static const long asn_VAL_187_Ngap_mandatory = 2;
+static const long asn_VAL_188_Ngap_id_UESecurityCapabilities = 119;
+static const long asn_VAL_188_Ngap_ignore = 1;
+static const long asn_VAL_188_Ngap_mandatory = 2;
+static const long asn_VAL_189_Ngap_id_PDUSessionResourceToBeSwitchedDLList = 76;
+static const long asn_VAL_189_Ngap_reject = 0;
+static const long asn_VAL_189_Ngap_mandatory = 2;
+static const long asn_VAL_190_Ngap_id_PDUSessionResourceFailedToSetupListPSReq = 57;
+static const long asn_VAL_190_Ngap_ignore = 1;
+static const long asn_VAL_190_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PathSwitchRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_176_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_176_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_185_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_185_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_176_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_177_Ngap_id_SourceAMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_177_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_185_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_186_Ngap_id_SourceAMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_186_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_177_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_178_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_178_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_186_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_187_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_187_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_178_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_179_Ngap_id_UESecurityCapabilities },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_179_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_187_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_188_Ngap_id_UESecurityCapabilities },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_188_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_179_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_180_Ngap_id_PDUSessionResourceToBeSwitchedDLList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_180_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_188_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_189_Ngap_id_PDUSessionResourceToBeSwitchedDLList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_189_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceToBeSwitchedDLList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_180_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_181_Ngap_id_PDUSessionResourceFailedToSetupListPSReq },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_181_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_189_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_190_Ngap_id_PDUSessionResourceFailedToSetupListPSReq },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_190_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceFailedToSetupListPSReq },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_181_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_190_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PathSwitchRequestIEs_1[] = {
 	{ 6, 4, asn_IOS_Ngap_PathSwitchRequestIEs_1_rows }
 };
-static const long asn_VAL_182_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_182_Ngap_ignore = 1;
-static const long asn_VAL_182_Ngap_mandatory = 2;
-static const long asn_VAL_183_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_183_Ngap_ignore = 1;
-static const long asn_VAL_183_Ngap_mandatory = 2;
-static const long asn_VAL_184_Ngap_id_UESecurityCapabilities = 119;
-static const long asn_VAL_184_Ngap_reject = 0;
-static const long asn_VAL_184_Ngap_optional = 0;
-static const long asn_VAL_185_Ngap_id_SecurityContext = 93;
-static const long asn_VAL_185_Ngap_reject = 0;
-static const long asn_VAL_185_Ngap_mandatory = 2;
-static const long asn_VAL_186_Ngap_id_NewSecurityContextInd = 41;
-static const long asn_VAL_186_Ngap_reject = 0;
-static const long asn_VAL_186_Ngap_optional = 0;
-static const long asn_VAL_187_Ngap_id_PDUSessionResourceSwitchedList = 77;
-static const long asn_VAL_187_Ngap_ignore = 1;
-static const long asn_VAL_187_Ngap_mandatory = 2;
-static const long asn_VAL_188_Ngap_id_PDUSessionResourceReleasedListPSAck = 68;
-static const long asn_VAL_188_Ngap_ignore = 1;
-static const long asn_VAL_188_Ngap_optional = 0;
-static const long asn_VAL_189_Ngap_id_AllowedNSSAI = 0;
-static const long asn_VAL_189_Ngap_reject = 0;
-static const long asn_VAL_189_Ngap_mandatory = 2;
-static const long asn_VAL_190_Ngap_id_CoreNetworkAssistanceInformation = 18;
-static const long asn_VAL_190_Ngap_ignore = 1;
-static const long asn_VAL_190_Ngap_optional = 0;
-static const long asn_VAL_191_Ngap_id_RRCInactiveTransitionReportRequest = 91;
+static const long asn_VAL_191_Ngap_id_AMF_UE_NGAP_ID = 10;
 static const long asn_VAL_191_Ngap_ignore = 1;
-static const long asn_VAL_191_Ngap_optional = 0;
-static const long asn_VAL_192_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_191_Ngap_mandatory = 2;
+static const long asn_VAL_192_Ngap_id_RAN_UE_NGAP_ID = 85;
 static const long asn_VAL_192_Ngap_ignore = 1;
-static const long asn_VAL_192_Ngap_optional = 0;
-static const long asn_VAL_193_Ngap_id_RedirectionVoiceFallback = 146;
-static const long asn_VAL_193_Ngap_ignore = 1;
+static const long asn_VAL_192_Ngap_mandatory = 2;
+static const long asn_VAL_193_Ngap_id_UESecurityCapabilities = 119;
+static const long asn_VAL_193_Ngap_reject = 0;
 static const long asn_VAL_193_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_PathSwitchRequestAcknowledgeIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_182_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_182_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_182_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_183_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_183_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_183_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_184_Ngap_id_UESecurityCapabilities },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_184_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_184_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_185_Ngap_id_SecurityContext },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_185_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityContext },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_185_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_186_Ngap_id_NewSecurityContextInd },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_186_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NewSecurityContextInd },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_186_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_187_Ngap_id_PDUSessionResourceSwitchedList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_187_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSwitchedList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_187_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_188_Ngap_id_PDUSessionResourceReleasedListPSAck },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_188_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceReleasedListPSAck },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_188_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_189_Ngap_id_AllowedNSSAI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_189_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_189_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_190_Ngap_id_CoreNetworkAssistanceInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_190_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_CoreNetworkAssistanceInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_190_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_191_Ngap_id_RRCInactiveTransitionReportRequest },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_191_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCInactiveTransitionReportRequest },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_191_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_192_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_192_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_192_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_193_Ngap_id_RedirectionVoiceFallback },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_193_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RedirectionVoiceFallback },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_193_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_PathSwitchRequestAcknowledgeIEs_1[] = {
-	{ 12, 4, asn_IOS_Ngap_PathSwitchRequestAcknowledgeIEs_1_rows }
-};
-static const long asn_VAL_194_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_194_Ngap_ignore = 1;
+static const long asn_VAL_194_Ngap_id_SecurityContext = 93;
+static const long asn_VAL_194_Ngap_reject = 0;
 static const long asn_VAL_194_Ngap_mandatory = 2;
-static const long asn_VAL_195_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_195_Ngap_ignore = 1;
-static const long asn_VAL_195_Ngap_mandatory = 2;
-static const long asn_VAL_196_Ngap_id_PDUSessionResourceReleasedListPSFail = 69;
+static const long asn_VAL_195_Ngap_id_NewSecurityContextInd = 41;
+static const long asn_VAL_195_Ngap_reject = 0;
+static const long asn_VAL_195_Ngap_optional = 0;
+static const long asn_VAL_196_Ngap_id_PDUSessionResourceSwitchedList = 77;
 static const long asn_VAL_196_Ngap_ignore = 1;
 static const long asn_VAL_196_Ngap_mandatory = 2;
-static const long asn_VAL_197_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_197_Ngap_id_PDUSessionResourceReleasedListPSAck = 68;
 static const long asn_VAL_197_Ngap_ignore = 1;
 static const long asn_VAL_197_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_PathSwitchRequestFailureIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_194_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_194_Ngap_ignore },
+static const long asn_VAL_198_Ngap_id_AllowedNSSAI = 0;
+static const long asn_VAL_198_Ngap_reject = 0;
+static const long asn_VAL_198_Ngap_mandatory = 2;
+static const long asn_VAL_199_Ngap_id_CoreNetworkAssistanceInformationForInactive = 18;
+static const long asn_VAL_199_Ngap_ignore = 1;
+static const long asn_VAL_199_Ngap_optional = 0;
+static const long asn_VAL_200_Ngap_id_RRCInactiveTransitionReportRequest = 91;
+static const long asn_VAL_200_Ngap_ignore = 1;
+static const long asn_VAL_200_Ngap_optional = 0;
+static const long asn_VAL_201_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_201_Ngap_ignore = 1;
+static const long asn_VAL_201_Ngap_optional = 0;
+static const long asn_VAL_202_Ngap_id_RedirectionVoiceFallback = 146;
+static const long asn_VAL_202_Ngap_ignore = 1;
+static const long asn_VAL_202_Ngap_optional = 0;
+static const long asn_VAL_203_Ngap_id_CNAssistedRANTuning = 165;
+static const long asn_VAL_203_Ngap_ignore = 1;
+static const long asn_VAL_203_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_PathSwitchRequestAcknowledgeIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_191_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_191_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_194_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_195_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_195_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_191_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_192_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_192_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_195_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_196_Ngap_id_PDUSessionResourceReleasedListPSFail },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_192_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_193_Ngap_id_UESecurityCapabilities },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_193_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UESecurityCapabilities },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_193_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_194_Ngap_id_SecurityContext },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_194_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SecurityContext },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_194_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_195_Ngap_id_NewSecurityContextInd },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_195_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NewSecurityContextInd },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_195_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_196_Ngap_id_PDUSessionResourceSwitchedList },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_196_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceReleasedListPSFail },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSwitchedList },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_196_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_197_Ngap_id_CriticalityDiagnostics },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_197_Ngap_id_PDUSessionResourceReleasedListPSAck },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_197_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceReleasedListPSAck },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_197_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_198_Ngap_id_AllowedNSSAI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_198_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_198_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_199_Ngap_id_CoreNetworkAssistanceInformationForInactive },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_199_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CoreNetworkAssistanceInformationForInactive },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_199_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_200_Ngap_id_RRCInactiveTransitionReportRequest },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_200_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCInactiveTransitionReportRequest },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_200_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_201_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_201_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_197_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_201_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_202_Ngap_id_RedirectionVoiceFallback },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_202_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RedirectionVoiceFallback },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_202_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_203_Ngap_id_CNAssistedRANTuning },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_203_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CNAssistedRANTuning },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_203_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_PathSwitchRequestAcknowledgeIEs_1[] = {
+	{ 13, 4, asn_IOS_Ngap_PathSwitchRequestAcknowledgeIEs_1_rows }
+};
+static const long asn_VAL_204_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_204_Ngap_ignore = 1;
+static const long asn_VAL_204_Ngap_mandatory = 2;
+static const long asn_VAL_205_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_205_Ngap_ignore = 1;
+static const long asn_VAL_205_Ngap_mandatory = 2;
+static const long asn_VAL_206_Ngap_id_PDUSessionResourceReleasedListPSFail = 69;
+static const long asn_VAL_206_Ngap_ignore = 1;
+static const long asn_VAL_206_Ngap_mandatory = 2;
+static const long asn_VAL_207_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_207_Ngap_ignore = 1;
+static const long asn_VAL_207_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_PathSwitchRequestFailureIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_204_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_204_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_204_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_205_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_205_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_205_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_206_Ngap_id_PDUSessionResourceReleasedListPSFail },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_206_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceReleasedListPSFail },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_206_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_207_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_207_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_207_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PathSwitchRequestFailureIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_PathSwitchRequestFailureIEs_1_rows }
 };
-static const long asn_VAL_198_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_198_Ngap_reject = 0;
-static const long asn_VAL_198_Ngap_mandatory = 2;
-static const long asn_VAL_199_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_199_Ngap_reject = 0;
-static const long asn_VAL_199_Ngap_mandatory = 2;
-static const long asn_VAL_200_Ngap_id_Cause = 15;
-static const long asn_VAL_200_Ngap_ignore = 1;
-static const long asn_VAL_200_Ngap_mandatory = 2;
+static const long asn_VAL_208_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_208_Ngap_reject = 0;
+static const long asn_VAL_208_Ngap_mandatory = 2;
+static const long asn_VAL_209_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_209_Ngap_reject = 0;
+static const long asn_VAL_209_Ngap_mandatory = 2;
+static const long asn_VAL_210_Ngap_id_Cause = 15;
+static const long asn_VAL_210_Ngap_ignore = 1;
+static const long asn_VAL_210_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_HandoverCancelIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_198_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_198_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_208_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_208_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_198_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_199_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_199_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_208_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_209_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_209_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_199_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_200_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_200_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_209_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_210_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_210_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_200_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_210_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_HandoverCancelIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_HandoverCancelIEs_1_rows }
 };
-static const long asn_VAL_201_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_201_Ngap_ignore = 1;
-static const long asn_VAL_201_Ngap_mandatory = 2;
-static const long asn_VAL_202_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_202_Ngap_ignore = 1;
-static const long asn_VAL_202_Ngap_mandatory = 2;
-static const long asn_VAL_203_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_203_Ngap_ignore = 1;
-static const long asn_VAL_203_Ngap_optional = 0;
+static const long asn_VAL_211_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_211_Ngap_ignore = 1;
+static const long asn_VAL_211_Ngap_mandatory = 2;
+static const long asn_VAL_212_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_212_Ngap_ignore = 1;
+static const long asn_VAL_212_Ngap_mandatory = 2;
+static const long asn_VAL_213_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_213_Ngap_ignore = 1;
+static const long asn_VAL_213_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_HandoverCancelAcknowledgeIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_201_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_201_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_211_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_211_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_201_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_202_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_202_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_211_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_212_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_212_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_202_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_203_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_203_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_212_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_213_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_213_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_203_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_213_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_HandoverCancelAcknowledgeIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_HandoverCancelAcknowledgeIEs_1_rows }
 };
-static const long asn_VAL_204_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_204_Ngap_reject = 0;
-static const long asn_VAL_204_Ngap_mandatory = 2;
-static const long asn_VAL_205_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_205_Ngap_reject = 0;
-static const long asn_VAL_205_Ngap_mandatory = 2;
-static const long asn_VAL_206_Ngap_id_RANStatusTransfer_TransparentContainer = 84;
-static const long asn_VAL_206_Ngap_reject = 0;
-static const long asn_VAL_206_Ngap_mandatory = 2;
+static const long asn_VAL_214_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_214_Ngap_reject = 0;
+static const long asn_VAL_214_Ngap_mandatory = 2;
+static const long asn_VAL_215_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_215_Ngap_reject = 0;
+static const long asn_VAL_215_Ngap_mandatory = 2;
+static const long asn_VAL_216_Ngap_id_RANStatusTransfer_TransparentContainer = 84;
+static const long asn_VAL_216_Ngap_reject = 0;
+static const long asn_VAL_216_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_UplinkRANStatusTransferIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_204_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_204_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_214_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_214_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_204_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_205_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_205_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_214_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_215_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_215_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_205_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_206_Ngap_id_RANStatusTransfer_TransparentContainer },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_206_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_215_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_216_Ngap_id_RANStatusTransfer_TransparentContainer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_216_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RANStatusTransfer_TransparentContainer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_206_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_216_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UplinkRANStatusTransferIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_UplinkRANStatusTransferIEs_1_rows }
 };
-static const long asn_VAL_207_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_207_Ngap_reject = 0;
-static const long asn_VAL_207_Ngap_mandatory = 2;
-static const long asn_VAL_208_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_208_Ngap_reject = 0;
-static const long asn_VAL_208_Ngap_mandatory = 2;
-static const long asn_VAL_209_Ngap_id_RANStatusTransfer_TransparentContainer = 84;
-static const long asn_VAL_209_Ngap_reject = 0;
-static const long asn_VAL_209_Ngap_mandatory = 2;
+static const long asn_VAL_217_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_217_Ngap_reject = 0;
+static const long asn_VAL_217_Ngap_mandatory = 2;
+static const long asn_VAL_218_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_218_Ngap_reject = 0;
+static const long asn_VAL_218_Ngap_mandatory = 2;
+static const long asn_VAL_219_Ngap_id_RANStatusTransfer_TransparentContainer = 84;
+static const long asn_VAL_219_Ngap_reject = 0;
+static const long asn_VAL_219_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_DownlinkRANStatusTransferIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_207_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_207_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_217_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_217_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_207_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_208_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_208_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_217_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_218_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_218_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_208_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_209_Ngap_id_RANStatusTransfer_TransparentContainer },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_209_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_218_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_219_Ngap_id_RANStatusTransfer_TransparentContainer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_219_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RANStatusTransfer_TransparentContainer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_209_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_219_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_DownlinkRANStatusTransferIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_DownlinkRANStatusTransferIEs_1_rows }
 };
-static const long asn_VAL_210_Ngap_id_UEPagingIdentity = 115;
-static const long asn_VAL_210_Ngap_ignore = 1;
-static const long asn_VAL_210_Ngap_mandatory = 2;
-static const long asn_VAL_211_Ngap_id_PagingDRX = 50;
-static const long asn_VAL_211_Ngap_ignore = 1;
-static const long asn_VAL_211_Ngap_optional = 0;
-static const long asn_VAL_212_Ngap_id_TAIListForPaging = 103;
-static const long asn_VAL_212_Ngap_ignore = 1;
-static const long asn_VAL_212_Ngap_mandatory = 2;
-static const long asn_VAL_213_Ngap_id_PagingPriority = 52;
-static const long asn_VAL_213_Ngap_ignore = 1;
-static const long asn_VAL_213_Ngap_optional = 0;
-static const long asn_VAL_214_Ngap_id_UERadioCapabilityForPaging = 118;
-static const long asn_VAL_214_Ngap_ignore = 1;
-static const long asn_VAL_214_Ngap_optional = 0;
-static const long asn_VAL_215_Ngap_id_PagingOrigin = 51;
-static const long asn_VAL_215_Ngap_ignore = 1;
-static const long asn_VAL_215_Ngap_optional = 0;
-static const long asn_VAL_216_Ngap_id_AssistanceDataForPaging = 11;
-static const long asn_VAL_216_Ngap_ignore = 1;
-static const long asn_VAL_216_Ngap_optional = 0;
+static const long asn_VAL_220_Ngap_id_UEPagingIdentity = 115;
+static const long asn_VAL_220_Ngap_ignore = 1;
+static const long asn_VAL_220_Ngap_mandatory = 2;
+static const long asn_VAL_221_Ngap_id_PagingDRX = 50;
+static const long asn_VAL_221_Ngap_ignore = 1;
+static const long asn_VAL_221_Ngap_optional = 0;
+static const long asn_VAL_222_Ngap_id_TAIListForPaging = 103;
+static const long asn_VAL_222_Ngap_ignore = 1;
+static const long asn_VAL_222_Ngap_mandatory = 2;
+static const long asn_VAL_223_Ngap_id_PagingPriority = 52;
+static const long asn_VAL_223_Ngap_ignore = 1;
+static const long asn_VAL_223_Ngap_optional = 0;
+static const long asn_VAL_224_Ngap_id_UERadioCapabilityForPaging = 118;
+static const long asn_VAL_224_Ngap_ignore = 1;
+static const long asn_VAL_224_Ngap_optional = 0;
+static const long asn_VAL_225_Ngap_id_PagingOrigin = 51;
+static const long asn_VAL_225_Ngap_ignore = 1;
+static const long asn_VAL_225_Ngap_optional = 0;
+static const long asn_VAL_226_Ngap_id_AssistanceDataForPaging = 11;
+static const long asn_VAL_226_Ngap_ignore = 1;
+static const long asn_VAL_226_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PagingIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_210_Ngap_id_UEPagingIdentity },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_210_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_220_Ngap_id_UEPagingIdentity },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_220_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UEPagingIdentity },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_210_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_211_Ngap_id_PagingDRX },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_211_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_220_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_221_Ngap_id_PagingDRX },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_221_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PagingDRX },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_211_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_212_Ngap_id_TAIListForPaging },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_212_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_221_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_222_Ngap_id_TAIListForPaging },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_222_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_TAIListForPaging },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_212_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_213_Ngap_id_PagingPriority },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_213_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_222_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_223_Ngap_id_PagingPriority },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_223_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PagingPriority },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_213_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_214_Ngap_id_UERadioCapabilityForPaging },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_214_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_223_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_224_Ngap_id_UERadioCapabilityForPaging },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_224_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UERadioCapabilityForPaging },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_214_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_215_Ngap_id_PagingOrigin },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_215_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_224_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_225_Ngap_id_PagingOrigin },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_225_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PagingOrigin },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_215_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_216_Ngap_id_AssistanceDataForPaging },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_216_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_225_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_226_Ngap_id_AssistanceDataForPaging },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_226_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AssistanceDataForPaging },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_216_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_226_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PagingIEs_1[] = {
 	{ 7, 4, asn_IOS_Ngap_PagingIEs_1_rows }
 };
-static const long asn_VAL_217_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_217_Ngap_reject = 0;
-static const long asn_VAL_217_Ngap_mandatory = 2;
-static const long asn_VAL_218_Ngap_id_NAS_PDU = 38;
-static const long asn_VAL_218_Ngap_reject = 0;
-static const long asn_VAL_218_Ngap_mandatory = 2;
-static const long asn_VAL_219_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_219_Ngap_reject = 0;
-static const long asn_VAL_219_Ngap_mandatory = 2;
-static const long asn_VAL_220_Ngap_id_RRCEstablishmentCause = 90;
-static const long asn_VAL_220_Ngap_ignore = 1;
-static const long asn_VAL_220_Ngap_mandatory = 2;
-static const long asn_VAL_221_Ngap_id_FiveG_S_TMSI = 26;
-static const long asn_VAL_221_Ngap_reject = 0;
-static const long asn_VAL_221_Ngap_optional = 0;
-static const long asn_VAL_222_Ngap_id_AMFSetID = 3;
-static const long asn_VAL_222_Ngap_ignore = 1;
-static const long asn_VAL_222_Ngap_optional = 0;
-static const long asn_VAL_223_Ngap_id_UEContextRequest = 112;
-static const long asn_VAL_223_Ngap_ignore = 1;
-static const long asn_VAL_223_Ngap_optional = 0;
-static const long asn_VAL_224_Ngap_id_AllowedNSSAI = 0;
-static const long asn_VAL_224_Ngap_reject = 0;
-static const long asn_VAL_224_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_InitialUEMessage_IEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_217_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_217_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_217_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_218_Ngap_id_NAS_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_218_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_218_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_219_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_219_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_219_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_220_Ngap_id_RRCEstablishmentCause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_220_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCEstablishmentCause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_220_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_221_Ngap_id_FiveG_S_TMSI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_221_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_FiveG_S_TMSI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_221_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_222_Ngap_id_AMFSetID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_222_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFSetID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_222_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_223_Ngap_id_UEContextRequest },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_223_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UEContextRequest },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_223_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_224_Ngap_id_AllowedNSSAI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_224_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_224_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_InitialUEMessage_IEs_1[] = {
-	{ 8, 4, asn_IOS_Ngap_InitialUEMessage_IEs_1_rows }
-};
-static const long asn_VAL_225_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_225_Ngap_reject = 0;
-static const long asn_VAL_225_Ngap_mandatory = 2;
-static const long asn_VAL_226_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_226_Ngap_reject = 0;
-static const long asn_VAL_226_Ngap_mandatory = 2;
-static const long asn_VAL_227_Ngap_id_OldAMF = 48;
+static const long asn_VAL_227_Ngap_id_RAN_UE_NGAP_ID = 85;
 static const long asn_VAL_227_Ngap_reject = 0;
-static const long asn_VAL_227_Ngap_optional = 0;
-static const long asn_VAL_228_Ngap_id_RANPagingPriority = 83;
-static const long asn_VAL_228_Ngap_ignore = 1;
-static const long asn_VAL_228_Ngap_optional = 0;
-static const long asn_VAL_229_Ngap_id_NAS_PDU = 38;
+static const long asn_VAL_227_Ngap_mandatory = 2;
+static const long asn_VAL_228_Ngap_id_NAS_PDU = 38;
+static const long asn_VAL_228_Ngap_reject = 0;
+static const long asn_VAL_228_Ngap_mandatory = 2;
+static const long asn_VAL_229_Ngap_id_UserLocationInformation = 121;
 static const long asn_VAL_229_Ngap_reject = 0;
 static const long asn_VAL_229_Ngap_mandatory = 2;
-static const long asn_VAL_230_Ngap_id_MobilityRestrictionList = 36;
+static const long asn_VAL_230_Ngap_id_RRCEstablishmentCause = 90;
 static const long asn_VAL_230_Ngap_ignore = 1;
-static const long asn_VAL_230_Ngap_optional = 0;
-static const long asn_VAL_231_Ngap_id_IndexToRFSP = 31;
-static const long asn_VAL_231_Ngap_ignore = 1;
+static const long asn_VAL_230_Ngap_mandatory = 2;
+static const long asn_VAL_231_Ngap_id_FiveG_S_TMSI = 26;
+static const long asn_VAL_231_Ngap_reject = 0;
 static const long asn_VAL_231_Ngap_optional = 0;
-static const long asn_VAL_232_Ngap_id_UEAggregateMaximumBitRate = 110;
+static const long asn_VAL_232_Ngap_id_AMFSetID = 3;
 static const long asn_VAL_232_Ngap_ignore = 1;
 static const long asn_VAL_232_Ngap_optional = 0;
-static const long asn_VAL_233_Ngap_id_AllowedNSSAI = 0;
-static const long asn_VAL_233_Ngap_reject = 0;
+static const long asn_VAL_233_Ngap_id_UEContextRequest = 112;
+static const long asn_VAL_233_Ngap_ignore = 1;
 static const long asn_VAL_233_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_DownlinkNASTransport_IEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_225_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_225_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_225_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_226_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_226_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_226_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_227_Ngap_id_OldAMF },
+static const long asn_VAL_234_Ngap_id_AllowedNSSAI = 0;
+static const long asn_VAL_234_Ngap_reject = 0;
+static const long asn_VAL_234_Ngap_optional = 0;
+static const long asn_VAL_235_Ngap_id_SourceToTarget_AMFInformationReroute = 171;
+static const long asn_VAL_235_Ngap_ignore = 1;
+static const long asn_VAL_235_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_InitialUEMessage_IEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_227_Ngap_id_RAN_UE_NGAP_ID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_227_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFName },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_227_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_228_Ngap_id_RANPagingPriority },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_228_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_228_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_229_Ngap_id_NAS_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_229_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_227_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_228_Ngap_id_NAS_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_228_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_228_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_229_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_229_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_229_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_230_Ngap_id_MobilityRestrictionList },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_230_Ngap_id_RRCEstablishmentCause },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_230_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_MobilityRestrictionList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_230_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_231_Ngap_id_IndexToRFSP },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_231_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_IndexToRFSP },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RRCEstablishmentCause },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_230_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_231_Ngap_id_FiveG_S_TMSI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_231_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_FiveG_S_TMSI },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_231_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_232_Ngap_id_UEAggregateMaximumBitRate },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_232_Ngap_id_AMFSetID },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_232_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFSetID },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_232_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_233_Ngap_id_AllowedNSSAI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_233_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_233_Ngap_id_UEContextRequest },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_233_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UEContextRequest },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_233_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_234_Ngap_id_AllowedNSSAI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_234_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_233_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_234_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_235_Ngap_id_SourceToTarget_AMFInformationReroute },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_235_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SourceToTarget_AMFInformationReroute },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_235_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_InitialUEMessage_IEs_1[] = {
+	{ 9, 4, asn_IOS_Ngap_InitialUEMessage_IEs_1_rows }
+};
+static const long asn_VAL_236_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_236_Ngap_reject = 0;
+static const long asn_VAL_236_Ngap_mandatory = 2;
+static const long asn_VAL_237_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_237_Ngap_reject = 0;
+static const long asn_VAL_237_Ngap_mandatory = 2;
+static const long asn_VAL_238_Ngap_id_OldAMF = 48;
+static const long asn_VAL_238_Ngap_reject = 0;
+static const long asn_VAL_238_Ngap_optional = 0;
+static const long asn_VAL_239_Ngap_id_RANPagingPriority = 83;
+static const long asn_VAL_239_Ngap_ignore = 1;
+static const long asn_VAL_239_Ngap_optional = 0;
+static const long asn_VAL_240_Ngap_id_NAS_PDU = 38;
+static const long asn_VAL_240_Ngap_reject = 0;
+static const long asn_VAL_240_Ngap_mandatory = 2;
+static const long asn_VAL_241_Ngap_id_MobilityRestrictionList = 36;
+static const long asn_VAL_241_Ngap_ignore = 1;
+static const long asn_VAL_241_Ngap_optional = 0;
+static const long asn_VAL_242_Ngap_id_IndexToRFSP = 31;
+static const long asn_VAL_242_Ngap_ignore = 1;
+static const long asn_VAL_242_Ngap_optional = 0;
+static const long asn_VAL_243_Ngap_id_UEAggregateMaximumBitRate = 110;
+static const long asn_VAL_243_Ngap_ignore = 1;
+static const long asn_VAL_243_Ngap_optional = 0;
+static const long asn_VAL_244_Ngap_id_AllowedNSSAI = 0;
+static const long asn_VAL_244_Ngap_reject = 0;
+static const long asn_VAL_244_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_DownlinkNASTransport_IEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_236_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_236_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_236_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_237_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_237_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_237_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_238_Ngap_id_OldAMF },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_238_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFName },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_238_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_239_Ngap_id_RANPagingPriority },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_239_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RANPagingPriority },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_239_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_240_Ngap_id_NAS_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_240_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_240_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_241_Ngap_id_MobilityRestrictionList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_241_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_MobilityRestrictionList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_241_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_242_Ngap_id_IndexToRFSP },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_242_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_IndexToRFSP },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_242_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_243_Ngap_id_UEAggregateMaximumBitRate },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_243_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UEAggregateMaximumBitRate },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_243_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_244_Ngap_id_AllowedNSSAI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_244_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_244_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_DownlinkNASTransport_IEs_1[] = {
 	{ 9, 4, asn_IOS_Ngap_DownlinkNASTransport_IEs_1_rows }
 };
-static const long asn_VAL_234_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_234_Ngap_reject = 0;
-static const long asn_VAL_234_Ngap_mandatory = 2;
-static const long asn_VAL_235_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_235_Ngap_reject = 0;
-static const long asn_VAL_235_Ngap_mandatory = 2;
-static const long asn_VAL_236_Ngap_id_NAS_PDU = 38;
-static const long asn_VAL_236_Ngap_reject = 0;
-static const long asn_VAL_236_Ngap_mandatory = 2;
-static const long asn_VAL_237_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_237_Ngap_ignore = 1;
-static const long asn_VAL_237_Ngap_mandatory = 2;
+static const long asn_VAL_245_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_245_Ngap_reject = 0;
+static const long asn_VAL_245_Ngap_mandatory = 2;
+static const long asn_VAL_246_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_246_Ngap_reject = 0;
+static const long asn_VAL_246_Ngap_mandatory = 2;
+static const long asn_VAL_247_Ngap_id_NAS_PDU = 38;
+static const long asn_VAL_247_Ngap_reject = 0;
+static const long asn_VAL_247_Ngap_mandatory = 2;
+static const long asn_VAL_248_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_248_Ngap_ignore = 1;
+static const long asn_VAL_248_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_UplinkNASTransport_IEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_234_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_234_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_245_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_245_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_234_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_235_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_235_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_245_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_246_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_246_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_235_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_236_Ngap_id_NAS_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_236_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_246_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_247_Ngap_id_NAS_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_247_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_236_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_237_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_237_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_247_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_248_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_248_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_237_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_248_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UplinkNASTransport_IEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_UplinkNASTransport_IEs_1_rows }
 };
-static const long asn_VAL_238_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_238_Ngap_reject = 0;
-static const long asn_VAL_238_Ngap_mandatory = 2;
-static const long asn_VAL_239_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_239_Ngap_reject = 0;
-static const long asn_VAL_239_Ngap_mandatory = 2;
-static const long asn_VAL_240_Ngap_id_NAS_PDU = 38;
-static const long asn_VAL_240_Ngap_ignore = 1;
-static const long asn_VAL_240_Ngap_mandatory = 2;
-static const long asn_VAL_241_Ngap_id_Cause = 15;
-static const long asn_VAL_241_Ngap_ignore = 1;
-static const long asn_VAL_241_Ngap_mandatory = 2;
+static const long asn_VAL_249_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_249_Ngap_reject = 0;
+static const long asn_VAL_249_Ngap_mandatory = 2;
+static const long asn_VAL_250_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_250_Ngap_reject = 0;
+static const long asn_VAL_250_Ngap_mandatory = 2;
+static const long asn_VAL_251_Ngap_id_NAS_PDU = 38;
+static const long asn_VAL_251_Ngap_ignore = 1;
+static const long asn_VAL_251_Ngap_mandatory = 2;
+static const long asn_VAL_252_Ngap_id_Cause = 15;
+static const long asn_VAL_252_Ngap_ignore = 1;
+static const long asn_VAL_252_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_NASNonDeliveryIndication_IEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_238_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_238_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_249_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_249_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_238_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_239_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_239_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_249_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_250_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_250_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_239_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_240_Ngap_id_NAS_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_240_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_250_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_251_Ngap_id_NAS_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_251_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NAS_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_240_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_241_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_241_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_251_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_252_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_252_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_241_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_252_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_NASNonDeliveryIndication_IEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_NASNonDeliveryIndication_IEs_1_rows }
 };
-static const long asn_VAL_242_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_242_Ngap_reject = 0;
-static const long asn_VAL_242_Ngap_mandatory = 2;
-static const long asn_VAL_243_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_243_Ngap_ignore = 1;
-static const long asn_VAL_243_Ngap_optional = 0;
-static const long asn_VAL_244_Ngap_id_NGAP_Message = 42;
-static const long asn_VAL_244_Ngap_reject = 0;
-static const long asn_VAL_244_Ngap_mandatory = 2;
-static const long asn_VAL_245_Ngap_id_AMFSetID = 3;
-static const long asn_VAL_245_Ngap_reject = 0;
-static const long asn_VAL_245_Ngap_mandatory = 2;
-static const long asn_VAL_246_Ngap_id_AllowedNSSAI = 0;
-static const long asn_VAL_246_Ngap_reject = 0;
-static const long asn_VAL_246_Ngap_optional = 0;
+static const long asn_VAL_253_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_253_Ngap_reject = 0;
+static const long asn_VAL_253_Ngap_mandatory = 2;
+static const long asn_VAL_254_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_254_Ngap_ignore = 1;
+static const long asn_VAL_254_Ngap_optional = 0;
+static const long asn_VAL_255_Ngap_id_NGAP_Message = 42;
+static const long asn_VAL_255_Ngap_reject = 0;
+static const long asn_VAL_255_Ngap_mandatory = 2;
+static const long asn_VAL_256_Ngap_id_AMFSetID = 3;
+static const long asn_VAL_256_Ngap_reject = 0;
+static const long asn_VAL_256_Ngap_mandatory = 2;
+static const long asn_VAL_257_Ngap_id_AllowedNSSAI = 0;
+static const long asn_VAL_257_Ngap_reject = 0;
+static const long asn_VAL_257_Ngap_optional = 0;
+static const long asn_VAL_258_Ngap_id_SourceToTarget_AMFInformationReroute = 171;
+static const long asn_VAL_258_Ngap_ignore = 1;
+static const long asn_VAL_258_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_RerouteNASRequest_IEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_242_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_242_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_253_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_253_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_242_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_243_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_243_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_253_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_254_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_254_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_243_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_244_Ngap_id_NGAP_Message },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_244_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_254_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_255_Ngap_id_NGAP_Message },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_255_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_OCTET_STRING },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_244_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_245_Ngap_id_AMFSetID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_245_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_255_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_256_Ngap_id_AMFSetID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_256_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFSetID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_245_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_246_Ngap_id_AllowedNSSAI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_246_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_256_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_257_Ngap_id_AllowedNSSAI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_257_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AllowedNSSAI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_246_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_257_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_258_Ngap_id_SourceToTarget_AMFInformationReroute },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_258_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SourceToTarget_AMFInformationReroute },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_258_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_RerouteNASRequest_IEs_1[] = {
-	{ 5, 4, asn_IOS_Ngap_RerouteNASRequest_IEs_1_rows }
+	{ 6, 4, asn_IOS_Ngap_RerouteNASRequest_IEs_1_rows }
 };
-static const long asn_VAL_247_Ngap_id_GlobalRANNodeID = 27;
-static const long asn_VAL_247_Ngap_reject = 0;
-static const long asn_VAL_247_Ngap_mandatory = 2;
-static const long asn_VAL_248_Ngap_id_RANNodeName = 82;
-static const long asn_VAL_248_Ngap_ignore = 1;
-static const long asn_VAL_248_Ngap_optional = 0;
-static const long asn_VAL_249_Ngap_id_SupportedTAList = 102;
-static const long asn_VAL_249_Ngap_reject = 0;
-static const long asn_VAL_249_Ngap_mandatory = 2;
-static const long asn_VAL_250_Ngap_id_DefaultPagingDRX = 21;
-static const long asn_VAL_250_Ngap_ignore = 1;
-static const long asn_VAL_250_Ngap_mandatory = 2;
-static const long asn_VAL_251_Ngap_id_UERetentionInformation = 147;
-static const long asn_VAL_251_Ngap_ignore = 1;
-static const long asn_VAL_251_Ngap_optional = 0;
+static const long asn_VAL_259_Ngap_id_GlobalRANNodeID = 27;
+static const long asn_VAL_259_Ngap_reject = 0;
+static const long asn_VAL_259_Ngap_mandatory = 2;
+static const long asn_VAL_260_Ngap_id_RANNodeName = 82;
+static const long asn_VAL_260_Ngap_ignore = 1;
+static const long asn_VAL_260_Ngap_optional = 0;
+static const long asn_VAL_261_Ngap_id_SupportedTAList = 102;
+static const long asn_VAL_261_Ngap_reject = 0;
+static const long asn_VAL_261_Ngap_mandatory = 2;
+static const long asn_VAL_262_Ngap_id_DefaultPagingDRX = 21;
+static const long asn_VAL_262_Ngap_ignore = 1;
+static const long asn_VAL_262_Ngap_mandatory = 2;
+static const long asn_VAL_263_Ngap_id_UERetentionInformation = 147;
+static const long asn_VAL_263_Ngap_ignore = 1;
+static const long asn_VAL_263_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_NGSetupRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_247_Ngap_id_GlobalRANNodeID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_247_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_259_Ngap_id_GlobalRANNodeID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_259_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_GlobalRANNodeID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_247_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_248_Ngap_id_RANNodeName },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_248_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_259_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_260_Ngap_id_RANNodeName },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_260_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RANNodeName },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_248_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_249_Ngap_id_SupportedTAList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_249_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_260_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_261_Ngap_id_SupportedTAList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_261_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_SupportedTAList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_249_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_250_Ngap_id_DefaultPagingDRX },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_250_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_261_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_262_Ngap_id_DefaultPagingDRX },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_262_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PagingDRX },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_250_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_251_Ngap_id_UERetentionInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_251_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_262_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_263_Ngap_id_UERetentionInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_263_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UERetentionInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_251_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_263_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_NGSetupRequestIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_NGSetupRequestIEs_1_rows }
 };
-static const long asn_VAL_252_Ngap_id_AMFName = 1;
-static const long asn_VAL_252_Ngap_reject = 0;
-static const long asn_VAL_252_Ngap_mandatory = 2;
-static const long asn_VAL_253_Ngap_id_ServedGUAMIList = 96;
-static const long asn_VAL_253_Ngap_reject = 0;
-static const long asn_VAL_253_Ngap_mandatory = 2;
-static const long asn_VAL_254_Ngap_id_RelativeAMFCapacity = 86;
-static const long asn_VAL_254_Ngap_ignore = 1;
-static const long asn_VAL_254_Ngap_mandatory = 2;
-static const long asn_VAL_255_Ngap_id_PLMNSupportList = 80;
-static const long asn_VAL_255_Ngap_reject = 0;
-static const long asn_VAL_255_Ngap_mandatory = 2;
-static const long asn_VAL_256_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_256_Ngap_ignore = 1;
-static const long asn_VAL_256_Ngap_optional = 0;
-static const long asn_VAL_257_Ngap_id_UERetentionInformation = 147;
-static const long asn_VAL_257_Ngap_ignore = 1;
-static const long asn_VAL_257_Ngap_optional = 0;
+static const long asn_VAL_264_Ngap_id_AMFName = 1;
+static const long asn_VAL_264_Ngap_reject = 0;
+static const long asn_VAL_264_Ngap_mandatory = 2;
+static const long asn_VAL_265_Ngap_id_ServedGUAMIList = 96;
+static const long asn_VAL_265_Ngap_reject = 0;
+static const long asn_VAL_265_Ngap_mandatory = 2;
+static const long asn_VAL_266_Ngap_id_RelativeAMFCapacity = 86;
+static const long asn_VAL_266_Ngap_ignore = 1;
+static const long asn_VAL_266_Ngap_mandatory = 2;
+static const long asn_VAL_267_Ngap_id_PLMNSupportList = 80;
+static const long asn_VAL_267_Ngap_reject = 0;
+static const long asn_VAL_267_Ngap_mandatory = 2;
+static const long asn_VAL_268_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_268_Ngap_ignore = 1;
+static const long asn_VAL_268_Ngap_optional = 0;
+static const long asn_VAL_269_Ngap_id_UERetentionInformation = 147;
+static const long asn_VAL_269_Ngap_ignore = 1;
+static const long asn_VAL_269_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_NGSetupResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_252_Ngap_id_AMFName },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_252_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_264_Ngap_id_AMFName },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_264_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFName },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_252_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_253_Ngap_id_ServedGUAMIList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_253_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_264_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_265_Ngap_id_ServedGUAMIList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_265_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_ServedGUAMIList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_253_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_254_Ngap_id_RelativeAMFCapacity },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_254_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_265_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_266_Ngap_id_RelativeAMFCapacity },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_266_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RelativeAMFCapacity },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_254_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_255_Ngap_id_PLMNSupportList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_255_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_266_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_267_Ngap_id_PLMNSupportList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_267_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PLMNSupportList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_255_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_256_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_256_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_267_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_268_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_268_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_256_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_257_Ngap_id_UERetentionInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_257_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_268_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_269_Ngap_id_UERetentionInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_269_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UERetentionInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_257_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_269_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_NGSetupResponseIEs_1[] = {
 	{ 6, 4, asn_IOS_Ngap_NGSetupResponseIEs_1_rows }
 };
-static const long asn_VAL_258_Ngap_id_Cause = 15;
-static const long asn_VAL_258_Ngap_ignore = 1;
-static const long asn_VAL_258_Ngap_mandatory = 2;
-static const long asn_VAL_259_Ngap_id_TimeToWait = 107;
-static const long asn_VAL_259_Ngap_ignore = 1;
-static const long asn_VAL_259_Ngap_optional = 0;
-static const long asn_VAL_260_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_260_Ngap_ignore = 1;
-static const long asn_VAL_260_Ngap_optional = 0;
+static const long asn_VAL_270_Ngap_id_Cause = 15;
+static const long asn_VAL_270_Ngap_ignore = 1;
+static const long asn_VAL_270_Ngap_mandatory = 2;
+static const long asn_VAL_271_Ngap_id_TimeToWait = 107;
+static const long asn_VAL_271_Ngap_ignore = 1;
+static const long asn_VAL_271_Ngap_optional = 0;
+static const long asn_VAL_272_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_272_Ngap_ignore = 1;
+static const long asn_VAL_272_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_NGSetupFailureIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_258_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_258_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_270_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_270_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_258_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_259_Ngap_id_TimeToWait },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_259_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_270_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_271_Ngap_id_TimeToWait },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_271_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_TimeToWait },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_259_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_260_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_260_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_271_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_272_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_272_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_260_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_272_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_NGSetupFailureIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_NGSetupFailureIEs_1_rows }
 };
-static const long asn_VAL_261_Ngap_id_RANNodeName = 82;
-static const long asn_VAL_261_Ngap_ignore = 1;
-static const long asn_VAL_261_Ngap_optional = 0;
-static const long asn_VAL_262_Ngap_id_SupportedTAList = 102;
-static const long asn_VAL_262_Ngap_reject = 0;
-static const long asn_VAL_262_Ngap_optional = 0;
-static const long asn_VAL_263_Ngap_id_DefaultPagingDRX = 21;
-static const long asn_VAL_263_Ngap_ignore = 1;
-static const long asn_VAL_263_Ngap_optional = 0;
-static const long asn_VAL_264_Ngap_id_GlobalRANNodeID = 27;
-static const long asn_VAL_264_Ngap_ignore = 1;
-static const long asn_VAL_264_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_RANConfigurationUpdateIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_261_Ngap_id_RANNodeName },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_261_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RANNodeName },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_261_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_262_Ngap_id_SupportedTAList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_262_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_SupportedTAList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_262_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_263_Ngap_id_DefaultPagingDRX },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_263_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PagingDRX },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_263_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_264_Ngap_id_GlobalRANNodeID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_264_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_GlobalRANNodeID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_264_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_RANConfigurationUpdateIEs_1[] = {
-	{ 4, 4, asn_IOS_Ngap_RANConfigurationUpdateIEs_1_rows }
-};
-static const long asn_VAL_265_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_265_Ngap_ignore = 1;
-static const long asn_VAL_265_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_RANConfigurationUpdateAcknowledgeIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_265_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_265_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_265_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_RANConfigurationUpdateAcknowledgeIEs_1[] = {
-	{ 1, 4, asn_IOS_Ngap_RANConfigurationUpdateAcknowledgeIEs_1_rows }
-};
-static const long asn_VAL_266_Ngap_id_Cause = 15;
-static const long asn_VAL_266_Ngap_ignore = 1;
-static const long asn_VAL_266_Ngap_mandatory = 2;
-static const long asn_VAL_267_Ngap_id_TimeToWait = 107;
-static const long asn_VAL_267_Ngap_ignore = 1;
-static const long asn_VAL_267_Ngap_optional = 0;
-static const long asn_VAL_268_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_268_Ngap_ignore = 1;
-static const long asn_VAL_268_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_RANConfigurationUpdateFailureIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_266_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_266_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_266_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_267_Ngap_id_TimeToWait },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_267_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_TimeToWait },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_267_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_268_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_268_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_268_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_RANConfigurationUpdateFailureIEs_1[] = {
-	{ 3, 4, asn_IOS_Ngap_RANConfigurationUpdateFailureIEs_1_rows }
-};
-static const long asn_VAL_269_Ngap_id_AMFName = 1;
-static const long asn_VAL_269_Ngap_reject = 0;
-static const long asn_VAL_269_Ngap_optional = 0;
-static const long asn_VAL_270_Ngap_id_ServedGUAMIList = 96;
-static const long asn_VAL_270_Ngap_reject = 0;
-static const long asn_VAL_270_Ngap_optional = 0;
-static const long asn_VAL_271_Ngap_id_RelativeAMFCapacity = 86;
-static const long asn_VAL_271_Ngap_ignore = 1;
-static const long asn_VAL_271_Ngap_optional = 0;
-static const long asn_VAL_272_Ngap_id_PLMNSupportList = 80;
-static const long asn_VAL_272_Ngap_reject = 0;
-static const long asn_VAL_272_Ngap_optional = 0;
-static const long asn_VAL_273_Ngap_id_AMF_TNLAssociationToAddList = 6;
+static const long asn_VAL_273_Ngap_id_RANNodeName = 82;
 static const long asn_VAL_273_Ngap_ignore = 1;
 static const long asn_VAL_273_Ngap_optional = 0;
-static const long asn_VAL_274_Ngap_id_AMF_TNLAssociationToRemoveList = 7;
-static const long asn_VAL_274_Ngap_ignore = 1;
+static const long asn_VAL_274_Ngap_id_SupportedTAList = 102;
+static const long asn_VAL_274_Ngap_reject = 0;
 static const long asn_VAL_274_Ngap_optional = 0;
-static const long asn_VAL_275_Ngap_id_AMF_TNLAssociationToUpdateList = 8;
+static const long asn_VAL_275_Ngap_id_DefaultPagingDRX = 21;
 static const long asn_VAL_275_Ngap_ignore = 1;
 static const long asn_VAL_275_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_AMFConfigurationUpdateIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_269_Ngap_id_AMFName },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_269_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFName },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_269_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_270_Ngap_id_ServedGUAMIList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_270_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_ServedGUAMIList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_270_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_271_Ngap_id_RelativeAMFCapacity },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_271_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_RelativeAMFCapacity },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_271_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_272_Ngap_id_PLMNSupportList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_272_Ngap_reject },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_PLMNSupportList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_272_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_273_Ngap_id_AMF_TNLAssociationToAddList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_273_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_TNLAssociationToAddList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_273_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_274_Ngap_id_AMF_TNLAssociationToRemoveList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_274_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_TNLAssociationToRemoveList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_274_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_275_Ngap_id_AMF_TNLAssociationToUpdateList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_275_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_TNLAssociationToUpdateList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_275_Ngap_optional }
-};
-static const asn_ioc_set_t asn_IOS_Ngap_AMFConfigurationUpdateIEs_1[] = {
-	{ 7, 4, asn_IOS_Ngap_AMFConfigurationUpdateIEs_1_rows }
-};
-static const long asn_VAL_276_Ngap_id_AMF_TNLAssociationSetupList = 5;
+static const long asn_VAL_276_Ngap_id_GlobalRANNodeID = 27;
 static const long asn_VAL_276_Ngap_ignore = 1;
 static const long asn_VAL_276_Ngap_optional = 0;
-static const long asn_VAL_277_Ngap_id_AMF_TNLAssociationFailedToSetupList = 4;
-static const long asn_VAL_277_Ngap_ignore = 1;
+static const long asn_VAL_277_Ngap_id_NGRAN_TNLAssociationToRemoveList = 167;
+static const long asn_VAL_277_Ngap_reject = 0;
 static const long asn_VAL_277_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_RANConfigurationUpdateIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_273_Ngap_id_RANNodeName },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_273_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RANNodeName },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_273_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_274_Ngap_id_SupportedTAList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_274_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_SupportedTAList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_274_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_275_Ngap_id_DefaultPagingDRX },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_275_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PagingDRX },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_275_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_276_Ngap_id_GlobalRANNodeID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_276_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_GlobalRANNodeID },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_276_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_277_Ngap_id_NGRAN_TNLAssociationToRemoveList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_277_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_NGRAN_TNLAssociationToRemoveList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_277_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_RANConfigurationUpdateIEs_1[] = {
+	{ 5, 4, asn_IOS_Ngap_RANConfigurationUpdateIEs_1_rows }
+};
 static const long asn_VAL_278_Ngap_id_CriticalityDiagnostics = 19;
 static const long asn_VAL_278_Ngap_ignore = 1;
 static const long asn_VAL_278_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_AMFConfigurationUpdateAcknowledgeIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_276_Ngap_id_AMF_TNLAssociationSetupList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_276_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_TNLAssociationSetupList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_276_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_277_Ngap_id_AMF_TNLAssociationFailedToSetupList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_277_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_TNLAssociationList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_277_Ngap_optional },
+static const asn_ioc_cell_t asn_IOS_Ngap_RANConfigurationUpdateAcknowledgeIEs_1_rows[] = {
 	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_278_Ngap_id_CriticalityDiagnostics },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_278_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_278_Ngap_optional }
 };
-static const asn_ioc_set_t asn_IOS_Ngap_AMFConfigurationUpdateAcknowledgeIEs_1[] = {
-	{ 3, 4, asn_IOS_Ngap_AMFConfigurationUpdateAcknowledgeIEs_1_rows }
+static const asn_ioc_set_t asn_IOS_Ngap_RANConfigurationUpdateAcknowledgeIEs_1[] = {
+	{ 1, 4, asn_IOS_Ngap_RANConfigurationUpdateAcknowledgeIEs_1_rows }
 };
 static const long asn_VAL_279_Ngap_id_Cause = 15;
 static const long asn_VAL_279_Ngap_ignore = 1;
@@ -2207,7 +2197,7 @@ static const long asn_VAL_280_Ngap_optional = 0;
 static const long asn_VAL_281_Ngap_id_CriticalityDiagnostics = 19;
 static const long asn_VAL_281_Ngap_ignore = 1;
 static const long asn_VAL_281_Ngap_optional = 0;
-static const asn_ioc_cell_t asn_IOS_Ngap_AMFConfigurationUpdateFailureIEs_1_rows[] = {
+static const asn_ioc_cell_t asn_IOS_Ngap_RANConfigurationUpdateFailureIEs_1_rows[] = {
 	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_279_Ngap_id_Cause },
 	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_279_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
@@ -2221,860 +2211,990 @@ static const asn_ioc_cell_t asn_IOS_Ngap_AMFConfigurationUpdateFailureIEs_1_rows
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
 	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_281_Ngap_optional }
 };
+static const asn_ioc_set_t asn_IOS_Ngap_RANConfigurationUpdateFailureIEs_1[] = {
+	{ 3, 4, asn_IOS_Ngap_RANConfigurationUpdateFailureIEs_1_rows }
+};
+static const long asn_VAL_282_Ngap_id_AMFName = 1;
+static const long asn_VAL_282_Ngap_reject = 0;
+static const long asn_VAL_282_Ngap_optional = 0;
+static const long asn_VAL_283_Ngap_id_ServedGUAMIList = 96;
+static const long asn_VAL_283_Ngap_reject = 0;
+static const long asn_VAL_283_Ngap_optional = 0;
+static const long asn_VAL_284_Ngap_id_RelativeAMFCapacity = 86;
+static const long asn_VAL_284_Ngap_ignore = 1;
+static const long asn_VAL_284_Ngap_optional = 0;
+static const long asn_VAL_285_Ngap_id_PLMNSupportList = 80;
+static const long asn_VAL_285_Ngap_reject = 0;
+static const long asn_VAL_285_Ngap_optional = 0;
+static const long asn_VAL_286_Ngap_id_AMF_TNLAssociationToAddList = 6;
+static const long asn_VAL_286_Ngap_ignore = 1;
+static const long asn_VAL_286_Ngap_optional = 0;
+static const long asn_VAL_287_Ngap_id_AMF_TNLAssociationToRemoveList = 7;
+static const long asn_VAL_287_Ngap_ignore = 1;
+static const long asn_VAL_287_Ngap_optional = 0;
+static const long asn_VAL_288_Ngap_id_AMF_TNLAssociationToUpdateList = 8;
+static const long asn_VAL_288_Ngap_ignore = 1;
+static const long asn_VAL_288_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_AMFConfigurationUpdateIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_282_Ngap_id_AMFName },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_282_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMFName },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_282_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_283_Ngap_id_ServedGUAMIList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_283_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_ServedGUAMIList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_283_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_284_Ngap_id_RelativeAMFCapacity },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_284_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RelativeAMFCapacity },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_284_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_285_Ngap_id_PLMNSupportList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_285_Ngap_reject },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_PLMNSupportList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_285_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_286_Ngap_id_AMF_TNLAssociationToAddList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_286_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_TNLAssociationToAddList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_286_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_287_Ngap_id_AMF_TNLAssociationToRemoveList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_287_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_TNLAssociationToRemoveList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_287_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_288_Ngap_id_AMF_TNLAssociationToUpdateList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_288_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_TNLAssociationToUpdateList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_288_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_AMFConfigurationUpdateIEs_1[] = {
+	{ 7, 4, asn_IOS_Ngap_AMFConfigurationUpdateIEs_1_rows }
+};
+static const long asn_VAL_289_Ngap_id_AMF_TNLAssociationSetupList = 5;
+static const long asn_VAL_289_Ngap_ignore = 1;
+static const long asn_VAL_289_Ngap_optional = 0;
+static const long asn_VAL_290_Ngap_id_AMF_TNLAssociationFailedToSetupList = 4;
+static const long asn_VAL_290_Ngap_ignore = 1;
+static const long asn_VAL_290_Ngap_optional = 0;
+static const long asn_VAL_291_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_291_Ngap_ignore = 1;
+static const long asn_VAL_291_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_AMFConfigurationUpdateAcknowledgeIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_289_Ngap_id_AMF_TNLAssociationSetupList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_289_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_TNLAssociationSetupList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_289_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_290_Ngap_id_AMF_TNLAssociationFailedToSetupList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_290_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_TNLAssociationList },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_290_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_291_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_291_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_291_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_AMFConfigurationUpdateAcknowledgeIEs_1[] = {
+	{ 3, 4, asn_IOS_Ngap_AMFConfigurationUpdateAcknowledgeIEs_1_rows }
+};
+static const long asn_VAL_292_Ngap_id_Cause = 15;
+static const long asn_VAL_292_Ngap_ignore = 1;
+static const long asn_VAL_292_Ngap_mandatory = 2;
+static const long asn_VAL_293_Ngap_id_TimeToWait = 107;
+static const long asn_VAL_293_Ngap_ignore = 1;
+static const long asn_VAL_293_Ngap_optional = 0;
+static const long asn_VAL_294_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_294_Ngap_ignore = 1;
+static const long asn_VAL_294_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_AMFConfigurationUpdateFailureIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_292_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_292_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_292_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_293_Ngap_id_TimeToWait },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_293_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_TimeToWait },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_293_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_294_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_294_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_294_Ngap_optional }
+};
 static const asn_ioc_set_t asn_IOS_Ngap_AMFConfigurationUpdateFailureIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_AMFConfigurationUpdateFailureIEs_1_rows }
 };
-static const long asn_VAL_282_Ngap_id_UnavailableGUAMIList = 120;
-static const long asn_VAL_282_Ngap_reject = 0;
-static const long asn_VAL_282_Ngap_mandatory = 2;
+static const long asn_VAL_295_Ngap_id_UnavailableGUAMIList = 120;
+static const long asn_VAL_295_Ngap_reject = 0;
+static const long asn_VAL_295_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_AMFStatusIndicationIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_282_Ngap_id_UnavailableGUAMIList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_282_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_295_Ngap_id_UnavailableGUAMIList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_295_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UnavailableGUAMIList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_282_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_295_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_AMFStatusIndicationIEs_1[] = {
 	{ 1, 4, asn_IOS_Ngap_AMFStatusIndicationIEs_1_rows }
 };
-static const long asn_VAL_283_Ngap_id_Cause = 15;
-static const long asn_VAL_283_Ngap_ignore = 1;
-static const long asn_VAL_283_Ngap_mandatory = 2;
-static const long asn_VAL_284_Ngap_id_ResetType = 88;
-static const long asn_VAL_284_Ngap_reject = 0;
-static const long asn_VAL_284_Ngap_mandatory = 2;
+static const long asn_VAL_296_Ngap_id_Cause = 15;
+static const long asn_VAL_296_Ngap_ignore = 1;
+static const long asn_VAL_296_Ngap_mandatory = 2;
+static const long asn_VAL_297_Ngap_id_ResetType = 88;
+static const long asn_VAL_297_Ngap_reject = 0;
+static const long asn_VAL_297_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_NGResetIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_283_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_283_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_296_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_296_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_283_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_284_Ngap_id_ResetType },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_284_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_296_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_297_Ngap_id_ResetType },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_297_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_ResetType },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_284_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_297_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_NGResetIEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_NGResetIEs_1_rows }
 };
-static const long asn_VAL_285_Ngap_id_UE_associatedLogicalNG_connectionList = 111;
-static const long asn_VAL_285_Ngap_ignore = 1;
-static const long asn_VAL_285_Ngap_optional = 0;
-static const long asn_VAL_286_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_286_Ngap_ignore = 1;
-static const long asn_VAL_286_Ngap_optional = 0;
+static const long asn_VAL_298_Ngap_id_UE_associatedLogicalNG_connectionList = 111;
+static const long asn_VAL_298_Ngap_ignore = 1;
+static const long asn_VAL_298_Ngap_optional = 0;
+static const long asn_VAL_299_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_299_Ngap_ignore = 1;
+static const long asn_VAL_299_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_NGResetAcknowledgeIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_285_Ngap_id_UE_associatedLogicalNG_connectionList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_285_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_298_Ngap_id_UE_associatedLogicalNG_connectionList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_298_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UE_associatedLogicalNG_connectionList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_285_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_286_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_286_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_298_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_299_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_299_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_286_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_299_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_NGResetAcknowledgeIEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_NGResetAcknowledgeIEs_1_rows }
 };
-static const long asn_VAL_287_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_287_Ngap_ignore = 1;
-static const long asn_VAL_287_Ngap_optional = 0;
-static const long asn_VAL_288_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_288_Ngap_ignore = 1;
-static const long asn_VAL_288_Ngap_optional = 0;
-static const long asn_VAL_289_Ngap_id_Cause = 15;
-static const long asn_VAL_289_Ngap_ignore = 1;
-static const long asn_VAL_289_Ngap_optional = 0;
-static const long asn_VAL_290_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_290_Ngap_ignore = 1;
-static const long asn_VAL_290_Ngap_optional = 0;
+static const long asn_VAL_300_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_300_Ngap_ignore = 1;
+static const long asn_VAL_300_Ngap_optional = 0;
+static const long asn_VAL_301_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_301_Ngap_ignore = 1;
+static const long asn_VAL_301_Ngap_optional = 0;
+static const long asn_VAL_302_Ngap_id_Cause = 15;
+static const long asn_VAL_302_Ngap_ignore = 1;
+static const long asn_VAL_302_Ngap_optional = 0;
+static const long asn_VAL_303_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_303_Ngap_ignore = 1;
+static const long asn_VAL_303_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_ErrorIndicationIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_287_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_287_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_300_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_300_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_287_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_288_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_288_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_300_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_301_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_301_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_288_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_289_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_289_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_301_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_302_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_302_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_289_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_290_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_290_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_302_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_303_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_303_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_290_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_303_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_ErrorIndicationIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_ErrorIndicationIEs_1_rows }
 };
-static const long asn_VAL_291_Ngap_id_AMFOverloadResponse = 2;
-static const long asn_VAL_291_Ngap_reject = 0;
-static const long asn_VAL_291_Ngap_optional = 0;
-static const long asn_VAL_292_Ngap_id_AMFTrafficLoadReductionIndication = 9;
-static const long asn_VAL_292_Ngap_ignore = 1;
-static const long asn_VAL_292_Ngap_optional = 0;
-static const long asn_VAL_293_Ngap_id_OverloadStartNSSAIList = 49;
-static const long asn_VAL_293_Ngap_ignore = 1;
-static const long asn_VAL_293_Ngap_optional = 0;
+static const long asn_VAL_304_Ngap_id_AMFOverloadResponse = 2;
+static const long asn_VAL_304_Ngap_reject = 0;
+static const long asn_VAL_304_Ngap_optional = 0;
+static const long asn_VAL_305_Ngap_id_AMFTrafficLoadReductionIndication = 9;
+static const long asn_VAL_305_Ngap_ignore = 1;
+static const long asn_VAL_305_Ngap_optional = 0;
+static const long asn_VAL_306_Ngap_id_OverloadStartNSSAIList = 49;
+static const long asn_VAL_306_Ngap_ignore = 1;
+static const long asn_VAL_306_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_OverloadStartIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_291_Ngap_id_AMFOverloadResponse },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_291_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_304_Ngap_id_AMFOverloadResponse },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_304_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_OverloadResponse },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_291_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_292_Ngap_id_AMFTrafficLoadReductionIndication },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_292_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_304_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_305_Ngap_id_AMFTrafficLoadReductionIndication },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_305_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_TrafficLoadReductionIndication },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_292_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_293_Ngap_id_OverloadStartNSSAIList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_293_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_305_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_306_Ngap_id_OverloadStartNSSAIList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_306_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_OverloadStartNSSAIList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_293_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_306_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_OverloadStartIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_OverloadStartIEs_1_rows }
 };
-static const long asn_VAL_294_Ngap_id_SONConfigurationTransferUL = 99;
-static const long asn_VAL_294_Ngap_ignore = 1;
-static const long asn_VAL_294_Ngap_optional = 0;
-static const long asn_VAL_295_Ngap_id_ENDC_SONConfigurationTransferUL = 158;
-static const long asn_VAL_295_Ngap_ignore = 1;
-static const long asn_VAL_295_Ngap_optional = 0;
+static const long asn_VAL_307_Ngap_id_SONConfigurationTransferUL = 99;
+static const long asn_VAL_307_Ngap_ignore = 1;
+static const long asn_VAL_307_Ngap_optional = 0;
+static const long asn_VAL_308_Ngap_id_ENDC_SONConfigurationTransferUL = 158;
+static const long asn_VAL_308_Ngap_ignore = 1;
+static const long asn_VAL_308_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_UplinkRANConfigurationTransferIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_294_Ngap_id_SONConfigurationTransferUL },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_294_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_307_Ngap_id_SONConfigurationTransferUL },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_307_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_SONConfigurationTransfer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_294_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_295_Ngap_id_ENDC_SONConfigurationTransferUL },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_295_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_307_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_308_Ngap_id_ENDC_SONConfigurationTransferUL },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_308_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_EN_DCSONConfigurationTransfer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_295_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_308_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UplinkRANConfigurationTransferIEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_UplinkRANConfigurationTransferIEs_1_rows }
 };
-static const long asn_VAL_296_Ngap_id_SONConfigurationTransferDL = 98;
-static const long asn_VAL_296_Ngap_ignore = 1;
-static const long asn_VAL_296_Ngap_optional = 0;
-static const long asn_VAL_297_Ngap_id_ENDC_SONConfigurationTransferDL = 157;
-static const long asn_VAL_297_Ngap_ignore = 1;
-static const long asn_VAL_297_Ngap_optional = 0;
+static const long asn_VAL_309_Ngap_id_SONConfigurationTransferDL = 98;
+static const long asn_VAL_309_Ngap_ignore = 1;
+static const long asn_VAL_309_Ngap_optional = 0;
+static const long asn_VAL_310_Ngap_id_ENDC_SONConfigurationTransferDL = 157;
+static const long asn_VAL_310_Ngap_ignore = 1;
+static const long asn_VAL_310_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_DownlinkRANConfigurationTransferIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_296_Ngap_id_SONConfigurationTransferDL },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_296_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_309_Ngap_id_SONConfigurationTransferDL },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_309_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_SONConfigurationTransfer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_296_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_297_Ngap_id_ENDC_SONConfigurationTransferDL },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_297_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_309_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_310_Ngap_id_ENDC_SONConfigurationTransferDL },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_310_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_EN_DCSONConfigurationTransfer },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_297_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_310_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_DownlinkRANConfigurationTransferIEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_DownlinkRANConfigurationTransferIEs_1_rows }
 };
-static const long asn_VAL_298_Ngap_id_MessageIdentifier = 35;
-static const long asn_VAL_298_Ngap_reject = 0;
-static const long asn_VAL_298_Ngap_mandatory = 2;
-static const long asn_VAL_299_Ngap_id_SerialNumber = 95;
-static const long asn_VAL_299_Ngap_reject = 0;
-static const long asn_VAL_299_Ngap_mandatory = 2;
-static const long asn_VAL_300_Ngap_id_WarningAreaList = 122;
-static const long asn_VAL_300_Ngap_ignore = 1;
-static const long asn_VAL_300_Ngap_optional = 0;
-static const long asn_VAL_301_Ngap_id_RepetitionPeriod = 87;
-static const long asn_VAL_301_Ngap_reject = 0;
-static const long asn_VAL_301_Ngap_mandatory = 2;
-static const long asn_VAL_302_Ngap_id_NumberOfBroadcastsRequested = 47;
-static const long asn_VAL_302_Ngap_reject = 0;
-static const long asn_VAL_302_Ngap_mandatory = 2;
-static const long asn_VAL_303_Ngap_id_WarningType = 125;
-static const long asn_VAL_303_Ngap_ignore = 1;
-static const long asn_VAL_303_Ngap_optional = 0;
-static const long asn_VAL_304_Ngap_id_WarningSecurityInfo = 124;
-static const long asn_VAL_304_Ngap_ignore = 1;
-static const long asn_VAL_304_Ngap_optional = 0;
-static const long asn_VAL_305_Ngap_id_DataCodingScheme = 20;
-static const long asn_VAL_305_Ngap_ignore = 1;
-static const long asn_VAL_305_Ngap_optional = 0;
-static const long asn_VAL_306_Ngap_id_WarningMessageContents = 123;
-static const long asn_VAL_306_Ngap_ignore = 1;
-static const long asn_VAL_306_Ngap_optional = 0;
-static const long asn_VAL_307_Ngap_id_ConcurrentWarningMessageInd = 17;
-static const long asn_VAL_307_Ngap_reject = 0;
-static const long asn_VAL_307_Ngap_optional = 0;
-static const long asn_VAL_308_Ngap_id_WarningAreaCoordinates = 141;
-static const long asn_VAL_308_Ngap_ignore = 1;
-static const long asn_VAL_308_Ngap_optional = 0;
+static const long asn_VAL_311_Ngap_id_MessageIdentifier = 35;
+static const long asn_VAL_311_Ngap_reject = 0;
+static const long asn_VAL_311_Ngap_mandatory = 2;
+static const long asn_VAL_312_Ngap_id_SerialNumber = 95;
+static const long asn_VAL_312_Ngap_reject = 0;
+static const long asn_VAL_312_Ngap_mandatory = 2;
+static const long asn_VAL_313_Ngap_id_WarningAreaList = 122;
+static const long asn_VAL_313_Ngap_ignore = 1;
+static const long asn_VAL_313_Ngap_optional = 0;
+static const long asn_VAL_314_Ngap_id_RepetitionPeriod = 87;
+static const long asn_VAL_314_Ngap_reject = 0;
+static const long asn_VAL_314_Ngap_mandatory = 2;
+static const long asn_VAL_315_Ngap_id_NumberOfBroadcastsRequested = 47;
+static const long asn_VAL_315_Ngap_reject = 0;
+static const long asn_VAL_315_Ngap_mandatory = 2;
+static const long asn_VAL_316_Ngap_id_WarningType = 125;
+static const long asn_VAL_316_Ngap_ignore = 1;
+static const long asn_VAL_316_Ngap_optional = 0;
+static const long asn_VAL_317_Ngap_id_WarningSecurityInfo = 124;
+static const long asn_VAL_317_Ngap_ignore = 1;
+static const long asn_VAL_317_Ngap_optional = 0;
+static const long asn_VAL_318_Ngap_id_DataCodingScheme = 20;
+static const long asn_VAL_318_Ngap_ignore = 1;
+static const long asn_VAL_318_Ngap_optional = 0;
+static const long asn_VAL_319_Ngap_id_WarningMessageContents = 123;
+static const long asn_VAL_319_Ngap_ignore = 1;
+static const long asn_VAL_319_Ngap_optional = 0;
+static const long asn_VAL_320_Ngap_id_ConcurrentWarningMessageInd = 17;
+static const long asn_VAL_320_Ngap_reject = 0;
+static const long asn_VAL_320_Ngap_optional = 0;
+static const long asn_VAL_321_Ngap_id_WarningAreaCoordinates = 141;
+static const long asn_VAL_321_Ngap_ignore = 1;
+static const long asn_VAL_321_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_WriteReplaceWarningRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_298_Ngap_id_MessageIdentifier },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_298_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_311_Ngap_id_MessageIdentifier },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_311_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_MessageIdentifier },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_298_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_299_Ngap_id_SerialNumber },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_299_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_311_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_312_Ngap_id_SerialNumber },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_312_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_SerialNumber },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_299_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_300_Ngap_id_WarningAreaList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_300_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_312_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_313_Ngap_id_WarningAreaList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_313_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_WarningAreaList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_300_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_301_Ngap_id_RepetitionPeriod },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_301_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_313_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_314_Ngap_id_RepetitionPeriod },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_314_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RepetitionPeriod },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_301_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_302_Ngap_id_NumberOfBroadcastsRequested },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_302_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_314_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_315_Ngap_id_NumberOfBroadcastsRequested },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_315_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NumberOfBroadcastsRequested },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_302_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_303_Ngap_id_WarningType },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_303_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_315_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_316_Ngap_id_WarningType },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_316_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_WarningType },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_303_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_304_Ngap_id_WarningSecurityInfo },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_304_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_316_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_317_Ngap_id_WarningSecurityInfo },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_317_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_WarningSecurityInfo },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_304_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_305_Ngap_id_DataCodingScheme },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_305_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_317_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_318_Ngap_id_DataCodingScheme },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_318_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_DataCodingScheme },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_305_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_306_Ngap_id_WarningMessageContents },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_306_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_318_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_319_Ngap_id_WarningMessageContents },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_319_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_WarningMessageContents },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_306_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_307_Ngap_id_ConcurrentWarningMessageInd },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_307_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_319_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_320_Ngap_id_ConcurrentWarningMessageInd },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_320_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_ConcurrentWarningMessageInd },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_307_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_308_Ngap_id_WarningAreaCoordinates },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_308_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_320_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_321_Ngap_id_WarningAreaCoordinates },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_321_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_WarningAreaCoordinates },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_308_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_321_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_WriteReplaceWarningRequestIEs_1[] = {
 	{ 11, 4, asn_IOS_Ngap_WriteReplaceWarningRequestIEs_1_rows }
 };
-static const long asn_VAL_309_Ngap_id_MessageIdentifier = 35;
-static const long asn_VAL_309_Ngap_reject = 0;
-static const long asn_VAL_309_Ngap_mandatory = 2;
-static const long asn_VAL_310_Ngap_id_SerialNumber = 95;
-static const long asn_VAL_310_Ngap_reject = 0;
-static const long asn_VAL_310_Ngap_mandatory = 2;
-static const long asn_VAL_311_Ngap_id_BroadcastCompletedAreaList = 13;
-static const long asn_VAL_311_Ngap_ignore = 1;
-static const long asn_VAL_311_Ngap_optional = 0;
-static const long asn_VAL_312_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_312_Ngap_ignore = 1;
-static const long asn_VAL_312_Ngap_optional = 0;
+static const long asn_VAL_322_Ngap_id_MessageIdentifier = 35;
+static const long asn_VAL_322_Ngap_reject = 0;
+static const long asn_VAL_322_Ngap_mandatory = 2;
+static const long asn_VAL_323_Ngap_id_SerialNumber = 95;
+static const long asn_VAL_323_Ngap_reject = 0;
+static const long asn_VAL_323_Ngap_mandatory = 2;
+static const long asn_VAL_324_Ngap_id_BroadcastCompletedAreaList = 13;
+static const long asn_VAL_324_Ngap_ignore = 1;
+static const long asn_VAL_324_Ngap_optional = 0;
+static const long asn_VAL_325_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_325_Ngap_ignore = 1;
+static const long asn_VAL_325_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_WriteReplaceWarningResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_309_Ngap_id_MessageIdentifier },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_309_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_322_Ngap_id_MessageIdentifier },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_322_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_MessageIdentifier },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_309_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_310_Ngap_id_SerialNumber },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_310_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_322_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_323_Ngap_id_SerialNumber },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_323_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_SerialNumber },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_310_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_311_Ngap_id_BroadcastCompletedAreaList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_311_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_323_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_324_Ngap_id_BroadcastCompletedAreaList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_324_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_BroadcastCompletedAreaList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_311_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_312_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_312_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_324_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_325_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_325_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_312_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_325_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_WriteReplaceWarningResponseIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_WriteReplaceWarningResponseIEs_1_rows }
 };
-static const long asn_VAL_313_Ngap_id_MessageIdentifier = 35;
-static const long asn_VAL_313_Ngap_reject = 0;
-static const long asn_VAL_313_Ngap_mandatory = 2;
-static const long asn_VAL_314_Ngap_id_SerialNumber = 95;
-static const long asn_VAL_314_Ngap_reject = 0;
-static const long asn_VAL_314_Ngap_mandatory = 2;
-static const long asn_VAL_315_Ngap_id_WarningAreaList = 122;
-static const long asn_VAL_315_Ngap_ignore = 1;
-static const long asn_VAL_315_Ngap_optional = 0;
-static const long asn_VAL_316_Ngap_id_CancelAllWarningMessages = 14;
-static const long asn_VAL_316_Ngap_reject = 0;
-static const long asn_VAL_316_Ngap_optional = 0;
+static const long asn_VAL_326_Ngap_id_MessageIdentifier = 35;
+static const long asn_VAL_326_Ngap_reject = 0;
+static const long asn_VAL_326_Ngap_mandatory = 2;
+static const long asn_VAL_327_Ngap_id_SerialNumber = 95;
+static const long asn_VAL_327_Ngap_reject = 0;
+static const long asn_VAL_327_Ngap_mandatory = 2;
+static const long asn_VAL_328_Ngap_id_WarningAreaList = 122;
+static const long asn_VAL_328_Ngap_ignore = 1;
+static const long asn_VAL_328_Ngap_optional = 0;
+static const long asn_VAL_329_Ngap_id_CancelAllWarningMessages = 14;
+static const long asn_VAL_329_Ngap_reject = 0;
+static const long asn_VAL_329_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PWSCancelRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_313_Ngap_id_MessageIdentifier },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_313_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_326_Ngap_id_MessageIdentifier },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_326_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_MessageIdentifier },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_313_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_314_Ngap_id_SerialNumber },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_314_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_326_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_327_Ngap_id_SerialNumber },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_327_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_SerialNumber },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_314_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_315_Ngap_id_WarningAreaList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_315_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_327_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_328_Ngap_id_WarningAreaList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_328_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_WarningAreaList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_315_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_316_Ngap_id_CancelAllWarningMessages },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_316_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_328_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_329_Ngap_id_CancelAllWarningMessages },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_329_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CancelAllWarningMessages },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_316_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_329_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PWSCancelRequestIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_PWSCancelRequestIEs_1_rows }
 };
-static const long asn_VAL_317_Ngap_id_MessageIdentifier = 35;
-static const long asn_VAL_317_Ngap_reject = 0;
-static const long asn_VAL_317_Ngap_mandatory = 2;
-static const long asn_VAL_318_Ngap_id_SerialNumber = 95;
-static const long asn_VAL_318_Ngap_reject = 0;
-static const long asn_VAL_318_Ngap_mandatory = 2;
-static const long asn_VAL_319_Ngap_id_BroadcastCancelledAreaList = 12;
-static const long asn_VAL_319_Ngap_ignore = 1;
-static const long asn_VAL_319_Ngap_optional = 0;
-static const long asn_VAL_320_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_320_Ngap_ignore = 1;
-static const long asn_VAL_320_Ngap_optional = 0;
+static const long asn_VAL_330_Ngap_id_MessageIdentifier = 35;
+static const long asn_VAL_330_Ngap_reject = 0;
+static const long asn_VAL_330_Ngap_mandatory = 2;
+static const long asn_VAL_331_Ngap_id_SerialNumber = 95;
+static const long asn_VAL_331_Ngap_reject = 0;
+static const long asn_VAL_331_Ngap_mandatory = 2;
+static const long asn_VAL_332_Ngap_id_BroadcastCancelledAreaList = 12;
+static const long asn_VAL_332_Ngap_ignore = 1;
+static const long asn_VAL_332_Ngap_optional = 0;
+static const long asn_VAL_333_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_333_Ngap_ignore = 1;
+static const long asn_VAL_333_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PWSCancelResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_317_Ngap_id_MessageIdentifier },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_317_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_330_Ngap_id_MessageIdentifier },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_330_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_MessageIdentifier },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_317_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_318_Ngap_id_SerialNumber },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_318_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_330_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_331_Ngap_id_SerialNumber },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_331_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_SerialNumber },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_318_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_319_Ngap_id_BroadcastCancelledAreaList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_319_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_331_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_332_Ngap_id_BroadcastCancelledAreaList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_332_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_BroadcastCancelledAreaList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_319_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_320_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_320_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_332_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_333_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_333_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_320_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_333_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PWSCancelResponseIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_PWSCancelResponseIEs_1_rows }
 };
-static const long asn_VAL_321_Ngap_id_CellIDListForRestart = 16;
-static const long asn_VAL_321_Ngap_reject = 0;
-static const long asn_VAL_321_Ngap_mandatory = 2;
-static const long asn_VAL_322_Ngap_id_GlobalRANNodeID = 27;
-static const long asn_VAL_322_Ngap_reject = 0;
-static const long asn_VAL_322_Ngap_mandatory = 2;
-static const long asn_VAL_323_Ngap_id_TAIListForRestart = 104;
-static const long asn_VAL_323_Ngap_reject = 0;
-static const long asn_VAL_323_Ngap_mandatory = 2;
-static const long asn_VAL_324_Ngap_id_EmergencyAreaIDListForRestart = 23;
-static const long asn_VAL_324_Ngap_reject = 0;
-static const long asn_VAL_324_Ngap_optional = 0;
+static const long asn_VAL_334_Ngap_id_CellIDListForRestart = 16;
+static const long asn_VAL_334_Ngap_reject = 0;
+static const long asn_VAL_334_Ngap_mandatory = 2;
+static const long asn_VAL_335_Ngap_id_GlobalRANNodeID = 27;
+static const long asn_VAL_335_Ngap_reject = 0;
+static const long asn_VAL_335_Ngap_mandatory = 2;
+static const long asn_VAL_336_Ngap_id_TAIListForRestart = 104;
+static const long asn_VAL_336_Ngap_reject = 0;
+static const long asn_VAL_336_Ngap_mandatory = 2;
+static const long asn_VAL_337_Ngap_id_EmergencyAreaIDListForRestart = 23;
+static const long asn_VAL_337_Ngap_reject = 0;
+static const long asn_VAL_337_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_PWSRestartIndicationIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_321_Ngap_id_CellIDListForRestart },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_321_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_334_Ngap_id_CellIDListForRestart },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_334_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CellIDListForRestart },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_321_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_322_Ngap_id_GlobalRANNodeID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_322_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_334_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_335_Ngap_id_GlobalRANNodeID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_335_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_GlobalRANNodeID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_322_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_323_Ngap_id_TAIListForRestart },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_323_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_335_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_336_Ngap_id_TAIListForRestart },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_336_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_TAIListForRestart },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_323_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_324_Ngap_id_EmergencyAreaIDListForRestart },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_324_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_336_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_337_Ngap_id_EmergencyAreaIDListForRestart },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_337_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_EmergencyAreaIDListForRestart },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_324_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_337_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PWSRestartIndicationIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_PWSRestartIndicationIEs_1_rows }
 };
-static const long asn_VAL_325_Ngap_id_PWSFailedCellIDList = 81;
-static const long asn_VAL_325_Ngap_reject = 0;
-static const long asn_VAL_325_Ngap_mandatory = 2;
-static const long asn_VAL_326_Ngap_id_GlobalRANNodeID = 27;
-static const long asn_VAL_326_Ngap_reject = 0;
-static const long asn_VAL_326_Ngap_mandatory = 2;
+static const long asn_VAL_338_Ngap_id_PWSFailedCellIDList = 81;
+static const long asn_VAL_338_Ngap_reject = 0;
+static const long asn_VAL_338_Ngap_mandatory = 2;
+static const long asn_VAL_339_Ngap_id_GlobalRANNodeID = 27;
+static const long asn_VAL_339_Ngap_reject = 0;
+static const long asn_VAL_339_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_PWSFailureIndicationIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_325_Ngap_id_PWSFailedCellIDList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_325_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_338_Ngap_id_PWSFailedCellIDList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_338_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PWSFailedCellIDList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_325_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_326_Ngap_id_GlobalRANNodeID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_326_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_338_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_339_Ngap_id_GlobalRANNodeID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_339_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_GlobalRANNodeID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_326_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_339_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_PWSFailureIndicationIEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_PWSFailureIndicationIEs_1_rows }
 };
-static const long asn_VAL_327_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_327_Ngap_reject = 0;
-static const long asn_VAL_327_Ngap_mandatory = 2;
-static const long asn_VAL_328_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_328_Ngap_reject = 0;
-static const long asn_VAL_328_Ngap_mandatory = 2;
-static const long asn_VAL_329_Ngap_id_RoutingID = 89;
-static const long asn_VAL_329_Ngap_reject = 0;
-static const long asn_VAL_329_Ngap_mandatory = 2;
-static const long asn_VAL_330_Ngap_id_NRPPa_PDU = 46;
-static const long asn_VAL_330_Ngap_reject = 0;
-static const long asn_VAL_330_Ngap_mandatory = 2;
+static const long asn_VAL_340_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_340_Ngap_reject = 0;
+static const long asn_VAL_340_Ngap_mandatory = 2;
+static const long asn_VAL_341_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_341_Ngap_reject = 0;
+static const long asn_VAL_341_Ngap_mandatory = 2;
+static const long asn_VAL_342_Ngap_id_RoutingID = 89;
+static const long asn_VAL_342_Ngap_reject = 0;
+static const long asn_VAL_342_Ngap_mandatory = 2;
+static const long asn_VAL_343_Ngap_id_NRPPa_PDU = 46;
+static const long asn_VAL_343_Ngap_reject = 0;
+static const long asn_VAL_343_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_DownlinkUEAssociatedNRPPaTransportIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_327_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_327_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_340_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_340_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_327_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_328_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_328_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_340_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_341_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_341_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_328_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_329_Ngap_id_RoutingID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_329_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_341_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_342_Ngap_id_RoutingID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_342_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RoutingID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_329_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_330_Ngap_id_NRPPa_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_330_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_342_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_343_Ngap_id_NRPPa_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_343_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NRPPa_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_330_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_343_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_DownlinkUEAssociatedNRPPaTransportIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_DownlinkUEAssociatedNRPPaTransportIEs_1_rows }
 };
-static const long asn_VAL_331_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_331_Ngap_reject = 0;
-static const long asn_VAL_331_Ngap_mandatory = 2;
-static const long asn_VAL_332_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_332_Ngap_reject = 0;
-static const long asn_VAL_332_Ngap_mandatory = 2;
-static const long asn_VAL_333_Ngap_id_RoutingID = 89;
-static const long asn_VAL_333_Ngap_reject = 0;
-static const long asn_VAL_333_Ngap_mandatory = 2;
-static const long asn_VAL_334_Ngap_id_NRPPa_PDU = 46;
-static const long asn_VAL_334_Ngap_reject = 0;
-static const long asn_VAL_334_Ngap_mandatory = 2;
+static const long asn_VAL_344_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_344_Ngap_reject = 0;
+static const long asn_VAL_344_Ngap_mandatory = 2;
+static const long asn_VAL_345_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_345_Ngap_reject = 0;
+static const long asn_VAL_345_Ngap_mandatory = 2;
+static const long asn_VAL_346_Ngap_id_RoutingID = 89;
+static const long asn_VAL_346_Ngap_reject = 0;
+static const long asn_VAL_346_Ngap_mandatory = 2;
+static const long asn_VAL_347_Ngap_id_NRPPa_PDU = 46;
+static const long asn_VAL_347_Ngap_reject = 0;
+static const long asn_VAL_347_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_UplinkUEAssociatedNRPPaTransportIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_331_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_331_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_344_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_344_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_331_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_332_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_332_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_344_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_345_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_345_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_332_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_333_Ngap_id_RoutingID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_333_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_345_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_346_Ngap_id_RoutingID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_346_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RoutingID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_333_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_334_Ngap_id_NRPPa_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_334_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_346_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_347_Ngap_id_NRPPa_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_347_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NRPPa_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_334_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_347_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UplinkUEAssociatedNRPPaTransportIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_UplinkUEAssociatedNRPPaTransportIEs_1_rows }
 };
-static const long asn_VAL_335_Ngap_id_RoutingID = 89;
-static const long asn_VAL_335_Ngap_reject = 0;
-static const long asn_VAL_335_Ngap_mandatory = 2;
-static const long asn_VAL_336_Ngap_id_NRPPa_PDU = 46;
-static const long asn_VAL_336_Ngap_reject = 0;
-static const long asn_VAL_336_Ngap_mandatory = 2;
+static const long asn_VAL_348_Ngap_id_RoutingID = 89;
+static const long asn_VAL_348_Ngap_reject = 0;
+static const long asn_VAL_348_Ngap_mandatory = 2;
+static const long asn_VAL_349_Ngap_id_NRPPa_PDU = 46;
+static const long asn_VAL_349_Ngap_reject = 0;
+static const long asn_VAL_349_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_DownlinkNonUEAssociatedNRPPaTransportIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_335_Ngap_id_RoutingID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_335_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_348_Ngap_id_RoutingID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_348_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RoutingID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_335_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_336_Ngap_id_NRPPa_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_336_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_348_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_349_Ngap_id_NRPPa_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_349_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NRPPa_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_336_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_349_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_DownlinkNonUEAssociatedNRPPaTransportIEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_DownlinkNonUEAssociatedNRPPaTransportIEs_1_rows }
 };
-static const long asn_VAL_337_Ngap_id_RoutingID = 89;
-static const long asn_VAL_337_Ngap_reject = 0;
-static const long asn_VAL_337_Ngap_mandatory = 2;
-static const long asn_VAL_338_Ngap_id_NRPPa_PDU = 46;
-static const long asn_VAL_338_Ngap_reject = 0;
-static const long asn_VAL_338_Ngap_mandatory = 2;
+static const long asn_VAL_350_Ngap_id_RoutingID = 89;
+static const long asn_VAL_350_Ngap_reject = 0;
+static const long asn_VAL_350_Ngap_mandatory = 2;
+static const long asn_VAL_351_Ngap_id_NRPPa_PDU = 46;
+static const long asn_VAL_351_Ngap_reject = 0;
+static const long asn_VAL_351_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_UplinkNonUEAssociatedNRPPaTransportIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_337_Ngap_id_RoutingID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_337_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_350_Ngap_id_RoutingID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_350_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RoutingID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_337_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_338_Ngap_id_NRPPa_PDU },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_338_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_350_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_351_Ngap_id_NRPPa_PDU },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_351_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NRPPa_PDU },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_338_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_351_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UplinkNonUEAssociatedNRPPaTransportIEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_UplinkNonUEAssociatedNRPPaTransportIEs_1_rows }
 };
-static const long asn_VAL_339_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_339_Ngap_reject = 0;
-static const long asn_VAL_339_Ngap_mandatory = 2;
-static const long asn_VAL_340_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_340_Ngap_reject = 0;
-static const long asn_VAL_340_Ngap_mandatory = 2;
-static const long asn_VAL_341_Ngap_id_TraceActivation = 108;
-static const long asn_VAL_341_Ngap_ignore = 1;
-static const long asn_VAL_341_Ngap_mandatory = 2;
+static const long asn_VAL_352_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_352_Ngap_reject = 0;
+static const long asn_VAL_352_Ngap_mandatory = 2;
+static const long asn_VAL_353_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_353_Ngap_reject = 0;
+static const long asn_VAL_353_Ngap_mandatory = 2;
+static const long asn_VAL_354_Ngap_id_TraceActivation = 108;
+static const long asn_VAL_354_Ngap_ignore = 1;
+static const long asn_VAL_354_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_TraceStartIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_339_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_339_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_352_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_352_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_339_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_340_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_340_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_352_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_353_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_353_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_340_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_341_Ngap_id_TraceActivation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_341_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_353_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_354_Ngap_id_TraceActivation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_354_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_TraceActivation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_341_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_354_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_TraceStartIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_TraceStartIEs_1_rows }
 };
-static const long asn_VAL_342_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_342_Ngap_reject = 0;
-static const long asn_VAL_342_Ngap_mandatory = 2;
-static const long asn_VAL_343_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_343_Ngap_reject = 0;
-static const long asn_VAL_343_Ngap_mandatory = 2;
-static const long asn_VAL_344_Ngap_id_NGRANTraceID = 44;
-static const long asn_VAL_344_Ngap_ignore = 1;
-static const long asn_VAL_344_Ngap_mandatory = 2;
-static const long asn_VAL_345_Ngap_id_Cause = 15;
-static const long asn_VAL_345_Ngap_ignore = 1;
-static const long asn_VAL_345_Ngap_mandatory = 2;
+static const long asn_VAL_355_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_355_Ngap_reject = 0;
+static const long asn_VAL_355_Ngap_mandatory = 2;
+static const long asn_VAL_356_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_356_Ngap_reject = 0;
+static const long asn_VAL_356_Ngap_mandatory = 2;
+static const long asn_VAL_357_Ngap_id_NGRANTraceID = 44;
+static const long asn_VAL_357_Ngap_ignore = 1;
+static const long asn_VAL_357_Ngap_mandatory = 2;
+static const long asn_VAL_358_Ngap_id_Cause = 15;
+static const long asn_VAL_358_Ngap_ignore = 1;
+static const long asn_VAL_358_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_TraceFailureIndicationIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_342_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_342_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_355_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_355_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_342_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_343_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_343_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_355_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_356_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_356_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_343_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_344_Ngap_id_NGRANTraceID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_344_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_356_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_357_Ngap_id_NGRANTraceID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_357_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NGRANTraceID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_344_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_345_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_345_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_357_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_358_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_358_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_345_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_358_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_TraceFailureIndicationIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_TraceFailureIndicationIEs_1_rows }
 };
-static const long asn_VAL_346_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_346_Ngap_reject = 0;
-static const long asn_VAL_346_Ngap_mandatory = 2;
-static const long asn_VAL_347_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_347_Ngap_reject = 0;
-static const long asn_VAL_347_Ngap_mandatory = 2;
-static const long asn_VAL_348_Ngap_id_NGRANTraceID = 44;
-static const long asn_VAL_348_Ngap_ignore = 1;
-static const long asn_VAL_348_Ngap_mandatory = 2;
+static const long asn_VAL_359_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_359_Ngap_reject = 0;
+static const long asn_VAL_359_Ngap_mandatory = 2;
+static const long asn_VAL_360_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_360_Ngap_reject = 0;
+static const long asn_VAL_360_Ngap_mandatory = 2;
+static const long asn_VAL_361_Ngap_id_NGRANTraceID = 44;
+static const long asn_VAL_361_Ngap_ignore = 1;
+static const long asn_VAL_361_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_DeactivateTraceIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_346_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_346_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_359_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_359_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_346_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_347_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_347_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_359_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_360_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_360_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_347_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_348_Ngap_id_NGRANTraceID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_348_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_360_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_361_Ngap_id_NGRANTraceID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_361_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NGRANTraceID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_348_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_361_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_DeactivateTraceIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_DeactivateTraceIEs_1_rows }
 };
-static const long asn_VAL_349_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_349_Ngap_reject = 0;
-static const long asn_VAL_349_Ngap_mandatory = 2;
-static const long asn_VAL_350_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_350_Ngap_reject = 0;
-static const long asn_VAL_350_Ngap_mandatory = 2;
-static const long asn_VAL_351_Ngap_id_NGRANTraceID = 44;
-static const long asn_VAL_351_Ngap_ignore = 1;
-static const long asn_VAL_351_Ngap_mandatory = 2;
-static const long asn_VAL_352_Ngap_id_NGRAN_CGI = 43;
-static const long asn_VAL_352_Ngap_ignore = 1;
-static const long asn_VAL_352_Ngap_mandatory = 2;
-static const long asn_VAL_353_Ngap_id_TraceCollectionEntityIPAddress = 109;
-static const long asn_VAL_353_Ngap_ignore = 1;
-static const long asn_VAL_353_Ngap_mandatory = 2;
+static const long asn_VAL_362_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_362_Ngap_reject = 0;
+static const long asn_VAL_362_Ngap_mandatory = 2;
+static const long asn_VAL_363_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_363_Ngap_reject = 0;
+static const long asn_VAL_363_Ngap_mandatory = 2;
+static const long asn_VAL_364_Ngap_id_NGRANTraceID = 44;
+static const long asn_VAL_364_Ngap_ignore = 1;
+static const long asn_VAL_364_Ngap_mandatory = 2;
+static const long asn_VAL_365_Ngap_id_NGRAN_CGI = 43;
+static const long asn_VAL_365_Ngap_ignore = 1;
+static const long asn_VAL_365_Ngap_mandatory = 2;
+static const long asn_VAL_366_Ngap_id_TraceCollectionEntityIPAddress = 109;
+static const long asn_VAL_366_Ngap_ignore = 1;
+static const long asn_VAL_366_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_CellTrafficTraceIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_349_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_349_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_362_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_362_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_349_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_350_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_350_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_362_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_363_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_363_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_350_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_351_Ngap_id_NGRANTraceID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_351_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_363_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_364_Ngap_id_NGRANTraceID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_364_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NGRANTraceID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_351_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_352_Ngap_id_NGRAN_CGI },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_352_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_364_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_365_Ngap_id_NGRAN_CGI },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_365_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_NGRAN_CGI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_352_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_353_Ngap_id_TraceCollectionEntityIPAddress },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_353_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_365_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_366_Ngap_id_TraceCollectionEntityIPAddress },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_366_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_TransportLayerAddress },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_353_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_366_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_CellTrafficTraceIEs_1[] = {
 	{ 5, 4, asn_IOS_Ngap_CellTrafficTraceIEs_1_rows }
 };
-static const long asn_VAL_354_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_354_Ngap_reject = 0;
-static const long asn_VAL_354_Ngap_mandatory = 2;
-static const long asn_VAL_355_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_355_Ngap_reject = 0;
-static const long asn_VAL_355_Ngap_mandatory = 2;
-static const long asn_VAL_356_Ngap_id_LocationReportingRequestType = 33;
-static const long asn_VAL_356_Ngap_ignore = 1;
-static const long asn_VAL_356_Ngap_mandatory = 2;
+static const long asn_VAL_367_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_367_Ngap_reject = 0;
+static const long asn_VAL_367_Ngap_mandatory = 2;
+static const long asn_VAL_368_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_368_Ngap_reject = 0;
+static const long asn_VAL_368_Ngap_mandatory = 2;
+static const long asn_VAL_369_Ngap_id_LocationReportingRequestType = 33;
+static const long asn_VAL_369_Ngap_ignore = 1;
+static const long asn_VAL_369_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_LocationReportingControlIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_354_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_354_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_367_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_367_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_354_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_355_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_355_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_367_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_368_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_368_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_355_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_356_Ngap_id_LocationReportingRequestType },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_356_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_368_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_369_Ngap_id_LocationReportingRequestType },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_369_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_LocationReportingRequestType },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_356_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_369_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_LocationReportingControlIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_LocationReportingControlIEs_1_rows }
 };
-static const long asn_VAL_357_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_357_Ngap_reject = 0;
-static const long asn_VAL_357_Ngap_mandatory = 2;
-static const long asn_VAL_358_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_358_Ngap_reject = 0;
-static const long asn_VAL_358_Ngap_mandatory = 2;
-static const long asn_VAL_359_Ngap_id_Cause = 15;
-static const long asn_VAL_359_Ngap_ignore = 1;
-static const long asn_VAL_359_Ngap_mandatory = 2;
+static const long asn_VAL_370_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_370_Ngap_reject = 0;
+static const long asn_VAL_370_Ngap_mandatory = 2;
+static const long asn_VAL_371_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_371_Ngap_reject = 0;
+static const long asn_VAL_371_Ngap_mandatory = 2;
+static const long asn_VAL_372_Ngap_id_Cause = 15;
+static const long asn_VAL_372_Ngap_ignore = 1;
+static const long asn_VAL_372_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_LocationReportingFailureIndicationIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_357_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_357_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_370_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_370_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_357_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_358_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_358_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_370_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_371_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_371_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_358_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_359_Ngap_id_Cause },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_359_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_371_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_372_Ngap_id_Cause },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_372_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_Cause },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_359_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_372_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_LocationReportingFailureIndicationIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_LocationReportingFailureIndicationIEs_1_rows }
 };
-static const long asn_VAL_360_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_360_Ngap_reject = 0;
-static const long asn_VAL_360_Ngap_mandatory = 2;
-static const long asn_VAL_361_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_361_Ngap_reject = 0;
-static const long asn_VAL_361_Ngap_mandatory = 2;
-static const long asn_VAL_362_Ngap_id_UserLocationInformation = 121;
-static const long asn_VAL_362_Ngap_ignore = 1;
-static const long asn_VAL_362_Ngap_mandatory = 2;
-static const long asn_VAL_363_Ngap_id_UEPresenceInAreaOfInterestList = 116;
-static const long asn_VAL_363_Ngap_ignore = 1;
-static const long asn_VAL_363_Ngap_optional = 0;
-static const long asn_VAL_364_Ngap_id_LocationReportingRequestType = 33;
-static const long asn_VAL_364_Ngap_ignore = 1;
-static const long asn_VAL_364_Ngap_mandatory = 2;
-static const long asn_VAL_365_Ngap_id_PSCellInformation = 149;
-static const long asn_VAL_365_Ngap_ignore = 1;
-static const long asn_VAL_365_Ngap_optional = 0;
+static const long asn_VAL_373_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_373_Ngap_reject = 0;
+static const long asn_VAL_373_Ngap_mandatory = 2;
+static const long asn_VAL_374_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_374_Ngap_reject = 0;
+static const long asn_VAL_374_Ngap_mandatory = 2;
+static const long asn_VAL_375_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_375_Ngap_ignore = 1;
+static const long asn_VAL_375_Ngap_mandatory = 2;
+static const long asn_VAL_376_Ngap_id_UEPresenceInAreaOfInterestList = 116;
+static const long asn_VAL_376_Ngap_ignore = 1;
+static const long asn_VAL_376_Ngap_optional = 0;
+static const long asn_VAL_377_Ngap_id_LocationReportingRequestType = 33;
+static const long asn_VAL_377_Ngap_ignore = 1;
+static const long asn_VAL_377_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_LocationReportIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_360_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_360_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_373_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_373_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_360_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_361_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_361_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_373_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_374_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_374_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_361_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_362_Ngap_id_UserLocationInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_362_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_374_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_375_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_375_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_362_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_363_Ngap_id_UEPresenceInAreaOfInterestList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_363_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_375_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_376_Ngap_id_UEPresenceInAreaOfInterestList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_376_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UEPresenceInAreaOfInterestList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_363_Ngap_optional },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_364_Ngap_id_LocationReportingRequestType },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_364_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_376_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_377_Ngap_id_LocationReportingRequestType },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_377_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_LocationReportingRequestType },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_364_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_365_Ngap_id_PSCellInformation },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_365_Ngap_ignore },
-	{ "&Value", aioc__type, &asn_DEF_Ngap_NGRAN_CGI },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_365_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_377_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_LocationReportIEs_1[] = {
-	{ 6, 4, asn_IOS_Ngap_LocationReportIEs_1_rows }
+	{ 5, 4, asn_IOS_Ngap_LocationReportIEs_1_rows }
 };
-static const long asn_VAL_366_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_366_Ngap_reject = 0;
-static const long asn_VAL_366_Ngap_mandatory = 2;
-static const long asn_VAL_367_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_367_Ngap_reject = 0;
-static const long asn_VAL_367_Ngap_mandatory = 2;
+static const long asn_VAL_378_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_378_Ngap_reject = 0;
+static const long asn_VAL_378_Ngap_mandatory = 2;
+static const long asn_VAL_379_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_379_Ngap_reject = 0;
+static const long asn_VAL_379_Ngap_mandatory = 2;
 static const asn_ioc_cell_t asn_IOS_Ngap_UETNLABindingReleaseRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_366_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_366_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_378_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_378_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_366_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_367_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_367_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_378_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_379_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_379_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_367_Ngap_mandatory }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_379_Ngap_mandatory }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UETNLABindingReleaseRequestIEs_1[] = {
 	{ 2, 4, asn_IOS_Ngap_UETNLABindingReleaseRequestIEs_1_rows }
 };
-static const long asn_VAL_368_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_368_Ngap_reject = 0;
-static const long asn_VAL_368_Ngap_mandatory = 2;
-static const long asn_VAL_369_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_369_Ngap_reject = 0;
-static const long asn_VAL_369_Ngap_mandatory = 2;
-static const long asn_VAL_370_Ngap_id_UERadioCapability = 117;
-static const long asn_VAL_370_Ngap_ignore = 1;
-static const long asn_VAL_370_Ngap_mandatory = 2;
-static const long asn_VAL_371_Ngap_id_UERadioCapabilityForPaging = 118;
-static const long asn_VAL_371_Ngap_ignore = 1;
-static const long asn_VAL_371_Ngap_optional = 0;
+static const long asn_VAL_380_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_380_Ngap_reject = 0;
+static const long asn_VAL_380_Ngap_mandatory = 2;
+static const long asn_VAL_381_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_381_Ngap_reject = 0;
+static const long asn_VAL_381_Ngap_mandatory = 2;
+static const long asn_VAL_382_Ngap_id_UERadioCapability = 117;
+static const long asn_VAL_382_Ngap_ignore = 1;
+static const long asn_VAL_382_Ngap_mandatory = 2;
+static const long asn_VAL_383_Ngap_id_UERadioCapabilityForPaging = 118;
+static const long asn_VAL_383_Ngap_ignore = 1;
+static const long asn_VAL_383_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_UERadioCapabilityInfoIndicationIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_368_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_368_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_380_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_380_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_368_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_369_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_369_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_380_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_381_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_381_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_369_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_370_Ngap_id_UERadioCapability },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_370_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_381_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_382_Ngap_id_UERadioCapability },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_382_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UERadioCapability },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_370_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_371_Ngap_id_UERadioCapabilityForPaging },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_371_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_382_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_383_Ngap_id_UERadioCapabilityForPaging },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_383_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UERadioCapabilityForPaging },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_371_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_383_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UERadioCapabilityInfoIndicationIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_UERadioCapabilityInfoIndicationIEs_1_rows }
 };
-static const long asn_VAL_372_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_372_Ngap_reject = 0;
-static const long asn_VAL_372_Ngap_mandatory = 2;
-static const long asn_VAL_373_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_373_Ngap_reject = 0;
-static const long asn_VAL_373_Ngap_mandatory = 2;
-static const long asn_VAL_374_Ngap_id_UERadioCapability = 117;
-static const long asn_VAL_374_Ngap_ignore = 1;
-static const long asn_VAL_374_Ngap_optional = 0;
+static const long asn_VAL_384_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_384_Ngap_reject = 0;
+static const long asn_VAL_384_Ngap_mandatory = 2;
+static const long asn_VAL_385_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_385_Ngap_reject = 0;
+static const long asn_VAL_385_Ngap_mandatory = 2;
+static const long asn_VAL_386_Ngap_id_UERadioCapability = 117;
+static const long asn_VAL_386_Ngap_ignore = 1;
+static const long asn_VAL_386_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_UERadioCapabilityCheckRequestIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_372_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_372_Ngap_reject },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_384_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_384_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_372_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_373_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_373_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_384_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_385_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_385_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_373_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_374_Ngap_id_UERadioCapability },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_374_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_385_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_386_Ngap_id_UERadioCapability },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_386_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_UERadioCapability },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_374_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_386_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UERadioCapabilityCheckRequestIEs_1[] = {
 	{ 3, 4, asn_IOS_Ngap_UERadioCapabilityCheckRequestIEs_1_rows }
 };
-static const long asn_VAL_375_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_375_Ngap_ignore = 1;
-static const long asn_VAL_375_Ngap_mandatory = 2;
-static const long asn_VAL_376_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_376_Ngap_ignore = 1;
-static const long asn_VAL_376_Ngap_mandatory = 2;
-static const long asn_VAL_377_Ngap_id_IMSVoiceSupportIndicator = 30;
-static const long asn_VAL_377_Ngap_reject = 0;
-static const long asn_VAL_377_Ngap_mandatory = 2;
-static const long asn_VAL_378_Ngap_id_CriticalityDiagnostics = 19;
-static const long asn_VAL_378_Ngap_ignore = 1;
-static const long asn_VAL_378_Ngap_optional = 0;
+static const long asn_VAL_387_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_387_Ngap_ignore = 1;
+static const long asn_VAL_387_Ngap_mandatory = 2;
+static const long asn_VAL_388_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_388_Ngap_ignore = 1;
+static const long asn_VAL_388_Ngap_mandatory = 2;
+static const long asn_VAL_389_Ngap_id_IMSVoiceSupportIndicator = 30;
+static const long asn_VAL_389_Ngap_reject = 0;
+static const long asn_VAL_389_Ngap_mandatory = 2;
+static const long asn_VAL_390_Ngap_id_CriticalityDiagnostics = 19;
+static const long asn_VAL_390_Ngap_ignore = 1;
+static const long asn_VAL_390_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_UERadioCapabilityCheckResponseIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_375_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_375_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_387_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_387_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_375_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_376_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_376_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_387_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_388_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_388_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_376_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_377_Ngap_id_IMSVoiceSupportIndicator },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_377_Ngap_reject },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_388_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_389_Ngap_id_IMSVoiceSupportIndicator },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_389_Ngap_reject },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_IMSVoiceSupportIndicator },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_377_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_378_Ngap_id_CriticalityDiagnostics },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_378_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_389_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_390_Ngap_id_CriticalityDiagnostics },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_390_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_CriticalityDiagnostics },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_378_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_390_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_UERadioCapabilityCheckResponseIEs_1[] = {
 	{ 4, 4, asn_IOS_Ngap_UERadioCapabilityCheckResponseIEs_1_rows }
 };
-static const long asn_VAL_379_Ngap_id_AMF_UE_NGAP_ID = 10;
-static const long asn_VAL_379_Ngap_ignore = 1;
-static const long asn_VAL_379_Ngap_mandatory = 2;
-static const long asn_VAL_380_Ngap_id_RAN_UE_NGAP_ID = 85;
-static const long asn_VAL_380_Ngap_ignore = 1;
-static const long asn_VAL_380_Ngap_mandatory = 2;
-static const long asn_VAL_381_Ngap_id_PDUSessionResourceSecondaryRATUsageList = 142;
-static const long asn_VAL_381_Ngap_ignore = 1;
-static const long asn_VAL_381_Ngap_mandatory = 2;
-static const long asn_VAL_382_Ngap_id_HandoverFlag = 143;
-static const long asn_VAL_382_Ngap_ignore = 1;
-static const long asn_VAL_382_Ngap_optional = 0;
+static const long asn_VAL_391_Ngap_id_AMF_UE_NGAP_ID = 10;
+static const long asn_VAL_391_Ngap_ignore = 1;
+static const long asn_VAL_391_Ngap_mandatory = 2;
+static const long asn_VAL_392_Ngap_id_RAN_UE_NGAP_ID = 85;
+static const long asn_VAL_392_Ngap_ignore = 1;
+static const long asn_VAL_392_Ngap_mandatory = 2;
+static const long asn_VAL_393_Ngap_id_PDUSessionResourceSecondaryRATUsageList = 142;
+static const long asn_VAL_393_Ngap_ignore = 1;
+static const long asn_VAL_393_Ngap_mandatory = 2;
+static const long asn_VAL_394_Ngap_id_HandoverFlag = 143;
+static const long asn_VAL_394_Ngap_ignore = 1;
+static const long asn_VAL_394_Ngap_optional = 0;
+static const long asn_VAL_395_Ngap_id_UserLocationInformation = 121;
+static const long asn_VAL_395_Ngap_ignore = 1;
+static const long asn_VAL_395_Ngap_optional = 0;
 static const asn_ioc_cell_t asn_IOS_Ngap_SecondaryRATDataUsageReportIEs_1_rows[] = {
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_379_Ngap_id_AMF_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_379_Ngap_ignore },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_391_Ngap_id_AMF_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_391_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_AMF_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_379_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_380_Ngap_id_RAN_UE_NGAP_ID },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_380_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_391_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_392_Ngap_id_RAN_UE_NGAP_ID },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_392_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_RAN_UE_NGAP_ID },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_380_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_381_Ngap_id_PDUSessionResourceSecondaryRATUsageList },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_381_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_392_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_393_Ngap_id_PDUSessionResourceSecondaryRATUsageList },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_393_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_PDUSessionResourceSecondaryRATUsageList },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_381_Ngap_mandatory },
-	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_382_Ngap_id_HandoverFlag },
-	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_382_Ngap_ignore },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_393_Ngap_mandatory },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_394_Ngap_id_HandoverFlag },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_394_Ngap_ignore },
 	{ "&Value", aioc__type, &asn_DEF_Ngap_HandoverFlag },
-	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_382_Ngap_optional }
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_394_Ngap_optional },
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_395_Ngap_id_UserLocationInformation },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_395_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_UserLocationInformation },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_395_Ngap_optional }
 };
 static const asn_ioc_set_t asn_IOS_Ngap_SecondaryRATDataUsageReportIEs_1[] = {
-	{ 4, 4, asn_IOS_Ngap_SecondaryRATDataUsageReportIEs_1_rows }
+	{ 5, 4, asn_IOS_Ngap_SecondaryRATDataUsageReportIEs_1_rows }
+};
+static const long asn_VAL_396_Ngap_id_RIMInformationTransfer = 175;
+static const long asn_VAL_396_Ngap_ignore = 1;
+static const long asn_VAL_396_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_UplinkRIMInformationTransferIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_396_Ngap_id_RIMInformationTransfer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_396_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RIMInformationTransfer },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_396_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_UplinkRIMInformationTransferIEs_1[] = {
+	{ 1, 4, asn_IOS_Ngap_UplinkRIMInformationTransferIEs_1_rows }
+};
+static const long asn_VAL_397_Ngap_id_RIMInformationTransfer = 175;
+static const long asn_VAL_397_Ngap_ignore = 1;
+static const long asn_VAL_397_Ngap_optional = 0;
+static const asn_ioc_cell_t asn_IOS_Ngap_DownlinkRIMInformationTransferIEs_1_rows[] = {
+	{ "&id", aioc__value, &asn_DEF_Ngap_ProtocolIE_ID, &asn_VAL_397_Ngap_id_RIMInformationTransfer },
+	{ "&criticality", aioc__value, &asn_DEF_Ngap_Criticality, &asn_VAL_397_Ngap_ignore },
+	{ "&Value", aioc__type, &asn_DEF_Ngap_RIMInformationTransfer },
+	{ "&presence", aioc__value, &asn_DEF_Ngap_Presence, &asn_VAL_397_Ngap_optional }
+};
+static const asn_ioc_set_t asn_IOS_Ngap_DownlinkRIMInformationTransferIEs_1[] = {
+	{ 1, 4, asn_IOS_Ngap_DownlinkRIMInformationTransferIEs_1_rows }
 };
 static int
 memb_Ngap_id_constraint_1(const asn_TYPE_descriptor_t *td, const void *sptr,
@@ -3416,6 +3536,33 @@ memb_Ngap_id_constraint_21(const asn_TYPE_descriptor_t *td, const void *sptr,
 	}
 }
 
+static asn_type_selector_result_t
+select_CPTransportLayerInformation_ExtIEs_Ngap_criticality_type(const asn_TYPE_descriptor_t *parent_type, const void *parent_sptr) {
+	asn_type_selector_result_t result = {0, 0};
+	const asn_ioc_set_t *itable = asn_IOS_Ngap_CPTransportLayerInformation_ExtIEs_1;
+	size_t constraining_column = 0; /* &id */
+	size_t for_column = 1; /* &criticality */
+	size_t row, presence_index = 0;
+	const long *constraining_value = (const long *)((const char *)parent_sptr + offsetof(struct Ngap_CPTransportLayerInformation_ExtIEs, id));
+	
+	for(row=0; row < itable->rows_count; row++) {
+	    const asn_ioc_cell_t *constraining_cell = &itable->rows[row * itable->columns_count + constraining_column];
+	    const asn_ioc_cell_t *type_cell = &itable->rows[row * itable->columns_count + for_column];
+	
+	    if(type_cell->cell_kind == aioc__undefined)
+	        continue;
+	
+	    presence_index++;
+	    if(constraining_cell->type_descriptor->op->compare_struct(constraining_cell->type_descriptor, constraining_value, constraining_cell->value_sptr) == 0) {
+	        result.type_descriptor = type_cell->type_descriptor;
+	        result.presence_index = presence_index;
+	        break;
+	    }
+	}
+	
+	return result;
+}
+
 static int
 memb_Ngap_criticality_constraint_21(const asn_TYPE_descriptor_t *td, const void *sptr,
 			asn_app_constraint_failed_f *ctfailcb, void *app_key) {
@@ -3433,6 +3580,33 @@ memb_Ngap_criticality_constraint_21(const asn_TYPE_descriptor_t *td, const void 
 	}
 	
 	return td->encoding_constraints.general_constraints(td, sptr, ctfailcb, app_key);
+}
+
+static asn_type_selector_result_t
+select_CPTransportLayerInformation_ExtIEs_Ngap_value_type(const asn_TYPE_descriptor_t *parent_type, const void *parent_sptr) {
+	asn_type_selector_result_t result = {0, 0};
+	const asn_ioc_set_t *itable = asn_IOS_Ngap_CPTransportLayerInformation_ExtIEs_1;
+	size_t constraining_column = 0; /* &id */
+	size_t for_column = 2; /* &Value */
+	size_t row, presence_index = 0;
+	const long *constraining_value = (const long *)((const char *)parent_sptr + offsetof(struct Ngap_CPTransportLayerInformation_ExtIEs, id));
+	
+	for(row=0; row < itable->rows_count; row++) {
+	    const asn_ioc_cell_t *constraining_cell = &itable->rows[row * itable->columns_count + constraining_column];
+	    const asn_ioc_cell_t *type_cell = &itable->rows[row * itable->columns_count + for_column];
+	
+	    if(type_cell->cell_kind == aioc__undefined)
+	        continue;
+	
+	    presence_index++;
+	    if(constraining_cell->type_descriptor->op->compare_struct(constraining_cell->type_descriptor, constraining_value, constraining_cell->value_sptr) == 0) {
+	        result.type_descriptor = type_cell->type_descriptor;
+	        result.presence_index = presence_index;
+	        break;
+	    }
+	}
+	
+	return result;
 }
 
 static int
@@ -14020,6 +14194,240 @@ memb_Ngap_value_constraint_421(const asn_TYPE_descriptor_t *td, const void *sptr
 	return td->encoding_constraints.general_constraints(td, sptr, ctfailcb, app_key);
 }
 
+static int
+memb_Ngap_id_constraint_425(const asn_TYPE_descriptor_t *td, const void *sptr,
+			asn_app_constraint_failed_f *ctfailcb, void *app_key) {
+	long value;
+	
+	if(!sptr) {
+		ASN__CTFAIL(app_key, td, sptr,
+			"%s: value not given (%s:%d)",
+			td->name, __FILE__, __LINE__);
+		return -1;
+	}
+	
+	value = *(const long *)sptr;
+	
+	if((value >= 0 && value <= 65535)) {
+		/* Constraint check succeeded */
+		return 0;
+	} else {
+		ASN__CTFAIL(app_key, td, sptr,
+			"%s: constraint failed (%s:%d)",
+			td->name, __FILE__, __LINE__);
+		return -1;
+	}
+}
+
+static asn_type_selector_result_t
+select_UplinkRIMInformationTransferIEs_Ngap_criticality_type(const asn_TYPE_descriptor_t *parent_type, const void *parent_sptr) {
+	asn_type_selector_result_t result = {0, 0};
+	const asn_ioc_set_t *itable = asn_IOS_Ngap_UplinkRIMInformationTransferIEs_1;
+	size_t constraining_column = 0; /* &id */
+	size_t for_column = 1; /* &criticality */
+	size_t row, presence_index = 0;
+	const long *constraining_value = (const long *)((const char *)parent_sptr + offsetof(struct Ngap_UplinkRIMInformationTransferIEs, id));
+	
+	for(row=0; row < itable->rows_count; row++) {
+	    const asn_ioc_cell_t *constraining_cell = &itable->rows[row * itable->columns_count + constraining_column];
+	    const asn_ioc_cell_t *type_cell = &itable->rows[row * itable->columns_count + for_column];
+	
+	    if(type_cell->cell_kind == aioc__undefined)
+	        continue;
+	
+	    presence_index++;
+	    if(constraining_cell->type_descriptor->op->compare_struct(constraining_cell->type_descriptor, constraining_value, constraining_cell->value_sptr) == 0) {
+	        result.type_descriptor = type_cell->type_descriptor;
+	        result.presence_index = presence_index;
+	        break;
+	    }
+	}
+	
+	return result;
+}
+
+static int
+memb_Ngap_criticality_constraint_425(const asn_TYPE_descriptor_t *td, const void *sptr,
+			asn_app_constraint_failed_f *ctfailcb, void *app_key) {
+	
+	if(!sptr) {
+		ASN__CTFAIL(app_key, td, sptr,
+			"%s: value not given (%s:%d)",
+			td->name, __FILE__, __LINE__);
+		return -1;
+	}
+	
+	
+	if(1 /* No applicable constraints whatsoever */) {
+		/* Nothing is here. See below */
+	}
+	
+	return td->encoding_constraints.general_constraints(td, sptr, ctfailcb, app_key);
+}
+
+static asn_type_selector_result_t
+select_UplinkRIMInformationTransferIEs_Ngap_value_type(const asn_TYPE_descriptor_t *parent_type, const void *parent_sptr) {
+	asn_type_selector_result_t result = {0, 0};
+	const asn_ioc_set_t *itable = asn_IOS_Ngap_UplinkRIMInformationTransferIEs_1;
+	size_t constraining_column = 0; /* &id */
+	size_t for_column = 2; /* &Value */
+	size_t row, presence_index = 0;
+	const long *constraining_value = (const long *)((const char *)parent_sptr + offsetof(struct Ngap_UplinkRIMInformationTransferIEs, id));
+	
+	for(row=0; row < itable->rows_count; row++) {
+	    const asn_ioc_cell_t *constraining_cell = &itable->rows[row * itable->columns_count + constraining_column];
+	    const asn_ioc_cell_t *type_cell = &itable->rows[row * itable->columns_count + for_column];
+	
+	    if(type_cell->cell_kind == aioc__undefined)
+	        continue;
+	
+	    presence_index++;
+	    if(constraining_cell->type_descriptor->op->compare_struct(constraining_cell->type_descriptor, constraining_value, constraining_cell->value_sptr) == 0) {
+	        result.type_descriptor = type_cell->type_descriptor;
+	        result.presence_index = presence_index;
+	        break;
+	    }
+	}
+	
+	return result;
+}
+
+static int
+memb_Ngap_value_constraint_425(const asn_TYPE_descriptor_t *td, const void *sptr,
+			asn_app_constraint_failed_f *ctfailcb, void *app_key) {
+	
+	if(!sptr) {
+		ASN__CTFAIL(app_key, td, sptr,
+			"%s: value not given (%s:%d)",
+			td->name, __FILE__, __LINE__);
+		return -1;
+	}
+	
+	
+	if(1 /* No applicable constraints whatsoever */) {
+		/* Nothing is here. See below */
+	}
+	
+	return td->encoding_constraints.general_constraints(td, sptr, ctfailcb, app_key);
+}
+
+static int
+memb_Ngap_id_constraint_429(const asn_TYPE_descriptor_t *td, const void *sptr,
+			asn_app_constraint_failed_f *ctfailcb, void *app_key) {
+	long value;
+	
+	if(!sptr) {
+		ASN__CTFAIL(app_key, td, sptr,
+			"%s: value not given (%s:%d)",
+			td->name, __FILE__, __LINE__);
+		return -1;
+	}
+	
+	value = *(const long *)sptr;
+	
+	if((value >= 0 && value <= 65535)) {
+		/* Constraint check succeeded */
+		return 0;
+	} else {
+		ASN__CTFAIL(app_key, td, sptr,
+			"%s: constraint failed (%s:%d)",
+			td->name, __FILE__, __LINE__);
+		return -1;
+	}
+}
+
+static asn_type_selector_result_t
+select_DownlinkRIMInformationTransferIEs_Ngap_criticality_type(const asn_TYPE_descriptor_t *parent_type, const void *parent_sptr) {
+	asn_type_selector_result_t result = {0, 0};
+	const asn_ioc_set_t *itable = asn_IOS_Ngap_DownlinkRIMInformationTransferIEs_1;
+	size_t constraining_column = 0; /* &id */
+	size_t for_column = 1; /* &criticality */
+	size_t row, presence_index = 0;
+	const long *constraining_value = (const long *)((const char *)parent_sptr + offsetof(struct Ngap_DownlinkRIMInformationTransferIEs, id));
+	
+	for(row=0; row < itable->rows_count; row++) {
+	    const asn_ioc_cell_t *constraining_cell = &itable->rows[row * itable->columns_count + constraining_column];
+	    const asn_ioc_cell_t *type_cell = &itable->rows[row * itable->columns_count + for_column];
+	
+	    if(type_cell->cell_kind == aioc__undefined)
+	        continue;
+	
+	    presence_index++;
+	    if(constraining_cell->type_descriptor->op->compare_struct(constraining_cell->type_descriptor, constraining_value, constraining_cell->value_sptr) == 0) {
+	        result.type_descriptor = type_cell->type_descriptor;
+	        result.presence_index = presence_index;
+	        break;
+	    }
+	}
+	
+	return result;
+}
+
+static int
+memb_Ngap_criticality_constraint_429(const asn_TYPE_descriptor_t *td, const void *sptr,
+			asn_app_constraint_failed_f *ctfailcb, void *app_key) {
+	
+	if(!sptr) {
+		ASN__CTFAIL(app_key, td, sptr,
+			"%s: value not given (%s:%d)",
+			td->name, __FILE__, __LINE__);
+		return -1;
+	}
+	
+	
+	if(1 /* No applicable constraints whatsoever */) {
+		/* Nothing is here. See below */
+	}
+	
+	return td->encoding_constraints.general_constraints(td, sptr, ctfailcb, app_key);
+}
+
+static asn_type_selector_result_t
+select_DownlinkRIMInformationTransferIEs_Ngap_value_type(const asn_TYPE_descriptor_t *parent_type, const void *parent_sptr) {
+	asn_type_selector_result_t result = {0, 0};
+	const asn_ioc_set_t *itable = asn_IOS_Ngap_DownlinkRIMInformationTransferIEs_1;
+	size_t constraining_column = 0; /* &id */
+	size_t for_column = 2; /* &Value */
+	size_t row, presence_index = 0;
+	const long *constraining_value = (const long *)((const char *)parent_sptr + offsetof(struct Ngap_DownlinkRIMInformationTransferIEs, id));
+	
+	for(row=0; row < itable->rows_count; row++) {
+	    const asn_ioc_cell_t *constraining_cell = &itable->rows[row * itable->columns_count + constraining_column];
+	    const asn_ioc_cell_t *type_cell = &itable->rows[row * itable->columns_count + for_column];
+	
+	    if(type_cell->cell_kind == aioc__undefined)
+	        continue;
+	
+	    presence_index++;
+	    if(constraining_cell->type_descriptor->op->compare_struct(constraining_cell->type_descriptor, constraining_value, constraining_cell->value_sptr) == 0) {
+	        result.type_descriptor = type_cell->type_descriptor;
+	        result.presence_index = presence_index;
+	        break;
+	    }
+	}
+	
+	return result;
+}
+
+static int
+memb_Ngap_value_constraint_429(const asn_TYPE_descriptor_t *td, const void *sptr,
+			asn_app_constraint_failed_f *ctfailcb, void *app_key) {
+	
+	if(!sptr) {
+		ASN__CTFAIL(app_key, td, sptr,
+			"%s: value not given (%s:%d)",
+			td->name, __FILE__, __LINE__);
+		return -1;
+	}
+	
+	
+	if(1 /* No applicable constraints whatsoever */) {
+		/* Nothing is here. See below */
+	}
+	
+	return td->encoding_constraints.general_constraints(td, sptr, ctfailcb, app_key);
+}
+
 static asn_oer_constraints_t asn_OER_memb_Ngap_id_constr_2 CC_NOTUSED = {
 	{ 2, 1 }	/* (0..65535) */,
 	-1};
@@ -16564,6 +16972,54 @@ static asn_per_constraints_t asn_PER_memb_Ngap_value_constr_424 CC_NOTUSED = {
 	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
 	0, 0	/* No PER value map */
 };
+static asn_oer_constraints_t asn_OER_memb_Ngap_id_constr_426 CC_NOTUSED = {
+	{ 2, 1 }	/* (0..65535) */,
+	-1};
+static asn_per_constraints_t asn_PER_memb_Ngap_id_constr_426 CC_NOTUSED = {
+	{ APC_CONSTRAINED,	 16,  16,  0,  65535 }	/* (0..65535) */,
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	0, 0	/* No PER value map */
+};
+static asn_oer_constraints_t asn_OER_memb_Ngap_criticality_constr_427 CC_NOTUSED = {
+	{ 0, 0 },
+	-1};
+static asn_per_constraints_t asn_PER_memb_Ngap_criticality_constr_427 CC_NOTUSED = {
+	{ APC_CONSTRAINED,	 2,  2,  0,  2 }	/* (0..2) */,
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	0, 0	/* No PER value map */
+};
+static asn_oer_constraints_t asn_OER_memb_Ngap_value_constr_428 CC_NOTUSED = {
+	{ 0, 0 },
+	-1};
+static asn_per_constraints_t asn_PER_memb_Ngap_value_constr_428 CC_NOTUSED = {
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	0, 0	/* No PER value map */
+};
+static asn_oer_constraints_t asn_OER_memb_Ngap_id_constr_430 CC_NOTUSED = {
+	{ 2, 1 }	/* (0..65535) */,
+	-1};
+static asn_per_constraints_t asn_PER_memb_Ngap_id_constr_430 CC_NOTUSED = {
+	{ APC_CONSTRAINED,	 16,  16,  0,  65535 }	/* (0..65535) */,
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	0, 0	/* No PER value map */
+};
+static asn_oer_constraints_t asn_OER_memb_Ngap_criticality_constr_431 CC_NOTUSED = {
+	{ 0, 0 },
+	-1};
+static asn_per_constraints_t asn_PER_memb_Ngap_criticality_constr_431 CC_NOTUSED = {
+	{ APC_CONSTRAINED,	 2,  2,  0,  2 }	/* (0..2) */,
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	0, 0	/* No PER value map */
+};
+static asn_oer_constraints_t asn_OER_memb_Ngap_value_constr_432 CC_NOTUSED = {
+	{ 0, 0 },
+	-1};
+static asn_per_constraints_t asn_PER_memb_Ngap_value_constr_432 CC_NOTUSED = {
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
+	0, 0	/* No PER value map */
+};
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_4 = {
 	sizeof(struct Ngap_AMFPagingTarget_ExtIEs__value),
 	offsetof(struct Ngap_AMFPagingTarget_ExtIEs__value, _asn_ctx),
@@ -16984,13 +17440,27 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_CellIDListForRestart_ExtIEs = {
 	&asn_SPC_Ngap_CellIDListForRestart_ExtIEs_specs_17	/* Additional specs */
 };
 
+static asn_TYPE_member_t asn_MBR_Ngap_value_24[] = {
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_CPTransportLayerInformation_ExtIEs__value, choice.EndpointIPAddressAndPort),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_EndpointIPAddressAndPort,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"EndpointIPAddressAndPort"
+		},
+};
+static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_24[] = {
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0, 0 } /* EndpointIPAddressAndPort */
+};
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_24 = {
 	sizeof(struct Ngap_CPTransportLayerInformation_ExtIEs__value),
 	offsetof(struct Ngap_CPTransportLayerInformation_ExtIEs__value, _asn_ctx),
 	offsetof(struct Ngap_CPTransportLayerInformation_ExtIEs__value, present),
 	sizeof(((struct Ngap_CPTransportLayerInformation_ExtIEs__value *)0)->present),
-	0,	/* No top level tags */
-	0,	/* No tags in the map */
+	asn_MAP_Ngap_value_tag2el_24,
+	1,	/* Count of tags in the map */
 	0, 0,
 	-1	/* Extensions start */
 };
@@ -17004,7 +17474,8 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_24 = {
 	0,	/* No tags (pointer) */
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
-	0, 0,	/* No members */
+	asn_MBR_Ngap_value_24,
+	1,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_24	/* Additional specs */
 };
 
@@ -17022,7 +17493,7 @@ asn_TYPE_member_t asn_MBR_Ngap_CPTransportLayerInformation_ExtIEs_21[] = {
 		(ASN_TAG_CLASS_UNIVERSAL | (10 << 2)),
 		0,
 		&asn_DEF_Ngap_Criticality,
-		0,
+		select_CPTransportLayerInformation_ExtIEs_Ngap_criticality_type,
 		{ &asn_OER_memb_Ngap_criticality_constr_23, &asn_PER_memb_Ngap_criticality_constr_23,  memb_Ngap_criticality_constraint_21 },
 		0, 0, /* No default value */
 		"criticality"
@@ -17031,7 +17502,7 @@ asn_TYPE_member_t asn_MBR_Ngap_CPTransportLayerInformation_ExtIEs_21[] = {
 		-1 /* Ambiguous tag (ANY?) */,
 		0,
 		&asn_DEF_Ngap_value_24,
-		0,
+		select_CPTransportLayerInformation_ExtIEs_Ngap_value_type,
 		{ &asn_OER_memb_Ngap_value_constr_24, &asn_PER_memb_Ngap_value_constr_24,  memb_Ngap_value_constraint_21 },
 		0, 0, /* No default value */
 		"value"
@@ -18803,11 +19274,21 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_108[] = {
 		0, 0, /* No default value */
 		"UPTransportLayerInformationList"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_PDUSessionResourceModifyRequestTransferIEs__value, choice.CommonNetworkInstance),
+		(ASN_TAG_CLASS_UNIVERSAL | (4 << 2)),
+		0,
+		&asn_DEF_Ngap_CommonNetworkInstance,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"CommonNetworkInstance"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_108[] = { 2, 0, 1, 3, 4, 5 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_108[] = { 1, 2, 0, 3, 4, 5 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_108[] = { 2, 6, 0, 1, 3, 4, 5 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_108[] = { 2, 3, 0, 4, 5, 6, 1 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_108[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 2, 0, 0 }, /* NetworkInstance */
+    { (ASN_TAG_CLASS_UNIVERSAL | (4 << 2)), 6, 0, 0 }, /* CommonNetworkInstance */
     { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0, 4 }, /* PDUSessionAggregateMaximumBitRate */
     { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 1, -1, 3 }, /* UL-NGU-UP-TNLModifyList */
     { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, -2, 2 }, /* QosFlowAddOrModifyRequestList */
@@ -18820,7 +19301,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_108 = {
 	offsetof(struct Ngap_PDUSessionResourceModifyRequestTransferIEs__value, present),
 	sizeof(((struct Ngap_PDUSessionResourceModifyRequestTransferIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_108,
-	6,	/* Count of tags in the map */
+	7,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_108,
 	asn_MAP_Ngap_value_from_canonical_108,
 	-1	/* Extensions start */
@@ -18836,7 +19317,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_108 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_108,
-	6,	/* Elements count */
+	7,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_108	/* Additional specs */
 };
 
@@ -18973,13 +19454,33 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_112[] = {
 		0, 0, /* No default value */
 		"QosFlowSetupRequestList"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_PDUSessionResourceSetupRequestTransferIEs__value, choice.CommonNetworkInstance),
+		(ASN_TAG_CLASS_UNIVERSAL | (4 << 2)),
+		0,
+		&asn_DEF_Ngap_CommonNetworkInstance,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"CommonNetworkInstance"
+		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_PDUSessionResourceSetupRequestTransferIEs__value, choice.DirectForwardingPathAvailability),
+		(ASN_TAG_CLASS_UNIVERSAL | (10 << 2)),
+		0,
+		&asn_DEF_Ngap_DirectForwardingPathAvailability,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"DirectForwardingPathAvailability"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_112[] = { 6, 3, 4, 0, 2, 5, 7, 1 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_112[] = { 3, 7, 4, 1, 2, 5, 0, 6 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_112[] = { 6, 8, 3, 4, 9, 0, 2, 5, 7, 1 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_112[] = { 5, 9, 6, 2, 3, 7, 0, 8, 1, 4 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_112[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 6, 0, 0 }, /* NetworkInstance */
-    { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 3, 0, 1 }, /* DataForwardingNotPossible */
-    { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 4, -1, 0 }, /* PDUSessionType */
+    { (ASN_TAG_CLASS_UNIVERSAL | (4 << 2)), 8, 0, 0 }, /* CommonNetworkInstance */
+    { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 3, 0, 2 }, /* DataForwardingNotPossible */
+    { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 4, -1, 1 }, /* PDUSessionType */
+    { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 9, -2, 0 }, /* DirectForwardingPathAvailability */
     { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0, 3 }, /* PDUSessionAggregateMaximumBitRate */
     { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 2, -1, 2 }, /* UPTransportLayerInformationList */
     { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -2, 1 }, /* SecurityIndication */
@@ -18993,7 +19494,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_112 = {
 	offsetof(struct Ngap_PDUSessionResourceSetupRequestTransferIEs__value, present),
 	sizeof(((struct Ngap_PDUSessionResourceSetupRequestTransferIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_112,
-	9,	/* Count of tags in the map */
+	11,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_112,
 	asn_MAP_Ngap_value_from_canonical_112,
 	-1	/* Extensions start */
@@ -19009,7 +19510,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_112 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_112,
-	8,	/* Elements count */
+	10,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_112	/* Additional specs */
 };
 
@@ -20366,14 +20867,14 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_152[] = {
 		0, 0, /* No default value */
 		"UEAggregateMaximumBitRate"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_InitialContextSetupRequestIEs__value, choice.CoreNetworkAssistanceInformation),
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_InitialContextSetupRequestIEs__value, choice.CoreNetworkAssistanceInformationForInactive),
 		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
 		0,
-		&asn_DEF_Ngap_CoreNetworkAssistanceInformation,
+		&asn_DEF_Ngap_CoreNetworkAssistanceInformationForInactive,
 		0,
 		{ 0, 0, 0 },
 		0, 0, /* No default value */
-		"CoreNetworkAssistanceInformation"
+		"CoreNetworkAssistanceInformationForInactive"
 		},
 	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_InitialContextSetupRequestIEs__value, choice.GUAMI),
 		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
@@ -20510,9 +21011,27 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_152[] = {
 		0, 0, /* No default value */
 		"RedirectionVoiceFallback"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_InitialContextSetupRequestIEs__value, choice.LocationReportingRequestType),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_LocationReportingRequestType,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"LocationReportingRequestType"
+		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_InitialContextSetupRequestIEs__value, choice.CNAssistedRANTuning),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_CNAssistedRANTuning,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"CNAssistedRANTuning"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_152[] = { 0, 1, 13, 9, 14, 12, 15, 17, 19, 3, 4, 5, 6, 7, 8, 10, 11, 16, 18, 2 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_152[] = { 0, 1, 19, 9, 10, 11, 12, 13, 14, 3, 15, 16, 5, 2, 4, 6, 17, 7, 18, 8 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_152[] = { 0, 1, 13, 9, 14, 12, 15, 17, 19, 3, 4, 5, 6, 7, 8, 10, 11, 16, 18, 20, 21, 2 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_152[] = { 0, 1, 21, 9, 10, 11, 12, 13, 14, 3, 15, 16, 5, 2, 4, 6, 17, 7, 18, 8, 19, 20 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_152[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 2 }, /* AMF-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 1, -1, 1 }, /* RAN-UE-NGAP-ID */
@@ -20523,16 +21042,18 @@ static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_152[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (4 << 2)), 15, -1, 0 }, /* NAS-PDU */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 17, 0, 1 }, /* RRCInactiveTransitionReportRequest */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 19, -1, 0 }, /* RedirectionVoiceFallback */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, 0, 9 }, /* UEAggregateMaximumBitRate */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, -1, 8 }, /* CoreNetworkAssistanceInformation */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -2, 7 }, /* GUAMI */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -3, 6 }, /* PDUSessionResourceSetupListCxtReq */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -4, 5 }, /* AllowedNSSAI */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -5, 4 }, /* UESecurityCapabilities */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 10, -6, 3 }, /* TraceActivation */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 11, -7, 2 }, /* MobilityRestrictionList */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 16, -8, 1 }, /* EmergencyFallbackIndicator */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 18, -9, 0 }, /* UERadioCapabilityForPaging */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, 0, 11 }, /* UEAggregateMaximumBitRate */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, -1, 10 }, /* CoreNetworkAssistanceInformationForInactive */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -2, 9 }, /* GUAMI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -3, 8 }, /* PDUSessionResourceSetupListCxtReq */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -4, 7 }, /* AllowedNSSAI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -5, 6 }, /* UESecurityCapabilities */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 10, -6, 5 }, /* TraceActivation */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 11, -7, 4 }, /* MobilityRestrictionList */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 16, -8, 3 }, /* EmergencyFallbackIndicator */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 18, -9, 2 }, /* UERadioCapabilityForPaging */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 20, -10, 1 }, /* LocationReportingRequestType */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 21, -11, 0 }, /* CNAssistedRANTuning */
     { (ASN_TAG_CLASS_UNIVERSAL | (19 << 2)), 2, 0, 0 } /* AMFName */
 };
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_152 = {
@@ -20541,7 +21062,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_152 = {
 	offsetof(struct Ngap_InitialContextSetupRequestIEs__value, present),
 	sizeof(((struct Ngap_InitialContextSetupRequestIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_152,
-	20,	/* Count of tags in the map */
+	22,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_152,
 	asn_MAP_Ngap_value_from_canonical_152,
 	-1	/* Extensions start */
@@ -20557,7 +21078,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_152 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_152,
-	20,	/* Elements count */
+	22,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_152	/* Additional specs */
 };
 
@@ -21376,14 +21897,14 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_176[] = {
 		0, 0, /* No default value */
 		"UESecurityCapabilities"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_UEContextModificationRequestIEs__value, choice.CoreNetworkAssistanceInformation),
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_UEContextModificationRequestIEs__value, choice.CoreNetworkAssistanceInformationForInactive),
 		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
 		0,
-		&asn_DEF_Ngap_CoreNetworkAssistanceInformation,
+		&asn_DEF_Ngap_CoreNetworkAssistanceInformationForInactive,
 		0,
 		{ 0, 0, 0 },
 		0, 0, /* No default value */
-		"CoreNetworkAssistanceInformation"
+		"CoreNetworkAssistanceInformationForInactive"
 		},
 	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_UEContextModificationRequestIEs__value, choice.EmergencyFallbackIndicator),
 		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
@@ -21412,9 +21933,27 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_176[] = {
 		0, 0, /* No default value */
 		"RRCInactiveTransitionReportRequest"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_UEContextModificationRequestIEs__value, choice.GUAMI),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_GUAMI,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"GUAMI"
+		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_UEContextModificationRequestIEs__value, choice.CNAssistedRANTuning),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_CNAssistedRANTuning,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"CNAssistedRANTuning"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_176[] = { 0, 1, 2, 4, 9, 3, 10, 5, 6, 7, 8 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_176[] = { 0, 1, 2, 5, 3, 7, 8, 9, 10, 4, 6 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_176[] = { 0, 1, 2, 4, 9, 3, 10, 5, 6, 7, 8, 11, 12 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_176[] = { 0, 1, 2, 5, 3, 7, 8, 9, 10, 4, 6, 11, 12 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_176[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 4 }, /* AMF-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 1, -1, 3 }, /* RAN-UE-NGAP-ID */
@@ -21423,10 +21962,12 @@ static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_176[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 9, -4, 0 }, /* AMF-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (3 << 2)), 3, 0, 0 }, /* SecurityKey */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 10, 0, 0 }, /* RRCInactiveTransitionReportRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, 0, 3 }, /* UEAggregateMaximumBitRate */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -1, 2 }, /* UESecurityCapabilities */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -2, 1 }, /* CoreNetworkAssistanceInformation */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -3, 0 } /* EmergencyFallbackIndicator */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, 0, 5 }, /* UEAggregateMaximumBitRate */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -1, 4 }, /* UESecurityCapabilities */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -2, 3 }, /* CoreNetworkAssistanceInformationForInactive */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -3, 2 }, /* EmergencyFallbackIndicator */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 11, -4, 1 }, /* GUAMI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 12, -5, 0 } /* CNAssistedRANTuning */
 };
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_176 = {
 	sizeof(struct Ngap_UEContextModificationRequestIEs__value),
@@ -21434,7 +21975,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_176 = {
 	offsetof(struct Ngap_UEContextModificationRequestIEs__value, present),
 	sizeof(((struct Ngap_UEContextModificationRequestIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_176,
-	11,	/* Count of tags in the map */
+	13,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_176,
 	asn_MAP_Ngap_value_from_canonical_176,
 	-1	/* Extensions start */
@@ -21450,7 +21991,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_176 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_176,
-	11,	/* Elements count */
+	13,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_176	/* Additional specs */
 };
 
@@ -22453,14 +22994,14 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_204[] = {
 		0, 0, /* No default value */
 		"UEAggregateMaximumBitRate"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_HandoverRequestIEs__value, choice.CoreNetworkAssistanceInformation),
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_HandoverRequestIEs__value, choice.CoreNetworkAssistanceInformationForInactive),
 		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
 		0,
-		&asn_DEF_Ngap_CoreNetworkAssistanceInformation,
+		&asn_DEF_Ngap_CoreNetworkAssistanceInformationForInactive,
 		0,
 		{ 0, 0, 0 },
 		0, 0, /* No default value */
-		"CoreNetworkAssistanceInformation"
+		"CoreNetworkAssistanceInformationForInactive"
 		},
 	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_HandoverRequestIEs__value, choice.UESecurityCapabilities),
 		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
@@ -22588,9 +23129,18 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_204[] = {
 		0, 0, /* No default value */
 		"RedirectionVoiceFallback"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_HandoverRequestIEs__value, choice.CNAssistedRANTuning),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_CNAssistedRANTuning,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"CNAssistedRANTuning"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_204[] = { 0, 12, 8, 13, 1, 7, 16, 18, 3, 4, 5, 6, 9, 10, 11, 14, 15, 17, 2 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_204[] = { 0, 4, 18, 8, 9, 10, 11, 5, 2, 12, 13, 14, 1, 3, 15, 16, 6, 17, 7 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_204[] = { 0, 12, 8, 13, 1, 7, 16, 18, 3, 4, 5, 6, 9, 10, 11, 14, 15, 17, 19, 2 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_204[] = { 0, 4, 19, 8, 9, 10, 11, 5, 2, 12, 13, 14, 1, 3, 15, 16, 6, 17, 7, 18 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_204[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 0 }, /* AMF-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (3 << 2)), 12, 0, 0 }, /* MaskedIMEISV */
@@ -22600,16 +23150,17 @@ static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_204[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 7, -1, 2 }, /* NewSecurityContextInd */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 16, -2, 1 }, /* RRCInactiveTransitionReportRequest */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 18, -3, 0 }, /* RedirectionVoiceFallback */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, 0, 9 }, /* UEAggregateMaximumBitRate */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, -1, 8 }, /* CoreNetworkAssistanceInformation */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -2, 7 }, /* UESecurityCapabilities */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -3, 6 }, /* SecurityContext */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 9, -4, 5 }, /* PDUSessionResourceSetupListHOReq */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 10, -5, 4 }, /* AllowedNSSAI */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 11, -6, 3 }, /* TraceActivation */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 14, -7, 2 }, /* MobilityRestrictionList */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 15, -8, 1 }, /* LocationReportingRequestType */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 17, -9, 0 }, /* GUAMI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, 0, 10 }, /* UEAggregateMaximumBitRate */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, -1, 9 }, /* CoreNetworkAssistanceInformationForInactive */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -2, 8 }, /* UESecurityCapabilities */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -3, 7 }, /* SecurityContext */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 9, -4, 6 }, /* PDUSessionResourceSetupListHOReq */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 10, -5, 5 }, /* AllowedNSSAI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 11, -6, 4 }, /* TraceActivation */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 14, -7, 3 }, /* MobilityRestrictionList */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 15, -8, 2 }, /* LocationReportingRequestType */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 17, -9, 1 }, /* GUAMI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 19, -10, 0 }, /* CNAssistedRANTuning */
     { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 2, 0, 0 }, /* radioNetwork */
     { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 2, 0, 0 }, /* transport */
     { (ASN_TAG_CLASS_CONTEXT | (2 << 2)), 2, 0, 0 }, /* nas */
@@ -22623,7 +23174,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_204 = {
 	offsetof(struct Ngap_HandoverRequestIEs__value, present),
 	sizeof(((struct Ngap_HandoverRequestIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_204,
-	24,	/* Count of tags in the map */
+	25,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_204,
 	asn_MAP_Ngap_value_from_canonical_204,
 	-1	/* Extensions start */
@@ -22639,7 +23190,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_204 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_204,
-	19,	/* Elements count */
+	20,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_204	/* Additional specs */
 };
 
@@ -23332,14 +23883,14 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_224[] = {
 		0, 0, /* No default value */
 		"AllowedNSSAI"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_PathSwitchRequestAcknowledgeIEs__value, choice.CoreNetworkAssistanceInformation),
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_PathSwitchRequestAcknowledgeIEs__value, choice.CoreNetworkAssistanceInformationForInactive),
 		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
 		0,
-		&asn_DEF_Ngap_CoreNetworkAssistanceInformation,
+		&asn_DEF_Ngap_CoreNetworkAssistanceInformationForInactive,
 		0,
 		{ 0, 0, 0 },
 		0, 0, /* No default value */
-		"CoreNetworkAssistanceInformation"
+		"CoreNetworkAssistanceInformationForInactive"
 		},
 	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_PathSwitchRequestAcknowledgeIEs__value, choice.RRCInactiveTransitionReportRequest),
 		(ASN_TAG_CLASS_UNIVERSAL | (10 << 2)),
@@ -23368,22 +23919,32 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_224[] = {
 		0, 0, /* No default value */
 		"RedirectionVoiceFallback"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_PathSwitchRequestAcknowledgeIEs__value, choice.CNAssistedRANTuning),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_CNAssistedRANTuning,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"CNAssistedRANTuning"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_224[] = { 0, 1, 4, 9, 11, 2, 3, 5, 6, 7, 8, 10 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_224[] = { 0, 1, 5, 6, 2, 7, 8, 9, 10, 3, 11, 4 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_224[] = { 0, 1, 4, 9, 11, 2, 3, 5, 6, 7, 8, 10, 12 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_224[] = { 0, 1, 5, 6, 2, 7, 8, 9, 10, 3, 11, 4, 12 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_224[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 1 }, /* AMF-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 1, -1, 0 }, /* RAN-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 4, 0, 2 }, /* NewSecurityContextInd */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 9, -1, 1 }, /* RRCInactiveTransitionReportRequest */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 11, -2, 0 }, /* RedirectionVoiceFallback */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 2, 0, 6 }, /* UESecurityCapabilities */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, -1, 5 }, /* SecurityContext */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -2, 4 }, /* PDUSessionResourceSwitchedList */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -3, 3 }, /* PDUSessionResourceReleasedListPSAck */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -4, 2 }, /* AllowedNSSAI */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -5, 1 }, /* CoreNetworkAssistanceInformation */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 10, -6, 0 } /* CriticalityDiagnostics */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 2, 0, 7 }, /* UESecurityCapabilities */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, -1, 6 }, /* SecurityContext */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -2, 5 }, /* PDUSessionResourceSwitchedList */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 6, -3, 4 }, /* PDUSessionResourceReleasedListPSAck */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -4, 3 }, /* AllowedNSSAI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -5, 2 }, /* CoreNetworkAssistanceInformationForInactive */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 10, -6, 1 }, /* CriticalityDiagnostics */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 12, -7, 0 } /* CNAssistedRANTuning */
 };
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_224 = {
 	sizeof(struct Ngap_PathSwitchRequestAcknowledgeIEs__value),
@@ -23391,7 +23952,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_224 = {
 	offsetof(struct Ngap_PathSwitchRequestAcknowledgeIEs__value, present),
 	sizeof(((struct Ngap_PathSwitchRequestAcknowledgeIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_224,
-	12,	/* Count of tags in the map */
+	13,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_224,
 	asn_MAP_Ngap_value_from_canonical_224,
 	-1	/* Extensions start */
@@ -23407,7 +23968,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_224 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_224,
-	12,	/* Elements count */
+	13,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_224	/* Additional specs */
 };
 
@@ -24317,17 +24878,27 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_252[] = {
 		0, 0, /* No default value */
 		"AllowedNSSAI"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_InitialUEMessage_IEs__value, choice.SourceToTarget_AMFInformationReroute),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_SourceToTarget_AMFInformationReroute,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"SourceToTarget-AMFInformationReroute"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_252[] = { 0, 5, 1, 3, 6, 4, 7, 2 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_252[] = { 0, 2, 7, 3, 5, 1, 4, 6 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_252[] = { 0, 5, 1, 3, 6, 4, 7, 8, 2 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_252[] = { 0, 2, 8, 3, 5, 1, 4, 6, 7 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_252[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 0 }, /* RAN-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (3 << 2)), 5, 0, 0 }, /* AMFSetID */
     { (ASN_TAG_CLASS_UNIVERSAL | (4 << 2)), 1, 0, 0 }, /* NAS-PDU */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 3, 0, 1 }, /* RRCEstablishmentCause */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 6, -1, 0 }, /* UEContextRequest */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, 0, 1 }, /* FiveG-S-TMSI */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -1, 0 }, /* AllowedNSSAI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, 0, 2 }, /* FiveG-S-TMSI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 7, -1, 1 }, /* AllowedNSSAI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 8, -2, 0 }, /* SourceToTarget-AMFInformationReroute */
     { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 2, 0, 0 }, /* userLocationInformationEUTRA */
     { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 2, 0, 0 }, /* userLocationInformationNR */
     { (ASN_TAG_CLASS_CONTEXT | (2 << 2)), 2, 0, 0 }, /* userLocationInformationN3IWF */
@@ -24339,7 +24910,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_252 = {
 	offsetof(struct Ngap_InitialUEMessage_IEs__value, present),
 	sizeof(((struct Ngap_InitialUEMessage_IEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_252,
-	11,	/* Count of tags in the map */
+	12,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_252,
 	asn_MAP_Ngap_value_from_canonical_252,
 	-1	/* Extensions start */
@@ -24355,7 +24926,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_252 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_252,
-	8,	/* Elements count */
+	9,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_252	/* Additional specs */
 };
 
@@ -24913,15 +25484,25 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_268[] = {
 		0, 0, /* No default value */
 		"AllowedNSSAI"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_RerouteNASRequest_IEs__value, choice.SourceToTarget_AMFInformationReroute),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_SourceToTarget_AMFInformationReroute,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"SourceToTarget-AMFInformationReroute"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_268[] = { 0, 1, 3, 2, 4 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_268[] = { 0, 1, 3, 2, 4 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_268[] = { 0, 1, 3, 2, 4, 5 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_268[] = { 0, 1, 3, 2, 4, 5 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_268[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 1 }, /* RAN-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 1, -1, 0 }, /* AMF-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (3 << 2)), 3, 0, 0 }, /* AMFSetID */
     { (ASN_TAG_CLASS_UNIVERSAL | (4 << 2)), 2, 0, 0 }, /* OCTET STRING */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, 0, 0 } /* AllowedNSSAI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, 0, 1 }, /* AllowedNSSAI */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 5, -1, 0 } /* SourceToTarget-AMFInformationReroute */
 };
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_268 = {
 	sizeof(struct Ngap_RerouteNASRequest_IEs__value),
@@ -24929,7 +25510,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_268 = {
 	offsetof(struct Ngap_RerouteNASRequest_IEs__value, present),
 	sizeof(((struct Ngap_RerouteNASRequest_IEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_268,
-	5,	/* Count of tags in the map */
+	6,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_268,
 	asn_MAP_Ngap_value_from_canonical_268,
 	-1	/* Extensions start */
@@ -24945,7 +25526,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_268 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_268,
-	5,	/* Elements count */
+	6,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_268	/* Additional specs */
 };
 
@@ -25470,12 +26051,22 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_284[] = {
 		0, 0, /* No default value */
 		"GlobalRANNodeID"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_RANConfigurationUpdateIEs__value, choice.NGRAN_TNLAssociationToRemoveList),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_NGRAN_TNLAssociationToRemoveList,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"NGRAN-TNLAssociationToRemoveList"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_284[] = { 2, 1, 0, 3 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_284[] = { 2, 1, 0, 3 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_284[] = { 2, 1, 4, 0, 3 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_284[] = { 3, 1, 0, 4, 2 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_284[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 2, 0, 0 }, /* PagingDRX */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 1, 0, 0 }, /* SupportedTAList */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 1, 0, 1 }, /* SupportedTAList */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, -1, 0 }, /* NGRAN-TNLAssociationToRemoveList */
     { (ASN_TAG_CLASS_UNIVERSAL | (19 << 2)), 0, 0, 0 }, /* RANNodeName */
     { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 3, 0, 0 }, /* globalGNB-ID */
     { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 3, 0, 0 }, /* globalNgENB-ID */
@@ -25488,7 +26079,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_284 = {
 	offsetof(struct Ngap_RANConfigurationUpdateIEs__value, present),
 	sizeof(((struct Ngap_RANConfigurationUpdateIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_284,
-	7,	/* Count of tags in the map */
+	8,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_284,
 	asn_MAP_Ngap_value_from_canonical_284,
 	-1	/* Extensions start */
@@ -25504,7 +26095,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_284 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_284,
-	4,	/* Elements count */
+	5,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_284	/* Additional specs */
 };
 
@@ -29244,29 +29835,17 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_404[] = {
 		0, 0, /* No default value */
 		"LocationReportingRequestType"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_LocationReportIEs__value, choice.NGRAN_CGI),
-		-1 /* Ambiguous tag (CHOICE?) */,
-		0,
-		&asn_DEF_Ngap_NGRAN_CGI,
-		0,
-		{ 0, 0, 0 },
-		0, 0, /* No default value */
-		"NGRAN-CGI"
-		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_404[] = { 0, 1, 3, 4, 2, 5 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_404[] = { 0, 1, 4, 2, 3, 5 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_404[] = { 0, 1, 3, 4, 2 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_404[] = { 0, 1, 4, 2, 3 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_404[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 1 }, /* AMF-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 1, -1, 0 }, /* RAN-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 3, 0, 1 }, /* UEPresenceInAreaOfInterestList */
     { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 4, -1, 0 }, /* LocationReportingRequestType */
-    { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 2, 0, 1 }, /* userLocationInformationEUTRA */
-    { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 5, -1, 0 }, /* nR-CGI */
-    { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 2, 0, 1 }, /* userLocationInformationNR */
-    { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 5, -1, 0 }, /* eUTRA-CGI */
-    { (ASN_TAG_CLASS_CONTEXT | (2 << 2)), 2, 0, 1 }, /* userLocationInformationN3IWF */
-    { (ASN_TAG_CLASS_CONTEXT | (2 << 2)), 5, -1, 0 }, /* choice-Extensions */
+    { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 2, 0, 0 }, /* userLocationInformationEUTRA */
+    { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 2, 0, 0 }, /* userLocationInformationNR */
+    { (ASN_TAG_CLASS_CONTEXT | (2 << 2)), 2, 0, 0 }, /* userLocationInformationN3IWF */
     { (ASN_TAG_CLASS_CONTEXT | (3 << 2)), 2, 0, 0 } /* choice-Extensions */
 };
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_404 = {
@@ -29275,7 +29854,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_404 = {
 	offsetof(struct Ngap_LocationReportIEs__value, present),
 	sizeof(((struct Ngap_LocationReportIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_404,
-	11,	/* Count of tags in the map */
+	8,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_404,
 	asn_MAP_Ngap_value_from_canonical_404,
 	-1	/* Extensions start */
@@ -29291,7 +29870,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_404 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_404,
-	6,	/* Elements count */
+	5,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_404	/* Additional specs */
 };
 
@@ -29878,14 +30457,27 @@ static asn_TYPE_member_t asn_MBR_Ngap_value_424[] = {
 		0, 0, /* No default value */
 		"HandoverFlag"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_SecondaryRATDataUsageReportIEs__value, choice.UserLocationInformation),
+		-1 /* Ambiguous tag (CHOICE?) */,
+		0,
+		&asn_DEF_Ngap_UserLocationInformation,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"UserLocationInformation"
+		},
 };
-static const unsigned asn_MAP_Ngap_value_to_canonical_424[] = { 0, 1, 3, 2 };
-static const unsigned asn_MAP_Ngap_value_from_canonical_424[] = { 0, 1, 3, 2 };
+static const unsigned asn_MAP_Ngap_value_to_canonical_424[] = { 0, 1, 3, 2, 4 };
+static const unsigned asn_MAP_Ngap_value_from_canonical_424[] = { 0, 1, 3, 2, 4 };
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_424[] = {
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 1 }, /* AMF-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 1, -1, 0 }, /* RAN-UE-NGAP-ID */
     { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 3, 0, 0 }, /* HandoverFlag */
-    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 2, 0, 0 } /* PDUSessionResourceSecondaryRATUsageList */
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 2, 0, 0 }, /* PDUSessionResourceSecondaryRATUsageList */
+    { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 4, 0, 0 }, /* userLocationInformationEUTRA */
+    { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 4, 0, 0 }, /* userLocationInformationNR */
+    { (ASN_TAG_CLASS_CONTEXT | (2 << 2)), 4, 0, 0 }, /* userLocationInformationN3IWF */
+    { (ASN_TAG_CLASS_CONTEXT | (3 << 2)), 4, 0, 0 } /* choice-Extensions */
 };
 static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_424 = {
 	sizeof(struct Ngap_SecondaryRATDataUsageReportIEs__value),
@@ -29893,7 +30485,7 @@ static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_424 = {
 	offsetof(struct Ngap_SecondaryRATDataUsageReportIEs__value, present),
 	sizeof(((struct Ngap_SecondaryRATDataUsageReportIEs__value *)0)->present),
 	asn_MAP_Ngap_value_tag2el_424,
-	4,	/* Count of tags in the map */
+	8,	/* Count of tags in the map */
 	asn_MAP_Ngap_value_to_canonical_424,
 	asn_MAP_Ngap_value_from_canonical_424,
 	-1	/* Extensions start */
@@ -29909,7 +30501,7 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_value_424 = {
 	0,	/* No tags (count) */
 	{ 0, 0, OPEN_TYPE_constraint },
 	asn_MBR_Ngap_value_424,
-	4,	/* Elements count */
+	5,	/* Elements count */
 	&asn_SPC_Ngap_value_specs_424	/* Additional specs */
 };
 
@@ -29971,5 +30563,203 @@ asn_TYPE_descriptor_t asn_DEF_Ngap_SecondaryRATDataUsageReportIEs = {
 	asn_MBR_Ngap_SecondaryRATDataUsageReportIEs_421,
 	3,	/* Elements count */
 	&asn_SPC_Ngap_SecondaryRATDataUsageReportIEs_specs_421	/* Additional specs */
+};
+
+static asn_TYPE_member_t asn_MBR_Ngap_value_428[] = {
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_UplinkRIMInformationTransferIEs__value, choice.RIMInformationTransfer),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_RIMInformationTransfer,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"RIMInformationTransfer"
+		},
+};
+static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_428[] = {
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0, 0 } /* RIMInformationTransfer */
+};
+static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_428 = {
+	sizeof(struct Ngap_UplinkRIMInformationTransferIEs__value),
+	offsetof(struct Ngap_UplinkRIMInformationTransferIEs__value, _asn_ctx),
+	offsetof(struct Ngap_UplinkRIMInformationTransferIEs__value, present),
+	sizeof(((struct Ngap_UplinkRIMInformationTransferIEs__value *)0)->present),
+	asn_MAP_Ngap_value_tag2el_428,
+	1,	/* Count of tags in the map */
+	0, 0,
+	-1	/* Extensions start */
+};
+static /* Use -fall-defs-global to expose */
+asn_TYPE_descriptor_t asn_DEF_Ngap_value_428 = {
+	"value",
+	"value",
+	&asn_OP_OPEN_TYPE,
+	0,	/* No effective tags (pointer) */
+	0,	/* No effective tags (count) */
+	0,	/* No tags (pointer) */
+	0,	/* No tags (count) */
+	{ 0, 0, OPEN_TYPE_constraint },
+	asn_MBR_Ngap_value_428,
+	1,	/* Elements count */
+	&asn_SPC_Ngap_value_specs_428	/* Additional specs */
+};
+
+asn_TYPE_member_t asn_MBR_Ngap_UplinkRIMInformationTransferIEs_425[] = {
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_UplinkRIMInformationTransferIEs, id),
+		(ASN_TAG_CLASS_UNIVERSAL | (2 << 2)),
+		0,
+		&asn_DEF_Ngap_ProtocolIE_ID,
+		0,
+		{ &asn_OER_memb_Ngap_id_constr_426, &asn_PER_memb_Ngap_id_constr_426,  memb_Ngap_id_constraint_425 },
+		0, 0, /* No default value */
+		"id"
+		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_UplinkRIMInformationTransferIEs, criticality),
+		(ASN_TAG_CLASS_UNIVERSAL | (10 << 2)),
+		0,
+		&asn_DEF_Ngap_Criticality,
+		select_UplinkRIMInformationTransferIEs_Ngap_criticality_type,
+		{ &asn_OER_memb_Ngap_criticality_constr_427, &asn_PER_memb_Ngap_criticality_constr_427,  memb_Ngap_criticality_constraint_425 },
+		0, 0, /* No default value */
+		"criticality"
+		},
+	{ ATF_OPEN_TYPE | ATF_NOFLAGS, 0, offsetof(struct Ngap_UplinkRIMInformationTransferIEs, value),
+		-1 /* Ambiguous tag (ANY?) */,
+		0,
+		&asn_DEF_Ngap_value_428,
+		select_UplinkRIMInformationTransferIEs_Ngap_value_type,
+		{ &asn_OER_memb_Ngap_value_constr_428, &asn_PER_memb_Ngap_value_constr_428,  memb_Ngap_value_constraint_425 },
+		0, 0, /* No default value */
+		"value"
+		},
+};
+static const ber_tlv_tag_t asn_DEF_Ngap_UplinkRIMInformationTransferIEs_tags_425[] = {
+	(ASN_TAG_CLASS_UNIVERSAL | (16 << 2))
+};
+static const asn_TYPE_tag2member_t asn_MAP_Ngap_UplinkRIMInformationTransferIEs_tag2el_425[] = {
+    { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 0 }, /* id */
+    { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 1, 0, 0 } /* criticality */
+};
+asn_SEQUENCE_specifics_t asn_SPC_Ngap_UplinkRIMInformationTransferIEs_specs_425 = {
+	sizeof(struct Ngap_UplinkRIMInformationTransferIEs),
+	offsetof(struct Ngap_UplinkRIMInformationTransferIEs, _asn_ctx),
+	asn_MAP_Ngap_UplinkRIMInformationTransferIEs_tag2el_425,
+	2,	/* Count of tags in the map */
+	0, 0, 0,	/* Optional elements (not needed) */
+	-1,	/* First extension addition */
+};
+asn_TYPE_descriptor_t asn_DEF_Ngap_UplinkRIMInformationTransferIEs = {
+	"UplinkRIMInformationTransferIEs",
+	"UplinkRIMInformationTransferIEs",
+	&asn_OP_SEQUENCE,
+	asn_DEF_Ngap_UplinkRIMInformationTransferIEs_tags_425,
+	sizeof(asn_DEF_Ngap_UplinkRIMInformationTransferIEs_tags_425)
+		/sizeof(asn_DEF_Ngap_UplinkRIMInformationTransferIEs_tags_425[0]), /* 1 */
+	asn_DEF_Ngap_UplinkRIMInformationTransferIEs_tags_425,	/* Same as above */
+	sizeof(asn_DEF_Ngap_UplinkRIMInformationTransferIEs_tags_425)
+		/sizeof(asn_DEF_Ngap_UplinkRIMInformationTransferIEs_tags_425[0]), /* 1 */
+	{ 0, 0, SEQUENCE_constraint },
+	asn_MBR_Ngap_UplinkRIMInformationTransferIEs_425,
+	3,	/* Elements count */
+	&asn_SPC_Ngap_UplinkRIMInformationTransferIEs_specs_425	/* Additional specs */
+};
+
+static asn_TYPE_member_t asn_MBR_Ngap_value_432[] = {
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_DownlinkRIMInformationTransferIEs__value, choice.RIMInformationTransfer),
+		(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)),
+		0,
+		&asn_DEF_Ngap_RIMInformationTransfer,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"RIMInformationTransfer"
+		},
+};
+static const asn_TYPE_tag2member_t asn_MAP_Ngap_value_tag2el_432[] = {
+    { (ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0, 0 } /* RIMInformationTransfer */
+};
+static asn_CHOICE_specifics_t asn_SPC_Ngap_value_specs_432 = {
+	sizeof(struct Ngap_DownlinkRIMInformationTransferIEs__value),
+	offsetof(struct Ngap_DownlinkRIMInformationTransferIEs__value, _asn_ctx),
+	offsetof(struct Ngap_DownlinkRIMInformationTransferIEs__value, present),
+	sizeof(((struct Ngap_DownlinkRIMInformationTransferIEs__value *)0)->present),
+	asn_MAP_Ngap_value_tag2el_432,
+	1,	/* Count of tags in the map */
+	0, 0,
+	-1	/* Extensions start */
+};
+static /* Use -fall-defs-global to expose */
+asn_TYPE_descriptor_t asn_DEF_Ngap_value_432 = {
+	"value",
+	"value",
+	&asn_OP_OPEN_TYPE,
+	0,	/* No effective tags (pointer) */
+	0,	/* No effective tags (count) */
+	0,	/* No tags (pointer) */
+	0,	/* No tags (count) */
+	{ 0, 0, OPEN_TYPE_constraint },
+	asn_MBR_Ngap_value_432,
+	1,	/* Elements count */
+	&asn_SPC_Ngap_value_specs_432	/* Additional specs */
+};
+
+asn_TYPE_member_t asn_MBR_Ngap_DownlinkRIMInformationTransferIEs_429[] = {
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_DownlinkRIMInformationTransferIEs, id),
+		(ASN_TAG_CLASS_UNIVERSAL | (2 << 2)),
+		0,
+		&asn_DEF_Ngap_ProtocolIE_ID,
+		0,
+		{ &asn_OER_memb_Ngap_id_constr_430, &asn_PER_memb_Ngap_id_constr_430,  memb_Ngap_id_constraint_429 },
+		0, 0, /* No default value */
+		"id"
+		},
+	{ ATF_NOFLAGS, 0, offsetof(struct Ngap_DownlinkRIMInformationTransferIEs, criticality),
+		(ASN_TAG_CLASS_UNIVERSAL | (10 << 2)),
+		0,
+		&asn_DEF_Ngap_Criticality,
+		select_DownlinkRIMInformationTransferIEs_Ngap_criticality_type,
+		{ &asn_OER_memb_Ngap_criticality_constr_431, &asn_PER_memb_Ngap_criticality_constr_431,  memb_Ngap_criticality_constraint_429 },
+		0, 0, /* No default value */
+		"criticality"
+		},
+	{ ATF_OPEN_TYPE | ATF_NOFLAGS, 0, offsetof(struct Ngap_DownlinkRIMInformationTransferIEs, value),
+		-1 /* Ambiguous tag (ANY?) */,
+		0,
+		&asn_DEF_Ngap_value_432,
+		select_DownlinkRIMInformationTransferIEs_Ngap_value_type,
+		{ &asn_OER_memb_Ngap_value_constr_432, &asn_PER_memb_Ngap_value_constr_432,  memb_Ngap_value_constraint_429 },
+		0, 0, /* No default value */
+		"value"
+		},
+};
+static const ber_tlv_tag_t asn_DEF_Ngap_DownlinkRIMInformationTransferIEs_tags_429[] = {
+	(ASN_TAG_CLASS_UNIVERSAL | (16 << 2))
+};
+static const asn_TYPE_tag2member_t asn_MAP_Ngap_DownlinkRIMInformationTransferIEs_tag2el_429[] = {
+    { (ASN_TAG_CLASS_UNIVERSAL | (2 << 2)), 0, 0, 0 }, /* id */
+    { (ASN_TAG_CLASS_UNIVERSAL | (10 << 2)), 1, 0, 0 } /* criticality */
+};
+asn_SEQUENCE_specifics_t asn_SPC_Ngap_DownlinkRIMInformationTransferIEs_specs_429 = {
+	sizeof(struct Ngap_DownlinkRIMInformationTransferIEs),
+	offsetof(struct Ngap_DownlinkRIMInformationTransferIEs, _asn_ctx),
+	asn_MAP_Ngap_DownlinkRIMInformationTransferIEs_tag2el_429,
+	2,	/* Count of tags in the map */
+	0, 0, 0,	/* Optional elements (not needed) */
+	-1,	/* First extension addition */
+};
+asn_TYPE_descriptor_t asn_DEF_Ngap_DownlinkRIMInformationTransferIEs = {
+	"DownlinkRIMInformationTransferIEs",
+	"DownlinkRIMInformationTransferIEs",
+	&asn_OP_SEQUENCE,
+	asn_DEF_Ngap_DownlinkRIMInformationTransferIEs_tags_429,
+	sizeof(asn_DEF_Ngap_DownlinkRIMInformationTransferIEs_tags_429)
+		/sizeof(asn_DEF_Ngap_DownlinkRIMInformationTransferIEs_tags_429[0]), /* 1 */
+	asn_DEF_Ngap_DownlinkRIMInformationTransferIEs_tags_429,	/* Same as above */
+	sizeof(asn_DEF_Ngap_DownlinkRIMInformationTransferIEs_tags_429)
+		/sizeof(asn_DEF_Ngap_DownlinkRIMInformationTransferIEs_tags_429[0]), /* 1 */
+	{ 0, 0, SEQUENCE_constraint },
+	asn_MBR_Ngap_DownlinkRIMInformationTransferIEs_429,
+	3,	/* Elements count */
+	&asn_SPC_Ngap_DownlinkRIMInformationTransferIEs_specs_429	/* Additional specs */
 };
 
