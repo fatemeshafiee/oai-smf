@@ -1586,17 +1586,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591,
             sm_context_req_msg.get_pdu_session_id());
 
+        sm_context_resp_pending->session_procedure_type = procedure_type;
         //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
 
         free_wrapper((void**) &qos_rules_ie);
         free_wrapper((void**) &qos_flow_description);
@@ -1607,19 +1598,10 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //PDU Session Modification Command Complete
       case PDU_SESSION_MODIFICATION_COMPLETE: {
         //PDU Session Modification procedure (Section 4.3.3.2@3GPP TS 23.502)
-        //TODO: should be verified since mentioned PDU_SESSION_MODIFICATION_COMMAND ACK in spec (see Step 11, section 4.3.3.2@3GPP TS 23.502)
         Logger::smf_app().debug("PDU_SESSION_MODIFICATION_COMPLETE");
 
         procedure_type =
             session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3;
-
-        /* ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-        PDUSessionIdentity pdusessionidentity;
-        ProcedureTransactionIdentity proceduretransactionidentity;
-        MessageType messagetype;
-        uint8_t presence;
-        ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions;
-        */
 
         /* see section 6.3.2.3@3GPP TS 24.501 V16.1.0
          Upon receipt of a PDU SESSION MODIFICATION COMPLETE message, the SMF shall stop timer T3591 and shall
@@ -1635,18 +1617,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //stop T3591
         itti_inst->timer_remove(sp.get()->timer_T3591);
 
-        //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
         sm_context_resp_pending->session_procedure_type = procedure_type;
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
+        //don't need to create a procedure to update UPF
       }
         break;
 
@@ -1684,7 +1656,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           sp.get()->set_pdu_session_status(
               pdu_session_status_e::PDU_SESSION_INACTIVE);
           //TODO: Release locally the existing PDU Session (see section 6.3.2.5@3GPP TS 24.501)
-        } else if (sp.get()->get_pdu_session_status() == pdu_session_status_e::PDU_SESSION_MODIFICATION_PENDING){
+        } else if (sp.get()->get_pdu_session_status()
+            == pdu_session_status_e::PDU_SESSION_MODIFICATION_PENDING) {
           //Update PDU Session status -> ACTIVE
           sp.get()->set_pdu_session_status(
               pdu_session_status_e::PDU_SESSION_ACTIVE);
@@ -1693,19 +1666,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //stop T3591
         itti_inst->timer_remove(sp.get()->timer_T3591);
 
-        //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
         sm_context_resp_pending->session_procedure_type = procedure_type;
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
-
+        //don't need to create a procedure to update UPF
       }
         break;
 
@@ -1858,23 +1820,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //Stop timer T3592
         itti_inst->timer_remove(sp.get()->timer_T3592);
 
-        //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
         sm_context_resp_pending->session_procedure_type = procedure_type;
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
+        //don't need to create a procedure to update UPF
 
         //TODO: SMF invokes Nsmf_PDUSession_SMContextStatusNotify to notify AMF that the SM context for this PDU Session is released
         //TODO: if dynamic PCC applied, SMF invokes an SM Policy Association Termination
         //TODO: SMF unsubscribes from Session Management Subscription data changes notification from UDM by invoking Numd_SDM_Unsubscribe
-
         if (sd.get()->get_number_pdu_sessions() == 0) {
           Logger::smf_app().debug(
               "Unsubscribe from Session Management Subscription data changes notification from UDM");
@@ -2007,6 +1958,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               (decoded_msg->dLQosFlowPerTNLInformation.associatedQosFlowList
                   .list.array[i])->qosFlowIdentifier);
         }
+
         //need to update UPF accordingly
         update_upf = true;
       }
@@ -2016,7 +1968,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       case n2_sm_info_type_e::PDU_RES_MOD_RSP: {
         Logger::smf_app().info("PDU_RES_MOD_RSP");
         Logger::smf_app().info(
-            "PDU Session Modification, processing N2 SM Information");
+            "PDU Session Modification Procedure, processing N2 SM Information");
 
         procedure_type =
             session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2;
@@ -2026,63 +1978,54 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             std::make_shared<Ngap_PDUSessionResourceModifyResponseTransfer_t>();
         int decode_status = smf_n1_n2_inst.decode_n2_sm_information(
             decoded_msg, n2_sm_information);
+
         if (decode_status == RETURNerror) {
-          Logger::smf_api_server().warn("asn_decode failed");
-          //send error to AMF
           Logger::smf_app().warn(
               "Decode N2 SM (Ngap_PDUSessionResourceModifyResponseTransfer) failed!");
           problem_details.setCause(
               pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
           smContextUpdateError.setError(problem_details);
-          //TODO: need to verify with/without N1 SM
-          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-          smContextUpdateError.setN1SmMsg(refToBinaryData);
-          //PDU Session Establishment Reject
-          //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
-          smf_n1_n2_inst.create_n1_sm_container(
-              sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
-          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
           smf_n11_inst->send_pdu_session_update_sm_context_response(
               smreq->http_response, smContextUpdateError,
-              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+              Pistache::Http::Code::Forbidden);
           return;
 
         }
 
-        /*
-         struct Ngap_UPTransportLayerInformation *dL_NGU_UP_TNLInformation;
-         struct Ngap_UPTransportLayerInformation *uL_NGU_UP_TNLInformation;
-         struct Ngap_QosFlowAddOrModifyResponseList  *qosFlowAddOrModifyResponseList;
-         struct Ngap_QosFlowPerTNLInformationList  *additionalDLQosFlowPerTNLInformation;
-         struct Ngap_QosFlowListWithCause  *qosFlowFailedToAddOrModifyList;
-         struct Ngap_ProtocolExtensionContainer  *iE_Extensions;
-         */
         //see section 8.2.3 (PDU Session Resource Modify) @3GPP TS 38.413
         //if dL_NGU_UP_TNLInformation is included, it shall be considered as the new DL transport layer addr for the PDU session (should be verified)
+        //TODO: may include uL_NGU_UP_TNLInformation (mapping between each new DL transport layer address and the corresponding UL transport layer address)
         fteid_t dl_teid;
         memcpy(
-            &dl_teid.ipv4_address,
+            &dl_teid.teid_gre_key,
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID
                 .buf,
             sizeof(struct in_addr));
         memcpy(
-            &dl_teid.teid_gre_key,
+            &dl_teid.ipv4_address,
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel
                 ->transportLayerAddress.buf,
             4);
         smreq->req.set_dl_fteid(dl_teid);
 
+        Logger::smf_app().debug("gTP_TEID " "0x%" PRIx32 " ",
+                                htonl(dl_teid.teid_gre_key));
+        Logger::smf_app().debug("uPTransportLayerInformation IP Addr %s",
+                                conv::toString(dl_teid.ipv4_address).c_str());
+
         //list of Qos Flows which have been successfully setup or modified
-        for (int i = 0;
-            i < decoded_msg->qosFlowAddOrModifyResponseList->list.count; i++) {
-          smreq->req.add_qfi(
-              (decoded_msg->qosFlowAddOrModifyResponseList->list.array[i])
-                  ->qosFlowIdentifier);
+        if (decoded_msg->qosFlowAddOrModifyResponseList) {
+          for (int i = 0;
+              i < decoded_msg->qosFlowAddOrModifyResponseList->list.count;
+              i++) {
+            smreq->req.add_qfi(
+                (decoded_msg->qosFlowAddOrModifyResponseList->list.array[i])
+                    ->qosFlowIdentifier);
+          }
         }
-        //TODO:
-        //list of QoS Flows which have failed to be modified
-        //qosFlowFailedToAddOrModifyList
+
+        //TODO: list of QoS Flows which have failed to be modified, qosFlowFailedToAddOrModifyList
+        //TODO: additionalDLQosFlowPerTNLInformation
 
         //need to update UPF accordingly
         update_upf = true;
@@ -2111,8 +2054,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         int decode_status = smf_n1_n2_inst.decode_n2_sm_information(
             decoded_msg, n2_sm_information);
         if (decode_status == RETURNerror) {
-          Logger::smf_api_server().warn("asn_decode failed");
-          //send error to AMF
           Logger::smf_app().warn(
               "Decode N2 SM (Ngap_PDUSessionResourceReleaseResponseTransfer) failed!");
           problem_details.setCause(
@@ -2124,19 +2065,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           return;
         }
 
-        //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
         sm_context_resp_pending->session_procedure_type = procedure_type;
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
-
+        //don't need to create a procedure to update UPF
       }
         break;
 
@@ -2199,7 +2129,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
     proc->session_procedure_type = procedure_type;
 
-    //smreq->req = sm_context_req_msg;
     insert_procedure(sproc);
     if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
       // error !
@@ -2258,6 +2187,15 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       return;
 
     }
+  } else {
+    Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
+                           sm_context_resp_pending->get_msg_name());
+    int ret = itti_inst->send_msg(sm_context_resp_pending);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_N11",
+          sm_context_resp_pending->get_msg_name());
+    }
   }
 
   //TODO, Step 6
@@ -2269,7 +2207,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
 }
 
-
 //-------------------------------------------------------------------------------------
 void smf_context::handle_pdu_session_release_sm_context_request(
     std::shared_ptr<itti_n11_release_sm_context_request> smreq) {
@@ -2278,52 +2215,48 @@ void smf_context::handle_pdu_session_release_sm_context_request(
 
   bool update_upf = false;
 
-   //Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and pdu_session must be existed
-   std::shared_ptr<dnn_context> sd = { };
-   std::shared_ptr<smf_pdu_session> sp = { };
-   bool find_dnn = find_dnn_context(smreq->req.get_snssai(),
-                                    smreq->req.get_dnn(), sd);
-   bool find_pdu = false;
-   if (find_dnn) {
-     find_pdu = sd.get()->find_pdu_session(
-         smreq->req.get_pdu_session_id(), sp);
-   }
-   if (!find_dnn or !find_pdu) {
-     //error, send reply to AMF with error code "Context Not Found"
-     Logger::smf_app().warn("DNN or PDU session context does not exist!");
-     smf_n11_inst->send_pdu_session_release_sm_context_response(
-         smreq->http_response,
-         Pistache::Http::Code::Not_Found);
-     return;
-   }
+  //Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and pdu_session must be existed
+  std::shared_ptr<dnn_context> sd = { };
+  std::shared_ptr<smf_pdu_session> sp = { };
+  bool find_dnn = find_dnn_context(smreq->req.get_snssai(),
+                                   smreq->req.get_dnn(), sd);
+  bool find_pdu = false;
+  if (find_dnn) {
+    find_pdu = sd.get()->find_pdu_session(smreq->req.get_pdu_session_id(), sp);
+  }
+  if (!find_dnn or !find_pdu) {
+    //error, send reply to AMF with error code "Context Not Found"
+    Logger::smf_app().warn("DNN or PDU session context does not exist!");
+    smf_n11_inst->send_pdu_session_release_sm_context_response(
+        smreq->http_response, Pistache::Http::Code::Not_Found);
+    return;
+  }
 
-   //we need to store HttpResponse and session-related information to be used when receiving the response from UPF
-   itti_n11_release_sm_context_response *n11_sm_context_resp =
-       new itti_n11_release_sm_context_response(TASK_SMF_APP, TASK_SMF_N11,
+  //we need to store HttpResponse and session-related information to be used when receiving the response from UPF
+  itti_n11_release_sm_context_response *n11_sm_context_resp =
+      new itti_n11_release_sm_context_response(TASK_SMF_APP, TASK_SMF_N11,
                                                smreq->http_response);
 
-   std::shared_ptr<itti_n11_release_sm_context_response> sm_context_resp_pending =
-       std::shared_ptr<itti_n11_release_sm_context_response>(n11_sm_context_resp);
+  std::shared_ptr<itti_n11_release_sm_context_response> sm_context_resp_pending =
+      std::shared_ptr<itti_n11_release_sm_context_response>(
+          n11_sm_context_resp);
 
-   n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
-   n11_sm_context_resp->res.set_supi_prefix(
-       smreq->req.get_supi_prefix());
-   n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
-   n11_sm_context_resp->res.set_pdu_session_id(
-       smreq->req.get_pdu_session_id());
-   n11_sm_context_resp->res.set_snssai(smreq->req.get_snssai());
-   n11_sm_context_resp->res.set_dnn(smreq->req.get_dnn());
+  n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
+  n11_sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
+  n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
+  n11_sm_context_resp->res.set_pdu_session_id(smreq->req.get_pdu_session_id());
+  n11_sm_context_resp->res.set_snssai(smreq->req.get_snssai());
+  n11_sm_context_resp->res.set_dnn(smreq->req.get_dnn());
 
-   session_release_sm_context_procedure *proc =
-       new session_release_sm_context_procedure(sp);
-   std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
+  session_release_sm_context_procedure *proc =
+      new session_release_sm_context_procedure(sp);
+  std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
 
-   insert_procedure(sproc);
-   if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
-     // error !
-     Logger::smf_app().info(
-         "PDU Release SM Context Request procedure failed");
-   }
+  insert_procedure(sproc);
+  if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
+    // error !
+    Logger::smf_app().info("PDU Release SM Context Request procedure failed");
+  }
 
 }
 
