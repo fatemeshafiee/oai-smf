@@ -50,7 +50,7 @@ IndividualSMContextApiImpl::IndividualSMContextApiImpl(
 
 void IndividualSMContextApiImpl::release_sm_context(
     const std::string &smContextRef,
-    const SmContextReleaseMessage &smContextReleaseMessage,
+    const SmContextReleaseData &smContextReleaseData,
     Pistache::Http::ResponseWriter &response) {
 
   //TODO: to be updated as update_sm_context_handler
@@ -58,30 +58,15 @@ void IndividualSMContextApiImpl::release_sm_context(
 
   //handle Nsmf_PDUSession_UpdateSMContext Request
   Logger::smf_api_server().info(
-      "Received a PDUSession_UpdateSMContext Request: PDU Session Release request from AMF.");
-  //Get the SmContextUpdateData from this message and process in smf_app
-  smf::pdu_session_update_sm_context_request sm_context_req_msg = { };
+      "Received a PDUSession_ReleaseSMContext Request: PDU Session Release request from AMF.");
+  std::shared_ptr<itti_n11_release_sm_context_request> itti_msg =
+      std::make_shared<itti_n11_release_sm_context_request>(TASK_SMF_N11,
+                                                           TASK_SMF_APP,
+                                                           response,
+                                                          smContextRef);
 
-  SmContextReleaseData smContextReleaseData = smContextReleaseMessage
-      .getJsonData();
-
-  if (smContextReleaseData.n2SmInfoIsSet()) {
-    //N2 SM (for Session establishment)
-    std::string n2_sm_information = smContextReleaseMessage
-        .getBinaryDataN2SmInformation();
-    Logger::smf_api_server().debug("smContextMessage, n2 sm information %s",
-                                   n2_sm_information.c_str());
-    std::string n2_sm_info_type = smContextReleaseData.getN2SmInfoType();
-    sm_context_req_msg.set_n2_sm_information(n2_sm_information);
-    sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
-  }
-  //Step 2. TODO: initialize necessary values for sm context req from smContextReleaseData
-
-  //Step 3. Handle the itti_n11_update_sm_context_request message in smf_app
-  //std::shared_ptr<itti_n11_update_sm_context_request> itti_msg = std::make_shared<itti_n11_update_sm_context_request>(TASK_SMF_N11, TASK_SMF_APP, response, smContextRef);
-  //itti_msg->req = sm_context_req_msg;
-  //itti_msg->scid = smContextRef;
-  //m_smf_app->handle_pdu_session_update_sm_context_request(itti_msg);
+  itti_msg->scid = smContextRef;
+  m_smf_app->handle_pdu_session_release_sm_context_request(itti_msg);
 
 }
 

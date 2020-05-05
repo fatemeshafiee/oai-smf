@@ -51,6 +51,8 @@ typedef enum {
   PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE,
   PDU_SESSION_UPDATE_SM_CONTEXT_REQUEST,
   PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE,
+  PDU_SESSION_RELEASE_SM_CONTEXT_REQUEST,
+  PDU_SESSION_RELEASE_SM_CONTEXT_RESPONSE,
   PDU_SESSION_MSG_TYPE_MAX
 } pdu_session_msg_type_t;
 
@@ -548,6 +550,34 @@ class pdu_session_update_sm_context_response : public pdu_session_msg {
   std::string n2_sm_info_type;
   std::map<uint8_t, qos_flow_context_updated> qos_flow_context_updateds;
 
+};
+
+class pdu_session_release_sm_context_request : public pdu_session_msg {
+ public:
+  pdu_session_release_sm_context_request()
+      :
+      pdu_session_msg(PDU_SESSION_RELEASE_SM_CONTEXT_REQUEST) {
+
+  }
+  ;
+
+ private:
+
+};
+
+class pdu_session_release_sm_context_response : public pdu_session_msg {
+ public:
+  pdu_session_release_sm_context_response()
+      :
+      pdu_session_msg(PDU_SESSION_RELEASE_SM_CONTEXT_RESPONSE) {
+    m_cause = 0;
+  }
+  ;
+  void set_cause(uint8_t cause);
+  uint8_t get_cause();
+
+ private:
+  uint8_t m_cause;
 };
 
 }

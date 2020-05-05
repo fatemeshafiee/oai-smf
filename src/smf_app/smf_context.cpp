@@ -2269,6 +2269,64 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
 }
 
+
+//-------------------------------------------------------------------------------------
+void smf_context::handle_pdu_session_release_sm_context_request(
+    std::shared_ptr<itti_n11_release_sm_context_request> smreq) {
+  Logger::smf_app().info(
+      "Handle a PDU Session Release SM Context Request message from AMF");
+
+  bool update_upf = false;
+
+   //Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and pdu_session must be existed
+   std::shared_ptr<dnn_context> sd = { };
+   std::shared_ptr<smf_pdu_session> sp = { };
+   bool find_dnn = find_dnn_context(smreq->req.get_snssai(),
+                                    smreq->req.get_dnn(), sd);
+   bool find_pdu = false;
+   if (find_dnn) {
+     find_pdu = sd.get()->find_pdu_session(
+         smreq->req.get_pdu_session_id(), sp);
+   }
+   if (!find_dnn or !find_pdu) {
+     //error, send reply to AMF with error code "Context Not Found"
+     Logger::smf_app().warn("DNN or PDU session context does not exist!");
+     smf_n11_inst->send_pdu_session_release_sm_context_response(
+         smreq->http_response,
+         Pistache::Http::Code::Not_Found);
+     return;
+   }
+
+   //we need to store HttpResponse and session-related information to be used when receiving the response from UPF
+   itti_n11_release_sm_context_response *n11_sm_context_resp =
+       new itti_n11_release_sm_context_response(TASK_SMF_APP, TASK_SMF_N11,
+                                               smreq->http_response);
+
+   std::shared_ptr<itti_n11_release_sm_context_response> sm_context_resp_pending =
+       std::shared_ptr<itti_n11_release_sm_context_response>(n11_sm_context_resp);
+
+   n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
+   n11_sm_context_resp->res.set_supi_prefix(
+       smreq->req.get_supi_prefix());
+   n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
+   n11_sm_context_resp->res.set_pdu_session_id(
+       smreq->req.get_pdu_session_id());
+   n11_sm_context_resp->res.set_snssai(smreq->req.get_snssai());
+   n11_sm_context_resp->res.set_dnn(smreq->req.get_dnn());
+
+   session_release_sm_context_procedure *proc =
+       new session_release_sm_context_procedure(sp);
+   std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
+
+   insert_procedure(sproc);
+   if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
+     // error !
+     Logger::smf_app().info(
+         "PDU Release SM Context Request procedure failed");
+   }
+
+}
+
 //------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(
     const snssai_t &snssai,

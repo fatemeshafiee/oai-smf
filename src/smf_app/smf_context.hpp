@@ -340,7 +340,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void handle_itti_msg(std::shared_ptr<itti_n4_session_report_request>&);
 
   /*
-   * Handle messages from AMF (e.g., PDU_SESSION_CREATESMContextRequest)
+   * Handle messages from AMF (e.g., PDU_SESSION_CreateSMContextRequest)
    * @param [std::shared_ptr<itti_n11_create_sm_context_request] smreq Request message
    * @return void
    */
@@ -348,13 +348,20 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<itti_n11_create_sm_context_request> smreq);
 
   /*
-   * Handle messages from AMF (e.g., PDU_SESSION_UPDATESMContextRequest)
+   * Handle messages from AMF (e.g., PDU_SESSION_UpdateSMContextRequest)
    * @param [std::shared_ptr<itti_n11_update_sm_context_request] smreq Request message
-   * @param [pdu_session_procedure_t procedure] pdu session procedure: session establishment/modification/release
    * @return void
    */
   void handle_pdu_session_update_sm_context_request(
       std::shared_ptr<itti_n11_update_sm_context_request> smreq);
+
+  /*
+   * Handle messages from AMF (e.g., PDU_SESSION_ReleaseSMContextRequest)
+   * @param [std::shared_ptr<itti_n11_release_sm_context_request] smreq Request message
+   * @return void
+   */
+  void handle_pdu_session_release_sm_context_request(
+      std::shared_ptr<itti_n11_release_sm_context_request> smreq);
 
   /*
    * Find DNN context with name

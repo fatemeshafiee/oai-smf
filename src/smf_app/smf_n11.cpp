@@ -474,6 +474,18 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     }
       break;
 
+    case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP2: {
+      Logger::smf_n11().info("PDU_SESSION_RELEASE_UE_REQUESTED (step 2)");
+      sm_context_res->http_response.send(Pistache::Http::Code::No_Content);
+    }
+      break;
+
+    case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP3: {
+      Logger::smf_n11().info("PDU_SESSION_RELEASE_UE_REQUESTED (step 3)");
+      sm_context_res->http_response.send(Pistache::Http::Code::No_Content);
+    }
+      break;
+
     default: {
       Logger::smf_n11().debug("Session management procedure: unknown!");
     }
@@ -590,6 +602,33 @@ void smf_n11::send_pdu_session_create_sm_context_response(
 void smf_n11::send_n1n2_message_transfer_request(
     std::shared_ptr<itti_n11_modify_session_request_smf_requested> sm_context_mod) {
   //TODO:
+}
+
+//------------------------------------------------------------------------------
+void smf_n11::send_pdu_session_release_sm_context_response(
+    Pistache::Http::ResponseWriter &httpResponse, Pistache::Http::Code code) {
+  Logger::smf_n11().debug(
+      "[SMF N11] Send PDUSessionReleaseContextResponse to AMF!");
+  httpResponse.send(code);
+}
+
+//------------------------------------------------------------------------------
+void smf_n11::send_pdu_session_release_sm_context_response(
+    Pistache::Http::ResponseWriter &httpResponse,
+    oai::smf_server::model::ProblemDetails &problem,
+    Pistache::Http::Code code) {
+
+  Logger::smf_n11().debug(
+      "[SMF N11] Send PDUSessionReleaseContextResponse to AMF!");
+  nlohmann::json json_data = { };
+  to_json(json_data, problem);
+  if (!json_data.empty()) {
+    httpResponse.headers().add<Pistache::Http::Header::ContentType>(
+        Pistache::Http::Mime::MediaType("application/json"));
+    httpResponse.send(code, json_data.dump().c_str());
+  } else {
+    httpResponse.send(code);
+  }
 }
 
 //------------------------------------------------------------------------------

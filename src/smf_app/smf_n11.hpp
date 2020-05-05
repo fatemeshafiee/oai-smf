@@ -153,6 +153,27 @@ class smf_n11 {
       Pistache::Http::Code code);
 
   /*
+   * Send release session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [Pistache::Http::Code] code, response code
+   *
+   */
+  void send_pdu_session_release_sm_context_response(
+      Pistache::Http::ResponseWriter &httpResponse, Pistache::Http::Code code);
+
+  /*
+   * Send release session response to AMF
+   * @param [Pistache::Http::ResponseWriter] httpResponse
+   * @param [oai::smf_server::model::ProblemDetails] problem
+   * @param [Pistache::Http::Code] code, response code
+   *
+   */
+  void send_pdu_session_release_sm_context_response(
+      Pistache::Http::ResponseWriter &httpResponse,
+      oai::smf_server::model::ProblemDetails &problem,
+      Pistache::Http::Code code);
+
+  /*
    * Create HTTP body content for multipart/related message
    * @param [std::string] body: Body of the created message
    * @param [std::string] json_part: Json part of multipart/related msg

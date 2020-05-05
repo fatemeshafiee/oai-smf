@@ -556,3 +556,14 @@ void pdu_session_update_sm_context_response::remove_all_qos_flow_context_updated
   qos_flow_context_updateds.clear();
 }
 
+
+//-----------------------------------------------------------------------------
+void pdu_session_release_sm_context_response::set_cause(uint8_t cause) {
+  m_cause = cause;
+}
+
+//-----------------------------------------------------------------------------
+uint8_t pdu_session_release_sm_context_response::get_cause() {
+  return m_cause;
+}
+

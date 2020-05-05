@@ -210,6 +210,14 @@ class smf_app {
       std::shared_ptr<itti_n11_update_sm_context_request> smreq);
 
   /*
+   * Handle PDUSession_ReleaseSMContextRequest from AMF
+   * @param [std::shared_ptr<itti_n11_release_sm_context_request>&] Request message
+   * @return void
+   */
+  void handle_pdu_session_release_sm_context_request(
+      std::shared_ptr<itti_n11_release_sm_context_request> smreq);
+
+  /*
    * Handle network-requested pdu session modification
    * @param should be updated
    * @return void

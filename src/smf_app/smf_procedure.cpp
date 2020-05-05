@@ -1321,3 +1321,86 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
 }
 
+//------------------------------------------------------------------------------
+int session_release_sm_context_procedure::run(
+    std::shared_ptr<itti_n11_release_sm_context_request> sm_context_req,
+    std::shared_ptr<itti_n11_release_sm_context_response> sm_context_res,
+    std::shared_ptr<smf::smf_context> sc) {
+
+  Logger::smf_app().info("Release SM Context Request");
+  // TODO check if compatible with ongoing procedures if any
+  pfcp::node_id_t up_node_id = { };
+  if (not pfcp_associations::get_instance().select_up_node(
+      up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
+    // TODO
+    sm_context_res->res.set_cause(REMOTE_PEER_NOT_RESPONDING);  //verify for 5G??
+    Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
+    return RETURNerror ;
+  }
+
+  //-------------------
+  n11_trigger = sm_context_req;
+  n11_triggered_pending = sm_context_res;
+  uint64_t seid = smf_app_inst->generate_seid();
+  sp->set_seid(seid);
+  itti_n4_session_deletion_request *n4_ser =
+      new itti_n4_session_deletion_request(TASK_SMF_APP, TASK_SMF_N4);
+  n4_ser->seid = sp->up_fseid.seid;
+  n4_ser->trxn_id = this->trxn_id;
+  n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
+  n4_triggered = std::shared_ptr<itti_n4_session_deletion_request>(n4_ser);
+
+  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N4",
+                         n4_ser->get_msg_name());
+  int ret = itti_inst->send_msg(n4_triggered);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N4",
+        n4_ser->get_msg_name());
+    return RETURNerror ;
+  }
+  return RETURNok ;
+
+}
+
+//------------------------------------------------------------------------------
+void session_release_sm_context_procedure::handle_itti_msg(
+    itti_n4_session_deletion_response &resp,
+    std::shared_ptr<smf::smf_context> sc) {
+  Logger::smf_app().info(
+      "Handle itti_n4_session_deletion_response (Release SM Context Request): pdu-session-id %d",
+      n11_trigger.get()->req.get_pdu_session_id());
+
+  pfcp::cause_t cause = { };
+  ::cause_t cause_gtp = { .cause_value = REQUEST_ACCEPTED };
+
+  // must be there
+  if (resp.pfcp_ies.get(cause)) {
+    xgpp_conv::pfcp_cause_to_core_cause(cause, cause_gtp);
+  }
+
+  if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
+    Logger::smf_app().info("PDU Session Release SM Context accepted by UPF");
+    //clear the resources including addresses allocated to this Session and associated QoS flows
+    sp->deallocate_ressources(n11_trigger.get()->req.get_dnn());  //TODO: for IPv6 (only for Ipv4 for the moment)
+    smf_n11_inst->send_pdu_session_release_sm_context_response(
+        n11_triggered_pending->http_response, Pistache::Http::Code::No_Content);
+
+  } else {
+    oai::smf_server::model::ProblemDetails problem_details = { };
+    problem_details.setCause(
+        pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]); //To be updated
+    smf_n11_inst->send_pdu_session_release_sm_context_response(
+        n11_triggered_pending->http_response, Pistache::Http::Code::Not_Acceptable);
+  }
+
+  //TODO:
+  /* If it is the last PDU Session the SMF is handling for the UE for the associated (DNN, S-
+   NSSAI), the SMF unsubscribes from Session Management Subscription data changes notification with the UDM
+   by means of the Nudm_SDM_Unsubscribe service operation. The SMF invokes the
+   Nudm_UECM_Deregistration service operation so that the UDM removes the association it had stored between
+   the SMF identity and the associated DNN and PDU Session Id
+   */
+
+}
+

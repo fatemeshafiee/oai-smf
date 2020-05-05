@@ -173,21 +173,20 @@ class session_update_sm_context_procedure : public smf_procedure {
 
 
 //------------------------------------------------------------------------------
-class session_release_pdu_session_procedure : public smf_procedure {
+class session_release_sm_context_procedure : public smf_procedure {
  public:
-  explicit session_release_pdu_session_procedure(
-      std::shared_ptr<smf_pdu_session> &sppc)
+  explicit session_release_sm_context_procedure(
+      std::shared_ptr<smf_pdu_session> &sps)
       :
       smf_procedure(),
-      ppc(sppc),
+      sp(sps),
       n4_triggered(),
       n11_triggered_pending(),
-      n11_trigger(),
-      session_procedure_type() {
+      n11_trigger() {
   }
 
-  int run(std::shared_ptr<itti_n11_update_sm_context_request> req,
-          std::shared_ptr<itti_n11_update_sm_context_response> resp,
+  int run(std::shared_ptr<itti_n11_release_sm_context_request> req,
+          std::shared_ptr<itti_n11_release_sm_context_response> resp,
           std::shared_ptr<smf::smf_context> sc);
   /*
    * Handle N4 modification response from UPF
@@ -195,16 +194,15 @@ class session_release_pdu_session_procedure : public smf_procedure {
    * @param [std::shared_ptr<smf::smf_context>] sc smf context
    * @return void
    */
-  void handle_itti_msg(itti_n4_session_modification_response &resp,
+  void handle_itti_msg(itti_n4_session_deletion_response &resp,
                        std::shared_ptr<smf::smf_context> sc);
 
-  std::shared_ptr<itti_n4_session_modification_request> n4_triggered;
-  std::shared_ptr<smf_pdu_session> ppc;
-  std::shared_ptr<smf::smf_context> pc;
+  std::shared_ptr<itti_n4_session_deletion_request> n4_triggered;
+  std::shared_ptr<smf_pdu_session> sp;
+  std::shared_ptr<smf::smf_context> sc;
 
-  std::shared_ptr<itti_n11_update_sm_context_request> n11_trigger;
-  std::shared_ptr<itti_n11_update_sm_context_response> n11_triggered_pending;
-  session_management_procedures_type_e session_procedure_type;
+  std::shared_ptr<itti_n11_release_sm_context_request> n11_trigger;
+  std::shared_ptr<itti_n11_release_sm_context_response> n11_triggered_pending;
 
 };
 

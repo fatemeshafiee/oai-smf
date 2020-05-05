@@ -383,13 +383,12 @@ void send_pdu_session_update_sm_context_establishment(
   free(buffer);
 }
 
-
-
 //------------------------------------------------------------------------------
 void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
 
-  std::cout << "[AMF N11] PDU Session Modification Request (SM Context Update, Step 1)"
-            << std::endl;
+  std::cout
+      << "[AMF N11] PDU Session Modification Request (SM Context Update, Step 1)"
+      << std::endl;
 
   nlohmann::json pdu_session_modification_request;
   //encode PDU Session Modification Request
@@ -403,27 +402,26 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
   ENCODE_U8(buffer + size, 0x01, size);  //PDUSessionIdentity
   ENCODE_U8(buffer + size, 0x01, size);  //ProcedureTransactionIdentity
   ENCODE_U8(buffer + size, 0xc9, size);  //MessageType - PDU Session Modification Request
- ENCODE_U8(buffer + size, 0x28, size);  //_5GSMCapability
+  ENCODE_U8(buffer + size, 0x28, size);  //_5GSMCapability
   ENCODE_U8(buffer + size, 0x01, size);  //_5GSMCapability
   ENCODE_U8(buffer + size, 0x00, size);  //_5GSMCapability
   ENCODE_U8(buffer + size, 0x59, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x00, size);  //_5GSMCause
-   ENCODE_U8(buffer + size, 0x7a, size);  //QoS Rules IE
-   ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules length
-   ENCODE_U8(buffer + size, 0x09, size);  //QoS Rules length
-   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules rule id
-   ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules rule length
-   ENCODE_U8(buffer + size, 0x06, size);  //QoS Rules rule length
-   ENCODE_U8(buffer + size, 0x31, size);  //QoS Rules
-   ENCODE_U8(buffer + size, 0x31, size);  //QoS Rules
-   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules filter 1 length
-   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
-   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
-   ENCODE_U8(buffer + size, 0x3c, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x00, size);  //_5GSMCause
+  ENCODE_U8(buffer + size, 0x7a, size);  //QoS Rules IE
+  ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules length
+  ENCODE_U8(buffer + size, 0x09, size);  //QoS Rules length
+  ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules rule id
+  ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules rule length
+  ENCODE_U8(buffer + size, 0x06, size);  //QoS Rules rule length
+  ENCODE_U8(buffer + size, 0x31, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x31, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules filter 1 length
+  ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x3c, size);  //QoS Rules
 
 //  ENCODE_U8(buffer + size, 0x00, size);  //MaximumNumberOfSupportedPacketFilters
 //  ENCODE_U8(buffer + size, 0x01, size);  //MaximumNumberOfSupportedPacketFilters
-
 
   std::cout << "Buffer: " << std::endl;
   for (int i = 0; i < size; i++) {
@@ -497,8 +495,6 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
 
   free(buffer);
 }
-
-
 
 //------------------------------------------------------------------------------
 void send_pdu_session_release_request(std::string smf_ip_address) {
@@ -594,8 +590,7 @@ void send_pdu_session_release_request(std::string smf_ip_address) {
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_release_resource_release_ack(
-    std::string smf_ip_address) {
+void send_pdu_session_release_resource_release_ack(std::string smf_ip_address) {
 
   std::cout
       << "[AMF N11] PDU Session Release Ack (Update SM Context): N2 SM - Resource Release Ack"
@@ -777,14 +772,12 @@ void send_pdu_session_release_complete(std::string smf_ip_address) {
   free(buffer);
 }
 
-
-
-
 //------------------------------------------------------------------------------
 void send_pdu_session_update_sm_context_ue_service_request(
     std::string smf_ip_address) {
-  std::cout << "[AMF N11] UE-triggered Service Request (SM Context Update Step 1)"
-            << std::endl;
+  std::cout
+      << "[AMF N11] UE-triggered Service Request (SM Context Update Step 1)"
+      << std::endl;
 
   nlohmann::json service_requests;
   //NO NAS, No NGAP
@@ -808,8 +801,7 @@ void send_pdu_session_update_sm_context_ue_service_request(
     CURLcode res = { };
     struct curl_slist *headers = nullptr;
     //headers = curl_slist_append(headers, "charsets: utf-8");
-    headers = curl_slist_append(
-        headers, "content-type: application/json");
+    headers = curl_slist_append(headers, "content-type: application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
@@ -847,12 +839,12 @@ void send_pdu_session_update_sm_context_ue_service_request(
 
 }
 
-
 //------------------------------------------------------------------------------
 void send_pdu_session_update_sm_context_ue_service_request_step2(
     std::string smf_ip_address) {
-  std::cout << "[AMF N11] UE-triggered Service Request (SM Context Update Step 2)"
-            << std::endl;
+  std::cout
+      << "[AMF N11] UE-triggered Service Request (SM Context Update Step 2)"
+      << std::endl;
 
   nlohmann::json service_requests;
   //encode PDU Session Resource Setup Response Transfer IE
@@ -897,7 +889,6 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
 
   service_requests["anType"] = "3GPP_ACCESS";
   service_requests["ratType"] = "NR";
-
 
   std::string body;
   std::string boundary = "----Boundary";
@@ -962,6 +953,66 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
   free(buffer);
 }
 
+//------------------------------------------------------------------------------
+void send_release_sm_context_request(std::string smf_ip_address) {
+
+  std::cout << "[AMF N11] PDU Session Release SM context Request" << std::endl;
+
+  nlohmann::json send_release_sm_context_request;
+
+  std::string url = std::string("http://");
+  url.append(smf_ip_address);
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/release"));
+
+  //Fill the json part
+  send_release_sm_context_request["pduSessionId"] = 1;
+
+  std::string body = send_release_sm_context_request.dump();
+
+  curl_global_init(CURL_GLOBAL_ALL);
+  CURL *curl = curl = curl_easy_init();
+
+  if (curl) {
+    CURLcode res = { };
+    struct curl_slist *headers = nullptr;
+    //headers = curl_slist_append(headers, "charsets: utf-8");
+    headers = curl_slist_append(headers, "content-type: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
+    //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
+
+    // Response information.
+    long httpCode = { 0 };
+    std::unique_ptr<std::string> httpData(new std::string());
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, body.length());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
+
+    res = curl_easy_perform(curl);
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    //get cause from the response
+    nlohmann::json response_data;
+    try {
+      response_data = nlohmann::json::parse(*httpData.get());
+    } catch (nlohmann::json::exception &e) {
+      std::cout << "Could not get json data from the response" << std::endl;
+    }
+    std::cout
+        << "[AMF N11] PDU Session Release SM Context Request, response from SMF, Http Code "
+        << httpCode << std::endl;
+
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+
+}
 
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
@@ -1010,6 +1061,9 @@ int main(int argc, char *argv[]) {
   usleep(200000);
   send_pdu_session_release_complete(smf_ip_address);
   usleep(200000);
+
+  //Release SM context
+  send_release_sm_context_request(smf_ip_address);
   return 0;
 }
 

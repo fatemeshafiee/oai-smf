@@ -76,7 +76,7 @@ class IndividualSMContextApiImpl :
 
   void release_sm_context(
       const std::string &smContextRef,
-      const SmContextReleaseMessage &smContextReleaseMessage,
+      const SmContextReleaseData &smContextReleaseData,
       Pistache::Http::ResponseWriter &response);
   void retrieve_sm_context(const std::string &smContextRef,
                            const SmContextRetrieveData &smContextRetrieveData,
