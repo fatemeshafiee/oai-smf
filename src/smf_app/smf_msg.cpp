@@ -51,8 +51,15 @@ void qos_flow_context_updated::set_dl_fteid(const fteid_t &teid) {
 }
 
 //-----------------------------------------------------------------------------
-void qos_flow_context_updated::set_qos_rule(const QOSRulesIE &rule) {
-  qos_rule = rule;
+void qos_flow_context_updated::add_qos_rule(const QOSRulesIE &rule) {
+  uint8_t rule_id = rule.qosruleidentifer;
+  if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
+      and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
+    qos_rules.erase(rule_id);
+    qos_rules.insert(std::pair<uint8_t, QOSRulesIE>(rule_id, rule));
+    Logger::smf_app().trace("qos_flow_context_updated::add_qos_rule(%d) success",
+                            rule_id);
+  }
 }
 
 void qos_flow_context_updated::set_qos_profile(const qos_profile_t &profile) {
@@ -567,3 +574,72 @@ uint8_t pdu_session_release_sm_context_response::get_cause() {
   return m_cause;
 }
 
+
+
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::set_cause(uint8_t cause) {
+  m_cause = cause;
+}
+
+//-----------------------------------------------------------------------------
+uint8_t pdu_session_modification_network_requested::get_cause() {
+  return m_cause;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::set_http_code(
+    Pistache::Http::Code code) {
+  m_code = code;
+}
+
+//-----------------------------------------------------------------------------
+Pistache::Http::Code pdu_session_modification_network_requested::get_http_code() {
+  return m_code;
+}
+
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_modification_network_requested::get_n2_sm_information() const {
+  return m_n2_sm_information;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::set_n2_sm_information(
+    std::string const &value) {
+  m_n2_sm_information = value;
+  m_n2_sm_info_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_modification_network_requested::get_n1_sm_message() const {
+  return m_n1_sm_message;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::set_n1_sm_message(
+    std::string const &value) {
+  m_n1_sm_message = value;
+  m_n1_sm_msg_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_modification_network_requested::n1_sm_msg_is_set() const {
+  return m_n1_sm_msg_is_set;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_modification_network_requested::n2_sm_info_is_set() const {
+  return m_n2_sm_info_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::set_amf_url(
+    std::string const &value) {
+  amf_url = value;
+}
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_modification_network_requested::get_amf_url() const {
+  return amf_url;
+}

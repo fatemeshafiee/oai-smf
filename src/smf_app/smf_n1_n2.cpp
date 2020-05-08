@@ -178,41 +178,17 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //authorized QoS rules of the PDU session: QOSRules (Section 6.2.5@3GPP TS 24.501)
       //(Section 6.4.1.3@3GPP TS 24.501 V16.1.0) Make sure that the number of the packet filters used in the authorized QoS rules of the PDU Session does not
       // exceed the maximum number of packet filters supported by the UE for the PDU session
-      sm_msg->pdu_session_establishment_accept.qosrules.lengthofqosrulesie = 1;
+      sm_msg->pdu_session_establishment_accept.qosrules.lengthofqosrulesie = qos_flow.qos_rules.size();
       sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie =
-          (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .qosruleidentifer = qos_flow.qos_rule.qosruleidentifer;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .ruleoperationcode = qos_flow.qos_rule.ruleoperationcode;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0].dqrbit =
-          qos_flow.qos_rule.dqrbit;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .numberofpacketfilters = qos_flow.qos_rule.numberofpacketfilters;
-      //1st rule
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace =
-          (Create_ModifyAndAdd_ModifyAndReplace*) calloc(
-              1, sizeof(Create_ModifyAndAdd_ModifyAndReplace));
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfilterdirection = qos_flow.qos_rule.packetfilterlist
-          .create_modifyandadd_modifyandreplace->packetfilterdirection;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfilteridentifier = qos_flow.qos_rule.packetfilterlist
-          .create_modifyandadd_modifyandreplace->packetfilteridentifier;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfiltercontents.component_type = qos_flow.qos_rule
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfiltercontents.component_type;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .qosruleprecedence = qos_flow.qos_rule.qosruleprecedence;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .segregation = qos_flow.qos_rule.segregation;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .qosflowidentifer = qos_flow.qfi.qfi;
+          (QOSRulesIE*) calloc(qos_flow.qos_rules.size(), sizeof(QOSRulesIE));
+
+      int i = 0;
+      for (auto rule: qos_flow.qos_rules) {
+        sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[i]
+            .qosruleidentifer = rule.second.qosruleidentifer;
+        memcpy(&sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[i], &rule.second, sizeof(QOSRulesIE));
+        i++;
+      }
 
       //SessionAMBR
       //TODO: get from subscription DB
@@ -316,7 +292,8 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
         sc.get()->get_default_qos_flow_description(
             sm_msg->pdu_session_establishment_accept.qosflowdescriptions
                 .qosflowdescriptionscontents[0],
-            sm_context_res.get_pdu_session_type());
+            sm_context_res.get_pdu_session_type(),
+            qos_flow.qfi);
       }
 
       //ExtendedProtocolConfigurationOptions
@@ -504,7 +481,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
         return;
       }
 
-      //Fill the content of PDU Session Establishment Request message with hardcoded values (to be completed)
       //PTI
       sm_msg->header.procedure_transaction_identity = sm_context_res.get_pti()
           .procedure_transaction_id;
@@ -532,10 +508,9 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       sm_msg->pdu_session_modification_command.qosrules.lengthofqosrulesie =
           qos_rules.size();
       sm_msg->pdu_session_modification_command.qosrules.qosrulesie =
-          (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
+          (QOSRulesIE*) calloc(qos_rules.size(), sizeof(QOSRulesIE));
       for (int i = 0; i < qos_rules.size(); i++) {
-        sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i] =
-            qos_rules[i];
+        memcpy (&sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i], &qos_rules[i], sizeof(QOSRulesIE));
       }
 
       //MappedEPSBearerContexts
@@ -555,7 +530,9 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
         sc.get()->get_default_qos_flow_description(
             sm_msg->pdu_session_modification_command.qosflowdescriptions
                 .qosflowdescriptionscontents[0],
-            sm_context_res.get_pdu_session_type());
+            sm_context_res.get_pdu_session_type(),
+            qos_rules[0].qosflowidentifer
+            );
       }
 
       //Encode NAS message
@@ -572,14 +549,10 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
 
       //free memory
       free_wrapper(
-          (void**) &sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-              .packetfilterlist.create_modifyandadd_modifyandreplace);
-      free_wrapper(
           (void**) &sm_msg->pdu_session_modification_command.qosrules.qosrulesie);
       free_wrapper(
           (void**) &sm_msg->pdu_session_modification_command.qosflowdescriptions
               .qosflowdescriptionscontents);
-
     }
       break;
 

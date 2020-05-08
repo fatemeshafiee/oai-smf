@@ -218,11 +218,11 @@ class smf_app {
       std::shared_ptr<itti_n11_release_sm_context_request> smreq);
 
   /*
-   * Handle network-requested pdu session modification
+   * Trigger pdu session modification
    * @param should be updated
    * @return void
    */
-  void handle_network_requested_pdu_session_modification();
+  void trigger_pdu_session_modification();
 
   /*
    * Verify if SM Context is existed for this Supi

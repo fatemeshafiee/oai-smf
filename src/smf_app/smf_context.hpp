@@ -78,8 +78,6 @@ class smf_qos_flow {
     far_id_ul = { };
     far_id_dl = { };
     released = false;
-    qos_rules_to_be_synchronised = {};
-    qos_rules = {};
     qos_profile = {};
   }
 
@@ -97,26 +95,14 @@ class smf_qos_flow {
   pfcp::pdr_id_t pdr_id_ul;
   pfcp::pdr_id_t pdr_id_dl;
   pfcp::precedence_t precedence;
-  //pfcp::pdi                         pdi;
-  // may use std::optional ? (fragment memory)
   std::pair<bool, pfcp::far_id_t> far_id_ul;
   std::pair<bool, pfcp::far_id_t> far_id_dl;
+
   bool released;  // finally seems necessary, TODO try to find heuristic ?
 
-  void get_default_qos_rule(QOSRulesIE &qos_rule) const;
-  void get_qos_rule(uint8_t rule_id, QOSRulesIE &qos_rule) const;
-  void update_qos_rule(QOSRulesIE qos_rule);
-  void add_qos_rule(QOSRulesIE qos_rule);
   pdu_session_id_t pdu_session_id;
-
-  //rule_id <-> qos_rule
-  std::map<uint8_t, QOSRulesIE> qos_rules;
-  //std::vector<QOSRulesIE> qos_rules;
-  std::vector<uint8_t> qos_rules_to_be_synchronised;
-  //QoS profile
-  qos_profile_t qos_profile;
-  //cause
-  uint8_t cause_value;
+  qos_profile_t qos_profile;   //QoS profile
+  uint8_t cause_value;   //cause
 
 };
 
@@ -137,6 +123,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     up_fseid = { };
     qos_flows.clear();
     released = false;
+    default_qfi.qfi = NO_QOS_FLOW_IDENTIFIER_ASSIGNED ;
     pdu_session_status = pdu_session_status_e::PDU_SESSION_INACTIVE;
     timer_T3590 = ITTI_INVALID_TIMER_ID;
     timer_T3591 = ITTI_INVALID_TIMER_ID;
@@ -152,8 +139,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   bool get_qos_flow(const pfcp::far_id_t &far_id, smf_qos_flow &q);
   bool get_qos_flow(const pfcp::qfi_t &qfi, smf_qos_flow &q);
   void add_qos_flow(smf_qos_flow &flow);
-  smf_qos_flow& get_qos_flow(const pfcp::qfi_t &qfi);
   void get_qos_flows(std::vector<smf_qos_flow> &flows);
+  void set_default_qos_flow(const pfcp::qfi_t &qfi);
 
   bool find_qos_flow(const pfcp::pdr_id_t &pdr_id, smf_qos_flow &flow);
   bool has_qos_flow(const pfcp::pdr_id_t &pdr_id, pfcp::qfi_t &qfi);
@@ -195,10 +182,28 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   void generate_qos_rule_id(uint8_t &rule_id);
   void release_qos_rule_id(const uint8_t &rule_id);
-  pdn_type_t get_pdn_type() const;
-
   void get_qos_rules_to_be_synchronised(std::vector<QOSRulesIE> &qos_rules) const;
 
+  /*
+   * Get list of QoS rules associated with a given QFI
+   * @param [pfcp::qfi_t] qfi
+   * @param [std::vector<QOSRulesIE> &] rules
+   * @void
+   */
+  void get_qos_rules(pfcp::qfi_t qfi,
+      std::vector<QOSRulesIE> &rules) const;
+
+  /*
+   * Get default QoS Rule associated with this PDU Session
+   * @param [QOSRulesIE &] qos_rule
+   * @void
+   */
+  bool get_default_qos_rule(QOSRulesIE &qos_rule) const;
+  bool get_qos_rule(uint8_t rule_id, QOSRulesIE &qos_rule) const;
+  void update_qos_rule(QOSRulesIE qos_rule);
+  void add_qos_rule(QOSRulesIE qos_rule);
+
+  pdn_type_t get_pdn_type() const;
 
   bool ipv4;                  // IP Address(es): IPv4 address and/or IPv6 prefix
   bool ipv6;                  // IP Address(es): IPv4 address and/or IPv6 prefix
@@ -223,7 +228,11 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   std::string amf_id;
   // QFI <-> QoS Flow
   std::map<uint8_t, smf_qos_flow> qos_flows;
-  //pdu session status
+  pfcp::qfi_t default_qfi;
+  // QFI <-> QoS Rules
+  std::map<uint8_t, QOSRulesIE> qos_rules;
+  std::vector<uint8_t> qos_rules_to_be_synchronised;
+  std::vector<uint8_t> qos_rules_to_be_removed;
   pdu_session_status_e pdu_session_status;
   timer_id_t timer_T3590;
   timer_id_t timer_T3591;
@@ -363,6 +372,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void handle_pdu_session_release_sm_context_request(
       std::shared_ptr<itti_n11_release_sm_context_request> smreq);
 
+  void handle_pdu_session_modification_network_requested(
+      std::shared_ptr<itti_nx_trigger_pdu_session_modification> msg);
+
   /*
    * Find DNN context with name
    * @param [const std::string&] dnn
@@ -456,7 +468,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   void get_default_qos_flow_description(
       QOSFlowDescriptionsContents &qos_flow_description,
-      uint8_t pdu_session_type);
+      uint8_t pdu_session_type,
+      const pfcp::qfi_t &qfi);
 
   void get_session_ambr(SessionAMBR &session_ambr, const snssai_t &snssai,
                         const std::string &dnn);

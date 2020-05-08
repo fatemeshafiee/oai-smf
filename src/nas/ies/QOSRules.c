@@ -8,9 +8,8 @@
 
 int encode_qos_rules(QOSRules qosrules, uint8_t iei, uint8_t *buffer,
                      uint32_t len) {
-  uint8_t *len_qosrule = NULL;
+
   uint8_t *len_qosrulesie = NULL;
-  uint8_t len_pos_qos_rule = 0;
   uint8_t bitstream = 0;
   uint32_t encoded = 0;
   int encode_result = 0;
@@ -34,6 +33,9 @@ int encode_qos_rules(QOSRules qosrules, uint8_t iei, uint8_t *buffer,
   for (i = 0; i < qosrules.lengthofqosrulesie; i++) {
     ENCODE_U8(buffer + encoded, qosrules.qosrulesie[i].qosruleidentifer,
               encoded);
+
+    uint8_t *len_qosrule = NULL;
+    uint8_t len_pos_qos_rule = 0;
 
     len_qosrule = buffer + encoded;
     encoded++;
@@ -115,6 +117,7 @@ int encode_qos_rules(QOSRules qosrules, uint8_t iei, uint8_t *buffer,
 
   //len of qos rule ie
   ENCODE_U16(len_qosrulesie, encoded - len_pos_qos_rulesie, temp);
+
   return encoded;
 }
 
@@ -135,16 +138,107 @@ int decode_qos_rules(QOSRules *qosrules, uint8_t iei, uint8_t *buffer,
 
   CHECK_LENGTH_DECODER(len - decoded, qosrules->lengthofqosrulesie);
 
-  qosrules->qosrulesie = (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
+  QOSRulesIE *qosrulesie = (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
+
+  int size = 0;
   i = 0;
-  //for(i=0;i<numberrules;i++)
+  int pre_decoded_pos = decoded;
+  while (decoded < qosrules->lengthofqosrulesie) {
+    DECODE_U8(buffer + decoded, qosrulesie->qosruleidentifer,
+              decoded);
+    DECODE_U16(buffer + decoded, qosrulesie->LengthofQoSrule,
+               decoded);
+
+    DECODE_U8(buffer + decoded, bitstream, decoded);
+    qosrulesie->ruleoperationcode = (bitstream >> 5);
+    qosrulesie->dqrbit = (bitstream >> 4) & 0x01;
+    qosrulesie->numberofpacketfilters = bitstream & 0x0f;
+
+    if (qosrulesie->ruleoperationcode
+        == MODIFY_EXISTING_QOS_RULE_AND_DELETE_PACKET_FILTERS) {
+      qosrulesie->packetfilterlist.modifyanddelete =
+          (ModifyAndDelete*) calloc(
+              qosrulesie->numberofpacketfilters,
+              sizeof(ModifyAndDelete));
+      for (j = 0; j < qosrulesie->numberofpacketfilters; j++) {
+        DECODE_U8(buffer + decoded, bitstream, decoded);
+        qosrulesie->packetfilterlist.modifyanddelete[j]
+            .packetfilteridentifier = bitstream & 0x0f;
+      }
+      DECODE_U8(buffer + decoded, bitstream, decoded);  //QoS rule precedence
+      qosrulesie->qosruleprecedence = bitstream;
+      DECODE_U8(buffer + decoded, bitstream, decoded);  //QoS flow identifier (QFI)
+      qosrulesie->segregation = (bitstream >> 6) & 0x01;
+      qosrulesie->qosflowidentifer = bitstream & 0x3f;
+    } else if ((qosrulesie->ruleoperationcode == CREATE_NEW_QOS_RULE)
+        || (qosrulesie->ruleoperationcode
+            == MODIFY_EXISTING_QOS_RULE_AND_ADD_PACKET_FILTERS)
+        || (qosrulesie->ruleoperationcode
+            == MODIFY_EXISTING_QOS_RULE_AND_REPLACE_ALL_PACKET_FILTERS)) {
+      qosrulesie->packetfilterlist
+          .create_modifyandadd_modifyandreplace =
+          (Create_ModifyAndAdd_ModifyAndReplace*) calloc(
+              qosrulesie->numberofpacketfilters,
+              sizeof(Create_ModifyAndAdd_ModifyAndReplace));
+      for (j = 0; j < qosrulesie->numberofpacketfilters; j++) {
+        DECODE_U8(buffer + decoded, bitstream, decoded);
+        qosrulesie->packetfilterlist
+            .create_modifyandadd_modifyandreplace[j].packetfilterdirection =
+            (bitstream >> 4) & 0x03;
+        qosrulesie->packetfilterlist
+            .create_modifyandadd_modifyandreplace[j].packetfilteridentifier =
+            bitstream & 0x0f;
+
+        uint8_t *lenghtofpacketfiltercontents = (uint8_t*) (*(buffer + decoded)
+            - 1);
+        decoded++;
+
+        DECODE_U8(buffer + decoded, bitstream, decoded);
+        qosrulesie->packetfilterlist
+            .create_modifyandadd_modifyandreplace[j].packetfiltercontents
+            .component_type = bitstream;
+
+        if (qosrulesie->packetfilterlist
+            .create_modifyandadd_modifyandreplace[j].packetfiltercontents
+            .component_type != QOS_RULE_MATCHALL_TYPE) {
+          if ((decode_result = decode_bstring(
+              &qosrulesie->packetfilterlist
+                  .create_modifyandadd_modifyandreplace[j].packetfiltercontents
+                  .component_value,
+              lenghtofpacketfiltercontents, buffer + decoded, len - decoded))
+              < 0)
+            return decode_result;
+          else
+            decoded += decode_result;
+        }
+
+      }
+      DECODE_U8(buffer + decoded, bitstream, decoded);
+      qosrulesie->qosruleprecedence = bitstream;
+      DECODE_U8(buffer + decoded, bitstream, decoded);
+      qosrulesie->segregation = (bitstream >> 6) & 0x01;
+      qosrulesie->qosflowidentifer = bitstream & 0x3f;
+    }
+
+    i++;
+    size++;
+  }
+
+  free(qosrulesie);
+  qosrulesie = NULL;
+
+  decoded = pre_decoded_pos;
+
+  qosrules->qosrulesie = (QOSRulesIE*) calloc(size, sizeof(QOSRulesIE));
+
+  i = 0;
+
   while (decoded < qosrules->lengthofqosrulesie) {
     DECODE_U8(buffer + decoded, qosrules->qosrulesie[i].qosruleidentifer,
               decoded);
-//    decoded++;
-//    decoded++;
 
-    DECODE_U16(buffer + decoded, qosrules->qosrulesie[i].LengthofQoSrule, decoded);
+    DECODE_U16(buffer + decoded, qosrules->qosrulesie[i].LengthofQoSrule,
+               decoded);
 
     DECODE_U8(buffer + decoded, bitstream, decoded);
     qosrules->qosrulesie[i].ruleoperationcode = (bitstream >> 5);
@@ -162,9 +256,9 @@ int decode_qos_rules(QOSRules *qosrules, uint8_t iei, uint8_t *buffer,
         qosrules->qosrulesie[i].packetfilterlist.modifyanddelete[j]
             .packetfilteridentifier = bitstream & 0x0f;
       }
-      DECODE_U8(buffer + decoded, bitstream, decoded); //QoS rule precedence
+      DECODE_U8(buffer + decoded, bitstream, decoded);  //QoS rule precedence
       qosrules->qosrulesie[i].qosruleprecedence = bitstream;
-      DECODE_U8(buffer + decoded, bitstream, decoded); //QoS flow identifier (QFI)
+      DECODE_U8(buffer + decoded, bitstream, decoded);  //QoS flow identifier (QFI)
       qosrules->qosrulesie[i].segregation = (bitstream >> 6) & 0x01;
       qosrules->qosrulesie[i].qosflowidentifer = bitstream & 0x3f;
     } else if ((qosrules->qosrulesie[i].ruleoperationcode == CREATE_NEW_QOS_RULE)
@@ -219,6 +313,7 @@ int decode_qos_rules(QOSRules *qosrules, uint8_t iei, uint8_t *buffer,
 
     i++;
   }
+
 
   return decoded;
 }

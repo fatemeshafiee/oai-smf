@@ -282,7 +282,7 @@ void send_pdu_session_update_sm_context_establishment(
   nlohmann::json pdu_session_update_request;
   //encode PDU Session Resource Setup Response Transfer IE
   /*
-   00 03 e0 ac 0a 05 01 00 00 00 01 00 3c
+   00 03 e0 ac 0a 05 01 00 00 00 01 00 06
    */
   size_t buffer_size = 128;
   char *buffer = (char*) calloc(1, buffer_size);
@@ -298,8 +298,8 @@ void send_pdu_session_update_sm_context_establishment(
   ENCODE_U8(buffer + size, 0x00, size);  //00
   ENCODE_U8(buffer + size, 0x00, size);  //00
   ENCODE_U8(buffer + size, 0x01, size);  //01
-  ENCODE_U8(buffer + size, 0x00, size);  //Associated QoS Flow 00 3c
-  ENCODE_U8(buffer + size, 0x3c, size);  //QFI: 60
+  ENCODE_U8(buffer + size, 0x00, size);  //Associated QoS Flow 00 06
+  ENCODE_U8(buffer + size, 0x06, size);  //QFI: 06
 
   std::cout << "Buffer: " << std::endl;
   for (int i = 0; i < size; i++) {
@@ -409,7 +409,7 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
   ENCODE_U8(buffer + size, 0x00, size);  //_5GSMCause
   ENCODE_U8(buffer + size, 0x7a, size);  //QoS Rules IE
   ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules length
-  ENCODE_U8(buffer + size, 0x09, size);  //QoS Rules length
+  ENCODE_U8(buffer + size, 0x12, size);  //QoS Rules length
   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules rule id
   ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules rule length
   ENCODE_U8(buffer + size, 0x06, size);  //QoS Rules rule length
@@ -418,10 +418,17 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules filter 1 length
   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
-  ENCODE_U8(buffer + size, 0x3c, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x06, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x02, size);  //QoS Rules rule id
+  ENCODE_U8(buffer + size, 0x00, size);  //QoS Rules rule length
+  ENCODE_U8(buffer + size, 0x06, size);  //QoS Rules rule length
+  ENCODE_U8(buffer + size, 0x21, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x31, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules filter 1 length
+  ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
+  ENCODE_U8(buffer + size, 0x06, size);  //QoS Rules
 
-//  ENCODE_U8(buffer + size, 0x00, size);  //MaximumNumberOfSupportedPacketFilters
-//  ENCODE_U8(buffer + size, 0x01, size);  //MaximumNumberOfSupportedPacketFilters
 
   std::cout << "Buffer: " << std::endl;
   for (int i = 0; i < size; i++) {
@@ -522,16 +529,7 @@ void send_pdu_session_modification_request_step2(std::string smf_ip_address) {
   ENCODE_U8(buffer + size, 0x00, size);  //Gtp-teid: 01000000
   ENCODE_U8(buffer + size, 0x01, size);  //Gtp-teid: 01000000
   ENCODE_U8(buffer + size, 0x00, size);  //QoSFlowAddorModifyResponseList
-  ENCODE_U8(buffer + size, 0x78, size);  //60: QFI
-
-  /*
-   struct Ngap_UPTransportLayerInformation *dL_NGU_UP_TNLInformation;
-   struct Ngap_UPTransportLayerInformation *uL_NGU_UP_TNLInformation;
-   struct Ngap_QosFlowAddOrModifyResponseList  *qosFlowAddOrModifyResponseList;
-   struct Ngap_QosFlowPerTNLInformationList  *additionalDLQosFlowPerTNLInformation;
-   struct Ngap_QosFlowListWithCause  *qosFlowFailedToAddOrModifyList;
-   struct Ngap_ProtocolExtensionContainer  *iE_Extensions;
-   */
+  ENCODE_U8(buffer + size, 0x0c, size);  //60: QFI
 
   std::cout << "Buffer: " << std::endl;
   for (int i = 0; i < size; i++) {
@@ -1050,7 +1048,7 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
   nlohmann::json service_requests;
   //encode PDU Session Resource Setup Response Transfer IE
   /*
-   00 03 e0 ac 0a 05 01 00 00 00 01 00 3c
+   00 03 e0 ac 0a 05 01 00 00 00 01 00 06
    */
   size_t buffer_size = 128;
   char *buffer = (char*) calloc(1, buffer_size);
@@ -1066,8 +1064,8 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
   ENCODE_U8(buffer + size, 0x00, size);  //00
   ENCODE_U8(buffer + size, 0x00, size);  //00
   ENCODE_U8(buffer + size, 0x01, size);  //01
-  ENCODE_U8(buffer + size, 0x00, size);  //Associated QoS Flow 00 3c
-  ENCODE_U8(buffer + size, 0x3c, size);  //QFI: 60
+  ENCODE_U8(buffer + size, 0x00, size);  //Associated QoS Flow 00 06
+  ENCODE_U8(buffer + size, 0x06, size);  //QFI: 06
 
   std::cout << "Buffer: " << std::endl;
   for (int i = 0; i < size; i++) {
@@ -1265,7 +1263,6 @@ int main(int argc, char *argv[]) {
   usleep(200000);
   send_pdu_session_release_complete(smf_ip_address);
   usleep(200000);
-
   //Release SM context
   //send_release_sm_context_request(smf_ip_address);
   return 0;

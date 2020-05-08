@@ -38,6 +38,7 @@
 #include "itti_msg_n11.hpp"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_n4_restore.hpp"
+#include "itti_msg_nx.hpp"
 #include "msg_pfcp.hpp"
 #include "msg_gtpv2c.hpp"
 #include "uint_generator.hpp"
@@ -111,10 +112,10 @@ class n4_session_restore_procedure : public smf_procedure {
 class session_create_sm_context_procedure : public smf_procedure {
  public:
   explicit session_create_sm_context_procedure(
-      std::shared_ptr<smf_pdu_session> &sppc)
+      std::shared_ptr<smf_pdu_session> &ps)
       :
       smf_procedure(),
-      ppc(sppc),
+      sps(ps),
       n4_triggered(),
       n11_triggered_pending(),
       n11_trigger() {
@@ -122,14 +123,13 @@ class session_create_sm_context_procedure : public smf_procedure {
 
   int run(std::shared_ptr<itti_n11_create_sm_context_request> req,
           std::shared_ptr<itti_n11_create_sm_context_response> resp,
-          std::shared_ptr<smf::smf_context> pc);
+          std::shared_ptr<smf::smf_context> sc);
 
   void handle_itti_msg(itti_n4_session_establishment_response &resp,
-                       std::shared_ptr<smf::smf_context> pc);
+                       std::shared_ptr<smf::smf_context> sc);
 
   std::shared_ptr<itti_n4_session_establishment_request> n4_triggered;
-  std::shared_ptr<smf_pdu_session> ppc;
-  std::shared_ptr<smf::smf_context> pc;
+  std::shared_ptr<smf_pdu_session> sps;
 
   std::shared_ptr<itti_n11_create_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_create_sm_context_response> n11_triggered_pending;
@@ -139,10 +139,10 @@ class session_create_sm_context_procedure : public smf_procedure {
 class session_update_sm_context_procedure : public smf_procedure {
  public:
   explicit session_update_sm_context_procedure(
-      std::shared_ptr<smf_pdu_session> &sppc)
+      std::shared_ptr<smf_pdu_session> &ps)
       :
       smf_procedure(),
-      ppc(sppc),
+      sps(ps),
       n4_triggered(),
       n11_triggered_pending(),
       n11_trigger(),
@@ -162,8 +162,7 @@ class session_update_sm_context_procedure : public smf_procedure {
                        std::shared_ptr<smf::smf_context> sc);
 
   std::shared_ptr<itti_n4_session_modification_request> n4_triggered;
-  std::shared_ptr<smf_pdu_session> ppc;
-  std::shared_ptr<smf::smf_context> pc;
+  std::shared_ptr<smf_pdu_session> sps;
 
   std::shared_ptr<itti_n11_update_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_update_sm_context_response> n11_triggered_pending;
@@ -176,10 +175,10 @@ class session_update_sm_context_procedure : public smf_procedure {
 class session_release_sm_context_procedure : public smf_procedure {
  public:
   explicit session_release_sm_context_procedure(
-      std::shared_ptr<smf_pdu_session> &sps)
+      std::shared_ptr<smf_pdu_session> &ps)
       :
       smf_procedure(),
-      sp(sps),
+      sps(ps),
       n4_triggered(),
       n11_triggered_pending(),
       n11_trigger() {
@@ -198,8 +197,7 @@ class session_release_sm_context_procedure : public smf_procedure {
                        std::shared_ptr<smf::smf_context> sc);
 
   std::shared_ptr<itti_n4_session_deletion_request> n4_triggered;
-  std::shared_ptr<smf_pdu_session> sp;
-  std::shared_ptr<smf::smf_context> sc;
+  std::shared_ptr<smf_pdu_session> sps;
 
   std::shared_ptr<itti_n11_release_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_release_sm_context_response> n11_triggered_pending;
