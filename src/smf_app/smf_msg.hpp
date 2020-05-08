@@ -51,27 +51,43 @@ typedef enum {
   PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE,
   PDU_SESSION_UPDATE_SM_CONTEXT_REQUEST,
   PDU_SESSION_UPDATE_SM_CONTEXT_RESPONSE,
+  PDU_SESSION_RELEASE_SM_CONTEXT_REQUEST,
+  PDU_SESSION_RELEASE_SM_CONTEXT_RESPONSE,
+  PDU_SESSION_MODIFICATION_SMF_REQUESTED,
   PDU_SESSION_MSG_TYPE_MAX
 } pdu_session_msg_type_t;
 
 namespace smf {
 
-//QoS flow created or modified
+//QoS flow to be created/modified/removed
 class qos_flow_context_updated {
  public:
+  qos_flow_context_updated()
+      :
+      cause_value(),
+      qfi(),
+      ul_fteid(),
+      dl_fteid(),
+    //  qos_rule(),
+      qos_profile(),
+      to_be_removed(false) {
+  }
+
   void set_cause(const uint8_t cause);
   void set_qfi(const pfcp::qfi_t &q);
   void set_ul_fteid(const fteid_t &teid);
   void set_dl_fteid(const fteid_t &teid);
-  void set_qos_rule(const QOSRulesIE &rule);
+  void add_qos_rule (const QOSRulesIE &rule);
   void set_qos_profile(const qos_profile_t &profile);
   void set_priority_level(uint8_t p);
   uint8_t cause_value;
   pfcp::qfi_t qfi;
   fteid_t ul_fteid;
   fteid_t dl_fteid;
-  QOSRulesIE qos_rule;
+ // QOSRulesIE qos_rule;
+  std::map <uint8_t, QOSRulesIE> qos_rules;
   qos_profile_t qos_profile;
+  bool to_be_removed;
 };
 
 //---------------------------------------------------------------------------------------
@@ -536,6 +552,84 @@ class pdu_session_update_sm_context_response : public pdu_session_msg {
   std::string n2_sm_info_type;
   std::map<uint8_t, qos_flow_context_updated> qos_flow_context_updateds;
 
+};
+
+class pdu_session_release_sm_context_request : public pdu_session_msg {
+ public:
+  pdu_session_release_sm_context_request()
+      :
+      pdu_session_msg(PDU_SESSION_RELEASE_SM_CONTEXT_REQUEST) {
+
+  }
+  ;
+
+ private:
+
+};
+
+class pdu_session_release_sm_context_response : public pdu_session_msg {
+ public:
+  pdu_session_release_sm_context_response()
+      :
+      pdu_session_msg(PDU_SESSION_RELEASE_SM_CONTEXT_RESPONSE) {
+    m_cause = 0;
+  }
+  ;
+  void set_cause(uint8_t cause);
+  uint8_t get_cause();
+
+ private:
+  uint8_t m_cause;
+};
+
+//---------------------------------------------------------------------------------------
+class pdu_session_modification_network_requested : public pdu_session_msg {
+
+ public:
+  pdu_session_modification_network_requested()
+      :
+      pdu_session_msg(PDU_SESSION_MODIFICATION_SMF_REQUESTED) {
+    m_n1_sm_msg_is_set = false;
+    m_n2_sm_info_is_set = false;
+    m_cause = 0;
+    m_code = { };
+    m_supi = { };
+  }
+  pdu_session_modification_network_requested(supi_t supi, pdu_session_id_t pdi,
+                                             std::string dnn, snssai_t snssai)
+      :
+      pdu_session_msg(PDU_SESSION_MODIFICATION_SMF_REQUESTED, supi, pdi, dnn,
+                      snssai) {
+    m_n1_sm_msg_is_set = false;
+    m_n2_sm_info_is_set = false;
+    m_cause = 0;
+    m_code = { };
+  }
+
+  void set_cause(uint8_t cause);
+  uint8_t get_cause();
+  void set_http_code(Pistache::Http::Code code);
+  Pistache::Http::Code get_http_code();
+  std::string get_n2_sm_information() const;
+  void set_n2_sm_information(std::string const &value);
+  std::string get_n1_sm_message() const;
+  void set_n1_sm_message(std::string const &value);
+  bool n1_sm_msg_is_set() const;
+  bool n2_sm_info_is_set() const;
+  void set_amf_url(std::string const &value);
+  std::string get_amf_url() const;
+  nlohmann::json n1n2_message_transfer_data;  //N1N2MessageTransferReqData from oai::amf::model
+
+ private:
+  std::string m_n1_sm_message;  //N1 SM message after decoding
+  bool m_n1_sm_msg_is_set;
+  std::string m_n2_sm_information;  //N2 SM info after decoding
+  bool m_n2_sm_info_is_set;
+  uint8_t m_cause;
+  Pistache::Http::Code m_code;
+  supi_t m_supi;
+  std::string m_supi_prefix;
+  std::string amf_url;
 };
 
 }

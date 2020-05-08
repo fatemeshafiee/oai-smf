@@ -346,4 +346,86 @@ class itti_n11_n1n2_message_transfer_response_status : public itti_n11_msg {
 
 };
 
+//-----------------------------------------------------------------------------
+class itti_n11_release_sm_context_request : public itti_n11_msg {
+ public:
+  itti_n11_release_sm_context_request(const task_id_t orig,
+                                      const task_id_t dest,
+                                      Pistache::Http::ResponseWriter &response)
+      :
+      itti_n11_msg(N11_SESSION_RELEASE_SM_CONTEXT_REQUEST, orig, dest),
+      http_response(response) {
+  }
+  itti_n11_release_sm_context_request(const task_id_t orig,
+                                      const task_id_t dest,
+                                      Pistache::Http::ResponseWriter &response,
+                                      const std::string id)
+      :
+      itti_n11_msg(N11_SESSION_RELEASE_SM_CONTEXT_REQUEST, orig, dest),
+      http_response(response),
+      scid(id) {
+  }
+  itti_n11_release_sm_context_request(
+      const itti_n11_release_sm_context_request &i)
+      :
+      itti_n11_msg(i),
+      http_response(i.http_response),
+      scid(i.scid),
+      req(i.req) {
+  }
+  itti_n11_release_sm_context_request(
+      const itti_n11_release_sm_context_request &i, const task_id_t orig,
+      const task_id_t dest)
+      :
+      itti_n11_msg(i, orig, dest),
+      http_response(i.http_response),
+      scid(i.scid),
+      req(i.req) {
+  }
+  const char* get_msg_name() {
+    return "N11_SESSION_RELEASE_SM_CONTEXT_REQUEST";
+  }
+  ;
+  smf::pdu_session_release_sm_context_request req;
+  Pistache::Http::ResponseWriter &http_response;
+  std::string scid;  //SM Context ID
+
+};
+
+//-----------------------------------------------------------------------------
+class itti_n11_release_sm_context_response : public itti_n11_msg {
+ public:
+  itti_n11_release_sm_context_response(const task_id_t orig,
+                                      const task_id_t dest,
+                                      Pistache::Http::ResponseWriter &response)
+      :
+      itti_n11_msg(N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE, orig, dest),
+      http_response(response.clone()),
+      res() {
+  }
+  itti_n11_release_sm_context_response(
+      const itti_n11_release_sm_context_response &i)
+      :
+      itti_n11_msg(i),
+      res(i.res),
+      http_response(i.http_response.clone()) {
+  }
+  itti_n11_release_sm_context_response(
+      const itti_n11_release_sm_context_response &i, const task_id_t orig,
+      const task_id_t dest)
+      :
+      itti_n11_msg(i, orig, dest),
+      res(i.res),
+      http_response(i.http_response.clone()) {
+  }
+  const char* get_msg_name() {
+    return "N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE";
+  }
+  ;
+  smf::pdu_session_release_sm_context_response res;
+  Pistache::Http::ResponseWriter http_response;
+
+};
+
+
 #endif /* ITTI_MSG_N11_HPP_INCLUDED_ */

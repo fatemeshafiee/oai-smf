@@ -98,7 +98,7 @@ class IndividualSMContextApi {
   /// <param name="smContextReleaseData">representation of the data to be sent to the SMF when releasing the SM context (optional)</param>
   virtual void release_sm_context(
       const std::string &smContextRef,
-      const SmContextReleaseMessage &smContextReleaseMessage,
+      const SmContextReleaseData &smContextReleaseData,
       Pistache::Http::ResponseWriter &response) = 0;
 
   /// <summary>

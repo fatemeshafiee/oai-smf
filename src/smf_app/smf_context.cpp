@@ -99,69 +99,6 @@ void smf_qos_flow::deallocate_ressources() {
 }
 
 //------------------------------------------------------------------------------
-void smf_qos_flow::get_default_qos_rule(QOSRulesIE &qos_rule) const {
-  Logger::smf_app().info("Get default QoS Rule this QoS Flow (%d)",
-                         (uint8_t) qfi.qfi);
-  for (auto it : qos_rules) {
-    if (it.second.dqrbit == THE_QOS_RULE_IS_DEFAULT_QOS_RULE) {
-      qos_rule = it.second;
-      return;
-    }
-  }
-}
-
-//------------------------------------------------------------------------------
-void smf_qos_flow::get_qos_rule(uint8_t rule_id, QOSRulesIE &qos_rule) const {
-  Logger::smf_app().info("Find QoS Rule with Rule Id %d", (uint8_t) rule_id);
-  if (qos_rules.count(rule_id) > 0) {
-    qos_rule = qos_rules.at(rule_id);
-  }
-}
-
-//------------------------------------------------------------------------------
-void smf_qos_flow::update_qos_rule(QOSRulesIE qos_rule) {
-  Logger::smf_app().info("Update QoS Rule with Rule Id %d",
-                         (uint8_t) qos_rule.qosruleidentifer);
-  uint8_t rule_id = qos_rule.qosruleidentifer;
-  if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
-      and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
-    qos_rules.erase(rule_id);
-    qos_rules.insert(std::pair<uint8_t, QOSRulesIE>(rule_id, qos_rule));
-    //marked to be synchronised with UE
-    qos_rules_to_be_synchronised.push_back(rule_id);
-    Logger::smf_app().trace("smf_qos_flow::update_qos_rule(%d) success",
-                            rule_id);
-  } else {
-    Logger::smf_app().error(
-        "smf_qos_flow::update_qos_rule(%d) failed, invalid Rule Id", rule_id);
-  }
-}
-
-//------------------------------------------------------------------------------
-void smf_qos_flow::add_qos_rule(QOSRulesIE qos_rule) {
-  Logger::smf_app().info("Add QoS Rule with Rule Id %d",
-                         (uint8_t) qos_rule.qosruleidentifer);
-  uint8_t rule_id = qos_rule.qosruleidentifer;
-
-  if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
-      and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
-    if (qos_rules.count(rule_id) > 0) {
-      Logger::smf_app().error(
-          "smf_qos_flow::add_qos_rule(%d) failed, rule existed", rule_id);
-    } else {
-      qos_rules.insert(std::pair<uint8_t, QOSRulesIE>(rule_id, qos_rule));
-      Logger::smf_app().trace("smf_qos_flow::add_qos_rule(%d) success",
-                              rule_id);
-    }
-
-  } else {
-    Logger::smf_app().error(
-        "smf_qos_flow::add_qos_rule(%d) failed, invalid Rule Id", rule_id);
-  }
-
-}
-
-//------------------------------------------------------------------------------
 void smf_pdu_session::set(const paa_t &paa) {
   switch (paa.pdn_type.pdn_type) {
     case PDN_TYPE_E_IPV4:
@@ -285,9 +222,10 @@ bool smf_pdu_session::get_qos_flow(const pfcp::qfi_t &qfi, smf_qos_flow &q) {
   return false;
 }
 
+
 //------------------------------------------------------------------------------
-smf_qos_flow& smf_pdu_session::get_qos_flow(const pfcp::qfi_t &qfi) {
-  return qos_flows[qfi.qfi];
+void smf_pdu_session::set_default_qos_flow(const pfcp::qfi_t &qfi) {
+  default_qfi.qfi = qfi.qfi;
 }
 
 //------------------------------------------------------------------------------
@@ -413,7 +351,7 @@ std::string smf_pdu_session::toString() const {
   if (ipv6)
     s.append("\tPAA IPv6:\t\t\t").append(conv::toString(ipv6_address)).append(
         "\n");
-  s.append("\tDefault EBI:\t\t\t").append(std::to_string(default_bearer.ebi))
+  s.append("\tDefault QFI:\t\t\t").append(std::to_string(default_qfi.qfi))
       .append("\n");
   s.append("\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
 
@@ -452,15 +390,93 @@ pdn_type_t smf_pdu_session::get_pdn_type() const {
 
 //------------------------------------------------------------------------------
 void smf_pdu_session::get_qos_rules_to_be_synchronised(
-    std::vector<QOSRulesIE> &qos_rules) const {
+    std::vector<QOSRulesIE> &rules) const {
+  for (auto it : qos_rules_to_be_synchronised) {
+    if (qos_rules.count(it) > 0)
+      rules.push_back(qos_rules.at(it));
+  }
+}
 
-  //  for (std::map<uint8_t, smf_qos_flow>::iterator it = qos_flows.begin();
-  //      it != qos_flows.end(); ++it) {
-  for (auto it : qos_flows) {
-    for (auto rule : it.second.qos_rules_to_be_synchronised) {
-      QOSRulesIE qos_rule = it.second.qos_rules.at(rule);
-      qos_rules.push_back(qos_rule);
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_qos_rules(pfcp::qfi_t qfi,
+                                    std::vector<QOSRulesIE> &rules) const {
+  for (auto it : qos_rules) {
+    if (it.first == qfi.qfi)
+      rules.push_back(qos_rules.at(it.first));
+  }
+}
+
+//------------------------------------------------------------------------------
+bool smf_pdu_session::get_default_qos_rule(QOSRulesIE &qos_rule) const {
+  Logger::smf_app().info("Get default QoS Rule this PDU Session (ID %d)",
+                         pdu_session_id);
+  for (auto it : qos_rules) {
+    if (it.second.dqrbit == THE_QOS_RULE_IS_DEFAULT_QOS_RULE) {
+      qos_rule = it.second;
+      return true;
     }
+  }
+  return false;
+}
+
+//------------------------------------------------------------------------------
+bool smf_pdu_session::get_qos_rule(uint8_t rule_id,
+                                   QOSRulesIE &qos_rule) const {
+  Logger::smf_app().info("Find QoS Rule with Rule Id %d", (uint8_t) rule_id);
+  if (qos_rules.count(rule_id) > 0) {
+    qos_rule = qos_rules.at(rule_id);
+  }
+  return false;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::update_qos_rule(QOSRulesIE qos_rule) {
+  Logger::smf_app().info("Update QoS Rule with Rule Id %d",
+                         (uint8_t) qos_rule.qosruleidentifer);
+  uint8_t rule_id = qos_rule.qosruleidentifer;
+  if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
+      and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
+
+    if (qos_rules.count(rule_id) > 0) {
+      qos_rules.erase(rule_id);
+      qos_rules.insert(std::pair<uint8_t, QOSRulesIE>(rule_id, qos_rule));
+      //marked to be synchronised with UE
+      qos_rules_to_be_synchronised.push_back(rule_id);
+      Logger::smf_app().trace("smf_pdu_session::update_qos_rule(%d) success",
+                              rule_id);
+    } else {
+      Logger::smf_app().error(
+          "smf_pdu_session::update_qos_rule(%d) failed, rule does not existed",
+          rule_id);
+    }
+
+  } else {
+    Logger::smf_app().error(
+        "smf_pdu_session::update_qos_rule(%d) failed, invalid Rule Id",
+        rule_id);
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::add_qos_rule(QOSRulesIE qos_rule) {
+  Logger::smf_app().info("Add QoS Rule with Rule Id %d",
+                         (uint8_t) qos_rule.qosruleidentifer);
+  uint8_t rule_id = qos_rule.qosruleidentifer;
+
+  if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
+      and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
+    if (qos_rules.count(rule_id) > 0) {
+      Logger::smf_app().error(
+          "smf_pdu_session::add_qos_rule(%d) failed, rule existed", rule_id);
+    } else {
+      qos_rules.insert(std::pair<uint8_t, QOSRulesIE>(rule_id, qos_rule));
+      Logger::smf_app().trace("smf_pdu_session::add_qos_rule(%d) success",
+                              rule_id);
+    }
+
+  } else {
+    Logger::smf_app().error(
+        "smf_pdu_session::add_qos_rule(%d) failed, invalid Rule Id", rule_id);
   }
 
 }
@@ -620,7 +636,7 @@ void smf_context::get_default_qos_rule(QOSRulesIE &qos_rule,
   Logger::smf_app().info("Get default QoS rule (PDU session type %d)",
                          pdu_session_type);
   //see section 9.11.4.13 @ 3GPP TS 24.501 and section 5.7.1.4 @ 3GPP TS 23.501
-  qos_rule.qosruleidentifer = 0x01;
+  qos_rule.qosruleidentifer = 0x01;  //be updated later on
   qos_rule.ruleoperationcode = CREATE_NEW_QOS_RULE;
   qos_rule.dqrbit = THE_QOS_RULE_IS_DEFAULT_QOS_RULE;
   if ((pdu_session_type == PDU_SESSION_TYPE_E_IPV4)
@@ -638,16 +654,16 @@ void smf_context::get_default_qos_rule(QOSRulesIE &qos_rule,
     qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0]
         .packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
     //qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_value = bfromcstralloc(2, "\0");
-    qos_rule.qosruleprecedence = 1;
+    qos_rule.qosruleprecedence = 0xff;
   }
 
   if (pdu_session_type == PDU_SESSION_TYPE_E_UNSTRUCTURED) {
     qos_rule.numberofpacketfilters = 0;
-    qos_rule.qosruleprecedence = 1;
+    qos_rule.qosruleprecedence = 0xff;
   }
 
   qos_rule.segregation = SEGREGATION_NOT_REQUESTED;
-  qos_rule.qosflowidentifer = 60;  //TODO: default value
+  qos_rule.qosflowidentifer = 6;  //TODO: default value
 
   Logger::smf_app().debug(
       "Default QoSRules: %x %x %x %x %x %x %x %x %x",
@@ -668,53 +684,54 @@ void smf_context::get_default_qos_rule(QOSRulesIE &qos_rule,
 //------------------------------------------------------------------------------
 void smf_context::get_default_qos_flow_description(
     QOSFlowDescriptionsContents &qos_flow_description,
-    uint8_t pdu_session_type) {
+    uint8_t pdu_session_type, const pfcp::qfi_t &qfi) {
   //TODO, update according to PDU Session type
   Logger::smf_app().info(
       "Get default QoS Flow Description (PDU session type %d)",
       pdu_session_type);
-  qos_flow_description.qfi = 60;
+  qos_flow_description.qfi = qfi.qfi;
   qos_flow_description.operationcode = CREATE_NEW_QOS_FLOW_DESCRIPTION;
   qos_flow_description.e = PARAMETERS_LIST_IS_INCLUDED;
-  qos_flow_description.numberofparameters = 3;
+  qos_flow_description.numberofparameters = 1;
   qos_flow_description.parameterslist = (ParametersList*) calloc(
       3, sizeof(ParametersList));
   qos_flow_description.parameterslist[0].parameteridentifier =
   PARAMETER_IDENTIFIER_5QI;
-  qos_flow_description.parameterslist[0].parametercontents._5qi = 60;  //TODO: ??
-  qos_flow_description.parameterslist[1].parameteridentifier =
-  PARAMETER_IDENTIFIER_GFBR_UPLINK;
-  qos_flow_description.parameterslist[1].parametercontents
-      .gfbrormfbr_uplinkordownlink.uint =
-  GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
-  qos_flow_description.parameterslist[1].parametercontents
-      .gfbrormfbr_uplinkordownlink.value = 0x10;
-  qos_flow_description.parameterslist[2].parameteridentifier =
-  PARAMETER_IDENTIFIER_GFBR_DOWNLINK;
-  qos_flow_description.parameterslist[2].parametercontents
-      .gfbrormfbr_uplinkordownlink.uint =
-  GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
-  qos_flow_description.parameterslist[2].parametercontents
-      .gfbrormfbr_uplinkordownlink.value = 0x10;
+  qos_flow_description.parameterslist[0].parametercontents._5qi = qfi.qfi;
+  /*
+   qos_flow_description.parameterslist[1].parameteridentifier =
+   PARAMETER_IDENTIFIER_GFBR_UPLINK;
+   qos_flow_description.parameterslist[1].parametercontents
+   .gfbrormfbr_uplinkordownlink.uint =
+   GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+   qos_flow_description.parameterslist[1].parametercontents
+   .gfbrormfbr_uplinkordownlink.value = 0x10;
+   qos_flow_description.parameterslist[2].parameteridentifier =
+   PARAMETER_IDENTIFIER_GFBR_DOWNLINK;
+   qos_flow_description.parameterslist[2].parametercontents
+   .gfbrormfbr_uplinkordownlink.uint =
+   GFBRORMFBR_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1MBPS;
+   qos_flow_description.parameterslist[2].parametercontents
+   .gfbrormfbr_uplinkordownlink.value = 0x10;
+   */
 
   Logger::smf_app().debug(
-      "Default Qos Flow Description: %x %x %x %x %x %x %x %x %x %x %x %x",
-      qos_flow_description.qfi,
-      qos_flow_description.operationcode,
-      qos_flow_description.e,
-      qos_flow_description.numberofparameters,
+      "Default Qos Flow Description: %x %x %x %x %x %x",
+      qos_flow_description.qfi, qos_flow_description.operationcode,
+      qos_flow_description.e, qos_flow_description.numberofparameters,
       qos_flow_description.parameterslist[0].parameteridentifier,
-      qos_flow_description.parameterslist[0].parametercontents._5qi,
-      qos_flow_description.parameterslist[1].parameteridentifier,
-      qos_flow_description.parameterslist[1].parametercontents
-          .gfbrormfbr_uplinkordownlink.uint,
-      qos_flow_description.parameterslist[1].parametercontents
-          .gfbrormfbr_uplinkordownlink.value,
-      qos_flow_description.parameterslist[2].parameteridentifier,
-      qos_flow_description.parameterslist[2].parametercontents
-          .gfbrormfbr_uplinkordownlink.uint,
-      qos_flow_description.parameterslist[2].parametercontents
-          .gfbrormfbr_uplinkordownlink.value);
+      qos_flow_description.parameterslist[0].parametercontents._5qi
+      /*      qos_flow_description.parameterslist[1].parameteridentifier,
+       qos_flow_description.parameterslist[1].parametercontents
+       .gfbrormfbr_uplinkordownlink.uint,
+       qos_flow_description.parameterslist[1].parametercontents
+       .gfbrormfbr_uplinkordownlink.value,
+       qos_flow_description.parameterslist[2].parameteridentifier,
+       qos_flow_description.parameterslist[2].parametercontents
+       .gfbrormfbr_uplinkordownlink.uint,
+       qos_flow_description.parameterslist[2].parametercontents
+       .gfbrormfbr_uplinkordownlink.value
+       */);
 }
 
 //------------------------------------------------------------------------------
@@ -1033,7 +1050,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   switch (sp->pdn_type.pdn_type) {
     case PDN_TYPE_E_IPV4: {
       if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) {  //use SM NAS signalling
-        //use NAS signalling
         //static or dynamic address allocation
         bool paa_res = false;  //how to define static or dynamic
         //depend of subscription information: staticIpAddress in DNN Configuration
@@ -1151,7 +1167,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           "PDU Session Establishment Request: Create SM Context Request procedure failed");
       remove_procedure(proc);
       //Set cause to error to trigger PDU session establishment reject (step 10)
-      //sm_context_resp->res.set_cause(UNKNOWN_ERROR);
+      sm_context_resp->res.set_cause(REMOTE_PEER_NOT_RESPONDING);  //TODO: check cause
     }
 
   } else {  //if request is rejected
@@ -1184,16 +1200,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     }
     //clear the created context??
     //TODO:
-
-    /*
-     for (auto it : sm_context_resp->res.bearer_contexts_to_be_created) {
-     gtpv2c::bearer_context_created_within_create_session_response bcc = {};
-     cause_t bcc_cause = {.cause_value = NO_RESOURCES_AVAILABLE, .pce = 0, .bce = 0, .cs = 0};
-     bcc.set(it.eps_bearer_id);
-     bcc.set(bcc_cause);
-     //sm_context_resp->res.add_bearer_context_created(bcc);
-     }
-     */
 
     //Create PDU Session Establishment Reject and embedded in Namf_Communication_N1N2MessageTransfer Request
     Logger::smf_app().debug("Create PDU Session Establishment Reject");
@@ -1391,10 +1397,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         uint16_t length_of_rule_ie = decoded_nas_msg.plain.sm
             .pdu_session_modification_request.qosrules.lengthofqosrulesie;
 
-        QOSRulesIE *qos_rules_ie = (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
-        qos_rules_ie = decoded_nas_msg.plain.sm.pdu_session_modification_request
-            .qosrules.qosrulesie;
-
         pfcp::qfi_t generated_qfi = { .qfi = 0 };
 
         //QOSFlowDescriptions
@@ -1416,7 +1418,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           for (int i = 0; i < number_of_flow_descriptions; i++) {
             if (qos_flow_description[i].qfi == NO_QOS_FLOW_IDENTIFIER_ASSIGNED) {
               //TODO: generate new QFI
-              generated_qfi.qfi = 77;        //hardcoded for now
+              generated_qfi.qfi = (uint8_t) 77;        //hardcoded for now
               qos_flow_description_content = qos_flow_description[i];
               qos_flow_description_content.qfi = generated_qfi.qfi;
               break;
@@ -1427,29 +1429,32 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         int i = 0;
         int length_of_rule = 0;
         while (length_of_rule_ie > 0) {
+          QOSRulesIE qos_rules_ie = { };
+          qos_rules_ie = decoded_nas_msg.plain.sm
+              .pdu_session_modification_request.qosrules.qosrulesie[i];
+
           uint8_t rule_id = { 0 };
-          QOSRulesIE qos_rule = { };
           pfcp::qfi_t qfi = { };
           smf_qos_flow qos_flow = { };
 
-          length_of_rule = qos_rules_ie[i].LengthofQoSrule;
+          length_of_rule = qos_rules_ie.LengthofQoSrule;
 
           //If UE requested a new GBR flow
-          if ((qos_rules_ie[i].ruleoperationcode == CREATE_NEW_QOS_RULE)
-              and (qos_rules_ie[i].segregation == SEGREGATION_REQUESTED)) {
+          if ((qos_rules_ie.ruleoperationcode == CREATE_NEW_QOS_RULE)
+              and (qos_rules_ie.segregation == SEGREGATION_REQUESTED)) {
             //Add a new QoS Flow
-            if (qos_rules_ie[i].qosruleidentifer
-                == NO_QOS_RULE_IDENTIFIER_ASSIGNED) {
+            if (qos_rules_ie.qosruleidentifer == NO_QOS_RULE_IDENTIFIER_ASSIGNED) {
               //Generate a new QoS rule
               sp.get()->generate_qos_rule_id(rule_id);
               Logger::smf_app().info("Create a new QoS rule (rule Id %d)",
                                      rule_id);
-              qos_rules_ie[i].qosruleidentifer = rule_id;
+              qos_rules_ie.qosruleidentifer = rule_id;
             }
+
+            sp.get()->add_qos_rule(qos_rules_ie);
 
             qfi.qfi = generated_qfi.qfi;
             qos_flow.qfi = generated_qfi.qfi;
-            qos_flow.add_qos_rule(qos_rules_ie[i]);
 
             //set qos_profile from qos_flow_description_content
             qos_flow.qos_profile = { };
@@ -1495,8 +1500,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               }
             }
 
+            Logger::smf_app().debug("Add new QoS Flow with new QRI");
             //mark this rule to be synchronised with the UE
-            qos_flow.update_qos_rule(qos_rules_ie[i]);
+            sp.get()->update_qos_rule(qos_rules_ie);
             //Add new QoS flow
             sp.get()->add_qos_flow(qos_flow);
 
@@ -1508,24 +1514,26 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             qcu.set_qos_profile(qos_flow.qos_profile);
             sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
 
-          } else { //update existing QRI
-            qfi.qfi = qos_rules_ie[i].qosflowidentifer;
-            sp.get()->get_qos_flow(qfi, qos_flow);
-            qos_flow.update_qos_rule(qos_rules_ie[i]);
-            //update QoS flow
-            sp.get()->add_qos_flow(qos_flow);
+          } else {  //update existing QRI
+            Logger::smf_app().debug("Update existing QRI");
+            qfi.qfi = qos_rules_ie.qosflowidentifer;
+            if (sp.get()->get_qos_flow(qfi, qos_flow)) {
+              sp.get()->update_qos_rule(qos_rules_ie);
+              //update QoS flow
+              sp.get()->add_qos_flow(qos_flow);
 
-            //ADD QoS Flow to be updated
-            qos_flow_context_updated qcu = { };
-            qcu.set_qfi(pfcp::qfi_t(qos_flow.qfi));
-            //qcu.set_ul_fteid(flow.ul_fteid);
-            //qcu.set_dl_fteid(flow.dl_fteid);
-            qcu.set_qos_profile(qos_flow.qos_profile);
-            sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
-
+              //ADD QoS Flow to be updated
+              qos_flow_context_updated qcu = { };
+              qcu.set_qfi(pfcp::qfi_t(qos_flow.qfi));
+              qcu.set_ul_fteid(qos_flow.ul_fteid);
+              qcu.set_dl_fteid(qos_flow.dl_fteid);
+              qcu.set_qos_profile(qos_flow.qos_profile);
+              sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
+            }
           }
           length_of_rule_ie -= (length_of_rule + 3);  // 2 for Length of QoS rules IE and 1 for QoS rule identifier
 
+          i++;
         }
 
         //TODO: MappedEPSBearerContexts
@@ -1584,19 +1592,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591,
             sm_context_req_msg.get_pdu_session_id());
 
+        sm_context_resp_pending->session_procedure_type = procedure_type;
         //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
 
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
-
-        free_wrapper((void**) &qos_rules_ie);
         free_wrapper((void**) &qos_flow_description);
       }
         break;
@@ -1605,7 +1603,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //PDU Session Modification Command Complete
       case PDU_SESSION_MODIFICATION_COMPLETE: {
         //PDU Session Modification procedure (Section 4.3.3.2@3GPP TS 23.502)
-        //TODO: should be verified since mentioned PDU_SESSION_MODIFICATION_COMMAND ACK in spec (see Step 11, section 4.3.3.2@3GPP TS 23.502)
         Logger::smf_app().debug("PDU_SESSION_MODIFICATION_COMPLETE");
 
         procedure_type =
@@ -1625,18 +1622,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //stop T3591
         itti_inst->timer_remove(sp.get()->timer_T3591);
 
-        //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
         sm_context_resp_pending->session_procedure_type = procedure_type;
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
+        //don't need to create a procedure to update UPF
       }
         break;
 
@@ -1674,7 +1661,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           sp.get()->set_pdu_session_status(
               pdu_session_status_e::PDU_SESSION_INACTIVE);
           //TODO: Release locally the existing PDU Session (see section 6.3.2.5@3GPP TS 24.501)
-        } else {
+        } else if (sp.get()->get_pdu_session_status()
+            == pdu_session_status_e::PDU_SESSION_MODIFICATION_PENDING) {
           //Update PDU Session status -> ACTIVE
           sp.get()->set_pdu_session_status(
               pdu_session_status_e::PDU_SESSION_ACTIVE);
@@ -1683,19 +1671,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //stop T3591
         itti_inst->timer_remove(sp.get()->timer_T3591);
 
-        //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
         sm_context_resp_pending->session_procedure_type = procedure_type;
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
-
+        //don't need to create a procedure to update UPF
       }
         break;
 
@@ -1756,57 +1733,11 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //Release the resources related to this PDU Session (in Procedure)
 
-        //find DNN context
-        /*       std::shared_ptr<dnn_context> sd = { };
-         if ((!find_dnn_context(sm_context_req_msg.get_snssai(),
-         sm_context_req_msg.get_dnn(), sd))
-         or (nullptr == sd.get())) {
-         Logger::smf_app().warn(
-         "Could not find the context for this PDU session");
-         //create PDU Session Release Reject and send to UE
-         problem_details.setCause(
-         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
-         smContextUpdateError.setError(problem_details);
-         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-         smContextUpdateError.setN1SmMsg(refToBinaryData);
-         smf_n1_n2_inst.create_n1_sm_container(
-         sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
-         cause_value_5gsm_e::CAUSE_111_PROTOCOL_ERROR_UNSPECIFIED);
-         smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-         smf_n11_inst->send_pdu_session_update_sm_context_response(
-         smreq->http_response, smContextUpdateError,
-         Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
-         return;
-         }
-
-         //find PDU Session
-         std::shared_ptr<smf_pdu_session> sp;
-         if ((!sd.get()->find_pdu_session(
-         sm_context_req_msg.get_pdu_session_id(), sp))
-         or (nullptr == sp.get())) {
-         Logger::smf_app().warn(
-         "Could not find the context for this PDU session");
-         //create PDU Session Release Reject and send to UE
-         problem_details.setCause(
-         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
-         smContextUpdateError.setError(problem_details);
-         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-         smContextUpdateError.setN1SmMsg(refToBinaryData);
-         smf_n1_n2_inst.create_n1_sm_container(
-         sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
-         cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY);
-         smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-         smf_n11_inst->send_pdu_session_update_sm_context_response(
-         smreq->http_response, smContextUpdateError,
-         Pistache::Http::Code::Not_Found, n1_sm_msg_hex);
-         return;
-         }
-         */
         //get the associated QoS flows: to be used for PFCP Session Modification procedure
         std::vector<smf_qos_flow> qos_flows;
         sp.get()->get_qos_flows(qos_flows);
         for (auto i : qos_flows) {
-          sm_context_req_msg.add_qfi(i.qfi.qfi);
+          smreq->req.add_qfi(i.qfi.qfi);
         }
 
         //need to update UPF accordingly
@@ -1848,23 +1779,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //Stop timer T3592
         itti_inst->timer_remove(sp.get()->timer_T3592);
 
-        //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
         sm_context_resp_pending->session_procedure_type = procedure_type;
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
+        //don't need to create a procedure to update UPF
 
         //TODO: SMF invokes Nsmf_PDUSession_SMContextStatusNotify to notify AMF that the SM context for this PDU Session is released
         //TODO: if dynamic PCC applied, SMF invokes an SM Policy Association Termination
         //TODO: SMF unsubscribes from Session Management Subscription data changes notification from UDM by invoking Numd_SDM_Unsubscribe
-
         if (sd.get()->get_number_pdu_sessions() == 0) {
           Logger::smf_app().debug(
               "Unsubscribe from Session Management Subscription data changes notification from UDM");
@@ -1933,7 +1853,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           problem_details.setCause(
               pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
           smContextUpdateError.setError(problem_details);
-          //TODO: need to verify with/without N1 SM
           refToBinaryData.setContentId(N1_SM_CONTENT_ID);
           smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
@@ -1982,7 +1901,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         Logger::smf_app().debug("uPTransportLayerInformation IP Addr %s",
                                 conv::toString(dl_teid.ipv4_address).c_str());
 
-        sm_context_req_msg.set_dl_fteid(dl_teid);
+        smreq->req.set_dl_fteid(dl_teid);
 
         for (int i = 0;
             i
@@ -1991,12 +1910,13 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           pfcp::qfi_t qfi(
               (uint8_t) (decoded_msg->dLQosFlowPerTNLInformation
                   .associatedQosFlowList.list.array[i])->qosFlowIdentifier);
-          sm_context_req_msg.add_qfi(qfi);
+          smreq->req.add_qfi(qfi);
           Logger::smf_app().debug(
               "QoSFlowPerTNLInformation, AssociatedQosFlowList, QFI %d",
               (decoded_msg->dLQosFlowPerTNLInformation.associatedQosFlowList
                   .list.array[i])->qosFlowIdentifier);
         }
+
         //need to update UPF accordingly
         update_upf = true;
       }
@@ -2006,7 +1926,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       case n2_sm_info_type_e::PDU_RES_MOD_RSP: {
         Logger::smf_app().info("PDU_RES_MOD_RSP");
         Logger::smf_app().info(
-            "PDU Session Modification, processing N2 SM Information");
+            "PDU Session Modification Procedure, processing N2 SM Information");
 
         procedure_type =
             session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2;
@@ -2016,53 +1936,53 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             std::make_shared<Ngap_PDUSessionResourceModifyResponseTransfer_t>();
         int decode_status = smf_n1_n2_inst.decode_n2_sm_information(
             decoded_msg, n2_sm_information);
+
         if (decode_status == RETURNerror) {
-          Logger::smf_api_server().warn("asn_decode failed");
-          //send error to AMF
           Logger::smf_app().warn(
               "Decode N2 SM (Ngap_PDUSessionResourceModifyResponseTransfer) failed!");
           problem_details.setCause(
               pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
           smContextUpdateError.setError(problem_details);
-          //TODO: need to verify with/without N1 SM
-          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-          smContextUpdateError.setN1SmMsg(refToBinaryData);
-          //PDU Session Establishment Reject
-          //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
-          smf_n1_n2_inst.create_n1_sm_container(
-              sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
-          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
           smf_n11_inst->send_pdu_session_update_sm_context_response(
               smreq->http_response, smContextUpdateError,
-              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+              Pistache::Http::Code::Forbidden);
           return;
-
         }
 
-        //if dL_NGU_UP_TNLInformation is included, it shall be considered as the new DL transfort layer addr for the PDU session (should be verified)
+        //see section 8.2.3 (PDU Session Resource Modify) @3GPP TS 38.413
+        //if dL_NGU_UP_TNLInformation is included, it shall be considered as the new DL transport layer addr for the PDU session (should be verified)
+        //TODO: may include uL_NGU_UP_TNLInformation (mapping between each new DL transport layer address and the corresponding UL transport layer address)
         fteid_t dl_teid;
         memcpy(
-            &dl_teid.ipv4_address,
+            &dl_teid.teid_gre_key,
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID
                 .buf,
             sizeof(struct in_addr));
         memcpy(
-            &dl_teid.teid_gre_key,
+            &dl_teid.ipv4_address,
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel
                 ->transportLayerAddress.buf,
             4);
-        sm_context_req_msg.set_dl_fteid(dl_teid);
+        smreq->req.set_dl_fteid(dl_teid);
+
+        Logger::smf_app().debug("gTP_TEID " "0x%" PRIx32 " ",
+                                htonl(dl_teid.teid_gre_key));
+        Logger::smf_app().debug("uPTransportLayerInformation IP Addr %s",
+                                conv::toString(dl_teid.ipv4_address).c_str());
+
         //list of Qos Flows which have been successfully setup or modified
-        for (int i = 0;
-            i < decoded_msg->qosFlowAddOrModifyResponseList->list.count; i++) {
-          sm_context_req_msg.add_qfi(
-              (decoded_msg->qosFlowAddOrModifyResponseList->list.array[i])
-                  ->qosFlowIdentifier);
+        if (decoded_msg->qosFlowAddOrModifyResponseList) {
+          for (int i = 0;
+              i < decoded_msg->qosFlowAddOrModifyResponseList->list.count;
+              i++) {
+            smreq->req.add_qfi(
+                (decoded_msg->qosFlowAddOrModifyResponseList->list.array[i])
+                    ->qosFlowIdentifier);
+          }
         }
-        //TODO:
-        //list of QoS Flows which have failed to be modified
-        //qosFlowFailedToAddOrModifyList
+
+        //TODO: list of QoS Flows which have failed to be modified, qosFlowFailedToAddOrModifyList
+        //TODO: additionalDLQosFlowPerTNLInformation
 
         //need to update UPF accordingly
         update_upf = true;
@@ -2091,8 +2011,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         int decode_status = smf_n1_n2_inst.decode_n2_sm_information(
             decoded_msg, n2_sm_information);
         if (decode_status == RETURNerror) {
-          Logger::smf_api_server().warn("asn_decode failed");
-          //send error to AMF
           Logger::smf_app().warn(
               "Decode N2 SM (Ngap_PDUSessionResourceReleaseResponseTransfer) failed!");
           problem_details.setCause(
@@ -2104,19 +2022,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           return;
         }
 
-        //don't need to create a procedure to update UPF
-        //Send ITTI to N11 to send PDUSession_UpdateSMContext Response to AMF
-        //No need to create N1/N2 Container
         sm_context_resp_pending->session_procedure_type = procedure_type;
-        Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
-                               sm_context_resp_pending->get_msg_name());
-        int ret = itti_inst->send_msg(sm_context_resp_pending);
-        if (RETURNok != ret) {
-          Logger::smf_app().error(
-              "Could not send ITTI message %s to task TASK_SMF_N11",
-              sm_context_resp_pending->get_msg_name());
-        }
-
+        //don't need to create a procedure to update UPF
       }
         break;
 
@@ -2144,7 +2051,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     std::vector<smf_qos_flow> qos_flows = { };
     sp.get()->get_qos_flows(qos_flows);
     for (auto i : qos_flows) {
-      sm_context_req_msg.add_qfi(i.qfi.qfi);
+      smreq->req.add_qfi(i.qfi.qfi);
     }
     //need update UPF
     update_upf = true;
@@ -2166,7 +2073,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     std::vector<smf_qos_flow> qos_flows = { };
     sp.get()->get_qos_flows(qos_flows);
     for (auto i : qos_flows) {
-      sm_context_req_msg.add_qfi(i.qfi.qfi);
+      smreq->req.add_qfi(i.qfi.qfi);
     }
     //need update UPF
     update_upf = true;
@@ -2179,7 +2086,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
     proc->session_procedure_type = procedure_type;
 
-    smreq->req = sm_context_req_msg;
     insert_procedure(sproc);
     if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
       // error !
@@ -2238,6 +2144,15 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       return;
 
     }
+  } else {
+    Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
+                           sm_context_resp_pending->get_msg_name());
+    int ret = itti_inst->send_msg(sm_context_resp_pending);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_N11",
+          sm_context_resp_pending->get_msg_name());
+    }
   }
 
   //TODO, Step 6
@@ -2247,6 +2162,99 @@ void smf_context::handle_pdu_session_update_sm_context_request(
    see step 18, section 4.3.2.2.1@3GPP TS 23.502)
    */
 
+}
+
+//-------------------------------------------------------------------------------------
+void smf_context::handle_pdu_session_release_sm_context_request(
+    std::shared_ptr<itti_n11_release_sm_context_request> smreq) {
+  Logger::smf_app().info(
+      "Handle a PDU Session Release SM Context Request message from AMF");
+
+  bool update_upf = false;
+
+  //Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and pdu_session must be existed
+  std::shared_ptr<dnn_context> sd = { };
+  std::shared_ptr<smf_pdu_session> sp = { };
+  bool find_dnn = find_dnn_context(smreq->req.get_snssai(),
+                                   smreq->req.get_dnn(), sd);
+  bool find_pdu = false;
+  if (find_dnn) {
+    find_pdu = sd.get()->find_pdu_session(smreq->req.get_pdu_session_id(), sp);
+  }
+  if (!find_dnn or !find_pdu) {
+    //error, send reply to AMF with error code "Context Not Found"
+    Logger::smf_app().warn("DNN or PDU session context does not exist!");
+    smf_n11_inst->send_pdu_session_release_sm_context_response(
+        smreq->http_response, Pistache::Http::Code::Not_Found);
+    return;
+  }
+
+  //we need to store HttpResponse and session-related information to be used when receiving the response from UPF
+  itti_n11_release_sm_context_response *n11_sm_context_resp =
+      new itti_n11_release_sm_context_response(TASK_SMF_APP, TASK_SMF_N11,
+                                               smreq->http_response);
+
+  std::shared_ptr<itti_n11_release_sm_context_response> sm_context_resp_pending =
+      std::shared_ptr<itti_n11_release_sm_context_response>(
+          n11_sm_context_resp);
+
+  n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
+  n11_sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
+  n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
+  n11_sm_context_resp->res.set_pdu_session_id(smreq->req.get_pdu_session_id());
+  n11_sm_context_resp->res.set_snssai(smreq->req.get_snssai());
+  n11_sm_context_resp->res.set_dnn(smreq->req.get_dnn());
+
+  session_release_sm_context_procedure *proc =
+      new session_release_sm_context_procedure(sp);
+  std::shared_ptr<smf_procedure> sproc = std::shared_ptr<smf_procedure>(proc);
+
+  insert_procedure(sproc);
+  if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
+    // error !
+    Logger::smf_app().info("PDU Release SM Context Request procedure failed");
+  }
+
+}
+
+//------------------------------------------------------------------------------
+void smf_context::handle_pdu_session_modification_network_requested(
+    std::shared_ptr<itti_nx_trigger_pdu_session_modification> itti_msg) {
+  Logger::smf_app().info(
+      "Handle a PDU Session Modification Request (SMF-Requested)");
+
+  pdu_session_modification_network_requested sm_context_msg = itti_msg->msg;
+  smf_n1_n2 smf_n1_n2_inst = { };
+  oai::smf_server::model::SmContextUpdateError smContextUpdateError = { };
+  oai::smf_server::model::SmContextUpdatedData smContextUpdatedData = { };
+
+  oai::smf_server::model::ProblemDetails problem_details = { };
+  oai::smf_server::model::RefToBinaryData refToBinaryData = { };
+  std::string n1_sm_msg, n1_sm_msg_hex;
+  std::string n2_sm_info, n2_sm_info_hex;
+
+  //Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and pdu_session must be existed
+  std::shared_ptr<dnn_context> sd = { };
+  std::shared_ptr<smf_pdu_session> sp = { };
+  bool find_dnn = find_dnn_context(sm_context_msg.get_snssai(),
+                                   sm_context_msg.get_dnn(), sd);
+  bool find_pdu = false;
+  if (find_dnn) {
+    find_pdu = sd.get()->find_pdu_session(sm_context_msg.get_pdu_session_id(),
+                                          sp);
+  }
+  if (!find_dnn or !find_pdu) {
+    //error, send reply to AMF with error code "Context Not Found"
+    Logger::smf_app().warn("DNN or PDU session context does not exist!");
+    return;
+  }
+
+  //prepare
+
+  // Step 1. verify if dnn context, pdu context exist
+
+  // Step 2. prepare information for N1N2MessageTransfer to send to AMF
+  // Step 3. Send itti to N11 for sending N1N2MessageTranfer
 }
 
 //------------------------------------------------------------------------------
@@ -2348,35 +2356,6 @@ bool dnn_context::find_pdu_session(
   }
   return false;
 }
-
-/*
- //------------------------------------------------------------------------------
- void dnn_context::create_or_update_qos_rule(QOSRulesIE &qos_rule,
- pfcp::qfi_t qfi,
- pdu_session_id_t pdu_session_id) {
- //TODO, update according to PDU Session type
- Logger::smf_app().info("Create or Update QoS Rule for PDU Session Id %d",
- pdu_session_id);
- uint8_t rule_id = { };
-
- //get smd_pdu_session
- std::shared_ptr<smf_pdu_session> sp = { };
- bool find_pdn = find_pdu_session(pdu_session_id, sp);
-
- if (nullptr == sp.get()) {
- Logger::smf_app().warn(
- "Could not retrieve the corresponding SMF PDU Session context!");
- }
-
- smf_qos_flow qos_flow = { };
- sp.get()->get_qos_flow(qfi, qos_flow);
- qos_flow.update_qos_rule(qos_rule);
-
- //update QoS flow
- sp.get()->add_qos_flow(qos_flow);
-
- }
- */
 
 //------------------------------------------------------------------------------
 void dnn_context::insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp) {

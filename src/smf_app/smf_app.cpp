@@ -542,7 +542,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
     smf_n1_n2_inst.create_n1_sm_container(smreq->req,
-                                          PDU_SESSION_ESTABLISHMENT_REJECT,
+    PDU_SESSION_ESTABLISHMENT_REJECT,
                                           n1_sm_message, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
     smf_n11_inst->send_pdu_session_create_sm_context_response(
@@ -845,15 +845,108 @@ void smf_app::handle_pdu_session_update_sm_context_request(
 }
 
 //------------------------------------------------------------------------------
-void smf_app::handle_network_requested_pdu_session_modification() {
-  std::shared_ptr<itti_nx_modify_pdu_session_request_network_requested> itti_msg =
-      std::make_shared<itti_nx_modify_pdu_session_request_network_requested>(
+void smf_app::handle_pdu_session_release_sm_context_request(
+    std::shared_ptr<itti_n11_release_sm_context_request> smreq) {
+  //TODO:
+
+  //handle PDU Session Release SM Context Request
+  Logger::smf_app().info(
+      "Handle a PDU Session Release SM Context Request from an AMF");
+
+  //Step 1. get supi, dnn, nssai, pdu_session id from sm_context
+  //SM Context ID - uint32_t in our case
+  scid_t scid = { };
+  try {
+    scid = std::stoi(smreq->scid);
+  } catch (const std::exception &err) {
+    Logger::smf_app().warn(
+        "Received a PDU Session Release SM Context Request, couldn't retrieve the corresponding SMF context, ignore message!");
+
+    smf_n11_inst->send_pdu_session_release_sm_context_response(
+        smreq->http_response, Pistache::Http::Code::Not_Found);
+    return;
+  }
+
+  std::shared_ptr<smf_context_ref> scf = { };
+
+  if (is_scid_2_smf_context(scid)) {
+    scf = scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+    smf_n11_inst->send_pdu_session_release_sm_context_response(
+        smreq->http_response, Pistache::Http::Code::Not_Found);
+    return;
+  }
+
+  //Step 2. store supi, dnn, nssai  in itti_n11_update_sm_context_request to be processed later on
+  supi64_t supi64 = smf_supi_to_u64(scf.get()->supi);
+  smreq->req.set_supi(scf.get()->supi);
+  smreq->req.set_dnn(scf.get()->dnn);
+  smreq->req.set_snssai(scf.get()->nssai);
+  smreq->req.set_pdu_session_id(scf.get()->pdu_session_id);
+
+  //Step 2. find the smf context
+  std::shared_ptr<smf_context> sc = { };
+  if (is_supi_2_smf_context(supi64)) {
+    sc = supi_2_smf_context(supi64);
+    Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
+                            supi64);
+  } else {
+    //send PDUSession_SMReleaseContext Response to AMF
+    Logger::smf_app().warn(
+        "Received PDU Session Release SM Context Request with Supi " SUPI_64_FMT "couldn't retrieve the corresponding SMF context, ignore message!",
+        supi64);
+
+    smf_n11_inst->send_pdu_session_release_sm_context_response(
+        smreq->http_response, Pistache::Http::Code::Not_Found);
+    return;
+  }
+
+  //get dnn context
+  std::shared_ptr<dnn_context> sd = { };
+
+  if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
+    if (nullptr == sd.get()) {
+      //Error, DNN context doesn't exist, send PDUSession_SMUpdateContext Response to AMF
+      Logger::smf_app().warn(
+          "Received PDU Session Release SM Context Request, couldn't retrieve the corresponding SMF context, ignore message!");
+
+      smf_n11_inst->send_pdu_session_release_sm_context_response(
+          smreq->http_response, Pistache::Http::Code::Not_Found);
+      return;
+    }
+  }
+
+  //Step 3. handle the message in smf_context
+  sc.get()->handle_pdu_session_release_sm_context_request(smreq);
+
+}
+
+//------------------------------------------------------------------------------
+void smf_app::trigger_pdu_session_modification () {
+  //SMF-requested session modification, see section 4.3.3.2@3GPP TS 23.502
+  //The SMF may decide to modify PDU Session. This procedure also may be
+  //triggered based on locally configured policy or triggered from the (R)AN (see clause 4.2.6 and clause 4.9.1).
+  //It may also be triggered if the UP connection is activated (as described in Service Request procedure) and the
+  //SMF has marked that the status of one or more QoS Flows are deleted in the 5GC but not synchronized with
+  //the UE yet.
+
+
+  std::shared_ptr<itti_nx_trigger_pdu_session_modification> itti_msg =
+      std::make_shared<itti_nx_trigger_pdu_session_modification>(
           TASK_SMF_N11, TASK_SMF_APP);
 
+  //step 1. collect the necessary information
   supi_t supi = { };
   std::string dnn;
   pdu_session_id_t pdu_session_id = { 0 };
-  snssai_t nssai = { };
+  snssai_t snssai = { };
+
+  itti_msg->msg.set_supi(supi);
+  itti_msg->msg.set_dnn(dnn);
+  itti_msg->msg.set_pdu_session_id(pdu_session_id);
+  itti_msg->msg.set_snssai(snssai);
 
   supi64_t supi64 = smf_supi_to_u64(supi);
 
@@ -865,20 +958,13 @@ void smf_app::handle_network_requested_pdu_session_modification() {
     Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
                             supi64);
   } else {
+    Logger::smf_app().debug("SMF context with SUPI " SUPI_64_FMT "does not exist",
+                                supi64);
     return;
   }
 
-  //get dnn context
-  std::shared_ptr<dnn_context> sd = { };
-
-  if (!sc.get()->find_dnn_context(nssai, dnn, sd)) {
-    if (nullptr == sd.get()) {
-      return;
-    }
-  }
-
   // handle the message in smf_context
-  //  sc.get()->handle_network_requested_pdu_session_modification(itti_msg);
+    sc.get()->handle_pdu_session_modification_network_requested(itti_msg);
 
 }
 

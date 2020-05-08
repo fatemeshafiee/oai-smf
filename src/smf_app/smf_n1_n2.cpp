@@ -57,6 +57,9 @@ extern "C" {
 #include "Ngap_PDUSessionResourceReleaseCommandTransfer.h"
 #include "dynamic_memory_check.h"
 #include "Ngap_PDUSessionResourceReleaseResponseTransfer.h"
+#include "Ngap_QosFlowAddOrModifyResponseItem.h"
+#include "Ngap_QosFlowAddOrModifyResponseList.h"
+
 }
 
 #define BUF_LEN 512
@@ -175,41 +178,17 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //authorized QoS rules of the PDU session: QOSRules (Section 6.2.5@3GPP TS 24.501)
       //(Section 6.4.1.3@3GPP TS 24.501 V16.1.0) Make sure that the number of the packet filters used in the authorized QoS rules of the PDU Session does not
       // exceed the maximum number of packet filters supported by the UE for the PDU session
-      sm_msg->pdu_session_establishment_accept.qosrules.lengthofqosrulesie = 1;
+      sm_msg->pdu_session_establishment_accept.qosrules.lengthofqosrulesie = qos_flow.qos_rules.size();
       sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie =
-          (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .qosruleidentifer = qos_flow.qos_rule.qosruleidentifer;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .ruleoperationcode = qos_flow.qos_rule.ruleoperationcode;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0].dqrbit =
-          qos_flow.qos_rule.dqrbit;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .numberofpacketfilters = qos_flow.qos_rule.numberofpacketfilters;
-      //1st rule
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace =
-          (Create_ModifyAndAdd_ModifyAndReplace*) calloc(
-              1, sizeof(Create_ModifyAndAdd_ModifyAndReplace));
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfilterdirection = qos_flow.qos_rule.packetfilterlist
-          .create_modifyandadd_modifyandreplace->packetfilterdirection;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfilteridentifier = qos_flow.qos_rule.packetfilterlist
-          .create_modifyandadd_modifyandreplace->packetfilteridentifier;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfiltercontents.component_type = qos_flow.qos_rule
-          .packetfilterlist.create_modifyandadd_modifyandreplace
-          ->packetfiltercontents.component_type;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .qosruleprecedence = qos_flow.qos_rule.qosruleprecedence;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .segregation = qos_flow.qos_rule.segregation;
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-          .qosflowidentifer = qos_flow.qfi.qfi;
+          (QOSRulesIE*) calloc(qos_flow.qos_rules.size(), sizeof(QOSRulesIE));
+
+      int i = 0;
+      for (auto rule: qos_flow.qos_rules) {
+        sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[i]
+            .qosruleidentifer = rule.second.qosruleidentifer;
+        memcpy(&sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[i], &rule.second, sizeof(QOSRulesIE));
+        i++;
+      }
 
       //SessionAMBR
       //TODO: get from subscription DB
@@ -313,7 +292,8 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
         sc.get()->get_default_qos_flow_description(
             sm_msg->pdu_session_establishment_accept.qosflowdescriptions
                 .qosflowdescriptionscontents[0],
-            sm_context_res.get_pdu_session_type());
+            sm_context_res.get_pdu_session_type(),
+            qos_flow.qfi);
       }
 
       //ExtendedProtocolConfigurationOptions
@@ -501,7 +481,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
         return;
       }
 
-      //Fill the content of PDU Session Establishment Request message with hardcoded values (to be completed)
       //PTI
       sm_msg->header.procedure_transaction_identity = sm_context_res.get_pti()
           .procedure_transaction_id;
@@ -529,10 +508,9 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       sm_msg->pdu_session_modification_command.qosrules.lengthofqosrulesie =
           qos_rules.size();
       sm_msg->pdu_session_modification_command.qosrules.qosrulesie =
-          (QOSRulesIE*) calloc(1, sizeof(QOSRulesIE));
+          (QOSRulesIE*) calloc(qos_rules.size(), sizeof(QOSRulesIE));
       for (int i = 0; i < qos_rules.size(); i++) {
-        sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i] =
-            qos_rules[i];
+        memcpy (&sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i], &qos_rules[i], sizeof(QOSRulesIE));
       }
 
       //MappedEPSBearerContexts
@@ -552,7 +530,9 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
         sc.get()->get_default_qos_flow_description(
             sm_msg->pdu_session_modification_command.qosflowdescriptions
                 .qosflowdescriptionscontents[0],
-            sm_context_res.get_pdu_session_type());
+            sm_context_res.get_pdu_session_type(),
+            qos_rules[0].qosflowidentifer
+            );
       }
 
       //Encode NAS message
@@ -569,14 +549,10 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
 
       //free memory
       free_wrapper(
-          (void**) &sm_msg->pdu_session_modification_command.qosrules.qosrulesie[0]
-              .packetfilterlist.create_modifyandadd_modifyandreplace);
-      free_wrapper(
           (void**) &sm_msg->pdu_session_modification_command.qosrules.qosrulesie);
       free_wrapper(
           (void**) &sm_msg->pdu_session_modification_command.qosflowdescriptions
               .qosflowdescriptionscontents);
-
     }
       break;
 
@@ -1330,6 +1306,105 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
     }
       break;
 
+
+    case n2_sm_info_type_e::PDU_RES_MOD_RSP: {
+      //PDU Session Resource Modify Response Transfer IE
+      //for testing purpose
+
+      Logger::smf_app().debug(
+          "[Create N2 SM Information] NGAP PDU Session Resource Modify Response Transfer");
+
+      //struct Ngap_UPTransportLayerInformation *dL_NGU_UP_TNLInformation;  /* OPTIONAL */
+      //struct Ngap_UPTransportLayerInformation *uL_NGU_UP_TNLInformation;  /* OPTIONAL */
+      //struct Ngap_QosFlowAddOrModifyResponseList  *qosFlowAddOrModifyResponseList;  /* OPTIONAL */
+      //struct Ngap_QosFlowPerTNLInformationList  *additionalDLQosFlowPerTNLInformation;  /* OPTIONAL */
+     // struct Ngap_QosFlowListWithCause  *qosFlowFailedToAddOrModifyList;  /* OPTIONAL */
+
+
+
+      Ngap_PDUSessionResourceModifyResponseTransfer_t *ngap_resource_response_transfer =
+          nullptr;
+      ngap_resource_response_transfer =
+          (Ngap_PDUSessionResourceModifyResponseTransfer_t*) calloc(
+              1, sizeof(Ngap_PDUSessionResourceModifyResponseTransfer_t));
+
+
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation = (Ngap_UPTransportLayerInformation *) calloc (1, sizeof (Ngap_UPTransportLayerInformation));
+
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->present = Ngap_UPTransportLayerInformation_PR_gTPTunnel;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel = (Ngap_GTPTunnel_t*) calloc(1, sizeof(Ngap_GTPTunnel_t));
+
+
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->transportLayerAddress
+          .size = 4;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->transportLayerAddress
+          .buf = (uint8_t*) calloc(4, sizeof(uint8_t));
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->transportLayerAddress
+          .buf[0] = 0xc0;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->transportLayerAddress
+          .buf[1] = 0xa8;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->transportLayerAddress
+          .buf[2] = 0xf8;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->transportLayerAddress
+          .buf[3] = 0x9f;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->transportLayerAddress
+          .bits_unused = 0;
+
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID.size = 4;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID.buf =
+          (uint8_t*) calloc(4, sizeof(uint8_t));
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID.buf[0] = 0x00;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID.buf[1] = 0x00;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID.buf[2] = 0x00;
+      ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID.buf[3] = 0x01;
+
+
+      ngap_resource_response_transfer->qosFlowAddOrModifyResponseList = (Ngap_QosFlowAddOrModifyResponseList_t*) calloc(1, sizeof (Ngap_QosFlowAddOrModifyResponseList_t));
+      Ngap_QosFlowAddOrModifyResponseItem  *qosFlowAddOrModifyResponseItem = nullptr;
+      qosFlowAddOrModifyResponseItem = (Ngap_QosFlowAddOrModifyResponseItem*) calloc (1, sizeof(Ngap_QosFlowAddOrModifyResponseItem));
+      qosFlowAddOrModifyResponseItem->qosFlowIdentifier = 60;
+
+      ASN_SEQUENCE_ADD(
+          &ngap_resource_response_transfer->qosFlowAddOrModifyResponseList->list,
+          qosFlowAddOrModifyResponseItem);
+
+      //encode
+      size_t buffer_size = 512;
+      char *buffer = (char*) calloc(1, buffer_size);
+
+      asn_enc_rval_t er = aper_encode_to_buffer(
+          &asn_DEF_Ngap_PDUSessionResourceModifyResponseTransfer, nullptr,
+          ngap_resource_response_transfer, (void*) buffer, buffer_size);
+      if (er.encoded < 0) {
+        Logger::smf_app().warn(
+            "[Create N2 SM Information] NGAP PDU Session Resource Modify Response Transfer encode failed, er.encoded: %d",
+            er.encoded);
+        return;
+      }
+
+      Logger::smf_app().debug("N2 SM buffer data: ");
+      for (int i = 0; i < er.encoded; i++)
+        printf("%02x ", (char) buffer[i]);
+      Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+      std::string ngap_message((char*) buffer, er.encoded);
+      ngap_msg_str = ngap_message;
+
+      //free memory
+     free_wrapper(
+          (void**) &ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->transportLayerAddress
+          .buf);
+      free_wrapper(
+          (void**) &ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID.buf);
+      free_wrapper(
+          (void**) &ngap_resource_response_transfer->dL_NGU_UP_TNLInformation->choice.gTPTunnel);
+      free_wrapper((void**) &qosFlowAddOrModifyResponseItem);
+      free_wrapper((void**) &ngap_resource_response_transfer->qosFlowAddOrModifyResponseList);
+      free_wrapper((void**) &ngap_resource_response_transfer);
+      free_wrapper((void**) &buffer);
+    }
+      break;
+
+
       //PDU Session Resource Release Command Transfer
     case n2_sm_info_type_e::PDU_RES_REL_CMD: {
       //PDU Session Resource Release Command Transfer IE
@@ -1513,7 +1588,7 @@ int smf_n1_n2::decode_n2_sm_information(
   free_wrapper((void**) &data);
 
   if (rc.code != RC_OK) {
-    Logger::smf_api_server().warn("asn_decode failed with code %d", rc.code);
+    Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
     return RETURNerror ;
   }
   return RETURNok ;
@@ -1542,7 +1617,7 @@ int smf_n1_n2::decode_n2_sm_information(
   free_wrapper((void**) &data);
 
   if (rc.code != RC_OK) {
-    Logger::smf_api_server().warn("asn_decode failed with code %d", rc.code);
+    Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
     return RETURNerror ;
   }
@@ -1572,7 +1647,7 @@ int smf_n1_n2::decode_n2_sm_information(
   free_wrapper((void**) &data);
 
   if (rc.code != RC_OK) {
-    Logger::smf_api_server().warn("asn_decode failed with code %d", rc.code);
+    Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
     return RETURNerror ;
   }

@@ -55,29 +55,31 @@ class itti_nx_msg : public itti_msg {
 };
 
 //-----------------------------------------------------------------------------
-class itti_nx_modify_pdu_session_request_network_requested : public itti_nx_msg {
+class itti_nx_trigger_pdu_session_modification : public itti_nx_msg {
  public:
-  itti_nx_modify_pdu_session_request_network_requested(const task_id_t orig,
-                                                       const task_id_t dest)
+  itti_nx_trigger_pdu_session_modification(const task_id_t orig,
+                                           const task_id_t dest)
       :
-      itti_nx_msg(NX_SESSION_MODIFICATION_REQUEST_NETWORK_REQUESTED, orig, dest) {
+      itti_nx_msg(NX_TRIGGER_SESSION_MODIFICATION, orig, dest) {
   }
-  itti_nx_modify_pdu_session_request_network_requested(
-      const itti_nx_modify_pdu_session_request_network_requested &i)
+  itti_nx_trigger_pdu_session_modification(
+      const itti_nx_trigger_pdu_session_modification &i)
       :
-      itti_nx_msg(i) {
+      itti_nx_msg(i),
+      msg(i.msg) {
   }
-  itti_nx_modify_pdu_session_request_network_requested(
-      const itti_nx_modify_pdu_session_request_network_requested &i,
-      const task_id_t orig, const task_id_t dest)
+  itti_nx_trigger_pdu_session_modification(
+      const itti_nx_trigger_pdu_session_modification &i, const task_id_t orig,
+      const task_id_t dest)
       :
-      itti_nx_msg(i, orig, dest) {
+      itti_nx_msg(i, orig, dest),
+      msg() {
   }
   const char* get_msg_name() {
-    return "NX_SESSION_MODIFICATION_REQUEST_NETWORK_REQUESTED";
+    return "NX_TRIGGER_PDU_SESSION_MODIFICATION";
   }
   ;
-//  smf::pdu_session_create_sm_context_request req;
+  smf::pdu_session_modification_network_requested msg;
 };
 
 #endif /* ITTI_MSG_NX_HPP_INCLUDED_ */
