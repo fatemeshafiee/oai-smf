@@ -324,9 +324,9 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       nas_msg_str = n1Message;
 
       //free memory
-      free_wrapper(
-          (void**) &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
-              .packetfilterlist.create_modifyandadd_modifyandreplace);
+//      free_wrapper(
+//          (void**) &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[0]
+//              .packetfilterlist.create_modifyandadd_modifyandreplace);
       free_wrapper(
           (void**) &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie);
       free_wrapper(
@@ -507,9 +507,13 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
 
       sm_msg->pdu_session_modification_command.qosrules.lengthofqosrulesie =
           qos_rules.size();
+
       sm_msg->pdu_session_modification_command.qosrules.qosrulesie =
           (QOSRulesIE*) calloc(qos_rules.size(), sizeof(QOSRulesIE));
       for (int i = 0; i < qos_rules.size(); i++) {
+        Logger::smf_app().debug("QoS Rule to be updated (Id %d)",
+                                qos_rules[i].qosruleidentifer);
+        //sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i] = qos_rules[i];
         memcpy (&sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i], &qos_rules[i], sizeof(QOSRulesIE));
       }
 

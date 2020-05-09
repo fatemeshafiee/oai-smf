@@ -222,7 +222,6 @@ bool smf_pdu_session::get_qos_flow(const pfcp::qfi_t &qfi, smf_qos_flow &q) {
   return false;
 }
 
-
 //------------------------------------------------------------------------------
 void smf_pdu_session::set_default_qos_flow(const pfcp::qfi_t &qfi) {
   default_qfi.qfi = qfi.qfi;
@@ -400,8 +399,10 @@ void smf_pdu_session::get_qos_rules_to_be_synchronised(
 //------------------------------------------------------------------------------
 void smf_pdu_session::get_qos_rules(pfcp::qfi_t qfi,
                                     std::vector<QOSRulesIE> &rules) const {
+  Logger::smf_app().info("Get QoS Rules associated with Flow with QFI %d",
+                         qfi.qfi);
   for (auto it : qos_rules) {
-    if (it.first == qfi.qfi)
+    if (it.second.qosflowidentifer == qfi.qfi)
       rules.push_back(qos_rules.at(it.first));
   }
 }
@@ -453,6 +454,29 @@ void smf_pdu_session::update_qos_rule(QOSRulesIE qos_rule) {
   } else {
     Logger::smf_app().error(
         "smf_pdu_session::update_qos_rule(%d) failed, invalid Rule Id",
+        rule_id);
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::mark_qos_rule_to_be_synchronised(uint8_t rule_id) {
+
+  if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
+      and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
+    if (qos_rules.count(rule_id) > 0) {
+      qos_rules_to_be_synchronised.push_back(rule_id);
+      Logger::smf_app().trace(
+          "smf_pdu_session::mark_qos_rule_to_be_synchronised(%d) success",
+          rule_id);
+    } else {
+      Logger::smf_app().error(
+          "smf_pdu_session::mark_qos_rule_to_be_synchronised(%d) failed, rule does not existed",
+          rule_id);
+    }
+
+  } else {
+    Logger::smf_app().error(
+        "smf_pdu_session::mark_qos_rule_to_be_synchronised(%d) failed, invalid Rule Id",
         rule_id);
   }
 }
@@ -683,8 +707,8 @@ void smf_context::get_default_qos_rule(QOSRulesIE &qos_rule,
 
 //------------------------------------------------------------------------------
 void smf_context::get_default_qos_flow_description(
-    QOSFlowDescriptionsContents &qos_flow_description,
-    uint8_t pdu_session_type, const pfcp::qfi_t &qfi) {
+    QOSFlowDescriptionsContents &qos_flow_description, uint8_t pdu_session_type,
+    const pfcp::qfi_t &qfi) {
   //TODO, update according to PDU Session type
   Logger::smf_app().info(
       "Get default QoS Flow Description (PDU session type %d)",
@@ -2223,7 +2247,6 @@ void smf_context::handle_pdu_session_modification_network_requested(
   Logger::smf_app().info(
       "Handle a PDU Session Modification Request (SMF-Requested)");
 
-  pdu_session_modification_network_requested sm_context_msg = itti_msg->msg;
   smf_n1_n2 smf_n1_n2_inst = { };
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = { };
   oai::smf_server::model::SmContextUpdatedData smContextUpdatedData = { };
@@ -2236,25 +2259,113 @@ void smf_context::handle_pdu_session_modification_network_requested(
   //Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and pdu_session must be existed
   std::shared_ptr<dnn_context> sd = { };
   std::shared_ptr<smf_pdu_session> sp = { };
-  bool find_dnn = find_dnn_context(sm_context_msg.get_snssai(),
-                                   sm_context_msg.get_dnn(), sd);
+  bool find_dnn = find_dnn_context(itti_msg->msg.get_snssai(),
+                                   itti_msg->msg.get_dnn(), sd);
   bool find_pdu = false;
   if (find_dnn) {
-    find_pdu = sd.get()->find_pdu_session(sm_context_msg.get_pdu_session_id(),
+    find_pdu = sd.get()->find_pdu_session(itti_msg->msg.get_pdu_session_id(),
                                           sp);
   }
   if (!find_dnn or !find_pdu) {
-    //error, send reply to AMF with error code "Context Not Found"
     Logger::smf_app().warn("DNN or PDU session context does not exist!");
     return;
   }
 
-  //prepare
+  std::vector<pfcp::qfi_t> list_qfis_to_be_updated;
+  itti_msg->msg.get_qfis(list_qfis_to_be_updated);
 
-  // Step 1. verify if dnn context, pdu context exist
+  //add QFI(s), QoS Profile(s), QoS Rules
+  for (auto it : list_qfis_to_be_updated) {
+    Logger::smf_app().debug("QFI to be updated: %d", it.qfi);
+
+    std::vector<QOSRulesIE> qos_rules;
+    sp.get()->get_qos_rules(it, qos_rules);
+    //mark QoS rule to be updated for all rules associated with the QFIs
+    for (auto r : qos_rules) {
+      sp.get()->mark_qos_rule_to_be_synchronised(r.qosruleidentifer);
+    }
+
+    //list of QFIs and QoS profiles
+    smf_qos_flow flow = { };
+    if (sp.get()->get_qos_flow(it, flow)) {
+      qos_flow_context_updated qcu = { };
+      qcu.set_qfi(flow.qfi);
+      qcu.set_qos_profile(flow.qos_profile);
+      qcu.set_ul_fteid(flow.ul_fteid);
+      qcu.set_dl_fteid(flow.dl_fteid);
+      itti_msg->msg.add_qos_flow_context_updated(qcu);
+    }
+  }
 
   // Step 2. prepare information for N1N2MessageTransfer to send to AMF
-  // Step 3. Send itti to N11 for sending N1N2MessageTranfer
+  Logger::smf_app().debug(
+      "Prepare N1N2MessageTransfer message and send to AMF");
+
+  //N1: PDU_SESSION_MODIFICATION_COMMAND
+  smf_n1_n2_inst.create_n1_sm_container(itti_msg->msg,
+  PDU_SESSION_MODIFICATION_COMMAND,
+                                        n1_sm_msg,
+                                        cause_value_5gsm_e::CAUSE_0_UNKNOWN);
+  smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+  itti_msg->msg.set_n1_sm_message(n1_sm_msg_hex);
+
+  //N2: PDU Session Resource Modify Request Transfer
+  smf_n1_n2_inst.create_n2_sm_information(itti_msg->msg, 1,
+                                          n2_sm_info_type_e::PDU_RES_MOD_REQ,
+                                          n2_sm_info);
+  smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+  itti_msg->msg.set_n2_sm_information(n2_sm_info_hex);
+
+  //Fill N1N2MesasgeTransferRequestData
+  //get supi and put into URL
+  supi_t supi = itti_msg->msg.get_supi();
+  std::string supi_str = itti_msg->msg.get_supi_prefix() + "-"
+      + smf_supi_to_string(supi);
+  std::string url = std::string(
+      inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) + ":"
+      + std::to_string(smf_cfg.amf_addr.port)
+      + fmt::format(NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
+                    supi_str.c_str());
+  itti_msg->msg.set_amf_url(url);
+  Logger::smf_n11().debug(
+      "N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
+
+  //Fill the json part
+  //N1SM
+  itti_msg->msg.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageClass"] =
+  N1N2_MESSAGE_CLASS;
+  itti_msg->msg.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
+  N1_SM_CONTENT_ID;  //NAS part
+  //N2SM
+  itti_msg->msg.n1n2_message_transfer_data["n2InfoContainer"]["n2InformationClass"] =
+  N1N2_MESSAGE_CLASS;
+  itti_msg->msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+      itti_msg->msg.get_pdu_session_id();
+  //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
+  itti_msg->msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+      "PDU_RES_MOD_REQ";  //NGAP message type
+  itti_msg->msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
+  N2_SM_CONTENT_ID;  //NGAP part
+  itti_msg->msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
+      itti_msg->msg.get_snssai().sST;
+  itti_msg->msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
+      itti_msg->msg.get_snssai().sD;
+  itti_msg->msg.n1n2_message_transfer_data["n2InfoContainer"]["ranInfo"] = "SM";
+
+  itti_msg->msg.n1n2_message_transfer_data["pduSessionId"] = itti_msg->msg
+      .get_pdu_session_id();
+
+  //Step 3. Send ITTI message to N11 interface to trigger N1N2MessageTransfer towards AMFs
+  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
+                         itti_msg->get_msg_name());
+
+  int ret = itti_inst->send_msg(itti_msg);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N11",
+        itti_msg->get_msg_name());
+  }
+
 }
 
 //------------------------------------------------------------------------------

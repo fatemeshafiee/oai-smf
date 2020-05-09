@@ -182,6 +182,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   void generate_qos_rule_id(uint8_t &rule_id);
   void release_qos_rule_id(const uint8_t &rule_id);
+  void mark_qos_rule_to_be_synchronised(uint8_t rule_id);
   void get_qos_rules_to_be_synchronised(std::vector<QOSRulesIE> &qos_rules) const;
 
   /*
@@ -229,7 +230,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   // QFI <-> QoS Flow
   std::map<uint8_t, smf_qos_flow> qos_flows;
   pfcp::qfi_t default_qfi;
-  // QFI <-> QoS Rules
+  // QRI <-> QoS Rules
   std::map<uint8_t, QOSRulesIE> qos_rules;
   std::vector<uint8_t> qos_rules_to_be_synchronised;
   std::vector<uint8_t> qos_rules_to_be_removed;

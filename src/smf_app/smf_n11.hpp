@@ -62,6 +62,14 @@ class smf_n11 {
       std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
 
   /*
+   * Send N1N2 Message Transfer Request to AMF
+   * @param [std::shared_ptr<itti_nx_trigger_pdu_session_modification>] sm_context_res: Content of message to be sent
+   *
+   */
+  void send_n1n2_message_transfer_request(
+      std::shared_ptr<itti_nx_trigger_pdu_session_modification> sm_context_res);
+
+  /*
    * Send update session response to AMF
    * @param [std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res] sm_context_res
    *

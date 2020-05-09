@@ -97,6 +97,11 @@ void smf_n11_task(void *args_p) {
             std::static_pointer_cast<
                 itti_n11_modify_session_request_smf_requested>(shared_msg));
         break;
+      case NX_TRIGGER_SESSION_MODIFICATION:
+        smf_n11_inst->send_n1n2_message_transfer_request(
+            std::static_pointer_cast<itti_nx_trigger_pdu_session_modification>(
+                shared_msg));
+        break;
 
       case TERMINATE:
         if (itti_msg_terminate *terminate =
@@ -348,6 +353,92 @@ void smf_n11::send_n1n2_message_transfer_request(
    }
    */
 }
+
+
+
+//------------------------------------------------------------------------------
+void smf_n11::send_n1n2_message_transfer_request(
+    std::shared_ptr<itti_nx_trigger_pdu_session_modification> sm_context_res) {
+  //Transfer N1/N2 message via AMF by using N_amf_Communication_N1N2MessageTransfer (see TS29518_Namf_Communication.yaml)
+
+  Logger::smf_n11().debug("Send Communication_N1N2MessageTransfer to AMF");
+
+  smf_n1_n2 smf_n1_n2_inst = { };
+  std::string n1_message = sm_context_res->msg.get_n1_sm_message();
+  std::string json_part = sm_context_res->msg.n1n2_message_transfer_data.dump();
+  std::string boundary = "----Boundary";
+  std::string body;
+
+  //add N2 content if available
+  auto n2_sm_found = sm_context_res->msg.n1n2_message_transfer_data.count(
+      "n2InfoContainer");
+  if (n2_sm_found > 0) {
+    std::string n2_message = sm_context_res->msg.get_n2_sm_information();
+    //prepare the body content for Curl
+    create_multipart_related_content(body, json_part, boundary, n1_message,
+                                     n2_message);
+  } else {
+    //prepare the body content for Curl
+    create_multipart_related_content(body, json_part, boundary, n1_message,
+                                     multipart_related_content_part_e::NAS);
+  }
+
+  unsigned int str_len = body.length();
+  char *data = (char*) malloc(str_len + 1);
+  memset(data, 0, str_len + 1);
+  memcpy((void*) data, (void*) body.c_str(), str_len);
+
+  curl_global_init(CURL_GLOBAL_ALL);
+  CURL *curl = curl_easy_init();
+
+  if (curl) {
+    CURLcode res = { };
+    struct curl_slist *headers = nullptr;
+    //headers = curl_slist_append(headers, "charsets: utf-8");
+    headers = curl_slist_append(
+        headers, "content-type: multipart/related; boundary=----Boundary");  //TODO: update Boundary
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     sm_context_res->msg.get_amf_url().c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+
+    // Response information.
+    long httpCode = { 0 };
+    std::unique_ptr<std::string> httpData(new std::string());
+
+    // Hook up data handling function
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, body.length());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    res = curl_easy_perform(curl);
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    //get cause from the response
+    json response_data = { };
+    try {
+      response_data = json::parse(*httpData.get());
+    } catch (json::exception &e) {
+      Logger::smf_n11().warn("Could not get the cause from the response");
+      //Set the default Cause
+      //response_data["cause"] = "504 Gateway Timeout";
+    }
+    Logger::smf_n11().debug("Response from AMF, Http Code: %d",
+                            httpCode);
+
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+  free_wrapper((void**) &data);
+
+}
+
 
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_update_sm_context_response(

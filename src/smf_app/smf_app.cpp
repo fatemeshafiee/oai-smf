@@ -924,7 +924,7 @@ void smf_app::handle_pdu_session_release_sm_context_request(
 }
 
 //------------------------------------------------------------------------------
-void smf_app::trigger_pdu_session_modification () {
+void smf_app::trigger_pdu_session_modification() {
   //SMF-requested session modification, see section 4.3.3.2@3GPP TS 23.502
   //The SMF may decide to modify PDU Session. This procedure also may be
   //triggered based on locally configured policy or triggered from the (R)AN (see clause 4.2.6 and clause 4.9.1).
@@ -932,22 +932,27 @@ void smf_app::trigger_pdu_session_modification () {
   //SMF has marked that the status of one or more QoS Flows are deleted in the 5GC but not synchronized with
   //the UE yet.
 
-
   std::shared_ptr<itti_nx_trigger_pdu_session_modification> itti_msg =
-      std::make_shared<itti_nx_trigger_pdu_session_modification>(
-          TASK_SMF_N11, TASK_SMF_APP);
+      std::make_shared<itti_nx_trigger_pdu_session_modification>(TASK_SMF_APP,
+                                                                 TASK_SMF_N11);
 
-  //step 1. collect the necessary information
+  //step 1. collect the necessary information- hardcoded
   supi_t supi = { };
-  std::string dnn;
-  pdu_session_id_t pdu_session_id = { 0 };
+  std::string dnn("default");
+  pdu_session_id_t pdu_session_id = { 1 };
   snssai_t snssai = { };
+  pfcp::qfi_t qfi = { };
+  qfi.qfi = 7;
+  std::string supi_str("200000000000001");
+  smf_string_to_supi(&supi, supi_str.c_str());
+  snssai.sST = 222;
+  snssai.sD = "0000D4";
 
   itti_msg->msg.set_supi(supi);
   itti_msg->msg.set_dnn(dnn);
   itti_msg->msg.set_pdu_session_id(pdu_session_id);
   itti_msg->msg.set_snssai(snssai);
-
+  itti_msg->msg.add_qfi(qfi);
   supi64_t supi64 = smf_supi_to_u64(supi);
 
   //Step 2. find the smf context
@@ -958,14 +963,13 @@ void smf_app::trigger_pdu_session_modification () {
     Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
                             supi64);
   } else {
-    Logger::smf_app().debug("SMF context with SUPI " SUPI_64_FMT "does not exist",
-                                supi64);
+    Logger::smf_app().debug(
+        "SMF context with SUPI " SUPI_64_FMT "does not exist", supi64);
     return;
   }
 
   // handle the message in smf_context
-    sc.get()->handle_pdu_session_modification_network_requested(itti_msg);
-
+  sc.get()->handle_pdu_session_modification_network_requested(itti_msg);
 }
 
 //------------------------------------------------------------------------------
