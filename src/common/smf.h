@@ -189,5 +189,7 @@ static const std::vector<std::string> multipart_related_content_part_e2str = {
 
 //for CURL
 #define AMF_CURL_TIMEOUT_MS 100L
+#define UDM_CURL_TIMEOUT_MS 100L
+#define UDM_NUMBER_RETRIES 3
 
 #endif

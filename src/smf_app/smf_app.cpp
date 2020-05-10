@@ -1019,6 +1019,16 @@ bool smf_app::is_scid_2_smf_context(const scid_t &scid) const {
 }
 
 //------------------------------------------------------------------------------
+bool smf_app::scid_2_smf_context(const scid_t &scid, std::shared_ptr<smf_context_ref> & scf) const {
+  std::shared_lock lock(m_scid2smf_context);
+  if ( scid2smf_context.count(scid) > 0 ) {
+    scf = scid2smf_context.at(scid);
+    return true;
+  }
+  return false;
+}
+
+//------------------------------------------------------------------------------
 bool smf_app::use_local_configuration_subscription_data(
     const std::string &dnn_selection_mode) {
   //TODO: should be implemented
@@ -1069,7 +1079,7 @@ void smf_app::convert_string_2_hex(std::string &input_str,
 }
 
 //---------------------------------------------------------------------------------------------
-unsigned char* smf_app::format_string_as_hex(std::string str) {
+unsigned char* smf_app::format_string_as_hex(std::string &str) {
   unsigned int str_len = str.length();
   char *data = (char*) malloc(str_len + 1);
   memset(data, 0, str_len + 1);
@@ -1094,8 +1104,8 @@ unsigned char* smf_app::format_string_as_hex(std::string str) {
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::update_pdu_session_status(const scid_t scid,
-                                        const pdu_session_status_e status) {
+void smf_app::update_pdu_session_status(const scid_t &scid,
+                                        const pdu_session_status_e &status) {
   Logger::smf_app().info("Update PDU Session Status");
 
   //get the smf context
@@ -1150,8 +1160,8 @@ void smf_app::update_pdu_session_status(const scid_t scid,
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::update_pdu_session_upCnx_state(const scid_t scid,
-                                             const upCnx_state_e state) {
+void smf_app::update_pdu_session_upCnx_state(const scid_t &scid,
+                                             const upCnx_state_e &state) {
   Logger::smf_app().info("Update UpCnx_State");
 
   //get the smf context
@@ -1209,7 +1219,7 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
 }
 
 //---------------------------------------------------------------------------------------------
-n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(std::string n2_info_type) {
+n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(std::string &n2_info_type) {
   std::size_t number_of_types = n2_sm_info_type_e2str.size();
   for (auto i = 0; i < number_of_types; ++i) {
     if (n2_info_type.compare(n2_sm_info_type_e2str[i]) == 0) {

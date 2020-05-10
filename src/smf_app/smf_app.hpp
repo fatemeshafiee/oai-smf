@@ -87,13 +87,10 @@ class smf_context_ref {
     pdu_session_id = 0;
   }
 
-  //	std::string toString() const;
-
   supi_t supi;
   std::string dnn;
   pdu_session_id_t pdu_session_id;
   snssai_t nssai;
-
 };
 
 class smf_app {
@@ -117,17 +114,49 @@ class smf_app {
   std::map<scid_t, std::shared_ptr<smf_context_ref>> scid2smf_context;
   mutable std::shared_mutex m_scid2smf_context;
 
+  /*
+   * Apply the config from the configuration file for APN pools
+   * @param [const smf_config &cfg] cfg
+   * @return
+   */
   int apply_config(const smf_config &cfg);
 
+  /*
+   * pco_push_protocol_or_container_id
+   * @param [protocol_configuration_options_t &] pco
+   * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @return
+   */
   int pco_push_protocol_or_container_id(
       protocol_configuration_options_t &pco,
       pco_protocol_or_container_id_t *const poc_id /* STOLEN_REF poc_id->contents*/);
+
+  /*
+   * process_pco_request_ipcp
+   * @param [protocol_configuration_options_t &] pco_resp
+   * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @return
+   */
   int process_pco_request_ipcp(
       protocol_configuration_options_t &pco_resp,
       const pco_protocol_or_container_id_t *const poc_id);
+
+  /*
+   * process_pco_dns_server_request
+   * @param [protocol_configuration_options_t &] pco_resp
+   * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @return
+   */
   int process_pco_dns_server_request(
       protocol_configuration_options_t &pco_resp,
       const pco_protocol_or_container_id_t *const poc_id);
+
+  /*
+   * process_pco_link_mtu_request
+   * @param [protocol_configuration_options_t &] pco_resp
+   * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @return
+   */
   int process_pco_link_mtu_request(
       protocol_configuration_options_t &pco_resp,
       const pco_protocol_or_container_id_t *const poc_id);
@@ -137,60 +166,204 @@ class smf_app {
   smf_app(smf_app const&) = delete;
   void operator=(smf_app const&) = delete;
 
+  /*
+   * Set the association between Seid and SM Context
+   * @param [const seid_t &] seid: SessionID
+   * @param [std::shared_ptr<smf_context> &] pc : Shared_ptr to a SMF context
+   * @return
+   */
   void set_seid_2_smf_context(const seid_t &seid,
                               std::shared_ptr<smf_context> &pc);
+
+  /*
+   * Find SMF context associated with a Session ID
+   * @param [const seid_t &] seid: SessionID
+   * @param [std::shared_ptr<smf_context> &] pc : Shared_ptr to a SMF context
+   * @return bool: True if SMF context found, otherwise return false
+   */
   bool seid_2_smf_context(const seid_t &seid,
                           std::shared_ptr<smf_context> &pc) const;
 
+  /*
+   * Delete the SMF Context
+   * @param [std::shared_ptr<smf_context> &] pc : Shared_ptr to the SMF context to be deleted
+   * @return void
+   */
   void delete_smf_context(std::shared_ptr<smf_context> spc);
 
-  int static_paa_get_free_paa(const std::string &apn, paa_t &paa);
-  int static_paa_release_address(const std::string &apn, struct in_addr &addr);
+  /*
+   * static_paa_get_free_paa
+   * @param [const std::string &] dnn
+   * @param [paa_t &] paa
+   * @return void
+   */
+  int static_paa_get_free_paa(const std::string &dnn, paa_t &paa);
+
+  /*
+   * static_paa_get_free_paa
+   * @param [const std::string &] dnn
+   * @param [struct in_addr &] addr
+   * @return void
+   */
+  int static_paa_release_address(const std::string &dnn, struct in_addr &addr);
+
+  /*
+   * static_paa_get_num_ipv4_pool
+   * @param void
+   * @return void
+   */
   int static_paa_get_num_ipv4_pool(void);
+
+  /*
+   * Get paa pool
+   * @param
+   * @return pool index
+   */
   int static_paa_get_ipv4_pool(
       const int pool_id, struct in_addr *const range_low,
       struct in_addr *const range_high, struct in_addr *const netaddr,
       struct in_addr *const netmask,
       std::vector<struct in_addr>::iterator &it_out_of_nw);
+
+  /*
+   * Get pool ID corresponding to an address
+   * @param [const struct in_addr &] ue_addr
+   * @return pool index
+   */
   int static_paa_get_pool_id(const struct in_addr &ue_addr);
 
+  /*
+   * process_pco_request
+   * @param [const protocol_configuration_options_t &] pco_req
+   * @param [const protocol_configuration_options_t &] pco_resp
+   * @param [const protocol_configuration_options_ids_t &] pco_ids
+   * @return pool index
+   */
   int process_pco_request(const protocol_configuration_options_t &pco_req,
                           protocol_configuration_options_t &pco_resp,
                           protocol_configuration_options_ids_t &pco_ids);
 
-  void handle_itti_msg(itti_n4_session_establishment_response &m);
-  void handle_itti_msg(itti_n4_session_modification_response &m);
-  void handle_itti_msg(itti_n4_session_deletion_response &m);
+  /*
+   * Handle ITTI message (N4 Session Establishment Response)
+   * @param [itti_n4_session_modification_response&] sne
+   * @return void
+   */
+  void handle_itti_msg(itti_n4_session_establishment_response &sne);
+
+  /*
+   * Handle ITTI message (N4 Session Modification Response)
+   * @param [itti_n4_session_modification_response&] snm
+   * @return void
+   */
+  void handle_itti_msg(itti_n4_session_modification_response &snm);
+
+  /*
+   * Handle ITTI message (N4 Session Report Request)
+   * @param [itti_n4_association_setup_request&] snd
+   * @return void
+   */
+  void handle_itti_msg(itti_n4_session_deletion_response &snd);
+
+  /*
+   * Handle ITTI message (N4 Session Report Request)
+   * @param [itti_n4_association_setup_request&] snr
+   * @return void
+   */
   void handle_itti_msg(std::shared_ptr<itti_n4_session_report_request> snr);
-  void handle_itti_msg(itti_n4_association_setup_request &m);
+
+  /*
+   * Handle ITTI message (N4 Association Setup Request)
+   * @param [itti_n4_association_setup_request&] sna
+   * @return void
+   */
+  void handle_itti_msg(itti_n4_association_setup_request &sna);
 
   /*
    * Handle ITTI message from N11 to update PDU session status
-   * @param [itti_n11_update_pdu_session_status&] itti_n11_update_pdu_session_status
+   * @param [itti_n11_update_pdu_session_status&] snu
    * @return void
    */
-  void handle_itti_msg(itti_n11_update_pdu_session_status &m);
+  void handle_itti_msg(itti_n11_update_pdu_session_status &snu);
 
   /*
    * Handle ITTI message from N11 (N1N2MessageTransfer Response)
-   * @param [itti_n11_n1n2_message_transfer_response_status&] itti_n11_n1n2_message_transfer_response_status
+   * @param [itti_n11_n1n2_message_transfer_response_status&] snm
    * @return void
    */
-  void handle_itti_msg(itti_n11_n1n2_message_transfer_response_status &m);
+  void handle_itti_msg(itti_n11_n1n2_message_transfer_response_status &snm);
 
+  /*
+   * Restore a N4 Session
+   * @param [const seid_t &] seid: Session ID to be restored
+   * @return void
+   */
   void restore_n4_sessions(const seid_t &seid) const;
 
+  /*
+   * Generate a Session ID
+   * @param [void]
+   * @return uint64_t: Return Seid generated
+   */
   uint64_t generate_seid();
+
+  /*
+   * Verify whether a session with a given ID exist
+   * @param [const uint64_t &] s: Seid ID
+   * @return bool: True if exist, otherwise false
+   */
   bool is_seid_n4_exist(const uint64_t &s) const;
+
+  /*
+   * Free a Seid by its ID
+   * @param [const uint64_t &] s: Seid ID
+   * @return void
+   */
   void free_seid_n4(const uint64_t &seid);
 
+  /*
+   * Generate a SMF Context Reference in a form of string
+   * @param [std::string &] smf_ref: Store the generated reference
+   * @return void
+   */
   void generate_smf_context_ref(std::string &smf_ref);
+
+  /*
+   * Generate a SMF Context Reference
+   * @param [void]
+   * @return the generated reference
+   */
   scid_t generate_smf_context_ref();
 
+  /*
+   * Set the association betwen a SMF Context Reference and a SMF Context
+   * @param [const scid_t &] id: SMF Context Reference Id
+   * @param [std::shared_ptr<smf_context_ref>] scf: SMF Context
+   * @return the generated reference
+   */
   void set_scid_2_smf_context(const scid_t &id,
                               std::shared_ptr<smf_context_ref> scf);
+
+  /*
+   * Find SMF Context Reference by its ID
+   * @param [const scid_t &] scid: SM Context Reference ID
+   * @return Shared_ptr to a SMF Context Reference if found, otherwise return false
+   */
   std::shared_ptr<smf_context_ref> scid_2_smf_context(const scid_t &scid) const;
+
+  /*
+   * Verify whether a SMF Context Reference with a given ID exist
+   * @param [const scid_t &] scid: SM Context Reference ID
+   * @return bool: True if a SMF Context Reference exist, otherwise return false
+   */
   bool is_scid_2_smf_context(const scid_t &scid) const;
+
+  /*
+   * Find SMF Context Reference by its ID
+   * @param [const scid_t &] scid: SM Context Reference ID
+   * @param [std::shared_ptr<smf_context_ref> &] scf : Shared_ptr to a SMF Context Reference
+   * @return bool: True if SMF Context Reference found, otherwise return false
+   */
+  bool scid_2_smf_context(const scid_t &scid, std::shared_ptr<smf_context_ref> & scf) const;
 
   /*
    * Handle PDUSession_CreateSMContextRequest from AMF
@@ -285,18 +458,29 @@ class smf_app {
    */
   void convert_string_2_hex(std::string &input_str, std::string &output_str);
 
-  unsigned char* format_string_as_hex(std::string str);
-
-  void start_upf_association(const pfcp::node_id_t &node_id);
+  /*
+   * Represent a string as hex
+   * @param [std::string&] str: input string
+   * @param [std::string&] output_str String represents string in hex format
+   * @return void
+   */
+  unsigned char* format_string_as_hex(std::string &str);
 
   /*
    * Update PDU session status
-   * @param [const scid_t] id SM Context ID
-   * @param [const pdu_session_status_e] status PDU Session Status
+   * @param [const scid_t &] id SM Context ID
+   * @param [const pdu_session_status_e &] status PDU Session Status
    * @return void
    */
-  void update_pdu_session_status(const scid_t id,
-                                 const pdu_session_status_e status);
+  void update_pdu_session_status(const scid_t &id,
+                                 const pdu_session_status_e &status);
+
+  /*
+   * Convert N2 Info type representing by a string to  n2_sm_info_type_e
+   * @param [std::string] n2_info_type
+   * @return representing of N2 info type in a form of emum
+   */
+  n2_sm_info_type_e n2_sm_info_type_str2e(std::string &n2_info_type);
 
   /*
    * Update PDU session UpCnxState
@@ -304,11 +488,23 @@ class smf_app {
    * @param [const upCnx_state_e] status PDU Session UpCnxState
    * @return void
    */
-  void update_pdu_session_upCnx_state(const scid_t scid,
-                                      const upCnx_state_e state);
+  void update_pdu_session_upCnx_state(const scid_t &scid,
+                                      const upCnx_state_e &state);
 
+  /*
+   * will be executed when timer T3591 expires
+   * @param [timer_id_t] timer_id
+   * @param [uint64_t] arg2_user
+   * @return void
+   */
   void timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user);
-  n2_sm_info_type_e n2_sm_info_type_str2e(std::string n2_info_type);
+
+  /*
+   * To start an association with a UPF (SMF-initiated association)
+   * @param [const pfcp::node_id_t] node_id: UPF Node ID
+   * @return void
+   */
+  void start_upf_association(const pfcp::node_id_t &node_id);
 
 };
 }

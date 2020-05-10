@@ -86,7 +86,6 @@ class smf_qos_flow {
    * @param void
    * @return void
    */
-
   void deallocate_ressources();
 
   /*
@@ -129,7 +128,6 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     ipv4_address.s_addr = INADDR_ANY;
     ipv6_address = in6addr_any;
     pdn_type = { };
-    default_bearer.ebi = EPS_BEARER_IDENTITY_UNASSIGNED;
     seid = 0;
     up_fseid = { };
     qos_flows.clear();
@@ -386,7 +384,6 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   struct in_addr ipv4_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
   struct in6_addr ipv6_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
   pdn_type_t pdn_type;            // IPv4, IPv6, IPv4v6 or Non-IP
-  ebi_t default_bearer;  //Default Bearer: Identifies the default bearer within the PDN connection by its EPS Bearer Id.
 
   bool released;  //(release access bearers request)
 
@@ -402,16 +399,17 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   uint32_t pdu_session_id;
   std::string amf_id;
-  std::map<uint8_t, smf_qos_flow> qos_flows;   // QFI <-> QoS Flow
-  pfcp::qfi_t default_qfi;
-  std::map<uint8_t, QOSRulesIE> qos_rules;   // QRI <-> QoS Rules
-  std::vector<uint8_t> qos_rules_to_be_synchronised;
-  std::vector<uint8_t> qos_rules_to_be_removed;
   pdu_session_status_e pdu_session_status;
+  upCnx_state_e upCnx_state;  //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
   timer_id_t timer_T3590;
   timer_id_t timer_T3591;
   timer_id_t timer_T3592;
-  upCnx_state_e upCnx_state;  //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
+
+  pfcp::qfi_t default_qfi; //Default QFI for this session
+  std::map<uint8_t, smf_qos_flow> qos_flows;   // QFI <-> QoS Flow
+  std::map<uint8_t, QOSRulesIE> qos_rules;   // QRI <-> QoS Rules
+  std::vector<uint8_t> qos_rules_to_be_synchronised;
+  std::vector<uint8_t> qos_rules_to_be_removed;
   //5GSM parameters and capabilities
   uint8_t maximum_number_of_supported_packet_filters;
   //TODO: 5GSM Capability (section 9.11.4.1@3GPP TS 24.501 V16.1.0)
@@ -446,6 +444,7 @@ class session_management_subscription {
    */
   void find_dnn_configuration(
       std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
+
  private:
   snssai_t single_nssai;
   std::map<std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;  //dnn <->dnn_configuration
@@ -753,19 +752,19 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
                         const snssai_t &snssai, const std::string &dnn);
 
  private:
-
   std::vector<std::shared_ptr<dnn_context>> dnns;
   imsi_t imsi;  // IMSI (International Mobile Subscriber Identity) is the subscriber permanent identity.
   bool imsi_unauthenticated_indicator;  // This is an IMSI indicator to show the IMSI is unauthenticated.
   // TO BE CHECKED me_identity_t    me_identity;       // Mobile Equipment Identity (e.g. IMEI/IMEISV).
   msisdn_t msisdn;  // The basic MSISDN of the UE. The presence is dictated by its storage in the HSS.
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
-  // Big recursive lock
-  mutable std::recursive_mutex m_context;
   // snssai-sst <-> session management subscription
   std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
   supi_t supi;
-  scid_t scid;
+  scid_t scid; //SM Context ID
+  // Big recursive lock
+  mutable std::recursive_mutex m_context;
+
 };
 }
 

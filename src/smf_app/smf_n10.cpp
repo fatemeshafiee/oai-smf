@@ -39,9 +39,6 @@
 #include "logger.hpp"
 #include "smf_config.hpp"
 
-#define UDM_CURL_TIMEOUT_MS 100L
-#define UDM_NUMBER_RETRIES 3
-
 using namespace smf;
 using namespace std;
 using json = nlohmann::json;
