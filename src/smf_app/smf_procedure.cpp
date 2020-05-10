@@ -863,7 +863,7 @@ int session_update_sm_context_procedure::run(
         }
 
         //update in the PDU Session
-        flow.release_qos_flow();
+        flow.mark_as_released();
         smf_qos_flow flow2 = flow;
         sps->add_qos_flow(flow2);
       }

@@ -46,8 +46,6 @@ class smf_n11 {
   std::thread::id thread_id;
   std::thread thread;
 
-  void handle_receive_sm_data_notification();
-
  public:
   smf_n11();
   smf_n11(smf_n11 const&) = delete;

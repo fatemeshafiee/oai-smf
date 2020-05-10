@@ -103,11 +103,6 @@ smf_n10::smf_n10() {
 }
 
 //------------------------------------------------------------------------------
-void smf_n10::handle_receive_sm_data_notification() {
-  //TODO:
-}
-
-//------------------------------------------------------------------------------
 bool smf_n10::get_sm_data(
     supi64_t &supi, std::string &dnn, snssai_t &snssai,
     std::shared_ptr<session_management_subscription> subscription) {

@@ -65,7 +65,6 @@ namespace smf {
 #define T3592_TIMER_VALUE_SEC 16
 #define T3592_TIMER_MAX_RETRIES 4
 
-
 typedef enum {
   PDU_SESSION_ESTABLISHMENT = 1,
   PDU_SESSION_MODIFICATION = 2,
@@ -219,10 +218,16 @@ class smf_app {
 
   /*
    * Trigger pdu session modification
-   * @param should be updated
+   * @param [supi_t &] supi
+   * @param [std::string &] dnn
+   * @param [pdu_session_id_t] pdu_session_id
+   * @param [snssai_t &] snssai
+   * @param [pfcp::qfi_t &] qfi
    * @return void
    */
-  void trigger_pdu_session_modification();
+  void trigger_pdu_session_modification(supi_t &supi, std::string &dnn,
+                                        pdu_session_id_t pdu_session_id,
+                                        snssai_t &snssai, pfcp::qfi_t &qfi);
 
   /*
    * Verify if SM Context is existed for this Supi
@@ -300,7 +305,7 @@ class smf_app {
    * @return void
    */
   void update_pdu_session_upCnx_state(const scid_t scid,
-                                          const upCnx_state_e state);
+                                      const upCnx_state_e state);
 
   void timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user);
   n2_sm_info_type_e n2_sm_info_type_str2e(std::string n2_info_type);

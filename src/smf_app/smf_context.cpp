@@ -63,7 +63,7 @@ extern smf::smf_n11 *smf_n11_inst;
 extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
-void smf_qos_flow::release_qos_flow() {
+void smf_qos_flow::mark_as_released() {
   released = true;
 }
 
@@ -163,7 +163,7 @@ void smf_pdu_session::get_paa(paa_t &paa) {
 }
 
 //------------------------------------------------------------------------------
-void smf_pdu_session::add_qos_flow(smf_qos_flow &flow) {
+void smf_pdu_session::add_qos_flow(const smf_qos_flow &flow) {
   if ((flow.qfi.qfi >= QOS_FLOW_IDENTIFIER_FIRST )
       and (flow.qfi.qfi <= QOS_FLOW_IDENTIFIER_LAST )) {
     qos_flows.erase(flow.qfi.qfi);
@@ -242,19 +242,6 @@ bool smf_pdu_session::find_qos_flow(const pfcp::pdr_id_t &pdr_id,
       it != qos_flows.end(); ++it) {
     if ((it->second.pdr_id_ul == pdr_id) || (it->second.pdr_id_dl == pdr_id)) {
       flow = it->second;
-      return true;
-    }
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
-bool smf_pdu_session::has_qos_flow(const pfcp::pdr_id_t &pdr_id,
-                                   pfcp::qfi_t &qfi) {
-  for (std::map<uint8_t, smf_qos_flow>::iterator it = qos_flows.begin();
-      it != qos_flows.end(); ++it) {
-    if ((it->second.pdr_id_ul == pdr_id) || (it->second.pdr_id_dl == pdr_id)) {
-      qfi = it->second.qfi;
       return true;
     }
   }
@@ -397,7 +384,7 @@ void smf_pdu_session::get_qos_rules_to_be_synchronised(
 }
 
 //------------------------------------------------------------------------------
-void smf_pdu_session::get_qos_rules(pfcp::qfi_t qfi,
+void smf_pdu_session::get_qos_rules(const pfcp::qfi_t &qfi,
                                     std::vector<QOSRulesIE> &rules) const {
   Logger::smf_app().info("Get QoS Rules associated with Flow with QFI %d",
                          qfi.qfi);
@@ -431,7 +418,7 @@ bool smf_pdu_session::get_qos_rule(uint8_t rule_id,
 }
 
 //------------------------------------------------------------------------------
-void smf_pdu_session::update_qos_rule(QOSRulesIE qos_rule) {
+void smf_pdu_session::update_qos_rule(const QOSRulesIE &qos_rule) {
   Logger::smf_app().info("Update QoS Rule with Rule Id %d",
                          (uint8_t) qos_rule.qosruleidentifer);
   uint8_t rule_id = qos_rule.qosruleidentifer;
@@ -482,7 +469,7 @@ void smf_pdu_session::mark_qos_rule_to_be_synchronised(uint8_t rule_id) {
 }
 
 //------------------------------------------------------------------------------
-void smf_pdu_session::add_qos_rule(QOSRulesIE qos_rule) {
+void smf_pdu_session::add_qos_rule(const QOSRulesIE &qos_rule) {
   Logger::smf_app().info("Add QoS Rule with Rule Id %d",
                          (uint8_t) qos_rule.qosruleidentifer);
   uint8_t rule_id = qos_rule.qosruleidentifer;
@@ -1586,8 +1573,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
                                            n2_sm_info_hex_to_be_created);
 
         n11_sm_context_resp->res.set_n1_sm_message(n1_sm_msg_hex_to_be_created);
-        n11_sm_context_resp->res.set_n1_sm_msg_type(
-            "PDU_SESSION_MODIFICATION_COMMAND");
         n11_sm_context_resp->res.set_n2_sm_information(
             n2_sm_info_hex_to_be_created);
         n11_sm_context_resp->res.set_n2_sm_info_type("PDU_RES_MOD_REQ");
@@ -2309,7 +2294,7 @@ void smf_context::handle_pdu_session_modification_network_requested(
   smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
   itti_msg->msg.set_n1_sm_message(n1_sm_msg_hex);
 
-  //N2: PDU Session Resource Modify Request Transfer
+  //N2: PDU Session Resource Modify Response Transfer
   smf_n1_n2_inst.create_n2_sm_information(itti_msg->msg, 1,
                                           n2_sm_info_type_e::PDU_RES_MOD_REQ,
                                           n2_sm_info);

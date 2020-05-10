@@ -229,16 +229,6 @@ std::string pdu_session_create_sm_context_request::get_dnn_selection_mode() cons
 }
 
 //-----------------------------------------------------------------------------
-ipmdr_t pdu_session_create_sm_context_request::get_ipmdr() const {
-  return m_ipmdr;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_request::set_ipmdr(ipmdr_t const &ipmdr) {
-  m_ipmdr = ipmdr;
-}
-
-//-----------------------------------------------------------------------------
 void pdu_session_create_sm_context_response::set_cause(uint8_t cause) {
   m_cause = cause;
 }
@@ -326,48 +316,48 @@ std::string pdu_session_create_sm_context_response::get_amf_url() const {
 }
 
 //-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context_request::get_n2_sm_information() const {
+std::string pdu_session_update_sm_context::get_n2_sm_information() const {
   return m_n2_sm_information;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_request::set_n2_sm_information(
+void pdu_session_update_sm_context::set_n2_sm_information(
     std::string const &value) {
   m_n2_sm_information = value;
   m_n2_sm_info_is_set = true;
 }
 
 //-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context_request::get_n2_sm_info_type() const {
+std::string pdu_session_update_sm_context::get_n2_sm_info_type() const {
   return m_n2_sm_info_type;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_request::set_n2_sm_info_type(
+void pdu_session_update_sm_context::set_n2_sm_info_type(
     std::string const &value) {
   m_n2_sm_info_type = value;
   m_n2_sm_info_is_set = true;
 }
 
 //-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context_request::get_n1_sm_message() const {
+std::string pdu_session_update_sm_context::get_n1_sm_message() const {
   return m_n1_sm_message;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_request::set_n1_sm_message(
+void pdu_session_update_sm_context::set_n1_sm_message(
     std::string const &value) {
   m_n1_sm_message = value;
   m_n1_sm_msg_is_set = true;
 }
 
 //-----------------------------------------------------------------------------
-bool pdu_session_update_sm_context_request::n1_sm_msg_is_set() const {
+bool pdu_session_update_sm_context::n1_sm_msg_is_set() const {
   return m_n1_sm_msg_is_set;
 }
 
 //-----------------------------------------------------------------------------
-bool pdu_session_update_sm_context_request::n2_sm_info_is_set() const {
+bool pdu_session_update_sm_context::n2_sm_info_is_set() const {
   return m_n2_sm_info_is_set;
 }
 
@@ -455,63 +445,6 @@ void pdu_session_update_sm_context_response::set_cause(uint8_t cause) {
 //-----------------------------------------------------------------------------
 uint8_t pdu_session_update_sm_context_response::get_cause() {
   return m_cause;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context_response::get_n2_sm_information() const {
-  return m_n2_sm_information;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_response::set_n2_sm_information(
-    std::string const &value) {
-  m_n2_sm_information = value;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context_response::get_n2_sm_info_type() const {
-  return n2_sm_info_type;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_response::set_n2_sm_info_type(
-    std::string const &value) {
-  n2_sm_info_type = value;
-  m_n2_sm_info_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context_response::get_n1_sm_message() const {
-  return m_n1_sm_message;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_response::set_n1_sm_message(
-    std::string const &value) {
-  m_n1_sm_message = value;
-  m_n1_sm_msg_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context_response::get_n1_sm_msg_type() const {
-  return n2_sm_info_type;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_response::set_n1_sm_msg_type(
-    std::string const &value) {
-  n2_sm_info_type = value;
-  m_n2_sm_info_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-bool pdu_session_update_sm_context_response::n1_sm_msg_is_set() const {
-  return m_n1_sm_msg_is_set;
-}
-
-//-----------------------------------------------------------------------------
-bool pdu_session_update_sm_context_response::n2_sm_info_is_set() const {
-  return m_n2_sm_info_is_set;
 }
 
 //-----------------------------------------------------------------------------

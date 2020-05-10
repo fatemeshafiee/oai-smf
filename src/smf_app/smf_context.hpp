@@ -78,32 +78,43 @@ class smf_qos_flow {
     far_id_ul = { };
     far_id_dl = { };
     released = false;
-    qos_profile = {};
+    qos_profile = { };
   }
 
+  /*
+   * Release resources associated with this flow
+   * @param void
+   * @return void
+   */
+
   void deallocate_ressources();
-  void release_qos_flow();
+
+  /*
+   * Mark this flow as released
+   * @param void
+   * @return void
+   */
+  void mark_as_released();
+
+  /*
+   * Represent flow as string to be printed
+   * @param void
+   * @return void
+   */
   std::string toString() const;
 
   pfcp::qfi_t qfi;  //QoS Flow Identifier
-
   fteid_t ul_fteid;  //fteid of UPF
   fteid_t dl_fteid;  //fteid of AN
-
-  // PFCP
-  // Packet Detection Rule ID
-  pfcp::pdr_id_t pdr_id_ul;
-  pfcp::pdr_id_t pdr_id_dl;
+  pfcp::pdr_id_t pdr_id_ul;   // Packet Detection Rule ID, UL
+  pfcp::pdr_id_t pdr_id_dl;   // Packet Detection Rule ID, DL
   pfcp::precedence_t precedence;
-  std::pair<bool, pfcp::far_id_t> far_id_ul;
-  std::pair<bool, pfcp::far_id_t> far_id_dl;
-
+  std::pair<bool, pfcp::far_id_t> far_id_ul;  //FAR ID, UL
+  std::pair<bool, pfcp::far_id_t> far_id_dl;  //FAR ID, DL
   bool released;  // finally seems necessary, TODO try to find heuristic ?
-
   pdu_session_id_t pdu_session_id;
   qos_profile_t qos_profile;   //QoS profile
   uint8_t cause_value;   //cause
-
 };
 
 class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
@@ -123,7 +134,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     up_fseid = { };
     qos_flows.clear();
     released = false;
-    default_qfi.qfi = NO_QOS_FLOW_IDENTIFIER_ASSIGNED ;
+    default_qfi.qfi = NO_QOS_FLOW_IDENTIFIER_ASSIGNED;
     pdu_session_status = pdu_session_status_e::PDU_SESSION_INACTIVE;
     timer_T3590 = ITTI_INVALID_TIMER_ID;
     timer_T3591 = ITTI_INVALID_TIMER_ID;
@@ -132,22 +143,99 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   smf_pdu_session(smf_pdu_session &b) = delete;
 
+  /*
+   * Set UE Address for this session
+   * @param [paa_t &] paa: PAA
+   * @return void
+   */
   void set(const paa_t &paa);
+
+  /*
+   * Get UE Address of this session
+   * @param [paa_t &] paa: PAA
+   * @return void
+   */
   void get_paa(paa_t &paa);
 
-  bool get_qos_flow(const pfcp::pdr_id_t &pdr_id, smf_qos_flow &q);
-  bool get_qos_flow(const pfcp::far_id_t &far_id, smf_qos_flow &q);
-  bool get_qos_flow(const pfcp::qfi_t &qfi, smf_qos_flow &q);
-  void add_qos_flow(smf_qos_flow &flow);
+  /*
+   * Find a QoS flow by a PDR ID
+   * @param [const pfcp::pdr_id_t &] pdr_id: PDR ID
+   * @param [const smf_qos_flow &] flow: flow to be assigned
+   * @return bool: Return True if found, otherwise return false
+   */
+  bool get_qos_flow(const pfcp::pdr_id_t &pdr_id, smf_qos_flow &flow);
+
+  /*
+   * Find a QoS flow by a FAR
+   * @param [const pfcp::far_id_t &] far_id: FAR ID
+   * @param [const smf_qos_flow &] flow: flow to be assigned if found
+   * @return bool: Return True if found, otherwise return false
+   */
+  bool get_qos_flow(const pfcp::far_id_t &far_id, smf_qos_flow &flow);
+
+  /*
+   * Find a QoS flow by its QFI
+   * @param [const pfcp::qfi_t &] QFI
+   * @param [const smf_qos_flow &] flow: flow to be assigned
+   * @return bool: Return True if found, otherwise return false
+   */
+  bool get_qos_flow(const pfcp::qfi_t &qfi, smf_qos_flow &flow);
+
+  /*
+   * Add a QoS flow to a PDU Session
+   * @param [const smf_qos_flow &] flow: Flow to be added
+   * @return void
+   */
+  void add_qos_flow(const smf_qos_flow &flow);
+
+  /*
+   * Get all QoS Flows associated with this PDU Session
+   * @param [std::vector<smf_qos_flow> &] flows: list of Flows associated with this session
+   * @return void
+   */
   void get_qos_flows(std::vector<smf_qos_flow> &flows);
+
+  /*
+   * Set a default flow for this PDU Session
+   * @param [const pfcp::qfi_t &] qfi: Default QFI
+   * @return void
+   */
   void set_default_qos_flow(const pfcp::qfi_t &qfi);
 
+  /*
+   * Find a QoS flow by its PDR ID
+   * @param [const pfcp::pdr_id_t &] pdr_id: PDR ID
+   * @param [smf_qos_flow &] flow: Flow to be returned if found
+   * @return bool: return true if a flow is found, otherwise false
+   */
   bool find_qos_flow(const pfcp::pdr_id_t &pdr_id, smf_qos_flow &flow);
-  bool has_qos_flow(const pfcp::pdr_id_t &pdr_id, pfcp::qfi_t &qfi);
+
+  /*
+   * Remove a QoS flow identified by its QFI
+   * @param [const pfcp::qfi_t &] qfi: QFI of the flow to be removed
+   * @return void
+   */
   void remove_qos_flow(const pfcp::qfi_t &qfi);
+
+  /*
+   * Remove a QoS flow
+   * @param [smf_qos_flow &] flow: flow to be removed
+   * @return void
+   */
   void remove_qos_flow(smf_qos_flow &flow);
 
+  /*
+   * Set current status of PDU Session
+   * @param [const pdu_session_status_e &] status: status to be set
+   * @return void
+   */
   void set_pdu_session_status(const pdu_session_status_e &status);
+
+  /*
+   * Get current status of PDU Session
+   * @param void
+   * @return pdu_session_status_e: status of PDU session
+   */
   pdu_session_status_e get_pdu_session_status() const;
 
   /*
@@ -170,29 +258,92 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   // when removing them from a collection, so that is why actually the deallocation of resources is not done in the destructor of objects.
   void deallocate_ressources(const std::string &apn);
 
+  /*
+   * Represent PDU Session as string to be printed
+   * @param void
+   * @return void
+   */
   std::string toString() const;
 
+  /*
+   * Generate a SEID to be used to communicate with UPF
+   * @param void
+   * @return void
+   */
   void generate_seid();
-  void set_seid(const uint64_t &seid);
-  void generate_pdr_id(pfcp::pdr_id_t &pdr_id);
-  void release_pdr_id(const pfcp::pdr_id_t &pdr_id);
-  void generate_far_id(pfcp::far_id_t &far_id);
-  void release_far_id(const pfcp::far_id_t &far_id);
-  void insert_procedure(smf_procedure *proc);
 
+  /*
+   * Set a value to SEID
+   * @param [const uint64_t &] seid: value to be set
+   * @return void
+   */
+  void set_seid(const uint64_t &seid);
+
+  /*
+   * Generate a PDR ID
+   * @param [pfcp::pdr_id_t &]: pdr_id: PDR ID generated
+   * @return void
+   */
+  void generate_pdr_id(pfcp::pdr_id_t &pdr_id);
+
+  /*
+   * Release a PDR ID
+   * @param [const pfcp::pdr_id_t &]: pdr_id: PDR ID to be released
+   * @return void
+   */
+  void release_pdr_id(const pfcp::pdr_id_t &pdr_id);
+
+  /*
+   * Generate a FAR ID
+   * @param [pfcp::far_id_t &]: far_id: FAR ID generated
+   * @return void
+   */
+  void generate_far_id(pfcp::far_id_t &far_id);
+
+  /*
+   * Release a FAR ID
+   * @param [const pfcp::far_id_t &]: far_id: FAR ID to be released
+   * @return void
+   */
+  void release_far_id(const pfcp::far_id_t &far_id);
+
+  /*
+   * Generate a QoS Rule ID
+   * @param [uint8_t &]: rule_id: QoS Rule ID generated
+   * @return void
+   */
   void generate_qos_rule_id(uint8_t &rule_id);
+
+  /*
+   * Release a QoS Rule ID
+   * @param [uint8_t &]: rule_id: QoS Rule ID to be released
+   * @return void
+   */
   void release_qos_rule_id(const uint8_t &rule_id);
+
+  /*
+   * Mark a QoS Rule to be synchronised with UE
+   * @param [uint8_t ]: rule_id: QoS Rule ID to be synchronised with UE
+   * @return void
+   */
   void mark_qos_rule_to_be_synchronised(uint8_t rule_id);
-  void get_qos_rules_to_be_synchronised(std::vector<QOSRulesIE> &qos_rules) const;
+
+  /*
+   * Get all QoS Rules to be synchronised with UE
+   * @param [std::vector<QOSRulesIE> &]: qos_rules: List of QoS Rules to be synchronised with UE
+   * @return void
+   */
+  void get_qos_rules_to_be_synchronised(
+      std::vector<QOSRulesIE> &qos_rules) const;
 
   /*
    * Get list of QoS rules associated with a given QFI
-   * @param [pfcp::qfi_t] qfi
+   * @param [pfcp::qfi_t &] qfi
    * @param [std::vector<QOSRulesIE> &] rules
    * @void
    */
-  void get_qos_rules(pfcp::qfi_t qfi,
-      std::vector<QOSRulesIE> &rules) const;
+  void get_qos_rules(const pfcp::qfi_t &qfi,
+                     std::vector<QOSRulesIE> &rules) const;
 
   /*
    * Get default QoS Rule associated with this PDU Session
@@ -200,10 +351,34 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    * @void
    */
   bool get_default_qos_rule(QOSRulesIE &qos_rule) const;
-  bool get_qos_rule(uint8_t rule_id, QOSRulesIE &qos_rule) const;
-  void update_qos_rule(QOSRulesIE qos_rule);
-  void add_qos_rule(QOSRulesIE qos_rule);
 
+  /*
+   * Get QoS Rule with Rule ID
+   * @param [uint8_t] rule_id: Rule ID
+   * @param [QOSRulesIE &] qos_rule
+   * @return bool: Return true if Rule exist, otherwise return false
+   */
+  bool get_qos_rule(uint8_t rule_id, QOSRulesIE &qos_rule) const;
+
+  /*
+   * Update QoS Rule
+   * @param [QOSRulesIE &] qos_rule
+   * @void
+   */
+  void update_qos_rule(const QOSRulesIE &qos_rule);
+
+  /*
+   * Add a QoS Rule
+   * @param [QOSRulesIE &] qos_rule
+   * @void
+   */
+  void add_qos_rule(const QOSRulesIE &qos_rule);
+
+  /*
+   * Get PDN Type of this PDU session
+   * @param void
+   * @return pdn_type_t: PDN Type
+   */
   pdn_type_t get_pdn_type() const;
 
   bool ipv4;                  // IP Address(es): IPv4 address and/or IPv6 prefix
@@ -227,25 +402,21 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   uint32_t pdu_session_id;
   std::string amf_id;
-  // QFI <-> QoS Flow
-  std::map<uint8_t, smf_qos_flow> qos_flows;
+  std::map<uint8_t, smf_qos_flow> qos_flows;   // QFI <-> QoS Flow
   pfcp::qfi_t default_qfi;
-  // QRI <-> QoS Rules
-  std::map<uint8_t, QOSRulesIE> qos_rules;
+  std::map<uint8_t, QOSRulesIE> qos_rules;   // QRI <-> QoS Rules
   std::vector<uint8_t> qos_rules_to_be_synchronised;
   std::vector<uint8_t> qos_rules_to_be_removed;
   pdu_session_status_e pdu_session_status;
   timer_id_t timer_T3590;
   timer_id_t timer_T3591;
   timer_id_t timer_T3592;
-  //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
-  upCnx_state_e upCnx_state;
+  upCnx_state_e upCnx_state;  //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
   //5GSM parameters and capabilities
   uint8_t maximum_number_of_supported_packet_filters;
   //TODO: 5GSM Capability (section 9.11.4.1@3GPP TS 24.501 V16.1.0)
   //TODO: Integrity protection maximum data rate (section 9.11.4.7@@3GPP TS 24.501 V16.1.0)
-  //number_of_supported_packet_filters
-  uint8_t number_of_supported_packet_filters;
+  uint8_t number_of_supported_packet_filters;  //number_of_supported_packet_filters
   util::uint_generator<uint32_t> qos_rule_id_generator;
 
 };
@@ -257,14 +428,27 @@ class session_management_subscription {
       single_nssai(snssai),
       dnn_configurations() {
   }
+
+  /*
+   * Insert a DNN configuration into the subscription
+   * @param [std::string] dnn
+   * @param [std::shared_ptr<dnn_configuration_t> &] dnn_configuration
+   * @return void
+   */
   void insert_dnn_configuration(
       std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
+
+  /*
+   * Find a DNN configuration
+   * @param [std::string] dnn
+   * @param [std::shared_ptr<dnn_configuration_t> &] dnn_configuration
+   * @return void
+   */
   void find_dnn_configuration(
       std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
  private:
   snssai_t single_nssai;
-  //dnn <->dnn_configuration
-  std::map<std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;
+  std::map<std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;  //dnn <->dnn_configuration
 };
 
 /*
@@ -292,26 +476,41 @@ class dnn_context {
   }
   dnn_context(dnn_context &b) = delete;
 
-  /* Find the PDU Session */
+  /*
+   * Find a PDU Session by its ID
+   * @param [const uint32_t] pdu_session_id
+   * @param [std::shared_ptr<smf_pdu_session> &] pdu_session
+   * @return bool: return true if pdu session is found, otherwise, return false
+   */
   bool find_pdu_session(const uint32_t pdu_session_id,
                         std::shared_ptr<smf_pdu_session> &pdu_session);
 
-  //void create_or_update_qos_rule(QOSRulesIE &qos_rule, pfcp::qfi_t qfi,
-  //                                            pdu_session_id_t pdu_id);
-
-  /* Insert a PDU Session into the DNN context */
+  /*
+   * Insert a PDU Session into the DNN context
+   * @param [std::shared_ptr<smf_pdu_session> &] sp: shared pointer to a PDU Session
+   * @return void
+   */
   void insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp);
-  /* get number of pdu sessions associated with this context (dnn and Nssai) */
+
+  /*
+   * Get number of pdu sessions associated with this context (dnn and Nssai)
+   * @param void
+   * @return size_t: number of PDU sessions
+   */
   size_t get_number_pdu_sessions();
 
+  /*
+   * Represent DNN Context as a string object
+   * @param void
+   * @return void
+   */
   std::string toString() const;
 
   bool in_use;
   std::string dnn_in_use;   // The APN currently used, as received from the SGW.
-  //ambr_t  apn_ambr;                 // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
+  //ambr_t  apn_ambr; // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
   snssai_t nssai;
-  /* Store all PDU Sessions associated with this DNN context */
-  std::vector<std::shared_ptr<smf_pdu_session>> pdu_sessions;
+  std::vector<std::shared_ptr<smf_pdu_session>> pdu_sessions;  //Store all PDU Sessions associated with this DNN context
   mutable std::recursive_mutex m_context;
 };
 
@@ -333,20 +532,58 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   smf_context(smf_context &b) = delete;
 
+  /*
+   * Insert a procedure to be processed
+   * @param [std::shared_ptr<smf_procedure> &] sproc: procedure to be processed
+   * @return void
+   */
   void insert_procedure(std::shared_ptr<smf_procedure> &sproc);
+
+  /*
+   * Find a with its transaction ID
+   * @param [const uint64_t &] trxn_id: Transaction ID
+   * @param [std::shared_ptr<smf_procedure> &] proc: Stored procedure if found
+   * @return void
+   */
   bool find_procedure(const uint64_t &trxn_id,
                       std::shared_ptr<smf_procedure> &proc);
+
+  /*
+   * Remove a procedure from the list
+   * @param [smf_procedure *] sproc: procedure to be removed
+   * @return void
+   */
   void remove_procedure(smf_procedure *proc);
 
 #define IS_FIND_PDN_WITH_LOCAL_TEID true
 #define IS_FIND_PDN_WITH_PEER_TEID  false
 
-  bool find_pdu_session(const pfcp::pdr_id_t &pdr_id,
-                        std::shared_ptr<smf_pdu_session> &pdn, ebi_t &ebi);
-
+  /*
+   * Handle N4 message (session establishment response) from UPF
+   * @param [itti_n4_session_establishment_responset&]
+   * @return void
+   */
   void handle_itti_msg(itti_n4_session_establishment_response&);
+
+  /*
+   * Handle N4 message (session modification response) from UPF
+   * @param [itti_n4_session_modification_response&]
+   * @return void
+   */
   void handle_itti_msg(itti_n4_session_modification_response&);
+
+  /*
+   * Handle N4 message (session deletion response) from UPF
+   * @param [itti_n4_session_deletion_response&]
+   * @return void
+   */
   void handle_itti_msg(itti_n4_session_deletion_response&);
+
+  /*
+   * Handle N4 message (session report) from UPF
+   * @param [itti_n4_session_report_request&]
+   * @return void
+   */
   void handle_itti_msg(std::shared_ptr<itti_n4_session_report_request>&);
 
   /*
@@ -373,6 +610,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void handle_pdu_session_release_sm_context_request(
       std::shared_ptr<itti_n11_release_sm_context_request> smreq);
 
+  /*
+   * Handle network-requested session modification (SMF, AN, AMF -requested)
+   * @param [std::shared_ptr<itti_nx_trigger_pdu_session_modification] msg: Request message
+   * @return void
+   */
   void handle_pdu_session_modification_network_requested(
       std::shared_ptr<itti_nx_trigger_pdu_session_modification> msg);
 
@@ -457,7 +699,19 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @return std::size_t: the number of contexts
    */
   std::size_t get_number_dnn_contexts();
-  void set_scid(scid_t const &id);
+
+  /*
+   * Set SM Context ID
+   * @param [const scid_t &] id: SM Context Id
+   * @return void
+   */
+  void set_scid(const scid_t &id);
+
+  /*
+   * Get SM Context ID
+   * @param [void
+   * @return scid_t: SM Context Id
+   */
   scid_t get_scid() const;
 
   /*
@@ -467,13 +721,34 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   void get_default_qos_rule(QOSRulesIE &qos_rule, uint8_t pdu_session_type);
 
+  /*
+   * Get the default QoS Flow Description, according to PDU session type and QFI
+   * @param [QOSFlowDescriptionsContents &] qos_flow_description
+   * @param [uint8_t] pdu_session_type: PDU Session Type
+   * @param [const pfcp::qfi_t &] qfi
+   * @return void
+   */
   void get_default_qos_flow_description(
       QOSFlowDescriptionsContents &qos_flow_description,
-      uint8_t pdu_session_type,
-      const pfcp::qfi_t &qfi);
+      uint8_t pdu_session_type, const pfcp::qfi_t &qfi);
 
+  /*
+   * Get the default value of Session-AMBR
+   * @param [SessionAMBR &] session_ambr
+   * @param [const snssai_t &] snssai
+   * @param [const std::string &] dnn
+   * @return void
+   */
   void get_session_ambr(SessionAMBR &session_ambr, const snssai_t &snssai,
                         const std::string &dnn);
+
+  /*
+   * Get the default value of Session-AMBR and stored as Ngap_PDUSessionAggregateMaximumBitRate
+   * @param [Ngap_PDUSessionAggregateMaximumBitRate_t &] session_ambr
+   * @param [const snssai_t &] snssai
+   * @param [const std::string &] dnn
+   * @return void
+   */
   void get_session_ambr(Ngap_PDUSessionAggregateMaximumBitRate_t &session_ambr,
                         const snssai_t &snssai, const std::string &dnn);
 
@@ -484,26 +759,13 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bool imsi_unauthenticated_indicator;  // This is an IMSI indicator to show the IMSI is unauthenticated.
   // TO BE CHECKED me_identity_t    me_identity;       // Mobile Equipment Identity (e.g. IMEI/IMEISV).
   msisdn_t msisdn;  // The basic MSISDN of the UE. The presence is dictated by its storage in the HSS.
-  //  selected_cn_operator_id                          // Selected core network operator identity (to support networksharing as defined in TS 23.251
-  // NOT IMPLEMENTED RAT type  Current RAT (implicit)
-  // NOT IMPLEMENTED Trace reference                        // Identifies a record or a collection of records for a particular trace.
-  // NOT IMPLEMENTED Trace type                             // Indicates the type of trace
-  // NOT IMPLEMENTED Trigger id                             // Identifies the entity that initiated the trace
-  // NOT IMPLEMENTED OMC identity                           // Identifies the OMC that shall receive the trace record(s).
-
-  //--------------------------------------------
-  // internals
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
-
   // Big recursive lock
   mutable std::recursive_mutex m_context;
-
   // snssai-sst <-> session management subscription
   std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
-
   supi_t supi;
   scid_t scid;
-
 };
 }
 
