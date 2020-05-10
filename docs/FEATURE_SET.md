@@ -22,18 +22,17 @@
 
 ![5GC SBA](./images/5gc_sba.png)
 
-#2. OAI SMF Available Interfaces #
+# 2. OAI SMF Available Interfaces #
 
-| **ID** | **Interface** | **Status**         | **Comment**                                          |
-| ------ | ------------- | ------------------ | -----------------------------------------------------|
-| 1      | N4            | :heavy_check_mark: | between SMF and UPF (PFCP)                           |
-| 2      | N7            | :x:                | between SMF and PCF                                  |
-| 3      | N10           | :heavy_check_mark: | between SMF and UDM (Nudm_SubscriberDataManagement)  |
-| 4      | N11           | :heavy_check_mark: | between SMF and AMF (Nsmf_PDU_Session Services,      |
-|        |               |                    |     Namf_N1N2MessageTransfer)                        |
+| **ID** | **Interface** | **Status**         | **Comment**                                                               |
+| ------ | ------------- | ------------------ | --------------------------------------------------------------------------|
+| 1      | N4            | :heavy_check_mark: | between SMF and UPF (PFCP)                                                |
+| 2      | N7            | :x:                | between SMF and PCF                                                       |
+| 3      | N10           | :heavy_check_mark: | between SMF and UDM (Nudm_SubscriberDataManagement)                       |
+| 4      | N11           | :heavy_check_mark: | between SMF and AMF (Nsmf_PDU_Session Services, Namf_N1N2MessageTransfer) |
+| 5      | N16/16a       | :x:                | between SMFs                                                              |
 
-
-#3. OAI SMF Feature List #
+# 3. OAI SMF Feature List #
 
 Based on document **3GPP TS 23.501 v16.0.0 §6.2.2**.
 
