@@ -314,12 +314,12 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //Encode NAS message
       bytes = nas_message_encode(data, &nas_msg,
                                  sizeof(data)/*don't know the size*/, nullptr);
-
+#if DEBUG_IS_ON
       Logger::smf_app().debug("Buffer Data: ");
       for (int i = 0; i < bytes; i++)
         printf("%02x ", data[i]);
       printf(" (bytes %d)\n", bytes);
-
+#endif
       std::string n1Message((char*) data, bytes);
       nas_msg_str = n1Message;
 
@@ -425,11 +425,12 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       bytes = nas_message_encode(data, &nas_msg,
                                  sizeof(data)/*don't know the size*/, nullptr);
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("Buffer Data: ");
       for (int i = 0; i < bytes; i++)
         printf("%02x ", data[i]);
       printf(" (bytes %d)\n", bytes);
-
+#endif
       std::string n1Message((char*) data, bytes);
       nas_msg_str = n1Message;
 
@@ -543,10 +544,12 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       bytes = nas_message_encode(data, &nas_msg,
                                  sizeof(data)/*don't know the size*/, nullptr);
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("Buffer Data: ");
       for (int i = 0; i < bytes; i++)
         printf("%02x ", data[i]);
       printf(" (bytes %d)\n", bytes);
+#endif
 
       std::string n1Message((char*) data, bytes);
       nas_msg_str = n1Message;
@@ -599,10 +602,12 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       bytes = nas_message_encode(data, &nas_msg,
                                  sizeof(data)/*don't know the size*/, nullptr);
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("Buffer Data: ");
       for (int i = 0; i < bytes; i++)
         printf("%02x ", data[i]);
       printf(" (bytes %d)\n", bytes);
+#endif
 
       std::string n1Message((char*) data, bytes);
       nas_msg_str = n1Message;
@@ -639,10 +644,12 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       bytes = nas_message_encode(data, &nas_msg,
                                  sizeof(data)/*don't know the size*/, nullptr);
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("Buffer Data: ");
       for (int i = 0; i < bytes; i++)
         printf("%02x ", data[i]);
       printf(" (bytes %d)\n", bytes);
+#endif
 
       std::string n1Message((char*) data, bytes);
       nas_msg_str = n1Message;
@@ -903,10 +910,13 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         return;
       }
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
       for (int i = 0; i < er.encoded; i++)
         printf("%02x ", (char) buffer[i]);
       printf(" (%d bytes)\n", (int) er.encoded);
+#endif
+
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
 
@@ -1164,10 +1174,13 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         return;
       }
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
       for (int i = 0; i < er.encoded; i++)
         printf("%02x ", (char) buffer[i]);
       printf(" (%d bytes)\n", (int) er.encoded);
+#endif
+
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
 
@@ -1286,10 +1299,13 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         return;
       }
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
       for (int i = 0; i < er.encoded; i++)
         printf("%02x ", (char) buffer[i]);
       Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+#endif
+
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
 
@@ -1386,10 +1402,13 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         return;
       }
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
       for (int i = 0; i < er.encoded; i++)
         printf("%02x ", (char) buffer[i]);
       Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+#endif
+
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
 
@@ -1458,10 +1477,13 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         return;
       }
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
       for (int i = 0; i < er.encoded; i++)
         printf("%02x ", (char) buffer[i]);
       Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+#endif
+
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
 
@@ -1501,10 +1523,13 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         return;
       }
 
+#if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
       for (int i = 0; i < er.encoded; i++)
         printf("%02x ", (char) buffer[i]);
       Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+#endif
+
       std::string ngap_message((char*) buffer, er.encoded);
       ngap_msg_str = ngap_message;
 
@@ -1525,7 +1550,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
 //------------------------------------------------------------------------------
 int smf_n1_n2::decode_n1_sm_container(nas_message_t &nas_msg,
                                       std::string &n1_sm_msg) {
-  Logger::smf_app().info("Decode NAS message from N1 SM Container");
+  Logger::smf_app().info("Decode NAS message from N1 SM Container.");
 
   //step 1. Decode NAS  message (for instance, ... only served as an example)
   nas_message_decode_status_t decode_status = { 0 };
@@ -1536,10 +1561,12 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t &nas_msg,
   memset(data, 0, data_len + 1);
   memcpy((void*) data, (void*) n1_sm_msg.c_str(), data_len);
 
+#if DEBUG_IS_ON
   printf("Content: ");
   for (int i = 0; i < data_len; i++)
     printf(" %02x ", data[i]);
   printf("\n");
+#endif
 
   //decode the NAS message (using NAS lib)
   decoder_rc = nas_message_decode(data, &nas_msg, data_len, nullptr,
@@ -1577,10 +1604,12 @@ int smf_n1_n2::decode_n2_sm_information(
   memset(data, 0, data_len + 1);
   memcpy((void*) data, (void*) n2_sm_info.c_str(), data_len);
 
+#if DEBUG_IS_ON
   printf("Content: ");
   for (int i = 0; i < data_len; i++)
     printf(" %02x ", data[i]);
   printf("\n");
+#endif
 
   //PDUSessionResourceSetupResponseTransfer
   asn_dec_rval_t rc = asn_decode(

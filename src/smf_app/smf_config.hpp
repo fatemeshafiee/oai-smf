@@ -85,8 +85,6 @@
 #define SMF_CONFIG_STRING_IPV4_POOL                             "IPV4_POOL"
 #define SMF_CONFIG_STRING_IPV6_POOL                             "IPV6_POOL"
 
-#define SMF_CONFIG_STRING_PCEF                                  "PCEF"
-#define SMF_CONFIG_STRING_PCEF_ENABLED                          "PCEF_ENABLED"
 #define SMF_CONFIG_STRING_TCP_ECN_ENABLED                       "TCP_ECN_ENABLED"
 #define SMF_CONFIG_STRING_AUTOMATIC_PUSH_DEDICATED_BEARER_PCC_RULE  "AUTOMATIC_PUSH_DEDICATED_BEARER_PCC_RULE"
 #define SMF_CONFIG_STRING_DEFAULT_BEARER_STATIC_PCC_RULE        "DEFAULT_BEARER_STATIC_PCC_RULE"
@@ -202,12 +200,6 @@ class smf_config {
   uint ue_mtu;
 
   struct {
-    bool tcp_ecn_enabled = false;           // test for CoDel qdisc
-    unsigned int apn_ambr_ul;
-    unsigned int apn_ambr_dl;
-  } pcef;
-
-  struct {
     struct in_addr ipv4_addr;
     unsigned int port;
   } amf_addr;
@@ -222,7 +214,6 @@ class smf_config {
   smf_config()
       :
       m_rw_lock(),
-      pcef(),
       num_apn(0),
       pid_dir(),
       instance(0),

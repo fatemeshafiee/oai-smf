@@ -77,8 +77,6 @@ int smf_config::finalize() {
     ue_pool_network[i].s_addr = htonl(network_hbo);
     ue_pool_netmask[i].s_addr = htonl(netmask_hbo);
   }
-  // "TODO"
-  //pgw_pcef_emulation_init(config_pP);
   Logger::smf_app().info("Finalized config");
   return 0;
 }
@@ -507,19 +505,6 @@ int smf_config::load(const string &config_file) {
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_UE_MTU, ue_mtu);
 
-    const Setting &pcef_cfg = smf_cfg[SMF_CONFIG_STRING_PCEF];
-    unsigned int apn_ambr = 0;
-    if (!(pcef_cfg.lookupValue(SMF_CONFIG_STRING_APN_AMBR_UL, apn_ambr))) {
-      Logger::smf_app().error(SMF_CONFIG_STRING_APN_AMBR_UL "failed");
-      throw(SMF_CONFIG_STRING_APN_AMBR_UL "failed");
-    }
-    pcef.apn_ambr_ul = apn_ambr;
-    if (!(pcef_cfg.lookupValue(SMF_CONFIG_STRING_APN_AMBR_DL, apn_ambr))) {
-      Logger::smf_app().error(SMF_CONFIG_STRING_APN_AMBR_DL "failed");
-      //throw (SMF_CONFIG_STRING_APN_AMBR_DL "failed");
-    }
-    pcef.apn_ambr_dl = apn_ambr;
-
     const Setting &amf_cfg = smf_cfg[SMF_CONFIG_STRING_AMF];
     struct in_addr amf_ipv4_addr;
     unsigned int amf_port = 0;
@@ -680,11 +665,7 @@ void smf_config::display() {
                              apn[i].pool_id_iv6);
     }
   }
-  Logger::smf_app().info("- PCEF support (in development)");
-  Logger::smf_app().info("    APN AMBR UL ..........: %lu  (Kilo bits/s)",
-                         pcef.apn_ambr_ul);
-  Logger::smf_app().info("    APN AMBR DL ..........: %lu  (Kilo bits/s)",
-                         pcef.apn_ambr_dl);
+
   Logger::smf_app().info("- Helpers:");
   Logger::smf_app().info("    Push PCO (DNS+MTU) ........: %s",
                          force_push_pco == 0 ? "false" : "true");

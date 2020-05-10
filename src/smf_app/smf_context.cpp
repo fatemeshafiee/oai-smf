@@ -1888,23 +1888,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
                 .choice.gTPTunnel->transportLayerAddress.buf,
             4);
-        printf("gTP_TEID:");
-        printf(
-            "%02x ",
-            decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
-                .choice.gTPTunnel->gTP_TEID.buf[0]);
-        printf(
-            "%02x ",
-            decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
-                .choice.gTPTunnel->gTP_TEID.buf[1]);
-        printf(
-            "%02x ",
-            decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
-                .choice.gTPTunnel->gTP_TEID.buf[2]);
-        printf(
-            "%02x \n",
-            decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
-                .choice.gTPTunnel->gTP_TEID.buf[3]);
         Logger::smf_app().debug("gTP_TEID " "0x%" PRIx32 " ",
                                 htonl(dl_teid.teid_gre_key));
         Logger::smf_app().debug("uPTransportLayerInformation IP Addr %s",

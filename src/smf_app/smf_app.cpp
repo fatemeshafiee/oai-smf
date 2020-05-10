@@ -599,7 +599,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //check pdu session id
   if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED )
       || (pdu_session_id > PDU_SESSION_IDENTITY_LAST )) {
-    Logger::smf_app().warn(" Invalid PDU Session ID value (psi = %d)",
+    Logger::smf_app().warn(" Invalid PDU Session ID value (%d)",
                            pdu_session_id);
     //section 7.3.2@3GPP TS 24.501; NAS N1 SM message: ignore the message
     return;
@@ -697,7 +697,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai)) {
     //uses a dummy UDM to test this part
     Logger::smf_app().debug(
-        "Retrieve Session Management Subscription data from an UDM");
+        "Retrieve Session Management Subscription data from the UDM");
     session_management_subscription *s = new session_management_subscription(
         snssai);
     std::shared_ptr<session_management_subscription> subscription =
@@ -1058,11 +1058,13 @@ void smf_app::convert_string_2_hex(std::string &input_str,
   memset(data, 0, input_str.length() + 1);
   memcpy((void*) data, (void*) input_str.c_str(), input_str.length());
 
+#if DEBUG_IS_ON
   Logger::smf_app().debug("Input: ");
   for (int i = 0; i < input_str.length(); i++) {
     printf("%02x ", data[i]);
   }
   printf("\n");
+#endif
   char *datahex = (char*) malloc(input_str.length() * 2 + 1);
   memset(datahex, 0, input_str.length() * 2 + 1);
 
@@ -1091,11 +1093,11 @@ unsigned char* smf_app::format_string_as_hex(std::string &str) {
   Logger::smf_app().debug("[Format string as Hex] Input string (%d bytes): %s ",
                           str_len, str.c_str());
   Logger::smf_app().debug("Data (formatted):");
-
+#if DEBUG_IS_ON
   for (int i = 0; i < str_len / 2; i++)
     printf(" %02x ", data_hex[i]);
   printf("\n");
-
+#endif
   //free memory
   free_wrapper((void**) &data);
 
