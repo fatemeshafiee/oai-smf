@@ -43,15 +43,30 @@ class smf_n10 {
   std::thread::id thread_id;
   std::thread thread;
 
-  void handle_receive_sm_data_notification();
-
  public:
   smf_n10();
   smf_n10(smf_n10 const&) = delete;
   void operator=(smf_n10 const&) = delete;
+
+  /*
+   * Get SM subscription data from UDM
+   * @param [supi64_t &] supi
+   * @param [std::string &] dnn
+   * @param [snssai_t &] snssai
+   * @param [std::shared_ptr<session_management_subscription>] subscription
+   * @return bool: True if successful, otherwise false
+   *
+   */
   bool get_sm_data(
       supi64_t &supi, std::string &dnn, snssai_t &snssai,
       std::shared_ptr<session_management_subscription> subscription);
+
+  /*
+   * Subscribe to be notify from UDM
+   * @param []
+   * @return void
+   *
+   */
   void subscribe_sm_data();
 
 };

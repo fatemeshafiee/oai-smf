@@ -71,7 +71,6 @@ class smf_procedure {
   virtual itti_msg_type_t get_procedure_type() {
     return ITTI_MSG_TYPE_NONE;
   }
-  //virtual void handle_itti_msg (itti_n4_session_establishment_response& resp) {}
   virtual void handle_itti_msg(itti_n4_session_establishment_response &resp,
                                std::shared_ptr<smf::smf_context> pc) {
   }
@@ -81,7 +80,6 @@ class smf_procedure {
   virtual void handle_itti_msg(itti_n4_session_deletion_response &resp,
                                std::shared_ptr<smf::smf_context> pc) {
   }
-  //virtual void handle_itti_msg (itti_s5s8_downlink_data_notification_acknowledge& resp) {}
 };
 
 class smf_qos_flow;
@@ -100,10 +98,7 @@ class n4_session_restore_procedure : public smf_procedure {
   }
 
   int run();
-  //void handle_itti_msg (itti_n4_session_establishment_response& resp);
-
   //~n4_session_restore_procedure() {}
-
   std::set<pfcp::fseid_t> pending_sessions;
   std::set<pfcp::fseid_t> restored_sessions;
 };
@@ -121,10 +116,23 @@ class session_create_sm_context_procedure : public smf_procedure {
       n11_trigger() {
   }
 
+  /*
+   * Execute N11 Create SM Context Request procedure
+   * @param [itti_n11_create_sm_context_request] req
+   * @param [itti_n11_create_sm_context_response] resp
+   * @param [std::shared_ptr<smf::smf_context>] sc: smf context
+   * @return
+   */
   int run(std::shared_ptr<itti_n11_create_sm_context_request> req,
           std::shared_ptr<itti_n11_create_sm_context_response> resp,
           std::shared_ptr<smf::smf_context> sc);
 
+  /*
+   * Handle N4 Session Establishment Response from UPF
+   * @param [itti_n4_session_establishment_response] resp
+   * @param [std::shared_ptr<smf::smf_context>] sc smf context
+   * @return void
+   */
   void handle_itti_msg(itti_n4_session_establishment_response &resp,
                        std::shared_ptr<smf::smf_context> sc);
 
@@ -149,11 +157,19 @@ class session_update_sm_context_procedure : public smf_procedure {
       session_procedure_type() {
   }
 
+  /*
+   * Execute N11 Update SM Context Request procedure
+   * @param [itti_n11_update_sm_context_request] req
+   * @param [itti_n11_update_sm_context_response] resp
+   * @param [std::shared_ptr<smf::smf_context>] sc: smf context
+   * @return
+   */
   int run(std::shared_ptr<itti_n11_update_sm_context_request> req,
           std::shared_ptr<itti_n11_update_sm_context_response> resp,
           std::shared_ptr<smf::smf_context> sc);
+
   /*
-   * Handle N4 modification response from UPF
+   * Handle N4 Session Modification Response from UPF
    * @param [itti_n4_session_modification_response] resp
    * @param [std::shared_ptr<smf::smf_context>] sc smf context
    * @return void
@@ -170,7 +186,6 @@ class session_update_sm_context_procedure : public smf_procedure {
 
 };
 
-
 //------------------------------------------------------------------------------
 class session_release_sm_context_procedure : public smf_procedure {
  public:
@@ -184,11 +199,19 @@ class session_release_sm_context_procedure : public smf_procedure {
       n11_trigger() {
   }
 
+  /*
+   * Execute N11 Release SM Context Request procedure
+   * @param [itti_n11_release_sm_context_request] req
+   * @param [itti_n11_release_sm_context_response] resp
+   * @param [std::shared_ptr<smf::smf_context>] sc: smf context
+   * @return
+   */
   int run(std::shared_ptr<itti_n11_release_sm_context_request> req,
           std::shared_ptr<itti_n11_release_sm_context_response> resp,
           std::shared_ptr<smf::smf_context> sc);
+
   /*
-   * Handle N4 modification response from UPF
+   * Handle N4 Session Modification Response from UPF
    * @param [itti_n4_session_modification_response] resp
    * @param [std::shared_ptr<smf::smf_context>] sc smf context
    * @return void

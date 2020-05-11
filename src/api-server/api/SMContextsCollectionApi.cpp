@@ -41,7 +41,6 @@
 #include <map>
 #include <string>
 
-
 #include "logger.hpp"
 #include "Helpers.h"
 extern "C" {
@@ -83,8 +82,9 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
     const Pistache::Rest::Request &request,
     Pistache::Http::ResponseWriter response) {
 
+  Logger::smf_api_server().debug("");
   Logger::smf_api_server().info(
-      "\nReceived a SM context create request from AMF");
+      "Received a SM context create request from AMF.");
   Logger::smf_api_server().debug("Request body: %s", request.body().c_str());
 
   //find boundary
@@ -120,7 +120,7 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
   if ((multipartparser_execute(&parser, &g_callbacks,
                                reinterpret_cast<const char*>(data), str_len)
       != strlen(request.body().c_str())) or (!g_body_begin_called)) {
-    Logger::smf_api_server().warn(
+    Logger::smf_api_server().debug(
         "The received message can not be parsed properly!");
     //TODO: fix this issue
     //response.send(Pistache::Http::Code::Bad_Request, "");
@@ -130,7 +130,7 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
   free_wrapper((void**) &data);
 
   uint8_t size = g_parts.size();
-  Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
+  Logger::smf_api_server().debug("Number of MIME parts %d", g_parts.size());
   //at least 2 parts for Json data and N1 (+ N2)
   if (g_parts.size() < 2) {
     response.send(Pistache::Http::Code::Bad_Request, "");

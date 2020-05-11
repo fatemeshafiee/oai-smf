@@ -139,7 +139,7 @@ void IndividualSMContextApi::update_sm_context_handler(
 
   Logger::smf_api_server().debug("");
   Logger::smf_api_server().info(
-      "Received a SM context update request from AMF");
+      "Received a SM context update request from AMF.");
   Logger::smf_api_server().debug("Request body: %s\n", request.body().c_str());
 
   //find boundary
@@ -174,7 +174,7 @@ void IndividualSMContextApi::update_sm_context_handler(
   if ((multipartparser_execute(&parser, &g_callbacks,
                                reinterpret_cast<const char*>(data), str_len)
       != strlen(request.body().c_str())) or (!g_body_begin_called)) {
-    Logger::smf_api_server().warn(
+    Logger::smf_api_server().debug(
         "The received message can not be parsed properly!");
     //TODO: fix this issue
     //response.send(Pistache::Http::Code::Bad_Request, "");
@@ -184,7 +184,7 @@ void IndividualSMContextApi::update_sm_context_handler(
   free_wrapper((void**) &data);
 
   uint8_t size = g_parts.size();
-  Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
+  Logger::smf_api_server().debug("Number of MIME parts %d", g_parts.size());
   part p0 = { };
   part p1 = { };
 

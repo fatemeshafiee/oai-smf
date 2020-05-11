@@ -58,7 +58,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
     const SmContextMessage &smContextMessage,
     Pistache::Http::ResponseWriter &response) {
 
-  Logger::smf_api_server().info("PDU Session Create SM Context Request ...");
+  Logger::smf_api_server().info("PDU Session Create SM Context Request.");
 
   //Assign the necessary informations to smf::pdu_session_create_sm_context_request
   //and pass this message to SMF to handle this message
@@ -88,18 +88,18 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   sm_context_req_msg.set_supi(supi);
   sm_context_req_msg.set_supi_prefix(supi_prefix);
   Logger::smf_api_server().debug(
-      "SmContextCreateData, supi %s, prefix %s, imsi %s",
+      "SmContextCreateData, SUPI %s, SUPI Prefix %s, IMSI %s",
       smContextCreateData.getSupi().c_str(), supi_prefix.c_str(),
       supi_str.c_str());
 
   //dnn
-  Logger::smf_api_server().debug("SmContextCreateData, dnn %s",
+  Logger::smf_api_server().debug("SmContextCreateData, DNN %s",
                                  smContextCreateData.getDnn().c_str());
   sm_context_req_msg.set_dnn(smContextCreateData.getDnn().c_str());
 
   //S-Nssai
   Logger::smf_api_server().debug(
-      "SmContextCreateData, S-NSSAI sst %d, sd %s",
+      "SmContextCreateData, S-NSSAI SST %d, SD %s",
       smContextCreateData.getSNssai().getSst(),
       smContextCreateData.getSNssai().getSd().c_str());
   snssai_t snssai(smContextCreateData.getSNssai().getSst(),
@@ -107,7 +107,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   sm_context_req_msg.set_snssai(snssai);
 
   //PDU session ID
-  Logger::smf_api_server().debug("SmContextCreateData, PDU SessionID %d",
+  Logger::smf_api_server().debug("SmContextCreateData, PDU Session ID %d",
                                  smContextCreateData.getPduSessionId());
   sm_context_req_msg.set_pdu_session_id(smContextCreateData.getPduSessionId());
 

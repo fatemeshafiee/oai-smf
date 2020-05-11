@@ -8039,6 +8039,9 @@ public:
   //--------
   explicit pfcp_update_pdr_ie(const pfcp::update_pdr& b) : pfcp_grouped_ie(PFCP_IE_UPDATE_PDR){
     tlv.set_length(0);
+    std::shared_ptr<pfcp_pdr_id_ie> sie(new pfcp_pdr_id_ie(b.pdr_id)); add_ie(sie);
+    if (b.far_id.first) {std::shared_ptr<pfcp_far_id_ie> sie(new pfcp_far_id_ie(b.far_id.second)); add_ie(sie);}
+    if (b.pdi.first) { std::shared_ptr<pfcp_pdi_ie> sie(new pfcp_pdi_ie(b.pdi.second)); add_ie(sie);}
   }
   //--------
   pfcp_update_pdr_ie() : pfcp_grouped_ie(PFCP_IE_UPDATE_PDR){

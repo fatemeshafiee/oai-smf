@@ -494,12 +494,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  Logger::smf_app().debug(
-      "NAS information: Extended Protocol Discriminator %d, Security Header Type %d, Message Type %d",
-      decoded_nas_msg.header.extended_protocol_discriminator,
-      decoded_nas_msg.header.security_header_type,
-      decoded_nas_msg.plain.sm.header.message_type);
-
   //Extended protocol discriminator (Mandatory)
   smreq->req.set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
   //PDUSessionIdentity
@@ -517,7 +511,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       == PDU_SESSION_ESTABLISHMENT_REQUEST) {
     //TODO: Disable this command temporarily since can't get this info from tester
     Logger::smf_app().debug(
-        "NAS, pdu_session_type %d",
+        "PDU Session Type %d",
         decoded_nas_msg.plain.sm.pdu_session_establishment_request
             ._pdusessiontype.pdu_session_type_value);
     pdu_session_type.pdu_session_type = decoded_nas_msg.plain.sm
@@ -565,7 +559,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   uint8_t message_type = decoded_nas_msg.plain.sm.header.message_type;
   std::string request_type = smreq->req.get_request_type();
   Logger::smf_app().info(
-      "Handle a PDU Session Create SM Context Request message from AMF, supi " SUPI_64_FMT ", dnn %s, snssai_sst %d, snssai_sd %s",
+      "Handle a PDU Session Create SM Context Request message from AMF, SUPI " SUPI_64_FMT ", DNN %s, SNSSAI SST %d, SD %s",
       supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str());
 
   //If no DNN information from UE, set to default value
@@ -577,7 +571,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //check pti
   if ((pti.procedure_transaction_id == PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED )
       || (pti.procedure_transaction_id > PROCEDURE_TRANSACTION_IDENTITY_LAST )) {
-    Logger::smf_app().warn(" Invalid PTI value (pti = %d)",
+    Logger::smf_app().warn("Invalid PTI value (pti = %d)",
                            pti.procedure_transaction_id);
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
@@ -599,8 +593,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //check pdu session id
   if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED )
       || (pdu_session_id > PDU_SESSION_IDENTITY_LAST )) {
-    Logger::smf_app().warn(" Invalid PDU Session ID value (psi = %d)",
-                           pdu_session_id);
+    Logger::smf_app().warn("Invalid PDU Session ID value (%d)", pdu_session_id);
     //section 7.3.2@3GPP TS 24.501; NAS N1 SM message: ignore the message
     return;
   }
@@ -630,7 +623,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //check request type
   if (request_type.compare("INITIAL_REQUEST") != 0) {
     Logger::smf_app().warn("Invalid request type (request type = %s)",
-                           "INITIAL_REQUEST");
+                           request_type.c_str());
     //TODO:
     //return
   }
@@ -697,13 +690,12 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai)) {
     //uses a dummy UDM to test this part
     Logger::smf_app().debug(
-        "Retrieve Session Management Subscription data from an UDM");
+        "Retrieve Session Management Subscription data from the UDM");
     session_management_subscription *s = new session_management_subscription(
         snssai);
     std::shared_ptr<session_management_subscription> subscription =
         std::shared_ptr<session_management_subscription>(s);
     if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
-      Logger::smf_app().debug("Update DNN subscription info");
       //update dnn_context with subscription info
       sc.get()->insert_dnn_subscription(snssai, subscription);
     } else {
@@ -782,7 +774,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     scf = scid_2_smf_context(scid);
   } else {
     Logger::smf_app().warn(
-        "Context associated with this id " SCID_FMT " does not exit!", scid);
+        "SM Context associated with this id " SCID_FMT " does not exit!", scid);
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
     smContextUpdateError.setError(problem_details);
@@ -924,7 +916,10 @@ void smf_app::handle_pdu_session_release_sm_context_request(
 }
 
 //------------------------------------------------------------------------------
-void smf_app::trigger_pdu_session_modification () {
+void smf_app::trigger_pdu_session_modification(supi_t &supi, std::string &dnn,
+                                               pdu_session_id_t pdu_session_id,
+                                               snssai_t &snssai,
+                                               pfcp::qfi_t &qfi) {
   //SMF-requested session modification, see section 4.3.3.2@3GPP TS 23.502
   //The SMF may decide to modify PDU Session. This procedure also may be
   //triggered based on locally configured policy or triggered from the (R)AN (see clause 4.2.6 and clause 4.9.1).
@@ -932,22 +927,30 @@ void smf_app::trigger_pdu_session_modification () {
   //SMF has marked that the status of one or more QoS Flows are deleted in the 5GC but not synchronized with
   //the UE yet.
 
-
   std::shared_ptr<itti_nx_trigger_pdu_session_modification> itti_msg =
-      std::make_shared<itti_nx_trigger_pdu_session_modification>(
-          TASK_SMF_N11, TASK_SMF_APP);
+      std::make_shared<itti_nx_trigger_pdu_session_modification>(TASK_SMF_APP,
+                                                                 TASK_SMF_N11);
 
   //step 1. collect the necessary information
-  supi_t supi = { };
-  std::string dnn;
-  pdu_session_id_t pdu_session_id = { 0 };
-  snssai_t snssai = { };
+  /*
+   //For testing purpose
+   supi_t supi = { };
+   std::string dnn("default");
+   pdu_session_id_t pdu_session_id = { 1 };
+   snssai_t snssai = { };
+   pfcp::qfi_t qfi = { };
+   qfi.qfi = 7;
+   std::string supi_str("200000000000001");
+   smf_string_to_supi(&supi, supi_str.c_str());
+   snssai.sST = 222;
+   snssai.sD = "0000D4";
+   */
 
   itti_msg->msg.set_supi(supi);
   itti_msg->msg.set_dnn(dnn);
   itti_msg->msg.set_pdu_session_id(pdu_session_id);
   itti_msg->msg.set_snssai(snssai);
-
+  itti_msg->msg.add_qfi(qfi);
   supi64_t supi64 = smf_supi_to_u64(supi);
 
   //Step 2. find the smf context
@@ -958,14 +961,13 @@ void smf_app::trigger_pdu_session_modification () {
     Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
                             supi64);
   } else {
-    Logger::smf_app().debug("SMF context with SUPI " SUPI_64_FMT "does not exist",
-                                supi64);
+    Logger::smf_app().debug(
+        "SMF context with SUPI " SUPI_64_FMT "does not exist", supi64);
     return;
   }
 
   // handle the message in smf_context
-    sc.get()->handle_pdu_session_modification_network_requested(itti_msg);
-
+  sc.get()->handle_pdu_session_modification_network_requested(itti_msg);
 }
 
 //------------------------------------------------------------------------------
@@ -1009,6 +1011,17 @@ bool smf_app::is_scid_2_smf_context(const scid_t &scid) const {
 }
 
 //------------------------------------------------------------------------------
+bool smf_app::scid_2_smf_context(const scid_t &scid,
+                                 std::shared_ptr<smf_context_ref> &scf) const {
+  std::shared_lock lock(m_scid2smf_context);
+  if (scid2smf_context.count(scid) > 0) {
+    scf = scid2smf_context.at(scid);
+    return true;
+  }
+  return false;
+}
+
+//------------------------------------------------------------------------------
 bool smf_app::use_local_configuration_subscription_data(
     const std::string &dnn_selection_mode) {
   //TODO: should be implemented
@@ -1038,11 +1051,13 @@ void smf_app::convert_string_2_hex(std::string &input_str,
   memset(data, 0, input_str.length() + 1);
   memcpy((void*) data, (void*) input_str.c_str(), input_str.length());
 
+#if DEBUG_IS_ON
   Logger::smf_app().debug("Input: ");
   for (int i = 0; i < input_str.length(); i++) {
     printf("%02x ", data[i]);
   }
   printf("\n");
+#endif
   char *datahex = (char*) malloc(input_str.length() * 2 + 1);
   memset(datahex, 0, input_str.length() * 2 + 1);
 
@@ -1059,7 +1074,7 @@ void smf_app::convert_string_2_hex(std::string &input_str,
 }
 
 //---------------------------------------------------------------------------------------------
-unsigned char* smf_app::format_string_as_hex(std::string str) {
+unsigned char* smf_app::format_string_as_hex(std::string &str) {
   unsigned int str_len = str.length();
   char *data = (char*) malloc(str_len + 1);
   memset(data, 0, str_len + 1);
@@ -1071,11 +1086,11 @@ unsigned char* smf_app::format_string_as_hex(std::string str) {
   Logger::smf_app().debug("[Format string as Hex] Input string (%d bytes): %s ",
                           str_len, str.c_str());
   Logger::smf_app().debug("Data (formatted):");
-
+#if DEBUG_IS_ON
   for (int i = 0; i < str_len / 2; i++)
     printf(" %02x ", data_hex[i]);
   printf("\n");
-
+#endif
   //free memory
   free_wrapper((void**) &data);
 
@@ -1084,8 +1099,8 @@ unsigned char* smf_app::format_string_as_hex(std::string str) {
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::update_pdu_session_status(const scid_t scid,
-                                        const pdu_session_status_e status) {
+void smf_app::update_pdu_session_status(const scid_t &scid,
+                                        const pdu_session_status_e &status) {
   Logger::smf_app().info("Update PDU Session Status");
 
   //get the smf context
@@ -1140,8 +1155,8 @@ void smf_app::update_pdu_session_status(const scid_t scid,
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::update_pdu_session_upCnx_state(const scid_t scid,
-                                             const upCnx_state_e state) {
+void smf_app::update_pdu_session_upCnx_state(const scid_t &scid,
+                                             const upCnx_state_e &state) {
   Logger::smf_app().info("Update UpCnx_State");
 
   //get the smf context
@@ -1199,7 +1214,7 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
 }
 
 //---------------------------------------------------------------------------------------------
-n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(std::string n2_info_type) {
+n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(std::string &n2_info_type) {
   std::size_t number_of_types = n2_sm_info_type_e2str.size();
   for (auto i = 0; i < number_of_types; ++i) {
     if (n2_info_type.compare(n2_sm_info_type_e2str[i]) == 0) {

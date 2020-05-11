@@ -142,8 +142,7 @@ static const std::vector<std::string> session_management_procedures_type_e2str =
         "PDU_SESSION_RELEASE_UE_REQUESTED_STEP2",
         "PDU_SESSION_RELEASE_UE_REQUESTED_STEP3",
         "PDU_SESSION_RELEASE_SMF_INITIATED",
-        "PDU_SESSION_RELEASE_AMF_INITIATED",
-        "PDU_SESSION_RELEASE_AN_INITIATED",
+        "PDU_SESSION_RELEASE_AMF_INITIATED", "PDU_SESSION_RELEASE_AN_INITIATED",
         "PDU_SESSION_TEST"
 
     };
@@ -189,5 +188,9 @@ static const std::vector<std::string> multipart_related_content_part_e2str = {
 
 //for CURL
 #define AMF_CURL_TIMEOUT_MS 100L
-
+#define AMF_NUMBER_RETRIES 3
+#define UDM_CURL_TIMEOUT_MS 100L
+#define UDM_NUMBER_RETRIES 3
+//for N1N2
+#define BUF_LEN 512
 #endif

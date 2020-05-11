@@ -77,8 +77,6 @@ int smf_config::finalize() {
     ue_pool_network[i].s_addr = htonl(network_hbo);
     ue_pool_netmask[i].s_addr = htonl(netmask_hbo);
   }
-  // "TODO"
-  //pgw_pcef_emulation_init(config_pP);
   Logger::smf_app().info("Finalized config");
   return 0;
 }
@@ -97,7 +95,8 @@ int smf_config::load_thread_sched_params(const Setting &thread_sched_params_cfg,
   try {
     std::string thread_rd_sched_policy;
     thread_sched_params_cfg.lookupValue(
-        SMF_CONFIG_STRING_THREAD_RD_SCHED_POLICY, thread_rd_sched_policy);
+    SMF_CONFIG_STRING_THREAD_RD_SCHED_POLICY,
+                                        thread_rd_sched_policy);
     util::trim(thread_rd_sched_policy);
     if (boost::iequals(thread_rd_sched_policy, "SCHED_OTHER")) {
       cfg.sched_policy = SCHED_OTHER;
@@ -122,7 +121,8 @@ int smf_config::load_thread_sched_params(const Setting &thread_sched_params_cfg,
 
   try {
     thread_sched_params_cfg.lookupValue(
-        SMF_CONFIG_STRING_THREAD_RD_SCHED_PRIORITY, cfg.sched_priority);
+    SMF_CONFIG_STRING_THREAD_RD_SCHED_PRIORITY,
+                                        cfg.sched_priority);
     if ((cfg.sched_priority > 99) || (cfg.sched_priority < 1)) {
       Logger::smf_app().error(
           "thread_rd_sched_priority: %d, must be in interval [1..99] in config file",
@@ -332,7 +332,7 @@ int smf_config::load(const string &config_file) {
           boost::token_compress_on);
       if (ips.size() != 2) {
         Logger::smf_app().error("Bad value %s : %s in config file %s",
-                                SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER,
+        SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER,
                                 ipv4_range.c_str(), config_file.c_str());
         throw("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER, ipv4_range
             .c_str(), config_file.c_str());
@@ -382,8 +382,8 @@ int smf_config::load(const string &config_file) {
           boost::token_compress_on);
       if (ips6.size() != 2) {
         Logger::smf_app().error("Bad value %s : %s in config file %s",
-                                SMF_CONFIG_STRING_PREFIX, ipv6_prefix.c_str(),
-                                config_file.c_str());
+        SMF_CONFIG_STRING_PREFIX,
+                                ipv6_prefix.c_str(), config_file.c_str());
         throw("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_PREFIX, ipv6_prefix
             .c_str(), config_file.c_str());
       }
@@ -506,19 +506,6 @@ int smf_config::load(const string &config_file) {
       force_push_pco = false;
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_UE_MTU, ue_mtu);
-
-    const Setting &pcef_cfg = smf_cfg[SMF_CONFIG_STRING_PCEF];
-    unsigned int apn_ambr = 0;
-    if (!(pcef_cfg.lookupValue(SMF_CONFIG_STRING_APN_AMBR_UL, apn_ambr))) {
-      Logger::smf_app().error(SMF_CONFIG_STRING_APN_AMBR_UL "failed");
-      throw(SMF_CONFIG_STRING_APN_AMBR_UL "failed");
-    }
-    pcef.apn_ambr_ul = apn_ambr;
-    if (!(pcef_cfg.lookupValue(SMF_CONFIG_STRING_APN_AMBR_DL, apn_ambr))) {
-      Logger::smf_app().error(SMF_CONFIG_STRING_APN_AMBR_DL "failed");
-      //throw (SMF_CONFIG_STRING_APN_AMBR_DL "failed");
-    }
-    pcef.apn_ambr_dl = apn_ambr;
 
     const Setting &amf_cfg = smf_cfg[SMF_CONFIG_STRING_AMF];
     struct in_addr amf_ipv4_addr;
@@ -680,11 +667,7 @@ void smf_config::display() {
                              apn[i].pool_id_iv6);
     }
   }
-  Logger::smf_app().info("- PCEF support (in development)");
-  Logger::smf_app().info("    APN AMBR UL ..........: %lu  (Kilo bits/s)",
-                         pcef.apn_ambr_ul);
-  Logger::smf_app().info("    APN AMBR DL ..........: %lu  (Kilo bits/s)",
-                         pcef.apn_ambr_dl);
+
   Logger::smf_app().info("- Helpers:");
   Logger::smf_app().info("    Push PCO (DNS+MTU) ........: %s",
                          force_push_pco == 0 ? "false" : "true");
@@ -760,15 +743,15 @@ smf_config::~smf_config() {
 //------------------------------------------------------------------------------
 bool smf_config::is_dotted_dnn_handled(
     const std::string &dnn, const pdu_session_type_t &pdn_session_type) {
-  Logger::smf_app().debug("requested dnn: %s", dnn.c_str());
+  Logger::smf_app().debug("Requested DNN: %s", dnn.c_str());
   for (int i = 0; i < smf_cfg.num_apn; i++) {
-    Logger::smf_app().debug("apn_label: %s, apn: %s",
+    Logger::smf_app().debug("DNN label: %s, dnn: %s",
                             smf_cfg.apn[i].apn_label.c_str(),
                             smf_cfg.apn[i].apn.c_str());
     //if (0 == dnn.compare(smf_cfg.apn[i].apn_label)) {
     if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
       Logger::smf_app().debug("DNN matched!");
-      Logger::smf_app().debug("pdu session type %d, pdn_type %d",
+      Logger::smf_app().debug("PDU Session Type %d, PDN Type %d",
                               pdn_session_type.pdu_session_type,
                               smf_cfg.apn[i].pdn_type.pdn_type);
       if (pdn_session_type.pdu_session_type

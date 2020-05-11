@@ -46,8 +46,6 @@ class smf_n11 {
   std::thread::id thread_id;
   std::thread thread;
 
-  void handle_receive_sm_data_notification();
-
  public:
   smf_n11();
   smf_n11(smf_n11 const&) = delete;
@@ -56,24 +54,31 @@ class smf_n11 {
   /*
    * Send N1N2 Message Transfer Request to AMF
    * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res: Content of message to be sent
-   *
+   * @return void
    */
   void send_n1n2_message_transfer_request(
       std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
 
   /*
+   * Send N1N2 Message Transfer Request to AMF
+   * @param [std::shared_ptr<itti_nx_trigger_pdu_session_modification>] sm_context_res: Content of message to be sent
+   * @return void
+   */
+  void send_n1n2_message_transfer_request(
+      std::shared_ptr<itti_nx_trigger_pdu_session_modification> sm_context_res);
+
+  /*
    * Send update session response to AMF
    * @param [std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res] sm_context_res
-   *
+   * @return void
    */
-
   void send_pdu_session_update_sm_context_response(
       std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res);
 
   /*
    * Send N1N2 Message Transfer Request to AMF
    * @param [std::shared_ptr<itti_n11_modify_session_request_smf_requested>] sm_context_mod: Content of message to be sent
-   *
+   * @return void
    */
   void send_n1n2_message_transfer_request(
       std::shared_ptr<itti_n11_modify_session_request_smf_requested> sm_context_mod);
@@ -83,7 +88,7 @@ class smf_n11 {
    * @param [Pistache::Http::ResponseWriter] httpResponse
    * @param [ oai::smf_server::model::SmContextUpdateError] SmContextUpdateError
    * @param [Pistache::Http::Code] code, response code
-   *
+   * @return void
    */
   void send_pdu_session_update_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
@@ -95,7 +100,7 @@ class smf_n11 {
    * @param [Pistache::Http::ResponseWriter] httpResponse
    * @param [ oai::smf_server::model::SmContextUpdatedData] smContextUpdatedData
    * @param [Pistache::Http::Code] code, response code
-   *
+   * @return void
    */
   void send_pdu_session_update_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
@@ -107,7 +112,7 @@ class smf_n11 {
    * @param [Pistache::Http::ResponseWriter] httpResponse
    * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
    * @param [Pistache::Http::Code] code, response code
-   *
+   * @return void
    */
   void send_pdu_session_create_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
@@ -120,7 +125,7 @@ class smf_n11 {
    * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
    * @param [Pistache::Http::Code] code, response code
    * @param [std::string] n1_sm_msg, N1 SM message content
-   *
+   * @return void
    */
   void send_pdu_session_create_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
@@ -133,7 +138,7 @@ class smf_n11 {
    * @param [ oai::smf_server::model::SmContextUpdateError] smContextUpdateError
    * @param [Pistache::Http::Code] code, response code
    * @param [std::string] n1_sm_msg, N1 SM message content
-   *
+   * @return void
    */
   void send_pdu_session_update_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
@@ -145,7 +150,7 @@ class smf_n11 {
    * @param [Pistache::Http::ResponseWriter] httpResponse
    * @param [ oai::smf_server::model::SmContextCreatedData] smContextCreatedData
    * @param [Pistache::Http::Code] code, response code
-   *
+   * @return void
    */
   void send_pdu_session_create_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
@@ -156,7 +161,7 @@ class smf_n11 {
    * Send release session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
    * @param [Pistache::Http::Code] code, response code
-   *
+   * @return void
    */
   void send_pdu_session_release_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse, Pistache::Http::Code code);
@@ -166,7 +171,7 @@ class smf_n11 {
    * @param [Pistache::Http::ResponseWriter] httpResponse
    * @param [oai::smf_server::model::ProblemDetails] problem
    * @param [Pistache::Http::Code] code, response code
-   *
+   * @return void
    */
   void send_pdu_session_release_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
@@ -180,7 +185,7 @@ class smf_n11 {
    * @param [std::string] boundary: Boundary of multipart/related msg
    * @param [std::string] n1_message: N1 (NAS) part
    * @param [std::string] n2_message: N2 (NGAP) part
-   *
+   * @return void
    */
   void create_multipart_related_content(std::string &body,
                                         std::string &json_part,
@@ -195,7 +200,7 @@ class smf_n11 {
    * @param [std::string] boundary: Boundary of multipart/related msg
    * @param [std::string] message: N1 (NAS) or N2 (NGAP) part
    * @param [uint8_t] content_type: 1 for NAS content, else NGAP content
-   *
+   * @return void
    */
   void create_multipart_related_content(
       std::string &body, std::string &json_part, std::string &boundary,
