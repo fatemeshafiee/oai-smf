@@ -363,7 +363,8 @@ class smf_app {
    * @param [std::shared_ptr<smf_context_ref> &] scf : Shared_ptr to a SMF Context Reference
    * @return bool: True if SMF Context Reference found, otherwise return false
    */
-  bool scid_2_smf_context(const scid_t &scid, std::shared_ptr<smf_context_ref> & scf) const;
+  bool scid_2_smf_context(const scid_t &scid,
+                          std::shared_ptr<smf_context_ref> &scf) const;
 
   /*
    * Handle PDUSession_CreateSMContextRequest from AMF

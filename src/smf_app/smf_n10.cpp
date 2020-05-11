@@ -142,28 +142,24 @@ bool smf_n10::get_sm_data(
     while (numRetries < UDM_NUMBER_RETRIES) {
       res = curl_easy_perform(curl);
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-      Logger::smf_n10().debug("Response from UDM, HTTP Code: %d ",
-                              httpCode);
+      Logger::smf_n10().debug("Response from UDM, HTTP Code: %d ", httpCode);
 
       if (static_cast<http_response_codes_e>(httpCode)
           == http_response_codes_e::HTTP_RESPONSE_CODE_OK) {
-        Logger::smf_n10().debug(
-            "Got successful response from UDM, URL: %s ",
-            url.c_str());
+        Logger::smf_n10().debug("Got successful response from UDM, URL: %s ",
+                                url.c_str());
         //Logger::smf_n10().debug("[get_sm_data] Http Data from UDM: %s ", *httpData.get());
         try {
           jsonData = nlohmann::json::parse(*httpData.get());
           //curl_easy_cleanup(curl);
           break;
         } catch (json::exception &e) {
-          Logger::smf_n10().warn(
-              "Could not parse json data from UDM");
+          Logger::smf_n10().warn("Could not parse json data from UDM");
         }
         numRetries++;
       } else {
         Logger::smf_n10().warn(
-            "Could not get response from UDM, URL %s, retry ...",
-            url.c_str());
+            "Could not get response from UDM, URL %s, retry ...", url.c_str());
         //retry
         numRetries++;
       }
@@ -173,8 +169,7 @@ bool smf_n10::get_sm_data(
 
   //process the response
   if (!jsonData.empty()) {
-    Logger::smf_n10().debug("Response from UDM %s",
-                            jsonData.dump().c_str());
+    Logger::smf_n10().debug("Response from UDM %s", jsonData.dump().c_str());
 
     //retrieve SessionManagementSubscription and store in the context
     for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin();
@@ -242,9 +237,8 @@ bool smf_n10::get_sm_data(
 
         subscription->insert_dnn_configuration(it.key(), dnn_configuration);
       } catch (nlohmann::json::exception &e) {
-        Logger::smf_n10().warn(
-            "Exception message %s, exception id %d ", e.what(),
-            e.id);
+        Logger::smf_n10().warn("Exception message %s, exception id %d ",
+                               e.what(), e.id);
         return false;
       }
     }

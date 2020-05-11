@@ -593,8 +593,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //check pdu session id
   if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED )
       || (pdu_session_id > PDU_SESSION_IDENTITY_LAST )) {
-    Logger::smf_app().warn("Invalid PDU Session ID value (%d)",
-                           pdu_session_id);
+    Logger::smf_app().warn("Invalid PDU Session ID value (%d)", pdu_session_id);
     //section 7.3.2@3GPP TS 24.501; NAS N1 SM message: ignore the message
     return;
   }
@@ -1012,9 +1011,10 @@ bool smf_app::is_scid_2_smf_context(const scid_t &scid) const {
 }
 
 //------------------------------------------------------------------------------
-bool smf_app::scid_2_smf_context(const scid_t &scid, std::shared_ptr<smf_context_ref> & scf) const {
+bool smf_app::scid_2_smf_context(const scid_t &scid,
+                                 std::shared_ptr<smf_context_ref> &scf) const {
   std::shared_lock lock(m_scid2smf_context);
-  if ( scid2smf_context.count(scid) > 0 ) {
+  if (scid2smf_context.count(scid) > 0) {
     scf = scid2smf_context.at(scid);
     return true;
   }

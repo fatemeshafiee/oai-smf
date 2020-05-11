@@ -286,6 +286,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
           sm_msg->pdu_session_establishment_accept.dnn->slen);
       Logger::smf_app().debug("DNN %s", dnn_str.c_str());
 
+      Logger::smf_app().info("Encode PDU Session Establishment Accept");
       //Encode NAS message
       bytes = nas_message_encode(data, &nas_msg,
                                  sizeof(data)/*don't know the size*/, nullptr);

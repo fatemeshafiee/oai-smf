@@ -95,7 +95,8 @@ int smf_config::load_thread_sched_params(const Setting &thread_sched_params_cfg,
   try {
     std::string thread_rd_sched_policy;
     thread_sched_params_cfg.lookupValue(
-        SMF_CONFIG_STRING_THREAD_RD_SCHED_POLICY, thread_rd_sched_policy);
+    SMF_CONFIG_STRING_THREAD_RD_SCHED_POLICY,
+                                        thread_rd_sched_policy);
     util::trim(thread_rd_sched_policy);
     if (boost::iequals(thread_rd_sched_policy, "SCHED_OTHER")) {
       cfg.sched_policy = SCHED_OTHER;
@@ -120,7 +121,8 @@ int smf_config::load_thread_sched_params(const Setting &thread_sched_params_cfg,
 
   try {
     thread_sched_params_cfg.lookupValue(
-        SMF_CONFIG_STRING_THREAD_RD_SCHED_PRIORITY, cfg.sched_priority);
+    SMF_CONFIG_STRING_THREAD_RD_SCHED_PRIORITY,
+                                        cfg.sched_priority);
     if ((cfg.sched_priority > 99) || (cfg.sched_priority < 1)) {
       Logger::smf_app().error(
           "thread_rd_sched_priority: %d, must be in interval [1..99] in config file",
@@ -330,7 +332,7 @@ int smf_config::load(const string &config_file) {
           boost::token_compress_on);
       if (ips.size() != 2) {
         Logger::smf_app().error("Bad value %s : %s in config file %s",
-                                SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER,
+        SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER,
                                 ipv4_range.c_str(), config_file.c_str());
         throw("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER, ipv4_range
             .c_str(), config_file.c_str());
@@ -380,8 +382,8 @@ int smf_config::load(const string &config_file) {
           boost::token_compress_on);
       if (ips6.size() != 2) {
         Logger::smf_app().error("Bad value %s : %s in config file %s",
-                                SMF_CONFIG_STRING_PREFIX, ipv6_prefix.c_str(),
-                                config_file.c_str());
+        SMF_CONFIG_STRING_PREFIX,
+                                ipv6_prefix.c_str(), config_file.c_str());
         throw("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_PREFIX, ipv6_prefix
             .c_str(), config_file.c_str());
       }

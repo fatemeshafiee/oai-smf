@@ -186,7 +186,6 @@ class session_update_sm_context_procedure : public smf_procedure {
 
 };
 
-
 //------------------------------------------------------------------------------
 class session_release_sm_context_procedure : public smf_procedure {
  public:
