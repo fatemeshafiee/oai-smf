@@ -741,15 +741,15 @@ smf_config::~smf_config() {
 //------------------------------------------------------------------------------
 bool smf_config::is_dotted_dnn_handled(
     const std::string &dnn, const pdu_session_type_t &pdn_session_type) {
-  Logger::smf_app().debug("requested dnn: %s", dnn.c_str());
+  Logger::smf_app().debug("Requested DNN: %s", dnn.c_str());
   for (int i = 0; i < smf_cfg.num_apn; i++) {
-    Logger::smf_app().debug("apn_label: %s, apn: %s",
+    Logger::smf_app().debug("DNN label: %s, dnn: %s",
                             smf_cfg.apn[i].apn_label.c_str(),
                             smf_cfg.apn[i].apn.c_str());
     //if (0 == dnn.compare(smf_cfg.apn[i].apn_label)) {
     if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
       Logger::smf_app().debug("DNN matched!");
-      Logger::smf_app().debug("pdu session type %d, pdn_type %d",
+      Logger::smf_app().debug("PDU Session Type %d, PDN Type %d",
                               pdn_session_type.pdu_session_type,
                               smf_cfg.apn[i].pdn_type.pdn_type);
       if (pdn_session_type.pdu_session_type

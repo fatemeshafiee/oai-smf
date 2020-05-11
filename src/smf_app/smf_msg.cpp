@@ -457,11 +457,11 @@ void pdu_session_update_sm_context_response::add_qos_flow_context_updated(
         std::pair<uint8_t, qos_flow_context_updated>((uint8_t) flow.qfi.qfi,
                                                      flow));
     Logger::smf_app().trace(
-        "pdu_session_update_sm_context_response::add_qos_flow_context(%d) success",
+        "A QoS Flow Context (QFI %d) has been added successfully",
         flow.qfi.qfi);
   } else {
     Logger::smf_app().error(
-        "pdu_session_update_sm_context_response::add_qos_flow_context(%d) failed, invalid QFI",
+        "Failed to add a QoS Flow Context (QFI %d), invalid QFI",
         flow.qfi.qfi);
   }
 }

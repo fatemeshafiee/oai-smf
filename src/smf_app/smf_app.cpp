@@ -494,12 +494,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  Logger::smf_app().debug(
-      "NAS information: Extended Protocol Discriminator %d, Security Header Type %d, Message Type %d",
-      decoded_nas_msg.header.extended_protocol_discriminator,
-      decoded_nas_msg.header.security_header_type,
-      decoded_nas_msg.plain.sm.header.message_type);
-
   //Extended protocol discriminator (Mandatory)
   smreq->req.set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
   //PDUSessionIdentity
@@ -517,7 +511,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       == PDU_SESSION_ESTABLISHMENT_REQUEST) {
     //TODO: Disable this command temporarily since can't get this info from tester
     Logger::smf_app().debug(
-        "NAS, pdu_session_type %d",
+        "PDU Session Type %d",
         decoded_nas_msg.plain.sm.pdu_session_establishment_request
             ._pdusessiontype.pdu_session_type_value);
     pdu_session_type.pdu_session_type = decoded_nas_msg.plain.sm
@@ -565,7 +559,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   uint8_t message_type = decoded_nas_msg.plain.sm.header.message_type;
   std::string request_type = smreq->req.get_request_type();
   Logger::smf_app().info(
-      "Handle a PDU Session Create SM Context Request message from AMF, supi " SUPI_64_FMT ", dnn %s, snssai_sst %d, snssai_sd %s",
+      "Handle a PDU Session Create SM Context Request message from AMF, SUPI " SUPI_64_FMT ", DNN %s, SNSSAI SST %d, SD %s",
       supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str());
 
   //If no DNN information from UE, set to default value
@@ -577,7 +571,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //check pti
   if ((pti.procedure_transaction_id == PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED )
       || (pti.procedure_transaction_id > PROCEDURE_TRANSACTION_IDENTITY_LAST )) {
-    Logger::smf_app().warn(" Invalid PTI value (pti = %d)",
+    Logger::smf_app().warn("Invalid PTI value (pti = %d)",
                            pti.procedure_transaction_id);
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
@@ -599,7 +593,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //check pdu session id
   if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED )
       || (pdu_session_id > PDU_SESSION_IDENTITY_LAST )) {
-    Logger::smf_app().warn(" Invalid PDU Session ID value (%d)",
+    Logger::smf_app().warn("Invalid PDU Session ID value (%d)",
                            pdu_session_id);
     //section 7.3.2@3GPP TS 24.501; NAS N1 SM message: ignore the message
     return;
@@ -630,7 +624,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //check request type
   if (request_type.compare("INITIAL_REQUEST") != 0) {
     Logger::smf_app().warn("Invalid request type (request type = %s)",
-                           "INITIAL_REQUEST");
+                           request_type.c_str());
     //TODO:
     //return
   }
@@ -703,7 +697,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     std::shared_ptr<session_management_subscription> subscription =
         std::shared_ptr<session_management_subscription>(s);
     if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
-      Logger::smf_app().debug("Update DNN subscription info");
       //update dnn_context with subscription info
       sc.get()->insert_dnn_subscription(snssai, subscription);
     } else {
@@ -782,7 +775,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     scf = scid_2_smf_context(scid);
   } else {
     Logger::smf_app().warn(
-        "Context associated with this id " SCID_FMT " does not exit!", scid);
+        "SM Context associated with this id " SCID_FMT " does not exit!", scid);
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
     smContextUpdateError.setError(problem_details);

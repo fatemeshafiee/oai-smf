@@ -443,7 +443,7 @@ void smf_n11::send_n1n2_message_transfer_request(
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_update_sm_context_response(
     std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res) {
-  Logger::smf_n11().debug("Send PDUSessionUpdateContextResponse to AMF ");
+  Logger::smf_n11().debug("Send PDUSession_UpdateSMContext Response to AMF.");
 
   switch (sm_context_res->session_procedure_type) {
 
@@ -591,7 +591,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     Pistache::Http::Code code) {
 
   Logger::smf_n11().debug(
-      "[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
+      "Send PDUSession_UpdateSMContext Response to AMF.");
   nlohmann::json json_data = { };
   to_json(json_data, smContextUpdateError);
 
@@ -611,7 +611,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
     Pistache::Http::Code code, std::string &n1_sm_msg) {
   Logger::smf_n11().debug(
-      "[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
+      "Send PDUSession_UpdateSMContext Response to AMF.");
 
   std::string boundary = "----Boundary";
   nlohmann::json json_part = { };
@@ -634,7 +634,7 @@ void smf_n11::send_pdu_session_create_sm_context_response(
     oai::smf_server::model::SmContextCreateError &smContextCreateError,
     Pistache::Http::Code code, std::string &n1_sm_msg) {
   Logger::smf_n11().debug(
-      "[SMF N11] Send PDUSessionCreateContextResponse to AMF!");
+      "Send PDUSession_CreateSMContext Response to AMF.");
 
   std::string boundary = "----Boundary";
   nlohmann::json json_part = { };
@@ -657,7 +657,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     oai::smf_server::model::SmContextUpdatedData &smContextUpdatedData,
     Pistache::Http::Code code) {
   Logger::smf_n11().debug(
-      "[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
+      "Send PDUSession_UpdateSMContext Response to AMF.");
   nlohmann::json json_data = { };
   to_json(json_data, smContextUpdatedData);
   if (!json_data.empty()) {
@@ -676,7 +676,7 @@ void smf_n11::send_pdu_session_create_sm_context_response(
     oai::smf_server::model::SmContextCreatedData &smContextCreatedData,
     Pistache::Http::Code code) {
   Logger::smf_n11().debug(
-      "[SMF N11] Send PDUSessionUpdateContextResponse to AMF!");
+      "Send PDUSession_CreateSMContext Response to AMF.");
   nlohmann::json json_data = { };
   to_json(json_data, smContextCreatedData);
   if (!json_data.empty()) {
@@ -699,7 +699,7 @@ void smf_n11::send_n1n2_message_transfer_request(
 void smf_n11::send_pdu_session_release_sm_context_response(
     Pistache::Http::ResponseWriter &httpResponse, Pistache::Http::Code code) {
   Logger::smf_n11().debug(
-      "[SMF N11] Send PDUSessionReleaseContextResponse to AMF!");
+      "Send PDUSession_ReleaseSMContext Response to AMF.");
   httpResponse.send(code);
 }
 
@@ -710,7 +710,7 @@ void smf_n11::send_pdu_session_release_sm_context_response(
     Pistache::Http::Code code) {
 
   Logger::smf_n11().debug(
-      "[SMF N11] Send PDUSessionReleaseContextResponse to AMF!");
+      "Send PDUSession_ReleaseSMContext Response to AMF.");
   nlohmann::json json_data = { };
   to_json(json_data, problem);
   if (!json_data.empty()) {

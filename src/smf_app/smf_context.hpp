@@ -201,6 +201,13 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   void set_default_qos_flow(const pfcp::qfi_t &qfi);
 
   /*
+   * Get the default QoS flow of this PDU Session
+   * @param [smf_qos_flow &] flow: Default QoS flow
+   * @return bool: Return true if the default QoS flow exist
+   */
+  bool get_default_qos_flow(smf_qos_flow &flow);
+
+  /*
    * Find a QoS flow by its PDR ID
    * @param [const pfcp::pdr_id_t &] pdr_id: PDR ID
    * @param [smf_qos_flow &] flow: Flow to be returned if found

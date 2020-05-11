@@ -423,9 +423,7 @@ class pdu_session_release_sm_context_request : public pdu_session_msg {
 
   }
   ;
-
  private:
-
 };
 
 class pdu_session_release_sm_context_response : public pdu_session_msg {

@@ -184,7 +184,7 @@ void IndividualSMContextApi::update_sm_context_handler(
   free_wrapper((void**) &data);
 
   uint8_t size = g_parts.size();
-  Logger::smf_api_server().debug("Number of g_parts %d", g_parts.size());
+  Logger::smf_api_server().debug("Number of MIME parts %d", g_parts.size());
   part p0 = { };
   part p1 = { };
 
