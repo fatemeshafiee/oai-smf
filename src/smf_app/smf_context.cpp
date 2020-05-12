@@ -2515,8 +2515,6 @@ std::string dnn_context::toString() const {
   s.append("DNN CONTEXT:\n");
   s.append("\tIn use:\t\t\t\t").append(std::to_string(in_use)).append("\n");
   s.append("\tDNN:\t\t\t\t").append(dnn_in_use).append("\n");
-  //s.append("\tAPN AMBR Bitrate Uplink:\t").append(std::to_string(apn_ambr.br_ul)).append("\n");
-  //s.append("\tAPN AMBR Bitrate Downlink:\t").append(std::to_string(apn_ambr.br_dl)).append("\n");
   for (auto it : pdu_sessions) {
     s.append(it->toString());
   }

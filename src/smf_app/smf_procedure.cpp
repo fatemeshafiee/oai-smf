@@ -971,63 +971,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
           .c_str());
 
   switch (session_procedure_type) {
-    /*
-     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
-     if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
-     Logger::smf_app().info(
-     "Service Request (step 1) accepted by UPF");
-     //delete AN Info
-
-     std::map<uint8_t, qos_flow_context_updated> qos_flow_context_to_be_updateds =
-     { };
-     n11_triggered_pending->res.get_all_qos_flow_context_updateds(
-     qos_flow_context_to_be_updateds);
-     n11_triggered_pending->res.remove_all_qos_flow_context_updateds();
-
-     for (auto it : qos_flow_context_to_be_updateds)
-     Logger::smf_app().debug("QoS Flow context to be modified QFI %d",
-     it.first);
-
-     for (auto it : qos_flow_context_to_be_updateds) {
-     smf_qos_flow flow = { };
-     if (!sps->get_qos_flow(it.second.qfi, flow)) {  //no QoS flow found
-     Logger::smf_app().error(
-     "Could not found any QoS flow with QFI %d",
-     it.first);
-     continue;
-     }
-     //if FAR DL exist -> remove it
-     if ((flow.far_id_dl.first) && (flow.far_id_dl.second.far_id)) {
-     Logger::smf_app().debug(
-     "FAR DL " "0x%" PRIx32 " has been removed",
-     flow.far_id_dl.second.far_id);
-     flow.far_id_dl.first = false;
-     flow.far_id_dl.second.far_id = 0;
-     }
-     //remove PDR DL if exist
-     if (flow.pdr_id_dl.rule_id) {
-     Logger::smf_app().debug(
-     "PDR DL " "0x%" PRIx16 " has been removed",
-     flow.pdr_id_dl.rule_id);
-     flow.pdr_id_dl.rule_id = 0;
-     }
-     // Update QoS Flow
-     smf_qos_flow flow2 = flow;
-     sps->add_qos_flow(flow2);
-
-     qos_flow_context_updated qcu = { };
-     qcu.set_cause(REQUEST_ACCEPTED);
-
-     qcu.set_qfi(pfcp::qfi_t(it.first));
-     qcu.set_ul_fteid(flow.ul_fteid);
-     qcu.set_qos_profile(flow.qos_profile);
-     n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-
-     }
-     }
-     }
-     break;
-     */
     case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_SMF_REQUESTED:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_AN_REQUESTED:
@@ -1200,10 +1143,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
     //FOR TESTING PURPOSE
     case session_management_procedures_type_e::PDU_SESSION_TEST: {
-
-      //N1 SM: PDU Session Modification Command​
-      //N2 SM: PDU Session Resource Modify Request Transfer IE
-
       //N1 SM
       smf_n1_n2_inst.create_n1_sm_container(
           n11_triggered_pending->res, PDU_SESSION_MODIFICATION_REQUEST,
