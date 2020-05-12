@@ -415,8 +415,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //1- PDU Session Update SM Context Response (PDU Session Modification UE-Initiated procedure - step 1)
       //2- N1N2MessageTransfer Request (PDU Session Modification SMF-Requested, step 1 (from SMF to AMF)) ​
 
-      Logger::smf_app().debug(
-          "[Create N1 SM Message] PDU Session Modification Command");
+      Logger::smf_app().debug("PDU Session Modification Command");
       //case 1 (case2: need to be verified?)
       pdu_session_update_sm_context_response &sm_context_res =
           static_cast<pdu_session_update_sm_context_response&>(msg);
@@ -542,8 +541,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //1 - PDU Session Update SM Context Response (PDU Session Release UE-Initiated, step 1)
       //2 - N1N2MessageTransfer Request (PDU Session Release SMF-Requested, step 1)
 
-      Logger::smf_app().debug(
-          "[Create N1 SM Message] PDU Session Release Command");
+      Logger::smf_app().debug("PDU Session Release Command");
       //case 1 (case2: need to be verified?)
       pdu_session_update_sm_context_response &sm_context_res =
           static_cast<pdu_session_update_sm_context_response&>(msg);
@@ -567,9 +565,8 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //_5GSMCongestionReattemptIndicator
       // ExtendedProtocolConfigurationOptions
 
-      Logger::smf_app().debug("SM MSG, 5GSM Cause: 0x%x, %d",
-                              sm_msg->pdu_session_release_command._5gsmcause,
-                              static_cast<uint8_t>(sm_cause));
+      Logger::smf_app().debug("SM message, 5GSM Cause: 0x%x",
+                              sm_msg->pdu_session_release_command._5gsmcause);
 
       //Encode NAS message
       bytes = nas_message_encode(data, &nas_msg,
@@ -750,6 +747,13 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
                        pduSessionAggregateMaximumBitRate);
 
       //UPTransportLayerInformation
+      fteid_t ul_fteid = { };
+      ul_fteid.interface_type = qos_flow.ul_fteid.interface_type;
+      ul_fteid.v4 = qos_flow.ul_fteid.v4;
+
+      ul_fteid.teid_gre_key = htonl(qos_flow.ul_fteid.teid_gre_key);
+      ul_fteid.ipv4_address = qos_flow.ul_fteid.ipv4_address;
+
       Ngap_PDUSessionResourceSetupRequestTransferIEs_t *upTransportLayerInformation =
           nullptr;
       upTransportLayerInformation =
@@ -774,7 +778,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       memcpy(
           upTransportLayerInformation->value.choice.UPTransportLayerInformation
               .choice.gTPTunnel->transportLayerAddress.buf,
-          &qos_flow.ul_fteid.ipv4_address, 4);
+          &ul_fteid.ipv4_address, 4);
       upTransportLayerInformation->value.choice.UPTransportLayerInformation
           .choice.gTPTunnel->transportLayerAddress.bits_unused = 0;
 
@@ -786,7 +790,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       memcpy(
           upTransportLayerInformation->value.choice.UPTransportLayerInformation
               .choice.gTPTunnel->gTP_TEID.buf,
-          &qos_flow.ul_fteid.teid_gre_key, sizeof(struct in_addr));
+          &ul_fteid.teid_gre_key, sizeof(struct in_addr));
 
       ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list,
                        upTransportLayerInformation);
@@ -925,7 +929,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       //2 - N1N2MessageTransfer Request (PDU Session Modification procedure, SMF-requested, step 1)
 
       Logger::smf_app().debug(
-          "[Create N2 SM Information] NGAP PDU Session Resource Modify Request Transfer");
+          "NGAP PDU Session Resource Modify Request Transfer");
 
       pdu_session_update_sm_context_response &sm_context_res =
           static_cast<pdu_session_update_sm_context_response&>(msg);
@@ -935,16 +939,17 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       sm_context_res.get_all_qos_flow_context_updateds(qos_flows);
       for (std::map<uint8_t, qos_flow_context_updated>::iterator it = qos_flows
           .begin(); it != qos_flows.end(); ++it)
-        Logger::smf_app().debug("qos_flow_context_updated qfi %d", it->first);
+        Logger::smf_app().debug("QoS flow context to be updated with QFI %d",
+                                it->first);
       //TODO: support only 1 qos flow
       qos_flow_context_updated qos_flow = qos_flows.begin()->second;
 
       Logger::smf_app().debug(
-          "QoS Flow, UL gTP_TEID " "0x%" PRIx32 ", UL IP Address %s ",
+          "QoS Flow, UL F-TEID ID " "0x%" PRIx32 ", IP Address %s ",
           qos_flow.ul_fteid.teid_gre_key,
           conv::toString(qos_flow.ul_fteid.ipv4_address).c_str());
       Logger::smf_app().debug(
-          "QoS Flow, DL gTP_TEID " "0x%" PRIx32 ", DL IP Address %s",
+          "QoS Flow, DL F-TEID ID" "0x%" PRIx32 ", IP Address %s",
           qos_flow.dl_fteid.teid_gre_key,
           conv::toString(qos_flow.dl_fteid.ipv4_address).c_str());
 
@@ -994,6 +999,18 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
 
       //Ngap_UL_NGU_UP_TNLModifyList_t (included if the PDU Session modification was requested by the UE for a
       //PDU Session that has no established User Plane resources)
+      fteid_t ul_fteid = { };
+      ul_fteid.interface_type = qos_flow.ul_fteid.interface_type;
+      ul_fteid.v4 = qos_flow.ul_fteid.v4;
+      ul_fteid.teid_gre_key = htonl(qos_flow.ul_fteid.teid_gre_key);
+      ul_fteid.ipv4_address = qos_flow.ul_fteid.ipv4_address;
+
+      fteid_t dl_fteid = { };
+      dl_fteid.interface_type = qos_flow.dl_fteid.interface_type;
+      dl_fteid.v4 = qos_flow.dl_fteid.v4;
+      dl_fteid.teid_gre_key = htonl(qos_flow.dl_fteid.teid_gre_key);
+      dl_fteid.ipv4_address = qos_flow.dl_fteid.ipv4_address;
+
       Ngap_PDUSessionResourceModifyRequestTransferIEs_t *ul_NGU_UP_TNLModifyList =
           nullptr;
       ul_NGU_UP_TNLModifyList =
@@ -1016,7 +1033,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       memcpy(
           ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice
               .gTPTunnel->transportLayerAddress.buf,
-          &qos_flow.ul_fteid.ipv4_address, 4);
+          &ul_fteid.ipv4_address, 4);
       ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel
           ->transportLayerAddress.size = 4;
       ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel
@@ -1030,7 +1047,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       memcpy(
           ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice
               .gTPTunnel->gTP_TEID.buf,
-          &qos_flow.ul_fteid.teid_gre_key, sizeof(struct in_addr));
+          &ul_fteid.teid_gre_key, sizeof(struct in_addr));
 
       ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.present =
           Ngap_UPTransportLayerInformation_PR_gTPTunnel;
@@ -1041,7 +1058,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       memcpy(
           ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice
               .gTPTunnel->transportLayerAddress.buf,
-          &qos_flow.dl_fteid.ipv4_address, 4);
+          &dl_fteid.ipv4_address, 4);
       ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel
           ->transportLayerAddress.size = 4;
       ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel
@@ -1055,7 +1072,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       memcpy(
           ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice
               .gTPTunnel->gTP_TEID.buf,
-          &qos_flow.dl_fteid.teid_gre_key, 4);
+          &dl_fteid.teid_gre_key, 4);
       ASN_SEQUENCE_ADD(
           &ul_NGU_UP_TNLModifyList->value.choice.UL_NGU_UP_TNLModifyList.list,
           ngap_UL_NGU_UP_TNLModifyItem);

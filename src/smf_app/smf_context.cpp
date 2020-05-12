@@ -74,10 +74,12 @@ std::string smf_qos_flow::toString() const {
   s.append("\tFQI:\t\t\t\t").append(std::to_string((uint8_t) qfi.qfi)).append(
       "\n");
   s.append("\tUL FTEID:\t\t").append(ul_fteid.toString()).append("\n");
+  s.append("\tDL FTEID:\t\t").append(dl_fteid.toString()).append("\n");
   s.append("\tPDR ID UL:\t\t\t").append(std::to_string(pdr_id_ul.rule_id))
       .append("\n");
   s.append("\tPDR ID DL:\t\t\t").append(std::to_string(pdr_id_dl.rule_id))
       .append("\n");
+
   s.append("\tPrecedence:\t\t\t").append(std::to_string(precedence.precedence))
       .append("\n");
   if (far_id_ul.first) {
@@ -335,6 +337,8 @@ void smf_pdu_session::release_qos_rule_id(const uint8_t &rule_id) {
 //------------------------------------------------------------------------------
 std::string smf_pdu_session::toString() const {
   std::string s = { };
+  smf_qos_flow flow = { };
+
   s.append("PDN CONNECTION:\n");
   s.append("\tPDN type:\t\t\t").append(pdn_type.toString()).append("\n");
   if (ipv4)
@@ -343,9 +347,24 @@ std::string smf_pdu_session::toString() const {
   if (ipv6)
     s.append("\tPAA IPv6:\t\t\t").append(conv::toString(ipv6_address)).append(
         "\n");
-  s.append("\tDefault QFI:\t\t\t").append(std::to_string(default_qfi.qfi))
-      .append("\n");
+  if (default_qfi.qfi) {
+    s.append("\tDefault QFI:\t\t\t").append(std::to_string(default_qfi.qfi))
+        .append("\n");
+  } else {
+    s.append("\tDefault QFI:\t\t\t").append("No QFI available").append("\n");
+  }
+
   s.append("\tSEID:\t\t\t\t").append(std::to_string(seid)).append("\n");
+
+  if (default_qfi.qfi) {
+    s.append("Default ");
+    for (auto it : qos_flows) {
+      if (it.second.qfi == default_qfi.qfi) {
+        s.append(it.second.toString());
+      }
+    }
+  }
+
   return s;
 }
 
@@ -437,17 +456,17 @@ void smf_pdu_session::update_qos_rule(const QOSRulesIE &qos_rule) {
       qos_rules.insert(std::pair<uint8_t, QOSRulesIE>(rule_id, qos_rule));
       //marked to be synchronised with UE
       qos_rules_to_be_synchronised.push_back(rule_id);
-      Logger::smf_app().trace("smf_pdu_session::update_qos_rule(%d) success",
+      Logger::smf_app().trace("Update QoS rule (%d) success",
                               rule_id);
     } else {
       Logger::smf_app().error(
-          "smf_pdu_session::update_qos_rule(%d) failed, rule does not existed",
+          "Update QoS Rule (%d) failed, rule does not existed",
           rule_id);
     }
 
   } else {
     Logger::smf_app().error(
-        "smf_pdu_session::update_qos_rule(%d) failed, invalid Rule Id",
+        "Update QoS rule (%d) failed, invalid Rule Id",
         rule_id);
   }
 }
@@ -1354,13 +1373,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       return;
     }
 
-    Logger::smf_app().debug(
-        "NAS header information, extended_protocol_discriminator %d, security_header_type:%d",
-        decoded_nas_msg.header.extended_protocol_discriminator,
-        decoded_nas_msg.header.security_header_type);
-    Logger::smf_app().debug("NAS header information, Message Type %d",
-                            decoded_nas_msg.plain.sm.header.message_type);
-
     uint8_t message_type = decoded_nas_msg.plain.sm.header.message_type;
     switch (message_type) {
 
@@ -1527,7 +1539,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               }
             }
 
-            Logger::smf_app().debug("Add new QoS Flow with new QRI");
+            Logger::smf_app().debug("Add new QoS Flow with new QRI %d",
+                                    qos_rules_ie.qosruleidentifer);
             //mark this rule to be synchronised with the UE
             sp.get()->update_qos_rule(qos_rules_ie);
             //Add new QoS flow
@@ -1542,7 +1555,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
 
           } else {  //update existing QRI
-            Logger::smf_app().debug("Update existing QRI");
+            Logger::smf_app().debug("Update existing QRI %d",
+                                    qos_rules_ie.qosruleidentifer);
             qfi.qfi = qos_rules_ie.qosflowidentifer;
             if (sp.get()->get_qos_flow(qfi, qos_flow)) {
               sp.get()->update_qos_rule(qos_rules_ie);
@@ -1893,7 +1907,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         }
 
         //store AN Tunnel Info + list of accepted QFIs
-        fteid_t dl_teid;
+        fteid_t dl_teid = { };
         memcpy(
             &dl_teid.teid_gre_key,
             decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
@@ -1904,12 +1918,16 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
                 .choice.gTPTunnel->transportLayerAddress.buf,
             4);
-        Logger::smf_app().debug("DL GTP_F-TEID (AN F-TEID) " "0x%" PRIx32 " ",
-                                htonl(dl_teid.teid_gre_key));
+
+        dl_teid.teid_gre_key = ntohl(dl_teid.teid_gre_key);
+        dl_teid.interface_type = S1_U_ENODEB_GTP_U;
+        dl_teid.v4 = 1;  //Only V4 for now
+        smreq->req.set_dl_fteid(dl_teid);
+
+        Logger::smf_app().debug("DL GTP F-TEID (AN F-TEID) " "0x%" PRIx32 " ",
+                                dl_teid.teid_gre_key);
         Logger::smf_app().debug("uPTransportLayerInformation (AN IP Addr) %s",
                                 conv::toString(dl_teid.ipv4_address).c_str());
-
-        smreq->req.set_dl_fteid(dl_teid);
 
         for (int i = 0;
             i
@@ -1932,7 +1950,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //PDU Session Modification procedure (UE-initiated, Section 4.3.3.2@3GPP TS 23.502 or SMF-Requested)(Step 2)
       case n2_sm_info_type_e::PDU_RES_MOD_RSP: {
-        Logger::smf_app().info("PDU_RES_MOD_RSP");
         Logger::smf_app().info(
             "PDU Session Modification Procedure, processing N2 SM Information");
 
@@ -1971,12 +1988,11 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel
                 ->transportLayerAddress.buf,
             4);
-        smreq->req.set_dl_fteid(dl_teid);
 
-        Logger::smf_app().debug("gTP_TEID " "0x%" PRIx32 " ",
-                                htonl(dl_teid.teid_gre_key));
-        Logger::smf_app().debug("uPTransportLayerInformation IP Addr %s",
-                                conv::toString(dl_teid.ipv4_address).c_str());
+        dl_teid.teid_gre_key = ntohl(dl_teid.teid_gre_key);
+        dl_teid.interface_type = S1_U_ENODEB_GTP_U;
+        dl_teid.v4 = 1;  //Only v4 for now
+        smreq->req.set_dl_fteid(dl_teid);
 
         //list of Qos Flows which have been successfully setup or modified
         if (decoded_msg->qosFlowAddOrModifyResponseList) {
@@ -2006,7 +2022,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //PDU Session Release procedure (UE-initiated, Section 4.3.4.2@3GPP TS 23.502 or SMF-Requested)(Step 2)
       case n2_sm_info_type_e::PDU_RES_REL_RSP: {
-        Logger::smf_app().info("PDU_RES_REL_RSP");
         Logger::smf_app().info(
             "PDU Session Release (UE-initiated), processing N2 SM Information");
 

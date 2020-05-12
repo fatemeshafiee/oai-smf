@@ -669,6 +669,7 @@ int session_update_sm_context_procedure::run(
 
           send_n4 = true;
           flow.far_id_dl.first = true;
+          flow.dl_fteid = dl_fteid;
 
         } else {
           Logger::smf_app().debug("Create FAR DL");
@@ -713,6 +714,7 @@ int session_update_sm_context_procedure::run(
 
           flow.far_id_dl.first = true;
           flow.far_id_dl.second.far_id = far_id.far_id;
+          flow.dl_fteid = dl_fteid;
           Logger::smf_app().debug("FAR DL ID " "0x%" PRIx32 " ", far_id.far_id);
         }
 
@@ -777,7 +779,7 @@ int session_update_sm_context_procedure::run(
                                   pdr_id.rule_id);
         } else {
           Logger::smf_app().debug(
-              "Update FAR, PDR DL Rule Id " "0x%" PRIx16 ", 0x%" PRIx32 " ",
+              "Update FAR, PDR DL Rule Id " "0x%" PRIx16 ", FAR ID 0x%" PRIx32 " ",
               flow.pdr_id_dl.rule_id, flow.far_id_dl.second.far_id);
           /*
            // Update FAR
@@ -831,7 +833,9 @@ int session_update_sm_context_procedure::run(
         }
         // after a release flows
         if (not flow.ul_fteid.is_zero()) {
+        }
 
+        if (not flow.dl_fteid.is_zero()) {
         }
         // may be modified
         smf_qos_flow flow2 = flow;
@@ -1032,6 +1036,9 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
       ::fteid_t dl_fteid = { };
       n11_trigger->req.get_dl_fteid(dl_fteid);
+
+      Logger::smf_app().debug("AN F-TEID ID" "0x%" PRIx32 ", IP Addr %s",
+                              dl_fteid.teid_gre_key, conv::toString(dl_fteid.ipv4_address).c_str());
 
       std::map<uint8_t, qos_flow_context_updated> qos_flow_context_to_be_updateds =
           { };
