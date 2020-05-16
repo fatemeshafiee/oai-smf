@@ -64,6 +64,10 @@ extern "C" {
 
 using namespace smf;
 
+constexpr auto SECONDS_SINCE_FIRST_EPOCH = (2208988800ULL);
+constexpr auto NTP_SCALE_FRAC = (4294967296ULL);
+
+
 #define SYSTEM_CMD_MAX_STR_SIZE 512
 extern util::async_shell_cmd *async_shell_cmd_inst;
 extern smf_app *smf_app_inst;
@@ -299,12 +303,9 @@ void smf_app::start_upf_association(const pfcp::node_id_t &node_id) {
   std::time_t ellapsed = now_c - time_epoch;
   uint64_t recovery_time_stamp = ellapsed;
 
-  //char* dt = ctime(&now_c);
-  //Logger::smf_app().info( "Current time %s", dt);
-  // convert now to tm struct for UTC
-  tm *gmtm = gmtime(&now_c);
-  char *dt = asctime(gmtm);
-  Logger::smf_app().info("Current time (UTC) %s", dt);
+  std::time_t _timeEpoch = std::time(nullptr);
+  unsigned long tv_ntp;
+  tv_ntp = _timeEpoch + SECONDS_SINCE_FIRST_EPOCH;
 
   pfcp_associations::get_instance().add_peer_candidate_node(node_id);
   std::shared_ptr<itti_n4_association_setup_request> n4_asc = std::shared_ptr<
@@ -341,7 +342,7 @@ void smf_app::start_upf_association(const pfcp::node_id_t &node_id) {
   if (smf_cfg.get_pfcp_node_id(this_node_id) == RETURNok) {
     n4_asc->pfcp_ies.set(this_node_id);
     pfcp::recovery_time_stamp_t r = { .recovery_time_stamp =
-        (uint32_t) recovery_time_stamp };
+        (uint32_t) tv_ntp };
     n4_asc->pfcp_ies.set(r);
 
     //n4_asc->pfcp_ies.set(up_function_features);
