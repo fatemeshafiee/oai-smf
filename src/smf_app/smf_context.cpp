@@ -48,6 +48,7 @@ extern "C" {
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
 #include "Ngap_PDUSessionResourceModifyResponseTransfer.h"
 #include "Ngap_PDUSessionResourceReleaseResponseTransfer.h"
+#include "Ngap_PDUSessionResourceSetupUnsuccessfulTransfer.h"
 #include "Ngap_GTPTunnel.h"
 #include "Ngap_AssociatedQosFlowItem.h"
 #include "Ngap_QosFlowAddOrModifyResponseList.h"
@@ -1069,7 +1070,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   }
 
   //pending session??
-  //Step 4. check if supi is authenticated
 
   //TODO: if "Integrity Protection is required", check UE Integrity Protection Maximum Data Rate
   //TODO: (Optional) Secondary authentication/authorization
@@ -1953,6 +1953,48 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //need to update UPF accordingly
         update_upf = true;
+      }
+        break;
+
+        //PDU Session Establishment procedure
+        //PDU Session Resource Setup Unsuccessful Transfer
+      case n2_sm_info_type_e::PDU_RES_SETUP_FAIL: {
+        Logger::smf_app().info("PDU Session Resource Setup Unsuccessful Transfer");
+
+        //Ngap_PDUSessionResourceSetupUnsuccessfulTransfer
+        std::shared_ptr<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t> decoded_msg =
+            std::make_shared<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t>();
+        int decode_status = smf_n1_n2_inst.decode_n2_sm_information(
+            decoded_msg, n2_sm_information);
+
+        if (decode_status == RETURNerror) {
+          Logger::smf_app().warn(
+              "Decode N2 SM (Ngap_PDUSessionResourceSetupUnsuccessfulTransfer) failed!");
+          problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
+          smContextUpdateError.setError(problem_details);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden);
+          return;
+        }
+
+        //Logger::smf_app().info("PDU Session Resource Setup Unsuccessful Transfer cause %d",decoded_msg->cause );
+        problem_details.setCause(
+              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_UE_NOT_RESPONDING]);
+        smContextUpdateError.setError(problem_details);
+          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+          smContextUpdateError.setN1SmMsg(refToBinaryData);
+          //PDU Session Establishment Reject, 24.501 cause "#26 Insufficient resources"
+          smf_n1_n2_inst.create_n1_sm_container(
+              smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
+              cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);
+          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+          smf_n11_inst->send_pdu_session_update_sm_context_response(
+              smreq->http_response, smContextUpdateError,
+              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+          //TODO: Need release established resources?
+          return;
       }
         break;
 

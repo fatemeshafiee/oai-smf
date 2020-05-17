@@ -1684,3 +1684,34 @@ int smf_n1_n2::decode_n2_sm_information(
 
 }
 
+
+
+//---------------------------------------------------------------------------------------------
+int smf_n1_n2::decode_n2_sm_information(
+    std::shared_ptr<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t> &ngap_IE,
+    std::string &n2_sm_info) {
+  Logger::smf_app().info(
+      "Decode NGAP message (Ngap_PDUSessionResourceSetupUnsuccessfulTransfer) from N2 SM Information");
+
+  unsigned int data_len = n2_sm_info.length();
+  unsigned char *data = (unsigned char*) malloc(data_len + 1);
+  memset(data, 0, data_len + 1);
+  memcpy((void*) data, (void*) n2_sm_info.c_str(), data_len);
+
+  //Ngap_PDUSessionResourceSetupUnsuccessfulTransfer
+  asn_dec_rval_t rc = asn_decode(
+      nullptr, ATS_ALIGNED_CANONICAL_PER,
+      &asn_DEF_Ngap_PDUSessionResourceSetupUnsuccessfulTransfer,
+      (void**) &ngap_IE, (void*) data, data_len);
+
+  //free memory
+  free_wrapper((void**) &data);
+
+  if (rc.code != RC_OK) {
+    Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
+
+    return RETURNerror ;
+  }
+  return RETURNok ;
+
+}
