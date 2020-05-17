@@ -258,10 +258,10 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   upCnx_state_e get_upCnx_state() const;
 
   // Called by GTPV2-C DELETE_SESSION_REQUEST
-  // deallocate_ressources is for releasing LTE resources prior to the deletion of objects
+  // deallocate_ressources is for releasing related-resources prior to the deletion of objects
   // since shared_ptr is actually heavy used for handling objects, deletion of object instances cannot be always guaranteed
   // when removing them from a collection, so that is why actually the deallocation of resources is not done in the destructor of objects.
-  void deallocate_ressources(const std::string &apn);
+  void deallocate_ressources(const std::string &dnn);
 
   /*
    * Represent PDU Session as string to be printed
@@ -478,7 +478,6 @@ class dnn_context {
       pdu_sessions(),
       nssai(),
       dnn_in_use(dnn) {
-    // apn_ambr = {0};
   }
   dnn_context(dnn_context &b) = delete;
 
@@ -513,8 +512,7 @@ class dnn_context {
   std::string toString() const;
 
   bool in_use;
-  std::string dnn_in_use;   // The APN currently used, as received from the SGW.
-  //ambr_t  apn_ambr; // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
+  std::string dnn_in_use;   // The DNN currently used, as received from the AMF
   snssai_t nssai;
   std::vector<std::shared_ptr<smf_pdu_session>> pdu_sessions;  //Store all PDU Sessions associated with this DNN context
   mutable std::recursive_mutex m_context;
@@ -528,10 +526,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   smf_context()
       :
       m_context(),
-      imsi(),
-      imsi_unauthenticated_indicator(false),
       pending_procedures(),
-      msisdn(),
       dnn_subscriptions(),
       scid(0) {
   }
@@ -760,10 +755,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
-  imsi_t imsi;  // IMSI (International Mobile Subscriber Identity) is the subscriber permanent identity.
-  bool imsi_unauthenticated_indicator;  // This is an IMSI indicator to show the IMSI is unauthenticated.
-  // TO BE CHECKED me_identity_t    me_identity;       // Mobile Equipment Identity (e.g. IMEI/IMEISV).
-  msisdn_t msisdn;  // The basic MSISDN of the UE. The presence is dictated by its storage in the HSS.
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
   // snssai-sst <-> session management subscription
   std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;

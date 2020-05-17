@@ -363,62 +363,62 @@ std::string Utility::epc(const unsigned char *plmnid) {
   return epc(mnc, mcc);
 }
 
-std::string Utility::apn_fqdn(const char *apnoi, const char *mnc,
+std::string Utility::dnn_fqdn(const char *apnoi, const char *mnc,
                               const char *mcc) {
   std::string s;
 
-  // '(.+)\.apn\.epc\.mnc(\d{3})\.mcc(\d{3})\.3gppnetworks\.org$'
-  s.append(apnoi).append(".apn.epc.").APPEND_MNC( mnc ).APPEND_MCC( mcc ).
+  // '(.+)\.dnn\.epc\.mnc(\d{3})\.mcc(\d{3})\.3gppnetworks\.org$'
+  s.append(apnoi).append(".dnn.epc.").APPEND_MNC( mnc ).APPEND_MCC( mcc ).
       APPEND_3GPPNETWORK;
 
   return s;
 }
 
-std::string Utility::apn_fqdn(const char *apnoi, const unsigned char *plmnid) {
+std::string Utility::dnn_fqdn(const char *apnoi, const unsigned char *plmnid) {
   PARSE_PLMNID(plmnid);
-  return apn_fqdn(apnoi, mnc, mcc);
+  return dnn_fqdn(apnoi, mnc, mcc);
 }
 
-std::string Utility::apn(const char *apnoi, const char *mnc, const char *mcc) {
+std::string Utility::dnn(const char *apnoi, const char *mnc, const char *mcc) {
   std::string s;
 
-  // '(.+)\.apn\.mnc(\d{3})\.mcc(\d{3})\.gprs$'}
-  s.append(apnoi).append(".apn.").APPEND_MNC( mnc ).APPEND_MCC( mcc ).append(
+  // '(.+)\.dnn\.mnc(\d{3})\.mcc(\d{3})\.gprs$'}
+  s.append(apnoi).append(".dnn.").APPEND_MNC( mnc ).APPEND_MCC( mcc ).append(
       "gprs");
 
   return s;
 }
 
-std::string Utility::apn(const char *apnoi, const unsigned char *plmnid) {
+std::string Utility::dnn(const char *apnoi, const unsigned char *plmnid) {
   PARSE_PLMNID(plmnid);
-  return apn(apnoi, mnc, mcc);
+  return dnn(apnoi, mnc, mcc);
 }
 
-std::string Utility::apn_label(const std::string &apn) {
-  std::string apn_label = { };
+std::string Utility::dnn_label(const std::string &dnn) {
+  std::string dnn_label = { };
   bool to_count = true;
   uint8_t counted = 0;
   int index = 0;
 
-  apn_label.push_back('?');
+  dnn_label.push_back('?');
 
-  for (int i = 0; i < apn.length(); ++i) {
-    if (isalnum(apn[i]) || (apn[i] == '-')) {
-      apn_label.push_back(apn[i]);
+  for (int i = 0; i < dnn.length(); ++i) {
+    if (isalnum(dnn[i]) || (dnn[i] == '-')) {
+      dnn_label.push_back(dnn[i]);
       counted++;
-    } else if (apn[i] == '.') {
-      apn_label.push_back('?');
+    } else if (dnn[i] == '.') {
+      dnn_label.push_back('?');
       if (to_count) {  // always true
-        apn_label[index] = counted;
+        dnn_label[index] = counted;
       }
       to_count = true;
       counted = 0;
-      index = apn_label.length() - 1;
+      index = dnn_label.length() - 1;
     }
   }
   if (to_count) {
-    apn_label[index] = counted;
+    dnn_label[index] = counted;
   }
-  return apn_label;
+  return dnn_label;
 }
 

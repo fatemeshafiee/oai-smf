@@ -271,7 +271,7 @@ void smf_pdu_session::remove_qos_flow(smf_qos_flow &flow) {
 }
 
 //------------------------------------------------------------------------------
-void smf_pdu_session::deallocate_ressources(const std::string &apn) {
+void smf_pdu_session::deallocate_ressources(const std::string &dnn) {
 
   for (std::map<uint8_t, smf_qos_flow>::iterator it = qos_flows.begin();
       it != qos_flows.end(); ++it) {
@@ -283,7 +283,7 @@ void smf_pdu_session::deallocate_ressources(const std::string &apn) {
     it->second.deallocate_ressources();
   }
   if (ipv4) {
-    paa_dynamic::get_instance().release_paa(apn, ipv4_address);
+    paa_dynamic::get_instance().release_paa(dnn, ipv4_address);
   }
   clear();  //including qos_flows.clear()
   Logger::smf_app().info(
@@ -292,8 +292,6 @@ void smf_pdu_session::deallocate_ressources(const std::string &apn) {
 
 //------------------------------------------------------------------------------
 void smf_pdu_session::generate_seid() {
-  // DO it simple now:
-  // seid = pgw_fteid_s5_s8_cp.teid_gre_key | (((uint64_t)smf_cfg.instance) << 32);
 }
 
 void smf_pdu_session::set_seid(const uint64_t &s) {

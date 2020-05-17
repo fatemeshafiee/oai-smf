@@ -28,7 +28,6 @@
 
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT     "%" SCNu64
-//typedef imsi_t supi_t;
 
 #define SUPI_DIGITS_MAX 15
 
@@ -193,4 +192,7 @@ static const std::vector<std::string> multipart_related_content_part_e2str = {
 #define UDM_NUMBER_RETRIES 3
 //for N1N2
 #define BUF_LEN 512
+
+constexpr uint64_t SECONDS_SINCE_FIRST_EPOCH = 2208988800;
+
 #endif

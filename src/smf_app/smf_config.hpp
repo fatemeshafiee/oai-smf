@@ -77,8 +77,8 @@
 
 #define SMF_CONFIG_STRING_INTERFACE_DISABLED                    "none"
 
-#define SMF_CONFIG_STRING_APN_LIST                              "APN_LIST"
-#define SMF_CONFIG_STRING_APN_NI                                "APN_NI"
+#define SMF_CONFIG_STRING_DNN_LIST                              "DNN_LIST"
+#define SMF_CONFIG_STRING_DNN_NI                                "DNN_NI"
 #define SMF_CONFIG_STRING_PDN_TYPE                              "PDN_TYPE"
 #define SMF_CONFIG_STRING_IPV4_POOL                             "IPV4_POOL"
 #define SMF_CONFIG_STRING_IPV6_POOL                             "IPV6_POOL"
@@ -116,7 +116,22 @@
 #define SMF_CONFIG_STRING_UPF_LIST                              "UPF_LIST"
 #define SMF_CONFIG_STRING_UPF_IPV4_ADDRESS                      "IPV4_ADDRESS"
 
-#define PGW_MAX_ALLOCATED_PDN_ADDRESSES 1024
+#define SMF_CONFIG_STRING_LOCAL_CONFIGURATION                    "LOCAL_CONFIGURATION"
+#define SMF_CONFIG_STRING_USE_LOCAL_CONFIGURATION                "USE_LOCAL_CONFIGURATION"
+#define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST   "SESSION_MANAGEMENT_SUBSCRIPTION_LIST"
+#define SMF_CONFIG_STRING_NSSAI_SST                              "NSSAI_SST"
+#define SMF_CONFIG_STRING_NSSAI_SD                               "NSSAI_SD"
+#define SMF_CONFIG_STRING_DNN                                    "DNN"
+#define SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE                   "DEFAULT_SESSION_TYPE"
+#define SMF_CONFIG_STRING_DEFAULT_SSC_MODE                       "DEFAULT_SSC_MODE"
+#define SMF_CONFIG_STRING_QOS_PROFILE_5QI                        "QOS_PROFILE_5QI"
+#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL         "QOS_PROFILE_ARP_PRIORITY_LEVEL"
+#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP             "QOS_PROFILE_ARP_PREEMPTCAP"
+#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN            "QOS_PROFILE_ARP_PREEMPTVULN"
+#define SMF_CONFIG_STRING_SESSION_AMBR_UL                        "SESSION_AMBR_UL"
+#define SMF_CONFIG_STRING_SESSION_AMBR_DL                        "SESSION_AMBR_DL"
+
+#define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
 namespace smf {
 
@@ -167,29 +182,29 @@ class smf_config {
   struct in6_addr default_dnsv6;
   struct in6_addr default_dns_secv6;
 
-#define PGW_NUM_APN_MAX 5
-  int num_apn;
+#define SMF_NUM_DNN_MAX 5
+  int num_dnn;
   struct {
-    std::string apn;
-    std::string apn_label;
+    std::string dnn;
+    std::string dnn_label;
     int pool_id_iv4;
     int pool_id_iv6;
     pdn_type_t pdn_type;
-  } apn[PGW_NUM_APN_MAX];
+  } dnn[SMF_NUM_DNN_MAX];
 
   int num_ue_pool;
-#define PGW_NUM_UE_POOL_MAX 96
-  struct in_addr ue_pool_range_low[PGW_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_range_high[PGW_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_network[PGW_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_netmask[PGW_NUM_UE_POOL_MAX];
+#define SMF_NUM_UE_POOL_MAX 96
+  struct in_addr ue_pool_range_low[SMF_NUM_UE_POOL_MAX];
+  struct in_addr ue_pool_range_high[SMF_NUM_UE_POOL_MAX];
+  struct in_addr ue_pool_network[SMF_NUM_UE_POOL_MAX];
+  struct in_addr ue_pool_netmask[SMF_NUM_UE_POOL_MAX];
   //computed from config, UE IP adresses that matches ue_pool_network[]/ue_pool_netmask[] but do not match ue_pool_range_low[] - ue_pool_range_high[]
   // The problem here is that OpenFlow do not deal with ip ranges but with netmasks
-  std::vector<struct in_addr> ue_pool_excluded[PGW_NUM_UE_POOL_MAX];
+  std::vector<struct in_addr> ue_pool_excluded[SMF_NUM_UE_POOL_MAX];
 
   int num_paa6_pool;
-  struct in6_addr paa_pool6_prefix[PGW_NUM_UE_POOL_MAX];
-  uint8_t paa_pool6_prefix_len[PGW_NUM_UE_POOL_MAX];
+  struct in6_addr paa_pool6_prefix[SMF_NUM_UE_POOL_MAX];
+  uint8_t paa_pool6_prefix_len[SMF_NUM_UE_POOL_MAX];
 
   bool force_push_pco;
   uint ue_mtu;
@@ -206,18 +221,31 @@ class smf_config {
 
   std::vector<pfcp::node_id_t> upfs;
 
+  //Local configuration
+  bool local_configuration;
+#define  SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 5
+  struct {
+    snssai_t single_nssai;
+    std::string session_type;
+    std::string dnn;
+    uint8_t ssc_mode;
+    subscribed_default_qos_t default_qos;
+    session_ambr_t session_ambr;
+  } session_management_subscription[SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX];
+  uint8_t num_session_management_subscription;
+
   smf_config()
       :
       m_rw_lock(),
-      num_apn(0),
+      num_dnn(0),
       pid_dir(),
       instance(0),
       n4(),
       sbi(),
       itti(),
       upfs() {
-    for (int i = 0; i < PGW_NUM_APN_MAX; i++) {
-      apn[i] = { };
+    for (int i = 0; i < SMF_NUM_DNN_MAX; i++) {
+      dnn[i] = { };
     }
     default_dnsv4.s_addr = INADDR_ANY;
     default_dns_secv4.s_addr = INADDR_ANY;
@@ -226,7 +254,7 @@ class smf_config {
 
     num_ue_pool = 0;
     num_paa6_pool = 0;
-    for (int i = 0; i < PGW_NUM_UE_POOL_MAX; i++) {
+    for (int i = 0; i < SMF_NUM_UE_POOL_MAX; i++) {
       ue_pool_range_low[i] = { };
       ue_pool_range_high[i] = { };
       ue_pool_network[i] = { };
@@ -254,6 +282,9 @@ class smf_config {
     amf_addr.ipv4_addr.s_addr = INADDR_ANY;
     udm_addr.port = 80;
 
+    local_configuration = false;
+    num_session_management_subscription = 0;
+
   }
   ;
   ~smf_config();
@@ -268,11 +299,11 @@ class smf_config {
   int load(const std::string &config_file);
   int finalize();
   void display();
-  bool is_dotted_apn_handled(const std::string &apn,
+  bool is_dotted_dnn_handled(const std::string &dnn,
                              const pdn_type_t &pdn_type);
   int get_pfcp_node_id(pfcp::node_id_t &node_id);
   int get_pfcp_fseid(pfcp::fseid_t &fseid);
-  bool is_dotted_dnn_handled(const std::string &apn,
+  bool is_dotted_dnn_handled(const std::string &dnn,
                              const pdu_session_type_t &pdn_session_type);
   std::string get_default_dnn();
 };

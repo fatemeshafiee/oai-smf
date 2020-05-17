@@ -115,7 +115,7 @@ class smf_app {
   mutable std::shared_mutex m_scid2smf_context;
 
   /*
-   * Apply the config from the configuration file for APN pools
+   * Apply the config from the configuration file for DNN pools
    * @param [const smf_config &cfg] cfg
    * @return
    */
@@ -443,6 +443,18 @@ class smf_app {
    */
   bool is_supi_dnn_snssai_subscription_data(supi_t &supi, std::string &dnn,
                                             snssai_t &snssai);
+
+  /*
+     * Get the Session Management Subscription data from local configuration
+     * @param [supi_t &] SUPI
+     * @param [std::string &] DNN
+     * @param [snssai_t &] S-NSSAI
+     * @param [std::shared_ptr<session_management_subscription>] subscription: store subscription data if exist
+     * @return True if local configuration for this session management subscription exists, False otherwise
+     */
+  bool get_session_management_subscription_data(
+      supi64_t &supi, std::string &dnn, snssai_t &snssai,
+      std::shared_ptr<session_management_subscription> subscription);
 
   /*
    * Verify whether the UE request is valid according to the user subscription and with local policies
