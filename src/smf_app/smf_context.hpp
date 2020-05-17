@@ -441,7 +441,7 @@ class session_management_subscription {
    * @return void
    */
   void insert_dnn_configuration(
-      std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
+      const std::string &dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
 
   /*
    * Find a DNN configuration
@@ -450,7 +450,14 @@ class session_management_subscription {
    * @return void
    */
   void find_dnn_configuration(
-      std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
+      const std::string &dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration) const;
+
+  /*
+   * Verify whether DNN configuration with a given DNN exist
+   * @param [std::string &] dnn
+   * @return bool: return true if the configuration exist, otherwise return false
+   */
+  bool dnn_configuration(const std::string &dnn) const;
 
  private:
   snssai_t single_nssai;
@@ -653,6 +660,14 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void insert_dnn_subscription(
       const snssai_t &snssai,
       std::shared_ptr<session_management_subscription> &ss);
+
+  /*
+   * Verify whether a subscription data exist with a given dnn and snssai
+   * @param [std::string &] dnn: DNN
+   * @param [const snssai_t&] snssai: single NSSAI
+   *@return bool: Return true if a subscription data corresponding with dnn and snssai exist, otherwise return false
+   */
+  bool is_dnn_snssai_subscription_data(std::string &dnn, snssai_t &snssai);
 
   /*
    * Find a session management subscription from a SMF context

@@ -454,18 +454,15 @@ void smf_pdu_session::update_qos_rule(const QOSRulesIE &qos_rule) {
       qos_rules.insert(std::pair<uint8_t, QOSRulesIE>(rule_id, qos_rule));
       //marked to be synchronised with UE
       qos_rules_to_be_synchronised.push_back(rule_id);
-      Logger::smf_app().trace("Update QoS rule (%d) success",
-                              rule_id);
+      Logger::smf_app().trace("Update QoS rule (%d) success", rule_id);
     } else {
       Logger::smf_app().error(
-          "Update QoS Rule (%d) failed, rule does not existed",
-          rule_id);
+          "Update QoS Rule (%d) failed, rule does not existed", rule_id);
     }
 
   } else {
-    Logger::smf_app().error(
-        "Update QoS rule (%d) failed, invalid Rule Id",
-        rule_id);
+    Logger::smf_app().error("Update QoS rule (%d) failed, invalid Rule Id",
+                            rule_id);
   }
 }
 
@@ -518,7 +515,8 @@ void smf_pdu_session::add_qos_rule(const QOSRulesIE &qos_rule) {
 
 //------------------------------------------------------------------------------
 void session_management_subscription::insert_dnn_configuration(
-    std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration) {
+    const std::string &dnn,
+    std::shared_ptr<dnn_configuration_t> &dnn_configuration) {
   dnn_configurations.insert(
       std::pair<std::string, std::shared_ptr<dnn_configuration_t>>(
           dnn, dnn_configuration));
@@ -526,10 +524,21 @@ void session_management_subscription::insert_dnn_configuration(
 
 //------------------------------------------------------------------------------
 void session_management_subscription::find_dnn_configuration(
-    std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration) {
+    const std::string &dnn,
+    std::shared_ptr<dnn_configuration_t> &dnn_configuration) const {
   Logger::smf_app().info("Find DNN configuration with DNN %s", dnn.c_str());
   if (dnn_configurations.count(dnn) > 0) {
     dnn_configuration = dnn_configurations.at(dnn);
+  }
+}
+
+//------------------------------------------------------------------------------
+bool session_management_subscription::dnn_configuration(
+    const std::string &dnn) const {
+  if (dnn_configurations.count(dnn) > 0) {
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -876,8 +885,6 @@ void smf_context::get_session_ambr(SessionAMBR &session_ambr,
 void smf_context::get_session_ambr(
     Ngap_PDUSessionAggregateMaximumBitRate_t &session_ambr,
     const snssai_t &snssai, const std::string &dnn) {
-  Logger::smf_app().debug(
-      "Get AMBR info from the subscription information (DNN %s)", dnn.c_str());
 
   std::shared_ptr<session_management_subscription> ss = { };
   std::shared_ptr<dnn_configuration_t> sdc = { };
@@ -898,9 +905,9 @@ void smf_context::get_session_ambr(
 
     if (nullptr != sdc.get()) {
       Logger::smf_app().debug(
-          "Default AMBR info from the DNN configuration, downlink %s, uplink %s",
-          (sdc.get()->session_ambr).downlink.c_str(),
-          (sdc.get()->session_ambr).uplink.c_str());
+          "Default AMBR info from the DNN configuration, uplink %s, downlink %s",
+          (sdc.get()->session_ambr).uplink.c_str(),
+          (sdc.get()->session_ambr).downlink.c_str());
       //Downlink
       size_t leng_of_session_ambr_dl =
           (sdc.get()->session_ambr).downlink.length();
@@ -958,6 +965,9 @@ void smf_context::get_session_ambr(
                     session_ambr.pDUSessionAggregateMaximumBitRateUL.buf);
   }
 
+  Logger::smf_app().debug(
+      "Get AMBR info from the subscription information (DNN %s), uplink %d downlink %d",
+      dnn.c_str(), bit_rate_ul, bit_rate_dl);
 }
 
 //------------------------------------------------------------------------------
@@ -2408,6 +2418,20 @@ void smf_context::insert_dnn_subscription(
   dnn_subscriptions[(uint8_t) snssai.sST] = ss;
   Logger::smf_app().info("Inserted DNN Subscription, key: %d",
                          (uint8_t) snssai.sST);
+}
+
+//------------------------------------------------------------------------------
+bool smf_context::is_dnn_snssai_subscription_data(std::string &dnn,
+                                                  snssai_t &snssai) {
+  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
+    std::shared_ptr<session_management_subscription> ss = dnn_subscriptions.at(
+        (uint8_t) snssai.sST);
+    if (ss.get()->dnn_configuration(dnn))
+      return true;
+    else
+      return false;
+  }
+  return false;
 }
 
 //------------------------------------------------------------------------------

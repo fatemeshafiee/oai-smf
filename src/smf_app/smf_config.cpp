@@ -580,13 +580,14 @@ int smf_config::load(const string &config_file) {
       const Setting &session_management_subscription_cfg =
           session_management_subscription_list_cfg[i];
 
-      unsigned int nssai_sst = { 0 };
+      unsigned int nssai_sst = 0;
       string nssai_sd = { };
       string dnn = { };
       string default_session_type = { };
-      unsigned int default_ssc_mode = { 0 };
-      unsigned int qos_profile_5qi = { 0 };
-      unsigned int qos_profile_arp_priority_level = { };
+      unsigned int default_ssc_mode = 0;
+      unsigned int qos_profile_5qi = 0;
+      unsigned int qos_profile_priority_level = 0;
+      unsigned int qos_profile_arp_priority_level = 0;
       string qos_profile_arp_preemptcap = { };
       string qos_profile_arp_preemptvuln = { };
       string session_ambr_ul = { };
@@ -609,6 +610,9 @@ int smf_config::load(const string &config_file) {
       SMF_CONFIG_STRING_QOS_PROFILE_5QI,
                                                       qos_profile_5qi);
       session_management_subscription_cfg.lookupValue(
+          SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL,
+          qos_profile_priority_level);
+      session_management_subscription_cfg.lookupValue(
           SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL,
           qos_profile_arp_priority_level);
       session_management_subscription_cfg.lookupValue(
@@ -621,7 +625,8 @@ int smf_config::load(const string &config_file) {
       SMF_CONFIG_STRING_SESSION_AMBR_UL,
                                                       session_ambr_ul);
       session_management_subscription_cfg.lookupValue(
-      SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
+      SMF_CONFIG_STRING_SESSION_AMBR_DL,
+                                                      session_ambr_dl);
 
       session_management_subscription[i].single_nssai.sST = nssai_sst;
       session_management_subscription[i].single_nssai.sD = nssai_sd;
@@ -629,6 +634,8 @@ int smf_config::load(const string &config_file) {
       session_management_subscription[i].dnn = dnn;
       session_management_subscription[i].ssc_mode = default_ssc_mode;
       session_management_subscription[i].default_qos._5qi = qos_profile_5qi;
+      session_management_subscription[i].default_qos.priority_level =
+          qos_profile_priority_level;
       session_management_subscription[i].default_qos.arp.priority_level =
           qos_profile_arp_priority_level;
       session_management_subscription[i].default_qos.arp.preempt_cap =
@@ -788,10 +795,12 @@ void smf_config::display() {
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_5QI ":  %d",
           session_management_subscription[i].default_qos._5qi);
-
+      Logger::smf_app().info(
+           "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ":  %d",
+           session_management_subscription[i].default_qos.priority_level);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL ":  %d",
-          session_management_subscription[i].default_qos.priority_level);
+          session_management_subscription[i].default_qos.arp.priority_level);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP ":  %s",
           session_management_subscription[i].default_qos.arp.preempt_cap.c_str());

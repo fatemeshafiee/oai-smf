@@ -872,6 +872,10 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
           ngap_QosFlowSetupRequestItem);
       ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, qosFlowSetupRequestList);
 
+      Logger::smf_app().info(
+          "QoS parameters: QFI %d, ARP priority level %d, qos_flow.qos_profile.arp.preempt_cap %s, qos_flow.qos_profile.arp.preempt_vuln %s",
+          qos_flow.qfi.qfi, qos_flow.qos_profile.arp.priority_level,qos_flow.qos_profile.arp.preempt_cap.c_str(), qos_flow.qos_profile.arp.preempt_vuln.c_str());
+
       //encode
       size_t buffer_size = BUF_LEN;
       char *buffer = (char*) calloc(1, buffer_size);

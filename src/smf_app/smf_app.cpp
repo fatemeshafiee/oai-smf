@@ -648,56 +648,56 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   }
 
   //Step 6. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
-  //TODO: Test with UDM (TESTER)
   std::string dnn_selection_mode = smreq->req.get_dnn_selection_mode();
-  if (not use_local_configuration_subscription_data(dnn_selection_mode)
-      && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai)) {
-    //uses a dummy UDM to test this part
+  //if the Session Management Subscription data is not available, get from configuration file or UDM
+  if (not sc.get()->is_dnn_snssai_subscription_data(dnn, snssai)) {
     Logger::smf_app().debug(
-        "Retrieve Session Management Subscription data from the UDM");
-    session_management_subscription *s = new session_management_subscription(
-        snssai);
-    std::shared_ptr<session_management_subscription> subscription =
-        std::shared_ptr<session_management_subscription>(s);
-    if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
-      //update dnn_context with subscription info
-      sc.get()->insert_dnn_subscription(snssai, subscription);
-    } else {
-      // Cannot retrieve information from UDM, reject PDU session establishment
-      Logger::smf_app().warn(
-          "Received PDU_SESSION_CREATESMCONTEXT_REQUEST, couldn't retrieve the Session Management Subscription from UDM, ignore message!");
-      problem_details.setCause(
-          pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]);
-      smContextCreateError.setError(problem_details);
-      refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-      smContextCreateError.setN1SmMsg(refToBinaryData);
-      //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"
-      smf_n1_n2_inst.create_n1_sm_container(
-          smreq->req,
-          PDU_SESSION_ESTABLISHMENT_REJECT,
-          n1_sm_message,
-          cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-      //Send response (PDU Session Establishment Reject) to AMF
-      smf_n11_inst->send_pdu_session_create_sm_context_response(
-          smreq->http_response, smContextCreateError,
-          Pistache::Http::Code::Forbidden, n1_sm_message_hex);
-      return;
-    }
-  } else {
-    //use local configuration
-    Logger::smf_app().debug(
-        "Retrieve Session Management Subscription data from local configuration");
-    session_management_subscription *s = new session_management_subscription(
-        snssai);
-    std::shared_ptr<session_management_subscription> subscription =
-        std::shared_ptr<session_management_subscription>(s);
-    if (get_session_management_subscription_data(supi64, dnn, snssai,
-                                                 subscription)) {
-      //update dnn_context with subscription info
-      sc.get()->insert_dnn_subscription(snssai, subscription);
-    }
+        "The Session Management Subscription data is not available");
 
+    session_management_subscription *s = new session_management_subscription(
+        snssai);
+    std::shared_ptr<session_management_subscription> subscription =
+        std::shared_ptr<session_management_subscription>(s);
+
+    if (not use_local_configuration_subscription_data(dnn_selection_mode)) {
+      Logger::smf_app().debug(
+          "Retrieve Session Management Subscription data from the UDM");
+      if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
+        //update dnn_context with subscription info
+        sc.get()->insert_dnn_subscription(snssai, subscription);
+      } else {
+        // Cannot retrieve information from UDM, reject PDU session establishment
+        Logger::smf_app().warn(
+            "Received PDU_SESSION_CREATESMCONTEXT_REQUEST, couldn't retrieve the Session Management Subscription from UDM, ignore message!");
+        problem_details.setCause(
+            pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]);
+        smContextCreateError.setError(problem_details);
+        refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+        smContextCreateError.setN1SmMsg(refToBinaryData);
+        //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"
+        smf_n1_n2_inst.create_n1_sm_container(
+            smreq->req,
+            PDU_SESSION_ESTABLISHMENT_REJECT,
+            n1_sm_message,
+            cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
+        smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+        //Send response (PDU Session Establishment Reject) to AMF
+        smf_n11_inst->send_pdu_session_create_sm_context_response(
+            smreq->http_response, smContextCreateError,
+            Pistache::Http::Code::Forbidden, n1_sm_message_hex);
+        return;
+      }
+    } else {
+      //use local configuration
+      Logger::smf_app().debug(
+          "Retrieve Session Management Subscription data from local configuration");
+      if (get_session_management_subscription_data(supi64, dnn, snssai,
+                                                   subscription)) {
+        //update dnn_context with subscription info
+        sc.get()->insert_dnn_subscription(snssai, subscription);
+      }
+
+    }
   }
 
   // Step 7. generate a SMF context Id and store the corresponding information in a map (SM_Context_ID, (supi, dnn, nssai, pdu_session_id))
@@ -1003,7 +1003,7 @@ bool smf_app::scid_2_smf_context(const scid_t &scid,
 bool smf_app::use_local_configuration_subscription_data(
     const std::string &dnn_selection_mode) {
   //TODO: should be implemented
-  return true;  //get Session Management Subscription from UDM
+  return smf_cfg.local_configuration;
 }
 
 //------------------------------------------------------------------------------
