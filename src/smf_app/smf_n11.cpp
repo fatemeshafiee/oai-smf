@@ -103,6 +103,12 @@ void smf_n11_task(void *args_p) {
                 shared_msg));
         break;
 
+      case N11_SESSION_REPORT_RESPONSE:
+        //TODO
+        smf_n11_inst->send_n1n2_message_transfer_request(
+            std::static_pointer_cast<itti_n11_session_report_request>(
+                shared_msg));
+        break;
       case TERMINATE:
         if (itti_msg_terminate *terminate =
             dynamic_cast<itti_msg_terminate*>(msg)) {
@@ -139,7 +145,6 @@ void smf_n11::send_n1n2_message_transfer_request(
   smf_n1_n2 smf_n1_n2_inst = { };
   std::string n1_message = sm_context_res->res.get_n1_sm_message();
   std::string json_part = sm_context_res->res.n1n2_message_transfer_data.dump();
-  std::string boundary = "----Boundary";
   std::string body;
 
   //add N2 content if available
@@ -148,11 +153,11 @@ void smf_n11::send_n1n2_message_transfer_request(
   if (n2_sm_found > 0) {
     std::string n2_message = sm_context_res->res.get_n2_sm_information();
     //prepare the body content for Curl
-    create_multipart_related_content(body, json_part, boundary, n1_message,
+    create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n1_message,
                                      n2_message);
   } else {
     //prepare the body content for Curl
-    create_multipart_related_content(body, json_part, boundary, n1_message,
+    create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n1_message,
                                      multipart_related_content_part_e::NAS);
   }
 
@@ -168,8 +173,9 @@ void smf_n11::send_n1n2_message_transfer_request(
     CURLcode res = { };
     struct curl_slist *headers = nullptr;
     //headers = curl_slist_append(headers, "charsets: utf-8");
-    headers = curl_slist_append(
-        headers, "content-type: multipart/related; boundary=----Boundary");  //TODO: update Boundary
+    std::string content_type = "content-type: multipart/related; boundary="
+        + std::string(CURL_MIME_BOUNDARY);
+    headers = curl_slist_append(headers, content_type.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL,
                      sm_context_res->res.get_amf_url().c_str());
@@ -210,6 +216,8 @@ void smf_n11::send_n1n2_message_transfer_request(
                                                            TASK_SMF_APP);
     itti_msg->set_response_code(httpCode);
     itti_msg->set_scid(sm_context_res->scid);
+    itti_msg->set_procedure_type(
+        session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
     itti_msg->set_cause(response_data["cause"]);
     if (sm_context_res->res.get_cause() == REQUEST_ACCEPTED) {
       itti_msg->set_msg_type(PDU_SESSION_ESTABLISHMENT_ACCEPT);
@@ -244,7 +252,6 @@ void smf_n11::send_n1n2_message_transfer_request(
   smf_n1_n2 smf_n1_n2_inst = { };
   std::string n1_message = sm_context_res->msg.get_n1_sm_message();
   std::string json_part = sm_context_res->msg.n1n2_message_transfer_data.dump();
-  std::string boundary = "----Boundary";
   std::string body;
 
   //add N2 content if available
@@ -253,11 +260,11 @@ void smf_n11::send_n1n2_message_transfer_request(
   if (n2_sm_found > 0) {
     std::string n2_message = sm_context_res->msg.get_n2_sm_information();
     //prepare the body content for Curl
-    create_multipart_related_content(body, json_part, boundary, n1_message,
+    create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n1_message,
                                      n2_message);
   } else {
     //prepare the body content for Curl
-    create_multipart_related_content(body, json_part, boundary, n1_message,
+    create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n1_message,
                                      multipart_related_content_part_e::NAS);
   }
 
@@ -273,8 +280,9 @@ void smf_n11::send_n1n2_message_transfer_request(
     CURLcode res = { };
     struct curl_slist *headers = nullptr;
     //headers = curl_slist_append(headers, "charsets: utf-8");
-    headers = curl_slist_append(
-        headers, "content-type: multipart/related; boundary=----Boundary");  //TODO: update Boundary
+    std::string content_type = "content-type: multipart/related; boundary="
+        + std::string(CURL_MIME_BOUNDARY);
+    headers = curl_slist_append(headers, content_type.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL,
                      sm_context_res->msg.get_amf_url().c_str());
@@ -303,10 +311,108 @@ void smf_n11::send_n1n2_message_transfer_request(
       response_data = json::parse(*httpData.get());
     } catch (json::exception &e) {
       Logger::smf_n11().warn("Could not get the cause from the response");
-      //Set the default Cause
-      //response_data["cause"] = "504 Gateway Timeout";
     }
     Logger::smf_n11().debug("Response from AMF, Http Code: %d", httpCode);
+
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+  free_wrapper((void**) &data);
+
+}
+
+//------------------------------------------------------------------------------
+void smf_n11::send_n1n2_message_transfer_request(
+    std::shared_ptr<itti_n11_session_report_request> report_msg) {
+
+  Logger::smf_n11().debug(
+      "Send Communication_N1N2MessageTransfer to AMF (Network-initiated Service Request)");
+
+  smf_n1_n2 smf_n1_n2_inst = { };
+  std::string n2_message = report_msg->res.get_n2_sm_information();
+  std::string json_part = report_msg->res.n1n2_message_transfer_data.dump();
+  std::string body;
+
+  //add N1 content if available
+  auto n1_sm_found = report_msg->res.n1n2_message_transfer_data.count(
+      "n1MessageContainer");
+  if (n1_sm_found > 0) {
+    std::string n1_message = report_msg->res.get_n1_sm_message();
+    //prepare the body content for Curl
+    create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n1_message,
+                                     n2_message);
+  } else {
+    create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n2_message,
+                                     multipart_related_content_part_e::NGAP);
+  }
+
+  unsigned int str_len = body.length();
+  char *data = (char*) malloc(str_len + 1);
+  memset(data, 0, str_len + 1);
+  memcpy((void*) data, (void*) body.c_str(), str_len);
+
+  curl_global_init(CURL_GLOBAL_ALL);
+  CURL *curl = curl_easy_init();
+
+  if (curl) {
+    CURLcode res = { };
+    struct curl_slist *headers = nullptr;
+    //headers = curl_slist_append(headers, "charsets: utf-8");
+    std::string content_type = "content-type: multipart/related; boundary="
+        + std::string(CURL_MIME_BOUNDARY);
+    headers = curl_slist_append(headers, content_type.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, report_msg->res.get_amf_url().c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+
+    // Response information.
+    long httpCode = { 0 };
+    std::unique_ptr<std::string> httpData(new std::string());
+
+    // Hook up data handling function
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, body.length());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    res = curl_easy_perform(curl);
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    //get cause from the response
+    json response_data = { };
+    try {
+      response_data = json::parse(*httpData.get());
+    } catch (json::exception &e) {
+      Logger::smf_n11().warn("Could not get the cause from the response");
+      //Set the default Cause
+      response_data["cause"] = "504 Gateway Timeout";
+    }
+    Logger::smf_n11().debug("Response from AMF, Http Code: %d, cause %s",
+                            httpCode, response_data["cause"].dump().c_str());
+
+    //send response to APP to process
+    itti_n11_n1n2_message_transfer_response_status *itti_msg =
+        new itti_n11_n1n2_message_transfer_response_status(TASK_SMF_N11,
+                                                           TASK_SMF_APP);
+    itti_msg->set_response_code(httpCode);
+    itti_msg->set_procedure_type(
+        session_management_procedures_type_e::SERVICE_REQUEST_NETWORK_TRIGGERED);
+    itti_msg->set_cause(response_data["cause"]);
+
+    std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> i =
+        std::shared_ptr<itti_n11_n1n2_message_transfer_response_status>(
+            itti_msg);
+    int ret = itti_inst->send_msg(i);
+    if (RETURNok != ret) {
+      Logger::smf_n11().error(
+          "Could not send ITTI message %s to task TASK_SMF_APP",
+          i->get_msg_name());
+    }
 
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
@@ -326,19 +432,18 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     case session_management_procedures_type_e::PDU_SESSION_TEST: {
       Logger::smf_n11().debug("PDU_SESSION_TEST");
 
-      std::string boundary = "----Boundary";
       std::string json_part =
           sm_context_res->res.sm_context_updated_data.dump();
       std::string n1_message = sm_context_res->res.get_n1_sm_message();
       std::string n2_message = sm_context_res->res.get_n2_sm_information();
       std::string body;
 
-      create_multipart_related_content(body, json_part, boundary, n1_message,
+      create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n1_message,
                                        n2_message);
       sm_context_res->http_response.headers()
           .add<Pistache::Http::Header::ContentType>(
           Pistache::Http::Mime::MediaType(
-              "multipart/related; boundary=" + boundary));
+              "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
       sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
     }
       break;
@@ -358,19 +463,18 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP1: {
       Logger::smf_n11().info("PDU_SESSION_MODIFICATION_UE_INITIATED (step 1)");
 
-      std::string boundary = "----Boundary";
       std::string json_part =
           sm_context_res->res.sm_context_updated_data.dump();
       std::string n1_message = sm_context_res->res.get_n1_sm_message();
       std::string n2_message = sm_context_res->res.get_n2_sm_information();
       std::string body;
 
-      create_multipart_related_content(body, json_part, boundary, n1_message,
+      create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n1_message,
                                        n2_message);
       sm_context_res->http_response.headers()
           .add<Pistache::Http::Header::ContentType>(
           Pistache::Http::Mime::MediaType(
-              "multipart/related; boundary=" + boundary));
+              "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
       sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
 
     }
@@ -391,18 +495,17 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
       Logger::smf_n11().info("SERVICE_REQUEST_UE_TRIGGERED (step 1)");
 
-      std::string boundary = "----Boundary";
       std::string json_part =
           sm_context_res->res.sm_context_updated_data.dump();
       std::string n2_message = sm_context_res->res.get_n2_sm_information();
       std::string body;
 
-      create_multipart_related_content(body, json_part, boundary, n2_message,
+      create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n2_message,
                                        multipart_related_content_part_e::NGAP);
       sm_context_res->http_response.headers()
           .add<Pistache::Http::Header::ContentType>(
           Pistache::Http::Mime::MediaType(
-              "multipart/related; boundary=" + boundary));
+              "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
       sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
 
     }
@@ -424,19 +527,18 @@ void smf_n11::send_pdu_session_update_sm_context_response(
     case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
       Logger::smf_n11().info("PDU_SESSION_RELEASE_UE_REQUESTED (step 1)");
 
-      std::string boundary = "----Boundary";
       std::string json_part =
           sm_context_res->res.sm_context_updated_data.dump();
       std::string n1_message = sm_context_res->res.get_n1_sm_message();
       std::string n2_message = sm_context_res->res.get_n2_sm_information();
       std::string body;
 
-      create_multipart_related_content(body, json_part, boundary, n1_message,
+      create_multipart_related_content(body, json_part, CURL_MIME_BOUNDARY, n1_message,
                                        n2_message);
       sm_context_res->http_response.headers()
           .add<Pistache::Http::Header::ContentType>(
           Pistache::Http::Mime::MediaType(
-              "multipart/related; boundary=" + boundary));
+              "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
       sm_context_res->http_response.send(Pistache::Http::Code::Ok, body);
     }
       break;
@@ -463,7 +565,7 @@ void smf_n11::send_pdu_session_update_sm_context_response(
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_update_sm_context_response(
     Pistache::Http::ResponseWriter &httpResponse,
-    oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+    const oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
     Pistache::Http::Code code) {
 
   Logger::smf_n11().debug("Send PDUSession_UpdateSMContext Response to AMF.");
@@ -477,57 +579,52 @@ void smf_n11::send_pdu_session_update_sm_context_response(
   } else {
     httpResponse.send(code);
   }
-
 }
 
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_update_sm_context_response(
     Pistache::Http::ResponseWriter &httpResponse,
-    oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+    const oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
     Pistache::Http::Code code, std::string &n1_sm_msg) {
   Logger::smf_n11().debug("Send PDUSession_UpdateSMContext Response to AMF.");
 
-  std::string boundary = "----Boundary";
   nlohmann::json json_part = { };
   to_json(json_part, smContextUpdateError);
   std::string json_str = json_part.dump();
   std::string body;
 
-  create_multipart_related_content(body, json_str, boundary, n1_sm_msg,
+  create_multipart_related_content(body, json_str, CURL_MIME_BOUNDARY, n1_sm_msg,
                                    multipart_related_content_part_e::NAS);
   httpResponse.headers().add<Pistache::Http::Header::ContentType>(
       Pistache::Http::Mime::MediaType(
-          "multipart/related; boundary=" + boundary));
+          "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
   httpResponse.send(code, body);
-
 }
 
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_create_sm_context_response(
     Pistache::Http::ResponseWriter &httpResponse,
-    oai::smf_server::model::SmContextCreateError &smContextCreateError,
+    const oai::smf_server::model::SmContextCreateError &smContextCreateError,
     Pistache::Http::Code code, std::string &n1_sm_msg) {
   Logger::smf_n11().debug("Send PDUSession_CreateSMContext Response to AMF.");
 
-  std::string boundary = "----Boundary";
   nlohmann::json json_part = { };
   to_json(json_part, smContextCreateError);
   std::string json_str = json_part.dump();
   std::string body;
 
-  create_multipart_related_content(body, json_str, boundary, n1_sm_msg,
+  create_multipart_related_content(body, json_str, CURL_MIME_BOUNDARY, n1_sm_msg,
                                    multipart_related_content_part_e::NAS);
   httpResponse.headers().add<Pistache::Http::Header::ContentType>(
       Pistache::Http::Mime::MediaType(
-          "multipart/related; boundary=" + boundary));
+          "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
   httpResponse.send(code, body);
-
 }
 
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_update_sm_context_response(
     Pistache::Http::ResponseWriter &httpResponse,
-    oai::smf_server::model::SmContextUpdatedData &smContextUpdatedData,
+    const oai::smf_server::model::SmContextUpdatedData &smContextUpdatedData,
     Pistache::Http::Code code) {
   Logger::smf_n11().debug("Send PDUSession_UpdateSMContext Response to AMF.");
   nlohmann::json json_data = { };
@@ -539,13 +636,12 @@ void smf_n11::send_pdu_session_update_sm_context_response(
   } else {
     httpResponse.send(code);
   }
-
 }
 
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_create_sm_context_response(
     Pistache::Http::ResponseWriter &httpResponse,
-    oai::smf_server::model::SmContextCreatedData &smContextCreatedData,
+    const oai::smf_server::model::SmContextCreatedData &smContextCreatedData,
     Pistache::Http::Code code) {
   Logger::smf_n11().debug("Send PDUSession_CreateSMContext Response to AMF.");
   nlohmann::json json_data = { };
@@ -557,7 +653,6 @@ void smf_n11::send_pdu_session_create_sm_context_response(
   } else {
     httpResponse.send(code);
   }
-
 }
 
 //------------------------------------------------------------------------------
@@ -576,7 +671,7 @@ void smf_n11::send_pdu_session_release_sm_context_response(
 //------------------------------------------------------------------------------
 void smf_n11::send_pdu_session_release_sm_context_response(
     Pistache::Http::ResponseWriter &httpResponse,
-    oai::smf_server::model::ProblemDetails &problem,
+    const oai::smf_server::model::ProblemDetails &problem,
     Pistache::Http::Code code) {
 
   Logger::smf_n11().debug("Send PDUSession_ReleaseSMContext Response to AMF.");
@@ -593,10 +688,10 @@ void smf_n11::send_pdu_session_release_sm_context_response(
 
 //------------------------------------------------------------------------------
 void smf_n11::create_multipart_related_content(std::string &body,
-                                               std::string &json_part,
-                                               std::string &boundary,
-                                               std::string &n1_message,
-                                               std::string &n2_message) {
+                                               const std::string &json_part,
+                                               const std::string boundary,
+                                               const std::string &n1_message,
+                                               const std::string &n2_message) {
 
   //format string as hex
   unsigned char *n1_msg_hex = smf_app_inst->format_string_as_hex(n1_message);
@@ -614,8 +709,6 @@ void smf_n11::create_multipart_related_content(std::string &body,
           + CRLF);
   body.append(CRLF);
   body.append(std::string((char*) n1_msg_hex, n1_message.length() / 2) + CRLF);
-  //body.append(n1_message + CRLF);
-
   body.append("--" + boundary + CRLF);
   body.append(
       "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg"
@@ -627,8 +720,8 @@ void smf_n11::create_multipart_related_content(std::string &body,
 
 //------------------------------------------------------------------------------
 void smf_n11::create_multipart_related_content(
-    std::string &body, std::string &json_part, std::string &boundary,
-    std::string &message, multipart_related_content_part_e content_type) {
+    std::string &body, const std::string &json_part, const std::string boundary,
+    const std::string &message, const multipart_related_content_part_e content_type) {
 
   //format string as hex
   unsigned char *msg_hex = smf_app_inst->format_string_as_hex(message);

@@ -43,6 +43,7 @@
 #include "3gpp_29.502.h"
 #include "3gpp_24.501.h"
 #include "SmContextCreatedData.h"
+#include "smf_pfcp_association.hpp"
 
 extern "C" {
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
@@ -433,7 +434,7 @@ bool smf_pdu_session::get_default_qos_rule(QOSRulesIE &qos_rule) const {
 }
 
 //------------------------------------------------------------------------------
-bool smf_pdu_session::get_qos_rule(uint8_t rule_id,
+bool smf_pdu_session::get_qos_rule(const uint8_t rule_id,
                                    QOSRulesIE &qos_rule) const {
   Logger::smf_app().info("Find QoS Rule with Rule Id %d", (uint8_t) rule_id);
   if (qos_rules.count(rule_id) > 0) {
@@ -468,7 +469,7 @@ void smf_pdu_session::update_qos_rule(const QOSRulesIE &qos_rule) {
 }
 
 //------------------------------------------------------------------------------
-void smf_pdu_session::mark_qos_rule_to_be_synchronised(uint8_t rule_id) {
+void smf_pdu_session::mark_qos_rule_to_be_synchronised(const uint8_t rule_id) {
 
   if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
       and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
@@ -639,6 +640,153 @@ void smf_context::handle_itti_msg(itti_n4_session_deletion_response &sdresp) {
 //------------------------------------------------------------------------------
 void smf_context::handle_itti_msg(
     std::shared_ptr<itti_n4_session_report_request> &req) {
+
+  pfcp::report_type_t report_type;
+  if (req->pfcp_ies.get(report_type)) {
+    pfcp::pdr_id_t pdr_id;
+    // Downlink Data Report
+    if (report_type.dldr) {
+      pfcp::downlink_data_report data_report;
+      if (req->pfcp_ies.get(data_report)) {
+        pfcp::pdr_id_t pdr_id;
+        if (data_report.get(pdr_id)) {
+          std::shared_ptr<dnn_context> sd = { };
+          std::shared_ptr<smf_pdu_session> sp = { };
+          pfcp::qfi_t qfi = { };
+          if (find_pdu_session(pdr_id, qfi, sd, sp)) {/*
+           downlink_data_report_procedure *proc =
+           new downlink_data_report_procedure(shared_from_this(), sp);
+           std::shared_ptr<smf_procedure> sproc =
+           std::shared_ptr<smf_procedure>(proc);
+           insert_procedure(sproc);
+           if (proc->run(pdr_id, qfi)) {
+           // error !
+           Logger::smf_app().info(
+           "Downlink Data Report Request procedure failed");
+           remove_procedure(proc);
+           }
+           */
+
+            //Step 1. send N4 Data Report Ack to UPF
+            pfcp::node_id_t up_node_id = { };
+            if (not pfcp_associations::get_instance().select_up_node(
+                up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
+              // TODO
+              Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
+              return;
+            }
+
+            itti_n4_session_report_response *n4_ser =
+                new itti_n4_session_report_response(TASK_SMF_APP, TASK_SMF_N4);
+            n4_ser->seid = req->seid;
+            n4_ser->trxn_id = req->trxn_id;
+            n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address,
+                                          pfcp::default_port);
+            std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
+                std::shared_ptr<itti_n4_session_report_response>(n4_ser);
+
+            Logger::smf_app().info(
+                "Sending ITTI message %s to task TASK_SMF_N4",
+                n4_ser->get_msg_name());
+            int ret = itti_inst->send_msg(n4_report_ack);
+            if (RETURNok != ret) {
+              Logger::smf_app().error(
+                  "Could not send ITTI message %s to task TASK_SMF_N4",
+                  n4_ser->get_msg_name());
+              return;
+            }
+
+            //Step 2. Send N1N2MessageTranfer to AMF
+            pdu_session_report_response session_report_msg = { };
+            //set the required IEs
+            session_report_msg.set_supi(supi);  //supi
+            session_report_msg.set_snssai(sd.get()->nssai);  //s-nssai
+            session_report_msg.set_dnn(sd.get()->dnn_in_use);  //dnn
+            session_report_msg.set_pdu_session_type(
+                sp.get()->get_pdn_type().pdn_type);  //pdu session type
+            //get supi and put into URL
+            std::string supi_prefix = { };
+            get_supi_prefix(supi_prefix);
+            std::string supi_str = supi_prefix + "-" + smf_supi_to_string(supi);
+            std::string url = std::string(
+                inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr)))
+                + ":" + std::to_string(smf_cfg.amf_addr.port)
+                + fmt::format(NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
+                              supi_str.c_str());
+            session_report_msg.set_amf_url(url);
+
+            //QFIs, QoS profiles, CN Tunnel
+            smf_qos_flow flow = { };
+            sp.get()->get_qos_flow(qfi, flow);
+            //ADD QoS Flow to be updated
+            qos_flow_context_updated qcu = { };
+            qcu.set_qfi(qfi);
+            qcu.set_ul_fteid(flow.ul_fteid);
+            qcu.set_qos_profile(flow.qos_profile);
+            session_report_msg.add_qos_flow_context_updated(qcu);
+
+            // Create N2 SM Information: PDU Session Resource Setup Request Transfer IE
+            //N2 SM Information
+            smf_n1_n2 smf_n1_n2_inst = { };
+            std::string n2_sm_info, n2_sm_info_hex;
+            smf_n1_n2_inst.create_n2_sm_information(
+                session_report_msg, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+                n2_sm_info);
+            smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+            session_report_msg.set_n2_sm_information(n2_sm_info_hex);
+
+            //Fill the json part
+            session_report_msg.n1n2_message_transfer_data["n2InfoContainer"]["n2InformationClass"] =
+            N1N2_MESSAGE_CLASS;
+            session_report_msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+                session_report_msg.get_pdu_session_id();
+            //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
+            session_report_msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+                "PDU_RES_SETUP_REQ";  //NGAP message type
+            session_report_msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
+            N2_SM_CONTENT_ID;  //NGAP part
+            session_report_msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
+                session_report_msg.get_snssai().sST;
+            session_report_msg.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
+                session_report_msg.get_snssai().sD;
+
+            itti_n11_session_report_request *itti_n11 =
+                new itti_n11_session_report_request(TASK_SMF_APP, TASK_SMF_N11);
+
+            std::shared_ptr<itti_n11_session_report_request> itti_n11_report =
+                std::shared_ptr<itti_n11_session_report_request>(itti_n11);
+            itti_n11_report->res = session_report_msg;
+            //send ITTI message to N11 interface to trigger N1N2MessageTransfer towards AMFs
+            Logger::smf_app().info(
+                "Sending ITTI message %s to task TASK_SMF_N11",
+                itti_n11_report->get_msg_name());
+
+            ret = itti_inst->send_msg(itti_n11_report);
+            if (RETURNok != ret) {
+              Logger::smf_app().error(
+                  "Could not send ITTI message %s to task TASK_SMF_N11",
+                  itti_n11_report->get_msg_name());
+            }
+          }
+        }
+      }
+    }
+    // Usage Report
+    if (report_type.usar) {
+      Logger::smf_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/Usage Report");
+    }
+    // Error Indication Report
+    if (report_type.erir) {
+      Logger::smf_app().debug(
+          "TODO PFCP_SESSION_REPORT_REQUEST/Error Indication Report");
+    }
+    // User Plane Inactivity Report
+    if (report_type.upir) {
+      Logger::smf_app().debug(
+          "TODO PFCP_SESSION_REPORT_REQUEST/User Plane Inactivity Report");
+    }
+  }
+
 }
 
 //------------------------------------------------------------------------------
@@ -1959,7 +2107,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //PDU Session Establishment procedure
         //PDU Session Resource Setup Unsuccessful Transfer
       case n2_sm_info_type_e::PDU_RES_SETUP_FAIL: {
-        Logger::smf_app().info("PDU Session Resource Setup Unsuccessful Transfer");
+        Logger::smf_app().info(
+            "PDU Session Resource Setup Unsuccessful Transfer");
 
         //Ngap_PDUSessionResourceSetupUnsuccessfulTransfer
         std::shared_ptr<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t> decoded_msg =
@@ -1981,20 +2130,20 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         //Logger::smf_app().info("PDU Session Resource Setup Unsuccessful Transfer cause %d",decoded_msg->cause );
         problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_UE_NOT_RESPONDING]);
+            pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_UE_NOT_RESPONDING]);
         smContextUpdateError.setError(problem_details);
-          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-          smContextUpdateError.setN1SmMsg(refToBinaryData);
-          //PDU Session Establishment Reject, 24.501 cause "#26 Insufficient resources"
-          smf_n1_n2_inst.create_n1_sm_container(
-              smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);
-          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-          smf_n11_inst->send_pdu_session_update_sm_context_response(
-              smreq->http_response, smContextUpdateError,
-              Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
-          //TODO: Need release established resources?
-          return;
+        refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+        smContextUpdateError.setN1SmMsg(refToBinaryData);
+        //PDU Session Establishment Reject, 24.501 cause "#26 Insufficient resources"
+        smf_n1_n2_inst.create_n1_sm_container(
+            smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
+            cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);
+        smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+        smf_n11_inst->send_pdu_session_update_sm_context_response(
+            smreq->http_response, smContextUpdateError,
+            Pistache::Http::Code::Forbidden, n1_sm_msg_hex);
+        //TODO: Need release established resources?
+        return;
       }
         break;
 
@@ -2463,8 +2612,8 @@ void smf_context::insert_dnn_subscription(
 }
 
 //------------------------------------------------------------------------------
-bool smf_context::is_dnn_snssai_subscription_data(std::string &dnn,
-                                                  snssai_t &snssai) {
+bool smf_context::is_dnn_snssai_subscription_data(const std::string &dnn,
+                                                  const snssai_t &snssai) {
   if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
     std::shared_ptr<session_management_subscription> ss = dnn_subscriptions.at(
         (uint8_t) snssai.sST);
@@ -2533,7 +2682,7 @@ void smf_context::set_supi(const supi_t &s) {
 }
 
 //-----------------------------------------------------------------------------
-std::size_t smf_context::get_number_dnn_contexts() {
+std::size_t smf_context::get_number_dnn_contexts() const {
   return dnns.size();
 }
 
@@ -2545,6 +2694,35 @@ void smf_context::set_scid(const scid_t &id) {
 //-----------------------------------------------------------------------------
 scid_t smf_context::get_scid() const {
   return scid;
+}
+
+//-----------------------------------------------------------------------------
+void smf_context::get_supi_prefix(std::string &prefix) const {
+  prefix = supi_prefix;
+}
+
+//-----------------------------------------------------------------------------
+void smf_context::set_supi_prefix(std::string const &prefix) {
+  supi_prefix = prefix;
+}
+
+//-----------------------------------------------------------------------------
+bool smf_context::find_pdu_session(const pfcp::pdr_id_t &pdr_id,
+                                   pfcp::qfi_t &qfi,
+                                   std::shared_ptr<dnn_context> &sd,
+                                   std::shared_ptr<smf_pdu_session> &sp) {
+  for (auto it : dnns) {
+    for (auto session : it.get()->pdu_sessions) {
+      smf_qos_flow flow = { };
+      if (session->find_qos_flow(pdr_id, flow)) {
+        qfi.qfi = flow.qfi.qfi;
+        sp = session;
+        sd = it;
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -2569,7 +2747,7 @@ void dnn_context::insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp) {
   pdu_sessions.push_back(sp);
 }
 
-size_t dnn_context::get_number_pdu_sessions() {
+size_t dnn_context::get_number_pdu_sessions() const {
   return pdu_sessions.size();
 }
 

@@ -383,28 +383,57 @@ void smf_app::handle_itti_msg(
   Logger::smf_app().info("Process N1N2MessageTransfer Response");
   //Update PDU Session accordingly
   //TODO: to be completed (process cause)
-  pdu_session_status_e status = { pdu_session_status_e::PDU_SESSION_INACTIVE };
-  upCnx_state_e state = { upCnx_state_e::UPCNX_STATE_DEACTIVATED };
-  if ((static_cast<http_response_codes_e>(m.response_code)
-      == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
-      or (static_cast<http_response_codes_e>(m.response_code)
-          == http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
-    if (m.msg_type == PDU_SESSION_ESTABLISHMENT_REJECT) {
-      status = pdu_session_status_e::PDU_SESSION_INACTIVE;
-    } else if (m.msg_type == PDU_SESSION_ESTABLISHMENT_ACCEPT) {
-      status = pdu_session_status_e::PDU_SESSION_ESTABLISHMENT_PENDING;
-      state = upCnx_state_e::UPCNX_STATE_ACTIVATING;
+
+  switch (m.procedure_type) {
+    case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
+      pdu_session_status_e status =
+          { pdu_session_status_e::PDU_SESSION_INACTIVE };
+      upCnx_state_e state = { upCnx_state_e::UPCNX_STATE_DEACTIVATED };
+      if ((static_cast<http_response_codes_e>(m.response_code)
+          == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
+          or (static_cast<http_response_codes_e>(m.response_code)
+              == http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
+        if (m.msg_type == PDU_SESSION_ESTABLISHMENT_REJECT) {
+          status = pdu_session_status_e::PDU_SESSION_INACTIVE;
+        } else if (m.msg_type == PDU_SESSION_ESTABLISHMENT_ACCEPT) {
+          status = pdu_session_status_e::PDU_SESSION_ESTABLISHMENT_PENDING;
+          state = upCnx_state_e::UPCNX_STATE_ACTIVATING;
+        }
+        update_pdu_session_status(m.scid, status);
+        update_pdu_session_upCnx_state(m.scid, state);
+        Logger::smf_app().debug(
+            "Got successful response from AMF (Response code %d), set session status to %s",
+            m.response_code,
+            pdu_session_status_e2str[static_cast<int>(status)].c_str());
+      } else {
+        //TODO:
+        Logger::smf_app().debug("Got response from AMF (Response code %d)",
+                                m.response_code);
+      }
     }
-    update_pdu_session_status(m.scid, status);
-    update_pdu_session_upCnx_state(m.scid, state);
-    Logger::smf_app().debug(
-        "Got successful response from AMF (Response code %d), set session status to %s",
-        m.response_code,
-        pdu_session_status_e2str[static_cast<int>(status)].c_str());
-  } else {
-    //TODO:
-    Logger::smf_app().debug("Got response from AMF (Response code %d)",
-                            m.response_code);
+      break;
+    case session_management_procedures_type_e::SERVICE_REQUEST_NETWORK_TRIGGERED: {
+
+      if ((static_cast<http_response_codes_e>(m.response_code)
+          == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
+          or (static_cast<http_response_codes_e>(m.response_code)
+              == http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
+        //TODO:
+        Logger::smf_app().debug(
+            "Got successful response from AMF (Response code %d)",
+            m.response_code);
+      } else {
+        //TODO:
+        Logger::smf_app().debug("Got response from AMF (Response code %d)",
+                                m.response_code);
+        //send failure indication to UPF
+
+      }
+    }
+      break;
+    default: {
+
+    }
   }
 
 }
@@ -516,6 +545,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
 
   //Get necessary information
   supi_t supi = smreq->req.get_supi();
+  std::string supi_prefix = smreq->req.get_supi_prefix();
   supi64_t supi64 = smf_supi_to_u64(supi);
   std::string dnn = smreq->req.get_dnn();
   snssai_t snssai = smreq->req.get_snssai();
@@ -628,6 +658,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         "Create a new SMF context with SUPI " SUPI_64_FMT "", supi64);
     sc = std::shared_ptr<smf_context>(new smf_context());
     sc.get()->set_supi(supi);
+    sc.get()->set_supi_prefix(supi_prefix);
     set_supi_2_smf_context(supi64, sc);
   }
 
@@ -894,10 +925,10 @@ void smf_app::handle_pdu_session_release_sm_context_request(
 }
 
 //------------------------------------------------------------------------------
-void smf_app::trigger_pdu_session_modification(supi_t &supi, std::string &dnn,
-                                               pdu_session_id_t pdu_session_id,
-                                               snssai_t &snssai,
-                                               pfcp::qfi_t &qfi) {
+void smf_app::trigger_pdu_session_modification(const supi_t &supi, const std::string &dnn,
+                                               const pdu_session_id_t pdu_session_id,
+                                               const snssai_t &snssai,
+                                               const pfcp::qfi_t &qfi) {
   //SMF-requested session modification, see section 4.3.3.2@3GPP TS 23.502
   //The SMF may decide to modify PDU Session. This procedure also may be
   //triggered based on locally configured policy or triggered from the (R)AN (see clause 4.2.6 and clause 4.9.1).
@@ -1007,22 +1038,22 @@ bool smf_app::use_local_configuration_subscription_data(
 }
 
 //------------------------------------------------------------------------------
-bool smf_app::is_supi_dnn_snssai_subscription_data(supi_t &supi,
-                                                   std::string &dnn,
-                                                   snssai_t &snssai) {
+bool smf_app::is_supi_dnn_snssai_subscription_data(const supi_t &supi,
+                                                   const std::string &dnn,
+                                                   const snssai_t &snssai) const {
   //TODO: should be implemented
   return false;  //Session Management Subscription from UDM isn't available
 }
 
 //------------------------------------------------------------------------------
-bool smf_app::is_create_sm_context_request_valid() {
+bool smf_app::is_create_sm_context_request_valid() const {
   //TODO: should be implemented
   return true;
 
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::convert_string_2_hex(std::string &input_str,
+void smf_app::convert_string_2_hex(const std::string &input_str,
                                    std::string &output_str) {
   Logger::smf_app().debug("Convert string to Hex");
   unsigned char *data = (unsigned char*) malloc(input_str.length() + 1);
@@ -1052,7 +1083,7 @@ void smf_app::convert_string_2_hex(std::string &input_str,
 }
 
 //---------------------------------------------------------------------------------------------
-unsigned char* smf_app::format_string_as_hex(std::string &str) {
+unsigned char* smf_app::format_string_as_hex(const std::string &str) {
   unsigned int str_len = str.length();
   char *data = (char*) malloc(str_len + 1);
   memset(data, 0, str_len + 1);
@@ -1192,7 +1223,7 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
 }
 
 //---------------------------------------------------------------------------------------------
-n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(std::string &n2_info_type) {
+n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(const std::string &n2_info_type) const {
   std::size_t number_of_types = n2_sm_info_type_e2str.size();
   for (auto i = 0; i < number_of_types; ++i) {
     if (n2_info_type.compare(n2_sm_info_type_e2str[i]) == 0) {
@@ -1202,7 +1233,7 @@ n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(std::string &n2_info_type) {
 }
 
 bool smf_app::get_session_management_subscription_data(
-    supi64_t &supi, std::string &dnn, snssai_t &snssai,
+    const supi64_t &supi, const std::string &dnn, const snssai_t &snssai,
     std::shared_ptr<session_management_subscription> subscription) {
 
   Logger::smf_app().debug(

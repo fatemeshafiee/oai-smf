@@ -1554,7 +1554,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
 
 //------------------------------------------------------------------------------
 int smf_n1_n2::decode_n1_sm_container(nas_message_t &nas_msg,
-                                      std::string &n1_sm_msg) {
+                                      const std::string &n1_sm_msg) {
   Logger::smf_app().info("Decode NAS message from N1 SM Container.");
 
   //step 1. Decode NAS  message (for instance, ... only served as an example)
@@ -1592,7 +1592,7 @@ int smf_n1_n2::decode_n1_sm_container(nas_message_t &nas_msg,
 //---------------------------------------------------------------------------------------------
 int smf_n1_n2::decode_n2_sm_information(
     std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t> &ngap_IE,
-    std::string &n2_sm_info) {
+    const std::string &n2_sm_info) {
   Logger::smf_app().info(
       "Decode NGAP message (PDUSessionResourceSetupResponseTransfer) from N2 SM Information");
   unsigned int data_len = n2_sm_info.length();
@@ -1627,7 +1627,7 @@ int smf_n1_n2::decode_n2_sm_information(
 //---------------------------------------------------------------------------------------------
 int smf_n1_n2::decode_n2_sm_information(
     std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t> &ngap_IE,
-    std::string &n2_sm_info) {
+    const std::string &n2_sm_info) {
   Logger::smf_app().info(
       "Decode NGAP message (Ngap_PDUSessionResourceModifyResponseTransfer) from N2 SM Information");
 
@@ -1657,7 +1657,7 @@ int smf_n1_n2::decode_n2_sm_information(
 //---------------------------------------------------------------------------------------------
 int smf_n1_n2::decode_n2_sm_information(
     std::shared_ptr<Ngap_PDUSessionResourceReleaseResponseTransfer_t> &ngap_IE,
-    std::string &n2_sm_info) {
+    const std::string &n2_sm_info) {
   Logger::smf_app().info(
       "Decode NGAP message (Ngap_PDUSessionResourceReleaseResponseTransfer) from N2 SM Information");
 
@@ -1689,7 +1689,7 @@ int smf_n1_n2::decode_n2_sm_information(
 //---------------------------------------------------------------------------------------------
 int smf_n1_n2::decode_n2_sm_information(
     std::shared_ptr<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t> &ngap_IE,
-    std::string &n2_sm_info) {
+    const std::string &n2_sm_info) {
   Logger::smf_app().info(
       "Decode NGAP message (Ngap_PDUSessionResourceSetupUnsuccessfulTransfer) from N2 SM Information");
 
