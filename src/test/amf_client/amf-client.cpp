@@ -1240,7 +1240,6 @@ int main(int argc, char *argv[]) {
   usleep(200000);
   send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address);
   usleep(200000);
-  /*
   //PDU Session Modification
   send_pdu_session_modification_request_step1(smf_ip_address);
   usleep(200000);
@@ -1255,7 +1254,7 @@ int main(int argc, char *argv[]) {
   usleep(200000);
   send_pdu_session_release_complete(smf_ip_address);
   usleep(200000);
- */ //Release SM context
+  //Release SM context
   //send_release_sm_context_request(smf_ip_address);
   return 0;
 }
