@@ -380,12 +380,12 @@ void smf_app::handle_itti_msg(
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(
     itti_n11_n1n2_message_transfer_response_status &m) {
+  //see TS29518_Namf_Communication.yaml
   Logger::smf_app().info("Process N1N2MessageTransfer Response");
-  //Update PDU Session accordingly
-  //TODO: to be completed (process cause)
 
   switch (m.procedure_type) {
     case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
+      //Update PDU Session accordingly
       pdu_session_status_e status =
           { pdu_session_status_e::PDU_SESSION_INACTIVE };
       upCnx_state_e state = { upCnx_state_e::UPCNX_STATE_DEACTIVATED };
@@ -413,20 +413,42 @@ void smf_app::handle_itti_msg(
     }
       break;
     case session_management_procedures_type_e::SERVICE_REQUEST_NETWORK_TRIGGERED: {
-
+      Logger::smf_app().debug("Got response from AMF (Response code %d) with cause %s",
+                                    m.response_code, m.cause.c_str());
       if ((static_cast<http_response_codes_e>(m.response_code)
-          == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
-          or (static_cast<http_response_codes_e>(m.response_code)
-              == http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
-        //TODO:
-        Logger::smf_app().debug(
-            "Got successful response from AMF (Response code %d)",
-            m.response_code);
-      } else {
-        //TODO:
-        Logger::smf_app().debug("Got response from AMF (Response code %d)",
-                                m.response_code);
+          != http_response_codes_e::HTTP_RESPONSE_CODE_OK)
+          and (static_cast<http_response_codes_e>(m.response_code)
+              != http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
         //send failure indication to UPF
+        Logger::smf_app().debug("Send failure indication to UPF");
+        //TODO: to be completed
+        pfcp::node_id_t up_node_id = { };
+        if (not pfcp_associations::get_instance().select_up_node(
+            up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
+          // TODO
+          Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
+          return;
+        }
+
+        itti_n4_session_failure_indication *itti_n4 =
+            new itti_n4_session_failure_indication(TASK_SMF_APP, TASK_SMF_N4);
+        itti_n4->seid = m.seid;
+        itti_n4->trxn_id = m.trxn_id;
+        itti_n4->r_endpoint = endpoint(up_node_id.u1.ipv4_address,
+                                      pfcp::default_port);
+        std::shared_ptr<itti_n4_session_failure_indication> itti_n4_failure_indication =
+            std::shared_ptr<itti_n4_session_failure_indication>(itti_n4);
+
+        Logger::smf_app().info(
+            "Sending ITTI message %s to task TASK_SMF_N4",
+            itti_n4->get_msg_name());
+        int ret = itti_inst->send_msg(itti_n4_failure_indication);
+        if (RETURNok != ret) {
+          Logger::smf_app().error(
+              "Could not send ITTI message %s to task TASK_SMF_N4",
+              itti_n4->get_msg_name());
+          return;
+        }
 
       }
     }

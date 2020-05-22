@@ -151,7 +151,7 @@ int session_create_sm_context_procedure::run(
   pfcp::destination_interface_t destination_interface = { };
 
   sps->generate_far_id(far_id);
-  apply_action.forw = 1;
+  apply_action.forw = 1; //forward the packets
 
   //wys-test-add
   pfcp::outer_header_creation_t outer_header_creation = { };
@@ -662,7 +662,8 @@ int session_update_sm_context_procedure::run(
               .s_addr;
           update_forwarding_parameters.set(outer_header_creation);
           update_far.set(update_forwarding_parameters);
-          apply_action.forw = 1;
+          apply_action.forw = 1; //forward the packets
+          //apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
           update_far.set(apply_action);
 
           n4_ser->pfcp_ies.set(update_far);
@@ -692,7 +693,8 @@ int session_update_sm_context_procedure::run(
           //pfcp::proxying_t                  proxying = {};
 
           sps->generate_far_id(far_id);
-          apply_action.forw = 1;
+          apply_action.forw = 1; //forward the packets
+          //apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
 
           destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;  // ACCESS is for downlink, CORE for uplink
           forwarding_parameters.set(destination_interface);
@@ -874,7 +876,7 @@ int session_update_sm_context_procedure::run(
           far_id.far_id = flow.far_id_dl.second.far_id;
           // apply_action.buff = 1;
           pfcp::apply_action_t apply_action = { };
-          apply_action.nocp = 1;
+          apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
 
           far.set(far_id);
           far.set(apply_action);

@@ -626,8 +626,7 @@ std::string pdu_session_report_response::get_n1_sm_message() const {
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_report_response::set_n1_sm_message(
-    const std::string &value) {
+void pdu_session_report_response::set_n1_sm_message(const std::string &value) {
   m_n1_sm_message = value;
   m_n1_sm_msg_is_set = true;
 }
@@ -641,3 +640,24 @@ bool pdu_session_report_response::n1_sm_msg_is_set() const {
 bool pdu_session_report_response::n2_sm_info_is_set() const {
   return m_n2_sm_info_is_set;
 }
+
+//-----------------------------------------------------------------------------
+void pdu_session_report_response::set_seid(const seid_t &s) {
+  seid = s;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_report_response::set_trxn_id(const uint64_t &t) {
+  trxn_id = t;
+}
+
+//-----------------------------------------------------------------------------
+seid_t pdu_session_report_response::get_seid() const {
+  return seid;
+}
+
+//-----------------------------------------------------------------------------
+uint64_t pdu_session_report_response::get_trxn_id() const {
+  return trxn_id;
+}
+

@@ -403,6 +403,8 @@ void smf_n11::send_n1n2_message_transfer_request(
     itti_msg->set_procedure_type(
         session_management_procedures_type_e::SERVICE_REQUEST_NETWORK_TRIGGERED);
     itti_msg->set_cause(response_data["cause"]);
+    itti_msg->set_seid(report_msg->res.get_seid());
+    itti_msg->set_trxn_id(report_msg->res.get_trxn_id());
 
     std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> i =
         std::shared_ptr<itti_n11_n1n2_message_transfer_response_status>(

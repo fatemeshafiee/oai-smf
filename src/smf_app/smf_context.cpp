@@ -714,6 +714,9 @@ void smf_context::handle_itti_msg(
                 + fmt::format(NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
                               supi_str.c_str());
             session_report_msg.set_amf_url(url);
+            //seid and trxn_id to be used in Failure indication
+            session_report_msg.set_seid(req->seid);
+            session_report_msg.set_trxn_id(req->trxn_id);
 
             //QFIs, QoS profiles, CN Tunnel
             smf_qos_flow flow = { };

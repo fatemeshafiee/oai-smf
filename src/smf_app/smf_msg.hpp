@@ -482,6 +482,8 @@ class pdu_session_report_response : public pdu_session_msg {
       pdu_session_msg() {
     m_n2_sm_info_is_set = false;
     m_n1_sm_msg_is_set = false;
+    seid = 0;
+    trxn_id = 0;
   }
   ;
   pdu_session_report_response(pdu_session_msg_type_t msg_type)
@@ -489,6 +491,8 @@ class pdu_session_report_response : public pdu_session_msg {
       pdu_session_msg(msg_type) {
     m_n2_sm_info_is_set = false;
     m_n1_sm_msg_is_set = false;
+    seid = 0;
+    trxn_id = 0;
   }
   ;
   void set_amf_url(std::string const &value);
@@ -506,6 +510,10 @@ class pdu_session_report_response : public pdu_session_msg {
   void set_n1_sm_message(const std::string &value);
   bool n1_sm_msg_is_set() const;
   bool n2_sm_info_is_set() const;
+  void set_seid(const seid_t &s);
+  void set_trxn_id(const uint64_t &t);
+  seid_t get_seid() const;
+  uint64_t get_trxn_id() const;
 
   nlohmann::json n1n2_message_transfer_data;  //N1N2MessageTransferReqData from oai::amf::model
 
@@ -519,6 +527,8 @@ class pdu_session_report_response : public pdu_session_msg {
   std::string m_n2_sm_information;
   bool m_n2_sm_info_is_set;
   std::string m_n2_sm_info_type;
+  seid_t seid;
+  uint64_t trxn_id;
 };
 
 }

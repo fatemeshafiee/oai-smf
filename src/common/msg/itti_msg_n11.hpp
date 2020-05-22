@@ -301,7 +301,10 @@ class itti_n11_n1n2_message_transfer_response_status : public itti_n11_msg {
       scid(0),
       response_code(0),
       msg_type(0),
-      procedure_type(session_management_procedures_type_e::PROCEDURE_TYPE_UNKNOWN) {
+      procedure_type(
+          session_management_procedures_type_e::PROCEDURE_TYPE_UNKNOWN),
+      seid(0),
+      trxn_id(0) {
   }
   itti_n11_n1n2_message_transfer_response_status(
       const itti_n11_n1n2_message_transfer_response_status &i)
@@ -310,7 +313,9 @@ class itti_n11_n1n2_message_transfer_response_status : public itti_n11_msg {
       scid(i.scid),
       response_code(i.response_code),
       msg_type(i.msg_type),
-      procedure_type(i.procedure_type) {
+      procedure_type(i.procedure_type),
+      seid(i.seid),
+      trxn_id(i.trxn_id) {
   }
   itti_n11_n1n2_message_transfer_response_status(
       const itti_n11_n1n2_message_transfer_response_status &i,
@@ -320,7 +325,9 @@ class itti_n11_n1n2_message_transfer_response_status : public itti_n11_msg {
       scid(i.scid),
       response_code(i.response_code),
       msg_type(i.msg_type),
-      procedure_type(i.procedure_type) {
+      procedure_type(i.procedure_type),
+      seid(i.seid),
+      trxn_id(i.trxn_id) {
   }
   const char* get_msg_name() {
     return "N11_SESSION_N1N2_MESSAGE_TRANSFER_RESPONSE_STATUS";
@@ -346,11 +353,24 @@ class itti_n11_n1n2_message_transfer_response_status : public itti_n11_msg {
     procedure_type = type;
   }
   ;
+
+  void set_seid(const seid_t &s) {
+    seid = s;
+  }
+  ;
+
+  void set_trxn_id(uint64_t t) {
+    trxn_id = t;
+  }
+  ;
+
   scid_t scid;  //SM Context ID
   int16_t response_code;
   std::string cause;
   uint8_t msg_type;
   session_management_procedures_type_e procedure_type;
+  seid_t seid;
+  uint64_t trxn_id;
 
 };
 
