@@ -43,8 +43,9 @@
 
 #include "logger.hpp"
 #include "Helpers.h"
+#include "simple_parser.hpp"
+
 extern "C" {
-#include "multipartparser.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -85,77 +86,34 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
   Logger::smf_api_server().debug("");
   Logger::smf_api_server().info(
       "Received a SM context create request from AMF.");
-  Logger::smf_api_server().debug("Request body: %s", request.body().c_str());
-
-  //find boundary
-  std::size_t found = request.body().find("Content-Type");
-  std::string boundary_str = request.body().substr(2, found - 4);
-  Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
-
   SmContextMessage smContextMessage = { };
   SmContextCreateData smContextCreateData = { };
 
-  //step 1. use multipartparser to decode the request
-  multipartparser_callbacks_init(&g_callbacks);
-  g_callbacks.on_body_begin = &on_body_begin;
-  g_callbacks.on_part_begin = &on_part_begin;
-  g_callbacks.on_header_field = &on_header_field;
-  g_callbacks.on_header_value = &on_header_value;
-  g_callbacks.on_headers_complete = &on_headers_complete;
-  g_callbacks.on_data = &on_data;
-  g_callbacks.on_part_end = &on_part_end;
-  g_callbacks.on_body_end = &on_body_end;
+  //simple parser
+  simple_parser sp = { };
+  sp.parse(request.body());
 
-  multipartparser parser = { };
-  init_globals();
-  multipartparser_init(&parser,
-                       reinterpret_cast<const char*>(boundary_str.c_str()));
-
-  unsigned int str_len = request.body().length();
-  unsigned char *data = (unsigned char*) malloc(str_len + 1);
-  memset(data, 0, str_len + 1);
-  memcpy((void*) data, (void*) request.body().c_str(), str_len);
-
-  //if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
-  if ((multipartparser_execute(&parser, &g_callbacks,
-                               reinterpret_cast<const char*>(data), str_len)
-      != strlen(request.body().c_str())) or (!g_body_begin_called)) {
-    Logger::smf_api_server().debug(
-        "The received message can not be parsed properly!");
-    //TODO: fix this issue
-    //response.send(Pistache::Http::Code::Bad_Request, "");
-    //return;
-  }
-
-  free_wrapper((void**) &data);
-
-  uint8_t size = g_parts.size();
-  Logger::smf_api_server().debug("Number of MIME parts %d", g_parts.size());
+  std::vector<mime_part> parts = { };
+  sp.get_mime_parts(parts);
+  uint8_t size = parts.size();
+  Logger::smf_api_server().debug("Number of MIME parts %d", size);
   //at least 2 parts for Json data and N1 (+ N2)
-  if (g_parts.size() < 2) {
+  if (size < 2) {
     response.send(Pistache::Http::Code::Bad_Request, "");
     return;
   }
 
-  part p0 = g_parts.front();
-  g_parts.pop_front();
-  Logger::smf_api_server().debug("Request body, part 1: \n%s", p0.body.c_str());
-  part p1 = g_parts.front();
-  g_parts.pop_front();
-  Logger::smf_api_server().debug("Request body, part 2: \n %s",
-                                 p1.body.c_str());
-  if (g_parts.size() > 0) {
-    part p2 = g_parts.front();
-    g_parts.pop_front();
-    Logger::smf_api_server().debug("Request body, part 3: \n %s",
-                                   p2.body.c_str());
-  }
-
   //step 2. process the request
   try {
-    nlohmann::json::parse(p0.body.c_str()).get_to(smContextCreateData);
+    nlohmann::json::parse(parts[0].body.c_str()).get_to(smContextCreateData);
     smContextMessage.setJsonData(smContextCreateData);
-    smContextMessage.setBinaryDataN1SmMessage(p1.body);
+    if (parts[1].content_type.compare("application/vnd.3gpp.5gnas") == 0) {
+      smContextMessage.setBinaryDataN1SmMessage(parts[1].body);
+    } else if (parts[1].content_type.compare("application/vnd.3gpp.ngap")
+        == 0) {
+      smContextMessage.setBinaryDataN2SmInformation(parts[1].body);
+    }
+
     this->post_sm_contexts(smContextMessage, response);
   } catch (nlohmann::detail::exception &e) {
     //send a 400 error
