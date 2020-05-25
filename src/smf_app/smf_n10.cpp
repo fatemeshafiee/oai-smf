@@ -101,7 +101,7 @@ smf_n10::smf_n10() {
 
 //------------------------------------------------------------------------------
 bool smf_n10::get_sm_data(
-    supi64_t &supi, std::string &dnn, snssai_t &snssai,
+    const supi64_t &supi, const std::string &dnn, const snssai_t &snssai,
     std::shared_ptr<session_management_subscription> subscription) {
   //retrieve a UE's Session Management Subscription Data (TS29503_Nudm_SDM.yaml: /{supi}/sm-data)
   //use curl to send data for the moment
@@ -114,7 +114,6 @@ bool smf_n10::get_sm_data(
   headers = curl_slist_append(headers, "charsets: utf-8");
 
   CURL *curl = curl_easy_init();
-//  std::string url = std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.udm_addr.ipv4_addr)))  + ":" + std::to_string(smf_cfg.udm_addr.port) + "/nudm-sdm/v2/" + std::to_string(supi) +"/sm-data";
   std::string url = std::string(
       inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) + ":"
       + std::to_string(smf_cfg.udm_addr.port)
@@ -148,7 +147,6 @@ bool smf_n10::get_sm_data(
           == http_response_codes_e::HTTP_RESPONSE_CODE_OK) {
         Logger::smf_n10().debug("Got successful response from UDM, URL: %s ",
                                 url.c_str());
-        //Logger::smf_n10().debug("[get_sm_data] Http Data from UDM: %s ", *httpData.get());
         try {
           jsonData = nlohmann::json::parse(*httpData.get());
           //curl_easy_cleanup(curl);

@@ -705,4 +705,33 @@ class itti_n4_session_report_response : public itti_n4_msg {
   pfcp::pfcp_session_report_response pfcp_ies;
 };
 
+
+//-----------------------------------------------------------------------------
+class itti_n4_session_failure_indication : public itti_n4_msg {
+ public:
+  itti_n4_session_failure_indication(const task_id_t origin,
+                                  const task_id_t destination)
+      :
+      itti_n4_msg(N4_SESSION_REPORT_RESPONSE, origin, destination) {
+  }
+  itti_n4_session_failure_indication(const itti_n4_session_failure_indication &i)
+      :
+      itti_n4_msg(i) {
+    pfcp_ies = i.pfcp_ies;
+  }
+  itti_n4_session_failure_indication(const itti_n4_session_failure_indication &i,
+                                  const task_id_t orig, const task_id_t dest)
+      :
+      itti_n4_msg(i, orig, dest) {
+    pfcp_ies = i.pfcp_ies;
+  }
+  const char* get_msg_name() {
+    return typeid(itti_n4_session_failure_indication).name();
+  }
+  ;
+
+  pfcp::pfcp_session_modification_request pfcp_ies;
+};
+
+
 #endif /* ITTI_MSG_N4_HPP_INCLUDED_ */

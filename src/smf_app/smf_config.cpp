@@ -406,66 +406,66 @@ int smf_config::load(const string &config_file) {
       num_paa6_pool += 1;
     }
 
-    const Setting &apn_list_cfg = smf_cfg[SMF_CONFIG_STRING_APN_LIST];
-    count = apn_list_cfg.getLength();
-    int apn_idx = 0;
-    num_apn = 0;
+    const Setting &dnn_list_cfg = smf_cfg[SMF_CONFIG_STRING_DNN_LIST];
+    count = dnn_list_cfg.getLength();
+    int dnn_idx = 0;
+    num_dnn = 0;
     for (int i = 0; i < count; i++) {
-      const Setting &apn_cfg = apn_list_cfg[i];
-      apn_cfg.lookupValue(SMF_CONFIG_STRING_APN_NI, astring);
-      apn[apn_idx].apn = astring;
-      apn[apn_idx].apn_label = EPC::Utility::apn_label(astring);
-      apn_cfg.lookupValue(SMF_CONFIG_STRING_PDN_TYPE, astring);
+      const Setting &dnn_cfg = dnn_list_cfg[i];
+      dnn_cfg.lookupValue(SMF_CONFIG_STRING_DNN_NI, astring);
+      dnn[dnn_idx].dnn = astring;
+      dnn[dnn_idx].dnn_label = EPC::Utility::dnn_label(astring);
+      dnn_cfg.lookupValue(SMF_CONFIG_STRING_PDN_TYPE, astring);
       if (boost::iequals(astring, "IPv4")) {
-        apn[apn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV4;
+        dnn[dnn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV4;
       } else if (boost::iequals(astring, "IPv6") == 0) {
-        apn[apn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV6;
+        dnn[dnn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV6;
       } else if (boost::iequals(astring, "IPv4IPv6") == 0) {
-        apn[apn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV4V6;
+        dnn[dnn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV4V6;
       } else if (boost::iequals(astring, "Non-IP") == 0) {
-        apn[apn_idx].pdn_type.pdn_type = PDN_TYPE_E_NON_IP;
+        dnn[dnn_idx].pdn_type.pdn_type = PDN_TYPE_E_NON_IP;
       } else {
         Logger::smf_app().error(
-            " " SMF_CONFIG_STRING_PDN_TYPE " in %d'th APN :%s", i + 1,
+            " " SMF_CONFIG_STRING_PDN_TYPE " in %d'th DNN :%s", i + 1,
             astring.c_str());
         throw("Error PDN_TYPE in config file");
       }
-      apn_cfg.lookupValue(SMF_CONFIG_STRING_IPV4_POOL,
-                          apn[apn_idx].pool_id_iv4);
-      apn_cfg.lookupValue(SMF_CONFIG_STRING_IPV6_POOL,
-                          apn[apn_idx].pool_id_iv6);
+      dnn_cfg.lookupValue(SMF_CONFIG_STRING_IPV4_POOL,
+                          dnn[dnn_idx].pool_id_iv4);
+      dnn_cfg.lookupValue(SMF_CONFIG_STRING_IPV6_POOL,
+                          dnn[dnn_idx].pool_id_iv6);
 
-      if ((0 <= apn[apn_idx].pool_id_iv4)
-          && (apn[apn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV6)) {
+      if ((0 <= dnn[dnn_idx].pool_id_iv4)
+          && (dnn[dnn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV6)) {
         Logger::smf_app().error(
-            "PDN_TYPE versus pool identifier %d 'th APN in config file", i + 1);
-        throw("PDN_TYPE versus pool identifier APN");
+            "PDN_TYPE versus pool identifier %d 'th DNN in config file", i + 1);
+        throw("PDN_TYPE versus pool identifier DNN");
       }
-      if ((0 <= apn[apn_idx].pool_id_iv6)
-          && (apn[apn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV4)) {
+      if ((0 <= dnn[dnn_idx].pool_id_iv6)
+          && (dnn[dnn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV4)) {
         Logger::smf_app().error(
-            "PDN_TYPE versus pool identifier %d 'th APN in config file", i + 1);
-        throw("PDN_TYPE versus pool identifier APN");
+            "PDN_TYPE versus pool identifier %d 'th DNN in config file", i + 1);
+        throw("PDN_TYPE versus pool identifier DNN");
       }
 
-      if (((0 <= apn[apn_idx].pool_id_iv4) || (0 <= apn[apn_idx].pool_id_iv6))
-          && (not boost::iequals(apn[apn_idx].apn, "none"))) {
+      if (((0 <= dnn[dnn_idx].pool_id_iv4) || (0 <= dnn[dnn_idx].pool_id_iv6))
+          && (not boost::iequals(dnn[dnn_idx].dnn, "none"))) {
         bool doublon = false;
-        for (int j = 0; j < apn_idx; j++) {
-          if (boost::iequals(apn[j].apn, apn[apn_idx].apn)) {
+        for (int j = 0; j < dnn_idx; j++) {
+          if (boost::iequals(dnn[j].dnn, dnn[dnn_idx].dnn)) {
             doublon = true;
             Logger::smf_app().info(
-                "%d'th APN %s already found in config file (%d 'th APN %s), bypassing",
-                i + 1, apn[apn_idx].apn.c_str(), j + 1, apn[j].apn.c_str());
+                "%d'th dnn %s already found in config file (%d 'th DNN %s), bypassing",
+                i + 1, dnn[dnn_idx].dnn.c_str(), j + 1, dnn[j].dnn.c_str());
           }
         }
         if (not doublon) {
-          apn_idx++;
-          num_apn++;
+          dnn_idx++;
+          num_dnn++;
         }
       } else {
-        Logger::smf_app().error("Bypass %d'th APN %s in config file", i + 1,
-                                apn[apn_idx].apn.c_str());
+        Logger::smf_app().error("Bypass %d'th DNN %s in config file", i + 1,
+                                dnn[dnn_idx].dnn.c_str());
       }
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_IPV4_ADDRESS, astring);
@@ -559,6 +559,95 @@ int smf_config::load(const string &config_file) {
             .c_str());
       }
     }
+
+    //Local configuration
+    num_session_management_subscription = 0;
+    const Setting &local_cfg = smf_cfg[SMF_CONFIG_STRING_LOCAL_CONFIGURATION];
+    string local_configuration_str = { };
+
+    local_cfg.lookupValue(SMF_CONFIG_STRING_USE_LOCAL_CONFIGURATION,
+                          local_configuration_str);
+    if (boost::iequals(local_configuration_str, "yes")) {
+      local_configuration = true;
+    } else {
+      local_configuration = false;
+    }
+
+    const Setting &session_management_subscription_list_cfg =
+        local_cfg[SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST];
+    count = session_management_subscription_list_cfg.getLength();
+    for (int i = 0; i < count; i++) {
+      const Setting &session_management_subscription_cfg =
+          session_management_subscription_list_cfg[i];
+
+      unsigned int nssai_sst = 0;
+      string nssai_sd = { };
+      string dnn = { };
+      string default_session_type = { };
+      unsigned int default_ssc_mode = 0;
+      unsigned int qos_profile_5qi = 0;
+      unsigned int qos_profile_priority_level = 0;
+      unsigned int qos_profile_arp_priority_level = 0;
+      string qos_profile_arp_preemptcap = { };
+      string qos_profile_arp_preemptvuln = { };
+      string session_ambr_ul = { };
+      string session_ambr_dl = { };
+      session_management_subscription_cfg.lookupValue(
+      SMF_CONFIG_STRING_NSSAI_SST,
+                                                      nssai_sst);
+      session_management_subscription_cfg.lookupValue(
+      SMF_CONFIG_STRING_NSSAI_SD,
+                                                      nssai_sd);
+      session_management_subscription_cfg.lookupValue(SMF_CONFIG_STRING_DNN,
+                                                      dnn);
+      session_management_subscription_cfg.lookupValue(
+      SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE,
+                                                      default_session_type);
+      session_management_subscription_cfg.lookupValue(
+      SMF_CONFIG_STRING_DEFAULT_SSC_MODE,
+                                                      default_ssc_mode);
+      session_management_subscription_cfg.lookupValue(
+      SMF_CONFIG_STRING_QOS_PROFILE_5QI,
+                                                      qos_profile_5qi);
+      session_management_subscription_cfg.lookupValue(
+          SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL,
+          qos_profile_priority_level);
+      session_management_subscription_cfg.lookupValue(
+          SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL,
+          qos_profile_arp_priority_level);
+      session_management_subscription_cfg.lookupValue(
+          SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP,
+          qos_profile_arp_preemptcap);
+      session_management_subscription_cfg.lookupValue(
+          SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN,
+          qos_profile_arp_preemptvuln);
+      session_management_subscription_cfg.lookupValue(
+      SMF_CONFIG_STRING_SESSION_AMBR_UL,
+                                                      session_ambr_ul);
+      session_management_subscription_cfg.lookupValue(
+      SMF_CONFIG_STRING_SESSION_AMBR_DL,
+                                                      session_ambr_dl);
+
+      session_management_subscription[i].single_nssai.sST = nssai_sst;
+      session_management_subscription[i].single_nssai.sD = nssai_sd;
+      session_management_subscription[i].session_type = default_session_type;
+      session_management_subscription[i].dnn = dnn;
+      session_management_subscription[i].ssc_mode = default_ssc_mode;
+      session_management_subscription[i].default_qos._5qi = qos_profile_5qi;
+      session_management_subscription[i].default_qos.priority_level =
+          qos_profile_priority_level;
+      session_management_subscription[i].default_qos.arp.priority_level =
+          qos_profile_arp_priority_level;
+      session_management_subscription[i].default_qos.arp.preempt_cap =
+          qos_profile_arp_preemptcap;
+      session_management_subscription[i].default_qos.arp.preempt_vuln =
+          qos_profile_arp_preemptvuln;
+      session_management_subscription[i].session_ambr.downlink =
+          session_ambr_dl;
+      session_management_subscription[i].session_ambr.uplink = session_ambr_ul;
+      num_session_management_subscription++;
+    }
+
   } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror ;
@@ -623,8 +712,8 @@ void smf_config::display() {
                          itti.async_cmd_sched_params.sched_priority);
   Logger::smf_app().info("- " SMF_CONFIG_STRING_IP_ADDRESS_POOL ":");
   for (int i = 0; i < num_ue_pool; i++) {
-    std::string range_low(inet_ntoa(ue_pool_range_low[apn[i].pool_id_iv4]));
-    std::string range_high(inet_ntoa(ue_pool_range_high[apn[i].pool_id_iv4]));
+    std::string range_low(inet_ntoa(ue_pool_range_low[dnn[i].pool_id_iv4]));
+    std::string range_high(inet_ntoa(ue_pool_range_high[dnn[i].pool_id_iv4]));
     Logger::smf_app().info("    IPv4 pool %d ..........: %s - %s", i,
                            range_low.c_str(), range_high.c_str());
   }
@@ -648,23 +737,23 @@ void smf_config::display() {
     Logger::smf_app().info("    Secondary DNS v6 .....: %s", str_addr6);
   }
 
-  Logger::smf_app().info("- " SMF_CONFIG_STRING_APN_LIST ":");
-  for (int i = 0; i < num_apn; i++) {
-    Logger::smf_app().info("    APN %d:", i);
-    Logger::smf_app().info("        " SMF_CONFIG_STRING_APN_NI ":  %s",
-                           apn[i].apn.c_str());
+  Logger::smf_app().info("- " SMF_CONFIG_STRING_DNN_LIST ":");
+  for (int i = 0; i < num_dnn; i++) {
+    Logger::smf_app().info("    DNN %d:", i);
+    Logger::smf_app().info("        " SMF_CONFIG_STRING_DNN_NI ":  %s",
+                           dnn[i].dnn.c_str());
     Logger::smf_app().info("        " SMF_CONFIG_STRING_PDN_TYPE ":  %s",
-                           apn[i].pdn_type.toString().c_str());
-    if (apn[i].pool_id_iv4 >= 0) {
-      std::string range_low(inet_ntoa(ue_pool_range_low[apn[i].pool_id_iv4]));
-      std::string range_high(inet_ntoa(ue_pool_range_high[apn[i].pool_id_iv4]));
+                           dnn[i].pdn_type.toString().c_str());
+    if (dnn[i].pool_id_iv4 >= 0) {
+      std::string range_low(inet_ntoa(ue_pool_range_low[dnn[i].pool_id_iv4]));
+      std::string range_high(inet_ntoa(ue_pool_range_high[dnn[i].pool_id_iv4]));
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_IPV4_POOL ":  %d ( %s - %s)",
-          apn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
+          dnn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
     }
-    if (apn[i].pool_id_iv6 >= 0) {
+    if (dnn[i].pool_id_iv6 >= 0) {
       Logger::smf_app().info("        " SMF_CONFIG_STRING_IPV6_POOL ":  %d",
-                             apn[i].pool_id_iv6);
+                             dnn[i].pool_id_iv6);
     }
   }
 
@@ -686,15 +775,56 @@ void smf_config::display() {
       "       Gnb Address ..........: %s",
       inet_ntoa(*((struct in_addr*) &test_upf_cfg.gnb_addr4)));
 
+  if (local_configuration) {
+    Logger::smf_app().info(
+        "- " SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST ":");
+    for (int i = 0; i < num_session_management_subscription; i++) {
+      Logger::smf_app().info("    Session Management Subscription Data %d:", i);
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_NSSAI_SST ":  %d, " SMF_CONFIG_STRING_NSSAI_SD " %s",
+          session_management_subscription[i].single_nssai.sST,
+          session_management_subscription[i].single_nssai.sD.c_str());
+      Logger::smf_app().info("        " SMF_CONFIG_STRING_DNN ":  %s",
+                             session_management_subscription[i].dnn.c_str());
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE ":  %s",
+          session_management_subscription[i].session_type.c_str());
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE ":  %d",
+          session_management_subscription[i].ssc_mode);
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_5QI ":  %d",
+          session_management_subscription[i].default_qos._5qi);
+      Logger::smf_app().info(
+           "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ":  %d",
+           session_management_subscription[i].default_qos.priority_level);
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL ":  %d",
+          session_management_subscription[i].default_qos.arp.priority_level);
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP ":  %s",
+          session_management_subscription[i].default_qos.arp.preempt_cap.c_str());
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN ":  %s",
+          session_management_subscription[i].default_qos.arp.preempt_vuln.c_str());
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_SESSION_AMBR_UL ":  %s",
+          session_management_subscription[i].session_ambr.uplink.c_str());
+      Logger::smf_app().info(
+          "        " SMF_CONFIG_STRING_SESSION_AMBR_DL ":  %s",
+          session_management_subscription[i].session_ambr.downlink.c_str());
+    }
+  }
+
 }
 
 //------------------------------------------------------------------------------
-bool smf_config::is_dotted_apn_handled(const string &apn,
+bool smf_config::is_dotted_dnn_handled(const string &dnn,
                                        const pdn_type_t &pdn_type) {
-  for (int i = 0; i < smf_cfg.num_apn; i++) {
-    if (0 == apn.compare(smf_cfg.apn[i].apn_label)) {
+  for (int i = 0; i < smf_cfg.num_dnn; i++) {
+    if (0 == dnn.compare(smf_cfg.dnn[i].dnn_label)) {
       // TODO refine
-      if (pdn_type.pdn_type == smf_cfg.apn[i].pdn_type.pdn_type) {
+      if (pdn_type.pdn_type == smf_cfg.dnn[i].pdn_type.pdn_type) {
         return true;
       }
     }
@@ -744,18 +874,18 @@ smf_config::~smf_config() {
 bool smf_config::is_dotted_dnn_handled(
     const std::string &dnn, const pdu_session_type_t &pdn_session_type) {
   Logger::smf_app().debug("Requested DNN: %s", dnn.c_str());
-  for (int i = 0; i < smf_cfg.num_apn; i++) {
+  for (int i = 0; i < smf_cfg.num_dnn; i++) {
     Logger::smf_app().debug("DNN label: %s, dnn: %s",
-                            smf_cfg.apn[i].apn_label.c_str(),
-                            smf_cfg.apn[i].apn.c_str());
-    //if (0 == dnn.compare(smf_cfg.apn[i].apn_label)) {
-    if (0 == dnn.compare(smf_cfg.apn[i].apn)) {
+                            smf_cfg.dnn[i].dnn_label.c_str(),
+                            smf_cfg.dnn[i].dnn.c_str());
+    //if (0 == dnn.compare(smf_cfg.dnn[i].dnn_label)) {
+    if (0 == dnn.compare(smf_cfg.dnn[i].dnn)) {
       Logger::smf_app().debug("DNN matched!");
       Logger::smf_app().debug("PDU Session Type %d, PDN Type %d",
                               pdn_session_type.pdu_session_type,
-                              smf_cfg.apn[i].pdn_type.pdn_type);
+                              smf_cfg.dnn[i].pdn_type.pdn_type);
       if (pdn_session_type.pdu_session_type
-          == smf_cfg.apn[i].pdn_type.pdn_type) {
+          == smf_cfg.dnn[i].pdn_type.pdn_type) {
         return true;
       }
     }
@@ -765,7 +895,7 @@ bool smf_config::is_dotted_dnn_handled(
 
 //------------------------------------------------------------------------------
 std::string smf_config::get_default_dnn() {
-  Logger::smf_app().debug("Default DNN: %s", smf_cfg.apn[0].apn.c_str());
-  return smf_cfg.apn[0].apn;
+  Logger::smf_app().debug("Default DNN: %s", smf_cfg.dnn[0].dnn.c_str());
+  return smf_cfg.dnn[0].dnn;
 }
 

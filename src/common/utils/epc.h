@@ -336,12 +336,12 @@ class Utility {
                                             const unsigned char *plmnid);
   static std::string epc(const char *mnc, const char *mcc);
   static std::string epc(const unsigned char *plmnid);
-  static std::string apn_fqdn(const char *apnoi, const char *mnc,
+  static std::string dnn_fqdn(const char *apnoi, const char *mnc,
                               const char *mcc);
-  static std::string apn_fqdn(const char *apnoi, const unsigned char *plmnid);
-  static std::string apn(const char *apnoi, const char *mnc, const char *mcc);
-  static std::string apn(const char *apnoi, const unsigned char *plmnid);
-  static std::string apn_label(const std::string &apn);
+  static std::string dnn_fqdn(const char *apnoi, const unsigned char *plmnid);
+  static std::string dnn(const char *apnoi, const char *mnc, const char *mcc);
+  static std::string dnn(const char *apnoi, const unsigned char *plmnid);
+  static std::string dnn_label(const std::string &dnn);
 
   static AppServiceEnum getAppService(const std::string &s);
   static AppProtocolEnum getAppProtocol(const std::string &p);

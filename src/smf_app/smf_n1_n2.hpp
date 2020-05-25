@@ -57,6 +57,7 @@ extern "C" {
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
 #include "Ngap_PDUSessionResourceModifyResponseTransfer.h"
 #include "Ngap_PDUSessionResourceReleaseResponseTransfer.h"
+#include "Ngap_PDUSessionResourceSetupUnsuccessfulTransfer.h"
 }
 
 namespace smf {
@@ -97,20 +98,20 @@ class smf_n1_n2 {
   /*
    * Decode N1 SM Container into the NAS mesasge (using NAS lib)
    * @param [nas_message_t&] nas_msg Store NAS message after decoded
-   * @param [std::string&] n1_sm_msg N1 SM Container from AMF
+   * @param [const std::string&] n1_sm_msg N1 SM Container
    * @return status of the decode process
    */
-  int decode_n1_sm_container(nas_message_t &nas_msg, std::string &n1_sm_msg);
+  int decode_n1_sm_container(nas_message_t &nas_msg, const std::string &n1_sm_msg);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceSetupResponseTransfer
    * @param [std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>&] ngap_IE Store decoded NGAP message
-   * @param [std::string&] n2_sm_info N2 SM Information
+   * @param [const std::string&] n2_sm_info N2 SM Information
    * @return status of the decode process
    */
   int decode_n2_sm_information(
       std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t> &ngap_IE,
-      std::string &n2_sm_info);
+      const std::string &n2_sm_info);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceModifyResponseTransfer_t
@@ -120,7 +121,7 @@ class smf_n1_n2 {
    */
   int decode_n2_sm_information(
       std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t> &ngap_IE,
-      std::string &n2_sm_info);
+      const std::string &n2_sm_info);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceReleaseResponseTransfer_t
@@ -130,7 +131,18 @@ class smf_n1_n2 {
    */
   int decode_n2_sm_information(
       std::shared_ptr<Ngap_PDUSessionResourceReleaseResponseTransfer_t> &ngap_IE,
-      std::string &n2_sm_info);
+      const std::string &n2_sm_info);
+
+  /*
+   * Decode N2 SM Information Ngap_PDUSessionResourceSetupUnsuccessfulTransfer
+   * @param [std::shared_ptr<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t>&] ngap_IE Store decoded NGAP message
+   * @param [std::string&] n2_sm_info N2 SM Information
+   * @return status of the decode process
+   */
+  int decode_n2_sm_information(
+      std::shared_ptr<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t> &ngap_IE,
+      const std::string &n2_sm_info);
+
 
 };
 

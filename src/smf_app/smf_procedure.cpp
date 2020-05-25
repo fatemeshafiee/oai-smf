@@ -151,7 +151,7 @@ int session_create_sm_context_procedure::run(
   pfcp::destination_interface_t destination_interface = { };
 
   sps->generate_far_id(far_id);
-  apply_action.forw = 1;
+  apply_action.forw = 1; //forward the packets
 
   //wys-test-add
   pfcp::outer_header_creation_t outer_header_creation = { };
@@ -662,13 +662,15 @@ int session_update_sm_context_procedure::run(
               .s_addr;
           update_forwarding_parameters.set(outer_header_creation);
           update_far.set(update_forwarding_parameters);
-          apply_action.forw = 1;
+          apply_action.forw = 1; //forward the packets
+          //apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
           update_far.set(apply_action);
 
           n4_ser->pfcp_ies.set(update_far);
 
           send_n4 = true;
           flow.far_id_dl.first = true;
+          flow.dl_fteid = dl_fteid;
 
         } else {
           Logger::smf_app().debug("Create FAR DL");
@@ -691,7 +693,8 @@ int session_update_sm_context_procedure::run(
           //pfcp::proxying_t                  proxying = {};
 
           sps->generate_far_id(far_id);
-          apply_action.forw = 1;
+          apply_action.forw = 1; //forward the packets
+          //apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
 
           destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;  // ACCESS is for downlink, CORE for uplink
           forwarding_parameters.set(destination_interface);
@@ -713,6 +716,7 @@ int session_update_sm_context_procedure::run(
 
           flow.far_id_dl.first = true;
           flow.far_id_dl.second.far_id = far_id.far_id;
+          flow.dl_fteid = dl_fteid;
           Logger::smf_app().debug("FAR DL ID " "0x%" PRIx32 " ", far_id.far_id);
         }
 
@@ -777,7 +781,7 @@ int session_update_sm_context_procedure::run(
                                   pdr_id.rule_id);
         } else {
           Logger::smf_app().debug(
-              "Update FAR, PDR DL Rule Id " "0x%" PRIx16 ", 0x%" PRIx32 " ",
+              "Update FAR, PDR DL Rule Id " "0x%" PRIx16 ", FAR ID 0x%" PRIx32 " ",
               flow.pdr_id_dl.rule_id, flow.far_id_dl.second.far_id);
           /*
            // Update FAR
@@ -831,7 +835,9 @@ int session_update_sm_context_procedure::run(
         }
         // after a release flows
         if (not flow.ul_fteid.is_zero()) {
+        }
 
+        if (not flow.dl_fteid.is_zero()) {
         }
         // may be modified
         smf_qos_flow flow2 = flow;
@@ -870,7 +876,7 @@ int session_update_sm_context_procedure::run(
           far_id.far_id = flow.far_id_dl.second.far_id;
           // apply_action.buff = 1;
           pfcp::apply_action_t apply_action = { };
-          apply_action.nocp = 1;
+          apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
 
           far.set(far_id);
           far.set(apply_action);
@@ -967,63 +973,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
           .c_str());
 
   switch (session_procedure_type) {
-    /*
-     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
-     if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
-     Logger::smf_app().info(
-     "Service Request (step 1) accepted by UPF");
-     //delete AN Info
-
-     std::map<uint8_t, qos_flow_context_updated> qos_flow_context_to_be_updateds =
-     { };
-     n11_triggered_pending->res.get_all_qos_flow_context_updateds(
-     qos_flow_context_to_be_updateds);
-     n11_triggered_pending->res.remove_all_qos_flow_context_updateds();
-
-     for (auto it : qos_flow_context_to_be_updateds)
-     Logger::smf_app().debug("QoS Flow context to be modified QFI %d",
-     it.first);
-
-     for (auto it : qos_flow_context_to_be_updateds) {
-     smf_qos_flow flow = { };
-     if (!sps->get_qos_flow(it.second.qfi, flow)) {  //no QoS flow found
-     Logger::smf_app().error(
-     "Could not found any QoS flow with QFI %d",
-     it.first);
-     continue;
-     }
-     //if FAR DL exist -> remove it
-     if ((flow.far_id_dl.first) && (flow.far_id_dl.second.far_id)) {
-     Logger::smf_app().debug(
-     "FAR DL " "0x%" PRIx32 " has been removed",
-     flow.far_id_dl.second.far_id);
-     flow.far_id_dl.first = false;
-     flow.far_id_dl.second.far_id = 0;
-     }
-     //remove PDR DL if exist
-     if (flow.pdr_id_dl.rule_id) {
-     Logger::smf_app().debug(
-     "PDR DL " "0x%" PRIx16 " has been removed",
-     flow.pdr_id_dl.rule_id);
-     flow.pdr_id_dl.rule_id = 0;
-     }
-     // Update QoS Flow
-     smf_qos_flow flow2 = flow;
-     sps->add_qos_flow(flow2);
-
-     qos_flow_context_updated qcu = { };
-     qcu.set_cause(REQUEST_ACCEPTED);
-
-     qcu.set_qfi(pfcp::qfi_t(it.first));
-     qcu.set_ul_fteid(flow.ul_fteid);
-     qcu.set_qos_profile(flow.qos_profile);
-     n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-
-     }
-     }
-     }
-     break;
-     */
     case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_SMF_REQUESTED:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_AN_REQUESTED:
@@ -1032,6 +981,9 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
       ::fteid_t dl_fteid = { };
       n11_trigger->req.get_dl_fteid(dl_fteid);
+
+      Logger::smf_app().debug("AN F-TEID ID" "0x%" PRIx32 ", IP Addr %s",
+                              dl_fteid.teid_gre_key, conv::toString(dl_fteid.ipv4_address).c_str());
 
       std::map<uint8_t, qos_flow_context_updated> qos_flow_context_to_be_updateds =
           { };
@@ -1193,10 +1145,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
     //FOR TESTING PURPOSE
     case session_management_procedures_type_e::PDU_SESSION_TEST: {
-
-      //N1 SM: PDU Session Modification Command​
-      //N2 SM: PDU Session Resource Modify Request Transfer IE
-
       //N1 SM
       smf_n1_n2_inst.create_n1_sm_container(
           n11_triggered_pending->res, PDU_SESSION_MODIFICATION_REQUEST,

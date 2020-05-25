@@ -43,10 +43,7 @@
 
 #include "logger.hpp"
 #include "Helpers.h"
-extern "C" {
-#include "multipartparser.h"
-#include "dynamic_memory_check.h"
-}
+#include "simple_parser.hpp"
 
 namespace oai {
 namespace smf_server {
@@ -141,91 +138,39 @@ void IndividualSMContextApi::update_sm_context_handler(
   Logger::smf_api_server().info(
       "Received a SM context update request from AMF.");
   Logger::smf_api_server().debug("Request body: %s\n", request.body().c_str());
-
-  //find boundary
-  std::size_t found = request.body().find("Content-Type");
-  std::string boundary_str = request.body().substr(2, found - 4);
-  Logger::smf_api_server().debug("Boundary: %s", boundary_str.c_str());
-
   SmContextUpdateMessage smContextUpdateMessage = { };
 
-  //step 1. use multipartparser to decode the request
-  multipartparser_callbacks_init(&g_callbacks);
-  g_callbacks.on_body_begin = &on_body_begin;
-  g_callbacks.on_part_begin = &on_part_begin;
-  g_callbacks.on_header_field = &on_header_field;
-  g_callbacks.on_header_value = &on_header_value;
-  g_callbacks.on_headers_complete = &on_headers_complete;
-  g_callbacks.on_data = &on_data;
-  g_callbacks.on_part_end = &on_part_end;
-  g_callbacks.on_body_end = &on_body_end;
+  //simple parser
+  simple_parser sp = { };
+  sp.parse(request.body());
 
-  multipartparser parser = { };
-  init_globals();
-  multipartparser_init(&parser,
-                       reinterpret_cast<const char*>(boundary_str.c_str()));
-
-  unsigned int str_len = request.body().length();
-  unsigned char *data = (unsigned char*) malloc(str_len + 1);
-  memset(data, 0, str_len + 1);
-  memcpy((void*) data, (void*) request.body().c_str(), str_len);
-
-  //if ((multipartparser_execute(&parser, &g_callbacks, request.body().c_str(), strlen(request.body().c_str())) != strlen(request.body().c_str())) or (!g_body_begin_called)){
-  if ((multipartparser_execute(&parser, &g_callbacks,
-                               reinterpret_cast<const char*>(data), str_len)
-      != strlen(request.body().c_str())) or (!g_body_begin_called)) {
-    Logger::smf_api_server().debug(
-        "The received message can not be parsed properly!");
-    //TODO: fix this issue
-    //response.send(Pistache::Http::Code::Bad_Request, "");
-    //return;
-  }
-
-  free_wrapper((void**) &data);
-
-  uint8_t size = g_parts.size();
-  Logger::smf_api_server().debug("Number of MIME parts %d", g_parts.size());
-  part p0 = { };
-  part p1 = { };
-
-  if (size > 0) {
-    p0 = g_parts.front();
-    g_parts.pop_front();
-    Logger::smf_api_server().debug("Request body, part 1: %s", p0.body.c_str());
-  }
-
-  if (size > 1) {
-    p1 = g_parts.front();
-    g_parts.pop_front();
-    Logger::smf_api_server().debug("Request body, part 2: %s (%d bytes)",
-                                   p1.body.c_str(), p1.body.length());
-    //part p2 = g_parts.front(); g_parts.pop_front();
-    //Logger::smf_api_server().debug("Request body, part 3: \n %s",p2.body.c_str());
-  }
+  std::vector<mime_part> parts = { };
+  sp.get_mime_parts(parts);
+  uint8_t size = parts.size();
+  Logger::smf_api_server().debug("Number of MIME parts %d", size);
 
   // Getting the body param
   SmContextUpdateData smContextUpdateData = { };
   try {
     if (size > 0) {
-      nlohmann::json::parse(p0.body.c_str()).get_to(smContextUpdateData);
+      nlohmann::json::parse(parts[0].body.c_str()).get_to(smContextUpdateData);
     } else {
       nlohmann::json::parse(request.body().c_str()).get_to(smContextUpdateData);
     }
 
     smContextUpdateMessage.setJsonData(smContextUpdateData);
 
-    if (size > 1) {
-      if (smContextUpdateData.n2SmInfoIsSet()) {
-        //N2 SM (for Session establishment, or for session modification)
-        Logger::smf_api_server().debug("N2 SM information is set");
-        smContextUpdateMessage.setBinaryDataN2SmInformation(p1.body);
-      }
-      if (smContextUpdateData.n1SmMsgIsSet()) {
-        //N1 SM (for session modification, UE-initiated)
+    for (int i = 1; i < size; i++) {
+      if (parts[i].content_type.compare("application/vnd.3gpp.5gnas") == 0) {
+        smContextUpdateMessage.setBinaryDataN1SmMessage(parts[i].body);
         Logger::smf_api_server().debug("N1 SM message is set");
-        smContextUpdateMessage.setBinaryDataN1SmMessage(p1.body);
+      } else if (parts[i].content_type.compare("application/vnd.3gpp.ngap")
+          == 0) {
+        smContextUpdateMessage.setBinaryDataN2SmInformation(parts[i].body);
+        Logger::smf_api_server().debug("N2 SM information is set");
       }
     }
+
     // Getting the path params
     auto smContextRef = request.param(":smContextRef").as<std::string>();
     this->update_sm_context(smContextRef, smContextUpdateMessage, response);

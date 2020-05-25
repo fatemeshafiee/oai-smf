@@ -258,10 +258,10 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   upCnx_state_e get_upCnx_state() const;
 
   // Called by GTPV2-C DELETE_SESSION_REQUEST
-  // deallocate_ressources is for releasing LTE resources prior to the deletion of objects
+  // deallocate_ressources is for releasing related-resources prior to the deletion of objects
   // since shared_ptr is actually heavy used for handling objects, deletion of object instances cannot be always guaranteed
   // when removing them from a collection, so that is why actually the deallocation of resources is not done in the destructor of objects.
-  void deallocate_ressources(const std::string &apn);
+  void deallocate_ressources(const std::string &dnn);
 
   /*
    * Represent PDU Session as string to be printed
@@ -328,10 +328,10 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   /*
    * Mark a QoS Rule to be synchronised with UE
-   * @param [uint8_t ]: rule_id: QoS Rule ID to be synchronised with UE
+   * @param [const uint8_t ]: rule_id: QoS Rule ID to be synchronised with UE
    * @return void
    */
-  void mark_qos_rule_to_be_synchronised(uint8_t rule_id);
+  void mark_qos_rule_to_be_synchronised(const uint8_t rule_id);
 
   /*
    * Get all QoS Rules to be synchronised with UE
@@ -363,7 +363,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    * @param [QOSRulesIE &] qos_rule
    * @return bool: Return true if Rule exist, otherwise return false
    */
-  bool get_qos_rule(uint8_t rule_id, QOSRulesIE &qos_rule) const;
+  bool get_qos_rule(const uint8_t rule_id, QOSRulesIE &qos_rule) const;
 
   /*
    * Update QoS Rule
@@ -412,7 +412,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   timer_id_t timer_T3591;
   timer_id_t timer_T3592;
 
-  pfcp::qfi_t default_qfi; //Default QFI for this session
+  pfcp::qfi_t default_qfi;  //Default QFI for this session
   std::map<uint8_t, smf_qos_flow> qos_flows;   // QFI <-> QoS Flow
   std::map<uint8_t, QOSRulesIE> qos_rules;   // QRI <-> QoS Rules
   std::vector<uint8_t> qos_rules_to_be_synchronised;
@@ -441,7 +441,8 @@ class session_management_subscription {
    * @return void
    */
   void insert_dnn_configuration(
-      std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
+      const std::string &dnn,
+      std::shared_ptr<dnn_configuration_t> &dnn_configuration);
 
   /*
    * Find a DNN configuration
@@ -450,7 +451,15 @@ class session_management_subscription {
    * @return void
    */
   void find_dnn_configuration(
-      std::string dnn, std::shared_ptr<dnn_configuration_t> &dnn_configuration);
+      const std::string &dnn,
+      std::shared_ptr<dnn_configuration_t> &dnn_configuration) const;
+
+  /*
+   * Verify whether DNN configuration with a given DNN exist
+   * @param [std::string &] dnn
+   * @return bool: return true if the configuration exist, otherwise return false
+   */
+  bool dnn_configuration(const std::string &dnn) const;
 
  private:
   snssai_t single_nssai;
@@ -478,7 +487,6 @@ class dnn_context {
       pdu_sessions(),
       nssai(),
       dnn_in_use(dnn) {
-    // apn_ambr = {0};
   }
   dnn_context(dnn_context &b) = delete;
 
@@ -503,7 +511,7 @@ class dnn_context {
    * @param void
    * @return size_t: number of PDU sessions
    */
-  size_t get_number_pdu_sessions();
+  size_t get_number_pdu_sessions() const;
 
   /*
    * Represent DNN Context as a string object
@@ -513,8 +521,7 @@ class dnn_context {
   std::string toString() const;
 
   bool in_use;
-  std::string dnn_in_use;   // The APN currently used, as received from the SGW.
-  //ambr_t  apn_ambr; // APN AMBR: The maximum aggregated uplink and downlink MBR values to be shared across all Non-GBR bearers, which are established for this APN.
+  std::string dnn_in_use;   // The DNN currently used, as received from the AMF
   snssai_t nssai;
   std::vector<std::shared_ptr<smf_pdu_session>> pdu_sessions;  //Store all PDU Sessions associated with this DNN context
   mutable std::recursive_mutex m_context;
@@ -528,12 +535,10 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   smf_context()
       :
       m_context(),
-      imsi(),
-      imsi_unauthenticated_indicator(false),
       pending_procedures(),
-      msisdn(),
       dnn_subscriptions(),
       scid(0) {
+    supi_prefix = { };
   }
 
   smf_context(smf_context &b) = delete;
@@ -660,6 +665,14 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<session_management_subscription> &ss);
 
   /*
+   * Verify whether a subscription data exist with a given dnn and snssai
+   * @param [const std::string &] dnn: DNN
+   * @param [const snssai_t&] snssai: single NSSAI
+   *@return bool: Return true if a subscription data corresponding with dnn and snssai exist, otherwise return false
+   */
+  bool is_dnn_snssai_subscription_data(const std::string &dnn, const snssai_t &snssai);
+
+  /*
    * Find a session management subscription from a SMF context
    * @param [const snssai_t&] snssai
    * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to the subscription
@@ -704,7 +717,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param
    * @return std::size_t: the number of contexts
    */
-  std::size_t get_number_dnn_contexts();
+  std::size_t get_number_dnn_contexts() const;
 
   /*
    * Set SM Context ID
@@ -721,8 +734,24 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   scid_t get_scid() const;
 
   /*
+   * Get Supi prefix
+   * @param [const std::string &]  prefix: Supi prefix (e.g., imsi)
+   * @return void
+   */
+  void get_supi_prefix(std::string &prefix) const;
+
+  /*
+   * Get Supi prefix
+   * @param [const std::string &]  prefix: Supi prefix (e.g., imsi)
+   * @return void
+   */
+  void set_supi_prefix(std::string const &value);
+
+
+  /*
    * Get the default QoS Rule for all QFIs
    * @param [QOSRulesIE] qos_rule
+   * @param [const uint8_t] pdu_session_type: PDU session type (e.g., Ipv4, Ipv6)
    * @return void
    */
   void get_default_qos_rule(QOSRulesIE &qos_rule, uint8_t pdu_session_type);
@@ -758,17 +787,26 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void get_session_ambr(Ngap_PDUSessionAggregateMaximumBitRate_t &session_ambr,
                         const snssai_t &snssai, const std::string &dnn);
 
+  /*
+   * Find the PDU Session, QFI associated with a given PDR_ID
+   * @param [const pfcp::pdr_id_t &] pdr_id: PDR ID
+   * @param [pfcp::qfi_t &] qfi: QFI
+   * @param [std::shared_ptr<dnn_context> &] sd: pointer to the DNN context
+   * @param [std::shared_ptr<smf_pdu_session> &] sp: pointer to the PDU session
+   * @return bool: return true if found, otherwise return false
+   */
+  bool find_pdu_session(const pfcp::pdr_id_t &pdr_id, pfcp::qfi_t &qfi,
+                        std::shared_ptr<dnn_context> &sd,
+                        std::shared_ptr<smf_pdu_session> &sp);
+
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
-  imsi_t imsi;  // IMSI (International Mobile Subscriber Identity) is the subscriber permanent identity.
-  bool imsi_unauthenticated_indicator;  // This is an IMSI indicator to show the IMSI is unauthenticated.
-  // TO BE CHECKED me_identity_t    me_identity;       // Mobile Equipment Identity (e.g. IMEI/IMEISV).
-  msisdn_t msisdn;  // The basic MSISDN of the UE. The presence is dictated by its storage in the HSS.
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
   // snssai-sst <-> session management subscription
   std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
   supi_t supi;
-  scid_t scid; //SM Context ID
+  std::string supi_prefix;
+  scid_t scid;  //SM Context ID
   // Big recursive lock
   mutable std::recursive_mutex m_context;
 

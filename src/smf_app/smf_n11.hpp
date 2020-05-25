@@ -68,6 +68,14 @@ class smf_n11 {
       std::shared_ptr<itti_nx_trigger_pdu_session_modification> sm_context_res);
 
   /*
+   * Send N1N2 Message Transfer Request to AMF
+   * @param [std::shared_ptr<itti_n11_session_report_request>] n11_msg: Content of message to be sent
+   * @return void
+   */
+  void send_n1n2_message_transfer_request(
+      std::shared_ptr<itti_n11_session_report_request> report_msg);
+
+  /*
    * Send update session response to AMF
    * @param [std::shared_ptr<itti_n11_update_sm_context_response> sm_context_res] sm_context_res
    * @return void
@@ -86,75 +94,75 @@ class smf_n11 {
   /*
    * Send update session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [ oai::smf_server::model::SmContextUpdateError] SmContextUpdateError
+   * @param [const oai::smf_server::model::SmContextUpdateError] SmContextUpdateError
    * @param [Pistache::Http::Code] code, response code
    * @return void
    */
   void send_pdu_session_update_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
-      oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+      const oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
       Pistache::Http::Code code);
 
   /*
    * Send Update session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [ oai::smf_server::model::SmContextUpdatedData] smContextUpdatedData
+   * @param [const oai::smf_server::model::SmContextUpdatedData] smContextUpdatedData
    * @param [Pistache::Http::Code] code, response code
    * @return void
    */
   void send_pdu_session_update_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
-      oai::smf_server::model::SmContextUpdatedData &smContextUpdatedData,
+      const oai::smf_server::model::SmContextUpdatedData &smContextUpdatedData,
       Pistache::Http::Code code);
 
   /*
    * Send create session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
+   * @param [const oai::smf_server::model::SmContextCreateError] smContextCreateError
    * @param [Pistache::Http::Code] code, response code
    * @return void
    */
   void send_pdu_session_create_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
-      oai::smf_server::model::SmContextCreateError &smContextCreateError,
+      const oai::smf_server::model::SmContextCreateError &smContextCreateError,
       Pistache::Http::Code code);
 
   /*
    * Send create session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [ oai::smf_server::model::SmContextCreateError] smContextCreateError
+   * @param [const oai::smf_server::model::SmContextCreateError] smContextCreateError
    * @param [Pistache::Http::Code] code, response code
    * @param [std::string] n1_sm_msg, N1 SM message content
    * @return void
    */
   void send_pdu_session_create_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
-      oai::smf_server::model::SmContextCreateError &smContextCreateError,
+      const oai::smf_server::model::SmContextCreateError &smContextCreateError,
       Pistache::Http::Code code, std::string &n1_sm_msg);
 
   /*
    * Send update session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [ oai::smf_server::model::SmContextUpdateError] smContextUpdateError
+   * @param [const oai::smf_server::model::SmContextUpdateError] smContextUpdateError
    * @param [Pistache::Http::Code] code, response code
    * @param [std::string] n1_sm_msg, N1 SM message content
    * @return void
    */
   void send_pdu_session_update_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
-      oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+      const oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
       Pistache::Http::Code code, std::string &n1_sm_msg);
 
   /*
    * Send create session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [ oai::smf_server::model::SmContextCreatedData] smContextCreatedData
+   * @param [const oai::smf_server::model::SmContextCreatedData] smContextCreatedData
    * @param [Pistache::Http::Code] code, response code
    * @return void
    */
   void send_pdu_session_create_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
-      oai::smf_server::model::SmContextCreatedData &smContextCreatedData,
+      const oai::smf_server::model::SmContextCreatedData &smContextCreatedData,
       Pistache::Http::Code code);
 
   /*
@@ -169,13 +177,13 @@ class smf_n11 {
   /*
    * Send release session response to AMF
    * @param [Pistache::Http::ResponseWriter] httpResponse
-   * @param [oai::smf_server::model::ProblemDetails] problem
+   * @param [const oai::smf_server::model::ProblemDetails] problem
    * @param [Pistache::Http::Code] code, response code
    * @return void
    */
   void send_pdu_session_release_sm_context_response(
       Pistache::Http::ResponseWriter &httpResponse,
-      oai::smf_server::model::ProblemDetails &problem,
+      const oai::smf_server::model::ProblemDetails &problem,
       Pistache::Http::Code code);
 
   /*
@@ -188,10 +196,10 @@ class smf_n11 {
    * @return void
    */
   void create_multipart_related_content(std::string &body,
-                                        std::string &json_part,
-                                        std::string &boundary,
-                                        std::string &n1_message,
-                                        std::string &n2_message);
+                                        const std::string &json_part,
+                                        const std::string boundary,
+                                        const std::string &n1_message,
+                                        const std::string &n2_message);
 
   /*
    * Create HTTP body content for multipart/related message
@@ -203,8 +211,8 @@ class smf_n11 {
    * @return void
    */
   void create_multipart_related_content(
-      std::string &body, std::string &json_part, std::string &boundary,
-      std::string &message, multipart_related_content_part_e content_type);
+      std::string &body, const std::string &json_part, const std::string boundary,
+      const std::string &message, const multipart_related_content_part_e content_type);
 
 };
 

@@ -79,24 +79,24 @@ void smf_app_task(void*);
 int smf_app::apply_config(const smf_config &cfg) {
   Logger::smf_app().info("Apply config...");
 
-  for (int ia = 0; ia < cfg.num_apn; ia++) {
-    if (cfg.apn[ia].pool_id_iv4 >= 0) {
-      int pool_id = cfg.apn[ia].pool_id_iv4;
+  for (int ia = 0; ia < cfg.num_dnn; ia++) {
+    if (cfg.dnn[ia].pool_id_iv4 >= 0) {
+      int pool_id = cfg.dnn[ia].pool_id_iv4;
       int range =
           be32toh(
               cfg.ue_pool_range_high[pool_id].s_addr) - be32toh(cfg.ue_pool_range_low[pool_id].s_addr);
-      paa_dynamic::get_instance().add_pool(cfg.apn[ia].apn, pool_id,
+      paa_dynamic::get_instance().add_pool(cfg.dnn[ia].dnn, pool_id,
                                            cfg.ue_pool_range_low[pool_id],
                                            range);
-      //TODO: check with apn_label
-      Logger::smf_app().info("Applied config %s", cfg.apn[ia].apn.c_str());
+      //TODO: check with dnn_label
+      Logger::smf_app().info("Applied config %s", cfg.dnn[ia].dnn.c_str());
     }
-    if (cfg.apn[ia].pool_id_iv6 >= 0) {
-      int pool_id = cfg.apn[ia].pool_id_iv6;
-      paa_dynamic::get_instance().add_pool(cfg.apn[ia].apn, pool_id,
+    if (cfg.dnn[ia].pool_id_iv6 >= 0) {
+      int pool_id = cfg.dnn[ia].pool_id_iv6;
+      paa_dynamic::get_instance().add_pool(cfg.dnn[ia].dnn, pool_id,
                                            cfg.paa_pool6_prefix[pool_id],
                                            cfg.paa_pool6_prefix_len[pool_id]);
-      //TODO: check with apn_label
+      //TODO: check with dnn_label
     }
   }
 
@@ -287,24 +287,9 @@ smf_app::smf_app(const std::string &config_file)
 //------------------------------------------------------------------------------
 //From SPGWU
 void smf_app::start_upf_association(const pfcp::node_id_t &node_id) {
-  // TODO  refine this, look at RFC5905
-  std::tm tm_epoch = { 0 };  // Feb 8th, 2036
-  tm_epoch.tm_year = 2036 - 1900;  // years count from 1900
-  tm_epoch.tm_mon = 2 - 1;    // months count from January=0
-  tm_epoch.tm_mday = 8 - 1;         // days count from 1
-  std::time_t time_epoch = std::mktime(&tm_epoch);
-  std::chrono::time_point<std::chrono::system_clock> now =
-      std::chrono::system_clock::now();
-  std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-  std::time_t ellapsed = now_c - time_epoch;
-  uint64_t recovery_time_stamp = ellapsed;
 
-  //char* dt = ctime(&now_c);
-  //Logger::smf_app().info( "Current time %s", dt);
-  // convert now to tm struct for UTC
-  tm *gmtm = gmtime(&now_c);
-  char *dt = asctime(gmtm);
-  Logger::smf_app().info("Current time (UTC) %s", dt);
+  std::time_t time_epoch = std::time(nullptr);
+  uint64_t tv_ntp = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
 
   pfcp_associations::get_instance().add_peer_candidate_node(node_id);
   std::shared_ptr<itti_n4_association_setup_request> n4_asc = std::shared_ptr<
@@ -317,34 +302,12 @@ void smf_app::start_upf_association(const pfcp::node_id_t &node_id) {
   cp_function_features.load = 1;
   cp_function_features.ovrl = 1;
 
-  /*
-   pfcp::up_function_features_s   up_function_features;
-   // TODO load from config when features available ?
-   up_function_features = {};
-   up_function_features.bucp = 0;
-   up_function_features.ddnd = 0;
-   up_function_features.dlbd = 0;
-   up_function_features.trst = 0;
-   up_function_features.ftup = 1;
-   up_function_features.pfdm = 0;
-   up_function_features.heeu = 0;
-   up_function_features.treu = 0;
-   up_function_features.empu = 0;
-   up_function_features.pdiu = 0;
-   up_function_features.udbc = 0;
-   up_function_features.quoac = 0;
-   up_function_features.trace = 0;
-   up_function_features.frrt = 0;
-   */
-
   pfcp::node_id_t this_node_id = { };
   if (smf_cfg.get_pfcp_node_id(this_node_id) == RETURNok) {
     n4_asc->pfcp_ies.set(this_node_id);
-    pfcp::recovery_time_stamp_t r = { .recovery_time_stamp =
-        (uint32_t) recovery_time_stamp };
+    pfcp::recovery_time_stamp_t r = { .recovery_time_stamp = (uint32_t) tv_ntp };
     n4_asc->pfcp_ies.set(r);
 
-    //n4_asc->pfcp_ies.set(up_function_features);
     n4_asc->pfcp_ies.set(cp_function_features);
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
       n4_asc->r_endpoint = endpoint(node_id.u1.ipv4_address,
@@ -417,31 +380,82 @@ void smf_app::handle_itti_msg(
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(
     itti_n11_n1n2_message_transfer_response_status &m) {
+  //see TS29518_Namf_Communication.yaml
   Logger::smf_app().info("Process N1N2MessageTransfer Response");
-  //Update PDU Session accordingly
-  //TODO: to be completed (process cause)
-  pdu_session_status_e status = { pdu_session_status_e::PDU_SESSION_INACTIVE };
-  upCnx_state_e state = { upCnx_state_e::UPCNX_STATE_DEACTIVATED };
-  if ((static_cast<http_response_codes_e>(m.response_code)
-      == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
-      or (static_cast<http_response_codes_e>(m.response_code)
-          == http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
-    if (m.msg_type == PDU_SESSION_ESTABLISHMENT_REJECT) {
-      status = pdu_session_status_e::PDU_SESSION_INACTIVE;
-    } else if (m.msg_type == PDU_SESSION_ESTABLISHMENT_ACCEPT) {
-      status = pdu_session_status_e::PDU_SESSION_ESTABLISHMENT_PENDING;
-      state = upCnx_state_e::UPCNX_STATE_ACTIVATING;
+
+  switch (m.procedure_type) {
+    case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
+      //Update PDU Session accordingly
+      pdu_session_status_e status =
+          { pdu_session_status_e::PDU_SESSION_INACTIVE };
+      upCnx_state_e state = { upCnx_state_e::UPCNX_STATE_DEACTIVATED };
+      if ((static_cast<http_response_codes_e>(m.response_code)
+          == http_response_codes_e::HTTP_RESPONSE_CODE_OK)
+          or (static_cast<http_response_codes_e>(m.response_code)
+              == http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
+        if (m.msg_type == PDU_SESSION_ESTABLISHMENT_REJECT) {
+          status = pdu_session_status_e::PDU_SESSION_INACTIVE;
+        } else if (m.msg_type == PDU_SESSION_ESTABLISHMENT_ACCEPT) {
+          status = pdu_session_status_e::PDU_SESSION_ESTABLISHMENT_PENDING;
+          state = upCnx_state_e::UPCNX_STATE_ACTIVATING;
+        }
+        update_pdu_session_status(m.scid, status);
+        update_pdu_session_upCnx_state(m.scid, state);
+        Logger::smf_app().debug(
+            "Got successful response from AMF (Response code %d), set session status to %s",
+            m.response_code,
+            pdu_session_status_e2str[static_cast<int>(status)].c_str());
+      } else {
+        //TODO:
+        Logger::smf_app().debug("Got response from AMF (Response code %d)",
+                                m.response_code);
+      }
     }
-    update_pdu_session_status(m.scid, status);
-    update_pdu_session_upCnx_state(m.scid, state);
-    Logger::smf_app().debug(
-        "Got successful response from AMF (Response code %d), set session status to %s",
-        m.response_code,
-        pdu_session_status_e2str[static_cast<int>(status)].c_str());
-  } else {
-    //TODO:
-    Logger::smf_app().debug("Got response from AMF (Response code %d)",
-                            m.response_code);
+      break;
+    case session_management_procedures_type_e::SERVICE_REQUEST_NETWORK_TRIGGERED: {
+      Logger::smf_app().debug("Got response from AMF (Response code %d) with cause %s",
+                                    m.response_code, m.cause.c_str());
+      if ((static_cast<http_response_codes_e>(m.response_code)
+          != http_response_codes_e::HTTP_RESPONSE_CODE_OK)
+          and (static_cast<http_response_codes_e>(m.response_code)
+              != http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
+        //send failure indication to UPF
+        Logger::smf_app().debug("Send failure indication to UPF");
+        //TODO: to be completed
+        pfcp::node_id_t up_node_id = { };
+        if (not pfcp_associations::get_instance().select_up_node(
+            up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
+          // TODO
+          Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
+          return;
+        }
+
+        itti_n4_session_failure_indication *itti_n4 =
+            new itti_n4_session_failure_indication(TASK_SMF_APP, TASK_SMF_N4);
+        itti_n4->seid = m.seid;
+        itti_n4->trxn_id = m.trxn_id;
+        itti_n4->r_endpoint = endpoint(up_node_id.u1.ipv4_address,
+                                      pfcp::default_port);
+        std::shared_ptr<itti_n4_session_failure_indication> itti_n4_failure_indication =
+            std::shared_ptr<itti_n4_session_failure_indication>(itti_n4);
+
+        Logger::smf_app().info(
+            "Sending ITTI message %s to task TASK_SMF_N4",
+            itti_n4->get_msg_name());
+        int ret = itti_inst->send_msg(itti_n4_failure_indication);
+        if (RETURNok != ret) {
+          Logger::smf_app().error(
+              "Could not send ITTI message %s to task TASK_SMF_N4",
+              itti_n4->get_msg_name());
+          return;
+        }
+
+      }
+    }
+      break;
+    default: {
+
+    }
   }
 
 }
@@ -553,6 +567,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
 
   //Get necessary information
   supi_t supi = smreq->req.get_supi();
+  std::string supi_prefix = smreq->req.get_supi_prefix();
   supi64_t supi64 = smf_supi_to_u64(supi);
   std::string dnn = smreq->req.get_dnn();
   snssai_t snssai = smreq->req.get_snssai();
@@ -624,8 +639,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   if (request_type.compare("INITIAL_REQUEST") != 0) {
     Logger::smf_app().warn("Invalid request type (request type = %s)",
                            request_type.c_str());
-    //TODO:
-    //return
+    //"Existing PDU Session", AMF should use PDUSession_UpdateSMContext instead (see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0)
+    //ignore the message
+    return;
   }
 
   //TODO: For the moment, not support PDU session authentication and authorization by the external DN
@@ -664,6 +680,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         "Create a new SMF context with SUPI " SUPI_64_FMT "", supi64);
     sc = std::shared_ptr<smf_context>(new smf_context());
     sc.get()->set_supi(supi);
+    sc.get()->set_supi_prefix(supi_prefix);
     set_supi_2_smf_context(supi64, sc);
   }
 
@@ -684,41 +701,55 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   }
 
   //Step 6. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
-  //TODO: Test with UDM (TESTER)
   std::string dnn_selection_mode = smreq->req.get_dnn_selection_mode();
-  if (not use_local_configuration_subscription_data(dnn_selection_mode)
-      && not is_supi_dnn_snssai_subscription_data(supi, dnn, snssai)) {
-    //uses a dummy UDM to test this part
+  //if the Session Management Subscription data is not available, get from configuration file or UDM
+  if (not sc.get()->is_dnn_snssai_subscription_data(dnn, snssai)) {
     Logger::smf_app().debug(
-        "Retrieve Session Management Subscription data from the UDM");
+        "The Session Management Subscription data is not available");
+
     session_management_subscription *s = new session_management_subscription(
         snssai);
     std::shared_ptr<session_management_subscription> subscription =
         std::shared_ptr<session_management_subscription>(s);
-    if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
-      //update dnn_context with subscription info
-      sc.get()->insert_dnn_subscription(snssai, subscription);
+
+    if (not use_local_configuration_subscription_data(dnn_selection_mode)) {
+      Logger::smf_app().debug(
+          "Retrieve Session Management Subscription data from the UDM");
+      if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
+        //update dnn_context with subscription info
+        sc.get()->insert_dnn_subscription(snssai, subscription);
+      } else {
+        // Cannot retrieve information from UDM, reject PDU session establishment
+        Logger::smf_app().warn(
+            "Received PDU_SESSION_CREATESMCONTEXT_REQUEST, couldn't retrieve the Session Management Subscription from UDM, ignore message!");
+        problem_details.setCause(
+            pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]);
+        smContextCreateError.setError(problem_details);
+        refToBinaryData.setContentId(N1_SM_CONTENT_ID);
+        smContextCreateError.setN1SmMsg(refToBinaryData);
+        //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"
+        smf_n1_n2_inst.create_n1_sm_container(
+            smreq->req,
+            PDU_SESSION_ESTABLISHMENT_REJECT,
+            n1_sm_message,
+            cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
+        smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+        //Send response (PDU Session Establishment Reject) to AMF
+        smf_n11_inst->send_pdu_session_create_sm_context_response(
+            smreq->http_response, smContextCreateError,
+            Pistache::Http::Code::Forbidden, n1_sm_message_hex);
+        return;
+      }
     } else {
-      // Cannot retrieve information from UDM, reject PDU session establishment
-      Logger::smf_app().warn(
-          "Received PDU_SESSION_CREATESMCONTEXT_REQUEST, couldn't retrieve the Session Management Subscription from UDM, ignore message!");
-      problem_details.setCause(
-          pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]);
-      smContextCreateError.setError(problem_details);
-      refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-      smContextCreateError.setN1SmMsg(refToBinaryData);
-      //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"
-      smf_n1_n2_inst.create_n1_sm_container(
-          smreq->req,
-          PDU_SESSION_ESTABLISHMENT_REJECT,
-          n1_sm_message,
-          cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-      //Send response (PDU Session Establishment Reject) to AMF
-      smf_n11_inst->send_pdu_session_create_sm_context_response(
-          smreq->http_response, smContextCreateError,
-          Pistache::Http::Code::Forbidden, n1_sm_message_hex);
-      return;
+      //use local configuration
+      Logger::smf_app().debug(
+          "Retrieve Session Management Subscription data from local configuration");
+      if (get_session_management_subscription_data(supi64, dnn, snssai,
+                                                   subscription)) {
+        //update dnn_context with subscription info
+        sc.get()->insert_dnn_subscription(snssai, subscription);
+      }
+
     }
   }
 
@@ -916,10 +947,10 @@ void smf_app::handle_pdu_session_release_sm_context_request(
 }
 
 //------------------------------------------------------------------------------
-void smf_app::trigger_pdu_session_modification(supi_t &supi, std::string &dnn,
-                                               pdu_session_id_t pdu_session_id,
-                                               snssai_t &snssai,
-                                               pfcp::qfi_t &qfi) {
+void smf_app::trigger_pdu_session_modification(const supi_t &supi, const std::string &dnn,
+                                               const pdu_session_id_t pdu_session_id,
+                                               const snssai_t &snssai,
+                                               const pfcp::qfi_t &qfi) {
   //SMF-requested session modification, see section 4.3.3.2@3GPP TS 23.502
   //The SMF may decide to modify PDU Session. This procedure also may be
   //triggered based on locally configured policy or triggered from the (R)AN (see clause 4.2.6 and clause 4.9.1).
@@ -1025,26 +1056,26 @@ bool smf_app::scid_2_smf_context(const scid_t &scid,
 bool smf_app::use_local_configuration_subscription_data(
     const std::string &dnn_selection_mode) {
   //TODO: should be implemented
-  return false;  //get Session Management Subscription from UDM
+  return smf_cfg.local_configuration;
 }
 
 //------------------------------------------------------------------------------
-bool smf_app::is_supi_dnn_snssai_subscription_data(supi_t &supi,
-                                                   std::string &dnn,
-                                                   snssai_t &snssai) {
+bool smf_app::is_supi_dnn_snssai_subscription_data(const supi_t &supi,
+                                                   const std::string &dnn,
+                                                   const snssai_t &snssai) const {
   //TODO: should be implemented
   return false;  //Session Management Subscription from UDM isn't available
 }
 
 //------------------------------------------------------------------------------
-bool smf_app::is_create_sm_context_request_valid() {
+bool smf_app::is_create_sm_context_request_valid() const {
   //TODO: should be implemented
   return true;
 
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::convert_string_2_hex(std::string &input_str,
+void smf_app::convert_string_2_hex(const std::string &input_str,
                                    std::string &output_str) {
   Logger::smf_app().debug("Convert string to Hex");
   unsigned char *data = (unsigned char*) malloc(input_str.length() + 1);
@@ -1074,7 +1105,7 @@ void smf_app::convert_string_2_hex(std::string &input_str,
 }
 
 //---------------------------------------------------------------------------------------------
-unsigned char* smf_app::format_string_as_hex(std::string &str) {
+unsigned char* smf_app::format_string_as_hex(const std::string &str) {
   unsigned int str_len = str.length();
   char *data = (char*) malloc(str_len + 1);
   memset(data, 0, str_len + 1);
@@ -1214,12 +1245,83 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
 }
 
 //---------------------------------------------------------------------------------------------
-n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(std::string &n2_info_type) {
+n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(const std::string &n2_info_type) const {
   std::size_t number_of_types = n2_sm_info_type_e2str.size();
   for (auto i = 0; i < number_of_types; ++i) {
     if (n2_info_type.compare(n2_sm_info_type_e2str[i]) == 0) {
       return static_cast<n2_sm_info_type_e>(i);
     }
   }
+}
+
+bool smf_app::get_session_management_subscription_data(
+    const supi64_t &supi, const std::string &dnn, const snssai_t &snssai,
+    std::shared_ptr<session_management_subscription> subscription) {
+
+  Logger::smf_app().debug(
+      "Get Session Management Subscription from configuration file");
+
+  for (int i = 0; i < smf_cfg.num_session_management_subscription; i++) {
+    if ((0 == dnn.compare(smf_cfg.session_management_subscription[i].dnn))
+        and (snssai.sST
+            == smf_cfg.session_management_subscription[i].single_nssai.sST)) {
+
+      std::shared_ptr<dnn_configuration_t> dnn_configuration = std::make_shared<
+          dnn_configuration_t>();
+
+      //PDU Session Type
+      pdu_session_type_t pdu_session_type(
+          pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
+      Logger::smf_app().debug(
+          "Default session type %s",
+          smf_cfg.session_management_subscription[i].session_type.c_str());
+      if (smf_cfg.session_management_subscription[i].session_type.compare(
+          "IPV4") == 0) {
+        pdu_session_type.pdu_session_type =
+            pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
+      } else if (smf_cfg.session_management_subscription[i].session_type.compare(
+          "IPV6") == 0) {
+        pdu_session_type.pdu_session_type =
+            pdu_session_type_e::PDU_SESSION_TYPE_E_IPV6;
+      } else if (smf_cfg.session_management_subscription[i].session_type.compare(
+          "IPV4V6") == 0) {
+        pdu_session_type.pdu_session_type =
+            pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
+      }
+      dnn_configuration->pdu_session_types.default_session_type =
+          pdu_session_type;
+
+      //Ssc_Mode
+      dnn_configuration->ssc_modes.default_ssc_mode.ssc_mode = smf_cfg
+          .session_management_subscription[i].ssc_mode;
+
+      //5gQosProfile
+      dnn_configuration->_5g_qos_profile._5qi = smf_cfg
+          .session_management_subscription[i].default_qos._5qi;
+      dnn_configuration->_5g_qos_profile.arp.priority_level = smf_cfg
+          .session_management_subscription[i].default_qos.priority_level;
+      dnn_configuration->_5g_qos_profile.arp.preempt_cap = smf_cfg
+          .session_management_subscription[i].default_qos.arp.preempt_cap;
+      dnn_configuration->_5g_qos_profile.arp.preempt_vuln = smf_cfg
+          .session_management_subscription[i].default_qos.arp.preempt_vuln;
+      dnn_configuration->_5g_qos_profile.priority_level = 1;  //TODO: hardcoded
+
+      //session_ambr
+      dnn_configuration->session_ambr.uplink = smf_cfg
+          .session_management_subscription[i].session_ambr.uplink;
+      dnn_configuration->session_ambr.downlink = smf_cfg
+          .session_management_subscription[i].session_ambr.downlink;
+      Logger::smf_app().debug("Session AMBR Uplink %s, Downlink %s",
+                              dnn_configuration->session_ambr.uplink.c_str(),
+                              dnn_configuration->session_ambr.downlink.c_str());
+
+      subscription->insert_dnn_configuration(dnn, dnn_configuration);
+      return true;
+
+    }
+
+  }
+  return false;
+
 }
 

@@ -50,15 +50,15 @@ class smf_n10 {
 
   /*
    * Get SM subscription data from UDM
-   * @param [supi64_t &] supi
-   * @param [std::string &] dnn
-   * @param [snssai_t &] snssai
+   * @param [const supi64_t &] supi
+   * @param [const std::string &] dnn
+   * @param [const snssai_t &] snssai
    * @param [std::shared_ptr<session_management_subscription>] subscription
    * @return bool: True if successful, otherwise false
    *
    */
   bool get_sm_data(
-      supi64_t &supi, std::string &dnn, snssai_t &snssai,
+      const supi64_t &supi, const std::string &dnn, const snssai_t &snssai,
       std::shared_ptr<session_management_subscription> subscription);
 
   /*

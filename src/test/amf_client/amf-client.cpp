@@ -108,10 +108,6 @@ void create_multipart_related_content(std::string &body, std::string &json_part,
                                       std::string &n1_message,
                                       std::string &n2_message) {
 
-  //format string as hex
-  //unsigned char *n1_msg_hex = format_string_as_hex(n1_message);
-  //unsigned char *n2_msg_hex = format_string_as_hex(n2_message);
-
   std::string CRLF = "\r\n";
   body.append("--" + boundary + CRLF);
   body.append("Content-Type: application/json" + CRLF);
@@ -123,7 +119,6 @@ void create_multipart_related_content(std::string &body, std::string &json_part,
       "Content-Type: application/vnd.3gpp.5gnas" + CRLF + "Content-Id: n1SmMsg"
           + CRLF);
   body.append(CRLF);
-  //body.append(std::string((char*) n1_msg_hex, n1_message.length() / 2) + CRLF);
   body.append(n1_message + CRLF);
 
   body.append("--" + boundary + CRLF);
@@ -131,7 +126,6 @@ void create_multipart_related_content(std::string &body, std::string &json_part,
       "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg"
           + CRLF);
   body.append(CRLF);
-  //body.append(std::string((char*) n2_msg_hex, n2_message.length() / 2) + CRLF);
   body.append(n2_message + CRLF);
   body.append("--" + boundary + "--" + CRLF);
 }
@@ -140,9 +134,6 @@ void create_multipart_related_content(std::string &body, std::string &json_part,
 void create_multipart_related_content(
     std::string &body, std::string &json_part, std::string &boundary,
     std::string &message, multipart_related_content_part_e content_type) {
-
-  //format string as hex
-  //unsigned char *msg_hex = format_string_as_hex(message);
 
   std::string CRLF = "\r\n";
   body.append("--" + boundary + CRLF);
@@ -161,7 +152,6 @@ void create_multipart_related_content(
             + CRLF);
   }
   body.append(CRLF);
-  //body.append(std::string((char*) msg_hex, message.length() / 2) + CRLF);
   body.append(message + CRLF);
   body.append("--" + boundary + "--" + CRLF);
 }
@@ -428,7 +418,6 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
   ENCODE_U8(buffer + size, 0x01, size);  //QoS Rules
   ENCODE_U8(buffer + size, 0x06, size);  //QoS Rules
-
 
   std::cout << "Buffer: " << std::endl;
   for (int i = 0; i < size; i++) {
@@ -1253,9 +1242,11 @@ int main(int argc, char *argv[]) {
   usleep(200000);
   //PDU Session Modification
   send_pdu_session_modification_request_step1(smf_ip_address);
+  usleep(200000);
   send_pdu_session_modification_request_step2(smf_ip_address);
+  usleep(200000);
   send_pdu_session_modification_complete(smf_ip_address);
-
+  usleep(200000);
   //PDU Session Release procedure
   send_pdu_session_release_request(smf_ip_address);
   usleep(200000);

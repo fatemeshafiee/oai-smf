@@ -115,7 +115,7 @@ class smf_app {
   mutable std::shared_mutex m_scid2smf_context;
 
   /*
-   * Apply the config from the configuration file for APN pools
+   * Apply the config from the configuration file for DNN pools
    * @param [const smf_config &cfg] cfg
    * @return
    */
@@ -392,16 +392,16 @@ class smf_app {
 
   /*
    * Trigger pdu session modification
-   * @param [supi_t &] supi
-   * @param [std::string &] dnn
-   * @param [pdu_session_id_t] pdu_session_id
-   * @param [snssai_t &] snssai
-   * @param [pfcp::qfi_t &] qfi
+   * @param [const supi_t &] supi
+   * @param [const std::string &] dnn
+   * @param [const pdu_session_id_t] pdu_session_id
+   * @param [const snssai_t &] snssai
+   * @param [const pfcp::qfi_t &] qfi
    * @return void
    */
-  void trigger_pdu_session_modification(supi_t &supi, std::string &dnn,
-                                        pdu_session_id_t pdu_session_id,
-                                        snssai_t &snssai, pfcp::qfi_t &qfi);
+  void trigger_pdu_session_modification(const supi_t &supi, const std::string &dnn,
+                                        const pdu_session_id_t pdu_session_id,
+                                        const snssai_t &snssai, const pfcp::qfi_t &qfi);
 
   /*
    * Verify if SM Context is existed for this Supi
@@ -412,7 +412,7 @@ class smf_app {
 
   /*
    * Create/Update SMF context with the corresponding supi
-   * @param [supi_t] supi
+   * @param [const supi_t&] supi
    * @param [std::shared_ptr<smf_context>] sc Shared_ptr Pointer to an SMF context
    * @return True if existed, otherwise false
    */
@@ -428,7 +428,7 @@ class smf_app {
 
   /*
    * Check whether SMF uses local configuration instead of retrieving Session Management Data from UDM
-   * @param [std::string] dnn_selection_mode
+   * @param [const std::string&] dnn_selection_mode
    * @return True if SMF uses the local configuration to check the validity of the UE request, False otherwise
    */
   bool use_local_configuration_subscription_data(
@@ -436,36 +436,49 @@ class smf_app {
 
   /*
    * Verify whether the Session Management Data is existed
-   * @param [supi_t] SUPI
-   * @param [std::string] DNN
-   * @param [snssai_t] S-NSSAI
+   * @param [const supi_t&] SUPI
+   * @param [const std::string&] DNN
+   * @param [const snssai_t&] S-NSSAI
    * @return True if SMF uses the local configuration to check the validity of the UE request, False otherwise
    */
-  bool is_supi_dnn_snssai_subscription_data(supi_t &supi, std::string &dnn,
-                                            snssai_t &snssai);
+  bool is_supi_dnn_snssai_subscription_data(const supi_t &supi,
+                                            const std::string &dnn,
+                                            const snssai_t &snssai) const;
+
+  /*
+   * Get the Session Management Subscription data from local configuration
+   * @param [const supi_t &] SUPI
+   * @param [const std::string &] DNN
+   * @param [const snssai_t &] S-NSSAI
+   * @param [std::shared_ptr<session_management_subscription>] subscription: store subscription data if exist
+   * @return True if local configuration for this session management subscription exists, False otherwise
+   */
+  bool get_session_management_subscription_data(
+      const supi64_t &supi, const std::string &dnn, const snssai_t &snssai,
+      std::shared_ptr<session_management_subscription> subscription);
 
   /*
    * Verify whether the UE request is valid according to the user subscription and with local policies
    * @param [..]
    * @return True if the request is valid, otherwise False
    */
-  bool is_create_sm_context_request_valid();
+  bool is_create_sm_context_request_valid() const;
 
   /*
    * Convert a string to hex representing this string
-   * @param [std::string&] input_str Input string
+   * @param [const std::string&] input_str Input string
    * @param [std::string&] output_str String represents string in hex format
    * @return void
    */
-  void convert_string_2_hex(std::string &input_str, std::string &output_str);
+  void convert_string_2_hex(const std::string &input_str,
+                            std::string &output_str);
 
   /*
    * Represent a string as hex
-   * @param [std::string&] str: input string
-   * @param [std::string&] output_str String represents string in hex format
-   * @return void
+   * @param [const std::string&] str: input string
+   * @return String represents string in hex format
    */
-  unsigned char* format_string_as_hex(std::string &str);
+  unsigned char* format_string_as_hex(const std::string &str);
 
   /*
    * Update PDU session status
@@ -478,10 +491,10 @@ class smf_app {
 
   /*
    * Convert N2 Info type representing by a string to  n2_sm_info_type_e
-   * @param [std::string] n2_info_type
+   * @param [const std::string] n2_info_type
    * @return representing of N2 info type in a form of emum
    */
-  n2_sm_info_type_e n2_sm_info_type_str2e(std::string &n2_info_type);
+  n2_sm_info_type_e n2_sm_info_type_str2e(const std::string &n2_info_type) const;
 
   /*
    * Update PDU session UpCnxState
