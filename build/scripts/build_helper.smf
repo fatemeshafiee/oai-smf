@@ -242,6 +242,8 @@ install_nghttp2_from_git() {
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
     $SUDO make install
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    $SUDO ldconfig
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
     popd
   fi
   return 0
