@@ -30,6 +30,9 @@
 
 using namespace smf;
 
+/*
+ * class: QoS Flow Context Updated
+ */
 //-----------------------------------------------------------------------------
 void qos_flow_context_updated::set_cause(const uint8_t cause) {
   cause_value = cause;
@@ -62,6 +65,8 @@ void qos_flow_context_updated::add_qos_rule(const QOSRulesIE &rule) {
   }
 }
 
+//-----------------------------------------------------------------------------
+
 void qos_flow_context_updated::set_qos_profile(const qos_profile_t &profile) {
   qos_profile = profile;
 }
@@ -72,6 +77,9 @@ void qos_flow_context_updated::set_priority_level(uint8_t p) {
   qos_profile.priority_level = p;
 }
 
+/*
+ * class: PDU Session MSG
+ */
 //-----------------------------------------------------------------------------
 pdu_session_msg_type_t pdu_session_msg::get_msg_type() const {
   return m_msg_type;
@@ -163,38 +171,118 @@ void pdu_session_msg::set_pti(const procedure_transaction_id_t &pti) {
 }
 
 //-----------------------------------------------------------------------------
-extended_protocol_discriminator_t pdu_session_create_sm_context::get_epd() const {
+std::string pdu_session_msg::get_n1_sm_message() const {
+  return m_n1_sm_message;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_msg::set_n1_sm_message(
+    const std::string &value) {
+  m_n1_sm_message = value;
+  m_n1_sm_msg_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_msg::n1_sm_msg_is_set() const {
+  return m_n1_sm_msg_is_set;
+}
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_msg::get_n2_sm_information() const {
+  return m_n2_sm_information;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_msg::set_n2_sm_information(
+    const std::string &value) {
+  m_n2_sm_information = value;
+  m_n2_sm_info_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_msg::n2_sm_info_is_set() const {
+  return m_n2_sm_info_is_set;
+}
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_msg::get_n2_sm_info_type() const {
+  return m_n2_sm_info_type;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_msg::set_n2_sm_info_type(
+    const std::string &value) {
+  m_n2_sm_info_type = value;
+  m_n2_sm_info_type_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_msg::n2_sm_info_type_is_set() const {
+  return m_n2_sm_info_type_is_set;
+}
+
+/*
+ * class: PDU Session SM Context Request
+ */
+//-----------------------------------------------------------------------------
+extended_protocol_discriminator_t pdu_session_sm_context_request::get_epd() const {
   return m_epd;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context::set_epd(
+void pdu_session_sm_context_request::set_epd(
     const extended_protocol_discriminator_t &epd) {
   m_epd = epd;
 }
 
 //-----------------------------------------------------------------------------
-uint8_t pdu_session_create_sm_context::get_message_type() const {
+uint8_t pdu_session_sm_context_request::get_message_type() const {
   return m_message_type;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context::set_message_type(
+void pdu_session_sm_context_request::set_message_type(
     const uint8_t &message_type) {
   m_message_type = message_type;
 }
 
+/*
+ * class: PDU Session SM Context Response
+ */
 //-----------------------------------------------------------------------------
-std::string pdu_session_create_sm_context_request::get_n1_sm_message() const {
-  return m_n1_sm_message;
+void pdu_session_sm_context_response::set_cause(const uint8_t cause) {
+  m_cause = cause;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_request::set_n1_sm_message(
-    std::string const &value) {
-  m_n1_sm_message = value;
+uint8_t pdu_session_sm_context_response::get_cause() const {
+  return m_cause;
 }
 
+//-----------------------------------------------------------------------------
+void pdu_session_sm_context_response::set_http_code(const
+    uint32_t code) {
+  m_http_code = code;
+}
+
+//-----------------------------------------------------------------------------
+uint32_t pdu_session_sm_context_response::get_http_code() const {
+  return m_http_code;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_sm_context_response::set_json_data(const nlohmann::json &data) {
+  m_json_data = data;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_sm_context_response::get_json_data(nlohmann::json &data) const {
+  data = m_json_data;
+}
+
+/*
+ * class: PDU Session Create SM Context Request
+ */
 //-----------------------------------------------------------------------------
 std::string pdu_session_create_sm_context_request::get_serving_nf_id() const {
   return m_serving_nf_id;
@@ -228,138 +316,54 @@ std::string pdu_session_create_sm_context_request::get_dnn_selection_mode() cons
   return m_dnn_selection_mode;
 }
 
+/*
+ * class: PDU Session Create SM Context Response
+ */
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_response::set_cause(uint8_t cause) {
-  m_cause = cause;
-}
-
-//-----------------------------------------------------------------------------
-uint8_t pdu_session_create_sm_context_response::get_cause() {
-  return m_cause;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_response::set_paa(paa_t paa) {
+void pdu_session_create_sm_context_response::set_paa(const paa_t &paa) {
   m_paa = paa;
 }
 
 //-----------------------------------------------------------------------------
-paa_t pdu_session_create_sm_context_response::get_paa() {
+paa_t pdu_session_create_sm_context_response::get_paa() const {
   return m_paa;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_response::set_http_code(
-    Pistache::Http::Code code) {
-  m_code = code;
-}
-
-//-----------------------------------------------------------------------------
-Pistache::Http::Code pdu_session_create_sm_context_response::get_http_code() {
-  return m_code;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_create_sm_context_response::set_qos_flow_context(
     const qos_flow_context_updated &qos_flow) {
-  qos_flow_context = qos_flow;
+  m_qos_flow_context = qos_flow;
 }
 
 //-----------------------------------------------------------------------------
 qos_flow_context_updated pdu_session_create_sm_context_response::get_qos_flow_context() const {
-  return qos_flow_context;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_create_sm_context_response::get_n2_sm_information() const {
-  return m_n2_sm_information;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_response::set_n2_sm_information(
-    const std::string &value) {
-  m_n2_sm_information = value;
-  m_n2_sm_info_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_create_sm_context_response::get_n1_sm_message() const {
-  return m_n1_sm_message;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_response::set_n1_sm_message(
-    const std::string &value) {
-  m_n1_sm_message = value;
-  m_n1_sm_msg_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-bool pdu_session_create_sm_context_response::n1_sm_msg_is_set() const {
-  return m_n1_sm_msg_is_set;
-}
-
-//-----------------------------------------------------------------------------
-bool pdu_session_create_sm_context_response::n2_sm_info_is_set() const {
-  return m_n2_sm_info_is_set;
+  return m_qos_flow_context;
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_create_sm_context_response::set_amf_url(
     const std::string &value) {
-  amf_url = value;
+  m_amf_url = value;
 }
 
 //-----------------------------------------------------------------------------
 std::string pdu_session_create_sm_context_response::get_amf_url() const {
-  return amf_url;
+  return m_amf_url;
 }
 
 //-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context::get_n2_sm_information() const {
-  return m_n2_sm_information;
+void pdu_session_create_sm_context_response::set_smf_context_uri(const std::string &value) {
+  m_smf_context_uri = value;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_update_sm_context::set_n2_sm_information(
-    const std::string &value) {
-  m_n2_sm_information = value;
-  m_n2_sm_info_is_set = true;
+std::string pdu_session_create_sm_context_response::get_smf_context_uri() const {
+return m_smf_context_uri;
 }
 
-//-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context::get_n2_sm_info_type() const {
-  return m_n2_sm_info_type;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_update_sm_context::set_n2_sm_info_type(
-    const std::string &value) {
-  m_n2_sm_info_type = value;
-  m_n2_sm_info_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_update_sm_context::get_n1_sm_message() const {
-  return m_n1_sm_message;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_update_sm_context::set_n1_sm_message(
-    const std::string &value) {
-  m_n1_sm_message = value;
-  m_n1_sm_msg_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-bool pdu_session_update_sm_context::n1_sm_msg_is_set() const {
-  return m_n1_sm_msg_is_set;
-}
-
-//-----------------------------------------------------------------------------
-bool pdu_session_update_sm_context::n2_sm_info_is_set() const {
-  return m_n2_sm_info_is_set;
-}
+/*
+ * class: PDU Session Update SM Context Request
+ */
 
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::add_qfi(const pfcp::qfi_t &qfi) {
@@ -437,16 +441,9 @@ void pdu_session_update_sm_context_request::set_release(bool value) {
   m_release_is_set = true;
 }
 
-//-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_response::set_cause(uint8_t cause) {
-  m_cause = cause;
-}
-
-//-----------------------------------------------------------------------------
-uint8_t pdu_session_update_sm_context_response::get_cause() {
-  return m_cause;
-}
-
+/*
+ * class: PDU Session Update SM Context Response
+ */
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_response::add_qos_flow_context_updated(
     const qos_flow_context_updated &flow) {
@@ -493,6 +490,20 @@ void pdu_session_update_sm_context_response::remove_all_qos_flow_context_updated
 }
 
 //-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_response::set_smf_context_uri(const std::string &value) {
+  m_smf_context_uri = value;
+}
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_update_sm_context_response::get_smf_context_uri() const {
+return m_smf_context_uri;
+}
+
+/*
+ * class: PDU Session Release SM Context Response
+ */
+
+//-----------------------------------------------------------------------------
 void pdu_session_release_sm_context_response::set_cause(uint8_t cause) {
   m_cause = cause;
 }
@@ -503,16 +514,20 @@ uint8_t pdu_session_release_sm_context_response::get_cause() {
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_modification_network_requested::set_http_code(
-    Pistache::Http::Code code) {
-  m_code = code;
+void pdu_session_release_sm_context_response::set_http_code(const
+    uint32_t code) {
+  m_http_code = code;
 }
 
 //-----------------------------------------------------------------------------
-Pistache::Http::Code pdu_session_modification_network_requested::get_http_code() {
-  return m_code;
+uint32_t pdu_session_release_sm_context_response::get_http_code() const {
+  return m_http_code;
 }
 
+
+/*
+ * class: PDU Session Modification Network Requested
+ */
 //-----------------------------------------------------------------------------
 void pdu_session_modification_network_requested::set_amf_url(
     const std::string &value) {
@@ -545,6 +560,49 @@ void pdu_session_modification_network_requested::get_qfis(
 }
 
 //-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::set_json_data(const nlohmann::json &data) {
+  m_json_data = data;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::get_json_data(nlohmann::json &data) const {
+  data = m_json_data;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::add_qos_flow_context_updated(
+    const qos_flow_context_updated &flow) {
+  if ((flow.qfi.qfi >= QOS_FLOW_IDENTIFIER_FIRST )
+      and (flow.qfi.qfi <= QOS_FLOW_IDENTIFIER_LAST )) {
+    qos_flow_context_updateds.erase(flow.qfi.qfi);
+    qos_flow_context_updateds.insert(
+        std::pair<uint8_t, qos_flow_context_updated>((uint8_t) flow.qfi.qfi,
+                                                     flow));
+    Logger::smf_app().trace(
+        "A QoS Flow Context (QFI %d) has been added successfully",
+        flow.qfi.qfi);
+  } else {
+    Logger::smf_app().error(
+        "Failed to add a QoS Flow Context (QFI %d), invalid QFI", flow.qfi.qfi);
+  }
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_modification_network_requested::get_qos_flow_context_updated(
+    const pfcp::qfi_t &qfi, qos_flow_context_updated &flow) {
+  for (auto it : qos_flow_context_updateds) {
+    if (it.second.qfi == qfi) {
+      flow = it.second;
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * class: PDU Session Report Response
+ */
+//-----------------------------------------------------------------------------
 void pdu_session_report_response::set_amf_url(const std::string &value) {
   amf_url = value;
 }
@@ -571,7 +629,6 @@ void pdu_session_report_response::add_qos_flow_context_updated(
     Logger::smf_app().error(
         "Failed to add a QoS Flow Context (QFI %d), invalid QFI", flow.qfi.qfi);
   }
-
 }
 
 //-----------------------------------------------------------------------------
@@ -597,51 +654,6 @@ void pdu_session_report_response::get_all_qos_flow_context_updateds(
 }
 
 //-----------------------------------------------------------------------------
-std::string pdu_session_report_response::get_n2_sm_information() const {
-  return m_n2_sm_information;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_report_response::set_n2_sm_information(
-    const std::string &value) {
-  m_n2_sm_information = value;
-  m_n2_sm_info_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_report_response::get_n2_sm_info_type() const {
-  return m_n2_sm_info_type;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_report_response::set_n2_sm_info_type(
-    const std::string &value) {
-  m_n2_sm_info_type = value;
-  m_n2_sm_info_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-std::string pdu_session_report_response::get_n1_sm_message() const {
-  return m_n1_sm_message;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_report_response::set_n1_sm_message(const std::string &value) {
-  m_n1_sm_message = value;
-  m_n1_sm_msg_is_set = true;
-}
-
-//-----------------------------------------------------------------------------
-bool pdu_session_report_response::n1_sm_msg_is_set() const {
-  return m_n1_sm_msg_is_set;
-}
-
-//-----------------------------------------------------------------------------
-bool pdu_session_report_response::n2_sm_info_is_set() const {
-  return m_n2_sm_info_is_set;
-}
-
-//-----------------------------------------------------------------------------
 void pdu_session_report_response::set_seid(const seid_t &s) {
   seid = s;
 }
@@ -660,4 +672,3 @@ seid_t pdu_session_report_response::get_seid() const {
 uint64_t pdu_session_report_response::get_trxn_id() const {
   return trxn_id;
 }
-

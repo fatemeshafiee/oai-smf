@@ -35,6 +35,7 @@
 #include <shared_mutex>
 #include <string>
 #include <thread>
+#include <future>
 
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
@@ -51,6 +52,10 @@
 #include "SmContextUpdateData.h"
 #include "SmContextCreateError.h"
 #include "SmContextUpdateError.h"
+
+#define BOOST_THREAD_PROVIDES_FUTURE
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
 
 namespace smf {
 
@@ -113,6 +118,13 @@ class smf_app {
 
   std::map<scid_t, std::shared_ptr<smf_context_ref>> scid2smf_context;
   mutable std::shared_mutex m_scid2smf_context;
+  //Store promise IDs for Create/Update session
+  std::map<uint32_t,
+      boost::shared_ptr<boost::promise<pdu_session_create_sm_context_response>>> sm_context_create_promises;
+  std::map<uint32_t,
+      boost::shared_ptr<boost::promise<pdu_session_update_sm_context_response>>> sm_context_update_promises;
+  std::map<uint32_t,
+      boost::shared_ptr<boost::promise<pdu_session_release_sm_context_response>>> sm_context_release_promises;
 
   /*
    * Apply the config from the configuration file for DNN pools
@@ -286,6 +298,27 @@ class smf_app {
   void handle_itti_msg(itti_n11_update_pdu_session_status &snu);
 
   /*
+   * Handle ITTI message N11 Create SM Context Response to trigger the response to AMF
+   * @param [itti_n11_create_sm_context_response&] snc
+   * @return void
+   */
+  void handle_itti_msg(itti_n11_create_sm_context_response &snc);
+
+  /*
+   * Handle ITTI message N11 Update SM Context Response to trigger the response to AMF
+   * @param [itti_n11_update_sm_context_response&] m
+   * @return void
+   */
+  void handle_itti_msg(itti_n11_update_sm_context_response &m);
+
+  /*
+   * Handle ITTI message N11 Release SM Context Response to trigger the response to AMF
+   * @param [itti_n11_release_sm_context_response&] m
+   * @return void
+   */
+  void handle_itti_msg(itti_n11_release_sm_context_response &m);
+
+  /*
    * Handle ITTI message from N11 (N1N2MessageTransfer Response)
    * @param [itti_n11_n1n2_message_transfer_response_status&] snm
    * @return void
@@ -381,7 +414,6 @@ class smf_app {
    */
   void handle_pdu_session_update_sm_context_request(
       std::shared_ptr<itti_n11_update_sm_context_request> smreq);
-
   /*
    * Handle PDUSession_ReleaseSMContextRequest from AMF
    * @param [std::shared_ptr<itti_n11_release_sm_context_request>&] Request message
@@ -399,9 +431,12 @@ class smf_app {
    * @param [const pfcp::qfi_t &] qfi
    * @return void
    */
-  void trigger_pdu_session_modification(const supi_t &supi, const std::string &dnn,
+  void trigger_pdu_session_modification(const supi_t &supi,
+                                        const std::string &dnn,
                                         const pdu_session_id_t pdu_session_id,
-                                        const snssai_t &snssai, const pfcp::qfi_t &qfi);
+                                        const snssai_t &snssai,
+                                        const pfcp::qfi_t &qfi,
+                                        const uint8_t &http_version);
 
   /*
    * Verify if SM Context is existed for this Supi
@@ -494,7 +529,8 @@ class smf_app {
    * @param [const std::string] n2_info_type
    * @return representing of N2 info type in a form of emum
    */
-  n2_sm_info_type_e n2_sm_info_type_str2e(const std::string &n2_info_type) const;
+  n2_sm_info_type_e n2_sm_info_type_str2e(
+      const std::string &n2_info_type) const;
 
   /*
    * Update PDU session UpCnxState
@@ -520,6 +556,83 @@ class smf_app {
    */
   void start_upf_association(const pfcp::node_id_t &node_id);
 
+  /*
+   * To store a promise of a PDU Session Create SM Contex Response to be triggered when the result is ready
+   * @param [uint32_t] id: promise id
+   * @param [boost::shared_ptr< boost::promise<pdu_session_create_sm_context_response> >&] p: pointer to the promise
+   * @return void
+   */
+  void add_promise(
+      uint32_t id,
+      boost::shared_ptr<boost::promise<pdu_session_create_sm_context_response> > &p);
+
+  /*
+   * To store a promise of a PDU Session Update SM Contex Response to be triggered when the result is ready
+   * @param [uint32_t] id: promise id
+   * @param [boost::shared_ptr< boost::promise<pdu_session_update_sm_context_response> >&] p: pointer to the promise
+   * @return void
+   */
+  void add_promise(
+      uint32_t id,
+      boost::shared_ptr<boost::promise<pdu_session_update_sm_context_response> > &p);
+
+  /*
+   * To store a promise of a PDU Session Release SM Context Response to be triggered when the result is ready
+   * @param [uint32_t] id: promise id
+   * @param [boost::shared_ptr< boost::promise<pdu_session_release_sm_context_response> >&] p: pointer to the promise
+   * @return void
+   */
+  void add_promise(
+      uint32_t id,
+      boost::shared_ptr<boost::promise<pdu_session_release_sm_context_response> > &p);
+
+  /*
+   * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
+   * @param [const uint32_t &] http_code: Status code of HTTP response
+   * @param [const oai::smf_server::model::SmContextCreateError &] smContextCreateError: store the json content of response message
+   * @param [const std::string &] n1_sm_msg: N1 SM message
+   * @param [uint32_t &] promise_id: Promise Id
+   * @return void
+   */
+  void trigger_http_response(
+      const uint32_t &http_code,
+      const oai::smf_server::model::SmContextCreateError &smContextCreateError,
+      const std::string &n1_sm_msg, uint32_t &promise_id);
+
+  /*
+   * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
+   * @param [const uint32_t &] http_code: Status code of HTTP response
+   * @param [const oai::smf_server::model::SmContextCreateError &] smContextCreateError: store the json content of response message
+   * @param [uint32_t &] promise_id: Promise Id
+   * @return void
+   */
+  void trigger_http_response(
+      const uint32_t &http_code,
+      const oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+      uint32_t &promise_id);
+
+  /*
+   * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
+   * @param [const uint32_t &] http_code: Status code of HTTP response
+   * @param [const oai::smf_server::model::SmContextUpdateError &] smContextUpdateError: store the json content of response message
+   * @param [const std::string &] n1_sm_msg: N1 SM message
+   * @param [uint32_t &] promise_id: Promise Id
+   * @return void
+   */
+  void trigger_http_response(
+      const uint32_t &http_code,
+      const oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+      const std::string &n1_sm_msg, uint32_t &promise_id);
+
+  /*
+   * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
+   * @param [const uint32_t &] http_code: Status code of HTTP response
+   * @param [uint32_t &] promise_id: Promise Id
+   * @param [uint8_t] msg_type
+   * @return void
+   */
+  void trigger_http_response(const uint32_t &http_code, uint32_t &promise_id,
+                             uint8_t msg_type);
 };
 }
 #include "smf_config.hpp"

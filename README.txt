@@ -87,7 +87,7 @@ cd /openair-cn-cups/build/scripts
 #configure SPGWU using an example configure file (spgw_u.conf)
 cd /oai-cn5g-smf/src/test/upf/
 ./spgwu_conf.sh
-sudo spgwu -c /usr/local/etc/oai/spgw_u.conf  -o
+sudo spgwu -c /usr/local/etc/oai/spgw_u.conf
 
 
 ## Build and launch AMF client
@@ -97,5 +97,9 @@ cd build
 cmake ..
 make
 ./amf-client -i 172.16.1.101
+
+#Launch AMF client with HTTP2 (-v: http version, -p: port)
+./amf-client -i 172.16.1.101 -v 2 -p 9090
+
 
 

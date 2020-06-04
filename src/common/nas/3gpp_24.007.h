@@ -24,21 +24,21 @@
 #include <stdint.h>
 
 typedef enum extended_protocol_discriminator_e {
-  /* Protocol discriminator identifier for 5G Session Management */
+  // Protocol discriminator identifier for 5G Session Management
   EPD_5GS_SESSION_MANAGEMENT_MESSAGES = 0x2e,
-  /* Protocol discriminator identifier for 5G Mobility Management */
+  // Protocol discriminator identifier for 5G Mobility Management
   EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES = 0x7e,
 
 } extended_protocol_discriminator_t;
 
-/* Procedure transaction identity */
+// Procedure transaction identity
 //8 bits
 #define PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED   (uint8_t)0
 #define PROCEDURE_TRANSACTION_IDENTITY_FIRST        (uint8_t)1
 #define PROCEDURE_TRANSACTION_IDENTITY_LAST         (uint8_t)254
 #define PROCEDURE_TRANSACTION_IDENTITY_RESERVED     (uint8_t)255
 
-/* PDU Session Identity */
+// PDU Session Identity
 typedef uint8_t pdu_session_id_t;
 
 //8 bits
@@ -46,30 +46,16 @@ typedef uint8_t pdu_session_id_t;
 #define PDU_SESSION_IDENTITY_FIRST        (uint8_t)1
 #define PDU_SESSION_IDENTITY_LAST         (uint8_t)15
 
-/* QFI */
+// QFI
 // type: integer,  minimum: 0, maximum: 63
 #define NO_QOS_FLOW_IDENTIFIER_ASSIGNED (uint8_t)0
 #define QOS_FLOW_IDENTIFIER_FIRST        (uint8_t)1
 #define QOS_FLOW_IDENTIFIER_LAST         (uint8_t)63
 
-/*
- //TODO: QFI defined in 3gpp_29.274.h
- typedef struct smf_qfi_s {
- uint8_t qfi;
- smf_qfi_s() : qfi(QOS_FLOW_IDENTIFIER_FIRST) {}
- smf_qfi_s(const uint8_t& q) : qfi(q) {}
- smf_qfi_s(const struct smf_qfi_s& q) : qfi(q.qfi) {}
-
- inline bool operator==(const struct smf_qfi_s& rhs) const { return qfi == rhs.qfi; }
- inline bool operator!=(const struct smf_qfi_s& rhs) const { return !(qfi == rhs.qfi); }
- } smf_qfi_t;
- */
-
 //QoS Rule
 #define NO_QOS_RULE_IDENTIFIER_ASSIGNED (uint8_t)0
 #define QOS_RULE_IDENTIFIER_FIRST        (uint8_t)1
 #define QOS_RULE_IDENTIFIER_LAST         (uint8_t)255
-
 
 // Integrity protection maximum data rate
 typedef struct ipmdr_s {

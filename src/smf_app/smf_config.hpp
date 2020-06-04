@@ -54,6 +54,7 @@
 #define SMF_CONFIG_STRING_PORT                                  "PORT"
 #define SMF_CONFIG_STRING_INTERFACE_N4                          "N4"
 #define SMF_CONFIG_STRING_INTERFACE_SBI                         "SBI"
+#define SMF_CONFIG_STRING_SBI_HTTP2_PORT                        "HTTP2_PORT"
 
 #define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO                    "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 
@@ -175,6 +176,7 @@ class smf_config {
 
   interface_cfg_t n4;
   interface_cfg_t sbi;
+  unsigned int sbi_http2_port;
   itti_cfg_t itti;
   test_upf_cfg_t test_upf_cfg;
 

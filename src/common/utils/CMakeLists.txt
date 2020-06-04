@@ -36,7 +36,7 @@ set(CN_UTILS_SRC STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/pid_file.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/string.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/thread_sched.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/simple_parser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mime_parser.cpp
     )
 
 

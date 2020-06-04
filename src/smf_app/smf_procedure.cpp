@@ -32,6 +32,7 @@
 
 #include "3gpp_29.244.h"
 #include "3gpp_29.274.h"
+#include "3gpp_29.500.h"
 #include "common_defs.h"
 #include "3gpp_conversions.hpp"
 #include "conversions.hpp"
@@ -105,7 +106,8 @@ int session_create_sm_context_procedure::run(
   if (not pfcp_associations::get_instance().select_up_node(
       up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
     // TODO
-    sm_context_resp->res.set_cause(REMOTE_PEER_NOT_RESPONDING);  //verify for 5G??
+    sm_context_resp->res.set_cause(
+        PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
     return RETURNerror ;
   }
 
@@ -151,7 +153,7 @@ int session_create_sm_context_procedure::run(
   pfcp::destination_interface_t destination_interface = { };
 
   sps->generate_far_id(far_id);
-  apply_action.forw = 1; //forward the packets
+  apply_action.forw = 1;  //forward the packets
 
   //wys-test-add
   pfcp::outer_header_creation_t outer_header_creation = { };
@@ -395,9 +397,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
   std::string n1_sm_msg, n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
 
-  //TODO: should comment this line when including UPF in the test
-  //n11_triggered_pending->res.set_cause(REQUEST_ACCEPTED);  //for testing purpose
-
   if (n11_triggered_pending->res.get_cause() != REQUEST_ACCEPTED) {  //PDU Session Establishment Reject
     Logger::smf_app().debug(
         "Prepare a PDU Session Establishment Reject message and send to UE");
@@ -456,36 +455,37 @@ void session_create_sm_context_procedure::handle_itti_msg(
       "N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
 
   //Fill the json part
+  nlohmann::json json_data = { };
   //N1SM
-  n11_triggered_pending->res.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageClass"] =
+  json_data["n1MessageContainer"]["n1MessageClass"] =
   N1N2_MESSAGE_CLASS;
-  n11_triggered_pending->res.n1n2_message_transfer_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
+  json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
   N1_SM_CONTENT_ID;  //NAS part
   //N2SM
   if (n11_triggered_pending->res.get_cause() == REQUEST_ACCEPTED) {
-    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["n2InformationClass"] =
+    json_data["n2InfoContainer"]["n2InformationClass"] =
     N1N2_MESSAGE_CLASS;
-    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+    json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
         n11_triggered_pending->res.get_pdu_session_id();
     //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
-    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+    json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
         "PDU_RES_SETUP_REQ";  //NGAP message type
-    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
+    json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
     N2_SM_CONTENT_ID;  //NGAP part
-    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
+    json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
         n11_triggered_pending->res.get_snssai().sST;
-    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
+    json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
         n11_triggered_pending->res.get_snssai().sD;
-    n11_triggered_pending->res.n1n2_message_transfer_data["n2InfoContainer"]["ranInfo"] =
-        "SM";
+    json_data["n2InfoContainer"]["ranInfo"] = "SM";
   }
   //Others information
   //n11_triggered_pending->res.n1n2_message_transfer_data["pti"] = 1;  //Don't need this info for the moment
-  n11_triggered_pending->res.n1n2_message_transfer_data["pduSessionId"] =
-      n11_triggered_pending->res.get_pdu_session_id();
+  json_data["pduSessionId"] = n11_triggered_pending->res.get_pdu_session_id();
 
-  //send ITTI message to N11 interface to trigger N1N2MessageTransfer towards AMFs
-  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
+  n11_triggered_pending->res.set_json_data(json_data);
+
+  //send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs
+  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_APP",
                          n11_triggered_pending->get_msg_name());
 
   int ret = itti_inst->send_msg(n11_triggered_pending);
@@ -494,7 +494,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
         "Could not send ITTI message %s to task TASK_SMF_N11",
         n11_triggered_pending->get_msg_name());
   }
-
 }
 
 //------------------------------------------------------------------------------
@@ -503,18 +502,16 @@ int session_update_sm_context_procedure::run(
     std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp,
     std::shared_ptr<smf::smf_context> sc) {
   //Handle SM update sm context request
-  //first try to reuse from CUPS....
   //The SMF initiates an N4 Session Modification procedure with the UPF. The SMF provides AN Tunnel Info to the UPF as well as the corresponding forwarding rules
 
   bool send_n4 = false;
-
   Logger::smf_app().info("Perform a procedure - Update SM Context Request");
   // TODO check if compatible with ongoing procedures if any
   pfcp::node_id_t up_node_id = { };
   if (not pfcp_associations::get_instance().select_up_node(
       up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-    // TODO
-    sm_context_resp->res.set_cause(REMOTE_PEER_NOT_RESPONDING);  //verify for 5G??
+    sm_context_resp->res.set_cause(
+        PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
     Logger::smf_app().info("[SMF Procedure] REMOTE_PEER_NOT_RESPONDING");
     return RETURNerror ;
   }
@@ -546,69 +543,6 @@ int session_update_sm_context_procedure::run(
           .c_str());
 
   switch (session_procedure_type) {
-    /*
-     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
-     //PFCP Session Modification to delete AN Tunnel info
-
-     for (auto qfi : list_of_qfis_to_be_modified) {
-     smf_qos_flow flow = { };
-     if (!sps->get_qos_flow(qfi, flow)) {  //no QoS flow found
-     Logger::smf_app().error("Could not found any QoS flow with QFI %d",
-     qfi.qfi);
-     //Set cause to SYSTEM_FAILURE and send response
-     qos_flow_context_updated qcu = { };
-     qcu.set_cause(SYSTEM_FAILURE);
-     qcu.set_qfi(qfi);
-     n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-     continue;
-     }
-
-     pfcp::far_id_t far_id = { };
-     pfcp::pdr_id_t pdr_id = { };
-     //if FAR DL exist -> remove it
-     if ((flow.far_id_dl.first) && (flow.far_id_dl.second.far_id)) {
-     Logger::smf_app().debug(
-     "Send a request to remove FAR DL at UPF (QFI %d, FAR ID " "0x%" PRIx32 ")",
-     flow.qfi, flow.far_id_dl.second.far_id);
-     // Remove FAR
-     far_id.far_id = flow.far_id_dl.second.far_id;
-     pfcp::remove_far remove_far = { };
-     remove_far.set(flow.far_id_dl.second);
-     n4_ser->pfcp_ies.set(remove_far);
-
-     send_n4 = true;
-     //qos_flow.far_id_dl.first = true;
-     }
-     //remove PDR DL if exist
-     if (flow.pdr_id_dl.rule_id) {
-     Logger::smf_app().debug(
-     "Update SM Context procedure: send a request to remove PDR DL at UPF");
-     Logger::smf_app().debug(
-     "Send a request to remove PDR DL at UPF (QFI %d, PDR ID " "0x%" PRIx16 ")",
-     flow.qfi, flow.pdr_id_dl.rule_id);
-     //Remove PDR DL
-     pdr_id.rule_id = flow.pdr_id_dl.rule_id;
-     pfcp::remove_pdr remove_pdr = { };
-     remove_pdr.set(flow.pdr_id_dl);
-     n4_ser->pfcp_ies.set(remove_pdr);
-
-     send_n4 = true;
-     }
-
-     // may be modified
-     smf_qos_flow flow2 = flow;
-     sps->add_qos_flow(flow2);
-
-     qos_flow_context_updated qcu = { };
-     qcu.set_cause(REQUEST_ACCEPTED);
-     qcu.set_qfi(qfi);
-     n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-     }
-
-     }
-     break;
-     */
-
     case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED:
     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_SMF_REQUESTED:
@@ -662,7 +596,7 @@ int session_update_sm_context_procedure::run(
               .s_addr;
           update_forwarding_parameters.set(outer_header_creation);
           update_far.set(update_forwarding_parameters);
-          apply_action.forw = 1; //forward the packets
+          apply_action.forw = 1;  //forward the packets
           //apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
           update_far.set(apply_action);
 
@@ -693,7 +627,7 @@ int session_update_sm_context_procedure::run(
           //pfcp::proxying_t                  proxying = {};
 
           sps->generate_far_id(far_id);
-          apply_action.forw = 1; //forward the packets
+          apply_action.forw = 1;  //forward the packets
           //apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
 
           destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;  // ACCESS is for downlink, CORE for uplink
@@ -876,7 +810,7 @@ int session_update_sm_context_procedure::run(
           far_id.far_id = flow.far_id_dl.second.far_id;
           // apply_action.buff = 1;
           pfcp::apply_action_t apply_action = { };
-          apply_action.nocp = 1; //notify the CP function about the arrival of a first DL packet
+          apply_action.nocp = 1;  //notify the CP function about the arrival of a first DL packet
 
           far.set(far_id);
           far.set(apply_action);
@@ -912,14 +846,13 @@ int session_update_sm_context_procedure::run(
         sps->add_qos_flow(flow2);
       }
     }
-
       break;
+
     default: {
       Logger::smf_app().error(
           "Update SM Context procedure: Unknown session management type %d",
           session_procedure_type);
     }
-
   }
 
   if (send_n4) {
@@ -937,9 +870,7 @@ int session_update_sm_context_procedure::run(
         "Update SM Context procedure: There is no QoS flow to be modified");
     return RETURNerror ;
   }
-
   return RETURNok ;
-
 }
 
 //------------------------------------------------------------------------------
@@ -983,7 +914,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
       n11_trigger->req.get_dl_fteid(dl_fteid);
 
       Logger::smf_app().debug("AN F-TEID ID" "0x%" PRIx32 ", IP Addr %s",
-                              dl_fteid.teid_gre_key, conv::toString(dl_fteid.ipv4_address).c_str());
+                              dl_fteid.teid_gre_key,
+                              conv::toString(dl_fteid.ipv4_address).c_str());
 
       std::map<uint8_t, qos_flow_context_updated> qos_flow_context_to_be_updateds =
           { };
@@ -1038,7 +970,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
               n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
               //TODO: remove this QFI from the list (as well as in n11_trigger->req)
               break;
-
             }
           }
         } else {
@@ -1090,12 +1021,11 @@ void session_update_sm_context_procedure::handle_itti_msg(
         problem_details.setCause(
             pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);
         smContextUpdateError.setError(problem_details);
-        smf_n11_inst->send_pdu_session_update_sm_context_response(
-            n11_triggered_pending->http_response, smContextUpdateError,
-            Pistache::Http::Code::Forbidden);
-        return;
+        //trigger to send reply to AMF
+        smf_app_inst->trigger_http_response(
+            http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+            smContextUpdateError, n11_triggered_pending->pid);
       }
-
     }
       break;
 
@@ -1108,20 +1038,18 @@ void session_update_sm_context_procedure::handle_itti_msg(
         //clear the resources including addresses allocated to this Session and associated QoS flows
         sps->deallocate_ressources(n11_trigger.get()->req.get_dnn());  //TODO: for IPv6 (only for Ipv4 for the moment)
       }
-
     }
   }
 
   n11_triggered_pending->res.set_cause(cause.cause_value);
+  n11_triggered_pending->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);
 
   // TODO
   // check we got all responses vs n11_triggered_pending->res.flow_context_modified
 
   //TODO: Optional: send ITTI message to N10 to trigger UDM registration (Nudm_UECM_Registration)
   //see TS29503_Nudm_UECM.yaml ( /{ueId}/registrations/smf-registrations/{pduSessionId}:)
-  /* std::shared_ptr<itti_n10_create_smf_registration_request> itti_msg = std::make_shared<itti_n10_create_smf_registration_request>(TASK_SMF_APP, TASK_SMF_N10, response);
-   int ret = itti_inst->send_msg(itti_msg);
-   */
 
   //Prepare response to send to AMF (N1N2MessageTransfer or PDUSession_UpdateSMContextResponse)
   nlohmann::json sm_context_updated_data = { };
@@ -1136,13 +1064,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
   sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
   N2_SM_CONTENT_ID;
 
-  //SHOULD BE REMOVED, FOR TESTING PURPOSE
-  //change value here to test the corresponding message
-  //session_procedure_type =
-  //    session_management_procedures_type_e::PDU_SESSION_TEST;
-
   switch (session_procedure_type) {
-
     //FOR TESTING PURPOSE
     case session_management_procedures_type_e::PDU_SESSION_TEST: {
       //N1 SM
@@ -1159,10 +1081,9 @@ void session_update_sm_context_procedure::handle_itti_msg(
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
       //fill the content of SmContextUpdatedData
-      n11_triggered_pending->res.sm_context_updated_data =
-          sm_context_updated_data;
-      n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+      sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
           "PDU_RES_MOD_RSP";  //NGAP message
+      n11_triggered_pending->res.set_json_data(sm_context_updated_data);
     }
       break;
 
@@ -1171,15 +1092,15 @@ void session_update_sm_context_procedure::handle_itti_msg(
       //No need to create N1/N2 Container, just Cause
       Logger::smf_app().info(
           "PDU Session Establishment Request (UE-Initiated)");
-      n11_triggered_pending->res.sm_context_updated_data["cause"] =
-          n11_triggered_pending->res.get_cause();
+      nlohmann::json json_data = { };
+      json_data["cause"] = n11_triggered_pending->res.get_cause();
+      n11_triggered_pending->res.set_json_data(json_data);
 
       //Update PDU session status to ACTIVE
       sps->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_ACTIVE);
 
       //set UpCnxState to DEACTIVATED
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
-
     }
       break;
 
@@ -1195,22 +1116,21 @@ void session_update_sm_context_procedure::handle_itti_msg(
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
       //fill the content of SmContextUpdatedData
-      n11_triggered_pending->res.sm_context_updated_data = { };
-      n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] =
+      nlohmann::json json_data = { };
+      json_data["n2InfoContainer"]["n2InformationClass"] =
       N1N2_MESSAGE_CLASS;
-      n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+      json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
           n11_triggered_pending->res.get_pdu_session_id();
-      n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
+      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] =
       N2_SM_CONTENT_ID;
-      n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
           "PDU_RES_SETUP_REQ";  //NGAP message
-      n11_triggered_pending->res.sm_context_updated_data["upCnxState"] =
-          "ACTIVATING";
+      json_data["upCnxState"] = "ACTIVATING";
+      n11_triggered_pending->res.set_json_data(json_data);
       //TODO: verify whether cause is needed (as in 23.502 but not in 3GPP TS 29.502)
 
       //Update upCnxState to ACTIVATING
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATING);
-
     }
       break;
 
@@ -1218,8 +1138,12 @@ void session_update_sm_context_procedure::handle_itti_msg(
     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2: {
       //No need to create N1/N2 Container, just Cause
       Logger::smf_app().info("UE Triggered Service Request (Step 2)");
-      n11_triggered_pending->res.sm_context_updated_data["cause"] =
-          n11_triggered_pending->res.get_cause();
+      nlohmann::json json_data = { };
+      json_data["cause"] = n11_triggered_pending->res.get_cause();
+      json_data["upCnxState"] = "ACTIVATED";
+      n11_triggered_pending->res.set_json_data(json_data);
+      n11_triggered_pending->res.set_http_code(
+          http_status_code_e::HTTP_STATUS_CODE_200_OK);
     }
       break;
 
@@ -1261,17 +1185,17 @@ void session_update_sm_context_procedure::handle_itti_msg(
         n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
         //fill the content of SmContextUpdatedData
-        n11_triggered_pending->res.sm_context_updated_data =
-            sm_context_updated_data;
-        n11_triggered_pending->res.sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+        sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
             "PDU_RES_REL_CMD";  //NGAP message
+        n11_triggered_pending->res.set_json_data(sm_context_updated_data);
       } else {
         //fill the content of SmContextUpdatedData
-        n11_triggered_pending->res.sm_context_updated_data = { };
-        n11_triggered_pending->res.sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
+        nlohmann::json json_data = { };
+        json_data["n1MessageContainer"]["n1MessageClass"] =
         N1N2_MESSAGE_CLASS;
-        n11_triggered_pending->res.sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
+        json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
         N1_SM_CONTENT_ID;
+        n11_triggered_pending->res.set_json_data(json_data);
       }
 
       //Update PDU session status to PDU_SESSION_INACTIVE_PENDING
@@ -1315,14 +1239,14 @@ void session_update_sm_context_procedure::handle_itti_msg(
     }
   }
 
-  //send ITTI message to N11 interface to trigger SessionUpdateSMContextResponse towards AMFs
-  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N11",
+  //send ITTI message to SMF_APP interface to trigger SessionUpdateSMContextResponse towards AMFs
+  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_APP",
                          n11_triggered_pending->get_msg_name());
   n11_triggered_pending->session_procedure_type = session_procedure_type;
   int ret = itti_inst->send_msg(n11_triggered_pending);
   if (RETURNok != ret) {
     Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N11",
+        "Could not send ITTI message %s to task TASK_SMF_APP",
         n11_triggered_pending->get_msg_name());
   }
 
@@ -1353,7 +1277,8 @@ int session_release_sm_context_procedure::run(
   if (not pfcp_associations::get_instance().select_up_node(
       up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
     // TODO
-    sm_context_res->res.set_cause(REMOTE_PEER_NOT_RESPONDING);  //verify for 5G??
+    sm_context_res->res.set_cause(
+        PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
     Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
     return RETURNerror ;
   }
@@ -1403,16 +1328,18 @@ void session_release_sm_context_procedure::handle_itti_msg(
     Logger::smf_app().info("PDU Session Release SM Context accepted by UPF");
     //clear the resources including addresses allocated to this Session and associated QoS flows
     sps->deallocate_ressources(n11_trigger.get()->req.get_dnn());  //TODO: for IPv6 (only for Ipv4 for the moment)
-    smf_n11_inst->send_pdu_session_release_sm_context_response(
-        n11_triggered_pending->http_response, Pistache::Http::Code::No_Content);
-
+    //trigger to send reply to AMF
+    smf_app_inst->trigger_http_response(
+        http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT,
+        n11_triggered_pending->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
   } else {
     oai::smf_server::model::ProblemDetails problem_details = { };
     problem_details.setCause(
-        pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);  //To be updated
-    smf_n11_inst->send_pdu_session_release_sm_context_response(
-        n11_triggered_pending->http_response,
-        Pistache::Http::Code::Not_Acceptable);
+        pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);
+    //trigger to send reply to AMF
+    smf_app_inst->trigger_http_response(
+        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE,
+        n11_triggered_pending->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
   }
 
   //TODO:

@@ -253,8 +253,7 @@ pkg_search_module(CONFIG REQUIRED libconfig++)
 include_directories(${CONFIG_INCLUDE_DIRS})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
+#find_package(Threads REQUIRED)
 
 ################################################################
 # Add sub modules
@@ -277,17 +276,17 @@ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/api-server ${CMAKE_CURREN
 
 ################################################################################
 # Specific part for oai_smf folder
-
 #SMF_API
 set(SMF_API_SERVER_DIR "${SRC_TOP_DIR}/api-server")
   
 file(GLOB SMF_API_SERVER_src_files
+    ${SMF_API_SERVER_DIR}/smf-http2-server.cpp
     ${SMF_API_SERVER_DIR}/smf-api-server.cpp
     ${SMF_API_SERVER_DIR}/model/*.cpp
     ${SMF_API_SERVER_DIR}/api/*.cpp
     ${SMF_API_SERVER_DIR}/impl/*.cpp
 )
-   
+ 
 set(SMF_API_SERVER_include_files
   ${SMF_API_SERVER_DIR}/api
   ${SMF_API_SERVER_DIR}/impl
@@ -295,7 +294,7 @@ set(SMF_API_SERVER_include_files
   ${SMF_API_SERVER_DIR}
   )
 add_library(SMF_API ${SMF_API_SERVER_src_files})
-
+  
 #for NAS
 set(NAS_DIR "${SRC_TOP_DIR}/nas")
 
@@ -377,7 +376,8 @@ IF(STATIC_LINKING)
     # asan do not support static linking
     SET(ASAN)
 ENDIF(STATIC_LINKING)
+   
 
-
-target_link_libraries (smf ${ASAN} -Wl,--start-group CN_UTILS SMF UDP GTPV2C PFCP 3GPP_COMMON_TYPES SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
-
+target_link_libraries (smf ${ASAN} 
+    -Wl,--start-group CN_UTILS SMF UDP GTPV2C PFCP 3GPP_COMMON_TYPES SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES}  -lnghttp2_asio -lboost_system  -lboost_thread -lssl -lcrypto  NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
+    

@@ -659,17 +659,6 @@ void SmContextUpdateData::setN2SmInfoType(std::string const& value)
     m_N2SmInfoTypeIsSet = true;
 }
 
-/*
-N2SmInfoType SmContextUpdateData::getN2SmInfoType() const
-{
-    return m_N2SmInfoType;
-}
-void SmContextUpdateData::setN2SmInfoType(N2SmInfoType const& value)
-{
-    m_N2SmInfoType = value;
-    m_N2SmInfoTypeIsSet = true;
-}
-*/
 bool SmContextUpdateData::n2SmInfoTypeIsSet() const
 {
     return m_N2SmInfoTypeIsSet;

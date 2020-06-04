@@ -59,29 +59,32 @@ class itti_n11_msg : public itti_msg {
 class itti_n11_create_sm_context_request : public itti_n11_msg {
  public:
   itti_n11_create_sm_context_request(const task_id_t orig, const task_id_t dest,
-                                     Pistache::Http::ResponseWriter &response)
+                                     uint32_t promise_id)
       :
       itti_n11_msg(N11_SESSION_CREATE_SM_CONTEXT_REQUEST, orig, dest),
-      http_response(response),
+      pid(promise_id),
       req(),
-      scid() {
+      scid(),
+      http_version(1) {
   }
   itti_n11_create_sm_context_request(
       const itti_n11_create_sm_context_request &i)
       :
       itti_n11_msg(i),
+      pid(),
       req(i.req),
-      http_response(i.http_response),
-      scid() {
+      scid(),
+      http_version(1) {
   }
   itti_n11_create_sm_context_request(
       const itti_n11_create_sm_context_request &i, const task_id_t orig,
       const task_id_t dest)
       :
       itti_n11_msg(i, orig, dest),
+      pid(i.pid),
       req(i.req),
-      http_response(i.http_response),
-      scid(i.scid) {
+      scid(i.scid),
+      http_version(i.http_version) {
   }
   const char* get_msg_name() {
     return "N11_SESSION_CREATE_SM_CONTEXT_REQUEST";
@@ -92,8 +95,9 @@ class itti_n11_create_sm_context_request : public itti_n11_msg {
   }
   ;
   smf::pdu_session_create_sm_context_request req;
-  Pistache::Http::ResponseWriter &http_response;
   scid_t scid;  //SM Context ID
+  uint32_t pid;  //Promise Id
+  uint8_t http_version;
 
 };
 
@@ -101,41 +105,45 @@ class itti_n11_create_sm_context_request : public itti_n11_msg {
 class itti_n11_create_sm_context_response : public itti_n11_msg {
  public:
   itti_n11_create_sm_context_response(const task_id_t orig,
-                                      const task_id_t dest,
-                                      Pistache::Http::ResponseWriter &response)
+                                      const task_id_t dest, uint32_t promise_id)
       :
       itti_n11_msg(N11_SESSION_CREATE_SM_CONTEXT_RESPONSE, orig, dest),
-      http_response(response.clone()),
-      scid(0) {
+      pid(promise_id),
+      scid(0),
+      http_version() {
   }
   itti_n11_create_sm_context_response(
       const itti_n11_create_sm_context_response &i)
       :
       itti_n11_msg(i),
+      pid(i.pid),
       res(i.res),
-      http_response(i.http_response.clone()),
-      scid(i.scid) {
+      scid(i.scid),
+      http_version(i.http_version) {
   }
   itti_n11_create_sm_context_response(
       const itti_n11_create_sm_context_response &i, const task_id_t orig,
       const task_id_t dest)
       :
       itti_n11_msg(i, orig, dest),
+      pid(i.pid),
       res(i.res),
-      http_response(i.http_response.clone()),
-      scid(i.scid) {
+      scid(i.scid),
+      http_version(i.http_version) {
   }
   const char* get_msg_name() {
     return "N11_SESSION_CREATE_SM_CONTEXT_RESPONSE";
   }
   ;
-  smf::pdu_session_create_sm_context_response res;
-  Pistache::Http::ResponseWriter http_response;
   void set_scid(scid_t id) {
     scid = id;
   }
   ;
+
+  smf::pdu_session_create_sm_context_response res;
   scid_t scid;  //SM Context ID
+  uint32_t pid;  //Promise Id
+  uint8_t http_version;  //HTTP version
 
 };
 
@@ -143,54 +151,51 @@ class itti_n11_create_sm_context_response : public itti_n11_msg {
 class itti_n11_update_sm_context_request : public itti_n11_msg {
  public:
   itti_n11_update_sm_context_request(const task_id_t orig, const task_id_t dest,
-                                     Pistache::Http::ResponseWriter &response)
+                                     uint32_t promise_id)
       :
       itti_n11_msg(N11_SESSION_UPDATE_SM_CONTEXT_REQUEST, orig, dest),
-      http_response(response) {
+      pid(promise_id),
+      scid(),
+      req(),
+      http_version() {
   }
   itti_n11_update_sm_context_request(const task_id_t orig, const task_id_t dest,
-                                     Pistache::Http::ResponseWriter &response,
-                                     const std::string id)
+                                     int32_t promise_id, const std::string id)
       :
       itti_n11_msg(N11_SESSION_UPDATE_SM_CONTEXT_REQUEST, orig, dest),
-      http_response(response),
-      scid(id) {
+      req(),
+      pid(promise_id),
+      scid(id),
+      http_version() {
   }
   itti_n11_update_sm_context_request(
       const itti_n11_update_sm_context_request &i)
       :
       itti_n11_msg(i),
       req(i.req),
-      http_response(i.http_response),
-      scid(i.scid) {
+      pid(i.pid),
+      scid(i.scid),
+      http_version(i.http_version) {
   }
-  itti_n11_update_sm_context_request(
-      const itti_n11_update_sm_context_request &i, const task_id_t orig,
-      const task_id_t dest)
-      :
-      itti_n11_msg(i, orig, dest),
-      req(i.req),
-      http_response(i.http_response),
-      scid(i.scid) {
-  }
+
   const char* get_msg_name() {
     return "N11_SESSION_UPDATE_SM_CONTEXT_REQUEST";
   }
   ;
   smf::pdu_session_update_sm_context_request req;
-  Pistache::Http::ResponseWriter &http_response;
+  uint32_t pid;
   std::string scid;  //SM Context ID
+  uint8_t http_version;
 };
 
 //-----------------------------------------------------------------------------
 class itti_n11_update_sm_context_response : public itti_n11_msg {
  public:
   itti_n11_update_sm_context_response(const task_id_t orig,
-                                      const task_id_t dest,
-                                      Pistache::Http::ResponseWriter &response)
+                                      const task_id_t dest, uint32_t promise_id)
       :
       itti_n11_msg(N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE, orig, dest),
-      http_response(response.clone()),
+      pid(promise_id),
       res(),
       session_procedure_type() {
   }
@@ -199,7 +204,7 @@ class itti_n11_update_sm_context_response : public itti_n11_msg {
       :
       itti_n11_msg(i),
       res(i.res),
-      http_response(i.http_response.clone()),
+      pid(i.pid),
       session_procedure_type(i.session_procedure_type) {
   }
   itti_n11_update_sm_context_response(
@@ -208,7 +213,7 @@ class itti_n11_update_sm_context_response : public itti_n11_msg {
       :
       itti_n11_msg(i, orig, dest),
       res(i.res),
-      http_response(i.http_response.clone()),
+      pid(i.pid),
       session_procedure_type(i.session_procedure_type) {
   }
   const char* get_msg_name() {
@@ -216,37 +221,9 @@ class itti_n11_update_sm_context_response : public itti_n11_msg {
   }
   ;
   smf::pdu_session_update_sm_context_response res;
-  Pistache::Http::ResponseWriter http_response;
+  uint32_t pid;  //promise Id
   session_management_procedures_type_e session_procedure_type;
 
-};
-
-//-----------------------------------------------------------------------------
-class itti_n11_modify_session_request_smf_requested : public itti_n11_msg {
- public:
-  itti_n11_modify_session_request_smf_requested(const task_id_t orig,
-                                                const task_id_t dest)
-      :
-      itti_n11_msg(N11_SESSION_MODIFICATION_REQUEST_SMF_REQUESTED, orig, dest) {
-  }
-  itti_n11_modify_session_request_smf_requested(
-      const itti_n11_modify_session_request_smf_requested &i)
-      :
-      itti_n11_msg(i),
-      req(i.req) {
-  }
-  itti_n11_modify_session_request_smf_requested(
-      const itti_n11_modify_session_request_smf_requested &i,
-      const task_id_t orig, const task_id_t dest)
-      :
-      itti_n11_msg(i, orig, dest),
-      req(i.req) {
-  }
-  const char* get_msg_name() {
-    return "N11_SESSION_MODIFICATION_REQUEST_SMF_REQUESTED";
-  }
-  ;
-  smf::pdu_session_create_sm_context_request req;
 };
 
 //-----------------------------------------------------------------------------
@@ -378,45 +355,48 @@ class itti_n11_n1n2_message_transfer_response_status : public itti_n11_msg {
 class itti_n11_release_sm_context_request : public itti_n11_msg {
  public:
   itti_n11_release_sm_context_request(const task_id_t orig,
-                                      const task_id_t dest,
-                                      Pistache::Http::ResponseWriter &response)
+                                      const task_id_t dest, uint32_t promise_id)
       :
       itti_n11_msg(N11_SESSION_RELEASE_SM_CONTEXT_REQUEST, orig, dest),
-      http_response(response) {
+      pid(promise_id),
+      http_version(1) {
   }
   itti_n11_release_sm_context_request(const task_id_t orig,
-                                      const task_id_t dest,
-                                      Pistache::Http::ResponseWriter &response,
+                                      const task_id_t dest, uint32_t promise_id,
                                       const std::string id)
       :
       itti_n11_msg(N11_SESSION_RELEASE_SM_CONTEXT_REQUEST, orig, dest),
-      http_response(response),
-      scid(id) {
+      pid(promise_id),
+      scid(id),
+      http_version(1) {
   }
   itti_n11_release_sm_context_request(
       const itti_n11_release_sm_context_request &i)
       :
       itti_n11_msg(i),
-      http_response(i.http_response),
+      pid(i.pid),
       scid(i.scid),
-      req(i.req) {
+      req(i.req),
+      http_version(i.http_version) {
   }
   itti_n11_release_sm_context_request(
       const itti_n11_release_sm_context_request &i, const task_id_t orig,
       const task_id_t dest)
       :
       itti_n11_msg(i, orig, dest),
-      http_response(i.http_response),
+      pid(i.pid),
       scid(i.scid),
-      req(i.req) {
+      req(i.req),
+      http_version(i.http_version) {
   }
   const char* get_msg_name() {
     return "N11_SESSION_RELEASE_SM_CONTEXT_REQUEST";
   }
   ;
   smf::pdu_session_release_sm_context_request req;
-  Pistache::Http::ResponseWriter &http_response;
   std::string scid;  //SM Context ID
+  uint32_t pid;  //Promise Id
+  uint8_t http_version;  //HTTP version
 
 };
 
@@ -425,10 +405,10 @@ class itti_n11_release_sm_context_response : public itti_n11_msg {
  public:
   itti_n11_release_sm_context_response(const task_id_t orig,
                                        const task_id_t dest,
-                                       Pistache::Http::ResponseWriter &response)
+                                       uint32_t promise_id)
       :
       itti_n11_msg(N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE, orig, dest),
-      http_response(response.clone()),
+      pid(promise_id),
       res() {
   }
   itti_n11_release_sm_context_response(
@@ -436,7 +416,7 @@ class itti_n11_release_sm_context_response : public itti_n11_msg {
       :
       itti_n11_msg(i),
       res(i.res),
-      http_response(i.http_response.clone()) {
+      pid(i.pid) {
   }
   itti_n11_release_sm_context_response(
       const itti_n11_release_sm_context_response &i, const task_id_t orig,
@@ -444,14 +424,14 @@ class itti_n11_release_sm_context_response : public itti_n11_msg {
       :
       itti_n11_msg(i, orig, dest),
       res(i.res),
-      http_response(i.http_response.clone()) {
+      pid(i.pid) {
   }
   const char* get_msg_name() {
     return "N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE";
   }
   ;
   smf::pdu_session_release_sm_context_response res;
-  Pistache::Http::ResponseWriter http_response;
+  uint32_t pid;  //Promise Id
 
 };
 
@@ -461,23 +441,28 @@ class itti_n11_session_report_request : public itti_n11_msg {
   itti_n11_session_report_request(const task_id_t orig, const task_id_t dest)
       :
       itti_n11_msg(N11_SESSION_REPORT_RESPONSE, orig, dest),
-      res() {
+      res(),
+      http_version() {
   }
   itti_n11_session_report_request(const itti_n11_session_report_request &i)
       :
-      itti_n11_msg(i) {
+      itti_n11_msg(i),
+      res(i.res),
+      http_version(i.http_version) {
   }
   itti_n11_session_report_request(const itti_n11_session_report_request &i,
                                   const task_id_t orig, const task_id_t dest)
       :
       itti_n11_msg(i, orig, dest),
-      res(i.res) {
+      res(i.res),
+      http_version(i.http_version) {
   }
   const char* get_msg_name() {
     return "N11_SESSION_REPORT_RESPONSE";
   }
   ;
   smf::pdu_session_report_response res;
+  uint8_t http_version;
 
 };
 

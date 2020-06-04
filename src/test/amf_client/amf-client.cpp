@@ -5,6 +5,12 @@
 #include <unistd.h>
 #include <stdexcept>
 
+#ifndef CURLPIPE_MULTIPLEX
+#define CURLPIPE_MULTIPLEX 0
+#endif
+
+#define HTTP_V1 1
+#define HTTP_V2 2
 /*
  * To read content of the response from UDM
  */
@@ -157,7 +163,9 @@ void create_multipart_related_content(
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_establishment_request(std::string smf_ip_address) {
+void send_pdu_session_establishment_request(std::string smf_ip_address,
+                                            uint8_t http_version,
+                                            std::string port) {
   std::cout << "[AMF N11] PDU Session Establishment Request (SM Context Create)"
             << std::endl;
 
@@ -185,6 +193,10 @@ void send_pdu_session_establishment_request(std::string smf_ip_address) {
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts"));
 
   //Fill the json part
@@ -231,6 +243,19 @@ void send_pdu_session_establishment_request(std::string smf_ip_address) {
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
 
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
+
     // Response information.
     long httpCode = { 0 };
     std::unique_ptr<std::string> httpData(new std::string());
@@ -253,8 +278,9 @@ void send_pdu_session_establishment_request(std::string smf_ip_address) {
       std::cout << "Could not get json data from the response" << std::endl;
     }
     std::cout
-        << "[AMF N11] PDU session establishment request, response from SMF, Http Code "
-        << httpCode << std::endl;
+        << "[AMF N11] PDU session establishment request, response from SMF "
+        << response_data.dump().c_str() << ", Http Code " << httpCode
+        << std::endl;
 
     curl_easy_cleanup(curl);
   }
@@ -265,7 +291,7 @@ void send_pdu_session_establishment_request(std::string smf_ip_address) {
 
 //------------------------------------------------------------------------------
 void send_pdu_session_update_sm_context_establishment(
-    std::string smf_ip_address) {
+    std::string smf_ip_address, uint8_t http_version, std::string port) {
   std::cout << "[AMF N11] PDU Session Establishment Request (SM Context Update)"
             << std::endl;
 
@@ -299,6 +325,11 @@ void send_pdu_session_update_sm_context_establishment(
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
@@ -337,6 +368,19 @@ void send_pdu_session_update_sm_context_establishment(
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
 
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
+
     // Response information.
     long httpCode = { 0 };
     std::unique_ptr<std::string> httpData(new std::string());
@@ -374,7 +418,9 @@ void send_pdu_session_update_sm_context_establishment(
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
+void send_pdu_session_modification_request_step1(std::string smf_ip_address,
+                                                 uint8_t http_version,
+                                                 std::string port) {
 
   std::cout
       << "[AMF N11] PDU Session Modification Request (SM Context Update, Step 1)"
@@ -427,6 +473,11 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
@@ -459,6 +510,19 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
+
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
 
     // Response information.
     long httpCode = { 0 };
@@ -493,7 +557,9 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address) {
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_modification_request_step2(std::string smf_ip_address) {
+void send_pdu_session_modification_request_step2(std::string smf_ip_address,
+                                                 uint8_t http_version,
+                                                 std::string port) {
 
   std::cout
       << "[AMF N11] PDU Session Modification procedure (SM Context Update, step 2)"
@@ -528,6 +594,11 @@ void send_pdu_session_modification_request_step2(std::string smf_ip_address) {
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
@@ -560,6 +631,19 @@ void send_pdu_session_modification_request_step2(std::string smf_ip_address) {
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
+
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
 
     // Response information.
     long httpCode = { 0 };
@@ -594,7 +678,9 @@ void send_pdu_session_modification_request_step2(std::string smf_ip_address) {
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_modification_complete(std::string smf_ip_address) {
+void send_pdu_session_modification_complete(std::string smf_ip_address,
+                                            uint8_t http_version,
+                                            std::string port) {
 
   std::cout
       << "[AMF N11] PDU Session Modification Complete (Update SM Context): N1 SM - PDU Session Modification Complete"
@@ -620,6 +706,11 @@ void send_pdu_session_modification_complete(std::string smf_ip_address) {
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
@@ -651,6 +742,19 @@ void send_pdu_session_modification_complete(std::string smf_ip_address) {
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
+
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
 
     // Response information.
     long httpCode = { 0 };
@@ -685,7 +789,8 @@ void send_pdu_session_modification_complete(std::string smf_ip_address) {
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_release_request(std::string smf_ip_address) {
+void send_pdu_session_release_request(std::string smf_ip_address,
+                                      uint8_t http_version, std::string port) {
 
   std::cout << "[AMF N11] PDU Session Release Request (SM Context Update)"
             << std::endl;
@@ -712,6 +817,11 @@ void send_pdu_session_release_request(std::string smf_ip_address) {
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
@@ -744,6 +854,19 @@ void send_pdu_session_release_request(std::string smf_ip_address) {
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
+
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
 
     // Response information.
     long httpCode = { 0 };
@@ -778,7 +901,9 @@ void send_pdu_session_release_request(std::string smf_ip_address) {
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_release_resource_release_ack(std::string smf_ip_address) {
+void send_pdu_session_release_resource_release_ack(std::string smf_ip_address,
+                                                   uint8_t http_version,
+                                                   std::string port) {
 
   std::cout
       << "[AMF N11] PDU Session Release Ack (Update SM Context): N2 SM - Resource Release Ack"
@@ -799,6 +924,11 @@ void send_pdu_session_release_resource_release_ack(std::string smf_ip_address) {
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
@@ -832,6 +962,19 @@ void send_pdu_session_release_resource_release_ack(std::string smf_ip_address) {
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
 
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
+
     // Response information.
     long httpCode = { 0 };
     std::unique_ptr<std::string> httpData(new std::string());
@@ -855,7 +998,7 @@ void send_pdu_session_release_resource_release_ack(std::string smf_ip_address) {
 
     }
     std::cout
-        << "[AMF N11] PDU Session Establishment Request, response from SMF, Http Code "
+        << "[AMF N11] PDU Session Release Ack, response from SMF, Http Code "
         << httpCode << std::endl;
 
     curl_easy_cleanup(curl);
@@ -866,7 +1009,8 @@ void send_pdu_session_release_resource_release_ack(std::string smf_ip_address) {
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_release_complete(std::string smf_ip_address) {
+void send_pdu_session_release_complete(std::string smf_ip_address,
+                                       uint8_t http_version, std::string port) {
 
   std::cout
       << "[AMF N11] PDU Session Release Complete (Update SM Context): N1 SM - PDU Session Release Complete"
@@ -895,6 +1039,11 @@ void send_pdu_session_release_complete(std::string smf_ip_address) {
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
@@ -927,6 +1076,19 @@ void send_pdu_session_release_complete(std::string smf_ip_address) {
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
+
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
 
     // Response information.
     long httpCode = { 0 };
@@ -962,7 +1124,7 @@ void send_pdu_session_release_complete(std::string smf_ip_address) {
 
 //------------------------------------------------------------------------------
 void send_pdu_session_update_sm_context_ue_service_request(
-    std::string smf_ip_address) {
+    std::string smf_ip_address, uint8_t http_version, std::string port) {
   std::cout
       << "[AMF N11] UE-triggered Service Request (SM Context Update Step 1)"
       << std::endl;
@@ -972,6 +1134,11 @@ void send_pdu_session_update_sm_context_ue_service_request(
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //PDU session ID (as specified in section 4.2.3.2 @ 3GPP TS 23.502, but can't find in Yaml file)
@@ -995,6 +1162,19 @@ void send_pdu_session_update_sm_context_ue_service_request(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
+
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
 
     // Response information.
     long httpCode = { 0 };
@@ -1029,7 +1209,7 @@ void send_pdu_session_update_sm_context_ue_service_request(
 
 //------------------------------------------------------------------------------
 void send_pdu_session_update_sm_context_ue_service_request_step2(
-    std::string smf_ip_address) {
+    std::string smf_ip_address, uint8_t http_version, std::string port) {
   std::cout
       << "[AMF N11] UE-triggered Service Request (SM Context Update Step 2)"
       << std::endl;
@@ -1064,6 +1244,11 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    //url.append(std::string(":9090"));
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
@@ -1105,6 +1290,19 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
 
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
+
     // Response information.
     long httpCode = { 0 };
     std::unique_ptr<std::string> httpData(new std::string());
@@ -1142,7 +1340,8 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
 }
 
 //------------------------------------------------------------------------------
-void send_release_sm_context_request(std::string smf_ip_address) {
+void send_release_sm_context_request(std::string smf_ip_address,
+                                     uint8_t http_version, std::string port) {
 
   std::cout << "[AMF N11] PDU Session Release SM context Request" << std::endl;
 
@@ -1150,6 +1349,10 @@ void send_release_sm_context_request(std::string smf_ip_address) {
 
   std::string url = std::string("http://");
   url.append(smf_ip_address);
+  if (http_version == 2) {
+    url.append(std::string(":"));
+    url.append(port);
+  }
   url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/release"));
 
   //Fill the json part
@@ -1170,6 +1373,19 @@ void send_release_sm_context_request(std::string smf_ip_address) {
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
     //curl_easy_setopt(curl, CURLOPT_INTERFACE, "eno1:amf");  //hardcoded
+
+    if (http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      /* we use a self-signed test server, skip verification during debugging */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+#if (CURLPIPE_MULTIPLEX > 0)
+      /* wait for pipe connection to confirm */
+      curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+#endif
+    }
 
     // Response information.
     long httpCode = { 0 };
@@ -1205,10 +1421,16 @@ void send_release_sm_context_request(std::string smf_ip_address) {
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
   std::string smf_ip_address;
+  uint8_t http_version = 1;
+  std::string port;
 
-  if ((argc != 1) && (argc != 3)) {
+  http_version = 1;
+  port = std::string("80");
+
+  if ((argc != 1) && (argc != 3) && (argc != 5) && (argc != 7)) {
     std::cout << "Error: Usage is " << std::endl;
-    std::cout << "  " << argv[0] << " [ -i www.xxx.yy.zz ]" << std::endl;
+    std::cout << "  " << argv[0] << " [ -i www.xxx.yy.zz -v 1 -p 9090]"
+              << std::endl;
     return -1;
   }
 
@@ -1216,46 +1438,63 @@ int main(int argc, char *argv[]) {
     smf_ip_address.append(std::string("192.168.28.2"));
   } else {
     int opt = 0;
-    while ((opt = getopt(argc, argv, "i:")) != -1) {
+    while ((opt = getopt(argc, argv, "i:v:p:")) != -1) {
       switch (opt) {
         case 'i':
           smf_ip_address.append(optarg);
           break;
+        case 'v':
+          http_version = std::stoi(optarg);
+          break;
+        case 'p':
+          port = std::string(optarg);
+          break;
         default:
           std::cout << "Error: Usage is " << std::endl;
-          std::cout << "  " << argv[0] << " [ -i www.xxx.yy.zz ]" << std::endl;
+          std::cout << "  " << argv[0] << " [ -i www.xxx.yy.zz -v 1 -p 9090]"
+                    << std::endl;
           return -1;
           break;
       }
     }
   }
+  std::cout << "Command line options: -i " << smf_ip_address.c_str() << ", -v "
+            << std::to_string(http_version) << ", -p " << port.c_str()
+            << std::endl;
 
   //PDU Session Establishment procedure
-  send_pdu_session_establishment_request(smf_ip_address);
+  send_pdu_session_establishment_request(smf_ip_address, http_version, port);
   usleep(100000);
-  send_pdu_session_update_sm_context_establishment(smf_ip_address);
+  send_pdu_session_update_sm_context_establishment(smf_ip_address, http_version,
+                                                   port);
   usleep(200000);
   //UE-initiated Service Request
-  send_pdu_session_update_sm_context_ue_service_request(smf_ip_address);
+  send_pdu_session_update_sm_context_ue_service_request(smf_ip_address,
+                                                        http_version, port);
   usleep(200000);
-  send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address);
+  send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address,
+                                                              http_version,
+                                                              port);
   usleep(200000);
   //PDU Session Modification
-  send_pdu_session_modification_request_step1(smf_ip_address);
+  send_pdu_session_modification_request_step1(smf_ip_address, http_version,
+                                              port);
   usleep(200000);
-  send_pdu_session_modification_request_step2(smf_ip_address);
+  send_pdu_session_modification_request_step2(smf_ip_address, http_version,
+                                              port);
   usleep(200000);
-  send_pdu_session_modification_complete(smf_ip_address);
+  send_pdu_session_modification_complete(smf_ip_address, http_version, port);
   usleep(200000);
   //PDU Session Release procedure
-  send_pdu_session_release_request(smf_ip_address);
+  send_pdu_session_release_request(smf_ip_address, http_version, port);
   usleep(200000);
-  send_pdu_session_release_resource_release_ack(smf_ip_address);
+  send_pdu_session_release_resource_release_ack(smf_ip_address, http_version,
+                                                port);
   usleep(200000);
-  send_pdu_session_release_complete(smf_ip_address);
+  send_pdu_session_release_complete(smf_ip_address, http_version, port);
   usleep(200000);
   //Release SM context
-  //send_release_sm_context_request(smf_ip_address);
+  //send_release_sm_context_request(smf_ip_address, http_version, port);
   return 0;
 }
 

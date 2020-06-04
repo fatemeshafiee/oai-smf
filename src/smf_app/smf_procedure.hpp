@@ -103,6 +103,7 @@ class n4_session_restore_procedure : public smf_procedure {
   std::set<pfcp::fseid_t> restored_sessions;
 };
 
+
 //------------------------------------------------------------------------------
 class session_create_sm_context_procedure : public smf_procedure {
  public:
@@ -142,6 +143,7 @@ class session_create_sm_context_procedure : public smf_procedure {
   std::shared_ptr<itti_n11_create_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_create_sm_context_response> n11_triggered_pending;
 };
+
 
 //------------------------------------------------------------------------------
 class session_update_sm_context_procedure : public smf_procedure {
