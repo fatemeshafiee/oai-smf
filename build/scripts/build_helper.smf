@@ -217,6 +217,30 @@ install_nghttp2_from_git() {
 
   if [[ $prompt =~ [yY](es)* ]]
   then
+    $SUDO apt-get install $OPTION \
+    g++ \
+    cmake \
+    binutils \
+    autoconf \
+    automake \
+    autotools-dev \
+    libtool \
+    pkg-config \
+    zlib1g-dev \
+    libcunit1-dev \
+    libssl-dev \
+    libxml2-dev \      
+    libev-dev \
+    libevent-dev \
+    libjansson-dev \
+    libc-ares-dev \
+    libjemalloc-dev \
+    libsystemd-dev \
+    cython \
+    python3-dev \
+    python-setuptool
+    ret=$?;[[ $ret -ne 0 ]] && return $ret
+   
     GIT_URL=https://github.com/nghttp2/nghttp2.git
     echo "Install nghttp2 from $GIT_URL"
     pushd $OPENAIRCN_DIR/build/ext
@@ -385,7 +409,6 @@ check_install_smf_deps() {
 
   install_nghttp2_from_git $1 $2
   ret=$?;[[ $ret -ne 0 ]] && return $ret
-  
   $SUDO /sbin/ldconfig -v
   ret=$?;[[ $ret -ne 0 ]] && return $ret
   
