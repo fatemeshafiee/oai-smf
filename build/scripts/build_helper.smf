@@ -197,6 +197,56 @@ install_nlohmann_from_git() {
   return 0
 }
 
+#-------------------------------------------------------------------------------
+#arg1 is force (0 or 1) (no interactive script)
+#arg2 is debug (0 or 1) (install debug libraries)
+install_nghttp2_from_git() {
+  if [ $1 -eq 0 ]; then
+    read -p "Do you want to install nghttp2 ? <y/N> " prompt
+    OPTION="-y"
+  else
+    prompt='y'
+    OPTION="-y"
+  fi
+  if [ $2 -eq 0 ]; then
+    debug=0
+  else
+    debug=1
+  fi
+
+
+  if [[ $prompt =~ [yY](es)* ]]
+  then
+    GIT_URL=https://github.com/nghttp2/nghttp2.git
+    echo "Install nghttp2 from $GIT_URL"
+    pushd $OPENAIRCN_DIR/build/ext
+    echo "Downloading nghttp2"
+    if [[ $OPTION =~ -[yY](es)* ]]
+    then
+      $SUDO rm -rf nghttp2
+    fi
+
+    git clone $GIT_URL
+    cd nghttp2
+    git submodule update --init
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    autoreconf -i
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    automake
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    autoconf
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    ./configure --enable-asio-lib
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    make
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    $SUDO make install
+    ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
+    popd
+  fi
+  return 0
+  
+}
 
 #-------------------------------------------------------------------------------
 #arg1 is force (0 or 1) (no interactive script)
@@ -333,6 +383,9 @@ check_install_smf_deps() {
   install_nlohmann_from_git $1 $2
   ret=$?;[[ $ret -ne 0 ]] && return $ret
 
+  install_nghttp2_from_git $1 $2
+  ret=$?;[[ $ret -ne 0 ]] && return $ret
+  
   return 0
 }
 #-------------------------------------------------------------------------------
