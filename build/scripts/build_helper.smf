@@ -229,23 +229,15 @@ install_nghttp2_from_git() {
     zlib1g-dev \
     libcunit1-dev \
     libssl-dev \
-    libxml2-dev \      
-    libev-dev \
-    libevent-dev \
-    libjansson-dev \
-    libc-ares-dev \
-    libjemalloc-dev \
-    libsystemd-dev \
-    cython \
-    python3-dev \
-    python-setuptool
+    libxml2-dev libev-dev libevent-dev libjansson-dev libc-ares-dev \
+    libjemalloc-dev libsystemd-dev cython python3-dev python-setuptools
     ret=$?;[[ $ret -ne 0 ]] && return $ret
    
     GIT_URL=https://github.com/nghttp2/nghttp2.git
     echo "Install nghttp2 from $GIT_URL"
     pushd $OPENAIRCN_DIR/build/ext
     echo "Downloading nghttp2"
-    if [[ $OPTION =~ -[yY](es)* ]]
+    if [[ $OPTION =~ [yY](es)* ]]
     then
       $SUDO rm -rf nghttp2
     fi
