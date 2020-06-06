@@ -411,6 +411,7 @@ void smf_app::handle_itti_msg(
   switch (m.procedure_type) {
     case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
       //Update PDU Session accordingly
+      Logger::smf_app().info("PDU_SESSION_ESTABLISHMENT_UE_REQUESTED");
       pdu_session_status_e status =
           { pdu_session_status_e::PDU_SESSION_INACTIVE };
       upCnx_state_e state = { upCnx_state_e::UPCNX_STATE_DEACTIVATED };
