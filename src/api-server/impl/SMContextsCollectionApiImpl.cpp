@@ -36,6 +36,7 @@
 #include "smf_msg.hpp"
 #include "itti_msg_n11.hpp"
 #include "3gpp_29.502.h"
+#include <nghttp2/asio_http2_server.h>
 
 namespace oai {
 namespace smf_server {
@@ -49,9 +50,7 @@ SMContextsCollectionApiImpl::SMContextsCollectionApiImpl(
     :
     SMContextsCollectionApi(rtr),
     m_smf_app(smf_app_inst),
-    m_address(address)
-
-{
+    m_address(address) {
 }
 
 void SMContextsCollectionApiImpl::post_sm_contexts(
@@ -66,8 +65,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
 
   SmContextCreateData smContextCreateData = smContextMessage.getJsonData();
   std::string n1_sm_msg = smContextMessage.getBinaryDataN1SmMessage();
-  Logger::smf_api_server().debug("smContextMessage, N1 SM message: %s",
-                                 n1_sm_msg.c_str());
+  Logger::smf_api_server().debug("N1 SM message: %s", n1_sm_msg.c_str());
 
   //Step 2. Create a pdu_session_create_sm_context_request message and store the necessary information
   Logger::smf_api_server().debug(
@@ -87,38 +85,36 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   smf_string_to_supi(&supi, supi_str.c_str());
   sm_context_req_msg.set_supi(supi);
   sm_context_req_msg.set_supi_prefix(supi_prefix);
-  Logger::smf_api_server().debug(
-      "SmContextCreateData, SUPI %s, SUPI Prefix %s, IMSI %s",
-      smContextCreateData.getSupi().c_str(), supi_prefix.c_str(),
-      supi_str.c_str());
+  Logger::smf_api_server().debug("SUPI %s, SUPI Prefix %s, IMSI %s",
+                                 smContextCreateData.getSupi().c_str(),
+                                 supi_prefix.c_str(), supi_str.c_str());
 
   //dnn
-  Logger::smf_api_server().debug("SmContextCreateData, DNN %s",
+  Logger::smf_api_server().debug("DNN %s",
                                  smContextCreateData.getDnn().c_str());
   sm_context_req_msg.set_dnn(smContextCreateData.getDnn().c_str());
 
   //S-Nssai
   Logger::smf_api_server().debug(
-      "SmContextCreateData, S-NSSAI SST %d, SD %s",
-      smContextCreateData.getSNssai().getSst(),
+      "S-NSSAI SST %d, SD %s", smContextCreateData.getSNssai().getSst(),
       smContextCreateData.getSNssai().getSd().c_str());
   snssai_t snssai(smContextCreateData.getSNssai().getSst(),
                   smContextCreateData.getSNssai().getSd());
   sm_context_req_msg.set_snssai(snssai);
 
   //PDU session ID
-  Logger::smf_api_server().debug("SmContextCreateData, PDU Session ID %d",
+  Logger::smf_api_server().debug("PDU Session ID %d",
                                  smContextCreateData.getPduSessionId());
   sm_context_req_msg.set_pdu_session_id(smContextCreateData.getPduSessionId());
 
   //AMF ID (ServingNFId)
-  Logger::smf_api_server().debug("SmContextCreateDatea, ServingNfId %s",
+  Logger::smf_api_server().debug("ServingNfId %s",
                                  smContextCreateData.getServingNfId().c_str());
   sm_context_req_msg.set_serving_nf_id(
       smContextCreateData.getServingNfId().c_str());  //TODO: should be verified that AMF ID is stored in GUAMI or ServingNfId
 
   //Request Type
-  Logger::smf_api_server().debug("SmContextCreateData, RequestType %s",
+  Logger::smf_api_server().debug("RequestType %s",
                                  smContextCreateData.getRequestType().c_str());
   sm_context_req_msg.set_request_type(smContextCreateData.getRequestType());
   //PCF ID
@@ -136,7 +132,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   //PCFId
 
   // DNN Selection Mode
-  Logger::smf_api_server().debug("SmContextCreateData, SelMode %s",
+  Logger::smf_api_server().debug("SelMode %s",
                                  smContextCreateData.getSelMode().c_str());
   sm_context_req_msg.set_dnn_selection_mode(
       smContextCreateData.getSelMode().c_str());
@@ -152,16 +148,40 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   //SM PDU DN request container (Optional)
   //Extended protocol configuration options (Optional) e.g, FOR DHCP
 
+  boost::shared_ptr<boost::promise<smf::pdu_session_create_sm_context_response> > p =
+      boost::make_shared<
+          boost::promise<smf::pdu_session_create_sm_context_response> >();
+  boost::shared_future<smf::pdu_session_create_sm_context_response> f;
+  f = p->get_future();
+
+  //Generate ID for this promise (to be used in SMF-APP)
+  uint32_t promise_id = generate_promise_id();
+  Logger::smf_api_server().debug("Promise ID generated %d", promise_id);
+  m_smf_app->add_promise(promise_id, p);
+
   //Step 3. Handle the pdu_session_create_sm_context_request message in smf_app
   std::shared_ptr<itti_n11_create_sm_context_request> itti_msg =
       std::make_shared<itti_n11_create_sm_context_request>(TASK_SMF_N11,
                                                            TASK_SMF_APP,
-                                                           response);
+                                                           promise_id);
   itti_msg->req = sm_context_req_msg;
+  itti_msg->http_version = 1;
   m_smf_app->handle_pdu_session_create_sm_context_request(itti_msg);
 
-}
+  //wait for the result from APP and send reply to AMF
+  smf::pdu_session_create_sm_context_response sm_context_response = f.get();
+  Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
+  nlohmann::json json_data = { };
+  sm_context_response.get_json_data(json_data);
+  if (!json_data.empty()) {
+    response.headers().add<Pistache::Http::Header::ContentType>(
+        Pistache::Http::Mime::MediaType("application/json"));
+    response.send(Pistache::Http::Code(sm_context_response.get_http_code()), json_data.dump().c_str());
+  } else {
+    response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
+  }
+}
 }
 }
 }

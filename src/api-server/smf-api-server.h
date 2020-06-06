@@ -31,6 +31,9 @@
  *      contact@openairinterface.org
  */
 
+#ifndef FILE_SMF_API_SERVER_SEEN
+#define FILE_SMF_API_SERVER_SEEN
+
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
@@ -63,7 +66,6 @@ class SMFApiServer {
     m_smContextsCollectionApiImpl =
         std::make_shared<SMContextsCollectionApiImpl>(m_router, smf_app_inst,
                                                       m_address);
-
   }
   void init(size_t thr = 1);
   void start();
@@ -77,6 +79,6 @@ class SMFApiServer {
   std::shared_ptr<PDUSessionsCollectionApiImpl> m_pduSessionsCollectionApiImpl;
   std::shared_ptr<SMContextsCollectionApiImpl> m_smContextsCollectionApiImpl;
   std::string m_address;
-
 };
 
+#endif

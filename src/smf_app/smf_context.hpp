@@ -118,7 +118,9 @@ class smf_qos_flow {
 
 class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
  public:
-  smf_pdu_session() {
+  smf_pdu_session()
+      :
+      m_pdu_session_mutex() {
     clear();
   }
 
@@ -137,6 +139,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     timer_T3590 = ITTI_INVALID_TIMER_ID;
     timer_T3591 = ITTI_INVALID_TIMER_ID;
     timer_T3592 = ITTI_INVALID_TIMER_ID;
+
   }
 
   smf_pdu_session(smf_pdu_session &b) = delete;
@@ -424,6 +427,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint8_t number_of_supported_packet_filters;  //number_of_supported_packet_filters
   util::uint_generator<uint32_t> qos_rule_id_generator;
 
+  // Recursive lock
+  mutable std::recursive_mutex m_pdu_session_mutex;
+
 };
 
 class session_management_subscription {
@@ -604,7 +610,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   void handle_pdu_session_create_sm_context_request(
       std::shared_ptr<itti_n11_create_sm_context_request> smreq);
-
   /*
    * Handle messages from AMF (e.g., PDU_SESSION_UpdateSMContextRequest)
    * @param [std::shared_ptr<itti_n11_update_sm_context_request] smreq Request message
@@ -670,7 +675,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [const snssai_t&] snssai: single NSSAI
    *@return bool: Return true if a subscription data corresponding with dnn and snssai exist, otherwise return false
    */
-  bool is_dnn_snssai_subscription_data(const std::string &dnn, const snssai_t &snssai);
+  bool is_dnn_snssai_subscription_data(const std::string &dnn,
+                                       const snssai_t &snssai);
 
   /*
    * Find a session management subscription from a SMF context
@@ -747,7 +753,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   void set_supi_prefix(std::string const &value);
 
-
   /*
    * Get the default QoS Rule for all QFIs
    * @param [QOSRulesIE] qos_rule
@@ -809,7 +814,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   scid_t scid;  //SM Context ID
   // Big recursive lock
   mutable std::recursive_mutex m_context;
-
 };
 }
 

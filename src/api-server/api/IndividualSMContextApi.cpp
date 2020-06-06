@@ -43,7 +43,7 @@
 
 #include "logger.hpp"
 #include "Helpers.h"
-#include "simple_parser.hpp"
+#include "mime_parser.hpp"
 
 namespace oai {
 namespace smf_server {
@@ -103,7 +103,6 @@ void IndividualSMContextApi::release_sm_context_handler(
     response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
     return;
   }
-
 }
 
 void IndividualSMContextApi::retrieve_sm_context_handler(
@@ -141,7 +140,7 @@ void IndividualSMContextApi::update_sm_context_handler(
   SmContextUpdateMessage smContextUpdateMessage = { };
 
   //simple parser
-  simple_parser sp = { };
+  mime_parser sp = { };
   sp.parse(request.body());
 
   std::vector<mime_part> parts = { };

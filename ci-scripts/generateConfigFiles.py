@@ -29,6 +29,7 @@ class smfConfigGen():
 		self.kind = ''
 		self.sbi_name = ''
 		self.sbi_port = '80'
+		self.sbi_http2_port = '9090'
 		self.n4_name = ''
 		self.amf_ip_addr = ''
 		self.amf_port = '80'
@@ -69,6 +70,7 @@ class smfConfigGen():
 		smfFile.write('SMF_CONF[@PID_DIRECTORY@]=\'/var/run\'\n')
 		smfFile.write('SMF_CONF[@SMF_INTERFACE_NAME_FOR_SBI@]=\'' + self.sbi_name + '\'\n')
 		smfFile.write('SMF_CONF[@SMF_INTERFACE_PORT_FOR_SBI@]=' + self.sbi_port + '\n')
+		smfFile.write('SMF_CONF[@SMF_INTERFACE_HTTP2_PORT_FOR_SBI@]=' + self.sbi_http2_port + '\n')
 		smfFile.write('SMF_CONF[@SMF_INTERFACE_NAME_FOR_N4@]=\'' + self.n4_name + '\'\n')
 		smfFile.write('SMF_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]=$MY_PRIMARY_DNS\n')
 		smfFile.write('SMF_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]=$MY_SECONDARY_DNS\n')

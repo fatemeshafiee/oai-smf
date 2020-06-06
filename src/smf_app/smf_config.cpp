@@ -307,6 +307,12 @@ int smf_config::load(const string &config_file) {
     const Setting &n11_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_SBI];
     load_interface(n11_cfg, sbi);
 
+    //HTTP2 port
+    if (!(n11_cfg.lookupValue(SMF_CONFIG_STRING_SBI_HTTP2_PORT, sbi_http2_port))) {
+      Logger::smf_app().error(SMF_CONFIG_STRING_SBI_HTTP2_PORT "failed");
+      throw(SMF_CONFIG_STRING_SBI_HTTP2_PORT "failed");
+    }
+
   } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror ;
@@ -673,6 +679,7 @@ void smf_config::display() {
   Logger::smf_app().info("    ip ...................: %s",
                          inet_ntoa(sbi.addr4));
   Logger::smf_app().info("    port .................: %d", sbi.port);
+  Logger::smf_app().info("    HTTP2 port ............: %d", sbi_http2_port);
 
   Logger::smf_app().info("- N4 Threading:");
   Logger::smf_app().info("    CPU id............: %d",

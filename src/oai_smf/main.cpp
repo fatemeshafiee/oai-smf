@@ -27,6 +27,7 @@
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
+#include "smf-http2-server.h"
 
 #include <iostream>
 #include <thread>
@@ -121,12 +122,15 @@ int main(int argc, char **argv)
     exit (-EDEADLK);
   }
 
-
-  //SMF API server
+  //SMF Pistache API server (HTTP1)
   Pistache::Address addr(std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.sbi.addr4))) , Pistache::Port(smf_cfg.sbi.port));
   SMFApiServer smfApiServer(addr, smf_app_inst);
   smfApiServer.init(2);
   std::thread smf_api_manager(&SMFApiServer::start, smfApiServer);
+
+  //SMF NGHTTP API server (HTTP2)
+  smf_http2_server *smf_server = new smf_http2_server(conv::toString(smf_cfg.sbi.addr4), smf_cfg.sbi_http2_port, smf_app_inst);
+  std::thread smf_api(&smf_http2_server::start, smf_server);
 
   FILE *fp = NULL;
   std::string filename = fmt::format("/tmp/smf_{}.status", getpid());

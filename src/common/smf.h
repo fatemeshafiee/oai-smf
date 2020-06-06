@@ -171,15 +171,6 @@ typedef struct qos_profile_s {
   } parameter;
 } qos_profile_t;
 
-enum class multipart_related_content_part_e {
-  JSON = 0,
-  NAS = 1,
-  NGAP = 2
-};
-
-static const std::vector<std::string> multipart_related_content_part_e2str = {
-    "JSON", "NAS", "NGAP" };
-
 #define NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL  "/namf-comm/v2/ue-contexts/{}/n1-n2-messages" //may get from configuration file
 #define NUDM_SDM_GET_SM_DATA_URL                      "/nudm-sdm/v2/{}/sm-data"                     //may get from configuration file
 #define N1_SM_CONTENT_ID                              "n1SmMsg"

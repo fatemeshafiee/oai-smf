@@ -43,11 +43,7 @@
 
 #include "logger.hpp"
 #include "Helpers.h"
-#include "simple_parser.hpp"
-
-extern "C" {
-#include "dynamic_memory_check.h"
-}
+#include "mime_parser.hpp"
 
 namespace oai {
 namespace smf_server {
@@ -90,7 +86,7 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
   SmContextCreateData smContextCreateData = { };
 
   //simple parser
-  simple_parser sp = { };
+  mime_parser sp = { };
   sp.parse(request.body());
 
   std::vector<mime_part> parts = { };
@@ -99,7 +95,7 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
   Logger::smf_api_server().debug("Number of MIME parts %d", size);
   //at least 2 parts for Json data and N1 (+ N2)
   if (size < 2) {
-    response.send(Pistache::Http::Code::Bad_Request, "");
+    response.send(Pistache::Http::Code::Bad_Request);
     return;
   }
 
@@ -107,14 +103,16 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
   try {
     nlohmann::json::parse(parts[0].body.c_str()).get_to(smContextCreateData);
     smContextMessage.setJsonData(smContextCreateData);
+    //must include N1 NAS msg
     if (parts[1].content_type.compare("application/vnd.3gpp.5gnas") == 0) {
       smContextMessage.setBinaryDataN1SmMessage(parts[1].body);
-    } else if (parts[1].content_type.compare("application/vnd.3gpp.ngap")
-        == 0) {
-      smContextMessage.setBinaryDataN2SmInformation(parts[1].body);
+    } else {
+      response.send(Pistache::Http::Code::Bad_Request);
+      return;
     }
 
     this->post_sm_contexts(smContextMessage, response);
+
   } catch (nlohmann::detail::exception &e) {
     //send a 400 error
     Logger::smf_api_server().warn("Can not parse the json data (error: %s)!",

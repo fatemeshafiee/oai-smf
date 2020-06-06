@@ -30,6 +30,7 @@
  *      contact@openairinterface.org
  */
 
+#include "smf-api-server.h"
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
@@ -39,7 +40,6 @@
 #include <unistd.h>
 #endif
 
-#include "smf-api-server.h"
 #define PISTACHE_SERVER_MAX_PAYLOAD 32768
 
 #ifdef __linux__
@@ -92,19 +92,3 @@ void SMFApiServer::start() {
 void SMFApiServer::shutdown() {
   m_httpEndpoint->shutdown();
 }
-
-/*
- int main() {
- #ifdef __linux__
- std::vector<int> sigs{SIGQUIT, SIGINT, SIGTERM, SIGHUP};
- setUpUnixSignals(sigs);
- #endif
-
- Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(8080));
- SMFApiServer smfApiServer(addr);
- smfApiServer.init(2);
- smfApiServer.start();
- smfApiServer.shutdown();
-
- }
- */
