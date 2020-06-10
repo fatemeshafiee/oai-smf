@@ -19,6 +19,14 @@
  *      contact@openairinterface.org
  */
 
+/*! \file smf_http2-server.cpp
+ \brief
+ \author  Tien-Thinh NGUYEN
+ \company Eurecom
+ \date 2020
+ \email: tien-thinh.nguyen@eurecom.fr
+ */
+
 #include "smf-http2-server.h"
 #include <string>
 #include <boost/algorithm/string.hpp>

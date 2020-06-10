@@ -203,7 +203,7 @@ install_nlohmann_from_git() {
 install_nghttp2_from_git() {
   if [ $1 -eq 0 ]; then
     read -p "Do you want to install nghttp2 ? <y/N> " prompt
-    OPTION="-y"
+    OPTION=""
   else
     prompt='y'
     OPTION="-y"
@@ -260,8 +260,7 @@ install_nghttp2_from_git() {
     ret=$?;[[ $ret -ne 0 ]] && popd && return $ret
     popd
   fi
-  return 0
-  
+  return 0  
 }
 
 #-------------------------------------------------------------------------------
@@ -400,8 +399,6 @@ check_install_smf_deps() {
   ret=$?;[[ $ret -ne 0 ]] && return $ret
 
   install_nghttp2_from_git $1 $2
-  ret=$?;[[ $ret -ne 0 ]] && return $ret
-  $SUDO /sbin/ldconfig -v
   ret=$?;[[ $ret -ne 0 ]] && return $ret
   
   return 0

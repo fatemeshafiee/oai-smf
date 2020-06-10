@@ -186,10 +186,10 @@ int nas_message_encode(unsigned char *buffer, const nas_message_t *const msg,
   if (bytes < 0) {
     return bytes;
   }
+//  if (size > 1) {
+//    return size + bytes;
+//  }
 
-  if (size > 1) {
-    return size + bytes;
-  }
   return bytes;
 }
 

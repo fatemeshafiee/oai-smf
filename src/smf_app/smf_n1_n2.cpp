@@ -77,9 +77,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
                          n1_msg_type);
   int bytes = { 0 };
   unsigned char data[BUF_LEN] = { '\0' };
-  memset(data, 0, sizeof(data));
   nas_message_t nas_msg = { };
-  memset(&nas_msg, 0, sizeof(nas_message_t));
 
   nas_msg.header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
@@ -187,7 +185,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //Presence
       sm_msg->pdu_session_establishment_accept.presence = 0xffff;  //TODO: To be updated
       //_5GSMCause
-      //sm_msg->pdu_session_establishment_accept._5gsmcause = sm_context_res.get_cause();
       sm_msg->pdu_session_establishment_accept._5gsmcause =
           static_cast<uint8_t>(sm_cause);
       Logger::smf_app().debug(
@@ -581,7 +578,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
 
       std::string n1Message((char*) data, bytes);
       nas_msg_str = n1Message;
-
     }
       break;
 
@@ -623,7 +619,6 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
 
       std::string n1Message((char*) data, bytes);
       nas_msg_str = n1Message;
-
     }
       break;
 
@@ -631,9 +626,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       Logger::smf_app().debug("Unknown PDU Session Type");
       //TODO:
     }
-
   }      //end Switch
-
 }
 
 //------------------------------------------------------------------------------
@@ -641,7 +634,6 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
                                          uint8_t ngap_msg_type,
                                          n2_sm_info_type_e ngap_ie_type,
                                          std::string &ngap_msg_str) {
-  //TODO: To be filled with the correct parameters
   Logger::smf_app().info(
       "Create N2 SM Information, NGAP message type %d, IE type %d",
       ngap_msg_type, ngap_ie_type);
@@ -725,6 +717,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       pduSessionAggregateMaximumBitRate->criticality = Ngap_Criticality_reject;
       pduSessionAggregateMaximumBitRate->value.present =
           Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_PDUSessionAggregateMaximumBitRate;
+      asn_set_empty(&ngap_IEs->protocolIEs.list);
 
       //SessionAMBR
       supi_t supi = msg.get_supi();
@@ -743,6 +736,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
             "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
         //TODO:
       }
+
       ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list,
                        pduSessionAggregateMaximumBitRate);
 
@@ -867,6 +861,8 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
             Ngap_Pre_emptionVulnerability_pre_emptable;
       }
 
+      asn_set_empty(
+          &qosFlowSetupRequestList->value.choice.QosFlowSetupRequestList.list);
       ASN_SEQUENCE_ADD(
           &qosFlowSetupRequestList->value.choice.QosFlowSetupRequestList.list,
           ngap_QosFlowSetupRequestItem);
@@ -874,30 +870,32 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
 
       Logger::smf_app().info(
           "QoS parameters: QFI %d, ARP priority level %d, qos_flow.qos_profile.arp.preempt_cap %s, qos_flow.qos_profile.arp.preempt_vuln %s",
-          qos_flow.qfi.qfi, qos_flow.qos_profile.arp.priority_level,qos_flow.qos_profile.arp.preempt_cap.c_str(), qos_flow.qos_profile.arp.preempt_vuln.c_str());
+          qos_flow.qfi.qfi, qos_flow.qos_profile.arp.priority_level,
+          qos_flow.qos_profile.arp.preempt_cap.c_str(),
+          qos_flow.qos_profile.arp.preempt_vuln.c_str());
 
       //encode
       size_t buffer_size = BUF_LEN;
       char *buffer = (char*) calloc(1, buffer_size);
 
-      asn_enc_rval_t er = aper_encode_to_buffer(
+      ssize_t encoded_size = aper_encode_to_new_buffer(
           &asn_DEF_Ngap_PDUSessionResourceSetupRequestTransfer, nullptr,
-          ngap_IEs, (void*) buffer, buffer_size);
-      if (er.encoded < 0) {
+          ngap_IEs, (void**) &buffer);
+      if (encoded_size < 0) {
         Logger::smf_app().warn(
-            "NGAP PDU Session Resource Setup Request Transfer encode failed, er.encoded: %d",
-            er.encoded);
+            "NGAP PDU Session Resource Setup Request Transfer encode failed (encode size %d)",
+            encoded_size);
         return;
       }
 
 #if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
-      for (int i = 0; i < er.encoded; i++)
+      for (int i = 0; i < encoded_size; i++)
         printf("%02x ", (char) buffer[i]);
-      printf(" (%d bytes)\n", (int) er.encoded);
+      printf(" (%d bytes)\n", (int) encoded_size);
 #endif
 
-      std::string ngap_message((char*) buffer, er.encoded);
+      std::string ngap_message((char*) buffer, encoded_size);
       ngap_msg_str = ngap_message;
 
       //free memory
@@ -921,7 +919,6 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       free_wrapper((void**) &ngap_QosFlowSetupRequestItem);
       free_wrapper((void**) &ngap_IEs);
       free_wrapper((void**) &buffer);
-
     }
       break;
 
@@ -1157,24 +1154,24 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       size_t buffer_size = BUF_LEN;
       char *buffer = (char*) calloc(1, buffer_size);
 
-      asn_enc_rval_t er = aper_encode_to_buffer(
+      ssize_t encoded_size = aper_encode_to_new_buffer(
           &asn_DEF_Ngap_PDUSessionResourceModifyRequestTransfer, nullptr,
-          ngap_IEs, (void*) buffer, buffer_size);
-      if (er.encoded < 0) {
+          ngap_IEs, (void**) &buffer);
+      if (encoded_size < 0) {
         Logger::smf_app().warn(
-            "[Create N2 SM Information] NGAP PDU Session Resource Modify Request Transfer encode failed, er.encoded: %d",
-            er.encoded);
+            "NGAP PDU Session Resource Modify Request Transfer encode failed (encoded size %d)",
+            encoded_size);
         return;
       }
 
 #if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
-      for (int i = 0; i < er.encoded; i++)
+      for (int i = 0; i < encoded_size; i++)
         printf("%02x ", (char) buffer[i]);
-      printf(" (%d bytes)\n", (int) er.encoded);
+      printf(" (%d bytes)\n", (int) encoded_size);
 #endif
 
-      std::string ngap_message((char*) buffer, er.encoded);
+      std::string ngap_message((char*) buffer, encoded_size);
       ngap_msg_str = ngap_message;
 
       //free memory
@@ -1208,8 +1205,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       break;
 
     case n2_sm_info_type_e::PDU_RES_SETUP_RSP: {
-      //PDU Session Resource Setup Response Transfer
-      //for testing purpose
+      //PDU Session Resource Setup Response Transfer for testing purpose
 
       Logger::smf_app().debug(
           "[Create N2 SM Information] NGAP PDU Session Resource Setup Response Transfer");
@@ -1282,24 +1278,24 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       size_t buffer_size = BUF_LEN;
       char *buffer = (char*) calloc(1, buffer_size);
 
-      asn_enc_rval_t er = aper_encode_to_buffer(
+      ssize_t encoded_size = aper_encode_to_new_buffer(
           &asn_DEF_Ngap_PDUSessionResourceSetupResponseTransfer, nullptr,
-          ngap_resource_response_transfer, (void*) buffer, buffer_size);
-      if (er.encoded < 0) {
+          ngap_resource_response_transfer, (void**) &buffer);
+      if (encoded_size < 0) {
         Logger::smf_app().warn(
-            "[Create N2 SM Information] NGAP PDU Session Resource Setup Response Transfer encode failed, er.encoded: %d",
-            er.encoded);
+            "NGAP PDU Session Resource Setup Response Transfer encode failed (encoded size %d)",
+            encoded_size);
         return;
       }
 
 #if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
-      for (int i = 0; i < er.encoded; i++)
+      for (int i = 0; i < encoded_size; i++)
         printf("%02x ", (char) buffer[i]);
-      Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+      Logger::smf_app().debug(" (%d bytes) \n", encoded_size);
 #endif
 
-      std::string ngap_message((char*) buffer, er.encoded);
+      std::string ngap_message((char*) buffer, encoded_size);
       ngap_msg_str = ngap_message;
 
       //free memory
@@ -1320,12 +1316,10 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       break;
 
     case n2_sm_info_type_e::PDU_RES_MOD_RSP: {
-      //PDU Session Resource Modify Response Transfer IE
-      //for testing purpose
+      //PDU Session Resource Modify Response Transfer IE for testing purpose
 
       Logger::smf_app().debug(
           "[Create N2 SM Information] NGAP PDU Session Resource Modify Response Transfer");
-
       //struct Ngap_UPTransportLayerInformation *dL_NGU_UP_TNLInformation;  /* OPTIONAL */
       //struct Ngap_UPTransportLayerInformation *uL_NGU_UP_TNLInformation;  /* OPTIONAL */
       //struct Ngap_QosFlowAddOrModifyResponseList  *qosFlowAddOrModifyResponseList;  /* OPTIONAL */
@@ -1394,24 +1388,24 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       size_t buffer_size = BUF_LEN;
       char *buffer = (char*) calloc(1, buffer_size);
 
-      asn_enc_rval_t er = aper_encode_to_buffer(
+      ssize_t encoded_size = aper_encode_to_new_buffer(
           &asn_DEF_Ngap_PDUSessionResourceModifyResponseTransfer, nullptr,
-          ngap_resource_response_transfer, (void*) buffer, buffer_size);
-      if (er.encoded < 0) {
+          ngap_resource_response_transfer, (void**) &buffer);
+      if (encoded_size < 0) {
         Logger::smf_app().warn(
-            "[Create N2 SM Information] NGAP PDU Session Resource Modify Response Transfer encode failed, er.encoded: %d",
-            er.encoded);
+            " NGAP PDU Session Resource Modify Response Transfer encode failed (encoded size %d)",
+            encoded_size);
         return;
       }
 
 #if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
-      for (int i = 0; i < er.encoded; i++)
+      for (int i = 0; i < encoded_size; i++)
         printf("%02x ", (char) buffer[i]);
-      Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+      Logger::smf_app().debug(" (%d bytes) \n", encoded_size);
 #endif
 
-      std::string ngap_message((char*) buffer, er.encoded);
+      std::string ngap_message((char*) buffer, encoded_size);
       ngap_msg_str = ngap_message;
 
       //free memory
@@ -1439,7 +1433,6 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       //This IE is included in the following messages:
       //1 - PDU Session Update SM Context Response (PDU Session Release UE-Initiated: section 4.3.4@3GPP TS 23.502, step 1)
       //2 - N1N2MessageTransfer Request​ (PDU Session Release SMF-Requested, step 1)
-      //TODO:
 
       Ngap_PDUSessionResourceReleaseCommandTransfer_t *ngap_resource_release_command_transfer =
           nullptr;
@@ -1471,31 +1464,29 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       size_t buffer_size = BUF_LEN;
       char *buffer = (char*) calloc(1, buffer_size);
 
-      asn_enc_rval_t er = aper_encode_to_buffer(
+      ssize_t encoded_size = aper_encode_to_new_buffer(
           &asn_DEF_Ngap_PDUSessionResourceReleaseCommandTransfer, nullptr,
-          ngap_resource_release_command_transfer, (void*) buffer, buffer_size);
-
-      if (er.encoded < 0) {
+          ngap_resource_release_command_transfer, (void**) &buffer);
+      if (encoded_size < 0) {
         Logger::smf_app().warn(
-            "[Create N2 SM Information] NGAP PDU Session Release Command encode failed, er.encoded: %d",
-            er.encoded);
+            "NGAP PDU Session Release Command encode failed (encoded size %d)",
+            encoded_size);
         return;
       }
 
 #if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
-      for (int i = 0; i < er.encoded; i++)
+      for (int i = 0; i < encoded_size; i++)
         printf("%02x ", (char) buffer[i]);
-      Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+      Logger::smf_app().debug(" (%d bytes) \n", encoded_size);
 #endif
 
-      std::string ngap_message((char*) buffer, er.encoded);
+      std::string ngap_message((char*) buffer, encoded_size);
       ngap_msg_str = ngap_message;
 
       //free memory
       free_wrapper((void**) &ngap_resource_release_command_transfer);
       free_wrapper((void**) &buffer);
-
     }
       break;
 
@@ -1517,31 +1508,29 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       size_t buffer_size = BUF_LEN;
       char *buffer = (char*) calloc(1, buffer_size);
 
-      asn_enc_rval_t er = aper_encode_to_buffer(
+      ssize_t encoded_size = aper_encode_to_new_buffer(
           &asn_DEF_Ngap_PDUSessionResourceReleaseResponseTransfer, nullptr,
-          ngap_resource_release_response_transfer, (void*) buffer, buffer_size);
-
-      if (er.encoded < 0) {
+          ngap_resource_release_response_transfer, (void**) &buffer);
+      if (encoded_size < 0) {
         Logger::smf_app().warn(
-            "[Create N2 SM Information] NGAP PDU Session Release Command encode failed, er.encoded: %d",
-            er.encoded);
+            "NGAP PDU Session Release Command encode failed (encoded size %d)",
+            encoded_size);
         return;
       }
 
 #if DEBUG_IS_ON
       Logger::smf_app().debug("N2 SM buffer data: ");
-      for (int i = 0; i < er.encoded; i++)
+      for (int i = 0; i < encoded_size; i++)
         printf("%02x ", (char) buffer[i]);
-      Logger::smf_app().debug(" (%d bytes) \n", er.encoded);
+      Logger::smf_app().debug(" (%d bytes) \n", encoded_size);
 #endif
 
-      std::string ngap_message((char*) buffer, er.encoded);
+      std::string ngap_message((char*) buffer, encoded_size);
       ngap_msg_str = ngap_message;
 
       //free memory
       free_wrapper((void**) &ngap_resource_release_response_transfer);
       free_wrapper((void**) &buffer);
-
     }
       break;
 
@@ -1549,7 +1538,6 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       Logger::smf_app().warn("Unknown NGAP IE type: %s \n",
                              n2_sm_info_type_e2str[(uint8_t) ngap_ie_type]);
   }
-
 }
 
 //------------------------------------------------------------------------------
@@ -1618,10 +1606,9 @@ int smf_n1_n2::decode_n2_sm_information(
 
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
-    return RETURNerror ;
+    return RETURNerror;
   }
-  return RETURNok ;
-
+  return RETURNok;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1648,10 +1635,9 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror ;
+    return RETURNerror;
   }
-  return RETURNok ;
-
+  return RETURNok;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1678,13 +1664,10 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror ;
+    return RETURNerror;
   }
-  return RETURNok ;
-
+  return RETURNok;
 }
-
-
 
 //---------------------------------------------------------------------------------------------
 int smf_n1_n2::decode_n2_sm_information(
@@ -1710,8 +1693,7 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror ;
+    return RETURNerror;
   }
-  return RETURNok ;
-
+  return RETURNok;
 }
