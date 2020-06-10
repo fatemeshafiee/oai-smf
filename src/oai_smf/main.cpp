@@ -46,6 +46,7 @@ itti_mw *itti_inst = nullptr;
 async_shell_cmd *async_shell_cmd_inst = nullptr;
 smf_app *smf_app_inst = nullptr;
 smf_config smf_cfg;
+SMFApiServer *smf_api_server_1 = nullptr;
 
 void send_heartbeat_to_tasks(const uint32_t sequence);
 
@@ -73,7 +74,9 @@ void my_app_signal_handler(int s)
   if (itti_inst) delete itti_inst; itti_inst = nullptr;
   std::cout << "ITTI memory done." << std::endl;
   if (smf_app_inst) delete smf_app_inst; smf_app_inst = nullptr;
-  std::cout << "PGW APP memory done." << std::endl;
+  std::cout << "SMF APP memory done." << std::endl;
+  smf_api_server_1->shutdown();
+  if (smf_api_server_1) delete smf_api_server_1; smf_api_server_1 = nullptr;
   std::cout << "Freeing Allocated memory done" << std::endl;
   exit(0);
 }
@@ -124,13 +127,15 @@ int main(int argc, char **argv)
 
   //SMF Pistache API server (HTTP1)
   Pistache::Address addr(std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.sbi.addr4))) , Pistache::Port(smf_cfg.sbi.port));
-  SMFApiServer smfApiServer(addr, smf_app_inst);
-  smfApiServer.init(2);
-  std::thread smf_api_manager(&SMFApiServer::start, smfApiServer);
+  SMFApiServer *smf_api_server_1 = new SMFApiServer(addr, smf_app_inst);
+  smf_api_server_1->init(2);
+  smf_api_server_1->start();
+  //std::thread smf_api_manager(&SMFApiServer::start, smf_api_server_1);
 
   //SMF NGHTTP API server (HTTP2)
-  smf_http2_server *smf_server = new smf_http2_server(conv::toString(smf_cfg.sbi.addr4), smf_cfg.sbi_http2_port, smf_app_inst);
-  std::thread smf_api(&smf_http2_server::start, smf_server);
+  smf_http2_server *smf_api_server_2 = new smf_http2_server(conv::toString(smf_cfg.sbi.addr4), smf_cfg.sbi_http2_port, smf_app_inst);
+  smf_api_server_2->start();
+  //std::thread smf_api(&smf_http2_server::start, smf_api_server_2);
 
   FILE *fp = NULL;
   std::string filename = fmt::format("/tmp/smf_{}.status", getpid());
