@@ -175,7 +175,9 @@ typedef struct qos_profile_s {
 #define NUDM_SDM_GET_SM_DATA_URL                      "/nudm-sdm/v2/{}/sm-data"                     //may get from configuration file
 #define N1_SM_CONTENT_ID                              "n1SmMsg"
 #define N1N2_MESSAGE_CLASS                             "SM"
-#define N2_SM_CONTENT_ID                              "n2SmMsg"
+#define N2_SM_CONTENT_ID                              "n2msg"
+
+#define NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE  "/nsmf-pdusession/v2/callback/N1N2MsgTxfrFailureNotification/{}" //may get from configuration file
 
 //for CURL
 #define AMF_CURL_TIMEOUT_MS 100L

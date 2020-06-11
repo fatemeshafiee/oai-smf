@@ -1364,7 +1364,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     json_data["cause"] = 0;
     sm_context_response.set_json_data(json_data);
     sm_context_response.set_http_code(
-        http_status_code_e::HTTP_STATUS_CODE_200_OK);
+        http_status_code_e::HTTP_STATUS_CODE_201_CREATED);
     itti_msg->res = sm_context_response;
 
     int ret = itti_inst->send_msg(itti_msg);

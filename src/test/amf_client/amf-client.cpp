@@ -129,7 +129,7 @@ void create_multipart_related_content(std::string &body, std::string &json_part,
 
   body.append("--" + boundary + CRLF);
   body.append(
-      "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg"
+      "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2msg"
           + CRLF);
   body.append(CRLF);
   body.append(n2_message + CRLF);
@@ -154,7 +154,7 @@ void create_multipart_related_content(
             + "Content-Id: n1SmMsg" + CRLF);
   } else if (content_type == multipart_related_content_part_e::NGAP) {  //NGAP
     body.append(
-        "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg"
+        "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2msg"
             + CRLF);
   }
   body.append(CRLF);
@@ -334,10 +334,10 @@ void send_pdu_session_update_sm_context_establishment(
 
   //Fill the json part
   pdu_session_update_request["n2SmInfoType"] = "PDU_RES_SETUP_RSP";
-  pdu_session_update_request["n2SmInfo"]["contentId"] = "n2SmMsg";  //NGAP
+  pdu_session_update_request["n2SmInfo"]["contentId"] = "n2msg";  //NGAP
 
   //pdu_session_update_request["n2InfoContainer"]["n2InformationClass"] = "SM";
-  //pdu_session_update_request["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg";
+  //pdu_session_update_request["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2msg";
   // pdu_session_update_request["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
   //   "PDU_RES_SETUP_RSP";  //NGAP message
 
@@ -603,7 +603,7 @@ void send_pdu_session_modification_request_step2(std::string smf_ip_address,
 
   //Fill the json part
   pdu_session_modification["n2SmInfoType"] = "PDU_RES_MOD_RSP";  //"PDU_RES_SETUP_RSP"
-  pdu_session_modification["n2SmInfo"]["contentId"] = "n2SmMsg";  //NGAP
+  pdu_session_modification["n2SmInfo"]["contentId"] = "n2msg";  //NGAP
 
   std::string body;
   std::string boundary = "----Boundary";
@@ -933,7 +933,7 @@ void send_pdu_session_release_resource_release_ack(std::string smf_ip_address,
 
   //Fill the json part
   pdu_session_release_ack["n2SmInfoType"] = "PDU_RES_REL_RSP";
-  pdu_session_release_ack["n2SmInfo"]["contentId"] = "n2SmMsg";  //NGAP
+  pdu_session_release_ack["n2SmInfo"]["contentId"] = "n2msg";  //NGAP
 
   std::string body;
   std::string boundary = "----Boundary";
@@ -1253,10 +1253,10 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
 
   //Fill the json part
   service_requests["n2SmInfoType"] = "PDU_RES_SETUP_RSP";
-  service_requests["n2SmInfo"]["contentId"] = "n2SmMsg";  //NGAP
+  service_requests["n2SmInfo"]["contentId"] = "n2msg";  //NGAP
 
   //service_requests["n2InfoContainer"]["n2InformationClass"] = "SM";
-  //service_requests["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2SmMsg";
+  //service_requests["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]["contentId"] = "n2msg";
   // service_requests["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
   //   "PDU_RES_SETUP_RSP";  //NGAP message
 

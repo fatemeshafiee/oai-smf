@@ -801,7 +801,8 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       pduSessionType->criticality = Ngap_Criticality_reject;
       pduSessionType->value.present =
           Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_PDUSessionType;
-      pduSessionType->value.choice.PDUSessionType = msg.get_pdu_session_type();  //TODO: different between Ngap_PDUSessionType_ipv4 vs pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4
+      pduSessionType->value.choice.PDUSessionType = msg.get_pdu_session_type()
+          - 1;  //TODO: dirty code, difference between Ngap_PDUSessionType_ipv4 vs pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4 (TS 38.413 vs TS 24.501)
       ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, pduSessionType);
 
       //SecurityIndication
@@ -1606,9 +1607,9 @@ int smf_n1_n2::decode_n2_sm_information(
 
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
-    return RETURNerror;
+    return RETURNerror ;
   }
-  return RETURNok;
+  return RETURNok ;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1635,9 +1636,9 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror;
+    return RETURNerror ;
   }
-  return RETURNok;
+  return RETURNok ;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1664,9 +1665,9 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror;
+    return RETURNerror ;
   }
-  return RETURNok;
+  return RETURNok ;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1693,7 +1694,7 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror;
+    return RETURNerror ;
   }
-  return RETURNok;
+  return RETURNok ;
 }

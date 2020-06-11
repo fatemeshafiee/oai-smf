@@ -119,7 +119,7 @@ void mime_parser::create_multipart_related_content(std::string &body,
   body.append(std::string((char*) n1_msg_hex, n1_message.length() / 2) + CRLF);
   body.append("--" + boundary + CRLF);
   body.append(
-      "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg"
+      "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2msg"
           + CRLF);
   body.append(CRLF);
   body.append(std::string((char*) n2_msg_hex, n2_message.length() / 2) + CRLF);
@@ -148,7 +148,7 @@ void mime_parser::create_multipart_related_content(
             + "Content-Id: n1SmMsg" + CRLF);
   } else if (content_type == multipart_related_content_part_e::NGAP) {  //NGAP
     body.append(
-        "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2SmMsg"
+        "Content-Type: application/vnd.3gpp.ngap" + CRLF + "Content-Id: n2msg"
             + CRLF);
   }
   body.append(CRLF);

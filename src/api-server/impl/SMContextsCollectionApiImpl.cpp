@@ -173,11 +173,15 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
   nlohmann::json json_data = { };
+
+  response.headers().add < Pistache::Http::Header::Location
+      > (sm_context_response.get_smf_context_uri());  //Location header
   sm_context_response.get_json_data(json_data);
   if (!json_data.empty()) {
-    response.headers().add<Pistache::Http::Header::ContentType>(
-        Pistache::Http::Mime::MediaType("application/json"));
-    response.send(Pistache::Http::Code(sm_context_response.get_http_code()), json_data.dump().c_str());
+    response.headers().add < Pistache::Http::Header::ContentType
+        > (Pistache::Http::Mime::MediaType("application/json"));
+    response.send(Pistache::Http::Code(sm_context_response.get_http_code()),
+                  json_data.dump().c_str());
   } else {
     response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
   }
