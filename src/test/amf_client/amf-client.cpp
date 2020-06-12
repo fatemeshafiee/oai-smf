@@ -11,6 +11,9 @@
 
 #define HTTP_V1 1
 #define HTTP_V2 2
+
+#define HTTP_CODE_OK 200
+#define HTTP_CODE_CREATED 201
 /*
  * To read content of the response from UDM
  */
@@ -163,11 +166,14 @@ void create_multipart_related_content(
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_establishment_request(std::string smf_ip_address,
+bool send_pdu_session_establishment_request(uint8_t pid,
+                                            std::string smf_ip_address,
                                             uint8_t http_version,
                                             std::string port) {
   std::cout << "[AMF N11] PDU Session Establishment Request (SM Context Create)"
             << std::endl;
+  // Response information.
+  long httpCode = { 0 };
 
   nlohmann::json pdu_session_establishment_request;
   //encode PDU Session Establishment Request
@@ -178,7 +184,7 @@ void send_pdu_session_establishment_request(std::string smf_ip_address,
   char *buffer = (char*) calloc(1, buffer_size);
   int size = 0;
   ENCODE_U8(buffer, 0x2e, size);  //ExtendedProtocolDiscriminator
-  ENCODE_U8(buffer + size, 0x01, size);  //PDUSessionIdentity
+  ENCODE_U8(buffer + size, pid, size);  //PDUSessionIdentity
   ENCODE_U8(buffer + size, 0x01, size);  //ProcedureTransactionIdentity
   ENCODE_U8(buffer + size, 0xc1, size);  //MessageType - PDU_SESSION_ESTABLISHMENT_REQUEST
   ENCODE_U8(buffer + size, 0xff, size);  //Integrity Protection Maximum Data Rate
@@ -206,7 +212,7 @@ void send_pdu_session_establishment_request(std::string smf_ip_address,
   pdu_session_establishment_request["dnn"] = "default";
   pdu_session_establishment_request["sNssai"]["sst"] = 222;
   pdu_session_establishment_request["sNssai"]["sd"] = "0000D4";
-  pdu_session_establishment_request["pduSessionId"] = 1;
+  pdu_session_establishment_request["pduSessionId"] = pid;
   pdu_session_establishment_request["requestType"] = "INITIAL_REQUEST";
   pdu_session_establishment_request["servingNfId"] = "servingNfId";
   pdu_session_establishment_request["servingNetwork"]["mcc"] = "234";
@@ -256,8 +262,6 @@ void send_pdu_session_establishment_request(std::string smf_ip_address,
 #endif
     }
 
-    // Response information.
-    long httpCode = { 0 };
     std::unique_ptr<std::string> httpData(new std::string());
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
@@ -281,19 +285,27 @@ void send_pdu_session_establishment_request(std::string smf_ip_address,
         << "[AMF N11] PDU session establishment request, response from SMF "
         << response_data.dump().c_str() << ", Http Code " << httpCode
         << std::endl;
-
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-
   free(buffer);
+
+  if (httpCode == HTTP_CODE_CREATED) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_update_sm_context_establishment(
-    std::string smf_ip_address, uint8_t http_version, std::string port) {
+bool send_pdu_session_update_sm_context_establishment(
+    uint8_t context_id, std::string smf_ip_address, uint8_t http_version,
+    std::string port) {
   std::cout << "[AMF N11] PDU Session Establishment Request (SM Context Update)"
             << std::endl;
+
+  // Response information.
+  long httpCode = { 0 };
 
   nlohmann::json pdu_session_update_request;
   //encode PDU Session Resource Setup Response Transfer IE
@@ -330,7 +342,10 @@ void send_pdu_session_update_sm_context_establishment(
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
+//  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
 
   //Fill the json part
   pdu_session_update_request["n2SmInfoType"] = "PDU_RES_SETUP_RSP";
@@ -381,8 +396,6 @@ void send_pdu_session_update_sm_context_establishment(
 #endif
     }
 
-    // Response information.
-    long httpCode = { 0 };
     std::unique_ptr<std::string> httpData(new std::string());
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
@@ -415,6 +428,13 @@ void send_pdu_session_update_sm_context_establishment(
   curl_global_cleanup();
 
   free(buffer);
+
+  if (httpCode == HTTP_CODE_OK) {
+    return true;
+  } else {
+    return false;
+  }
+
 }
 
 //------------------------------------------------------------------------------
@@ -1462,36 +1482,54 @@ int main(int argc, char *argv[]) {
             << std::to_string(http_version) << ", -p " << port.c_str()
             << std::endl;
 
-  //PDU Session Establishment procedure
-  send_pdu_session_establishment_request(smf_ip_address, http_version, port);
-  usleep(100000);
-  send_pdu_session_update_sm_context_establishment(smf_ip_address, http_version,
-                                                   port);
-  usleep(200000);
-  //UE-initiated Service Request
-  send_pdu_session_update_sm_context_ue_service_request(smf_ip_address,
-                                                        http_version, port);
-  usleep(200000);
-  send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address,
-                                                              http_version,
-                                                              port);
-  usleep(200000);
-  //PDU Session Modification
-  send_pdu_session_modification_request_step1(smf_ip_address, http_version,
-                                              port);
-  usleep(200000);
-  send_pdu_session_modification_request_step2(smf_ip_address, http_version,
-                                              port);
-  usleep(200000);
-  send_pdu_session_modification_complete(smf_ip_address, http_version, port);
-  usleep(200000);
-  //PDU Session Release procedure
-  send_pdu_session_release_request(smf_ip_address, http_version, port);
-  usleep(200000);
-  send_pdu_session_release_resource_release_ack(smf_ip_address, http_version,
+  bool cont = false;
+
+  /*//Check multiple sessions
+   for (int i=1; i< 10; i++){
+   //PDU Session Establishment procedure
+   if (send_pdu_session_establishment_request(i, smf_ip_address, http_version, port)) {
+   usleep(100000);
+   cont = send_pdu_session_update_sm_context_establishment(i, smf_ip_address, http_version,
+   port);
+   }
+   }
+   */
+
+  if (send_pdu_session_establishment_request(1, smf_ip_address, http_version,
+                                             port)) {
+    usleep(100000);
+    cont = send_pdu_session_update_sm_context_establishment(1, smf_ip_address,
+                                                            http_version, port);
+  }
+
+  if (cont) {
+    usleep(200000);
+    //UE-initiated Service Request
+    send_pdu_session_update_sm_context_ue_service_request(smf_ip_address,
+                                                          http_version, port);
+    usleep(200000);
+    send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address,
+                                                                http_version,
+                                                                port);
+    usleep(200000);
+    //PDU Session Modification
+    send_pdu_session_modification_request_step1(smf_ip_address, http_version,
                                                 port);
-  usleep(200000);
-  send_pdu_session_release_complete(smf_ip_address, http_version, port);
+    usleep(200000);
+    send_pdu_session_modification_request_step2(smf_ip_address, http_version,
+                                                port);
+    usleep(200000);
+    send_pdu_session_modification_complete(smf_ip_address, http_version, port);
+    usleep(200000);
+    //PDU Session Release procedure
+    send_pdu_session_release_request(smf_ip_address, http_version, port);
+    usleep(200000);
+    send_pdu_session_release_resource_release_ack(smf_ip_address, http_version,
+                                                  port);
+    usleep(200000);
+    send_pdu_session_release_complete(smf_ip_address, http_version, port);
+  }
+
   usleep(200000);
   //Release SM context
   //send_release_sm_context_request(smf_ip_address, http_version, port);

@@ -1176,7 +1176,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
   sm_context_resp->http_version = smreq->http_version;
 
-  sm_context_resp->res.set_http_code(http_status_code_e::HTTP_STATUS_CODE_200_OK); //default status code
+  sm_context_resp->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);  //default status code
   sm_context_resp->res.set_supi(supi);
   sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
   sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
@@ -1220,10 +1221,11 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     sd->insert_pdu_session(sp);
   } else {
     Logger::smf_app().debug("PDN connection is already existed!");
-    //TODO:
+    //trigger to send reply to AMF
+    smf_app_inst->trigger_http_response(
+        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
+        N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
   }
-
-  //pending session??
 
   //TODO: if "Integrity Protection is required", check UE Integrity Protection Maximum Data Rate
   //TODO: (Optional) Secondary authentication/authorization
@@ -1520,7 +1522,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
   std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp_pending =
       std::shared_ptr<itti_n11_update_sm_context_response>(n11_sm_context_resp);
 
-  sm_context_resp_pending->res.set_http_code(http_status_code_e::HTTP_STATUS_CODE_200_OK); //default status code
+  sm_context_resp_pending->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);  //default status code
   n11_sm_context_resp->res.set_supi(sm_context_req_msg.get_supi());
   n11_sm_context_resp->res.set_supi_prefix(
       sm_context_req_msg.get_supi_prefix());
@@ -2482,7 +2485,8 @@ void smf_context::handle_pdu_session_release_sm_context_request(
       std::shared_ptr<itti_n11_release_sm_context_response>(
           n11_sm_context_resp);
 
-  n11_sm_context_resp->res.set_http_code(http_status_code_e::HTTP_STATUS_CODE_200_OK); //default http response code
+  n11_sm_context_resp->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);  //default http response code
   n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
   n11_sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
   n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);

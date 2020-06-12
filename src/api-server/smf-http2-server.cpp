@@ -49,8 +49,9 @@ using namespace oai::smf_server::model;
 void smf_http2_server::start() {
   boost::system::error_code ec;
 
+  Logger::smf_api_server().info("HTTP2 server started");
   //Create SM Context Request
-  server.handle("/nsmf-pdusession/v2/sm-contexts",
+  server.handle(NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
                 [&](const request &request, const response &response) {
 
                   request.on_data([&](const uint8_t *data, std::size_t len) {
@@ -130,7 +131,7 @@ void smf_http2_server::start() {
                 });
 
                 //Update SM Context Request
-  server.handle("/nsmf-pdusession/v2/sm-contexts/",
+  server.handle(NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL,
                 [&](const request &request, const response &response) {
 
                   request.on_data([&](const uint8_t *data, std::size_t len) {

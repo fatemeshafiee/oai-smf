@@ -337,7 +337,6 @@ set(NAS_include_files
   ${SRC_TOP_DIR}/ngap/ies
   ${SRC_TOP_DIR}/common
   )
-
 add_library(NAS ${NAS_src_files} ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES})
 
 set(NGAP_include_files
@@ -375,9 +374,8 @@ IF(STATIC_LINKING)
     SET_TARGET_PROPERTIES(smf PROPERTIES LINK_SEARCH_END_STATIC 1)
     # asan do not support static linking
     SET(ASAN)
-ENDIF(STATIC_LINKING)
-   
+ENDIF(STATIC_LINKING)   
 
 target_link_libraries (smf ${ASAN} 
-    -Wl,--start-group CN_UTILS SMF UDP GTPV2C PFCP 3GPP_COMMON_TYPES SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES}  -lnghttp2_asio -lboost_system  -lboost_thread -lssl -lcrypto  NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
+    -Wl,--start-group CN_UTILS SMF UDP GTPV2C PFCP 3GPP_COMMON_TYPES SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} -lnghttp2_asio -lboost_system -lboost_thread -lssl -lcrypto NAS gflags glog dl double-conversion folly -Wl,--end-group pthread m rt config++ event boost_system pistache curl)
     
