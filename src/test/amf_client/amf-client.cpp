@@ -170,6 +170,7 @@ bool send_pdu_session_establishment_request(uint8_t pid,
                                             std::string smf_ip_address,
                                             uint8_t http_version,
                                             std::string port) {
+  //TODO: return the created SM context Id
   std::cout << "[AMF N11] PDU Session Establishment Request (SM Context Create)"
             << std::endl;
   // Response information.
@@ -438,7 +439,9 @@ bool send_pdu_session_update_sm_context_establishment(
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_modification_request_step1(std::string smf_ip_address,
+void send_pdu_session_modification_request_step1(uint8_t pid,
+                                                 uint8_t context_id,
+                                                 std::string smf_ip_address,
                                                  uint8_t http_version,
                                                  std::string port) {
 
@@ -455,7 +458,7 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address,
   char *buffer = (char*) calloc(1, buffer_size);
   int size = 0;
   ENCODE_U8(buffer, 0x2e, size);  //ExtendedProtocolDiscriminator
-  ENCODE_U8(buffer + size, 0x01, size);  //PDUSessionIdentity
+  ENCODE_U8(buffer + size, pid, size);  //PDUSessionIdentity
   ENCODE_U8(buffer + size, 0x01, size);  //ProcedureTransactionIdentity
   ENCODE_U8(buffer + size, 0xc9, size);  //MessageType - PDU Session Modification Request
   ENCODE_U8(buffer + size, 0x28, size);  //_5GSMCapability
@@ -498,10 +501,13 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address,
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
 
   //Fill the json part
-  pdu_session_modification_request["pduSessionId"] = 1;
+  pdu_session_modification_request["pduSessionId"] = pid;
   pdu_session_modification_request["n1SmMsg"]["contentId"] = "n1SmMsg";  // NAS
 
   std::string body;
@@ -577,7 +583,8 @@ void send_pdu_session_modification_request_step1(std::string smf_ip_address,
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_modification_request_step2(std::string smf_ip_address,
+void send_pdu_session_modification_request_step2(uint8_t context_id,
+                                                 std::string smf_ip_address,
                                                  uint8_t http_version,
                                                  std::string port) {
 
@@ -619,7 +626,10 @@ void send_pdu_session_modification_request_step2(std::string smf_ip_address,
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  // url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
 
   //Fill the json part
   pdu_session_modification["n2SmInfoType"] = "PDU_RES_MOD_RSP";  //"PDU_RES_SETUP_RSP"
@@ -698,7 +708,8 @@ void send_pdu_session_modification_request_step2(std::string smf_ip_address,
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_modification_complete(std::string smf_ip_address,
+void send_pdu_session_modification_complete(uint8_t pid, uint8_t context_id,
+                                            std::string smf_ip_address,
                                             uint8_t http_version,
                                             std::string port) {
 
@@ -712,7 +723,7 @@ void send_pdu_session_modification_complete(std::string smf_ip_address,
   char *buffer = (char*) calloc(1, buffer_size);
   int size = 0;
   ENCODE_U8(buffer, 0x2e, size);  //ExtendedProtocolDiscriminator
-  ENCODE_U8(buffer + size, 0x01, size);  //PDUSessionIdentity
+  ENCODE_U8(buffer + size, pid, size);  //PDUSessionIdentity
   ENCODE_U8(buffer + size, 0x01, size);  //ProcedureTransactionIdentity
   ENCODE_U8(buffer + size, 0xcc, size);  //MessageType
   ENCODE_U8(buffer + size, 0x00, size);  //presence
@@ -731,7 +742,10 @@ void send_pdu_session_modification_complete(std::string smf_ip_address,
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+//  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
 
   //Fill the json part
   pdu_session_modification_complete["n1SmMsg"]["contentId"] = "n1SmMsg";  // NAS
@@ -809,7 +823,8 @@ void send_pdu_session_modification_complete(std::string smf_ip_address,
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_release_request(std::string smf_ip_address,
+void send_pdu_session_release_request(uint8_t pid, uint8_t context_id,
+                                      std::string smf_ip_address,
                                       uint8_t http_version, std::string port) {
 
   std::cout << "[AMF N11] PDU Session Release Request (SM Context Update)"
@@ -824,7 +839,7 @@ void send_pdu_session_release_request(std::string smf_ip_address,
   char *buffer = (char*) calloc(1, buffer_size);
   int size = 0;
   ENCODE_U8(buffer, 0x2e, size);  //ExtendedProtocolDiscriminator
-  ENCODE_U8(buffer + size, 0x01, size);  //PDUSessionIdentity
+  ENCODE_U8(buffer + size, pid, size);  //PDUSessionIdentity
   ENCODE_U8(buffer + size, 0x01, size);  //ProcedureTransactionIdentity
   ENCODE_U8(buffer + size, 0xd1, size);  //MessageType
   ENCODE_U8(buffer + size, 0x00, size);  //presence
@@ -842,7 +857,10 @@ void send_pdu_session_release_request(std::string smf_ip_address,
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
 
   //Fill the json part
   pdu_session_release_request["cause"] = "INSUFFICIENT_UP_RESOURCES";  //need to be updated
@@ -921,7 +939,8 @@ void send_pdu_session_release_request(std::string smf_ip_address,
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_release_resource_release_ack(std::string smf_ip_address,
+void send_pdu_session_release_resource_release_ack(uint8_t context_id,
+                                                   std::string smf_ip_address,
                                                    uint8_t http_version,
                                                    std::string port) {
 
@@ -949,7 +968,10 @@ void send_pdu_session_release_resource_release_ack(std::string smf_ip_address,
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+//  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
 
   //Fill the json part
   pdu_session_release_ack["n2SmInfoType"] = "PDU_RES_REL_RSP";
@@ -1029,7 +1051,8 @@ void send_pdu_session_release_resource_release_ack(std::string smf_ip_address,
 }
 
 //------------------------------------------------------------------------------
-void send_pdu_session_release_complete(std::string smf_ip_address,
+void send_pdu_session_release_complete(uint8_t pid, uint8_t context_id,
+                                       std::string smf_ip_address,
                                        uint8_t http_version, std::string port) {
 
   std::cout
@@ -1045,7 +1068,7 @@ void send_pdu_session_release_complete(std::string smf_ip_address,
   char *buffer = (char*) calloc(1, buffer_size);
   int size = 0;
   ENCODE_U8(buffer, 0x2e, size);  //ExtendedProtocolDiscriminator
-  ENCODE_U8(buffer + size, 0x01, size);  //PDUSessionIdentity
+  ENCODE_U8(buffer + size, pid, size);  //PDUSessionIdentity
   ENCODE_U8(buffer + size, 0x01, size);  //ProcedureTransactionIdentity
   ENCODE_U8(buffer + size, 0xd4, size);  //MessageType
   ENCODE_U8(buffer + size, 0x00, size);  //Cause
@@ -1064,7 +1087,10 @@ void send_pdu_session_release_complete(std::string smf_ip_address,
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
 
   //Fill the json part
   pdu_session_release_complete["cause"] = "INSUFFICIENT_UP_RESOURCES";  //need to be updated
@@ -1144,7 +1170,8 @@ void send_pdu_session_release_complete(std::string smf_ip_address,
 
 //------------------------------------------------------------------------------
 void send_pdu_session_update_sm_context_ue_service_request(
-    std::string smf_ip_address, uint8_t http_version, std::string port) {
+    uint8_t context_id, std::string smf_ip_address, uint8_t http_version,
+    std::string port) {
   std::cout
       << "[AMF N11] UE-triggered Service Request (SM Context Update Step 1)"
       << std::endl;
@@ -1159,7 +1186,10 @@ void send_pdu_session_update_sm_context_ue_service_request(
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
 
   //PDU session ID (as specified in section 4.2.3.2 @ 3GPP TS 23.502, but can't find in Yaml file)
   service_requests["upCnxState"] = "ACTIVATING";
@@ -1229,7 +1259,8 @@ void send_pdu_session_update_sm_context_ue_service_request(
 
 //------------------------------------------------------------------------------
 void send_pdu_session_update_sm_context_ue_service_request_step2(
-    std::string smf_ip_address, uint8_t http_version, std::string port) {
+    uint8_t context_id, std::string smf_ip_address, uint8_t http_version,
+    std::string port) {
   std::cout
       << "[AMF N11] UE-triggered Service Request (SM Context Update Step 2)"
       << std::endl;
@@ -1269,7 +1300,10 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/modify"));
 
   //Fill the json part
   service_requests["n2SmInfoType"] = "PDU_RES_SETUP_RSP";
@@ -1360,7 +1394,8 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
 }
 
 //------------------------------------------------------------------------------
-void send_release_sm_context_request(std::string smf_ip_address,
+void send_release_sm_context_request(uint8_t pid, uint8_t context_id,
+                                     std::string smf_ip_address,
                                      uint8_t http_version, std::string port) {
 
   std::cout << "[AMF N11] PDU Session Release SM context Request" << std::endl;
@@ -1373,10 +1408,13 @@ void send_release_sm_context_request(std::string smf_ip_address,
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/release"));
+  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/release"));
+  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::to_string(context_id));
+  url.append(std::string("/release"));
 
   //Fill the json part
-  send_release_sm_context_request["pduSessionId"] = 1;
+  send_release_sm_context_request["pduSessionId"] = pid;
 
   std::string body = send_release_sm_context_request.dump();
 
@@ -1483,6 +1521,8 @@ int main(int argc, char *argv[]) {
             << std::endl;
 
   bool cont = false;
+  uint8_t context_id = 1;
+  uint8_t pid = 1;
 
   /*//Check multiple sessions
    for (int i=1; i< 10; i++){
@@ -1495,44 +1535,51 @@ int main(int argc, char *argv[]) {
    }
    */
 
-  if (send_pdu_session_establishment_request(1, smf_ip_address, http_version,
+  if (send_pdu_session_establishment_request(pid, smf_ip_address, http_version,
                                              port)) {
     usleep(100000);
-    cont = send_pdu_session_update_sm_context_establishment(1, smf_ip_address,
+    cont = send_pdu_session_update_sm_context_establishment(context_id,
+                                                            smf_ip_address,
                                                             http_version, port);
   }
 
   if (cont) {
     usleep(200000);
     //UE-initiated Service Request
-    send_pdu_session_update_sm_context_ue_service_request(smf_ip_address,
+    send_pdu_session_update_sm_context_ue_service_request(context_id,
+                                                          smf_ip_address,
                                                           http_version, port);
     usleep(200000);
-    send_pdu_session_update_sm_context_ue_service_request_step2(smf_ip_address,
+    send_pdu_session_update_sm_context_ue_service_request_step2(context_id,
+                                                                smf_ip_address,
                                                                 http_version,
                                                                 port);
     usleep(200000);
     //PDU Session Modification
-    send_pdu_session_modification_request_step1(smf_ip_address, http_version,
-                                                port);
+    send_pdu_session_modification_request_step1(pid, context_id, smf_ip_address,
+                                                http_version, port);
     usleep(200000);
-    send_pdu_session_modification_request_step2(smf_ip_address, http_version,
-                                                port);
+    send_pdu_session_modification_request_step2(context_id, smf_ip_address,
+                                                http_version, port);
     usleep(200000);
-    send_pdu_session_modification_complete(smf_ip_address, http_version, port);
+    send_pdu_session_modification_complete(pid, context_id, smf_ip_address,
+                                           http_version, port);
     usleep(200000);
     //PDU Session Release procedure
-    send_pdu_session_release_request(smf_ip_address, http_version, port);
+    send_pdu_session_release_request(pid, context_id, smf_ip_address,
+                                     http_version, port);
     usleep(200000);
-    send_pdu_session_release_resource_release_ack(smf_ip_address, http_version,
-                                                  port);
+    send_pdu_session_release_resource_release_ack(context_id, smf_ip_address,
+                                                  http_version, port);
     usleep(200000);
-    send_pdu_session_release_complete(smf_ip_address, http_version, port);
+    send_pdu_session_release_complete(pid, context_id, smf_ip_address,
+                                      http_version, port);
+
   }
 
   usleep(200000);
   //Release SM context
-  //send_release_sm_context_request(smf_ip_address, http_version, port);
+  //send_release_sm_context_request(pid, smf_ip_address, http_version, port);
   return 0;
 }
 

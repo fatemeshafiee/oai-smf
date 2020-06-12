@@ -1532,6 +1532,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       sm_context_req_msg.get_pdu_session_id());
   n11_sm_context_resp->res.set_snssai(sm_context_req_msg.get_snssai());
   n11_sm_context_resp->res.set_dnn(sm_context_req_msg.get_dnn());
+  n11_sm_context_resp->res.set_pdu_session_type(sp.get()->get_pdn_type().pdn_type);
 
   //Step 2.1. Decode N1 (if content is available)
   if (sm_context_req_msg.n1_sm_msg_is_set()) {

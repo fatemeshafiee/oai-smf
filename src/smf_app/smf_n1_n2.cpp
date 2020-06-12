@@ -804,6 +804,8 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       pduSessionType->value.choice.PDUSessionType = msg.get_pdu_session_type()
           - 1;  //TODO: dirty code, difference between Ngap_PDUSessionType_ipv4 vs pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4 (TS 38.413 vs TS 24.501)
       ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, pduSessionType);
+      Logger::smf_app().debug("PDU Session Type: %d ",
+                              msg.get_pdu_session_type());
 
       //SecurityIndication
       //TODO: should get from UDM
