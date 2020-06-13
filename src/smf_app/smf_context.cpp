@@ -1151,16 +1151,23 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
-    smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_n2_inst.create_n1_sm_container(
         smreq->req,
         PDU_SESSION_ESTABLISHMENT_REJECT,
         n1_sm_message,
-        cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
-    //trigger to send reply to AMF
-    smf_app_inst->trigger_http_response(
-        http_status_code_e::HTTP_STATUS_CODE_401_UNAUTHORIZED,
-        smContextCreateError, n1_sm_msg_hex, smreq->pid);
+        cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
+
+      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
+      //trigger to send reply to AMF
+      smf_app_inst->trigger_http_response(
+          http_status_code_e::HTTP_STATUS_CODE_401_UNAUTHORIZED,
+          smContextCreateError, n1_sm_msg_hex, smreq->pid);
+
+    } else {
+      smf_app_inst->trigger_http_response(
+          http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+          smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    }
     //TODO:
     //SMF unsubscribes to the modifications of Session Management Subscription data for (SUPI, DNN, S-NSSAI)
     //using Nudm_SDM_Unsubscribe()
@@ -1225,6 +1232,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     smf_app_inst->trigger_http_response(
         http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
         N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    return;
   }
 
   //TODO: if "Integrity Protection is required", check UE Integrity Protection Maximum Data Rate
@@ -1317,14 +1325,19 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       refToBinaryData.setContentId(N1_SM_CONTENT_ID);
       smContextCreateError.setN1SmMsg(refToBinaryData);
       //PDU Session Establishment Reject
-      smf_n1_n2_inst.create_n1_sm_container(
+      if (smf_n1_n2_inst.create_n1_sm_container(
           smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-          cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE);
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
-      //trigger to send reply to AMF
-      smf_app_inst->trigger_http_response(
-          http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-          smContextCreateError, n1_sm_msg_hex, smreq->pid);
+          cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE)) {
+        smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
+        //trigger to send reply to AMF
+        smf_app_inst->trigger_http_response(
+            http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+            smContextCreateError, n1_sm_msg_hex, smreq->pid);
+      } else {
+        smf_app_inst->trigger_http_response(
+            http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+            smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+      }
       request_accepted = false;
       break;
   }
@@ -1471,6 +1484,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           "Could not send ITTI message %s to task TASK_SMF_N11",
           sm_context_resp_pending->get_msg_name());
     }
+
   }
 }
 
@@ -1532,7 +1546,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       sm_context_req_msg.get_pdu_session_id());
   n11_sm_context_resp->res.set_snssai(sm_context_req_msg.get_snssai());
   n11_sm_context_resp->res.set_dnn(sm_context_req_msg.get_dnn());
-  n11_sm_context_resp->res.set_pdu_session_type(sp.get()->get_pdn_type().pdn_type);
+  n11_sm_context_resp->res.set_pdu_session_type(
+      sp.get()->get_pdn_type().pdn_type);
 
   //Step 2.1. Decode N1 (if content is available)
   if (sm_context_req_msg.n1_sm_msg_is_set()) {
@@ -1770,13 +1785,19 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         std::string n1_sm_msg_to_be_created, n1_sm_msg_hex_to_be_created;
         std::string n2_sm_info_to_be_created, n2_sm_info_hex_to_be_created;
         //N1 SM (PDU Session Modification Command)
-        smf_n1_n2_inst.create_n1_sm_container(
+        if (not smf_n1_n2_inst.create_n1_sm_container(
             n11_sm_context_resp->res, PDU_SESSION_MODIFICATION_COMMAND,
-            n1_sm_msg_to_be_created, cause_value_5gsm_e::CAUSE_0_UNKNOWN);  //TODO: need cause?
-        //N2 SM (PDU Session Resource Modify Request Transfer IE)
-        smf_n1_n2_inst.create_n2_sm_information(
-            n11_sm_context_resp->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ,
-            n2_sm_info_to_be_created);
+            n1_sm_msg_to_be_created, cause_value_5gsm_e::CAUSE_0_UNKNOWN) or  //TODO: need cause?
+            //N2 SM (PDU Session Resource Modify Request Transfer IE)
+            not smf_n1_n2_inst.create_n2_sm_information(
+                n11_sm_context_resp->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ,
+                n2_sm_info_to_be_created)) {
+          smf_app_inst->trigger_http_response(
+              http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+              smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+          return;
+        }
+
         smf_app_inst->convert_string_2_hex(n1_sm_msg_to_be_created,
                                            n1_sm_msg_hex_to_be_created);
         smf_app_inst->convert_string_2_hex(n2_sm_info_to_be_created,
@@ -1921,14 +1942,21 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           smContextUpdateError.setError(problem_details);
           refToBinaryData.setContentId(N1_SM_CONTENT_ID);
           smContextUpdateError.setN1SmMsg(refToBinaryData);
-          smf_n1_n2_inst.create_n1_sm_container(
+          if (smf_n1_n2_inst.create_n1_sm_container(
               sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY);
-          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-          //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
-              http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, n1_sm_msg_hex, smreq->pid);
+              cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY)) {
+
+            smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+            //trigger to send reply to AMF
+            smf_app_inst->trigger_http_response(
+                http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                smContextUpdateError, n1_sm_msg_hex, smreq->pid);
+          } else {
+            smf_app_inst->trigger_http_response(
+                http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+                smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+          }
+          return;
         }
         //Abnormal cases in network side (see section 6.3.3.5 @3GPP TS 24.501)
         if (sp.get()->get_pdu_session_status()
@@ -2079,14 +2107,20 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
           //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
-          smf_n1_n2_inst.create_n1_sm_container(
+          if (smf_n1_n2_inst.create_n1_sm_container(
               sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
-          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);  //TODO: need N1SM?
-          //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
-              http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, smreq->pid);
+              cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
+
+            smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);  //TODO: need N1SM?
+            //trigger to send reply to AMF
+            smf_app_inst->trigger_http_response(
+                http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                smContextUpdateError, smreq->pid);
+          } else {
+            smf_app_inst->trigger_http_response(
+                http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+                smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+          }
           return;
         }
 
@@ -2165,15 +2199,20 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
         smContextUpdateError.setN1SmMsg(refToBinaryData);
         //PDU Session Establishment Reject, 24.501 cause "#26 Insufficient resources"
-        smf_n1_n2_inst.create_n1_sm_container(
+        if (smf_n1_n2_inst.create_n1_sm_container(
             smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-            cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);
-        smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-        //trigger to send reply to AMF
-        smf_app_inst->trigger_http_response(
-            http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-            smContextUpdateError, n1_sm_msg_hex, smreq->pid);
-        //TODO: Need release established resources?
+            cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES)) {
+          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+          //trigger to send reply to AMF
+          smf_app_inst->trigger_http_response(
+              http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+              smContextUpdateError, n1_sm_msg_hex, smreq->pid);
+          //TODO: Need release established resources?
+        } else {
+          smf_app_inst->trigger_http_response(
+              http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+              smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+        }
         return;
       }
         break;
@@ -2390,14 +2429,19 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           refToBinaryData.setContentId(N1_SM_CONTENT_ID);
           smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
-          smf_n1_n2_inst.create_n1_sm_container(
+          if (smf_n1_n2_inst.create_n1_sm_container(
               sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE);
-          smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-          //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
-              http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, smreq->pid);
+              cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE)) {
+            smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+            //trigger to send reply to AMF
+            smf_app_inst->trigger_http_response(
+                http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                smContextUpdateError, smreq->pid);
+          } else {
+            smf_app_inst->trigger_http_response(
+                http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+                smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+          }
         }
           break;
 
@@ -2570,6 +2614,7 @@ void smf_context::handle_pdu_session_modification_network_requested(
   Logger::smf_app().debug(
       "Prepare N1N2MessageTransfer message and send to AMF");
 
+  //TODO: handle encode N1, N2 failure
   //N1: PDU_SESSION_MODIFICATION_COMMAND
   smf_n1_n2_inst.create_n1_sm_container(itti_msg->msg,
   PDU_SESSION_MODIFICATION_COMMAND,
@@ -2582,6 +2627,7 @@ void smf_context::handle_pdu_session_modification_network_requested(
   smf_n1_n2_inst.create_n2_sm_information(itti_msg->msg, 1,
                                           n2_sm_info_type_e::PDU_RES_MOD_REQ,
                                           n2_sm_info);
+
   smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
   itti_msg->msg.set_n2_sm_information(n2_sm_info_hex);
 

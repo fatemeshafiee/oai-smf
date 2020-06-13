@@ -78,9 +78,9 @@ class smf_n1_n2 {
    * @param [uint8_t] msg_type Type of N1 message
    * @param [std::string&] nas_msg_str store NAS message in form of string
    * @param [uint8_t] sm_cause store NAS Cause
-   *
+   * @return boolean: True if the NAS message has been created successfully, otherwise return false
    */
-  void create_n1_sm_container(pdu_session_msg &msg, uint8_t msg_type,
+  bool create_n1_sm_container(pdu_session_msg &msg, uint8_t msg_type,
                               std::string &nas_msg_str,
                               cause_value_5gsm_e sm_cause);
 
@@ -89,9 +89,10 @@ class smf_n1_n2 {
    * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res
    * @param [uint8_t] msg_type Type of N2 message
    * @param [std::string&] ngap_msg_str store NGAP message in form of string
+   * @return boolean: True if the NGAP message has been created successfully, otherwise return false
    *
    */
-  void create_n2_sm_information(pdu_session_msg &msg, uint8_t ngap_msg_type,
+  bool create_n2_sm_information(pdu_session_msg &msg, uint8_t ngap_msg_type,
                                 n2_sm_info_type_e ngap_ie_type,
                                 std::string &ngap_msg_str);
 

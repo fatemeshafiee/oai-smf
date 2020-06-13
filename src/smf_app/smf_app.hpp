@@ -620,6 +620,7 @@ class smf_app {
    * @param [const uint32_t &] http_code: Status code of HTTP response
    * @param [const oai::smf_server::model::SmContextCreateError &] smContextCreateError: store the json content of response message
    * @param [uint32_t &] promise_id: Promise Id
+   * @param [uint8_t] msg_type: Type of HTTP message (Update/Release)
    * @return void
    */
   void trigger_http_response(
@@ -633,6 +634,7 @@ class smf_app {
    * @param [const oai::smf_server::model::SmContextUpdateError &] smContextUpdateError: store the json content of response message
    * @param [const std::string &] n1_sm_msg: N1 SM message
    * @param [uint32_t &] promise_id: Promise Id
+   * @param [uint8_t] msg_type: Type of HTTP message (Update/Release)
    * @return void
    */
   void trigger_http_response(
@@ -644,7 +646,7 @@ class smf_app {
    * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
    * @param [const uint32_t &] http_code: Status code of HTTP response
    * @param [uint32_t &] promise_id: Promise Id
-   * @param [uint8_t] msg_type
+   * @param [uint8_t] msg_type: Type of HTTP message (Create/Update/Release)
    * @return void
    */
   void trigger_http_response(const uint32_t &http_code, uint32_t &promise_id,
