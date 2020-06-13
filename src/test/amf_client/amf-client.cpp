@@ -4,6 +4,7 @@
 #include <string>
 #include <unistd.h>
 #include <stdexcept>
+#include <thread>
 
 #ifndef CURLPIPE_MULTIPLEX
 #define CURLPIPE_MULTIPLEX 0
@@ -1477,6 +1478,143 @@ void send_release_sm_context_request(uint8_t pid, uint8_t context_id,
 }
 
 //------------------------------------------------------------------------------
+bool pdu_session_establishment(uint8_t pid, uint8_t context_id,
+                               std::string smf_ip_address, uint8_t http_version,
+                               std::string port) {
+
+  bool status = false;
+  if (send_pdu_session_establishment_request(pid, smf_ip_address, http_version,
+                                             port)) {
+    usleep(100000);
+    status = send_pdu_session_update_sm_context_establishment(context_id,
+                                                              smf_ip_address,
+                                                              http_version,
+                                                              port);
+  }
+  return status;
+
+}
+
+//------------------------------------------------------------------------------
+void test_all_procedures_for_one_session(uint8_t pid, uint8_t context_id,
+                                         std::string smf_ip_address,
+                                         uint8_t http_version,
+                                         std::string port) {
+
+  bool status = false;
+  if (send_pdu_session_establishment_request(pid, smf_ip_address, http_version,
+                                             port)) {
+    usleep(100000);
+    status = send_pdu_session_update_sm_context_establishment(context_id,
+                                                              smf_ip_address,
+                                                              http_version,
+                                                              port);
+  }
+
+  if (status) {
+    usleep(200000);
+    //UE-initiated Service Request
+    send_pdu_session_update_sm_context_ue_service_request(context_id,
+                                                          smf_ip_address,
+                                                          http_version, port);
+    usleep(200000);
+    send_pdu_session_update_sm_context_ue_service_request_step2(context_id,
+                                                                smf_ip_address,
+                                                                http_version,
+                                                                port);
+    usleep(200000);
+    //PDU Session Modification
+    send_pdu_session_modification_request_step1(pid, context_id, smf_ip_address,
+                                                http_version, port);
+    usleep(200000);
+    send_pdu_session_modification_request_step2(context_id, smf_ip_address,
+                                                http_version, port);
+    usleep(200000);
+    send_pdu_session_modification_complete(pid, context_id, smf_ip_address,
+                                           http_version, port);
+    usleep(200000);
+    //PDU Session Release procedure
+    send_pdu_session_release_request(pid, context_id, smf_ip_address,
+                                     http_version, port);
+    usleep(200000);
+    send_pdu_session_release_resource_release_ack(context_id, smf_ip_address,
+                                                  http_version, port);
+    usleep(200000);
+    send_pdu_session_release_complete(pid, context_id, smf_ip_address,
+                                      http_version, port);
+    usleep(200000);
+    //Release SM context
+    //send_release_sm_context_request(pid, smf_ip_address, http_version, port);
+  }
+}
+
+//------------------------------------------------------------------------------
+void test_session_establishment_multiple_threads(std::string smf_ip_address,
+                                                 uint8_t http_version,
+                                                 std::string port) {
+  std::vector<std::thread> pdu_threads;
+
+  for (int i = 0; i < 10; i++) {
+    std::thread session_establishment(&pdu_session_establishment, i, i,
+                                      smf_ip_address, http_version, port);
+
+    pdu_threads.push_back(std::move(session_establishment));
+  }
+
+  for (auto &t : pdu_threads) {
+    t.join();
+  }
+
+}
+
+//------------------------------------------------------------------------------
+void test_all_procedures_for_multiple_threads(std::string smf_ip_address,
+                                              uint8_t http_version,
+                                              std::string port) {
+  uint8_t pid = 1;
+  uint8_t context_id = 1;
+
+  //bool status = false;
+
+  std::thread t1(&send_pdu_session_establishment_request, pid, smf_ip_address,
+                 http_version, port);
+  std::thread t2(&send_pdu_session_update_sm_context_establishment, context_id,
+                 smf_ip_address, http_version, port);
+  std::thread t3(&send_pdu_session_update_sm_context_ue_service_request,
+                 context_id, smf_ip_address, http_version, port);
+  std::thread t4(&send_pdu_session_update_sm_context_ue_service_request_step2,
+                 context_id, smf_ip_address, http_version, port);
+  std::thread t5(&send_pdu_session_modification_request_step1, pid, context_id,
+                 smf_ip_address, http_version, port);
+  std::thread t6(&send_pdu_session_modification_request_step2, context_id,
+                 smf_ip_address, http_version, port);
+  std::thread t7(&send_pdu_session_modification_complete, pid, context_id,
+                 smf_ip_address, http_version, port);
+  //PDU Session Release procedure
+  std::thread t8(&send_pdu_session_release_request, pid, context_id,
+                 smf_ip_address, http_version, port);
+  std::thread t9(&send_pdu_session_release_resource_release_ack, context_id,
+                 smf_ip_address, http_version, port);
+  std::thread t10(&send_pdu_session_release_complete, pid, context_id,
+                  smf_ip_address, http_version, port);
+
+  //Release SM context
+  //send_release_sm_context_request(pid, smf_ip_address, http_version, port);
+
+  t1.join();
+  t2.join();
+  t3.join();
+  t4.join();
+  t5.join();
+  t6.join();
+  t7.join();
+  t8.join();
+  t9.join();
+  t10.join();
+
+}
+
+//------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
   std::string smf_ip_address;
   uint8_t http_version = 1;
@@ -1524,62 +1662,11 @@ int main(int argc, char *argv[]) {
   uint8_t context_id = 1;
   uint8_t pid = 1;
 
-  /*//Check multiple sessions
-   for (int i=1; i< 10; i++){
-   //PDU Session Establishment procedure
-   if (send_pdu_session_establishment_request(i, smf_ip_address, http_version, port)) {
-   usleep(100000);
-   cont = send_pdu_session_update_sm_context_establishment(i, smf_ip_address, http_version,
-   port);
-   }
-   }
-   */
-
-  if (send_pdu_session_establishment_request(pid, smf_ip_address, http_version,
-                                             port)) {
-    usleep(100000);
-    cont = send_pdu_session_update_sm_context_establishment(context_id,
-                                                            smf_ip_address,
-                                                            http_version, port);
-  }
-
-  if (cont) {
-    usleep(200000);
-    //UE-initiated Service Request
-    send_pdu_session_update_sm_context_ue_service_request(context_id,
-                                                          smf_ip_address,
-                                                          http_version, port);
-    usleep(200000);
-    send_pdu_session_update_sm_context_ue_service_request_step2(context_id,
-                                                                smf_ip_address,
-                                                                http_version,
-                                                                port);
-    usleep(200000);
-    //PDU Session Modification
-    send_pdu_session_modification_request_step1(pid, context_id, smf_ip_address,
-                                                http_version, port);
-    usleep(200000);
-    send_pdu_session_modification_request_step2(context_id, smf_ip_address,
-                                                http_version, port);
-    usleep(200000);
-    send_pdu_session_modification_complete(pid, context_id, smf_ip_address,
-                                           http_version, port);
-    usleep(200000);
-    //PDU Session Release procedure
-    send_pdu_session_release_request(pid, context_id, smf_ip_address,
-                                     http_version, port);
-    usleep(200000);
-    send_pdu_session_release_resource_release_ack(context_id, smf_ip_address,
-                                                  http_version, port);
-    usleep(200000);
-    send_pdu_session_release_complete(pid, context_id, smf_ip_address,
+  test_all_procedures_for_one_session(pid, context_id, smf_ip_address,
                                       http_version, port);
-
-  }
-
-  usleep(200000);
-  //Release SM context
-  //send_release_sm_context_request(pid, smf_ip_address, http_version, port);
+  //test_session_establishment_multiple_threads(smf_ip_address, http_version, port);
+  //test_all_procedures_for_multiple_threads(smf_ip_address, http_version,
+  //                                         port);
   return 0;
 }
 
