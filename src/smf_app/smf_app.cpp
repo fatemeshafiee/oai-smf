@@ -277,7 +277,12 @@ void smf_app_task(void*) {
 //------------------------------------------------------------------------------
 smf_app::smf_app(const std::string &config_file)
     :
-    m_seid2smf_context() {
+    m_seid2smf_context(),
+    m_supi2smf_context(),
+    m_scid2smf_context(),
+    m_sm_context_create_promises(),
+    m_sm_context_update_promises(),
+    m_sm_context_release_promises() {
   Logger::smf_app().startup("Starting...");
 
   supi2smf_context = { };
@@ -547,13 +552,20 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
-    smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_n2_inst.create_n1_sm_container(
         smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-        cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-    //trigger to send reply to AMF
-    trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                          smContextCreateError, n1_sm_message_hex, smreq->pid);
+        cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
+      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      //trigger to send reply to AMF
+      trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                            smContextCreateError, n1_sm_message_hex,
+                            smreq->pid);
+    } else {
+      //trigger to send reply to AMF
+      trigger_http_response(
+          http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+          smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    }
     return;
   }
 
@@ -598,13 +610,19 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
-    smf_n1_n2_inst.create_n1_sm_container(smreq->req,
+    if (smf_n1_n2_inst.create_n1_sm_container(smreq->req,
     PDU_SESSION_ESTABLISHMENT_REJECT,
-                                          n1_sm_message, cause_n1);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-    //trigger to send reply to AMF
-    trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                          smContextCreateError, n1_sm_message_hex, smreq->pid);
+                                              n1_sm_message, cause_n1)) {
+      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      //trigger to send reply to AMF
+      trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                            smContextCreateError, n1_sm_message_hex,
+                            smreq->pid);
+    } else {
+      trigger_http_response(
+          http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+          smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    }
     return;
   }
 
@@ -644,13 +662,19 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject including cause "#81 Invalid PTI value" (section 7.3.1 @3GPP TS 24.501)
-    smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_n2_inst.create_n1_sm_container(
         smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-        cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-    //trigger to send reply to AMF
-    trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                          smContextCreateError, n1_sm_message_hex, smreq->pid);
+        cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE)) {
+      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      //trigger to send reply to AMF
+      trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                            smContextCreateError, n1_sm_message_hex,
+                            smreq->pid);
+    } else {
+      trigger_http_response(
+          http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+          smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    }
     return;
   }
   smreq->req.set_pti(pti);
@@ -660,6 +684,10 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       || (pdu_session_id > PDU_SESSION_IDENTITY_LAST )) {
     Logger::smf_app().warn("Invalid PDU Session ID value (%d)", pdu_session_id);
     //section 7.3.2@3GPP TS 24.501; NAS N1 SM message: ignore the message
+    //trigger to send reply to AMF
+    trigger_http_response(
+        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
+        N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
     return;
   }
 
@@ -674,15 +702,22 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
     //(24.501 (section 7.4)) implementation dependent->do similar to UE: response with a 5GSM STATUS message including cause "#98 message type not compatible with protocol state."
-    smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_n2_inst.create_n1_sm_container(
         smreq->req,
         PDU_SESSION_ESTABLISHMENT_REJECT,
         n1_sm_message,
-        cause_value_5gsm_e::CAUSE_98_MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-    //trigger to send reply to AMF
-    trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                          smContextCreateError, n1_sm_message_hex, smreq->pid);
+        cause_value_5gsm_e::CAUSE_98_MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE)) {
+
+      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      //trigger to send reply to AMF
+      trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                            smContextCreateError, n1_sm_message_hex,
+                            smreq->pid);
+    } else {
+      trigger_http_response(
+          http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+          smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    }
     return;
   }
 
@@ -709,17 +744,35 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject, 24.501 cause "#27 Missing or unknown DNN"
-    smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_n2_inst.create_n1_sm_container(
         smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-        cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-    //trigger to send reply to AMF
-    trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                          smContextCreateError, n1_sm_message_hex, smreq->pid);
+        cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN)) {
+      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      //trigger to send reply to AMF
+      trigger_http_response(http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                            smContextCreateError, n1_sm_message_hex,
+                            smreq->pid);
+    } else {
+      trigger_http_response(
+          http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+          smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    }
     return;
   }
 
-  //Step 4. create a context for this supi if not existed, otherwise update
+  //Step 4. Verify the session is already existed
+  if (is_scid_2_smf_context(supi64, dnn, snssai, pdu_session_id)) {
+    Logger::smf_app().warn(
+        "PDU Session already existed (SUPI " SUPI_64_FMT ", DNN %s, NSSAI (sst %d, sd %s), PDU Session ID %d)",
+        supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);
+    //trigger to send reply to AMF
+    trigger_http_response(
+        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
+        N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    return;
+  }
+
+  //Step 5. create a context for this supi if not existed, otherwise update
   std::shared_ptr<smf_context> sc = { };
   if (is_supi_2_smf_context(supi64)) {
     Logger::smf_app().debug("Update SMF context with SUPI " SUPI_64_FMT "",
@@ -735,7 +788,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     set_supi_2_smf_context(supi64, sc);
   }
 
-  //Step 5. Create/update context with dnn information
+  //Step 6. Create/update context with dnn information
   std::shared_ptr<dnn_context> sd = { };
 
   if (!sc.get()->find_dnn_context(snssai, dnn, sd)) {
@@ -751,7 +804,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     }
   }
 
-  //Step 6. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
+  //Step 7. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
   std::string dnn_selection_mode = smreq->req.get_dnn_selection_mode();
   //if the Session Management Subscription data is not available, get from configuration file or UDM
   if (not sc.get()->is_dnn_snssai_subscription_data(dnn, snssai)) {
@@ -779,16 +832,21 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
         smContextCreateError.setN1SmMsg(refToBinaryData);
         //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"
-        smf_n1_n2_inst.create_n1_sm_container(
+        if (smf_n1_n2_inst.create_n1_sm_container(
             smreq->req,
             PDU_SESSION_ESTABLISHMENT_REJECT,
             n1_sm_message,
-            cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED);
-        smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-        //trigger to send reply to AMF
-        trigger_http_response(
-            http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-            smContextCreateError, n1_sm_message_hex, smreq->pid);
+            cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
+          smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+          //trigger to send reply to AMF
+          trigger_http_response(
+              http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+              smContextCreateError, n1_sm_message_hex, smreq->pid);
+        } else {
+          trigger_http_response(
+              http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+              smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+        }
         return;
       }
     } else {
@@ -803,7 +861,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     }
   }
 
-  // Step 7. generate a SMF context Id and store the corresponding information in a map (SM_Context_ID, (supi, dnn, nssai, pdu_session_id))
+  // Step 8. generate a SMF context Id and store the corresponding information in a map (SM_Context_ID, (supi, dnn, nssai, pdu_session_id))
   scid_t scid = generate_smf_context_ref();
   std::shared_ptr<smf_context_ref> scf = std::shared_ptr<smf_context_ref>(
       new smf_context_ref());
@@ -818,7 +876,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
 
   Logger::smf_app().debug("Generated a SMF Context ID " SCID_FMT " ", scid);
 
-  //Step 8. let the context handle the message
+  //Step 9. Let the context handle the message
   sc.get()->handle_pdu_session_create_sm_context_request(smreq);
 
 }
@@ -1090,6 +1148,21 @@ std::shared_ptr<smf_context_ref> smf_app::scid_2_smf_context(
 bool smf_app::is_scid_2_smf_context(const scid_t &scid) const {
   std::shared_lock lock(m_scid2smf_context);
   return bool { scid2smf_context.count(scid) > 0 };
+}
+
+//------------------------------------------------------------------------------
+bool smf_app::is_scid_2_smf_context(const supi64_t &supi,
+                                    const std::string &dnn,
+                                    const snssai_t &snssai,
+                                    const pdu_session_id_t &pid) const {
+  std::shared_lock lock(m_scid2smf_context);
+  for (auto it : scid2smf_context) {
+    supi64_t supi64 = smf_supi_to_u64(it.second->supi);
+    if ((supi64 == supi) and (it.second->dnn.compare(dnn) == 0)
+        and (it.second->nssai == snssai) and (it.second->pdu_session_id == pid))
+      return true;
+  }
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -1376,6 +1449,7 @@ bool smf_app::get_session_management_subscription_data(
 void smf_app::add_promise(
     uint32_t id,
     boost::shared_ptr<boost::promise<pdu_session_create_sm_context_response> > &p) {
+  std::shared_lock lock(m_sm_context_create_promises);
   sm_context_create_promises.emplace(id, p);
 }
 
@@ -1383,6 +1457,7 @@ void smf_app::add_promise(
 void smf_app::add_promise(
     uint32_t id,
     boost::shared_ptr<boost::promise<pdu_session_update_sm_context_response> > &p) {
+  std::shared_lock lock(m_sm_context_update_promises);
   sm_context_update_promises.emplace(id, p);
 }
 
@@ -1390,6 +1465,7 @@ void smf_app::add_promise(
 void smf_app::add_promise(
     uint32_t id,
     boost::shared_ptr<boost::promise<pdu_session_release_sm_context_response> > &p) {
+  std::shared_lock lock(m_sm_context_release_promises);
   sm_context_release_promises.emplace(id, p);
 }
 
@@ -1426,6 +1502,7 @@ void smf_app::trigger_http_response(
     uint32_t &promise_id) {
   Logger::smf_app().debug(
       "Send ITTI msg to SMF APP to trigger the response of API Server");
+
   std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
       std::make_shared<itti_n11_update_sm_context_response>(TASK_SMF_N11,
                                                             TASK_SMF_APP,
@@ -1442,6 +1519,7 @@ void smf_app::trigger_http_response(
         "Could not send ITTI message %s to task TASK_SMF_APP",
         itti_msg->get_msg_name());
   }
+
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1452,6 +1530,7 @@ void smf_app::trigger_http_response(
 
   Logger::smf_app().debug(
       "Send ITTI msg to SMF APP to trigger the response of HTTP Server");
+
   std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
       std::make_shared<itti_n11_update_sm_context_response>(TASK_SMF_N11,
                                                             TASK_SMF_APP,
@@ -1469,6 +1548,7 @@ void smf_app::trigger_http_response(
         "Could not send ITTI message %s to task TASK_SMF_APP",
         itti_msg->get_msg_name());
   }
+
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1494,12 +1574,45 @@ void smf_app::trigger_http_response(const uint32_t &http_code,
       }
     }
       break;
+
     case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE: {
 
+      std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
+          std::make_shared<itti_n11_create_sm_context_response>(TASK_SMF_N11,
+                                                                TASK_SMF_APP,
+                                                                promise_id);
+      pdu_session_create_sm_context_response sm_context_response = { };
+      sm_context_response.set_http_code(http_code);
+      itti_msg->res = sm_context_response;
+      int ret = itti_inst->send_msg(itti_msg);
+      if (RETURNok != ret) {
+        Logger::smf_app().error(
+            "Could not send ITTI message %s to task TASK_SMF_APP",
+            itti_msg->get_msg_name());
+      }
     }
       break;
-    default: {
 
+    case N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE: {
+
+      std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
+          std::make_shared<itti_n11_update_sm_context_response>(TASK_SMF_N11,
+                                                                TASK_SMF_APP,
+                                                                promise_id);
+      pdu_session_update_sm_context_response sm_context_response = { };
+      sm_context_response.set_http_code(http_code);
+      itti_msg->res = sm_context_response;
+      int ret = itti_inst->send_msg(itti_msg);
+      if (RETURNok != ret) {
+        Logger::smf_app().error(
+            "Could not send ITTI message %s to task TASK_SMF_APP",
+            itti_msg->get_msg_name());
+      }
+    }
+      break;
+
+    default: {
+      //TODO:
     }
   }
 

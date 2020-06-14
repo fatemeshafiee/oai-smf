@@ -68,7 +68,7 @@ using namespace smf;
 extern smf_app *smf_app_inst;
 
 //-----------------------------------------------------------------------------------------------------
-void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
+bool smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
                                        uint8_t n1_msg_type,
                                        std::string &nas_msg_str,
                                        cause_value_5gsm_e sm_cause) {
@@ -103,7 +103,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
         Logger::smf_app().error(
             "Cannot create an PDU Session Establishment Accept for this message (type %d)",
             msg.get_msg_type());
-        return;
+        return false;
       }
 
       pdu_session_create_sm_context_response &sm_context_res =
@@ -112,6 +112,13 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //get default QoS value
       qos_flow_context_updated qos_flow = { };
       qos_flow = sm_context_res.get_qos_flow_context();
+      //check the QoS Flow
+      if ((qos_flow.qfi.qfi < QOS_FLOW_IDENTIFIER_FIRST )
+          or (qos_flow.qfi.qfi > QOS_FLOW_IDENTIFIER_LAST )) {
+        //error
+        Logger::smf_app().error("Incorrect QFI %d", qos_flow.qfi.qfi);
+        return false;
+      }
 
       Logger::smf_app().info(
           "PDU_SESSION_ESTABLISHMENT_ACCEPT, encode starting...");
@@ -149,18 +156,21 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //authorized QoS rules of the PDU session: QOSRules (Section 6.2.5@3GPP TS 24.501)
       //(Section 6.4.1.3@3GPP TS 24.501 V16.1.0) Make sure that the number of the packet filters used in the authorized QoS rules of the PDU Session does not
       // exceed the maximum number of packet filters supported by the UE for the PDU session
-      sm_msg->pdu_session_establishment_accept.qosrules.lengthofqosrulesie =
-          qos_flow.qos_rules.size();
-      sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie =
-          (QOSRulesIE*) calloc(qos_flow.qos_rules.size(), sizeof(QOSRulesIE));
+      if (qos_flow.qos_rules.size() > 0) {
+        sm_msg->pdu_session_establishment_accept.qosrules.lengthofqosrulesie =
+            qos_flow.qos_rules.size();
+        sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie =
+            (QOSRulesIE*) calloc(qos_flow.qos_rules.size(), sizeof(QOSRulesIE));
 
-      int i = 0;
-      for (auto rule : qos_flow.qos_rules) {
-        sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[i]
-            .qosruleidentifer = rule.second.qosruleidentifer;
-        memcpy(&sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[i],
-               &rule.second, sizeof(QOSRulesIE));
-        i++;
+        int i = 0;
+        for (auto rule : qos_flow.qos_rules) {
+          sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[i]
+              .qosruleidentifer = rule.second.qosruleidentifer;
+          memcpy(
+              &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie[i],
+              &rule.second, sizeof(QOSRulesIE));
+          i++;
+        }
       }
 
       //SessionAMBR
@@ -179,7 +189,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       } else {
         Logger::smf_app().warn(
             "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
-        //TODO:
+        return false;
       }
 
       //Presence
@@ -298,8 +308,11 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       nas_msg_str = n1Message;
 
       //free memory
-      free_wrapper(
-          (void**) &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie);
+      if (qos_flow.qos_rules.size() > 0) {
+        free_wrapper(
+            (void**) &sm_msg->pdu_session_establishment_accept.qosrules
+                .qosrulesie);
+      }
       free_wrapper(
           (void**) &sm_msg->pdu_session_establishment_accept.qosflowdescriptions
               .qosflowdescriptionscontents);
@@ -434,7 +447,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       } else {
         Logger::smf_app().warn(
             "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
-        //TODO:
+        return false;
       }
 
       bool find_dnn = sc.get()->find_dnn_context(sm_context_res.get_snssai(),
@@ -447,8 +460,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       if (!find_dnn or !find_pdu) {
         //error
         Logger::smf_app().warn("DNN or PDU session context does not exist!");
-        //TODO:
-        return;
+        return false;
       }
 
       //PTI
@@ -474,6 +486,10 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
       //Get the authorized QoS Rules
       std::vector<QOSRulesIE> qos_rules;
       sp.get()->get_qos_rules_to_be_synchronised(qos_rules);
+
+      if (qos_rules.size() == 0) {
+        return false;
+      }
 
       sm_msg->pdu_session_modification_command.qosrules.lengthofqosrulesie =
           qos_rules.size();
@@ -630,7 +646,7 @@ void smf_n1_n2::create_n1_sm_container(pdu_session_msg &msg,
 }
 
 //------------------------------------------------------------------------------
-void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
+bool smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
                                          uint8_t ngap_msg_type,
                                          n2_sm_info_type_e ngap_ie_type,
                                          std::string &ngap_msg_str) {
@@ -684,6 +700,10 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
               qos_flows.begin(); it != qos_flows.end(); ++it)
             Logger::smf_app().debug("QoS Flow context to be updated QFI %d",
                                     it->first);
+
+          if (qos_flows.empty()) {
+            return false;
+          }
           //TODO: support only 1 qos flow
           qos_flow = qos_flows.begin()->second;
 
@@ -703,7 +723,15 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
                                  msg.get_msg_type());
           //TODO:
           free_wrapper((void**) &ngap_IEs);
-          return;
+          return false;
+      }
+
+      //check the QoS Flow
+      if ((qos_flow.qfi.qfi < QOS_FLOW_IDENTIFIER_FIRST )
+          or (qos_flow.qfi.qfi > QOS_FLOW_IDENTIFIER_LAST )) {
+        //error
+        Logger::smf_app().error("Incorrect QFI %d", qos_flow.qfi.qfi);
+        return false;
       }
 
       //PDUSessionAggregateMaximumBitRate
@@ -734,7 +762,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       } else {
         Logger::smf_app().warn(
             "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
-        //TODO:
+        return false;
       }
 
       ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list,
@@ -801,8 +829,11 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
       pduSessionType->criticality = Ngap_Criticality_reject;
       pduSessionType->value.present =
           Ngap_PDUSessionResourceSetupRequestTransferIEs__value_PR_PDUSessionType;
-      pduSessionType->value.choice.PDUSessionType = msg.get_pdu_session_type();  //TODO: different between Ngap_PDUSessionType_ipv4 vs pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4
+      pduSessionType->value.choice.PDUSessionType = msg.get_pdu_session_type()
+          - 1;  //TODO: dirty code, difference between Ngap_PDUSessionType_ipv4 vs pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4 (TS 38.413 vs TS 24.501)
       ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, pduSessionType);
+      Logger::smf_app().debug("PDU Session Type: %d ",
+                              msg.get_pdu_session_type());
 
       //SecurityIndication
       //TODO: should get from UDM
@@ -885,7 +916,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         Logger::smf_app().warn(
             "NGAP PDU Session Resource Setup Request Transfer encode failed (encode size %d)",
             encoded_size);
-        return;
+        return false;
       }
 
 #if DEBUG_IS_ON
@@ -944,6 +975,14 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
                                 it->first);
       //TODO: support only 1 qos flow
       qos_flow_context_updated qos_flow = qos_flows.begin()->second;
+
+      //check the QoS Flow
+      if ((qos_flow.qfi.qfi < QOS_FLOW_IDENTIFIER_FIRST )
+          or (qos_flow.qfi.qfi > QOS_FLOW_IDENTIFIER_LAST )) {
+        //error
+        Logger::smf_app().error("Incorrect QFI %d", qos_flow.qfi.qfi);
+        return false;
+      }
 
       Logger::smf_app().debug(
           "QoS Flow, UL F-TEID ID " "0x%" PRIx32 ", IP Address %s ",
@@ -1161,7 +1200,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         Logger::smf_app().warn(
             "NGAP PDU Session Resource Modify Request Transfer encode failed (encoded size %d)",
             encoded_size);
-        return;
+        return false;
       }
 
 #if DEBUG_IS_ON
@@ -1285,7 +1324,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         Logger::smf_app().warn(
             "NGAP PDU Session Resource Setup Response Transfer encode failed (encoded size %d)",
             encoded_size);
-        return;
+        return false;
       }
 
 #if DEBUG_IS_ON
@@ -1395,7 +1434,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         Logger::smf_app().warn(
             " NGAP PDU Session Resource Modify Response Transfer encode failed (encoded size %d)",
             encoded_size);
-        return;
+        return false;
       }
 
 #if DEBUG_IS_ON
@@ -1471,7 +1510,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         Logger::smf_app().warn(
             "NGAP PDU Session Release Command encode failed (encoded size %d)",
             encoded_size);
-        return;
+        return false;
       }
 
 #if DEBUG_IS_ON
@@ -1515,7 +1554,7 @@ void smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
         Logger::smf_app().warn(
             "NGAP PDU Session Release Command encode failed (encoded size %d)",
             encoded_size);
-        return;
+        return false;
       }
 
 #if DEBUG_IS_ON
@@ -1606,9 +1645,9 @@ int smf_n1_n2::decode_n2_sm_information(
 
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
-    return RETURNerror;
+    return RETURNerror ;
   }
-  return RETURNok;
+  return RETURNok ;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1635,9 +1674,9 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror;
+    return RETURNerror ;
   }
-  return RETURNok;
+  return RETURNok ;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1664,9 +1703,9 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror;
+    return RETURNerror ;
   }
-  return RETURNok;
+  return RETURNok ;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1693,7 +1732,7 @@ int smf_n1_n2::decode_n2_sm_information(
   if (rc.code != RC_OK) {
     Logger::smf_app().warn("asn_decode failed with code %d", rc.code);
 
-    return RETURNerror;
+    return RETURNerror ;
   }
-  return RETURNok;
+  return RETURNok ;
 }

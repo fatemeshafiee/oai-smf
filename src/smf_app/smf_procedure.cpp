@@ -465,7 +465,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
   if (n11_triggered_pending->res.get_cause() == REQUEST_ACCEPTED) {
     json_data["n2InfoContainer"]["n2InformationClass"] =
     N1N2_MESSAGE_CLASS;
-    json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+    json_data["n2InfoContainer"]["smInfo"]["pduSessionId"] =
         n11_triggered_pending->res.get_pdu_session_id();
     //N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
     json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
@@ -477,6 +477,15 @@ void session_create_sm_context_procedure::handle_itti_msg(
     json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
         n11_triggered_pending->res.get_snssai().sD;
     json_data["n2InfoContainer"]["ranInfo"] = "SM";
+
+    //N1N2MsgTxfrFailureNotification
+    std::string callback_uri = std::string(
+        inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) + ":"
+        + std::to_string(smf_cfg.amf_addr.port)
+        + fmt::format(NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE,
+                      supi_str.c_str());
+    json_data["n1n2FailureTxfNotifURI"] = callback_uri.c_str();
+    //json_data["n1n2FailureTxfNotifURI"] = "http://192.168.122.1/namf-comm/callback/N1N2MsgTxfrFailureNotification/imsi-310410000000001-1";
   }
   //Others information
   //n11_triggered_pending->res.n1n2_message_transfer_data["pti"] = 1;  //Don't need this info for the moment
@@ -1025,6 +1034,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
         smf_app_inst->trigger_http_response(
             http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
             smContextUpdateError, n11_triggered_pending->pid);
+        return;
       }
     }
       break;

@@ -85,6 +85,7 @@ void SMFApiServer::init(size_t thr) {
 
 }
 void SMFApiServer::start() {
+  Logger::smf_api_server().info("HTTP1 server started");
   m_httpEndpoint->setHandler(m_router->handler());
   m_httpEndpoint->serve();
 

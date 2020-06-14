@@ -119,6 +119,10 @@ class smf_app {
   std::map<scid_t, std::shared_ptr<smf_context_ref>> scid2smf_context;
   mutable std::shared_mutex m_scid2smf_context;
   //Store promise IDs for Create/Update session
+  mutable std::shared_mutex m_sm_context_create_promises;
+  mutable std::shared_mutex m_sm_context_update_promises;
+  mutable std::shared_mutex m_sm_context_release_promises;
+
   std::map<uint32_t,
       boost::shared_ptr<boost::promise<pdu_session_create_sm_context_response>>> sm_context_create_promises;
   std::map<uint32_t,
@@ -391,6 +395,18 @@ class smf_app {
   bool is_scid_2_smf_context(const scid_t &scid) const;
 
   /*
+   * Verify whether a SMF Context Reference with a given ID exist
+   * @param [const supi64_t &] supi64: Supi64
+   * @param [const std::string &] dnn: DNN
+   * @param [const snssai_t &] snssai: S-NSSAI
+   * @param [const pdu_session_id_t &] pid: PDU Session ID
+   *
+   * @return bool: True if a SMF Context Reference exist, otherwise return false
+   */
+  bool is_scid_2_smf_context(const supi64_t &supi, const std::string &dnn, const snssai_t &snssai,
+                                      const pdu_session_id_t &pid ) const;
+
+  /*
    * Find SMF Context Reference by its ID
    * @param [const scid_t &] scid: SM Context Reference ID
    * @param [std::shared_ptr<smf_context_ref> &] scf : Shared_ptr to a SMF Context Reference
@@ -604,6 +620,7 @@ class smf_app {
    * @param [const uint32_t &] http_code: Status code of HTTP response
    * @param [const oai::smf_server::model::SmContextCreateError &] smContextCreateError: store the json content of response message
    * @param [uint32_t &] promise_id: Promise Id
+   * @param [uint8_t] msg_type: Type of HTTP message (Update/Release)
    * @return void
    */
   void trigger_http_response(
@@ -617,6 +634,7 @@ class smf_app {
    * @param [const oai::smf_server::model::SmContextUpdateError &] smContextUpdateError: store the json content of response message
    * @param [const std::string &] n1_sm_msg: N1 SM message
    * @param [uint32_t &] promise_id: Promise Id
+   * @param [uint8_t] msg_type: Type of HTTP message (Update/Release)
    * @return void
    */
   void trigger_http_response(
@@ -628,7 +646,7 @@ class smf_app {
    * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
    * @param [const uint32_t &] http_code: Status code of HTTP response
    * @param [uint32_t &] promise_id: Promise Id
-   * @param [uint8_t] msg_type
+   * @param [uint8_t] msg_type: Type of HTTP message (Create/Update/Release)
    * @return void
    */
   void trigger_http_response(const uint32_t &http_code, uint32_t &promise_id,
