@@ -45,7 +45,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include "3gpp_29.274.hpp"
+//#include "3gpp_29.274.hpp"
 #include "common_defs.h"
 #include "epc.h"
 #include "if.hpp"

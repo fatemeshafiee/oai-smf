@@ -503,7 +503,12 @@ void smf_app::handle_itti_msg(itti_n11_create_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Create SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_create_sm_context_response sm_context_response = { };
-  sm_context_create_promises[m.pid]->set_value(m.res);
+  std::shared_lock lock(m_sm_context_create_promises);
+  if (sm_context_create_promises.count(m.pid) > 0 ){
+    sm_context_create_promises[m.pid]->set_value(m.res);
+    //Remove this promise from list
+    sm_context_create_promises.erase(m.pid);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -511,7 +516,12 @@ void smf_app::handle_itti_msg(itti_n11_update_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Update SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_update_sm_context_response sm_context_response = { };
-  sm_context_update_promises[m.pid]->set_value(m.res);
+  std::shared_lock lock(m_sm_context_update_promises);
+  if (sm_context_update_promises.count(m.pid) > 0 ){
+    sm_context_update_promises[m.pid]->set_value(m.res);
+    //Remove this promise from list
+    sm_context_update_promises.erase(m.pid);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -519,7 +529,12 @@ void smf_app::handle_itti_msg(itti_n11_release_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Release SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_release_sm_context_response sm_context_response = { };
-  sm_context_release_promises[m.pid]->set_value(m.res);
+  std::shared_lock lock(m_sm_context_release_promises);
+  if (sm_context_release_promises.count(m.pid) > 0 ){
+    sm_context_release_promises[m.pid]->set_value(m.res);
+    //Remove this promise from list
+    sm_context_release_promises.erase(m.pid);
+  }
 }
 
 //------------------------------------------------------------------------------

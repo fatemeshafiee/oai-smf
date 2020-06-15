@@ -89,12 +89,6 @@ class Logger {
   static _Logger& async_cmd() {
     return *singleton().m_async_cmd;
   }
-  static _Logger& gtpv1_u() {
-    return *singleton().m_gtpv1_u;
-  }
-  static _Logger& gtpv2_c() {
-    return *singleton().m_gtpv2_c;
-  }
   static _Logger& itti() {
     return *singleton().m_itti;
   }
@@ -146,8 +140,6 @@ class Logger {
   std::string m_pattern;
 
   _Logger *m_async_cmd;
-  _Logger *m_gtpv1_u;
-  _Logger *m_gtpv2_c;
   _Logger *m_itti;
   _Logger *m_smf_app;
   _Logger *m_system;

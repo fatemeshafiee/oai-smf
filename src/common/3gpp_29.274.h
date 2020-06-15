@@ -38,8 +38,7 @@
 #include <stdint.h>
 #include <string>
 
-extern const char *interface_type2char[];
-
+//extern const char *interface_type2char[];
 namespace gtpv2c {
 
 struct gtpc_exception : public std::exception {
@@ -1337,6 +1336,49 @@ struct interface_type_s {
 
   //------------------------------------------------------------------------------
   std::string toString() const {
+
+    const char* interface_type2char[40] = {
+        "S1_U_ENODEB_GTP_U",
+        "S1_U_SGW_GTP_U",
+        "S12_RNC_GTP_U",
+        "S12_SGW_GTP_U",
+        "S5_S8_SGW_GTP_U",
+        "S5_S8_PGW_GTP_U",
+        "S5_S8_SGW_GTP_C",
+        "S5_S8_PGW_GTP_C",
+        "S5_S8_SGW_PMIPv6",
+        "S5_S8_PGW_PMIPv6",
+        "S11_MME_GTP_C",
+        "S11_S4_SGW_GTP_C",
+        "S10_MME_GTP_C",
+        "S3_MME_GTP_C",
+        "S3_SGSN_GTP_C",
+        "S4_SGSN_GTP_U",
+        "S4_SGW_GTP_U",
+        "S4_SGSN_GTP_C",
+        "S16_SGSN_GTP_C",
+        "ENODEB_GTP_U_DL_DATA_FORWARDING",
+        "ENODEB_GTP_U_UL_DATA_FORWARDING",
+        "RNC_GTP_U_DATA_FORWARDING",
+        "SGSN_GTP_U_DATA_FORWARDING",
+        "SGW_UPF_GTP_U_DL_DATA_FORWARDING",
+        "SM_MBMS_GW_GTP_C",
+        "SN_MBMS_GW_GTP_C",
+        "SM_MME_GTP_C",
+        "SN_SGSN_GTP_C",
+        "SGW_GTP_U_UL_DATA_FORWARDING",
+        "SN_SGSN_GTP_U",
+        "S2B_EPDG_GTP_C",
+        "S2B_U_EPDG_GTP_U",
+        "S2B_PGW_GTP_C",
+        "S2B_U_PGW_GTP_U",
+        "S2A_TWAN_GTP_U",
+        "S2A_TWAN_GTP_C",
+        "S2A_PGW_GTP_C",
+        "S2A_PGW_GTP_U",
+        "S11_MME_GTP_U",
+        "S11_SGW_GTP_U"};
+
     if ((interface_type >= INTERFACE_TYPE_MIN)
         && (interface_type <= INTERFACE_TYPE_MAX)) {
       return std::string(interface_type2char[interface_type]);

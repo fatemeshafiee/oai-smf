@@ -39,7 +39,6 @@
 #include "itti.hpp"
 #include "itti_msg_n4_restore.hpp"
 #include "logger.hpp"
-#include "msg_gtpv2c.hpp"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
 #include "smf_pfcp_association.hpp"
