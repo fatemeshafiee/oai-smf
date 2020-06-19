@@ -777,6 +777,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
 
   //Step 4. Verify the session is already existed
   if (is_scid_2_smf_context(supi64, dnn, snssai, pdu_session_id)) {
+    //TODO: should delete the local context (including and any associated resources in the UPF and PCF) and create a new one
     Logger::smf_app().warn(
         "PDU Session already existed (SUPI " SUPI_64_FMT ", DNN %s, NSSAI (sst %d, sd %s), PDU Session ID %d)",
         supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);
