@@ -270,97 +270,43 @@ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/gtpv2c ${CMAKE_CURRENT_BI
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/pfcp ${CMAKE_CURRENT_BINARY_DIR}/pfcp)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/udp ${CMAKE_CURRENT_BINARY_DIR}/udp)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/api-server ${CMAKE_CURRENT_BINARY_DIR}/api-server)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/nas ${CMAKE_CURRENT_BINARY_DIR}/nas)
 
 #ENABLE_TESTING()
 #ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/test ${CMAKE_CURRENT_BINARY_DIR}/test)
 
 ################################################################################
 # Specific part for oai_smf folder
-#SMF_API
-set(SMF_API_SERVER_DIR "${SRC_TOP_DIR}/api-server")
-  
-file(GLOB SMF_API_SERVER_src_files
-    ${SMF_API_SERVER_DIR}/smf-http2-server.cpp
-    ${SMF_API_SERVER_DIR}/smf-api-server.cpp
-    ${SMF_API_SERVER_DIR}/model/*.cpp
-    ${SMF_API_SERVER_DIR}/api/*.cpp
-    ${SMF_API_SERVER_DIR}/impl/*.cpp
-)
- 
-set(SMF_API_SERVER_include_files
-  ${SMF_API_SERVER_DIR}/api
-  ${SMF_API_SERVER_DIR}/impl
-  ${SMF_API_SERVER_DIR}/model
-  ${SMF_API_SERVER_DIR}
-  )
-add_library(SMF_API ${SMF_API_SERVER_src_files})
-  
-#for NAS
-set(NAS_DIR "${SRC_TOP_DIR}/nas")
-
-file(GLOB NAS_src_files
-    ${NAS_DIR}/*.c
-    ${NAS_DIR}/ies/*.c
-    ${NAS_DIR}/network/*.c
-    ${NAS_DIR}/mm/msg/*.c
-    ${NAS_DIR}/mm/*.c
-    ${NAS_DIR}/sm/*.c
-    ${NAS_DIR}/sm/msg/*.c
-    ${SRC_TOP_DIR}/utils/conversions.c
-    ${SRC_TOP_DIR}/utils/pid_file.c
-    ${SRC_TOP_DIR}/utils/hashtable.c
-    ${SRC_TOP_DIR}/utils/obj_hashtable.c
-    ${SRC_TOP_DIR}/utils/TLVDecoder.c
-    ${SRC_TOP_DIR}/utils/TLVEncoder.c
-    ${SRC_TOP_DIR}/utils/dynamic_memory_check.c
-    ${SRC_TOP_DIR}/utils/backtrace.c
-    ${SRC_TOP_DIR}/utils/bstr/*.c
-    ${SRC_TOP_DIR}/utils/multipartparser.c
-    ${SRC_TOP_DIR}/nas/security/*.c
-    ${SRC_TOP_DIR}/common/*.c
-    ${SRC_TOP_DIR}/ngap/asn1c/*.c
-    ${SRC_TOP_DIR}/ngap/ies/*.c
-)   
-
-set(NAS_include_files
-  ${NAS_DIR}/ies
-  ${NAS_DIR}/network
-  ${NAS_DIR}/mm
-  ${NAS_DIR}/mm/msg
-  ${NAS_DIR}/sm
-  ${NAS_DIR}/sm/msg
-  ${NAS_DIR}
-  ${NAS_DIR}/security
-  ${SRC_TOP_DIR}/utils
-  ${SRC_TOP_DIR}/utils/bstr
-  ${SRC_TOP_DIR}/ngap/asn1c
-  ${SRC_TOP_DIR}/ngap/ies
-  ${SRC_TOP_DIR}/common
-  )
-add_library(NAS ${NAS_src_files} ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES})
-
-set(NGAP_include_files
-  ${SRC_TOP_DIR}/ngap/asn1c
-  ${SRC_TOP_DIR}/ngap/ies
-  ${SRC_TOP_DIR}/common/ngap
-  )
-
 add_definitions("-DPACKAGE_NAME=\"SMF\"")
 
 include_directories(${SRC_TOP_DIR}/smf_app)
 include_directories(${SRC_TOP_DIR}/oai_smf)
-include_directories(${SRC_TOP_DIR}/common)
 include_directories(${SRC_TOP_DIR}/itti)
+include_directories(${SRC_TOP_DIR}/common)
 include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/nas)
+include_directories(${SRC_TOP_DIR}/common/ngap)
 include_directories(${SRC_TOP_DIR}/common/utils)
 include_directories(${SRC_TOP_DIR}/gtpv2c)
 include_directories(${SRC_TOP_DIR}/pfcp)
 include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
-include_directories(${SMF_API_SERVER_include_files})
-include_directories(${NAS_include_files})
-include_directories(${NGAP_include_files})
+include_directories(${SRC_TOP_DIR}/api-server)
+include_directories(${SRC_TOP_DIR}/api-server/api)
+include_directories(${SRC_TOP_DIR}/api-server/impl)
+include_directories(${SRC_TOP_DIR}/api-server/model)
+include_directories(${SRC_TOP_DIR}/nas)
+include_directories(${SRC_TOP_DIR}/nas/ies)
+include_directories(${SRC_TOP_DIR}/nas/mm)
+include_directories(${SRC_TOP_DIR}/nas/mm/msg)
+include_directories(${SRC_TOP_DIR}/nas/sm)
+include_directories(${SRC_TOP_DIR}/nas/sm/msg)
+include_directories(${SRC_TOP_DIR}/nas/security)
+include_directories(${SRC_TOP_DIR}/ngap)
+include_directories(${SRC_TOP_DIR}/ngap/asn1c)
+include_directories(${SRC_TOP_DIR}/ngap/ies)
+include_directories(${SRC_TOP_DIR}/utils)
+include_directories(${SRC_TOP_DIR}/utils/bstr)
 
 add_executable(smf
   ${SRC_TOP_DIR}/oai_smf/main.cpp
