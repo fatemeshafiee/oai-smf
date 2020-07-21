@@ -1485,7 +1485,7 @@ bool pdu_session_establishment(uint8_t pid, uint8_t context_id,
   bool status = false;
   if (send_pdu_session_establishment_request(pid, smf_ip_address, http_version,
                                              port)) {
-    usleep(100000);
+    //usleep(100000);
     status = send_pdu_session_update_sm_context_establishment(context_id,
                                                               smf_ip_address,
                                                               http_version,
@@ -1576,10 +1576,14 @@ void test_all_procedures_for_multiple_threads(std::string smf_ip_address,
 
   //bool status = false;
 
-  std::thread t1(&send_pdu_session_establishment_request, pid, smf_ip_address,
+/*  std::thread t1(&send_pdu_session_establishment_request, pid, smf_ip_address,
                  http_version, port);
   std::thread t2(&send_pdu_session_update_sm_context_establishment, context_id,
                  smf_ip_address, http_version, port);
+*/
+  std::thread t1(&pdu_session_establishment, pid, context_id, smf_ip_address,
+                  http_version, port);
+
   std::thread t3(&send_pdu_session_update_sm_context_ue_service_request,
                  context_id, smf_ip_address, http_version, port);
   std::thread t4(&send_pdu_session_update_sm_context_ue_service_request_step2,
@@ -1602,7 +1606,7 @@ void test_all_procedures_for_multiple_threads(std::string smf_ip_address,
   //send_release_sm_context_request(pid, smf_ip_address, http_version, port);
 
   t1.join();
-  t2.join();
+//  t2.join();
   t3.join();
   t4.join();
   t5.join();
@@ -1662,11 +1666,11 @@ int main(int argc, char *argv[]) {
   uint8_t context_id = 1;
   uint8_t pid = 1;
 
-  test_all_procedures_for_one_session(pid, context_id, smf_ip_address,
-                                      http_version, port);
+  //test_all_procedures_for_one_session(pid, context_id, smf_ip_address,
+  //                                    http_version, port);
   //test_session_establishment_multiple_threads(smf_ip_address, http_version, port);
-  //test_all_procedures_for_multiple_threads(smf_ip_address, http_version,
-  //                                         port);
+  test_all_procedures_for_multiple_threads(smf_ip_address, http_version,
+                                           port);
   return 0;
 }
 

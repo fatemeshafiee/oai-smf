@@ -34,13 +34,12 @@
 #include <set>
 
 #include "3gpp_29.244.hpp"
-#include "3gpp_29.274.hpp"
+//#include "3gpp_29.274.hpp"
 #include "itti_msg_n11.hpp"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_n4_restore.hpp"
 #include "itti_msg_nx.hpp"
 #include "msg_pfcp.hpp"
-#include "msg_gtpv2c.hpp"
 #include "uint_generator.hpp"
 #include "smf_msg.hpp"
 

@@ -41,7 +41,6 @@
 
 #include "3gpp_29.244.h"
 #include "3gpp_29.274.h"
-#include "gtpv2c.hpp"
 #include "pfcp.hpp"
 #include "smf.h"
 
