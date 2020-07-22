@@ -503,7 +503,12 @@ void smf_app::handle_itti_msg(itti_n11_create_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Create SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_create_sm_context_response sm_context_response = { };
-  sm_context_create_promises[m.pid]->set_value(m.res);
+  std::shared_lock lock(m_sm_context_create_promises);
+  if (sm_context_create_promises.count(m.pid) > 0 ){
+    sm_context_create_promises[m.pid]->set_value(m.res);
+    //Remove this promise from list
+    sm_context_create_promises.erase(m.pid);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -511,7 +516,12 @@ void smf_app::handle_itti_msg(itti_n11_update_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Update SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_update_sm_context_response sm_context_response = { };
-  sm_context_update_promises[m.pid]->set_value(m.res);
+  std::shared_lock lock(m_sm_context_update_promises);
+  if (sm_context_update_promises.count(m.pid) > 0 ){
+    sm_context_update_promises[m.pid]->set_value(m.res);
+    //Remove this promise from list
+    sm_context_update_promises.erase(m.pid);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -519,7 +529,12 @@ void smf_app::handle_itti_msg(itti_n11_release_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Release SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_release_sm_context_response sm_context_response = { };
-  sm_context_release_promises[m.pid]->set_value(m.res);
+  std::shared_lock lock(m_sm_context_release_promises);
+  if (sm_context_release_promises.count(m.pid) > 0 ){
+    sm_context_release_promises[m.pid]->set_value(m.res);
+    //Remove this promise from list
+    sm_context_release_promises.erase(m.pid);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -762,6 +777,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
 
   //Step 4. Verify the session is already existed
   if (is_scid_2_smf_context(supi64, dnn, snssai, pdu_session_id)) {
+    //TODO: should delete the local context (including and any associated resources in the UPF and PCF) and create a new one
     Logger::smf_app().warn(
         "PDU Session already existed (SUPI " SUPI_64_FMT ", DNN %s, NSSAI (sst %d, sd %s), PDU Session ID %d)",
         supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);

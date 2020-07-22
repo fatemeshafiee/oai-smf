@@ -36,7 +36,6 @@
 #include <stdlib.h> // srand
 #include <unistd.h> // get_pid(), pause()
 
-using namespace gtpv2c;
 using namespace smf;
 using namespace util;
 using namespace std;

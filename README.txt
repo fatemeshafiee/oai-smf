@@ -19,8 +19,6 @@ openair-cn5g-smf
     ├── common:    Common header files
     │   ├── msg:   ITTI messages definitions.
     │   └── utils: Common utilities.
-    ├── gtpv1u:    Generic GTPV1-U stack implementation.
-    ├── gtpv2c:    Generic GTPV2-C stack implementation.
     ├── itti:      Inter task interface.
     ├── nas:       NAS protocol implememtation.
     ├── ngap:      NGAP protocol implememtation.

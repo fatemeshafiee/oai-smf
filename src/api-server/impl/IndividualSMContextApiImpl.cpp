@@ -220,10 +220,13 @@ void IndividualSMContextApiImpl::update_sm_context(
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(
             "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
-  } else {
+  } else if (json_data.size() > 0 ){
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType("application/json"));
     body = json_data.dump().c_str();
+  } else {
+    response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
+    return;
   }
 
   response.send(Pistache::Http::Code(sm_context_response.get_http_code()),

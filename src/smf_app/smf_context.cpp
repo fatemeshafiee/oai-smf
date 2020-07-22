@@ -1220,14 +1220,14 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   bool find_pdu = sd.get()->find_pdu_session(pdu_session_id, sp);
 
   if (nullptr == sp.get()) {
-    Logger::smf_app().debug("Create a new PDN connection");
+    Logger::smf_app().debug("Create a new PDU session");
     sp = std::shared_ptr<smf_pdu_session>(new smf_pdu_session());
     sp.get()->pdn_type.pdn_type = smreq->req.get_pdu_session_type();
     sp.get()->pdu_session_id = pdu_session_id;
     sp.get()->amf_id = smreq->req.get_serving_nf_id();  //amf id
     sd->insert_pdu_session(sp);
   } else {
-    Logger::smf_app().debug("PDN connection is already existed!");
+    Logger::smf_app().debug("PDU session is already existed!");
     //trigger to send reply to AMF
     smf_app_inst->trigger_http_response(
         http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
@@ -2317,6 +2317,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         sm_context_resp_pending->session_procedure_type = procedure_type;
         //don't need to create a procedure to update UPF
+        smf_app_inst->trigger_http_response(
+            http_status_code_e::HTTP_STATUS_CODE_200_OK,
+            smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
       }
         break;
 
