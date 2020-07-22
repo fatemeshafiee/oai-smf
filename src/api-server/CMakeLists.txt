@@ -18,7 +18,6 @@ include_directories(${SRC_TOP_DIR}/nas/sm/msg)
 include_directories(${SRC_TOP_DIR}/ngap/asn1c)
 include_directories(${SRC_TOP_DIR}/ngap/ies)
 include_directories(${SRC_TOP_DIR}/udp)
-include_directories(${SRC_TOP_DIR}/gtpv2c)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
 file(GLOB SMF_API_SERVER_src_files

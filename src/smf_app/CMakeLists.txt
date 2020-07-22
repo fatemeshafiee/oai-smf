@@ -44,8 +44,6 @@ include_directories(${SRC_TOP_DIR}/api-server/impl)
 include_directories(${SRC_TOP_DIR}/api-server/model)
 include_directories(${SRC_TOP_DIR}/api-server/)
 
-
-
 add_library (SMF STATIC
   ${SRC_TOP_DIR}/common/ngap/ngap_common.c
   smf_app.cpp
