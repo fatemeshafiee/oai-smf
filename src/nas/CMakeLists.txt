@@ -27,7 +27,6 @@ file(GLOB NAS_src_files
     ${SRC_TOP_DIR}/utils/conversions.c
     ${SRC_TOP_DIR}/utils/pid_file.c
     ${SRC_TOP_DIR}/utils/hashtable.c
-    ${SRC_TOP_DIR}/utils/obj_hashtable.c
     ${SRC_TOP_DIR}/utils/TLVDecoder.c
     ${SRC_TOP_DIR}/utils/TLVEncoder.c
     ${SRC_TOP_DIR}/utils/dynamic_memory_check.c

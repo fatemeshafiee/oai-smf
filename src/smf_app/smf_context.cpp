@@ -1656,7 +1656,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           for (int i = 0; i < number_of_flow_descriptions; i++) {
             if (qos_flow_description[i].qfi == NO_QOS_FLOW_IDENTIFIER_ASSIGNED) {
               //TODO: generate new QFI
-              generated_qfi.qfi = (uint8_t) 77;        //hardcoded for now
+              generated_qfi.qfi = (uint8_t) 60; //hardcoded for now
               qos_flow_description_content = qos_flow_description[i];
               qos_flow_description_content.qfi = generated_qfi.qfi;
               break;
