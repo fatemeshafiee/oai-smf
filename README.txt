@@ -26,7 +26,6 @@ openair-cn5g-smf
     ├── pfcp:      Generic PFCP stack implementation.
     ├── smf_app:   SMF network functions procedures and contexts.
     ├── test:      Minimal implementation for AMF, UDM network functions for testing purpose.
-    ├── utils:     Common utilities.   
     └── udp :      UDP server implementation.
 
 # OAI-SMF testbed: network topology

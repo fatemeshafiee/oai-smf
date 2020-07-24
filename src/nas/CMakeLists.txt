@@ -6,13 +6,12 @@ include_directories(${NAS_DIR}/mm/msg)
 include_directories(${NAS_DIR}/sm)
 include_directories(${NAS_DIR}/sm/msg)
 include_directories(${NAS_DIR}/security)
-include_directories(${SRC_TOP_DIR}/utils)
-include_directories(${SRC_TOP_DIR}/utils/bstr)
 include_directories(${SRC_TOP_DIR}/ngap/asn1c)
 include_directories(${SRC_TOP_DIR}/ngap/ies)
 include_directories(${SRC_TOP_DIR}/common)
 include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/utils)
+include_directories(${SRC_TOP_DIR}/common/utils/bstr)
 include_directories(${SRC_TOP_DIR}/common/nas)
 include_directories(${SRC_TOP_DIR}/common/ngap)
   
@@ -24,15 +23,8 @@ file(GLOB NAS_src_files
     ${NAS_DIR}/mm/*.c
     ${NAS_DIR}/sm/*.c
     ${NAS_DIR}/sm/msg/*.c
-    ${SRC_TOP_DIR}/utils/conversions.c
-    ${SRC_TOP_DIR}/utils/pid_file.c
-    ${SRC_TOP_DIR}/utils/hashtable.c
-    ${SRC_TOP_DIR}/utils/TLVDecoder.c
-    ${SRC_TOP_DIR}/utils/TLVEncoder.c
-    ${SRC_TOP_DIR}/utils/dynamic_memory_check.c
-    ${SRC_TOP_DIR}/utils/backtrace.c
-    ${SRC_TOP_DIR}/utils/bstr/*.c
-    ${SRC_TOP_DIR}/utils/multipartparser.c
+    ${SRC_TOP_DIR}/common/utils/*.c
+    ${SRC_TOP_DIR}/common/utils/bstr/*.c
     ${SRC_TOP_DIR}/nas/security/*.c
     ${SRC_TOP_DIR}/common/*.c
     ${SRC_TOP_DIR}/ngap/asn1c/*.c
