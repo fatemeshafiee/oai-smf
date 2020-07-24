@@ -23,8 +23,6 @@
 
 cmake_minimum_required (VERSION 3.0.2)
 
-project(OpenAirInterface)
-
 ###########################################
 # macros to define options as there is numerous options in oai
 ################################################
