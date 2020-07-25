@@ -124,7 +124,6 @@ int encode_qos_rules(QOSRules qosrules, uint8_t iei, uint8_t *buffer,
 int decode_qos_rules(QOSRules *qosrules, uint8_t iei, uint8_t *buffer,
                      uint32_t len) {
   int decoded = 0;
-  uint16_t ielen = 0;
   int decode_result = 0;
   uint8_t bitstream = 0;
   int i = 0, j = 0;

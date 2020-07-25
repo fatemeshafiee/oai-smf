@@ -38,12 +38,6 @@
 #ifndef FILE_CONVERSIONS_SEEN
 #define FILE_CONVERSIONS_SEEN
 
-
-int BIT_STRING_fromBuf(BIT_STRING_t *st, const uint8_t *str, unsigned int bit_len);
-
-uint32_t asn1str_to_u32(const OCTET_STRING_t *in,  uint32_t *tac_Value);
-
-
 /* Endianness conversions for 16 and 32 bits integers from host to network order */
 #if (BYTE_ORDER == LITTLE_ENDIAN)
 # define hton_int32(x)   \

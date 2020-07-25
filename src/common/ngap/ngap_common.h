@@ -24,7 +24,6 @@
 
 #include  "common_defs.h"
 #include  "common_types.h"
-#include  "conversions.h"
 #include  "bstrlib.h"
 
 #include  "Ngap_NGAP-PDU.h"

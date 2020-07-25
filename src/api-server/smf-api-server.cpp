@@ -76,7 +76,7 @@ using namespace oai::smf_server::api;
 void SMFApiServer::init(size_t thr) {
   auto opts = Pistache::Http::Endpoint::options().threads(thr);
   opts.flags(Pistache::Tcp::Options::ReuseAddr);
-  opts.maxPayload(PISTACHE_SERVER_MAX_PAYLOAD);
+  opts.maxRequestSize(PISTACHE_SERVER_MAX_PAYLOAD);
   m_httpEndpoint->init(opts);
   m_individualPDUSessionHSMFApiImpl->init();
   m_individualSMContextApiImpl->init();

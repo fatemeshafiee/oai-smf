@@ -23,8 +23,6 @@
 
 cmake_minimum_required (VERSION 3.0.2)
 
-project (OpenAirInterface)
-
 ###########################################
 # macros to define options as there is numerous options in oai
 ################################################
@@ -286,6 +284,7 @@ include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/nas)
 include_directories(${SRC_TOP_DIR}/common/ngap)
 include_directories(${SRC_TOP_DIR}/common/utils)
+include_directories(${SRC_TOP_DIR}/common/utils/bstr)
 include_directories(${SRC_TOP_DIR}/pfcp)
 include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
@@ -303,8 +302,6 @@ include_directories(${SRC_TOP_DIR}/nas/security)
 include_directories(${SRC_TOP_DIR}/ngap)
 include_directories(${SRC_TOP_DIR}/ngap/asn1c)
 include_directories(${SRC_TOP_DIR}/ngap/ies)
-include_directories(${SRC_TOP_DIR}/utils)
-include_directories(${SRC_TOP_DIR}/utils/bstr)
 
 add_executable(smf
   ${SRC_TOP_DIR}/oai_smf/main.cpp

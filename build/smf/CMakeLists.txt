@@ -19,6 +19,8 @@
 #      contact@openairinterface.org
 ################################################################################
 cmake_minimum_required (VERSION 3.0.2)
+project(oai-cn)
+
 # Override options for SMF
 set (  PACKAGE_NAME                    "SMF" )
 set (  STATIC_LINKING                   False )
