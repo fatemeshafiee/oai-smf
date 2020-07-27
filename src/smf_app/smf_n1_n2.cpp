@@ -702,6 +702,7 @@ bool smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
                                     it->first);
 
           if (qos_flows.empty()) {
+            free_wrapper((void**) &ngap_IEs);
             return false;
           }
           //TODO: support only 1 qos flow

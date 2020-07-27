@@ -21,6 +21,7 @@ namespace model {
 
 AccessType::AccessType()
 {
+  m_value = eAccessType::AccessType_3GPP_ACCESS;
 }
 
 AccessType::~AccessType()

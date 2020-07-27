@@ -2,12 +2,12 @@
  * Licensed to the OpenAirInterface (OAI) Software Alliance under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The OpenAirInterface Software Alliance licenses this file to You under 
- * the Apache License, Version 2.0  (the "License"); you may not use this file
- * except in compliance with the License.  
+ * The OpenAirInterface Software Alliance licenses this file to You under
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this file
+ * except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.openairinterface.org/?page_id=698
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -187,38 +187,18 @@ nas_stream_encrypt_nia1 (
   IV[2] = ((((uint32_t) stream_cipher->bearer) & 0x0000001F) << 27);
   IV[1] = (uint32_t) (stream_cipher->count) ^ ((uint32_t) (stream_cipher->direction) << 31);
   IV[0] = ((((uint32_t) stream_cipher->bearer) & 0x0000001F) << 27) ^ ((uint32_t) (stream_cipher->direction & 0x00000001) << 15);
-  //printf ("K:\n");
-  //hexprint(K, 16);
-  //printf ("K[0]:%08X\n",K[0]);
-  //printf ("K[1]:%08X\n",K[1]);
-  //printf ("K[2]:%08X\n",K[2]);
-  //printf ("K[3]:%08X\n",K[3]);
-  //printf ("IV:\n");
-  //hexprint(IV, 16);
-  //printf ("IV[0]:%08X\n",IV[0]);
-  //printf ("IV[1]:%08X\n",IV[1]);
-  //printf ("IV[2]:%08X\n",IV[2]);
-  //printf ("IV[3]:%08X\n",IV[3]);
   z[0] = z[1] = z[2] = z[3] = z[4] = 0;
   /*
    * Run SNOW 3G to produce 5 keystream words z_1, z_2, z_3, z_4 and z_5.
    */
   snow3g_initialize (K, IV, &snow_3g_context);
   snow3g_generate_key_stream (5, z, &snow_3g_context);
-  //printf ("z[0]:%08X\n",z[0]);
-  //printf ("z[1]:%08X\n",z[1]);
-  //printf ("z[2]:%08X\n",z[2]);
-  //printf ("z[3]:%08X\n",z[3]);
-  //printf ("z[4]:%08X\n",z[4]);
   P = ((uint64_t) z[0] << 32) | (uint64_t) z[1];
   Q = ((uint64_t) z[2] << 32) | (uint64_t) z[3];
-  //printf ("P:%16lX\n",P);
-  //printf ("Q:%16lX\n",Q);
   /*
    * Calculation
    */
   D = ceil (stream_cipher->blength / 64.0) + 1;
-  //printf ("D:%d\n",D);
   EVAL = 0;
   c = 0x1b;
 
@@ -228,7 +208,6 @@ nas_stream_encrypt_nia1 (
   for (i = 0; i < D - 2; i++) {
     V = EVAL ^ ((uint64_t) hton_int32 (message[2 * i]) << 32 | (uint64_t) hton_int32 (message[2 * i + 1]));
     EVAL = MUL64 (V, P, c);
-    //printf ("Mi: %16X %16X\tEVAL: %16lX\n",hton_int32(message[2*i]),hton_int32(message[2*i+1]), EVAL);
   }
 
   /*
@@ -258,7 +237,6 @@ nas_stream_encrypt_nia1 (
    */
   EVAL = MUL64 (EVAL, Q, c);
   MAC_I = (uint32_t) (EVAL >> 32) ^ z[4];
-  //printf ("MAC_I:%16X\n",MAC_I);
   MAC_I = hton_int32 (MAC_I);
   memcpy ((void *)out, &MAC_I, 4);
   return 0;

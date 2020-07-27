@@ -106,7 +106,6 @@ int nas_message_encode(unsigned char *buffer, const nas_message_t *const msg,
    */
   int size = _nas_message_header_encode(buffer, &msg->header, length);
   if (size < 0) {
-    //OAILOG_FUNC_RETURN (LOG_NAS, TLV_BUFFER_TOO_SHORT);
     return TLV_BUFFER_TOO_SHORT;
   } else if (size > 2) {
     /*
@@ -196,7 +195,7 @@ int nas_message_encode(unsigned char *buffer, const nas_message_t *const msg,
 int nas_message_decode(const unsigned char *const buffer, nas_message_t *msg,
                        size_t length, void *security,
                        nas_message_decode_status_t *status) {
-  //OAILOG_FUNC_IN (LOG_NAS);
+
   fivegmm_security_context_t *fivegmm_security_context =
       (fivegmm_security_context_t*) security;
   int bytes = 0;
@@ -212,12 +211,10 @@ int nas_message_decode(const unsigned char *const buffer, nas_message_t *msg,
   }
   size = _nas_message_header_decode(buffer, &msg->header, length, status,
                                     &is_sr);
-  //OAILOG_DEBUG(LOG_NAS, "return header size(%d)\n",size);
   //OAILOG_DEBUG (LOG_NAS, "_nas_message_header_decode returned size %d\n", size);
 
   if (size < 0) {
     return TLV_BUFFER_TOO_SHORT;
-    //OAILOG_FUNC_RETURN (LOG_NAS, TLV_BUFFER_TOO_SHORT);
   }
   if (size > 1) {
     // found security header
@@ -288,7 +285,6 @@ int nas_message_decode(const unsigned char *const buffer, nas_message_t *msg,
   }
 
   //return bytes;
-  //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
   return RETURNok ;
 }
 
@@ -325,7 +321,6 @@ static int _nas_message_header_encode(
    * Encode the first octet of the header (security header type or EPS bearer
    * * * * identity, and protocol discriminator)
    */
-  //ENCODE_U8 (buffer, *(uint8_t *) (header), size);
   ENCODE_U8(buffer, header->extended_protocol_discriminator, size);
 
   //Security header type associated with a spare half octet;
@@ -347,7 +342,6 @@ static int _nas_message_header_encode(
          * The buffer is not big enough to contain security header
          */
         //OAILOG_WARNING(LOG_NAS, "NET-API   - The size of the header (%u) " "exceeds the buffer length (%lu)\n", NAS_MESSAGE_SECURITY_HEADER_SIZE, length);
-        //OAILOG_FUNC_RETURN (LOG_NAS, RETURNerror);
         return RETURNerror ;
       }
 
@@ -365,8 +359,6 @@ static int _nas_message_header_encode(
 #endif
   }
   return size;
-  //OAILOG_STREAM_HEX(OAILOG_LEVEL_DEBUG, LOG_NAS, "encode nas header Incoming NAS message: ", buffer, size)
-  //OAILOG_FUNC_RETURN (LOG_NAS, size);
 }
 
 /****************************************************************************
@@ -390,7 +382,7 @@ static int _nas_message_header_encode(
 static int _nas_message_protected_encode(
     unsigned char *buffer, const nas_message_security_protected_t *msg,
     size_t length, void *security) {
-  //OAILOG_FUNC_IN (LOG_NAS);
+
   fivegmm_security_context_t *fivegmm_security_context =
       (fivegmm_security_context_t*) security;
   int bytes = TLV_BUFFER_TOO_SHORT;
@@ -424,7 +416,6 @@ static int _nas_message_protected_encode(
     free_wrapper((void**) &plain_msg);
   }
   return bytes;
-  //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
 }
 
 /****************************************************************************
@@ -448,7 +439,7 @@ static int _nas_message_protected_encode(
 static int _nas_message_plain_encode(
     unsigned char *buffer, const nas_message_security_header_t *header,
     const nas_message_plain_t *msg, size_t length) {
-  //OAILOG_FUNC_IN (LOG_NAS);
+
   int bytes = TLV_PROTOCOL_NOT_SUPPORTED;
 
   if (header->extended_protocol_discriminator
@@ -471,7 +462,6 @@ static int _nas_message_plain_encode(
     //OAILOG_WARNING(LOG_NAS, "NET-API   - Extended Protocol discriminator 0x%x is " "not supported\n", header->extended_protocol_discriminator);
   }
   return bytes;
-  //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
 }
 
 /****************************************************************************
@@ -599,7 +589,6 @@ static int _nas_message_encrypt(
     }
       break;
   }
-  //OAILOG_FUNC_RETURN (LOG_NAS, length);
 
   return length;
 }
@@ -625,11 +614,10 @@ static int _nas_message_encrypt(
 static uint32_t _nas_message_get_mac(
     const unsigned char *const buffer, size_t const length, int const direction,
     fivegmm_security_context_t *const fivegmm_security_context) {
-  //OAILOG_FUNC_IN (LOG_NAS);
 
   if (!fivegmm_security_context) {
     //OAILOG_DEBUG (LOG_NAS, "No security context set for integrity protection algorithm\n");
-    //OAILOG_FUNC_RETURN (LOG_NAS, 0);
+    return 0;
   }
 
   switch (fivegmm_security_context->selected_algorithms.integrity) {
@@ -667,7 +655,6 @@ static uint32_t _nas_message_get_mac(
       //OAILOG_DEBUG (LOG_NAS, "NAS_SECURITY_ALGORITHMS_EIA1 returned MAC %x.%x.%x.%x(%u) for length %lu direction %d, count %d\n",
       //    mac[0], mac[1], mac[2], mac[3], *((uint32_t *) & mac), length, direction, count);
       mac32 = (uint32_t*) &mac;
-      //OAILOG_FUNC_RETURN (LOG_NAS, ntohl (*mac32));
       return ntohl(*mac32);
     }
       break;
@@ -718,7 +705,6 @@ static uint32_t _nas_message_get_mac(
       //OAILOG_ERROR(LOG_NAS, "Unknown integrity protection algorithm %d\n", fivegmm_security_context->selected_algorithms.integrity);
       break;
   }
-  //OAILOG_FUNC_RETURN (LOG_NAS, 0);
   return 0;
 }
 
@@ -727,7 +713,7 @@ static int _nas_message_header_decode(
     nas_message_security_header_t *const header, const size_t length,
     nas_message_decode_status_t *const status,
     bool *const is_sr) {
-  //OAILOG_FUNC_IN (LOG_NAS);
+
   int size = 0;
 
   /*
@@ -735,7 +721,6 @@ static int _nas_message_header_decode(
    */
   DECODE_U8(buffer, header->extended_protocol_discriminator, size);
 
-  //OAILOG_DEBUG(LOG_NAS,"security header type(%x)\n",header->security_header_type&0x0f);
   *is_sr = false;
   if (header->extended_protocol_discriminator
       == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
@@ -770,7 +755,6 @@ static int _nas_message_header_decode(
            * The buffer is not big enough to contain security header
            */
           //OAILOG_WARNING(LOG_NAS, "NET-API   - The size of the header (%u) " "exceeds the buffer length (%lu)\n", NAS_MESSAGE_SECURITY_HEADER_SIZE, length);
-          //OAILOG_FUNC_RETURN (LOG_NAS, RETURNerror);
           return RETURNerror ;
         }
         // Decode the message authentication code
@@ -781,7 +765,6 @@ static int _nas_message_header_decode(
       }
     }
   }
-  //OAILOG_FUNC_RETURN (LOG_NAS, size);
   return size;
 }
 
@@ -790,7 +773,6 @@ static int _nas_message_protected_decode(
     nas_message_plain_t *msg, size_t length,
     fivegmm_security_context_t *const fivegmm_security_context,
     nas_message_decode_status_t *const status) {
-  //OAILOG_FUNC_IN (LOG_NAS);
   int bytes = TLV_BUFFER_TOO_SHORT;
   unsigned char *const plain_msg = (unsigned char*) calloc(1, length);
 
@@ -809,7 +791,6 @@ static int _nas_message_protected_decode(
     free_wrapper((void**) &plain_msg);
   }
   return bytes;
-  //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
 }
 
 static int _nas_message_decrypt(
@@ -821,7 +802,6 @@ static int _nas_message_decrypt(
   uint32_t count = 0;
   uint8_t direction = 0;
 
-  //OAILOG_FUNC_IN (LOG_NAS);
   int size = 0;
   nas_message_security_header_t header = { 0 };
 #if TEST_MAC_ENCRYPT_DECRYPT__
@@ -927,7 +907,6 @@ static int _nas_message_decrypt(
              * Decode the first octet (security header type or EPS bearer identity,
              * * * * and protocol discriminator)
              */
-            //DECODE_U8 (dest, *(uint8_t *) (&header), size);
             DECODE_U8(dest, header.extended_protocol_discriminator, size);
             DECODE_U8(dest + size, header.security_header_type, size);
             //OAILOG_FUNC_RETURN (LOG_NAS, header.extended_protocol_discriminator);
@@ -940,7 +919,6 @@ static int _nas_message_decrypt(
              * Decode the first octet (security header type or EPS bearer identity,
              * * * * and protocol discriminator)
              */
-            //DECODE_U8 (dest, *(uint8_t *) (&header), size);
             DECODE_U8(dest, header.extended_protocol_discriminator, size)
             ;
             DECODE_U8(dest + size, header.security_header_type, size)
@@ -955,7 +933,6 @@ static int _nas_message_decrypt(
              * Decode the first octet (security header type or EPS bearer identity,
              * * * * and protocol discriminator)
              */
-            //DECODE_U8 (dest, *(uint8_t *) (&header), size);
             DECODE_U8(dest, header.extended_protocol_discriminator, size)
             ;
             DECODE_U8(dest + size, header.security_header_type, size)
@@ -980,7 +957,7 @@ static int _nas_message_decrypt(
 static int _nas_message_plain_decode(
     const unsigned char *buffer, const nas_message_security_header_t *header,
     nas_message_plain_t *msg, size_t length) {
-  //OAILOG_FUNC_IN (LOG_NAS);
+
   int bytes = TLV_PROTOCOL_NOT_SUPPORTED;
   if (header->extended_protocol_discriminator
       == EPD_5GS_MOBILITY_MANAGEMENT_MESSAGES) {
@@ -997,5 +974,4 @@ static int _nas_message_plain_decode(
   }
 
   return bytes;
-  //OAILOG_FUNC_RETURN (LOG_NAS, bytes);
 }

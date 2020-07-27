@@ -1191,6 +1191,7 @@ pfcp_msg::pfcp_msg(const pfcp_session_modification_response& pfcp_ies) : pfcp_ms
 //------------------------------------------------------------------------------
 pfcp_msg::pfcp_msg(const pfcp_session_deletion_request& pfcp_ies) : pfcp_msg_header() {
   ies = {};
+  remote_port = 0;
   set_message_type(PFCP_SESSION_DELETION_REQUEST);
   // NO IEs !
 }

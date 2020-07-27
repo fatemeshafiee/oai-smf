@@ -77,6 +77,7 @@ public:
   udp_server(const struct in6_addr& address, const uint16_t port_num)
     : app_(nullptr), port_(port_num)
   {
+    recv_buffer_[0] = 0;
     socket_ = create_socket (address, port_);
     if (socket_ > 0) {
       Logger::udp().debug( "udp_server::udp_server(%s:%d)", conv::toString(address).c_str(), port_);

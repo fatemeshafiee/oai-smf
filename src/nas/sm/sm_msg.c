@@ -171,6 +171,7 @@ int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
   if (header_result < 0) {
     //OAILOG_ERROR (LOG_NAS, "ESM-MSG   - Failed to encode ESM message header (%d)\n", header_result);
     //OAILOG_FUNC_RETURN (LOG_NAS, header_result);
+    return header_result;
   }
 
   buffer += header_result;
@@ -251,6 +252,7 @@ int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
 
   if (encode_result < 0) {
     //OAILOG_ERROR (LOG_NAS, "SM-MSG   - Failed to encode L3 ESM message 0x%x ""(%d)\n", msg->header.message_type, encode_result);
+    return encode_result;
   }
   // OAILOG_FUNC_RETURN (LOG_NAS, header_result + encode_result);
   return header_result + encode_result;

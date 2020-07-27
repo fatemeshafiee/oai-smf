@@ -85,6 +85,7 @@ class pfcp_association {
     num_retries_timer_heartbeat = 0;
     trxn_id_heartbeat = 0;
     timer_association = ITTI_INVALID_TIMER_ID;
+    is_restore_sessions_pending = false;
   }
   pfcp_association(const pfcp::node_id_t &ni, pfcp::recovery_time_stamp_t &rts,
                    pfcp::up_function_features_s &uff)

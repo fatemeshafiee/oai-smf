@@ -1795,6 +1795,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           smf_app_inst->trigger_http_response(
               http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
               smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+
+          free_wrapper((void**) &qos_flow_description);
           return;
         }
 

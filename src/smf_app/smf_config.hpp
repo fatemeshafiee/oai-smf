@@ -286,6 +286,12 @@ class smf_config {
 
     local_configuration = false;
     num_session_management_subscription = 0;
+    test_upf_cfg  = {};
+
+    for (int i = 0; i < SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX; i++) {
+      session_management_subscription[i] = {};
+    }
+    sbi_http2_port = 0;
 
   }
   ;

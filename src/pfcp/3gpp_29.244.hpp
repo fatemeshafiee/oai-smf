@@ -4009,6 +4009,7 @@ public:
   }
   //--------
   explicit pfcp_urr_id_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    urr_id = 0;
   };
   //--------
   void to_core_type(pfcp::urr_id_t& b) {
@@ -4155,6 +4156,11 @@ public:
   }
   //--------
   explicit pfcp_outer_header_creation_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    outer_header_creation_description = {};
+    teid = {};
+    ipv4_address = {};
+    ipv6_address = {};
+    port_number = {};
   };
   //--------
   void to_core_type(pfcp::outer_header_creation_t& b) {
@@ -4750,6 +4756,7 @@ public:
   }
   //--------
   explicit pfcp_outer_header_removal_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    outer_header_removal_description = 0;
   };
   //--------
   void to_core_type(pfcp::outer_header_removal_t& b) {
@@ -5335,6 +5342,7 @@ public:
   }
   //--------
   explicit pfcp_far_id_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    far_id = 0;
   };
   //--------
   void to_core_type(pfcp::far_id_t& b) {
@@ -5380,6 +5388,7 @@ public:
   }
   //--------
   explicit pfcp_qer_id_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    qer_id = 0;
   };
   //--------
   void to_core_type(pfcp::qer_id_t& b) {
@@ -5918,6 +5927,7 @@ public:
   }
   //--------
   explicit pfcp_user_plane_inactivity_timer_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    user_plane_inactivity_timer = 0;
   };
   //--------
   void to_core_type(pfcp::user_plane_inactivity_timer_t& b) {

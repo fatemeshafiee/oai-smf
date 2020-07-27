@@ -79,6 +79,7 @@ class smf_qos_flow {
     far_id_dl = { };
     released = false;
     qos_profile = { };
+    cause_value = 0;
   }
 
   /*
