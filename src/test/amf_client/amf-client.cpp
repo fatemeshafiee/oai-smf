@@ -1666,11 +1666,11 @@ int main(int argc, char *argv[]) {
   uint8_t context_id = 1;
   uint8_t pid = 1;
 
-  //test_all_procedures_for_one_session(pid, context_id, smf_ip_address,
-  //                                    http_version, port);
+  test_all_procedures_for_one_session(pid, context_id, smf_ip_address,
+                                      http_version, port);
   //test_session_establishment_multiple_threads(smf_ip_address, http_version, port);
-  test_all_procedures_for_multiple_threads(smf_ip_address, http_version,
-                                           port);
+  //test_all_procedures_for_multiple_threads(smf_ip_address, http_version,
+  //                                         port);
   return 0;
 }
 
