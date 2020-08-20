@@ -503,7 +503,7 @@ void smf_app::handle_itti_msg(itti_n11_create_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Create SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_create_sm_context_response sm_context_response = { };
-  std::shared_lock lock(m_sm_context_create_promises);
+  std::unique_lock lock(m_sm_context_create_promises);
   if (sm_context_create_promises.count(m.pid) > 0 ){
     sm_context_create_promises[m.pid]->set_value(m.res);
     //Remove this promise from list
@@ -516,7 +516,7 @@ void smf_app::handle_itti_msg(itti_n11_update_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Update SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_update_sm_context_response sm_context_response = { };
-  std::shared_lock lock(m_sm_context_update_promises);
+  std::unique_lock lock(m_sm_context_update_promises);
   if (sm_context_update_promises.count(m.pid) > 0 ){
     sm_context_update_promises[m.pid]->set_value(m.res);
     //Remove this promise from list
@@ -529,7 +529,7 @@ void smf_app::handle_itti_msg(itti_n11_release_sm_context_response &m) {
   Logger::smf_app().debug(
       "PDU Session Release SM Context: Set promise with ID %d to ready", m.pid);
   pdu_session_release_sm_context_response sm_context_response = { };
-  std::shared_lock lock(m_sm_context_release_promises);
+  std::unique_lock lock(m_sm_context_release_promises);
   if (sm_context_release_promises.count(m.pid) > 0 ){
     sm_context_release_promises[m.pid]->set_value(m.res);
     //Remove this promise from list
@@ -1142,14 +1142,14 @@ std::shared_ptr<smf_context> smf_app::supi_2_smf_context(
 //------------------------------------------------------------------------------
 void smf_app::set_supi_2_smf_context(const supi64_t &supi,
                                      std::shared_ptr<smf_context> sc) {
-  std::shared_lock lock(m_supi2smf_context);
+  std::unique_lock lock(m_supi2smf_context);
   supi2smf_context[supi] = sc;
 }
 
 //------------------------------------------------------------------------------
 void smf_app::set_scid_2_smf_context(const scid_t &id,
                                      std::shared_ptr<smf_context_ref> scf) {
-  std::shared_lock lock(m_scid2smf_context);
+  std::unique_lock lock(m_scid2smf_context);
   scid2smf_context[id] = scf;
 }
 
@@ -1465,7 +1465,7 @@ bool smf_app::get_session_management_subscription_data(
 void smf_app::add_promise(
     uint32_t id,
     boost::shared_ptr<boost::promise<pdu_session_create_sm_context_response> > &p) {
-  std::shared_lock lock(m_sm_context_create_promises);
+  std::unique_lock lock(m_sm_context_create_promises);
   sm_context_create_promises.emplace(id, p);
 }
 
@@ -1473,7 +1473,7 @@ void smf_app::add_promise(
 void smf_app::add_promise(
     uint32_t id,
     boost::shared_ptr<boost::promise<pdu_session_update_sm_context_response> > &p) {
-  std::shared_lock lock(m_sm_context_update_promises);
+  std::unique_lock lock(m_sm_context_update_promises);
   sm_context_update_promises.emplace(id, p);
 }
 
@@ -1481,7 +1481,7 @@ void smf_app::add_promise(
 void smf_app::add_promise(
     uint32_t id,
     boost::shared_ptr<boost::promise<pdu_session_release_sm_context_response> > &p) {
-  std::shared_lock lock(m_sm_context_release_promises);
+  std::unique_lock lock(m_sm_context_release_promises);
   sm_context_release_promises.emplace(id, p);
 }
 
