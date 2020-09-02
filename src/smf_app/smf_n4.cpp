@@ -215,8 +215,13 @@ smf_n4::smf_n4()
       std::chrono::system_clock::now();
   std::time_t now_c = std::chrono::system_clock::to_time_t(now);
   std::time_t ellapsed = now_c - time_epoch;
-  recovery_time_stamp = ellapsed;
+  //recovery_time_stamp = ellapsed;
 
+  //test new way to calculate recovery_time_stamp
+  std::time_t time_epoch_ntp = std::time(nullptr);
+  uint64_t tv_ntp = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
+  recovery_time_stamp = tv_ntp;
+  
   // TODO may load this from config
   cp_function_features = { };
   cp_function_features.ovrl = 0;
@@ -560,9 +565,12 @@ void smf_n4::send_n4_msg(itti_n4_session_report_response &i) {
 
 //------------------------------------------------------------------------------
 void smf_n4::send_heartbeat_request(std::shared_ptr<pfcp_association> &a) {
+  std::time_t time_epoch = std::time(nullptr);
+  uint64_t tv_ntp = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
+
   pfcp::pfcp_heartbeat_request h = { };
   pfcp::recovery_time_stamp_t r = { .recovery_time_stamp =
-      (uint32_t) recovery_time_stamp };
+      (uint32_t) tv_ntp };
   h.set(r);
 
   pfcp::node_id_t &node_id = a->node_id;
