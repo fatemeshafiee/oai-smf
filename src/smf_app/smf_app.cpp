@@ -781,11 +781,14 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     Logger::smf_app().warn(
         "PDU Session already existed (SUPI " SUPI_64_FMT ", DNN %s, NSSAI (sst %d, sd %s), PDU Session ID %d)",
         supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);
+    //TODO: temporary disable this action to test with AMF
+    /*
     //trigger to send reply to AMF
-   // trigger_http_response(
-   //     http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
-   //     N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
-   // return;
+   trigger_http_response(
+        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
+        N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    return;
+    */
   }
 
   //Step 5. create a context for this supi if not existed, otherwise update
