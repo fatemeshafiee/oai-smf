@@ -1228,11 +1228,14 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     sd->insert_pdu_session(sp);
   } else {
     Logger::smf_app().debug("PDU session is already existed!");
+    //TODO: temporary disable this action to test with AMF
+    /*
     //trigger to send reply to AMF
-   // smf_app_inst->trigger_http_response(
-   //     http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
-   //     N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
-   // return;
+    smf_app_inst->trigger_http_response(
+        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
+        N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+    return;
+    */
   }
 
   //TODO: if "Integrity Protection is required", check UE Integrity Protection Maximum Data Rate
