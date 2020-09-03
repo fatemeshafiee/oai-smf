@@ -63,6 +63,7 @@ public:
   udp_server(const struct in_addr& address, const uint16_t port_num)
     : app_(nullptr), port_(port_num)
   {
+    recv_buffer_[0] = 0;
     socket_ = create_socket (address, port_);
     if (socket_ > 0) {
       Logger::udp().debug( "udp_server::udp_server(%s:%d)", conv::toString(address).c_str(), port_);
@@ -74,6 +75,7 @@ public:
     }
   }
 
+  //------------------------------------------------------------------------------
   udp_server(const struct in6_addr& address, const uint16_t port_num)
     : app_(nullptr), port_(port_num)
   {
@@ -89,9 +91,11 @@ public:
     }
   }
 
+  //------------------------------------------------------------------------------
   udp_server(const char * address, const uint16_t port_num)
     : app_(nullptr), port_(port_num)
   {
+    recv_buffer_[0] = 0;
     socket_ = create_socket (address, port_);
     if (socket_ > 0) {
       Logger::udp().debug( "udp_server::udp_server(%s:%d)", address, port_);
@@ -109,6 +113,7 @@ public:
 
   void udp_read_loop(const util::thread_sched_params& thread_sched_params);
 
+  //------------------------------------------------------------------------------
   void async_send_to(const char* send_buffer, const ssize_t num_bytes, const endpoint& r_endpoint)
   {
     ssize_t bytes_written = sendto (socket_, send_buffer, num_bytes, 0, (struct sockaddr *)&r_endpoint.addr_storage, r_endpoint.addr_storage_len);
@@ -117,6 +122,7 @@ public:
     }   
   }
 
+  //------------------------------------------------------------------------------
   void async_send_to(const char* send_buffer, const ssize_t num_bytes, const struct sockaddr_in& r_endpoint)
   {
     ssize_t bytes_written = sendto (socket_, send_buffer, num_bytes, 0, (struct sockaddr *)&r_endpoint, sizeof(struct sockaddr_in));
@@ -125,6 +131,7 @@ public:
     }   
   }
 
+  //------------------------------------------------------------------------------
   void async_send_to(const char* send_buffer, const ssize_t num_bytes, const struct sockaddr_in6& r_endpoint)
   {
     ssize_t bytes_written = sendto (socket_, send_buffer, num_bytes, 0, (struct sockaddr *)&r_endpoint, sizeof(struct sockaddr_in6));
@@ -133,7 +140,6 @@ public:
     }   
   }
 
-
   void start_receive(udp_application * gtp_stack, const util::thread_sched_params& sched_params);
 
 protected:
@@ -141,14 +147,11 @@ protected:
   int create_socket (const struct in6_addr& address, const uint16_t port);
   int create_socket (const char * address, const uint16_t port_num);
 
- // void handle_receive(const int& error, std::size_t bytes_transferred);
-
   static void handle_send(const char *, /*buffer*/
       const int& /*error*/,
       std::size_t /*bytes_transferred*/)
   {
   }
-
 
   udp_application*  app_;
   std::thread       thread_;

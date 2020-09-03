@@ -732,6 +732,7 @@ bool smf_n1_n2::create_n2_sm_information(pdu_session_msg &msg,
           or (qos_flow.qfi.qfi > QOS_FLOW_IDENTIFIER_LAST )) {
         //error
         Logger::smf_app().error("Incorrect QFI %d", qos_flow.qfi.qfi);
+        free_wrapper((void**) &ngap_IEs);
         return false;
       }
 

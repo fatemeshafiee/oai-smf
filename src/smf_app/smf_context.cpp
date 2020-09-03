@@ -1797,6 +1797,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
 
           free_wrapper((void**) &qos_flow_description);
+          free_wrapper ((void**) &decoded_nas_msg.plain.sm
+                        .pdu_session_modification_request.qosflowdescriptions
+                        .qosflowdescriptionscontents);
           return;
         }
 
@@ -1840,6 +1843,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //don't need to create a procedure to update UPF
 
         free_wrapper((void**) &qos_flow_description);
+        free_wrapper ((void**) &decoded_nas_msg.plain.sm
+                      .pdu_session_modification_request.qosflowdescriptions
+                      .qosflowdescriptionscontents);
       }
         break;
 
