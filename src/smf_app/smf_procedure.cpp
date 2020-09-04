@@ -1324,9 +1324,11 @@ void session_release_sm_context_procedure::handle_itti_msg(
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);
     //trigger to send reply to AMF
+    /*
     smf_app_inst->trigger_http_response(
-        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE,
-        n11_triggered_pending->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+    http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE,
+    n11_triggered_pending->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+    */
   }
 
   //TODO:
