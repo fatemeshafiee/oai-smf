@@ -1,3 +1,27 @@
+/*
+ * Licensed to the OpenAirInterface (OAI) Software Alliance under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The OpenAirInterface Software Alliance licenses this file to You under
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this file
+ * except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.openairinterface.org/?page_id=698
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *-------------------------------------------------------------------------------
+ * For more information about the OpenAirInterface (OAI) Software Alliance:
+ *      contact@openairinterface.org
+ */
+
+#ifndef SECURITY_MODE_COMMAND_H_
+#define SECURITY_MODE_COMMAND_H_
+
 #include <stdint.h>
 
 #include "ExtendedProtocolDiscriminator.h"
@@ -12,7 +36,6 @@
 #include "EAPMessage.h"
 #include "ABBA.h"
 #include "S1UESecurityCapability.h"
-
 
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define SECURITY_MODE_COMMAND_MINIMUM_LENGTH ( \
@@ -46,7 +69,6 @@
 		S1_UE_SECURITY_CAPABILITY_MAXIMUM_LENGTH + \
 0)
 
-
 #define SECURITY_MODE_COMMAND_IMEISV_REQUEST_IEI 0xE0
 #define SECURITY_MODE_COMMAND_IMEISV_REQUEST_PRESENT (1<<0)
 #define SECURITY_MODE_COMMAND_EPS_NAS_SECURITY_ALGORITHMS_IEI 0x57
@@ -60,26 +82,23 @@
 #define SECURITY_MODE_COMMAND_S1_UE_SECURITY_CAPABILITY_IEI 0x19
 #define SECURITY_MODE_COMMAND_S1_UE_SECURITY_CAPABILITY_PRESENT (1<<5)
 
-
-
-
-
-typedef struct security_mode_command_msg_tag{
-	ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
-	SecurityHeaderType securityheadertype;
-	MessageType messagetype;
-	NASSecurityAlgorithms nassecurityalgorithms;
-	NASKeySetIdentifier naskeysetidentifier;
-	UESecurityCapability uesecuritycapability;
-        uint8_t presence;
-	IMEISVRequest imeisvrequest;
-	EPSNASSecurityAlgorithms epsnassecurityalgorithms;
-	Additional5GSecurityInformation additional5gsecurityinformation;
-	EAPMessage eapmessage;
-	ABBA abba;
-	//S1UESecurityCapability s1uesecuritycapability;
-}security_mode_command_msg;
-
+typedef struct security_mode_command_msg_tag {
+  ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
+  SecurityHeaderType securityheadertype;
+  MessageType messagetype;
+  NASSecurityAlgorithms nassecurityalgorithms;
+  NASKeySetIdentifier naskeysetidentifier;
+  UESecurityCapability uesecuritycapability;
+  uint8_t presence;
+  IMEISVRequest imeisvrequest;
+  EPSNASSecurityAlgorithms epsnassecurityalgorithms;
+  Additional5GSecurityInformation additional5gsecurityinformation;
+  EAPMessage eapmessage;
+  ABBA abba;
+  //S1UESecurityCapability s1uesecuritycapability;
+} security_mode_command_msg;
 
 int decode_security_mode_command(security_mode_command_msg *securitymodecommand, uint8_t *buffer, uint32_t len);
 int encode_security_mode_command(security_mode_command_msg *securitymodecommand, uint8_t *buffer, uint32_t len);
+
+#endif

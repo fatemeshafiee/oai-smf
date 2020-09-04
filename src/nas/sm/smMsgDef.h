@@ -19,8 +19,12 @@
  *      contact@openairinterface.org
  */
 
+#ifndef SM_MSG_DEF_H_
+#define SM_MSG_DEF_H_
+
 #include <stdint.h>
 #include <asm/byteorder.h>
+
 typedef struct {
   uint8_t extended_protocol_discriminator;
   uint8_t pdu_session_identity;
@@ -28,3 +32,4 @@ typedef struct {
   uint8_t message_type;
 }__attribute__((__packed__)) sm_msg_header_t;
 
+#endif
