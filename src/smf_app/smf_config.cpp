@@ -232,22 +232,6 @@ int smf_config::load_interface(const Setting &if_cfg, interface_cfg_t &cfg) {
 }
 
 //------------------------------------------------------------------------------
-int smf_config::load_upf_config(const Setting &if_cfg, test_upf_cfg_t &cfg) {
-  std::string is_test = { };
-  if_cfg.lookupValue(SMF_CONFIG_STRING_TEST_UPF_IS_TEST, is_test);
-  util::trim(is_test);
-  if (not boost::iequals(is_test, "none")) {
-    cfg.is_test = atoi(is_test.c_str());
-
-    std::string address = { };
-    if_cfg.lookupValue(SMF_CONFIG_STRING_TEST_UPF_GNB_IPV4_ADDRESS, address);
-    util::trim(address);
-    inet_aton(address.c_str(), &cfg.gnb_addr4);
-  }
-  return RETURNok ;
-}
-
-//------------------------------------------------------------------------------
 int smf_config::load(const string &config_file) {
   Config cfg;
   unsigned char buf_in6_addr[sizeof(struct in6_addr)];
@@ -774,13 +758,6 @@ void smf_config::display() {
   Logger::smf_app().info("    UDM ..........: %s",
                          inet_ntoa(*((struct in_addr*) &udm_addr.ipv4_addr)));
   Logger::smf_app().info("    UDM Port  ..........: %lu  ", udm_addr.port);
-
-  Logger::smf_app().info("- UPF support (test upf)");
-  Logger::smf_app().info("       UPF is test ..........: %lu  ",
-                         test_upf_cfg.is_test);
-  Logger::smf_app().info(
-      "       Gnb Address ..........: %s",
-      inet_ntoa(*((struct in_addr*) &test_upf_cfg.gnb_addr4)));
 
   if (local_configuration) {
     Logger::smf_app().info(

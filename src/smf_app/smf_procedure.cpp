@@ -154,27 +154,9 @@ int session_create_sm_context_procedure::run(
   sps->generate_far_id(far_id);
   apply_action.forw = 1;  //forward the packets
 
-  //wys-test-add
-  pfcp::outer_header_creation_t outer_header_creation = { };
+  destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;  // ACCESS is for downlink, CORE for uplink
+  forwarding_parameters.set(destination_interface);
 
-  if (smf_cfg.test_upf_cfg.is_test) {
-    //wys-test-add
-    destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;  // ACCESS is for downlink, CORE for uplink
-    outer_header_creation.teid = 1;
-    //inet_aton("192.168.20.136", &outer_header_creation.ipv4_address);
-    outer_header_creation.ipv4_address = smf_cfg.test_upf_cfg.gnb_addr4;
-    outer_header_creation.outer_header_creation_description =
-        pfcp::OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
-
-    forwarding_parameters.set(outer_header_creation);
-    forwarding_parameters.set(destination_interface);
-  } else {
-    destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;  // ACCESS is for downlink, CORE for uplink
-    forwarding_parameters.set(destination_interface);
-  }
-
-  //destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE; // ACCESS is for downlink, CORE for uplink
-  //forwarding_parameters.set(destination_interface);
   //TODO
   //Network instance
 
@@ -236,10 +218,6 @@ int session_create_sm_context_procedure::run(
   create_pdr.set(pdr_id);
   create_pdr.set(precedence);
   create_pdr.set(pdi);
-
-  //wys-add-test
-  //if (smf_cfg.test_upf_cfg.is_test)
-  //  create_pdr.set(outer_header_removal);
   create_pdr.set(outer_header_removal);
 
   create_pdr.set(far_id);
