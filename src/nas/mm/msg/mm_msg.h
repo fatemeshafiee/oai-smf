@@ -19,10 +19,8 @@
  *      contact@openairinterface.org
  */
 
-
 #ifndef MM_MSG_H_
 #define MM_MSG_H_
-
 
 #include "mmMsgDef.h"
 #include "AuthenticationRequest.h"
@@ -51,21 +49,18 @@
 #include "SecurityModeReject.h"
 #include "_5GMMStatus.h"
 
-
-
 /*
  * Structure of EMM plain NAS message
  * ----------------------------------
  */
 typedef union {
   mm_msg_header_t header;
-  authentication_request_msg authentication_request;//Done 19/03/2019
-  authentication_response_msg authentication_response;//Done 19/03/2019
+  authentication_request_msg authentication_request;
+  authentication_response_msg authentication_response;
   authentication_result_msg authentication_result;
-  authentication_failure_msg authentication_failure;//Done  19/03/2019
-  authentication_reject_msg authentication_reject;//Done 19/03/2019
+  authentication_failure_msg authentication_failure;
+  authentication_reject_msg authentication_reject;
   registration_request_msg registration_request;
-
 
   registration_accept_msg registration_accept;
   registration_complete_msg registration_complete;
@@ -88,17 +83,10 @@ typedef union {
   security_mode_reject_msg security_mode_reject;
 
   _5gmm_status_msg _5gmm_status;
-}MM_msg;
+} MM_msg;
 
-int mm_msg_decode (
-  MM_msg * msg,
-  uint8_t * buffer,
-  uint32_t len);
+int mm_msg_decode(MM_msg *msg, uint8_t *buffer, uint32_t len);
 
-int fivegmm_msg_encode (
-  MM_msg * msg,
-  uint8_t * buffer,
-  uint32_t len);
-
+int fivegmm_msg_encode(MM_msg *msg, uint8_t *buffer, uint32_t len);
 
 #endif

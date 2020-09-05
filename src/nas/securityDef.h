@@ -21,19 +21,12 @@
 
 /*****************************************************************************
  Source      securityDef.h
-
  Version     0.1
-
  Date        2013/05/02
-
  Product     NAS stack
-
  Subsystem   include
-
  Author      Frederic Maurel
-
  Description Contains global security definitions
-
  *****************************************************************************/
 #ifndef FILE_SECURITYDEF_SEEN
 #define FILE_SECURITYDEF_SEEN

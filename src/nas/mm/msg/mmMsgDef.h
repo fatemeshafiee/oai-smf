@@ -19,9 +19,11 @@
  *      contact@openairinterface.org
  */
 
+#ifndef MM_MSG_DEF_H_
+#define MM_MSG_DEF_H_
+
 #include <stdint.h>
 #include <asm/byteorder.h>
-
 
 typedef struct {
 #ifdef __LITTLE_ENDIAN_BITFIELD
@@ -34,4 +36,6 @@ typedef struct {
   uint8_t security_header_type:4;
 #endif
   uint8_t message_type;
-} __attribute__((__packed__)) mm_msg_header_t;
+}__attribute__((__packed__)) mm_msg_header_t;
+
+#endif

@@ -1,3 +1,24 @@
+/*
+ * Licensed to the OpenAirInterface (OAI) Software Alliance under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The OpenAirInterface Software Alliance licenses this file to You under
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this file
+ * except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.openairinterface.org/?page_id=698
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *-------------------------------------------------------------------------------
+ * For more information about the OpenAirInterface (OAI) Software Alliance:
+ *      contact@openairinterface.org
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -197,7 +218,7 @@ int encode_pdu_session_establishment_accept(
     return encoded_result;
   else
     encoded += encoded_result;
-  //TODO: In Wireshark Version 3.2.2 (Git commit a3efece3d640), SSC Mode (4 bit) + PDU sessiion type (4 bit) = 1 byte,
+  //TODO: In Wireshark Version 3.2.2 (Git commit a3efece3d640), SSC Mode (4 bit) + PDU session type (4 bit) = 1 byte,
   //so disable encode SSC Mode for the moment, Should be verified later
   /*  if((encoded_result = encode_ssc_mode (pdu_session_establishment_accept->sscmode, 0, buffer+encoded,len-encoded))<0)
    return encoded_result;

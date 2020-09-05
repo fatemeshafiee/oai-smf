@@ -26,22 +26,18 @@
 #include "PDUSessionEstablishmentRequest.h"
 #include "PDUSessionEstablishmentAccept.h"
 #include "PDUSessionEstablishmentReject.h"
-
 #include "PDUSessionAuthenticationCommand.h"
 #include "PDUSessionAuthenticationComplete.h"
 #include "PDUSessionAuthenticationResult.h"
-
 #include "PDUSessionModificationRequest.h"
 #include "PDUSessionModificationReject.h"
 #include "PDUSessionModificationComplete.h"
 #include "PDUSessionModificationCommand.h"
 #include "PDUSessionModificationCommandReject.h"
-
 #include "PDUSessionReleaseRequest.h"
 #include "PDUSessionReleaseReject.h"
 #include "PDUSessionReleaseCommand.h"
 #include "PDUSessionReleaseComplete.h"
-
 #include "_5GSMStatus.h"
 
 typedef union {

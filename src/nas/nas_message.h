@@ -26,21 +26,16 @@
 #include "sm_msg.h"
 #include "common_types.h"
 
-/***********************************/
-/********test mac and encrypt/decrypt********/
-/***********************************/
+//test mac and encrypt/decrypt
 #define DIRECTION__ 1//SECU_DIRECTION_DOWNLINK
 #define TEST_MAC_ENCRYPT_DECRYPT__	0
-
 #define NAS_MESSAGE_SECURITY_HEADER_SIZE  7
 
-/*********************************************************/
-/************************* 9.1 24501**********************/
-
+//Section 9.1 3GPP TS 24.501
 /* Structure of security protected header */
 typedef struct nas_message_security_header_s {
 #ifdef __LITTLE_ENDIAN_BITFIELD
-  extended_protocol_discriminator_t extended_protocol_discriminator;  //3gpp_24.501.h
+  extended_protocol_discriminator_t extended_protocol_discriminator;
   uint8_t security_header_type :4;
   uint8_t spare_half_octet :4;
 #endif
