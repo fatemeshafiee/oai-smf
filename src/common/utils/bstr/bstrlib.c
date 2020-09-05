@@ -2115,6 +2115,9 @@ int bsreadlna (bstring r, struct bStream * s, char terminator) {
 int i, l, ret, rlo;
 char * b;
 struct tagbstring x;
+x.mlen = 0;
+x.slen = 0;
+x.data = NULL;
 
 	if (s == NULL || s->buff == NULL || r == NULL || r->mlen <= 0 ||
 	    r->slen < 0 || r->mlen < r->slen) return BSTR_ERR;
@@ -2181,6 +2184,9 @@ int i, l, ret, rlo;
 unsigned char * b;
 struct tagbstring x;
 struct charField cf;
+x.mlen = 0;
+x.slen = 0;
+x.data = NULL;
 
 	if (s == NULL || s->buff == NULL || r == NULL || term == NULL ||
 	    term->data == NULL || r->mlen <= 0 || r->slen < 0 ||

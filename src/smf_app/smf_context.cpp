@@ -1649,7 +1649,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //Only one flow description for new requested QoS Flow
         QOSFlowDescriptionsContents *qos_flow_description =
             (QOSFlowDescriptionsContents*) calloc(
-                1, sizeof(QOSFlowDescriptionsContents));
+                number_of_flow_descriptions, sizeof(QOSFlowDescriptionsContents));
 
         if (number_of_flow_descriptions > 0) {
           qos_flow_description = decoded_nas_msg.plain.sm
