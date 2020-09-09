@@ -79,7 +79,7 @@
 
 #define SMF_CONFIG_STRING_DNN_LIST                              "DNN_LIST"
 #define SMF_CONFIG_STRING_DNN_NI                                "DNN_NI"
-#define SMF_CONFIG_STRING_PDN_TYPE                              "PDN_TYPE"
+#define SMF_CONFIG_STRING_PDN_TYPE                              "PDU_SESSION_TYPE"
 #define SMF_CONFIG_STRING_IPV4_POOL                             "IPV4_POOL"
 #define SMF_CONFIG_STRING_IPV6_POOL                             "IPV6_POOL"
 
