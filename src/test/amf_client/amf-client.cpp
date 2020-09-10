@@ -205,7 +205,7 @@ bool send_pdu_session_establishment_request(uint8_t pid,
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts"));
 
   //Fill the json part
   pdu_session_establishment_request["supi"] = "imsi-200000000000001";
@@ -344,10 +344,10 @@ bool send_pdu_session_update_sm_context_establishment(
     url.append(std::string(":"));
     url.append(port);
   }
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
-//  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
+//  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
 
   //Fill the json part
   pdu_session_update_request["n2SmInfoType"] = "PDU_RES_SETUP_RSP";
@@ -502,8 +502,8 @@ void send_pdu_session_modification_request_step1(uint8_t pid,
     url.append(std::string(":"));
     url.append(port);
   }
-  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  //url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
 
@@ -627,8 +627,8 @@ void send_pdu_session_modification_request_step2(uint8_t context_id,
     url.append(std::string(":"));
     url.append(port);
   }
-  // url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  // url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
 
@@ -743,8 +743,8 @@ void send_pdu_session_modification_complete(uint8_t pid, uint8_t context_id,
     url.append(std::string(":"));
     url.append(port);
   }
-//  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+//  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
 
@@ -858,8 +858,8 @@ void send_pdu_session_release_request(uint8_t pid, uint8_t context_id,
     url.append(std::string(":"));
     url.append(port);
   }
-  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  //url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
 
@@ -969,8 +969,8 @@ void send_pdu_session_release_resource_release_ack(uint8_t context_id,
     url.append(std::string(":"));
     url.append(port);
   }
-//  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+//  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
 
@@ -1088,8 +1088,8 @@ void send_pdu_session_release_complete(uint8_t pid, uint8_t context_id,
     url.append(std::string(":"));
     url.append(port);
   }
-  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  //url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
 
@@ -1187,8 +1187,8 @@ void send_pdu_session_update_sm_context_ue_service_request(
     url.append(std::string(":"));
     url.append(port);
   }
-  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  //url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
 
@@ -1301,8 +1301,8 @@ void send_pdu_session_update_sm_context_ue_service_request_step2(
     url.append(std::string(":"));
     url.append(port);
   }
-  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/modify"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  //url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/modify"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/modify"));
 
@@ -1409,8 +1409,8 @@ void send_release_sm_context_request(uint8_t pid, uint8_t context_id,
     url.append(std::string(":"));
     url.append(port);
   }
-  //url.append(std::string("/nsmf-pdusession/v2/sm-contexts/1/release"));
-  url.append(std::string("/nsmf-pdusession/v2/sm-contexts/"));
+  //url.append(std::string("/nsmf-pdusession/v1/sm-contexts/1/release"));
+  url.append(std::string("/nsmf-pdusession/v1/sm-contexts/"));
   url.append(std::to_string(context_id));
   url.append(std::string("/release"));
 
