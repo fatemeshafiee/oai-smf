@@ -292,7 +292,7 @@ void smf_http2_server::create_sm_contexts_handler(
   //set api root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
       m_address + ":" + std::to_string(m_port)
-          + "/nsmf-pdusession/v2/sm-context");
+          + "/nsmf-pdusession/v1/sm-context");
 
   //supi
   supi_t supi = { .length = 0 };
