@@ -182,11 +182,11 @@ typedef struct qos_profile_s {
 #define NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL  "/namf-comm/v2/ue-contexts/{}/n1-n2-messages" //context id
 #define NUDM_SDM_GET_SM_DATA_URL                      "/nudm-sdm/v2/{}/sm-data" //ue Id
 #define N1_SM_CONTENT_ID                              "n1SmMsg"
-#define N1N2_MESSAGE_CLASS                             "SM"
+#define N1N2_MESSAGE_CLASS                            "SM"
 #define N2_SM_CONTENT_ID                              "n2msg"
-#define NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE  "/nsmf-pdusession/v2/callback/N1N2MsgTxfrFailureNotification/{}" //UE Id
-#define NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL  "/nsmf-pdusession/v2/sm-contexts"
-#define NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL  "/nsmf-pdusession/v2/sm-contexts/"
+#define NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE   "/nsmf-pdusession/v2/callback/N1N2MsgTxfrFailureNotification/{}" //UE Id
+#define NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL        "/nsmf-pdusession/v2/sm-contexts"
+#define NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL        "/nsmf-pdusession/v2/sm-contexts/"
 
 //for CURL
 #define AMF_CURL_TIMEOUT_MS 100L
