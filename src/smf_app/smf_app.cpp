@@ -44,7 +44,7 @@
 #include "3gpp_24.007.h"
 #include "smf.h"
 #include "3gpp_24.501.h"
-#include "smf_n1_n2.hpp"
+#include "smf_n1.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "smf_n4.hpp"
 #include "smf_n10.hpp"
@@ -548,7 +548,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   oai::smf_server::model::ProblemDetails problem_details = { };
   oai::smf_server::model::RefToBinaryData refToBinaryData = { };
   std::string n1_sm_message, n1_sm_message_hex;
-  smf_n1_n2 smf_n1_n2_inst = { };
+  smf_n1 smf_n1_inst = { };
   nas_message_t decoded_nas_msg = { };
   cause_value_5gsm_e cause_n1 = { cause_value_5gsm_e::CAUSE_0_UNKNOWN };
   pdu_session_type_t pdu_session_type = { .pdu_session_type =
@@ -557,7 +557,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //Step 1. Decode NAS and get the necessary information
   std::string n1_sm_msg = smreq->req.get_n1_sm_message();
 
-  int decoder_rc = smf_n1_n2_inst.decode_n1_sm_container(decoded_nas_msg,
+  int decoder_rc = smf_n1_inst.decode_n1_sm_container(decoded_nas_msg,
                                                          n1_sm_msg);
   if (decoder_rc != RETURNok) {
     //error, send reply to AMF with PDU Session Establishment Reject
@@ -567,7 +567,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
-    if (smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_inst.create_n1_sm_container(
         smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
         cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -625,7 +625,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
-    if (smf_n1_n2_inst.create_n1_sm_container(smreq->req,
+    if (smf_n1_inst.create_n1_sm_container(smreq->req,
     PDU_SESSION_ESTABLISHMENT_REJECT,
                                               n1_sm_message, cause_n1)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -677,7 +677,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject including cause "#81 Invalid PTI value" (section 7.3.1 @3GPP TS 24.501)
-    if (smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_inst.create_n1_sm_container(
         smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
         cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -717,7 +717,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
     //(24.501 (section 7.4)) implementation dependent->do similar to UE: response with a 5GSM STATUS message including cause "#98 message type not compatible with protocol state."
-    if (smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_inst.create_n1_sm_container(
         smreq->req,
         PDU_SESSION_ESTABLISHMENT_REJECT,
         n1_sm_message,
@@ -759,7 +759,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject, 24.501 cause "#27 Missing or unknown DNN"
-    if (smf_n1_n2_inst.create_n1_sm_container(
+    if (smf_n1_inst.create_n1_sm_container(
         smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
         cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -851,7 +851,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
         smContextCreateError.setN1SmMsg(refToBinaryData);
         //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"
-        if (smf_n1_n2_inst.create_n1_sm_container(
+        if (smf_n1_inst.create_n1_sm_container(
             smreq->req,
             PDU_SESSION_ESTABLISHMENT_REJECT,
             n1_sm_message,
