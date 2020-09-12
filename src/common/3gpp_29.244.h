@@ -1610,6 +1610,28 @@ typedef struct framed_ipv6_route_s {
   std::string framed_ipv6_route;
 } framed_ipv6_route_t;
 
+//-------------------------------------
+// 8.2.118. 3GPP Interface Type
+enum _3gpp_interface_type_e {
+  S1_U = 0,
+  S5_S8_U = 1,
+  S4_U = 2,
+  S11_U = 3,
+  S12_U = 4,
+  GN_GP_U = 5,
+  S2A_U = 6,
+  S2B_U = 7,
+  ENODEB_GTP_U_DL = 8,
+  ENODEB_GTP_U_UL = 9,
+  SGW_UPF_GTP_U_DL = 10,
+  N3_3GPP_ACCESS = 11,
+  N3_TRUSTED_NON_3GPP_ACCESS = 12,
+  N3_UNTRUSTED_NON_3GPP_ACCESS = 13,
+  N3 = 14,
+  N9 = 15
+};
+
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Specific IEs
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
