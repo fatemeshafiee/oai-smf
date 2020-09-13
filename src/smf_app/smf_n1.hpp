@@ -86,7 +86,7 @@ class smf_n1 {
                               std::string &nas_msg_str,
                               cause_value_5gsm_e sm_cause);
 
-  bool create_n1_pdu_session_establishment_reject(pdu_session_create_sm_context_response &msg, uint8_t msg_type,
+  bool create_n1_pdu_session_establishment_reject(pdu_session_update_sm_context_response &msg, uint8_t msg_type,
                               std::string &nas_msg_str,
                               cause_value_5gsm_e sm_cause);
   bool create_n1_pdu_session_establishment_reject(pdu_session_update_sm_context_request &msg, uint8_t msg_type,

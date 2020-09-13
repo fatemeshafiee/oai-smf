@@ -731,10 +731,6 @@ void smf_context::handle_itti_msg(
             //N2 SM Information
             smf_n2 smf_n2_inst = { };
             std::string n2_sm_info, n2_sm_info_hex;
-            //smf_n2_inst.create_n2_sm_information(
-            //    session_report_msg, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
-            //    n2_sm_info);
-
             smf_n2_inst.create_n2_pdu_session_resource_setup_request_transfer(
                 session_report_msg, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
                 n2_sm_info);
@@ -1157,16 +1153,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
-/*    if (smf_n1_inst.create_n1_sm_container(
+    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
         smreq->req,
-        PDU_SESSION_ESTABLISHMENT_REJECT,
         n1_sm_message,
         cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
-        */
-      if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
-          smreq->req,
-          n1_sm_message,
-          cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
       //trigger to send reply to AMF
       smf_app_inst->trigger_http_response(
@@ -1338,10 +1328,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       refToBinaryData.setContentId(N1_SM_CONTENT_ID);
       smContextCreateError.setN1SmMsg(refToBinaryData);
       //PDU Session Establishment Reject
-/*      if (smf_n1_inst.create_n1_sm_container(
-          smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_message,
-          cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE)) {
-*/
       if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE)) {
@@ -1463,10 +1449,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     if (sm_context_resp->res.get_cause() == NO_RESOURCES_AVAILABLE) {
       cause_n1 = cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES;
     }
-/*    smf_n1_inst.create_n1_sm_container(sm_context_resp_pending->res,
-    PDU_SESSION_ESTABLISHMENT_REJECT,
-                                          n1_sm_message, cause_n1);
-*/
     smf_n1_inst.create_n1_pdu_session_establishment_reject(sm_context_resp_pending->res,
                                               n1_sm_message, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
@@ -1806,17 +1788,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         std::string n1_sm_msg_to_be_created, n1_sm_msg_hex_to_be_created;
         std::string n2_sm_info_to_be_created, n2_sm_info_hex_to_be_created;
         //N1 SM (PDU Session Modification Command)
-/*        if (not smf_n1_inst.create_n1_sm_container(
-            n11_sm_context_resp->res, PDU_SESSION_MODIFICATION_COMMAND,
-            n1_sm_msg_to_be_created, cause_value_5gsm_e::CAUSE_0_UNKNOWN) or  //TODO: need cause?
-*/
         if (not smf_n1_inst.create_n1_pdu_session_modification_command(
             n11_sm_context_resp->res, n1_sm_msg_to_be_created, cause_value_5gsm_e::CAUSE_0_UNKNOWN) or  //TODO: need cause?
             //N2 SM (PDU Session Resource Modify Request Transfer IE)
-            //    not smf_n2_inst.create_n2_sm_information(
-            //        n11_sm_context_resp->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ,
-            //        n2_sm_info_to_be_created)) {
-
             not smf_n2_inst.create_n2_pdu_session_resource_modify_request_transfer(
                 n11_sm_context_resp->res, n2_sm_info_type_e::PDU_RES_MOD_REQ,
                 n2_sm_info_to_be_created)) {
@@ -1978,10 +1952,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           smContextUpdateError.setError(problem_details);
           refToBinaryData.setContentId(N1_SM_CONTENT_ID);
           smContextUpdateError.setN1SmMsg(refToBinaryData);
-/*          if (smf_n1_inst.create_n1_sm_container(
-              sm_context_req_msg, PDU_SESSION_RELEASE_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY)) {
-*/
           if (smf_n1_inst.create_n1_pdu_session_release_reject(
                 sm_context_req_msg, n1_sm_msg,
                 cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY)) {
@@ -2146,10 +2116,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
           //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
-/*          if (smf_n1_inst.create_n1_sm_container(
-              sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
-*/
           if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
                 sm_context_req_msg, n1_sm_msg,
                 cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
@@ -2241,10 +2207,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
         smContextUpdateError.setN1SmMsg(refToBinaryData);
         //PDU Session Establishment Reject, 24.501 cause "#26 Insufficient resources"
-/*        if (smf_n1_inst.create_n1_sm_container(
-            smreq->req, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-            cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES)) {
-*/
         if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
               smreq->req, n1_sm_msg,
               cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES)) {
@@ -2404,9 +2366,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
     // Create N2 SM Information: PDU Session Resource Setup Request Transfer IE
     //N2 SM Information
-    //smf_n2_inst.create_n2_sm_information(
-    //    sm_context_resp_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
-    //    n2_sm_info);
     smf_n2_inst.create_n2_pdu_session_resource_setup_request_transfer(
         sm_context_resp_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
         n2_sm_info);
@@ -2482,10 +2441,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           refToBinaryData.setContentId(N1_SM_CONTENT_ID);
           smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
-/*          if (smf_n1_inst.create_n1_sm_container(
-              sm_context_req_msg, PDU_SESSION_ESTABLISHMENT_REJECT, n1_sm_msg,
-              cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE)) {
- */
           if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
               sm_context_req_msg, n1_sm_msg,
               cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE)) {
@@ -2674,22 +2629,13 @@ void smf_context::handle_pdu_session_modification_network_requested(
 
   //TODO: handle encode N1, N2 failure
   //N1: PDU_SESSION_MODIFICATION_COMMAND
-/*  smf_n1_inst.create_n1_sm_container(itti_msg->msg,
-  PDU_SESSION_MODIFICATION_COMMAND,
-                                        n1_sm_msg,
-                                        cause_value_5gsm_e::CAUSE_0_UNKNOWN);
-*/
   smf_n1_inst.create_n1_pdu_session_modification_command(itti_msg->msg,
                                         n1_sm_msg,
                                         cause_value_5gsm_e::CAUSE_0_UNKNOWN);
-
   smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
   itti_msg->msg.set_n1_sm_message(n1_sm_msg_hex);
 
   //N2: PDU Session Resource Modify Response Transfer
-  //smf_n2_inst.create_n2_sm_information(itti_msg->msg, 1,
-  //                                        n2_sm_info_type_e::PDU_RES_MOD_REQ,
-  //                                        n2_sm_info);
   smf_n2_inst.create_n2_pdu_session_resource_modify_request_transfer(itti_msg->msg,
                                           n2_sm_info_type_e::PDU_RES_MOD_REQ,
                                           n2_sm_info);

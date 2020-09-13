@@ -66,6 +66,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_c
                                                                    std::string &ngap_msg_str) {
   Logger::smf_n2().info("Create N2 SM Information, PDU Session Resource Setup Request Transfer");
 
+  bool result = false;
   Ngap_PDUSessionResourceSetupRequestTransfer_t *ngap_IEs = nullptr;
   ngap_IEs = (Ngap_PDUSessionResourceSetupRequestTransfer_t*) calloc(
       1, sizeof(Ngap_PDUSessionResourceSetupRequestTransfer_t));
@@ -120,6 +121,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_c
   } else {
     Logger::smf_n2().warn(
         "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
+    free_wrapper((void**) &pduSessionAggregateMaximumBitRate);
     return false;
   }
 
@@ -274,19 +276,19 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_c
     Logger::smf_n2().warn(
         "NGAP PDU Session Resource Setup Request Transfer encode failed (encode size %d)",
         encoded_size);
-    return false;
-  }
-
+    result = false;
+  } else {
 #if DEBUG_IS_ON
-  Logger::smf_n2().debug("N2 SM buffer data: ");
-  for (int i = 0; i < encoded_size; i++)
-    printf("%02x ", (char) buffer[i]);
-  printf(" (%d bytes)\n", (int) encoded_size);
+    Logger::smf_n2().debug("N2 SM buffer data: ");
+    for (int i = 0; i < encoded_size; i++)
+      printf("%02x ", (char) buffer[i]);
+    printf(" (%d bytes)\n", (int) encoded_size);
 #endif
 
-  std::string ngap_message((char*) buffer, encoded_size);
-  ngap_msg_str = ngap_message;
-
+    std::string ngap_message((char*) buffer, encoded_size);
+    ngap_msg_str = ngap_message;
+    result = true;
+  }
   //free memory
   free_wrapper((void**) &pduSessionAggregateMaximumBitRate);
   free_wrapper(
@@ -308,6 +310,8 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_c
   free_wrapper((void**) &ngap_QosFlowSetupRequestItem);
   free_wrapper((void**) &ngap_IEs);
   free_wrapper((void**) &buffer);
+
+  return result;
 }
 
 //------------------------------------------------------------------------------
@@ -316,6 +320,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_u
                                                                    std::string &ngap_msg_str) {
   Logger::smf_n2().info("Create N2 SM Information, PDU Session Resource Setup Request Transfer");
 
+  bool result = false;
   Ngap_PDUSessionResourceSetupRequestTransfer_t *ngap_IEs = nullptr;
   ngap_IEs = (Ngap_PDUSessionResourceSetupRequestTransfer_t*) calloc(
       1, sizeof(Ngap_PDUSessionResourceSetupRequestTransfer_t));
@@ -383,6 +388,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_u
   } else {
     Logger::smf_n2().warn(
         "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
+    free_wrapper((void**) &pduSessionAggregateMaximumBitRate);
     return false;
   }
 
@@ -537,18 +543,19 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_u
     Logger::smf_n2().warn(
         "NGAP PDU Session Resource Setup Request Transfer encode failed (encode size %d)",
         encoded_size);
-    return false;
-  }
-
+    result = false;
+  } else {
 #if DEBUG_IS_ON
-  Logger::smf_n2().debug("N2 SM buffer data: ");
-  for (int i = 0; i < encoded_size; i++)
-    printf("%02x ", (char) buffer[i]);
-  printf(" (%d bytes)\n", (int) encoded_size);
+    Logger::smf_n2().debug("N2 SM buffer data: ");
+    for (int i = 0; i < encoded_size; i++)
+      printf("%02x ", (char) buffer[i]);
+    printf(" (%d bytes)\n", (int) encoded_size);
 #endif
 
-  std::string ngap_message((char*) buffer, encoded_size);
-  ngap_msg_str = ngap_message;
+    std::string ngap_message((char*) buffer, encoded_size);
+    ngap_msg_str = ngap_message;
+    result = true;
+  }
 
   //free memory
   free_wrapper((void**) &pduSessionAggregateMaximumBitRate);
@@ -572,6 +579,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_u
   free_wrapper((void**) &ngap_IEs);
   free_wrapper((void**) &buffer);
 
+  return result;
 }
 
 //------------------------------------------------------------------------------
@@ -580,6 +588,7 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(pdu_session_
                                                                     std::string &ngap_msg_str) {
   Logger::smf_n2().debug("Create N2 SM Information: NGAP PDU Session Resource Modify Request Transfer");
 
+   bool result = false;
   //get default QoS info
   std::map<uint8_t, qos_flow_context_updated> qos_flows = { };
   sm_context_res.get_all_qos_flow_context_updateds(qos_flows);
@@ -805,18 +814,19 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(pdu_session_
     Logger::smf_n2().warn(
         "NGAP PDU Session Resource Modify Request Transfer encode failed (encoded size %d)",
         encoded_size);
-    return false;
-  }
-
+    result = false;
+  } else {
 #if DEBUG_IS_ON
-  Logger::smf_n2().debug("N2 SM buffer data: ");
-  for (int i = 0; i < encoded_size; i++)
-    printf("%02x ", (char) buffer[i]);
-  printf(" (%d bytes)\n", (int) encoded_size);
+    Logger::smf_n2().debug("N2 SM buffer data: ");
+    for (int i = 0; i < encoded_size; i++)
+      printf("%02x ", (char) buffer[i]);
+    printf(" (%d bytes)\n", (int) encoded_size);
 #endif
 
-  std::string ngap_message((char*) buffer, encoded_size);
-  ngap_msg_str = ngap_message;
+    std::string ngap_message((char*) buffer, encoded_size);
+    ngap_msg_str = ngap_message;
+    result = true;
+  }
 
   //free memory
   free_wrapper((void**) &pduSessionAggregateMaximumBitRate);
@@ -845,6 +855,8 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(pdu_session_
   free_wrapper((void**) &qosFlowAddOrModifyRequestList);
   free_wrapper((void**) &ngap_IEs);
   free_wrapper((void**) &buffer);
+
+  return result;
 }
 
 //------------------------------------------------------------------------------
@@ -853,7 +865,7 @@ bool smf_n2::create_n2_pdu_session_resource_release_command_transfer(pdu_session
                                                                      std::string &ngap_msg_str) {
 
   Logger::smf_n2().debug("Create N2 SM Information: NGAP PDU Session Resource Release Command Transfer IE");
-
+  bool result = false;
   Ngap_PDUSessionResourceReleaseCommandTransfer_t *ngap_resource_release_command_transfer =
       nullptr;
   ngap_resource_release_command_transfer =
@@ -891,22 +903,24 @@ bool smf_n2::create_n2_pdu_session_resource_release_command_transfer(pdu_session
     Logger::smf_n2().warn(
         "NGAP PDU Session Release Command encode failed (encoded size %d)",
         encoded_size);
-    return false;
-  }
-
+    result = false;
+  } else {
 #if DEBUG_IS_ON
-  Logger::smf_n2().debug("N2 SM buffer data: ");
-  for (int i = 0; i < encoded_size; i++)
-    printf("%02x ", (char) buffer[i]);
-  Logger::smf_n2().debug(" (%d bytes) \n", encoded_size);
+    Logger::smf_n2().debug("N2 SM buffer data: ");
+    for (int i = 0; i < encoded_size; i++)
+      printf("%02x ", (char) buffer[i]);
+    Logger::smf_n2().debug(" (%d bytes) \n", encoded_size);
 #endif
 
-  std::string ngap_message((char*) buffer, encoded_size);
-  ngap_msg_str = ngap_message;
+    std::string ngap_message((char*) buffer, encoded_size);
+    ngap_msg_str = ngap_message;
+    result = true;
+  }
 
   //free memory
   free_wrapper((void**) &ngap_resource_release_command_transfer);
   free_wrapper((void**) &buffer);
+  return result;
 }
 
 //------------------------------------------------------------------------------
@@ -915,6 +929,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_r
                                                                    std::string &ngap_msg_str) {
   Logger::smf_n2().debug("Create N2 SM Information: NGAP PDU Session Resource Setup Request Transfer IE");
   //TODO:
+  return true;
 }
 
 //------------------------------------------------------------------------------
@@ -923,6 +938,7 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(pdu_session_
                                                                     std::string &ngap_msg_str) {
   Logger::smf_n2().debug("Create N2 SM Information: NGAP PDU Session Resource Modify Request Transfer IE");
   //TODO:
+  return true;
 }
 
 //------------------------------------------------------------------------------
@@ -930,6 +946,8 @@ bool smf_n2::create_n2_pdu_session_resource_modify_response_transfer(pdu_session
                                   std::string &ngap_msg_str) {
   //PDU Session Resource Modify Response Transfer IE for testing purpose
   Logger::smf_n2().debug("Create N2 SM Information: NGAP PDU Session Resource Modify Response Transfer IE");
+  bool result = false;
+
   //struct Ngap_UPTransportLayerInformation *dL_NGU_UP_TNLInformation;  /* OPTIONAL */
   //struct Ngap_UPTransportLayerInformation *uL_NGU_UP_TNLInformation;  /* OPTIONAL */
   //struct Ngap_QosFlowAddOrModifyResponseList  *qosFlowAddOrModifyResponseList;  /* OPTIONAL */
@@ -1005,18 +1023,19 @@ bool smf_n2::create_n2_pdu_session_resource_modify_response_transfer(pdu_session
     Logger::smf_n2().warn(
         " NGAP PDU Session Resource Modify Response Transfer encode failed (encoded size %d)",
         encoded_size);
-    return false;
-  }
-
+    result = false;
+  } else {
 #if DEBUG_IS_ON
-  Logger::smf_n2().debug("N2 SM buffer data: ");
-  for (int i = 0; i < encoded_size; i++)
-    printf("%02x ", (char) buffer[i]);
-  Logger::smf_n2().debug(" (%d bytes) \n", encoded_size);
+    Logger::smf_n2().debug("N2 SM buffer data: ");
+    for (int i = 0; i < encoded_size; i++)
+      printf("%02x ", (char) buffer[i]);
+    Logger::smf_n2().debug(" (%d bytes) \n", encoded_size);
 #endif
 
-  std::string ngap_message((char*) buffer, encoded_size);
-  ngap_msg_str = ngap_message;
+    std::string ngap_message((char*) buffer, encoded_size);
+    ngap_msg_str = ngap_message;
+    result = true;
+  }
 
   //free memory
   free_wrapper(
@@ -1035,8 +1054,7 @@ bool smf_n2::create_n2_pdu_session_resource_modify_response_transfer(pdu_session
   free_wrapper((void**) &ngap_resource_response_transfer);
   free_wrapper((void**) &buffer);
 
-
-  //TODO:
+  return result;
 }
 
 //------------------------------------------------------------------------------

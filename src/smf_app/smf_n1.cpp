@@ -52,6 +52,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(pdu_session_create_sm_co
   int bytes = { 0 };
   unsigned char data[BUF_LEN] = { '\0' };
   nas_message_t nas_msg = { };
+  bool result = false;
 
   nas_msg.header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
@@ -125,6 +126,10 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(pdu_session_create_sm_co
   } else {
     Logger::smf_app().warn(
         "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
+    //free memory
+    if (qos_flow.qos_rules.size() > 0) {
+      free_wrapper((void**) &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie);
+    }
     return false;
   }
 
@@ -197,6 +202,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(pdu_session_create_sm_co
   Logger::smf_app().info("Encode PDU Session Establishment Accept");
   //Encode NAS message
   bytes = nas_message_encode(data, &nas_msg, sizeof(data)/*don't know the size*/, nullptr);
+
 #if DEBUG_IS_ON
   Logger::smf_app().debug("Buffer Data: ");
   for (int i = 0; i < bytes; i++)
@@ -204,14 +210,20 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(pdu_session_create_sm_co
   printf(" (bytes %d)\n", bytes);
 #endif
 
-  std::string n1Message((char*) data, bytes);
-  nas_msg_str = n1Message;
-
+  if (bytes > 0) {
+    std::string n1Message((char*) data, bytes);
+    nas_msg_str = n1Message;
+    result = true;
+  } else {
+    result = false;
+  }
   //free memory
   if (qos_flow.qos_rules.size() > 0) {
     free_wrapper((void**) &sm_msg->pdu_session_establishment_accept.qosrules.qosrulesie);
   }
   free_wrapper((void**) &sm_msg->pdu_session_establishment_accept.qosflowdescriptions.qosflowdescriptionscontents);
+
+  return result;
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -222,6 +234,7 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(pdu_session_msg &msg,
   int bytes = { 0 };
   unsigned char data[BUF_LEN] = { '\0' };
   nas_message_t nas_msg = { };
+  bool result = false;
 
   nas_msg.header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
@@ -311,8 +324,16 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(pdu_session_msg &msg,
       printf("%02x ", data[i]);
     printf(" (bytes %d)\n", bytes);
 #endif
-  std::string n1Message((char*) data, bytes);
-  nas_msg_str = n1Message;
+
+  if (bytes > 0) {
+    std::string n1Message((char*) data, bytes);
+    nas_msg_str = n1Message;
+    result = true;
+  } else {
+    result = false;
+  }
+
+  return result;
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -322,7 +343,7 @@ bool smf_n1::create_n1_pdu_session_modification_request(pdu_session_update_sm_co
                                                         cause_value_5gsm_e sm_cause) {
   //TODO:
   Logger::smf_app().info("Create N1 SM Container, PDU Session Modification Request");
-
+  return true;
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -335,6 +356,7 @@ bool smf_n1::create_n1_pdu_session_modification_command(pdu_session_update_sm_co
   int bytes = { 0 };
   unsigned char data[BUF_LEN] = { '\0' };
   nas_message_t nas_msg = { };
+  bool result = false;
 
   nas_msg.header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
@@ -437,12 +459,19 @@ bool smf_n1::create_n1_pdu_session_modification_command(pdu_session_update_sm_co
   printf(" (bytes %d)\n", bytes);
 #endif
 
-  std::string n1Message((char*) data, bytes);
-  nas_msg_str = n1Message;
+  if (bytes > 0 ){
+    std::string n1Message((char*) data, bytes);
+    nas_msg_str = n1Message;
+    result = true;
+  } else {
+    result = false;
+  }
 
   //free memory
   free_wrapper((void**) &sm_msg->pdu_session_modification_command.qosrules.qosrulesie);
   free_wrapper((void**) &sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents);
+
+  return result;
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -455,6 +484,7 @@ bool smf_n1::create_n1_pdu_session_modification_command(pdu_session_modification
   int bytes = { 0 };
   unsigned char data[BUF_LEN] = { '\0' };
   nas_message_t nas_msg = { };
+  bool result = false;
 
   nas_msg.header.extended_protocol_discriminator = EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
@@ -557,12 +587,19 @@ bool smf_n1::create_n1_pdu_session_modification_command(pdu_session_modification
   printf(" (bytes %d)\n", bytes);
 #endif
 
-  std::string n1Message((char*) data, bytes);
-  nas_msg_str = n1Message;
 
+  if (bytes > 0){
+    std::string n1Message((char*) data, bytes);
+    nas_msg_str = n1Message;
+    result = true;
+  } else {
+    result = false;
+  }
   //free memory
   free_wrapper((void**) &sm_msg->pdu_session_modification_command.qosrules.qosrulesie);
   free_wrapper((void**) &sm_msg->pdu_session_modification_command.qosflowdescriptions.qosflowdescriptionscontents);
+
+  return result;
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -612,8 +649,14 @@ bool smf_n1::create_n1_pdu_session_release_reject(pdu_session_update_sm_context_
   printf(" (bytes %d)\n", bytes);
 #endif
 
-  std::string n1Message((char*) data, bytes);
-  nas_msg_str = n1Message;
+  if (bytes > 0) {
+    std::string n1Message((char*) data, bytes);
+    nas_msg_str = n1Message;
+    return true;
+  } else {
+    return false;
+  }
+
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -669,8 +712,14 @@ bool smf_n1::create_n1_pdu_session_release_command(pdu_session_update_sm_context
   printf(" (bytes %d)\n", bytes);
 #endif
 
-  std::string n1Message((char*) data, bytes);
-  nas_msg_str = n1Message;
+  if (bytes > 0){
+    std::string n1Message((char*) data, bytes);
+    nas_msg_str = n1Message;
+    return true;
+  } else {
+    return false;
+  }
+
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -679,6 +728,7 @@ bool create_n1_pdu_session_release_command(pdu_session_modification_network_requ
                                            cause_value_5gsm_e sm_cause) {
   Logger::smf_app().info("Create N1 SM Container, PDU Session Release Command (pdu_session_modification_network_requested)");
   //TODO:
+  return true;
 }
 
 //------------------------------------------------------------------------------
