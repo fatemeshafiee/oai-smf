@@ -62,6 +62,8 @@ void Logger::_init(const char *app, const bool log_stdout,
   m_udp = new _Logger("udp      ", m_sinks, ss.str().c_str());
   m_pfcp = new _Logger("pfcp     ", m_sinks, ss.str().c_str());
   m_pfcp_switch = new _Logger("pfcp_sw  ", m_sinks, ss.str().c_str());
+  m_smf_n1 = new _Logger("smf_n1  ", m_sinks, ss.str().c_str());
+  m_smf_n2 = new _Logger("smf_n2  ", m_sinks, ss.str().c_str());
   m_smf_n4 = new _Logger("smf_n4  ", m_sinks, ss.str().c_str());
   m_smf_n10 = new _Logger("smf_n10  ", m_sinks, ss.str().c_str());
   m_smf_n11 = new _Logger("smf_n11  ", m_sinks, ss.str().c_str());

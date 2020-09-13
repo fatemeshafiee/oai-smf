@@ -731,9 +731,14 @@ void smf_context::handle_itti_msg(
             //N2 SM Information
             smf_n2 smf_n2_inst = { };
             std::string n2_sm_info, n2_sm_info_hex;
-            smf_n2_inst.create_n2_sm_information(
-                session_report_msg, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+            //smf_n2_inst.create_n2_sm_information(
+            //    session_report_msg, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+            //    n2_sm_info);
+
+            smf_n2_inst.create_n2_pdu_session_resource_setup_request_transfer(
+                session_report_msg, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
                 n2_sm_info);
+
             smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
             session_report_msg.set_n2_sm_information(n2_sm_info_hex);
 
@@ -1794,8 +1799,12 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             n11_sm_context_resp->res, PDU_SESSION_MODIFICATION_COMMAND,
             n1_sm_msg_to_be_created, cause_value_5gsm_e::CAUSE_0_UNKNOWN) or  //TODO: need cause?
             //N2 SM (PDU Session Resource Modify Request Transfer IE)
-            not smf_n2_inst.create_n2_sm_information(
-                n11_sm_context_resp->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ,
+            //    not smf_n2_inst.create_n2_sm_information(
+            //        n11_sm_context_resp->res, 1, n2_sm_info_type_e::PDU_RES_MOD_REQ,
+            //        n2_sm_info_to_be_created)) {
+
+            not smf_n2_inst.create_n2_pdu_session_resource_modify_request_transfer(
+                n11_sm_context_resp->res, n2_sm_info_type_e::PDU_RES_MOD_REQ,
                 n2_sm_info_to_be_created)) {
           smf_app_inst->trigger_http_response(
               http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
@@ -2371,9 +2380,13 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
     // Create N2 SM Information: PDU Session Resource Setup Request Transfer IE
     //N2 SM Information
-    smf_n2_inst.create_n2_sm_information(
-        sm_context_resp_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+    //smf_n2_inst.create_n2_sm_information(
+    //    sm_context_resp_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+    //    n2_sm_info);
+    smf_n2_inst.create_n2_pdu_session_resource_setup_request_transfer(
+        sm_context_resp_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
         n2_sm_info);
+
     smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
     sm_context_resp_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
@@ -2641,7 +2654,10 @@ void smf_context::handle_pdu_session_modification_network_requested(
   itti_msg->msg.set_n1_sm_message(n1_sm_msg_hex);
 
   //N2: PDU Session Resource Modify Response Transfer
-  smf_n2_inst.create_n2_sm_information(itti_msg->msg, 1,
+  //smf_n2_inst.create_n2_sm_information(itti_msg->msg, 1,
+  //                                        n2_sm_info_type_e::PDU_RES_MOD_REQ,
+  //                                        n2_sm_info);
+  smf_n2_inst.create_n2_pdu_session_resource_modify_request_transfer(itti_msg->msg,
                                           n2_sm_info_type_e::PDU_RES_MOD_REQ,
                                           n2_sm_info);
 

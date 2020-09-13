@@ -412,9 +412,13 @@ void session_create_sm_context_procedure::handle_itti_msg(
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
     //N2 SM Information (Step 11, section 4.3.2.2.1 @ 3GPP TS 23.502): PDUSessionRessourceSetupRequestTransfer IE
-    smf_n2_inst.create_n2_sm_information(
-        n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+    //smf_n2_inst.create_n2_sm_information(
+    //    n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+    //    n2_sm_info);
+    smf_n2_inst.create_n2_pdu_session_resource_setup_request_transfer(
+        n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
         n2_sm_info);
+
     smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
     n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
   }
@@ -1064,8 +1068,11 @@ void session_update_sm_context_procedure::handle_itti_msg(
       smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
       //N2 SM Information
-      smf_n2_inst.create_n2_sm_information(
-          n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_MOD_RSP,
+      //smf_n2_inst.create_n2_sm_information(
+      //    n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_MOD_RSP,
+      //    n2_sm_info);
+      smf_n2_inst.create_n2_pdu_session_resource_modify_response_transfer(
+          n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_MOD_RSP,
           n2_sm_info);
       smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
@@ -1099,9 +1106,13 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // Create N2 SM Information: PDU Session Resource Setup Request Transfer IE
 
       //N2 SM Information
-      smf_n2_inst.create_n2_sm_information(
-          n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+      //smf_n2_inst.create_n2_sm_information(
+      //    n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+      //    n2_sm_info);
+      smf_n2_inst.create_n2_pdu_session_resource_setup_request_transfer(
+          n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
           n2_sm_info);
+
       smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
@@ -1168,8 +1179,11 @@ void session_update_sm_context_procedure::handle_itti_msg(
       //include N2 SM Resource Release Request only when User Plane connection is activated
       if (sps->get_upCnx_state() == upCnx_state_e::UPCNX_STATE_ACTIVATED) {
         //N2 SM Information
-        smf_n2_inst.create_n2_sm_information(
-            n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_REL_CMD,
+        //smf_n2_inst.create_n2_sm_information(
+        //    n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_REL_CMD,
+        //    n2_sm_info);
+        smf_n2_inst.create_n2_pdu_session_resource_release_command_transfer(
+            n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_REL_CMD,
             n2_sm_info);
         smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
         n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
