@@ -55,7 +55,6 @@ using namespace std;
 extern itti_mw *itti_inst;
 extern smf::smf_app *smf_app_inst;
 extern smf::smf_config smf_cfg;
-extern smf::smf_n11 *smf_n11_inst;
 
 //------------------------------------------------------------------------------
 int n4_session_restore_procedure::run() {

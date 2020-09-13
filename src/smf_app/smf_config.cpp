@@ -55,7 +55,6 @@ using namespace std;
 using namespace libconfig;
 using namespace smf;
 
-extern smf_app *smf_app_inst;
 extern smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
