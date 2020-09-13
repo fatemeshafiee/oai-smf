@@ -107,6 +107,13 @@ class Logger {
   static _Logger& pfcp_switch() {
     return *singleton().m_pfcp_switch;
   }
+
+  static _Logger& smf_n1() {
+    return *singleton().m_smf_n1;
+  }
+  static _Logger& smf_n2() {
+    return *singleton().m_smf_n2;
+  }
   static _Logger& smf_n4() {
     return *singleton().m_smf_n4;
   }
@@ -146,6 +153,8 @@ class Logger {
   _Logger *m_udp;
   _Logger *m_pfcp;
   _Logger *m_pfcp_switch;
+  _Logger *m_smf_n1;
+  _Logger *m_smf_n2;
   _Logger *m_smf_n4;
   _Logger *m_smf_n10;
   _Logger *m_smf_n11;
