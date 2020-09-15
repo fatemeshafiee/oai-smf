@@ -84,7 +84,7 @@ class smfConfigGen():
 		smfFile.write('SMF_CONF[@AMF_API_VERSION@]=\'' + self.amf_api_version + '\'\n')
 		smfFile.write('SMF_CONF[@UDM_IPV4_ADDRESS@]=\'' + self.udm_ip_addr + '\'\n')
 		smfFile.write('SMF_CONF[@UDM_PORT@]=' + self.udm_port + '\n')
-	  smfFile.write('SMF_CONF[@UDM_API_VERSION@]=\'' + self.udm_api_version + '\'\n')
+	        smfFile.write('SMF_CONF[@UDM_API_VERSION@]=\'' + self.udm_api_version + '\'\n')
 		smfFile.write('SMF_CONF[@UPF_IPV4_ADDRESS@]=\'' + self.upf_ip_addr + '\'\n')
 		smfFile.write('\n')
 		smfFile.write('for K in "${!SMF_CONF[@]}"; do \n')
