@@ -425,6 +425,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
   std::string url = std::string(
       inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) + ":"
       + std::to_string(smf_cfg.amf_addr.port)
+      + NAMF_COMMUNICATION_BASE + smf_cfg.amf_addr.api_version
       + fmt::format(NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
                     supi_str.c_str());
   n11_triggered_pending->res.set_amf_url(url);
@@ -459,6 +460,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
     std::string callback_uri = std::string(
         inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) + ":"
         + std::to_string(smf_cfg.amf_addr.port)
+        + NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version
         + fmt::format(NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE,
                       supi_str.c_str());
     json_data["n1n2FailureTxfNotifURI"] = callback_uri.c_str();

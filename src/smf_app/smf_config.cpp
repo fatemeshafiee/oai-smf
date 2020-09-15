@@ -286,13 +286,19 @@ int smf_config::load(const string &config_file) {
     const Setting &n4_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_N4];
     load_interface(n4_cfg, n4);
 
-    const Setting &n11_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_SBI];
-    load_interface(n11_cfg, sbi);
+    const Setting &sbi_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_SBI];
+    load_interface(sbi_cfg, sbi);
 
     //HTTP2 port
-    if (!(n11_cfg.lookupValue(SMF_CONFIG_STRING_SBI_HTTP2_PORT, sbi_http2_port))) {
+    if (!(sbi_cfg.lookupValue(SMF_CONFIG_STRING_SBI_HTTP2_PORT, sbi_http2_port))) {
       Logger::smf_app().error(SMF_CONFIG_STRING_SBI_HTTP2_PORT "failed");
       throw(SMF_CONFIG_STRING_SBI_HTTP2_PORT "failed");
+    }
+
+    //SBI API VERSION
+    if (!(sbi_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION, sbi_api_version))) {
+      Logger::smf_app().error(SMF_CONFIG_STRING_API_VERSION "failed");
+      throw(SMF_CONFIG_STRING_API_VERSION "failed");
     }
 
   } catch (const SettingNotFoundException &nfex) {
@@ -495,9 +501,11 @@ int smf_config::load(const string &config_file) {
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_UE_MTU, ue_mtu);
 
+    //AMF
     const Setting &amf_cfg = smf_cfg[SMF_CONFIG_STRING_AMF];
     struct in_addr amf_ipv4_addr;
     unsigned int amf_port = 0;
+    std::string amf_api_version;
     amf_cfg.lookupValue(SMF_CONFIG_STRING_AMF_IPV4_ADDRESS, astring);
     IPV4_STR_ADDR_TO_INADDR(util::trim(astring).c_str(), amf_ipv4_addr,
                             "BAD IPv4 ADDRESS FORMAT FOR AMF !");
@@ -508,9 +516,17 @@ int smf_config::load(const string &config_file) {
     }
     amf_addr.port = amf_port;
 
+    if (!(amf_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION, amf_api_version))) {
+      Logger::smf_app().error(SMF_CONFIG_STRING_API_VERSION "failed");
+      throw(SMF_CONFIG_STRING_API_VERSION "failed");
+    }
+    amf_addr.api_version = amf_api_version;
+
+    //UDM
     const Setting &udm_cfg = smf_cfg[SMF_CONFIG_STRING_UDM];
     struct in_addr udm_ipv4_addr;
     unsigned int udm_port = 0;
+    std::string udm_api_version;
     udm_cfg.lookupValue(SMF_CONFIG_STRING_UDM_IPV4_ADDRESS, astring);
     IPV4_STR_ADDR_TO_INADDR(util::trim(astring).c_str(), udm_ipv4_addr,
                             "BAD IPv4 ADDRESS FORMAT FOR UDM !");
@@ -520,6 +536,13 @@ int smf_config::load(const string &config_file) {
       throw(SMF_CONFIG_STRING_UDM_PORT "failed");
     }
     udm_addr.port = udm_port;
+
+    if (!(udm_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION, udm_api_version))) {
+      Logger::smf_app().error(SMF_CONFIG_STRING_API_VERSION "failed");
+      throw(SMF_CONFIG_STRING_API_VERSION "failed");
+    }
+    udm_addr.api_version = udm_api_version;
+
 
     //UPF list
     unsigned char buf_in_addr[sizeof(struct in_addr) + 1];
@@ -746,16 +769,21 @@ void smf_config::display() {
     }
   }
 
+  Logger::smf_app().info("- AMF:");
+  Logger::smf_app().info("    Address..........: %s",
+                         inet_ntoa(*((struct in_addr*) &amf_addr.ipv4_addr)));
+  Logger::smf_app().info("    Port  ..........: %lu  ", amf_addr.port);
+  Logger::smf_app().info("    API Version.....: %s  ", amf_addr.api_version);
+
+  Logger::smf_app().info("- UDM:");
+  Logger::smf_app().info("    Address ..........: %s",
+                         inet_ntoa(*((struct in_addr*) &udm_addr.ipv4_addr)));
+  Logger::smf_app().info("    Port  ..........: %lu  ", udm_addr.port);
+  Logger::smf_app().info("    API Version.....: %s  ", udm_addr.api_version);
+
   Logger::smf_app().info("- Helpers:");
   Logger::smf_app().info("    Push PCO (DNS+MTU) ........: %s",
                          force_push_pco == 0 ? "false" : "true");
-
-  Logger::smf_app().info("    AMF Address..........: %s",
-                         inet_ntoa(*((struct in_addr*) &amf_addr.ipv4_addr)));
-  Logger::smf_app().info("    AMF Port  ..........: %lu  ", amf_addr.port);
-  Logger::smf_app().info("    UDM ..........: %s",
-                         inet_ntoa(*((struct in_addr*) &udm_addr.ipv4_addr)));
-  Logger::smf_app().info("    UDM Port  ..........: %lu  ", udm_addr.port);
 
   if (local_configuration) {
     Logger::smf_app().info(

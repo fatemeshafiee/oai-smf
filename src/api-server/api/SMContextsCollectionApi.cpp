@@ -44,6 +44,9 @@
 #include "logger.hpp"
 #include "Helpers.h"
 #include "mime_parser.hpp"
+#include "smf_config.hpp"
+
+extern smf::smf_config smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -65,7 +68,7 @@ void SMContextsCollectionApi::setupRoutes() {
   using namespace Pistache::Rest;
 
   Routes::Post(
-      *router, base + "/sm-contexts",
+      *router, base + smf_cfg.sbi_api_version + "/sm-contexts",
       Routes::bind(&SMContextsCollectionApi::post_sm_contexts_handler, this));
 
   // Default handler, called when a route is not found
