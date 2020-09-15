@@ -67,7 +67,7 @@ void Logger::_init(const char *app, const bool log_stdout,
   m_smf_n4 = new _Logger("smf_n4  ", m_sinks, ss.str().c_str());
   m_smf_n10 = new _Logger("smf_n10 ", m_sinks, ss.str().c_str());
   m_smf_n11 = new _Logger("smf_n11 ", m_sinks, ss.str().c_str());
-  m_smf_api_server = new _Logger("api_server", m_sinks, ss.str().c_str());
+  m_smf_api_server = new _Logger("sbi_srv ", m_sinks, ss.str().c_str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
