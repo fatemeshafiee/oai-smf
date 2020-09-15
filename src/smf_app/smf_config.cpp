@@ -675,78 +675,80 @@ void smf_config::display() {
   Logger::smf_app().info("- PID dir ...............: %s\n", pid_dir.c_str());
 
   Logger::smf_app().info("- N4 Networking:");
-  Logger::smf_app().info("    iface ................: %s", n4.if_name.c_str());
-  Logger::smf_app().info("    ip ...................: %s", inet_ntoa(n4.addr4));
-  Logger::smf_app().info("    port .................: %d", n4.port);
+  Logger::smf_app().info("    Interface name ......: %s", n4.if_name.c_str());
+  Logger::smf_app().info("    IPv4 Addr ...........: %s", inet_ntoa(n4.addr4));
+  Logger::smf_app().info("    Port ................: %d", n4.port);
 
   Logger::smf_app().info("- SBI Networking:");
-  Logger::smf_app().info("    iface ................: %s", sbi.if_name.c_str());
-  Logger::smf_app().info("    ip ...................: %s",
+  Logger::smf_app().info("    Interface name ......: %s", sbi.if_name.c_str());
+  Logger::smf_app().info("    IPv4 Addr ...........: %s",
                          inet_ntoa(sbi.addr4));
-  Logger::smf_app().info("    port .................: %d", sbi.port);
-  Logger::smf_app().info("    HTTP2 port ............: %d", sbi_http2_port);
+  Logger::smf_app().info("    Port ................: %d", sbi.port);
+  Logger::smf_app().info("    HTTP2 port ..........: %d", sbi_http2_port);
+  Logger::smf_app().info("    API version..........: %s", sbi_api_version.c_str());
+
 
   Logger::smf_app().info("- N4 Threading:");
-  Logger::smf_app().info("    CPU id............: %d",
+  Logger::smf_app().info("    CPU id ..............: %d",
                          n4.thread_rd_sched_params.cpu_id);
-  Logger::smf_app().info("    Scheduling policy : %d",
+  Logger::smf_app().info("    Scheduling policy ...: %d",
                          n4.thread_rd_sched_params.sched_policy);
-  Logger::smf_app().info("    Scheduling prio  .: %d",
+  Logger::smf_app().info("    Scheduling prio .....: %d",
                          n4.thread_rd_sched_params.sched_priority);
 
   Logger::smf_app().info("- ITTI Timer Task Threading:");
-  Logger::smf_app().info("    CPU id............: %d",
+  Logger::smf_app().info("    CPU id ..............: %d",
                          itti.itti_timer_sched_params.cpu_id);
-  Logger::smf_app().info("    Scheduling policy : %d",
+  Logger::smf_app().info("    Scheduling policy ...: %d",
                          itti.itti_timer_sched_params.sched_policy);
-  Logger::smf_app().info("    Scheduling prio  .: %d",
+  Logger::smf_app().info("    Scheduling prio .....: %d",
                          itti.itti_timer_sched_params.sched_priority);
-  Logger::smf_app().info("- ITTI N4 Task Threading:");
-  Logger::smf_app().info("    CPU id............: %d",
+  Logger::smf_app().info("- ITTI N4 Task Threading :");
+  Logger::smf_app().info("    CPU id ..............: %d",
                          itti.n4_sched_params.cpu_id);
-  Logger::smf_app().info("    Scheduling policy : %d",
+  Logger::smf_app().info("    Scheduling policy ...: %d",
                          itti.n4_sched_params.sched_policy);
-  Logger::smf_app().info("    Scheduling prio  .: %d",
+  Logger::smf_app().info("    Scheduling prio .....: %d",
                          itti.n4_sched_params.sched_priority);
   Logger::smf_app().info("- ITTI SMF_APP task Threading:");
-  Logger::smf_app().info("    CPU id............: %d",
+  Logger::smf_app().info("    CPU id ..............: %d",
                          itti.smf_app_sched_params.cpu_id);
-  Logger::smf_app().info("    Scheduling policy : %d",
+  Logger::smf_app().info("    Scheduling policy ...: %d",
                          itti.smf_app_sched_params.sched_policy);
-  Logger::smf_app().info("    Scheduling prio  .: %d",
+  Logger::smf_app().info("    Scheduling prio .....: %d",
                          itti.smf_app_sched_params.sched_priority);
   Logger::smf_app().info("- ITTI ASYNC_CMD task Threading:");
-  Logger::smf_app().info("    CPU id............: %d",
+  Logger::smf_app().info("    CPU id ..............: %d",
                          itti.async_cmd_sched_params.cpu_id);
-  Logger::smf_app().info("    Scheduling policy : %d",
+  Logger::smf_app().info("    Scheduling policy ...: %d",
                          itti.async_cmd_sched_params.sched_policy);
-  Logger::smf_app().info("    Scheduling prio  .: %d",
+  Logger::smf_app().info("    Scheduling prio .....: %d",
                          itti.async_cmd_sched_params.sched_priority);
   Logger::smf_app().info("- " SMF_CONFIG_STRING_IP_ADDRESS_POOL ":");
   for (int i = 0; i < num_ue_pool; i++) {
     std::string range_low(inet_ntoa(ue_pool_range_low[dnn[i].pool_id_iv4]));
     std::string range_high(inet_ntoa(ue_pool_range_high[dnn[i].pool_id_iv4]));
-    Logger::smf_app().info("    IPv4 pool %d ..........: %s - %s", i,
+    Logger::smf_app().info("    IPv4 pool %d .........: %s - %s", i,
                            range_low.c_str(), range_high.c_str());
   }
   char str_addr6[INET6_ADDRSTRLEN];
   for (int i = 0; i < num_paa6_pool; i++) {
     if (inet_ntop(AF_INET6, &paa_pool6_prefix[i], str_addr6,
                   sizeof(str_addr6))) {
-      Logger::smf_app().info("    IPv6 pool %d ..........: %s / %d", i,
+      Logger::smf_app().info("    IPv6 pool %d .........: %s / %d", i,
                              str_addr6, paa_pool6_prefix_len[i]);
     }
   }
   Logger::smf_app().info("- DEFAULT DNS:");
-  Logger::smf_app().info("    Primary DNS ..........: %s",
+  Logger::smf_app().info("    Primary DNS .........: %s",
                          inet_ntoa(*((struct in_addr*) &default_dnsv4)));
-  Logger::smf_app().info("    Secondary DNS ........: %s",
+  Logger::smf_app().info("    Secondary DNS .......: %s",
                          inet_ntoa(*((struct in_addr*) &default_dns_secv4)));
   if (inet_ntop(AF_INET6, &default_dnsv6, str_addr6, sizeof(str_addr6))) {
-    Logger::smf_app().info("    Primary DNS v6........: %s", str_addr6);
+    Logger::smf_app().info("    Primary DNS v6 ......: %s", str_addr6);
   }
   if (inet_ntop(AF_INET6, &default_dns_secv6, str_addr6, sizeof(str_addr6))) {
-    Logger::smf_app().info("    Secondary DNS v6 .....: %s", str_addr6);
+    Logger::smf_app().info("    Secondary DNS v6 ....: %s", str_addr6);
   }
 
   Logger::smf_app().info("- " SMF_CONFIG_STRING_DNN_LIST ":");
@@ -770,19 +772,19 @@ void smf_config::display() {
   }
 
   Logger::smf_app().info("- AMF:");
-  Logger::smf_app().info("    Address..........: %s",
+  Logger::smf_app().info("    IPv4 Addr ...........: %s",
                          inet_ntoa(*((struct in_addr*) &amf_addr.ipv4_addr)));
-  Logger::smf_app().info("    Port  ..........: %lu  ", amf_addr.port);
-  Logger::smf_app().info("    API Version.....: %s  ", amf_addr.api_version);
+  Logger::smf_app().info("    Port ................: %lu  ", amf_addr.port);
+  Logger::smf_app().info("    API version .........: %s", amf_addr.api_version.c_str());
 
   Logger::smf_app().info("- UDM:");
-  Logger::smf_app().info("    Address ..........: %s",
+  Logger::smf_app().info("    IPv4 Addr ...........: %s",
                          inet_ntoa(*((struct in_addr*) &udm_addr.ipv4_addr)));
-  Logger::smf_app().info("    Port  ..........: %lu  ", udm_addr.port);
-  Logger::smf_app().info("    API Version.....: %s  ", udm_addr.api_version);
+  Logger::smf_app().info("    Port ................: %lu  ", udm_addr.port);
+  Logger::smf_app().info("    API version .........: %s", udm_addr.api_version.c_str());
 
   Logger::smf_app().info("- Helpers:");
-  Logger::smf_app().info("    Push PCO (DNS+MTU) ........: %s",
+  Logger::smf_app().info("    Push PCO (DNS+MTU) ..: %s",
                          force_push_pco == 0 ? "false" : "true");
 
   if (local_configuration) {
