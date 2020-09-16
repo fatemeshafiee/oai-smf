@@ -33,6 +33,10 @@ def new_host_flag = false
 def new_host = ""
 def new_host_user = ""
 
+// Tags/Branches to use
+def smf_tag = "develop"
+def smf_branch = "develop"
+
 //-------------------------------------------------------------------------------
 // Pipeline start
 pipeline {
@@ -80,10 +84,6 @@ pipeline {
             echo "Node       is ${NODE_NAME}"
           }
           echo "Git URL    is ${GIT_URL}"
-          if (params.PrivateGitLabRepository_Credentials == null) {
-            echo "No credentials to access Private Repository"
-            sh "./ci-scripts/fail.sh"
-          }
         }
       }
     }
@@ -95,6 +95,8 @@ pipeline {
             gitCommitAuthorEmailAddr = env.gitlabUserEmail
             echo "GitLab Usermail is ${gitCommitAuthorEmailAddr}"
             sh "./ci-scripts/doGitLabMerge.sh --src-branch ${env.gitlabSourceBranch} --src-commit ${env.gitlabMergeRequestLastCommit} --target-branch ${env.gitlabTargetBranch} --target-commit ${GIT_COMMIT}"
+            smf_tag = "ci-tmp"
+            smf_branch = env.gitlabSourceBranch
           } else {
             echo "Git Branch      is ${GIT_BRANCH}"
             echo "Git Commit      is ${GIT_COMMIT}"
@@ -128,25 +130,17 @@ pipeline {
           steps {
             script {
               gitlabCommitStatus(name: "Build SMF Image") {
-                withCredentials([
-                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${params.PrivateGitLabRepository_Credentials}", usernameVariable: 'git_username', passwordVariable: 'git_password']
-                  ]) {
-                  if ("MERGE".equals(env.gitlabActionType)) {
-                    // Building a temporary image
-                    myShCmd('docker image prune --force', new_host_flag, new_host_user, new_host)
-                    myShCmd('docker build --target oai-smf --tag oai-smf:ci-temp --file ci-scripts/Dockerfile.private.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg BUILD_FOR_CI="True" --build-arg CI_SRC_BRANCH="' + env.gitlabSourceBranch + '" --build-arg CI_SRC_COMMIT="' + env.gitlabMergeRequestLastCommit + '" --build-arg CI_DEST_BRANCH="' + env.gitlabTargetBranch + '" . > archives/smf_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
-                  } else {
-                    // Currently this pipeline only runs for pushes to `develop` branch
-                    // First clean image registry
-                    try {
-                      myShCmd('docker image rm oai-smf:develop', new_host_flag, new_host_user, new_host)
-                    } catch (Exception e) {
-                      echo "Maybe a previous build went wrong"
-                    }
-                    myShCmd('docker image prune --force', new_host_flag, new_host_user, new_host)
-                    myShCmd('docker build --target oai-smf --tag oai-smf:develop --file ci-scripts/Dockerfile.private.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg CI_SRC_BRANCH="develop" . > archives/smf_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
+                myShCmd('docker image prune --force', new_host_flag, new_host_user, new_host)
+                if ("PUSH".equals(env.gitlabActionType)) {
+                  // Currently this pipeline only runs for pushes to `develop` branch
+                  // First clean image registry
+                  try {
+                    myShCmd('docker image rm oai-smf:develop', new_host_flag, new_host_user, new_host)
+                  } catch (Exception e) {
+                    echo "Maybe a previous build went wrong"
                   }
                 }
+                myShCmd('docker build --target oai-smf --tag oai-smf:' + smf_tag + ' --file docker/Dockerfile.ubuntu18.04 --build-arg NEEDED_GIT_PROXY="http://proxy.eurecom.fr:8080" . > archives/smf_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
                 myShCmd('docker image ls >> archives/smf_docker_image_build.log', new_host_flag, new_host_user, new_host)
               }
             }
@@ -250,15 +244,7 @@ pipeline {
           steps {
             script {
               gitlabCommitStatus(name: "Build AMF-server") {
-                withCredentials([
-                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${params.PrivateGitLabRepository_Credentials}", usernameVariable: 'git_username', passwordVariable: 'git_password']
-                  ]) {
-                  if ("MERGE".equals(env.gitlabActionType)) {
-                    myShCmd('docker build --target test-amf-server --tag test-amf-server:test-deploy --file ci-scripts/Dockerfile.private.amf-server.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg BUILD_FOR_CI="True" --build-arg CI_SRC_BRANCH="' + env.gitlabSourceBranch + '" --build-arg CI_SRC_COMMIT="' + env.gitlabMergeRequestLastCommit + '" --build-arg CI_DEST_BRANCH="develop" . > archives/amf_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
-                  } else {
-                    myShCmd('docker build --target test-amf-server --tag test-amf-server:test-deploy --file ci-scripts/Dockerfile.private.amf-server.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg CI_SRC_BRANCH="develop" . > archives/amf_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
-                  }
-                }
+                myShCmd('docker build --target test-amf-server --tag test-amf-server:test-deploy --file docker/test-images/Dockerfile.amf-server.ubuntu18.04 --build-arg NEEDED_PROXY="http://proxy.eurecom.fr:8080" . > archives/amf_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
                 myShCmd('docker image ls >> archives/amf_server_docker_image_build.log', new_host_flag, new_host_user, new_host)
               }
             }
@@ -281,15 +267,7 @@ pipeline {
           steps {
             script {
               gitlabCommitStatus(name: "Build UDM-server") {
-                withCredentials([
-                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${params.PrivateGitLabRepository_Credentials}", usernameVariable: 'git_username', passwordVariable: 'git_password']
-                  ]) {
-                  if ("MERGE".equals(env.gitlabActionType)) {
-                    myShCmd('docker build --target test-udm-server --tag test-udm-server:test-deploy --file ci-scripts/Dockerfile.private.udm-server.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg BUILD_FOR_CI="True" --build-arg CI_SRC_BRANCH="' + env.gitlabSourceBranch + '" --build-arg CI_SRC_COMMIT="' + env.gitlabMergeRequestLastCommit + '" --build-arg CI_DEST_BRANCH="develop" . > archives/udm_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
-                  } else {
-                    myShCmd('docker build --target test-udm-server --tag test-udm-server:test-deploy --file ci-scripts/Dockerfile.private.udm-server.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg CI_SRC_BRANCH="develop" . > archives/udm_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
-                  }
-                }
+                myShCmd('docker build --target test-udm-server --tag test-udm-server:test-deploy --file docker/test-images/Dockerfile.udm-server.ubuntu18.04 --build-arg NEEDED_GIT_PROXY="http://proxy.eurecom.fr:8080" . > archives/udm_server_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
                 myShCmd('docker image ls >> archives/udm_server_docker_image_build.log', new_host_flag, new_host_user, new_host)
               }
             }
@@ -312,15 +290,7 @@ pipeline {
           steps {
             script {
               gitlabCommitStatus(name: "Build AMF-client") {
-                withCredentials([
-                  [$class: 'UsernamePasswordMultiBinding', credentialsId: "${params.PrivateGitLabRepository_Credentials}", usernameVariable: 'git_username', passwordVariable: 'git_password']
-                  ]) {
-                  if ("MERGE".equals(env.gitlabActionType)) {
-                    myShCmd('docker build --target test-amf-client --tag test-amf-client:test-deploy --file ci-scripts/Dockerfile.private.amf-client.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg BUILD_FOR_CI="True" --build-arg CI_SRC_BRANCH="' + env.gitlabSourceBranch + '" --build-arg CI_SRC_COMMIT="' + env.gitlabMergeRequestLastCommit + '" --build-arg CI_DEST_BRANCH="develop" . > archives/amf_client_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
-                  } else {
-                    myShCmd('docker build --target test-amf-client --tag test-amf-client:test-deploy --file ci-scripts/Dockerfile.private.amf-client.ubuntu18.04 --build-arg EURECOM_PROXY="http://proxy.eurecom.fr:8080" --build-arg GITLAB_USERNAME="' + git_username + '" --build-arg GITLAB_PASSWORD="' + git_password + '" --build-arg CI_SRC_BRANCH="develop" . > archives/amf_client_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
-                  }
-                }
+                myShCmd('docker build --target test-amf-client --tag test-amf-client:test-deploy --file docker/test-images/Dockerfile.amf-client.ubuntu18.04 --build-arg NEEDED_GIT_PROXY="http://proxy.eurecom.fr:8080" . > archives/amf_client_docker_image_build.log 2>&1', new_host_flag, new_host_user, new_host)
                 myShCmd('docker image ls >> archives/amf_client_docker_image_build.log', new_host_flag, new_host_user, new_host)
               }
             }

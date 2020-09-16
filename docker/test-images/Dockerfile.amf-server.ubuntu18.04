@@ -30,13 +30,7 @@
 #---------------------------------------------------------------------
 FROM ubuntu:bionic as oai-smf-builder
 
-ARG EURECOM_PROXY
-ARG GITLAB_USERNAME
-ARG GITLAB_PASSWORD
-ARG BUILD_FOR_CI
-ARG CI_SRC_BRANCH
-ARG CI_SRC_COMMIT
-ARG CI_DEST_BRANCH
+ARG NEEDED_GIT_PROXY
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe
@@ -47,27 +41,24 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DE
   && rm -rf /var/lib/apt/lists/*
 
 # Some GIT configuration command quite useful
-RUN /bin/bash -c "if [[ -v EURECOM_PROXY ]]; then git config --global http.proxy $EURECOM_PROXY; fi"
+RUN /bin/bash -c "if [[ -v NEEDED_GIT_PROXY ]]; then git config --global http.proxy $NEEDED_GIT_PROXY; fi"
 RUN git config --global https.postBuffer 123289600
 RUN git config --global http.sslverify false
-# In normal case, we build out of the develop branch
-RUN /bin/bash -c "if [[ -v CI_SRC_BRANCH ]]; then git clone https://$GITLAB_USERNAME:$GITLAB_PASSWORD@gitlab.eurecom.fr/oai/cn5g/oai-cn5g-smf.git -b $CI_SRC_BRANCH /openair-smf; else git clone https://$GITLAB_USERNAME:$GITLAB_PASSWORD@gitlab.eurecom.fr/oai/cn5g/oai-cn5g-smf.git -b develop /openair-smf; fi"
-# For CI, especially for Pull/Merge Requests, we build out of temp merge
+
+# Copying source code
 WORKDIR /openair-smf
-RUN /bin/bash -c "if [[ -v BUILD_FOR_CI ]]; then git config --global user.name \"OAI CI\"; fi"
-RUN /bin/bash -c "if [[ -v BUILD_FOR_CI ]]; then git config --global user.email ci@openairinterface.org; fi"
-RUN /bin/bash -c "if [[ -v BUILD_FOR_CI ]]; then git checkout -f $CI_SRC_COMMIT; fi"
-RUN /bin/bash -c "if [[ -v BUILD_FOR_CI ]]; then git merge --ff origin/$CI_DEST_BRANCH -m \"Temporary merge for CI\"; fi"
+COPY . /openair-smf
 
 # Installing and Building SMF
 WORKDIR /openair-smf/build/scripts
 RUN ./build_smf --install-deps --force
-RUN ./build_smf --clean --Verbose --build-type Release --jobs
+WORKDIR /openair-smf/src/test/amf
+RUN mkdir build && cd build && cmake .. && make
 
 #---------------------------------------------------------------------
 # TARGET IMAGE
 #---------------------------------------------------------------------
-FROM ubuntu:bionic as oai-smf
+FROM ubuntu:bionic as test-amf-server
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -75,29 +66,13 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
     psmisc \
     net-tools \
-    bc \
-    tshark \
-    libasan4 \
-    libgoogle-glog0v5 \
-    libdouble-conversion1 \
-    libconfig++9v5 \
-    libcurl4-gnutls-dev \
   && rm -rf /var/lib/apt/lists/*
 
 # Copying executable and generated libraries
-WORKDIR /openair-smf/bin
-COPY --from=oai-smf-builder /openair-smf/build/smf/build/smf oai_smf
+WORKDIR /test-amf-server/bin
+COPY --from=oai-smf-builder /openair-smf/src/test/amf/build/amf-server .
 COPY --from=oai-smf-builder /usr/local/lib/libpistache.so /usr/local/lib/
-COPY --from=oai-smf-builder /usr/local/lib/libnghttp2_asio.so.1 /usr/local/lib/
-COPY --from=oai-smf-builder /usr/lib/x86_64-linux-gnu/libboost_system.so.1.65.1 /usr/lib/x86_64-linux-gnu/
-COPY --from=oai-smf-builder /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.65.1 /usr/lib/x86_64-linux-gnu/
-COPY --from=oai-smf-builder /openair-smf/build/smf/build/nas/libNAS.so /usr/local/lib/
 RUN ldconfig
 
-# Copying template configuration files
-# The configuration folder will be flat
-WORKDIR /openair-smf/etc
-COPY --from=oai-smf-builder /openair-smf/etc/smf.conf .
-
-WORKDIR /openair-smf
+WORKDIR /test-amf-server
 
