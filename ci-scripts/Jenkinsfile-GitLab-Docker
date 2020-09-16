@@ -244,7 +244,7 @@ pipeline {
           steps {
             script {
               BUILDER_SHA_ONE = myShRetCmd('docker image ls | head -3 | grep none | sed -e "s#> *<#><#" | sed -e "s#<none><none> *##" | cut -d " " -f 1', new_host_flag, new_host_user, new_host)
-              myShCmd('docker image tag' + BUILDER_SHA_ONE + ' oai-smf-builder-installed:latest', new_host_flag, new_host_user, new_host)
+              myShCmd('docker image tag ' + BUILDER_SHA_ONE + ' oai-smf-builder-installed:latest', new_host_flag, new_host_user, new_host)
             }
           }
         }
