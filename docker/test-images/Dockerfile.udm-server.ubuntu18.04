@@ -28,30 +28,9 @@
 #---------------------------------------------------------------------
 # BUILDER IMAGE
 #---------------------------------------------------------------------
-FROM ubuntu:bionic as oai-smf-builder
+FROM oai-smf-builder-installed:latest as oai-smf-builder
 
-ARG NEEDED_GIT_PROXY
-
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
-    psmisc \
-    git \
-  && rm -rf /var/lib/apt/lists/*
-
-# Some GIT configuration command quite useful
-RUN /bin/bash -c "if [[ -v NEEDED_GIT_PROXY ]]; then git config --global http.proxy $NEEDED_GIT_PROXY; fi"
-RUN git config --global https.postBuffer 123289600
-RUN git config --global http.sslverify false
-
-# Copying source code
-WORKDIR /openair-smf
-COPY . /openair-smf
-
-# Installing and Building SMF
-WORKDIR /openair-smf/build/scripts
-RUN ./build_smf --install-deps --force
+# Building UDM-server
 WORKDIR /openair-smf/src/test/udm
 RUN mkdir build && cd build && cmake .. && make
 
