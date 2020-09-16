@@ -31,7 +31,6 @@
 FROM oai-smf-builder-installed:latest as oai-smf-builder
 
 # Building AMF-Server
-RUN ./build_smf --install-deps --force
 WORKDIR /openair-smf/src/test/amf
 RUN mkdir build && cd build && cmake .. && make
 
