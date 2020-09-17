@@ -1182,7 +1182,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
 
   sm_context_resp->http_version = smreq->http_version;
-
   sm_context_resp->res.set_http_code(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);  //default status code
   sm_context_resp->res.set_supi(supi);
@@ -1246,6 +1245,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   //For the moment, SMF uses the local policy (e.g., default QoS rule)
 
   //address allocation based on PDN type
+  //IP Address pool is controlled by SMF
   //Step 6. paa
   bool set_paa = false;
   paa_t paa = { };
@@ -1267,7 +1267,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   //smf_app_inst->process_pco_request(extended_protocol_options, pco_resp, pco_ids);
 
   //Step 7. Address allocation based on PDN type
-  Logger::smf_app().debug("UE address allocation");
+  Logger::smf_app().debug("UE Address Allocation");
   switch (sp->pdn_type.pdn_type) {
     case PDN_TYPE_E_IPV4: {
       if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) {  //use SM NAS signalling
@@ -1294,6 +1294,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           if (success) {
             set_paa = true;
           } else {
+            //TODO:
             //cause: ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED; //check for 5G?
           }
           // Static IP address allocation
@@ -1354,11 +1355,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       sm_context_resp_pending->res.set_paa(paa);  //will be used when procedure is running
       sp->set(paa);
     } else {
-      // Valid PAA sent in CSR ?
-      //bool paa_res = csreq->gtp_ies.get(paa);
-      //if ((paa_res) && ( paa.is_ip_assigned())) {
-      //  sp->set(paa);
-      //}
+      //TODO:
     }
 
     //Step 5 (4.3.2.2.1 TS 23.502): Trigger SMF APP to send response to SMF-HTTP-API-SERVER

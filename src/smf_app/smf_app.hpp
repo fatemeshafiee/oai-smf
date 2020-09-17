@@ -77,7 +77,6 @@ typedef enum {
 } pdu_session_procedure_t;
 
 class smf_config;
-// same namespace
 
 class smf_context_ref {
  public:

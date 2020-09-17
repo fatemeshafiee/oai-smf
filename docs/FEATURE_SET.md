@@ -39,7 +39,7 @@ Based on document **3GPP TS 23.501 v16.0.0 §6.2.2**.
 | **ID** | **Classification**                                                  | **Status**         | **Comments**                                |
 | ------ | ------------------------------------------------------------------- | ------------------ | ------------------------------------------- |
 | 1      | Session Management (Session Establishment/Modification/Release)     | :heavy_check_mark: |                                             |
-| 2      | UE IP address allocation & management​                               | :heavy_check_mark: | Only support static ipv4 address allocation |
+| 2      | UE IP address allocation & management​                               | :heavy_check_mark: | IP Address pool is controlled by SMF |
 | 3      | DHCPv4 (server and client) and DHCPv6 (server and client) function  | :x:                |                                             |
 | 4      | Respond to ARP requests and/or IPv6 Neighbour Solicitation requests | :x:                |                                             |
 | 5      | Selection of UPF function​                                           | :heavy_check_mark: | Local configuration in SMF                  |
