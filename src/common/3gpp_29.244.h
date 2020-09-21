@@ -320,6 +320,7 @@ struct pfcp_ie_value_exception : public pfcp_ie_exception {
 #define PFCP_IE_FRAMED_ROUTE                                                           (153)
 #define PFCP_IE_FRAMED_ROUTING                                                         (154)
 #define PFCP_IE_FRAMED_IPV6_ROUTE                                                      (155)
+#define PFCP_IE_3GPP_INTERFACE_TYPE                                                    (160)
 
 #define PFCP_MESSAGE_RESERVED                                                (0)
 // PFCP_NODE_RELATED_MESSAGES
@@ -409,8 +410,8 @@ typedef struct source_interface_s {
 struct fteid_s {
   uint8_t chid :1;
   uint8_t ch :1;
-  uint8_t v4 :1;
   uint8_t v6 :1;
+  uint8_t v4 :1;
   teid_t teid;
   struct in_addr ipv4_address;
   struct in6_addr ipv6_address;
@@ -1613,24 +1614,28 @@ typedef struct framed_ipv6_route_s {
 //-------------------------------------
 // 8.2.118. 3GPP Interface Type
 enum _3gpp_interface_type_e {
-  S1_U = 0,
-  S5_S8_U = 1,
-  S4_U = 2,
-  S11_U = 3,
-  S12_U = 4,
-  GN_GP_U = 5,
-  S2A_U = 6,
-  S2B_U = 7,
-  ENODEB_GTP_U_DL = 8,
-  ENODEB_GTP_U_UL = 9,
-  SGW_UPF_GTP_U_DL = 10,
-  N3_3GPP_ACCESS = 11,
-  N3_TRUSTED_NON_3GPP_ACCESS = 12,
-  N3_UNTRUSTED_NON_3GPP_ACCESS = 13,
-  N3 = 14,
-  N9 = 15
+  _3GPP_INTERFACE_TYPE_S1_U = 0,
+  _3GPP_INTERFACE_TYPE_S5_S8_U = 1,
+  _3GPP_INTERFACE_TYPE_S4_U = 2,
+  _3GPP_INTERFACE_TYPE_S11_U = 3,
+  _3GPP_INTERFACE_TYPE_S12_U = 4,
+  _3GPP_INTERFACE_TYPE_GN_GP_U = 5,
+  _3GPP_INTERFACE_TYPE_S2A_U = 6,
+  _3GPP_INTERFACE_TYPE_S2B_U = 7,
+  _3GPP_INTERFACE_TYPE_ENODEB_GTP_U_DL = 8,
+  _3GPP_INTERFACE_TYPE_ENODEB_GTP_U_UL = 9,
+  _3GPP_INTERFACE_TYPE_SGW_UPF_GTP_U_DL = 10,
+  _3GPP_INTERFACE_TYPE_N3_3GPP_ACCESS = 11,
+  _3GPP_INTERFACE_TYPE_N3_TRUSTED_NON_3GPP_ACCESS = 12,
+  _3GPP_INTERFACE_TYPE_N3_UNTRUSTED_NON_3GPP_ACCESS = 13,
+  _3GPP_INTERFACE_TYPE_N3 = 14,
+  _3GPP_INTERFACE_TYPE_N9 = 15
 };
 
+typedef struct _3gpp_interface_type_s {
+  uint8_t spare :2;
+  uint8_t interface_type_value :6;
+} _3gpp_interface_type_t;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Specific IEs

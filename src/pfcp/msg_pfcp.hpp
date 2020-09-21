@@ -558,6 +558,10 @@ namespace pfcp {
     //  PFCP_IE_FRAMED_IPV6_ROUTE
     virtual bool get(pfcp::framed_ipv6_route_t& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_FRAMED_IPV6_ROUTE, __FILE__, __LINE__);}
     virtual void set(const pfcp::framed_ipv6_route_t& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_FRAMED_IPV6_ROUTE, __FILE__, __LINE__);}
+    //  PFCP_IE_3GPP_INTERFACE_TYPE
+    virtual bool get(pfcp::_3gpp_interface_type_t& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_3GPP_INTERFACE_TYPE, __FILE__, __LINE__);}
+    virtual void set(const pfcp::_3gpp_interface_type_t& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_3GPP_INTERFACE_TYPE, __FILE__, __LINE__);}
+
 
     virtual ~pfcp_ies_container() {};
   };
@@ -692,6 +696,8 @@ namespace pfcp {
       std::pair<bool, pfcp::framed_route_t>           framed_route;
       std::pair<bool, pfcp::framed_routing_t>         framed_routing;
       std::pair<bool, pfcp::framed_ipv6_route_t>      framed_ipv6_route;
+      std::pair<bool, pfcp::_3gpp_interface_type_t>   _3gpp_interface_type;
+
 
 
       pdi() :
@@ -737,6 +743,7 @@ namespace pfcp {
       void set(const pfcp::framed_route_t& v) {framed_route.first = true; framed_route.second = v;}
       void set(const pfcp::framed_routing_t& v) {framed_routing.first = true; framed_routing.second = v;}
       void set(const pfcp::framed_ipv6_route_t& v) {framed_ipv6_route.first = true; framed_ipv6_route.second = v;}
+      void set(const pfcp::_3gpp_interface_type_t& v) {_3gpp_interface_type.first = true; _3gpp_interface_type.second = v;}
 
       bool get(pfcp::source_interface_t& v) const {if (source_interface.first) {v = source_interface.second;return true;}return false;}
       bool get(pfcp::fteid_t& v) const {if (local_fteid.first) {v = local_fteid.second;return true;}return false;}
@@ -750,6 +757,7 @@ namespace pfcp {
       bool get(pfcp::framed_route_t& v) const {if (framed_route.first) {v = framed_route.second;return true;}return false;}
       bool get(pfcp::framed_routing_t& v) const {if (framed_routing.first) {v = framed_routing.second;return true;}return false;}
       bool get(pfcp::framed_ipv6_route_t& v) const {if (framed_ipv6_route.first) {v = framed_ipv6_route.second;return true;}return false;}
+      bool get(pfcp::_3gpp_interface_type_t& v) const {if (_3gpp_interface_type.first) {v = _3gpp_interface_type.second;return true;}return false;}
   };
 
   //------------------------------------------------------------------------------
