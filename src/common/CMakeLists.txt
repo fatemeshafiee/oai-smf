@@ -18,6 +18,7 @@
 # For more information about the OpenAirInterface (OAI) Software Alliance:
 #      contact@openairinterface.org
 ################################################################################
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/msg)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/nas)

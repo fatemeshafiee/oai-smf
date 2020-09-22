@@ -1425,8 +1425,8 @@ struct fully_qualified_tunnel_endpoint_identifier_s {
     std::string s = { };
     interface_type_t iface_type((interface_type_e) interface_type);
     if ((v4) || (v6)) {
-      s.append("Interface type=").append(iface_type.toString());
-      s.append(", TEID=").append(std::to_string(teid_gre_key));
+      //s.append("Interface type=").append(iface_type.toString());
+      s.append("TEID=").append(std::to_string(teid_gre_key));
       if (v4) {
         s.append(", IPv4=").append(conv::toString(ipv4_address));
       }

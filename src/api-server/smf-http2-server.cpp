@@ -40,10 +40,13 @@
 #include "3gpp_29.502.h"
 #include "mime_parser.hpp"
 #include "3gpp_29.500.h"
+#include "smf_config.hpp"
 
 using namespace nghttp2::asio_http2;
 using namespace nghttp2::asio_http2::server;
 using namespace oai::smf_server::model;
+
+extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
 void smf_http2_server::start() {
@@ -51,7 +54,7 @@ void smf_http2_server::start() {
 
   Logger::smf_api_server().info("HTTP2 server started");
   //Create SM Context Request
-  server.handle(NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
+  server.handle(NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
                 [&](const request &request, const response &response) {
 
                   request.on_data([&](const uint8_t *data, std::size_t len) {
@@ -131,7 +134,7 @@ void smf_http2_server::start() {
                 });
 
                 //Update SM Context Request
-  server.handle(NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL,
+  server.handle(NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL,
                 [&](const request &request, const response &response) {
 
                   request.on_data([&](const uint8_t *data, std::size_t len) {
@@ -292,7 +295,7 @@ void smf_http2_server::create_sm_contexts_handler(
   //set api root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
       m_address + ":" + std::to_string(m_port)
-          + "/nsmf-pdusession/v1/sm-context");
+          + "/nsmf-pdusession/" + smf_cfg.sbi_api_version + "/sm-context");
 
   //supi
   supi_t supi = { .length = 0 };
@@ -389,17 +392,21 @@ void smf_http2_server::create_sm_contexts_handler(
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
   nlohmann::json json_data = { };
   sm_context_response.get_json_data(json_data);
+
+  //Add header
+  header_map h;
+  //Location header
   if (sm_context_response.get_smf_context_uri().size() > 0) {
     Logger::smf_api_server().debug(
         "Add location header %s",
         sm_context_response.get_smf_context_uri().c_str());
-    header_map h;
     h.emplace("location", header_value {
                   sm_context_response.get_smf_context_uri().c_str() });
-    response.write_head(sm_context_response.get_http_code(), h);
-  } else {
-    response.write_head(sm_context_response.get_http_code());
   }
+  //content-type header
+  h.emplace("content-type", header_value {"application/json"});
+  response.write_head(sm_context_response.get_http_code(), h);
+
   response.end(json_data.dump().c_str());
 }
 

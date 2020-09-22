@@ -415,17 +415,17 @@ void smf_n4::handle_receive_association_setup_response(
   if (!error) {
     if (not msg_ies_container.node_id.first) {
       // Should be detected by lower layers
-      Logger::smf_app().warn(
+      Logger::smf_n4().warn(
           "Received N4 ASSOCIATION SETUP RESPONSE without node id IE!, ignore message");
       return;
     }
     if (not msg_ies_container.recovery_time_stamp.first) {
       // Should be detected by lower layers
-      Logger::smf_app().warn(
+      Logger::smf_n4().warn(
           "Received N4 ASSOCIATION SETUP RESPONSE without recovery time stamp IE!, ignore message");
       return;
     }
-    Logger::smf_app().info("Received N4 ASSOCIATION SETUP RESPONSE");
+    Logger::smf_n4().info("Received N4 ASSOCIATION SETUP RESPONSE");
     bool restore_n4_sessions = false;
     if (msg_ies_container.up_function_features.first) {
       pfcp_associations::get_instance().add_association(

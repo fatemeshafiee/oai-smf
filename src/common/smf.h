@@ -179,14 +179,18 @@ typedef struct qos_profile_s {
 } qos_profile_t;
 
 //URL, N1, N2 (may get from configuration file)
-#define NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL  "/namf-comm/v1/ue-contexts/{}/n1-n2-messages" //context id
-#define NUDM_SDM_GET_SM_DATA_URL                      "/nudm-sdm/v2/{}/sm-data" //ue Id
+#define NAMF_COMMUNICATION_BASE                       "/namf-comm/"
+#define NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL  "/ue-contexts/{}/n1-n2-messages" //context id
+#define NUDM_SDM_BASE                                 "/nudm-sdm/"
+#define NUDM_SDM_GET_SM_DATA_URL                      "/{}/sm-data" //ue Id
 #define N1_SM_CONTENT_ID                              "n1SmMsg"
-#define N1N2_MESSAGE_CLASS                             "SM"
+#define N1N2_MESSAGE_CLASS                            "SM"
 #define N2_SM_CONTENT_ID                              "n2msg"
-#define NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE  "/nsmf-pdusession/v1/callback/N1N2MsgTxfrFailureNotification/{}" //UE Id
-#define NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL  "/nsmf-pdusession/v1/sm-contexts"
-#define NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL  "/nsmf-pdusession/v1/sm-contexts/"
+#define NSMF_PDU_SESSION_BASE                         "/nsmf-pdusession/"
+#define NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE   "/callback/N1N2MsgTxfrFailureNotification/{}" //UE Id
+#define NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL        "/sm-contexts"
+#define NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL        "/sm-contexts/"
+
 
 //for CURL
 #define AMF_CURL_TIMEOUT_MS 100L

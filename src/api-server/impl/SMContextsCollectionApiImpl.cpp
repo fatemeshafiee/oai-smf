@@ -37,6 +37,9 @@
 #include "itti_msg_n11.hpp"
 #include "3gpp_29.502.h"
 #include <nghttp2/asio_http2_server.h>
+#include "smf_config.hpp"
+
+extern smf::smf_config smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -75,7 +78,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   //set N1 SM Message
   sm_context_req_msg.set_n1_sm_message(n1_sm_msg);
   //set api root to be used as location header in HTTP response
-  sm_context_req_msg.set_api_root(m_address + base + "/sm-contexts");
+  sm_context_req_msg.set_api_root(m_address + base + smf_cfg.sbi_api_version + "/sm-contexts");
 
   //supi
   supi_t supi = { .length = 0 };

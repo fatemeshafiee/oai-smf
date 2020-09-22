@@ -62,7 +62,7 @@ class SMContextsCollectionApi {
   }
   void init();
 
-  const std::string base = "/nsmf-pdusession/v1";
+  const std::string base = "/nsmf-pdusession/";
 
  private:
   void setupRoutes();

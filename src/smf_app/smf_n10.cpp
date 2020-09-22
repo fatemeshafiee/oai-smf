@@ -117,6 +117,7 @@ bool smf_n10::get_sm_data(
   std::string url = std::string(
       inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) + ":"
       + std::to_string(smf_cfg.udm_addr.port)
+      + NUDM_SDM_BASE + smf_cfg.udm_addr.api_version
       + fmt::format(NUDM_SDM_GET_SM_DATA_URL, std::to_string(supi));
   Logger::smf_n10().debug("UDM's URL: %s ", url.c_str());
 

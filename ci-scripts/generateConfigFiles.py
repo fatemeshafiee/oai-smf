@@ -30,11 +30,14 @@ class smfConfigGen():
 		self.sbi_name = ''
 		self.sbi_port = '80'
 		self.sbi_http2_port = '9090'
+		self.sbi_api_version = 'v1'
 		self.n4_name = ''
 		self.amf_ip_addr = ''
 		self.amf_port = '80'
+		self.amf_api_version = 'v1'
 		self.udm_ip_addr = ''
 		self.udm_port = '80'
+		self.udm_api_version = 'v2'
 		self.upf_ip_addr = ''
 		self.apn = 'carrier.com'
 		self.dns1_ip = '192.168.18.129'
@@ -68,17 +71,20 @@ class smfConfigGen():
 		smfFile.write('\n')
 		smfFile.write('SMF_CONF[@INSTANCE@]=$INSTANCE\n')
 		smfFile.write('SMF_CONF[@PID_DIRECTORY@]=\'/var/run\'\n')
+		smfFile.write('SMF_CONF[@SMF_INTERFACE_NAME_FOR_N4@]=\'' + self.n4_name + '\'\n')
 		smfFile.write('SMF_CONF[@SMF_INTERFACE_NAME_FOR_SBI@]=\'' + self.sbi_name + '\'\n')
 		smfFile.write('SMF_CONF[@SMF_INTERFACE_PORT_FOR_SBI@]=' + self.sbi_port + '\n')
-		smfFile.write('SMF_CONF[@SMF_INTERFACE_HTTP2_PORT_FOR_SBI@]=' + self.sbi_http2_port + '\n')
-		smfFile.write('SMF_CONF[@SMF_INTERFACE_NAME_FOR_N4@]=\'' + self.n4_name + '\'\n')
+		smfFile.write('SMF_CONF[@SMF_INTERFACE_HTTP2_PORT_FOR_SBI@]=' + self.sbi_http2_port + '\n')		
+		smfFile.write('SMF_CONF[@SMF_API_VERSION@]=\'' + self.sbi_api_version + '\'\n')
 		smfFile.write('SMF_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]=$MY_PRIMARY_DNS\n')
 		smfFile.write('SMF_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]=$MY_SECONDARY_DNS\n')
 		#smfFile.write('SMF_CONF[@DEFAULT_APN@]=$MY_APN\n')
 		smfFile.write('SMF_CONF[@AMF_IPV4_ADDRESS@]=\'' + self.amf_ip_addr + '\'\n')
 		smfFile.write('SMF_CONF[@AMF_PORT@]=' + self.amf_port + '\n')
+		smfFile.write('SMF_CONF[@AMF_API_VERSION@]=\'' + self.amf_api_version + '\'\n')
 		smfFile.write('SMF_CONF[@UDM_IPV4_ADDRESS@]=\'' + self.udm_ip_addr + '\'\n')
 		smfFile.write('SMF_CONF[@UDM_PORT@]=' + self.udm_port + '\n')
+		smfFile.write('SMF_CONF[@UDM_API_VERSION@]=\'' + self.udm_api_version + '\'\n')
 		smfFile.write('SMF_CONF[@UPF_IPV4_ADDRESS@]=\'' + self.upf_ip_addr + '\'\n')
 		smfFile.write('\n')
 		smfFile.write('for K in "${!SMF_CONF[@]}"; do \n')

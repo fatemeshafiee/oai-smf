@@ -12,6 +12,9 @@
 
 #include "PDUSessionsCollectionApi.h"
 #include "Helpers.h"
+#include "smf_config.hpp"
+
+extern smf::smf_config smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -33,7 +36,7 @@ void PDUSessionsCollectionApi::setupRoutes() {
   using namespace Pistache::Rest;
 
   Routes::Post(
-      *router, base + "/pdu-sessions",
+      *router, base + smf_cfg.sbi_api_version + "/pdu-sessions",
       Routes::bind(&PDUSessionsCollectionApi::post_pdu_sessions_handler, this));
 
   // Default handler, called when a route is not found

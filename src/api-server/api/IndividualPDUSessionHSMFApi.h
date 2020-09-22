@@ -18,6 +18,7 @@
 #ifndef IndividualPDUSessionHSMFApi_H_
 #define IndividualPDUSessionHSMFApi_H_
 
+#include <string>
 #include <pistache/http.h>
 #include <pistache/router.h>
 #include <pistache/http_headers.h>
@@ -28,7 +29,6 @@
 #include "HsmfUpdatedData.h"
 #include "ProblemDetails.h"
 #include "ReleaseData.h"
-#include <string>
 
 namespace oai {
 namespace smf_server {
@@ -43,7 +43,7 @@ class IndividualPDUSessionHSMFApi {
   }
   void init();
 
-  const std::string base = "/nsmf-pdusession/v1";
+  const std::string base = "/nsmf-pdusession/";
 
  private:
   void setupRoutes();

@@ -65,7 +65,6 @@ extern "C" {
 
 using namespace smf;
 
-#define SYSTEM_CMD_MAX_STR_SIZE 512
 extern util::async_shell_cmd *async_shell_cmd_inst;
 extern smf_app *smf_app_inst;
 extern smf_config smf_cfg;
@@ -559,8 +558,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
 
   int decoder_rc = smf_n1_inst.decode_n1_sm_container(decoded_nas_msg,
                                                          n1_sm_msg);
+
+  //Failed to decode, send reply to AMF with PDU Session Establishment Reject
   if (decoder_rc != RETURNok) {
-    //error, send reply to AMF with PDU Session Establishment Reject
     Logger::smf_app().warn("N1 SM container cannot be decoded correctly!");
     problem_details.setCause(
         pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
@@ -599,7 +599,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //PDU session type (Optional)
   if (decoded_nas_msg.plain.sm.header.message_type
       == PDU_SESSION_ESTABLISHMENT_REQUEST) {
-    //TODO: Disable this command temporarily since can't get this info from tester
     Logger::smf_app().debug(
         "PDU Session Type %d",
         decoded_nas_msg.plain.sm.pdu_session_establishment_request
@@ -608,7 +607,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         .pdu_session_establishment_request._pdusessiontype
         .pdu_session_type_value;
   }
-
   smreq->req.set_pdu_session_type(pdu_session_type.pdu_session_type);
 
   //TODO: Support IPv4 only for now
