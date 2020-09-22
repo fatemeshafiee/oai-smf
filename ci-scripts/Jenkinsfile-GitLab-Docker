@@ -332,11 +332,7 @@ pipeline {
         stage ('Deploy Containers') {
           steps {
             script {
-              if ("MERGE".equals(env.gitlabActionType)) {
-                myShCmd('docker run --privileged --name ci-oai-smf -d oai-smf:ci-temp /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
-              } else {
-                myShCmd('docker run --privileged --name ci-oai-smf -d oai-smf:develop /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
-              }
+              myShCmd('docker run --privileged --name ci-oai-smf -d oai-smf:' + smf_tag + ' /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
               // SBI --> eth1
               myShCmd('docker network connect ci-sbi ci-oai-smf', new_host_flag, new_host_user, new_host)
               // N4 --> eth2
@@ -531,7 +527,7 @@ pipeline {
         // Removing temporary / intermediate images
         try {
           if ("MERGE".equals(env.gitlabActionType)) {
-            myShCmd('docker image rm --force oai-smf:ci-temp', new_host_flag, new_host_user, new_host)
+            myShCmd('docker image rm --force oai-smf:ci-tmp', new_host_flag, new_host_user, new_host)
           }
         } catch (Exception e) {
           echo "We failed to delete the OAI-SMF temp image"
