@@ -156,9 +156,9 @@ int session_create_sm_context_procedure::run(
 
   destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;  // ACCESS is for downlink, CORE for uplink
   forwarding_parameters.set(destination_interface);
-
-  //TODO
-  //Network instance
+  //TODO: Network Instance
+  //TODO: Redirect Information
+  //TODO: Outer Header Creation
 
   create_far.set(far_id);
   create_far.set(apply_action);
@@ -266,18 +266,6 @@ int session_create_sm_context_procedure::run(
   sps->add_qos_flow(flow2);
   sps->set_default_qos_flow(flow.qfi);
 
-  /*
-   //add another flow for testing purpose, TODO: SHOULD BE REMOVED
-   smf_qos_flow flow3 = flow;
-   flow3.qfi = 7;
-   sps->add_qos_flow(flow3);
-   QOSRulesIE qos_rule2 = qos_rule;
-   qos_rule2.qosruleidentifer = 10;
-   qos_rule2.qosflowidentifer = 7;
-   qos_rule2.dqrbit = THE_QOS_RULE_IS_NOT_THE_DEFAULT_QOS_RULE;
-   sps->add_qos_rule(qos_rule2);
-   */
-
   // for finding procedure when receiving response
   smf_app_inst->set_seid_2_smf_context(cp_fseid.seid, sc);
 
@@ -325,13 +313,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
           //Update Qos Flow
           smf_qos_flow flow2 = flow;
           sps->add_qos_flow(flow2);
-
-          /*
-           //add another flow for testing purpose, TODO: SHOULD BE REMOVED
-           smf_qos_flow flow3 = flow;
-           flow3.qfi = 7;
-           sps->add_qos_flow(flow3);
-           */
         }
       } else {
         Logger::smf_app().error("Could not get QoS Flow for created_pdr %d",
@@ -360,8 +341,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
     }
     if (sps->get_default_qos_rule(qos_rule)) {
       flow_updated.add_qos_rule(qos_rule);
-//      qos_rule.qosruleidentifer = 2;
-//      flow_updated.add_qos_rule(qos_rule);
     }
     flow_updated.set_qfi(default_qos_flow.qfi);
     qos_profile_t profile = { };
@@ -376,7 +355,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
   n11_triggered_pending->res.set_qos_flow_context(flow_updated);
 
   //fill content for N1N2MessageTransfer (including N1, N2 SM)
-
   // Create N1 SM container & N2 SM Information
   smf_n1_n2 smf_n1_n2_inst = { };
   std::string n1_sm_msg, n1_sm_msg_hex;
@@ -470,7 +448,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
         + fmt::format(NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE,
                       supi_str.c_str());
     json_data["n1n2FailureTxfNotifURI"] = callback_uri.c_str();
-    //json_data["n1n2FailureTxfNotifURI"] = "http://192.168.122.1/namf-comm/callback/N1N2MsgTxfrFailureNotification/imsi-310410000000001-1";
   }
   //Others information
   //n11_triggered_pending->res.n1n2_message_transfer_data["pti"] = 1;  //Don't need this info for the moment
