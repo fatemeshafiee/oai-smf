@@ -178,7 +178,7 @@ void smf_n11::send_n1n2_message_transfer_request(
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
-                         CURL_HTTP_VERSION_2_0);
+                         CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
     }
 
     // Response information.
@@ -292,7 +292,7 @@ void smf_n11::send_n1n2_message_transfer_request(
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
-                         CURL_HTTP_VERSION_2_0);
+                         CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
     }
 
     // Response information.
@@ -380,7 +380,7 @@ void smf_n11::send_n1n2_message_transfer_request(
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
-                         CURL_HTTP_VERSION_2_0);
+                         CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
     }
 
     // Response information.
