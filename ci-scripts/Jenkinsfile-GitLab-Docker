@@ -56,7 +56,8 @@ pipeline {
       "Build AMF-server",
       "Build UDM-server",
       "Build AMF-client",
-      "Local SMF test"
+      "Local SMF test",
+      "Test with DsTester"
     ])
 
   }
@@ -490,6 +491,36 @@ pipeline {
         }
       }
     }
+    stage ('Testing in CN-5G-FED environment') {
+      steps {
+        script {
+          gitlabCommitStatus(name: "Test with DsTester") {
+            localStatus = build job: 'CI-OpenAir-CN5G-FED',
+              parameters: [
+                string(name: 'SMF_TAG', value: String.valueOf(smf_tag)),
+                string(name: 'SMF_BRANCH', value: String.valueOf(smf_branch))
+              ], propagate: false
+            localResult = localStatus.getResult()
+
+            if (localStatus.resultIsBetterOrEqualTo('SUCCESS')) {
+              echo "Federation Test Job is OK"
+            } else {
+              echo "Federation Test Job is KO"
+              sh "ci-scripts/fail.sh"
+            }
+          }
+        }
+      }
+      post {
+        always {
+          script {
+            copyArtifacts(projectName: 'CI-OpenAir-CN5G-FED',
+                          filter: '*_results_oai_cn5g.html',
+                          selector: lastCompleted())
+          }
+        }
+      }
+    }
   }
   post {
     success {
@@ -558,6 +589,10 @@ pipeline {
         sh "sed -i -e 's#TEMPLATE_TIME#${JOB_TIMESTAMP}#' test_results_oai_smf.html"
         if (fileExists('test_results_oai_smf.html')) {
           archiveArtifacts artifacts: 'test_results_oai_smf.html'
+        }
+        if (fileExists('deploy_results_oai_cn5g.html')) {
+          sh "sed -i -e 's#TEMPLATE_TIME#${JOB_TIMESTAMP}#' *_results_oai_cn5g.html"
+          archiveArtifacts artifacts: '*_results_oai_cn5g.html'
         }
 
         // Sending email to commiter
