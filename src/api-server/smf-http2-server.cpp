@@ -392,17 +392,21 @@ void smf_http2_server::create_sm_contexts_handler(
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
   nlohmann::json json_data = { };
   sm_context_response.get_json_data(json_data);
+
+  //Add header
+  header_map h;
+  //Location header
   if (sm_context_response.get_smf_context_uri().size() > 0) {
     Logger::smf_api_server().debug(
         "Add location header %s",
         sm_context_response.get_smf_context_uri().c_str());
-    header_map h;
     h.emplace("location", header_value {
                   sm_context_response.get_smf_context_uri().c_str() });
-    response.write_head(sm_context_response.get_http_code(), h);
-  } else {
-    response.write_head(sm_context_response.get_http_code());
   }
+  //content-type header
+  h.emplace("content-type", header_value {"application/json"});
+  response.write_head(sm_context_response.get_http_code(), h);
+
   response.end(json_data.dump().c_str());
 }
 
