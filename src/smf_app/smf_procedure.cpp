@@ -158,7 +158,7 @@ int session_create_sm_context_procedure::run(
   forwarding_parameters.set(destination_interface);
   //TODO: Network Instance
   //TODO: Redirect Information
-  //TODO: Outer Header Creation
+  //TODO: Outer Header Creation (e.g., in case of N9)
 
   create_far.set(far_id);
   create_far.set(apply_action);
@@ -180,15 +180,6 @@ int session_create_sm_context_procedure::run(
   pfcp::application_id_t application_id = { };
   pfcp::qfi_t qfi = { };
   pfcp::_3gpp_interface_type_t source_interface_type = { };
-  source_interface_type.interface_type_value = pfcp::_3GPP_INTERFACE_TYPE_N3;
-
-  source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
-  local_fteid.ch = 1; // SMF requests the UPF to assign a local F-TEID to the PDR
-  //TODO required?: local_fteid.v4 = 1;
-  //local_fteid.chid = 1;
-
-  xgpp_conv::paa_to_pfcp_ue_ip_address(sm_context_resp->res.get_paa(),
-                                       ue_ip_address);
 
   // DOIT simple
   // shall uniquely identify the PDR among all the PDRs configured for that PFCP session.
@@ -204,10 +195,19 @@ int session_create_sm_context_procedure::run(
   Logger::smf_app().info("Default qfi %d", qfi.qfi);
 
   //Packet detection information (see Table 7.5.2.2-2: PDI IE within PFCP Session Establishment Request, 3GPP TS 29.244 V16.0.0)
-  pdi.set(source_interface);  //source interface
-  pdi.set(local_fteid);  // CN tunnel info
+  //source interface
+  source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
+  pdi.set(source_interface);
+  // CN tunnel info
+  local_fteid.ch = 1; // SMF requests the UPF to assign a local F-TEID to the PDR
+  //TODO required?: local_fteid.v4 = 1;
+  //local_fteid.chid = 1;
+  pdi.set(local_fteid);
   //TODO: Network Instance
-  pdi.set(ue_ip_address);  //UE IP address
+  //UE IP address
+  xgpp_conv::paa_to_pfcp_ue_ip_address(sm_context_resp->res.get_paa(),
+                                       ue_ip_address);
+  pdi.set(ue_ip_address);
   //TODO: Traffic Endpoint ID
   //TODO: SDF Filter
   //TODO: Application ID
@@ -218,6 +218,7 @@ int session_create_sm_context_procedure::run(
   //TODO: Framed-Routing
   //TODO: Framed-IPv6-Route
   //Source Interface Type - N3
+  source_interface_type.interface_type_value = pfcp::_3GPP_INTERFACE_TYPE_N3;
   pdi.set(source_interface_type);
 
   outer_header_removal.outer_header_removal_description =
