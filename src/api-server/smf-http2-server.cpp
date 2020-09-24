@@ -294,8 +294,8 @@ void smf_http2_server::create_sm_contexts_handler(
   sm_context_req_msg.set_n1_sm_message(n1_sm_msg);
   //set api root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
-      m_address + ":" + std::to_string(m_port)
-          + "/nsmf-pdusession/" + smf_cfg.sbi_api_version + "/sm-context");
+     // m_address + ":" + std::to_string(m_port) + 
+          "/nsmf-pdusession/" + smf_cfg.sbi_api_version + "/sm-contexts");
 
   //supi
   supi_t supi = { .length = 0 };

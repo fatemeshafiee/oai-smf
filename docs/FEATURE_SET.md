@@ -29,17 +29,18 @@
 | 1      | N4            | :heavy_check_mark: | between SMF and UPF (PFCP)                                                |
 | 2      | N7            | :x:                | between SMF and PCF                                                       |
 | 3      | N10           | :heavy_check_mark: | between SMF and UDM (Nudm_SubscriberDataManagement)                       |
-| 4      | N11           | :heavy_check_mark: | between SMF and AMF (Nsmf_PDU_Session Services, Namf_N1N2MessageTransfer) |
+| 4      | N11 (*)       | :heavy_check_mark: | between SMF and AMF (Nsmf_PDU_Session Services, Namf_N1N2MessageTransfer) |
 | 5      | N16/16a       | :x:                | between SMFs                                                              |
 
+(*): support both HTTP/1.1 and HTTP/2
 # 3. OAI SMF Feature List #
 
-Based on document **3GPP TS 23.501 v16.0.0 §6.2.2**.
+Based on document **3GPP TS 23.501 v16.0.0 (Section 6.2.2)**.
 
 | **ID** | **Classification**                                                  | **Status**         | **Comments**                                |
 | ------ | ------------------------------------------------------------------- | ------------------ | ------------------------------------------- |
 | 1      | Session Management (Session Establishment/Modification/Release)     | :heavy_check_mark: |                                             |
-| 2      | UE IP address allocation & management​                               | :heavy_check_mark: | IP Address pool is controlled by SMF |
+| 2      | UE IP address allocation & management​                               | :heavy_check_mark: | IP Address pool is controlled by SMF        |
 | 3      | DHCPv4 (server and client) and DHCPv6 (server and client) function  | :x:                |                                             |
 | 4      | Respond to ARP requests and/or IPv6 Neighbour Solicitation requests | :x:                |                                             |
 | 5      | Selection of UPF function​                                           | :heavy_check_mark: | Local configuration in SMF                  |
