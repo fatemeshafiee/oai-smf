@@ -42,7 +42,6 @@
 #include "logger.hpp"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
-#include "smf_n1_n2.hpp"
 #include "mime_parser.hpp"
 
 extern "C" {
@@ -129,7 +128,6 @@ void smf_n11::send_n1n2_message_transfer_request(
   Logger::smf_n11().debug("Send Communication_N1N2MessageTransfer to AMF (HTTP version %d)", sm_context_res->http_version);
 
   mime_parser parser = {};
-  smf_n1_n2 smf_n1_n2_inst = { };
   std::string n1_message = sm_context_res->res.get_n1_sm_message();
   nlohmann::json json_data = {};
   std::string body;
@@ -248,7 +246,6 @@ void smf_n11::send_n1n2_message_transfer_request(
 
   mime_parser parser = {};
   std::string body;
-  smf_n1_n2 smf_n1_n2_inst = { };
   nlohmann::json json_data = {};
   std::string json_part;
   std::string n1_message = sm_session_modification->msg.get_n1_sm_message();
@@ -337,7 +334,6 @@ void smf_n11::send_n1n2_message_transfer_request(
       "Send Communication_N1N2MessageTransfer to AMF (Network-initiated Service Request)");
 
   mime_parser parser = {};
-  smf_n1_n2 smf_n1_n2_inst = { };
   std::string n2_message = report_msg->res.get_n2_sm_information();
   nlohmann::json json_data = {};
   std::string body;

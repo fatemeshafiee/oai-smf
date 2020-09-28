@@ -54,6 +54,8 @@
 #define SMF_CONFIG_STRING_INTERFACE_N4                          "N4"
 #define SMF_CONFIG_STRING_INTERFACE_SBI                         "SBI"
 #define SMF_CONFIG_STRING_SBI_HTTP2_PORT                        "HTTP2_PORT"
+#define SMF_CONFIG_STRING_API_VERSION                           "API_VERSION"
+
 
 #define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO                    "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 
@@ -73,19 +75,15 @@
 #define SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS              "DEFAULT_DNS_IPV6_ADDRESS"
 #define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS          "DEFAULT_DNS_SEC_IPV6_ADDRESS"
 #define SMF_CONFIG_STRING_UE_MTU                                "UE_MTU"
-#define SMF_CONFIG_STRING_GTPV1U_REALIZATION                    "GTPV1U_REALIZATION"
 
 #define SMF_CONFIG_STRING_INTERFACE_DISABLED                    "none"
 
 #define SMF_CONFIG_STRING_DNN_LIST                              "DNN_LIST"
 #define SMF_CONFIG_STRING_DNN_NI                                "DNN_NI"
-#define SMF_CONFIG_STRING_PDN_TYPE                              "PDN_TYPE"
+#define SMF_CONFIG_STRING_PDN_TYPE                              "PDU_SESSION_TYPE"
 #define SMF_CONFIG_STRING_IPV4_POOL                             "IPV4_POOL"
 #define SMF_CONFIG_STRING_IPV6_POOL                             "IPV6_POOL"
 
-#define SMF_CONFIG_STRING_AUTOMATIC_PUSH_DEDICATED_BEARER_PCC_RULE  "AUTOMATIC_PUSH_DEDICATED_BEARER_PCC_RULE"
-#define SMF_CONFIG_STRING_DEFAULT_BEARER_STATIC_PCC_RULE        "DEFAULT_BEARER_STATIC_PCC_RULE"
-#define SMF_CONFIG_STRING_PUSH_STATIC_PCC_RULES                 "PUSH_STATIC_PCC_RULES"
 #define SMF_ABORT_ON_ERROR true
 #define SMF_WARN_ON_ERROR  false
 
@@ -165,6 +163,7 @@ class smf_config {
   interface_cfg_t n4;
   interface_cfg_t sbi;
   unsigned int sbi_http2_port;
+  std::string sbi_api_version;
   itti_cfg_t itti;
 
   struct in_addr default_dnsv4;
@@ -202,11 +201,13 @@ class smf_config {
   struct {
     struct in_addr ipv4_addr;
     unsigned int port;
+    std::string api_version;
   } amf_addr;
 
   struct {
     struct in_addr ipv4_addr;
     unsigned int port;
+    std::string api_version;
   } udm_addr;
 
   std::vector<pfcp::node_id_t> upfs;
@@ -269,8 +270,10 @@ class smf_config {
 
     amf_addr.ipv4_addr.s_addr = INADDR_ANY;
     amf_addr.port = 80;
-    amf_addr.ipv4_addr.s_addr = INADDR_ANY;
+    amf_addr.api_version = "v1";
+    udm_addr.ipv4_addr.s_addr = INADDR_ANY;
     udm_addr.port = 80;
+    udm_addr.api_version = "v1";
 
     local_configuration = false;
     num_session_management_subscription = 0;
@@ -278,7 +281,8 @@ class smf_config {
     for (int i = 0; i < SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX; i++) {
       session_management_subscription[i] = {};
     }
-    sbi_http2_port = 0;
+    sbi_http2_port = 8080;
+    sbi_api_version = "v1";
 
   }
   ;

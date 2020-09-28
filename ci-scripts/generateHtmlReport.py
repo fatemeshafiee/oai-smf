@@ -38,6 +38,8 @@ class HtmlReport():
 		self.git_pull_request = False
 		self.git_target_branch = ''
 		self.git_target_commit = ''
+		self.nb_warnings = 0
+		self.warning_rows = ''
 
 	def generate(self):
 		cwd = os.getcwd()
@@ -359,6 +361,20 @@ class HtmlReport():
 	def buildSummaryFooter(self):
 		self.file.write('  </table>\n')
 		self.file.write('  <br>\n')
+		if self.nb_warnings > 0:
+			self.file.write('  <h3>Compilation Warnings Details</h3>\n')
+			self.file.write('  <button data-toggle="collapse" data-target="#oai-compilation-details">Details for Compilation Errors and Warnings </button>\n')
+			self.file.write('  <div id="oai-compilation-details" class="collapse">\n')
+			self.file.write('  <table class="table-bordered">\n')
+			self.file.write('    <tr bgcolor = "#33CCFF" >\n')
+			self.file.write('      <th>File</th>\n')
+			self.file.write('      <th>Line Number</th>\n')
+			self.file.write('      <th>Status</th>\n')
+			self.file.write('      <th>Message</th>\n')
+			self.file.write(self.warning_rows)
+			self.file.write('    </tr>\n')
+			self.file.write('  </table>\n')
+			self.file.write('  </div>\n')
 
 	def testBuildSummaryHeader(self):
 		self.file.write('  <h2>Test Images Build Summary</h2>\n')
@@ -661,6 +677,15 @@ class HtmlReport():
 						result = re.search('warning:', line)
 						if result is not None:
 							nb_warnings += 1
+							if nfType == 'SMF':
+								correctLine = re.sub("^.*/openair-smf","/openair-smf",line.strip())
+								wordsList = correctLine.split(None,2)
+								filename = re.sub(":[0-9]*:[0-9]*:","", wordsList[0])
+								linenumber = re.sub(filename + ':',"", wordsList[0])
+								linenumber = re.sub(':[0-9]*:',"", linenumber)
+								error_warning_status = re.sub(':',"", wordsList[1])
+								error_warning_msg = re.sub('^.*' + error_warning_status + ':', '', correctLine)
+								self.warning_rows += '<tr><td>' + filename + '</td><td>' + linenumber + '</td><td>' + error_warning_status + '</td><td>' + error_warning_msg + '</td></tr>\n'
 				logfile.close()
 			if nb_warnings == 0 and nb_errors == 0:
 				cell_msg = '	   <td bgcolor="LimeGreen"><pre style="border:none; background-color:LimeGreen"><b>'
@@ -671,6 +696,8 @@ class HtmlReport():
 			if nb_errors > 0:
 				cell_msg += str(nb_errors) + ' errors found in compile log\n'
 			cell_msg += str(nb_warnings) + ' warnings found in compile log</b></pre></td>\n'
+			if nfType == 'SMF':
+				self.nb_warnings = nb_warnings
 		else:
 			cell_msg = '	  <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>'
 			cell_msg += 'KO: logfile (' + logFileName + ') not found</b></pre></td>\n'
@@ -816,7 +843,7 @@ class HtmlReport():
 					if section_status:
 						if nfType == 'SMF':
 							if self.git_pull_request:
-								result = re.search('oai-smf *ci-temp', line)
+								result = re.search('oai-smf *ci-tmp', line)
 							else:
 								result = re.search('oai-smf *develop', line)
 						if nfType == 'AMF-Server':

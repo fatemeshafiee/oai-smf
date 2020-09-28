@@ -43,7 +43,8 @@
 #include "smf_config.hpp"
 #include "smf_pfcp_association.hpp"
 #include "smf_context.hpp"
-#include "smf_n1_n2.hpp"
+#include "smf_n1.hpp"
+#include "smf_n2.hpp"
 #include "smf_n11.hpp"
 #include "SmContextCreatedData.h"
 
@@ -54,7 +55,6 @@ using namespace std;
 extern itti_mw *itti_inst;
 extern smf::smf_app *smf_app_inst;
 extern smf::smf_config smf_cfg;
-extern smf::smf_n11 *smf_n11_inst;
 
 //------------------------------------------------------------------------------
 int n4_session_restore_procedure::run() {
@@ -357,7 +357,8 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
   //fill content for N1N2MessageTransfer (including N1, N2 SM)
   // Create N1 SM container & N2 SM Information
-  smf_n1_n2 smf_n1_n2_inst = { };
+  smf_n1 smf_n1_inst = { };
+  smf_n2 smf_n2_inst = { };
   std::string n1_sm_msg, n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
 
@@ -373,9 +374,8 @@ void session_create_sm_context_procedure::handle_itti_msg(
           cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
     }
 
-    smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res,
-    PDU_SESSION_ESTABLISHMENT_REJECT,
-                                          n1_sm_msg, cause_n1);
+    smf_n1_inst.create_n1_pdu_session_establishment_reject(n11_triggered_pending->res,
+                                              n1_sm_msg, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
@@ -391,15 +391,15 @@ void session_create_sm_context_procedure::handle_itti_msg(
           cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
     }
 
-    smf_n1_n2_inst.create_n1_sm_container(n11_triggered_pending->res,
-    PDU_SESSION_ESTABLISHMENT_ACCEPT,
-                                          n1_sm_msg, cause_n1);
+    smf_n1_inst.create_n1_pdu_session_establishment_accept(n11_triggered_pending->res,
+                                                           n1_sm_msg, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
     //N2 SM Information (Step 11, section 4.3.2.2.1 @ 3GPP TS 23.502): PDUSessionRessourceSetupRequestTransfer IE
-    smf_n1_n2_inst.create_n2_sm_information(
-        n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+    smf_n2_inst.create_n2_pdu_session_resource_setup_request_transfer(
+        n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
         n2_sm_info);
+
     smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
     n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
   }
@@ -412,6 +412,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
   std::string url = std::string(
       inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) + ":"
       + std::to_string(smf_cfg.amf_addr.port)
+      + NAMF_COMMUNICATION_BASE + smf_cfg.amf_addr.api_version
       + fmt::format(NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
                     supi_str.c_str());
   n11_triggered_pending->res.set_amf_url(url);
@@ -446,6 +447,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
     std::string callback_uri = std::string(
         inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) + ":"
         + std::to_string(smf_cfg.amf_addr.port)
+        + NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version
         + fmt::format(NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE,
                       supi_str.c_str());
     json_data["n1n2FailureTxfNotifURI"] = callback_uri.c_str();
@@ -850,7 +852,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
     itti_n4_session_modification_response &resp,
     std::shared_ptr<smf::smf_context> sc) {
 
-  smf_n1_n2 smf_n1_n2_inst = { };
+  smf_n1 smf_n1_inst = { };
+  smf_n2 smf_n2_inst = { };
   std::string n1_sm_msg, n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
 
@@ -1041,14 +1044,13 @@ void session_update_sm_context_procedure::handle_itti_msg(
     //FOR TESTING PURPOSE
     case session_management_procedures_type_e::PDU_SESSION_TEST: {
       //N1 SM
-      smf_n1_n2_inst.create_n1_sm_container(
-          n11_triggered_pending->res, PDU_SESSION_MODIFICATION_REQUEST,
-          n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN);
+      smf_n1_inst.create_n1_pdu_session_modification_request(
+          n11_triggered_pending->res, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN);
       smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
       //N2 SM Information
-      smf_n1_n2_inst.create_n2_sm_information(
-          n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_MOD_RSP,
+      smf_n2_inst.create_n2_pdu_session_resource_modify_response_transfer(
+          n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_MOD_RSP,
           n2_sm_info);
       smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
@@ -1082,9 +1084,10 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // Create N2 SM Information: PDU Session Resource Setup Request Transfer IE
 
       //N2 SM Information
-      smf_n1_n2_inst.create_n2_sm_information(
-          n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
+      smf_n2_inst.create_n2_pdu_session_resource_setup_request_transfer(
+          n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
           n2_sm_info);
+
       smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
@@ -1142,8 +1145,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
       Logger::smf_app().info("PDU Session Release UE-initiated (Step 1))");
 
       //N1 SM
-      smf_n1_n2_inst.create_n1_sm_container(
-          n11_triggered_pending->res, PDU_SESSION_RELEASE_COMMAND, n1_sm_msg,
+      smf_n1_inst.create_n1_pdu_session_release_command(
+          n11_triggered_pending->res, n1_sm_msg,
           cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);  //TODO: check Cause
       smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
@@ -1151,8 +1154,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
       //include N2 SM Resource Release Request only when User Plane connection is activated
       if (sps->get_upCnx_state() == upCnx_state_e::UPCNX_STATE_ACTIVATED) {
         //N2 SM Information
-        smf_n1_n2_inst.create_n2_sm_information(
-            n11_triggered_pending->res, 1, n2_sm_info_type_e::PDU_RES_REL_CMD,
+        smf_n2_inst.create_n2_pdu_session_resource_release_command_transfer(
+            n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_REL_CMD,
             n2_sm_info);
         smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
         n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
