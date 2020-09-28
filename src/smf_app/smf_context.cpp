@@ -2131,25 +2131,24 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         }
 
         //store AN Tunnel Info + list of accepted QFIs
-        fteid_t dl_teid = { };
+        pfcp::fteid_t dl_teid = { };
         memcpy(
-            &dl_teid.teid_gre_key,
+            &dl_teid.teid,
             decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
                 .choice.gTPTunnel->gTP_TEID.buf,
-            sizeof(struct in_addr));
+                TEID_GRE_KEY_LENGTH);
         memcpy(
             &dl_teid.ipv4_address,
             decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
                 .choice.gTPTunnel->transportLayerAddress.buf,
             4);
 
-        dl_teid.teid_gre_key = ntohl(dl_teid.teid_gre_key);
-        dl_teid.interface_type = S1_U_ENODEB_GTP_U;
+        dl_teid.teid = ntohl(dl_teid.teid);
         dl_teid.v4 = 1;  //Only V4 for now
         smreq->req.set_dl_fteid(dl_teid);
 
         Logger::smf_app().debug("DL GTP F-TEID (AN F-TEID) " "0x%" PRIx32 " ",
-                                dl_teid.teid_gre_key);
+                                dl_teid.teid);
         Logger::smf_app().debug("uPTransportLayerInformation (AN IP Addr) %s",
                                 conv::toString(dl_teid.ipv4_address).c_str());
 
@@ -2252,20 +2251,19 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //see section 8.2.3 (PDU Session Resource Modify) @3GPP TS 38.413
         //if dL_NGU_UP_TNLInformation is included, it shall be considered as the new DL transport layer addr for the PDU session (should be verified)
         //TODO: may include uL_NGU_UP_TNLInformation (mapping between each new DL transport layer address and the corresponding UL transport layer address)
-        fteid_t dl_teid;
+        pfcp::fteid_t dl_teid;
         memcpy(
-            &dl_teid.teid_gre_key,
+            &dl_teid.teid,
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID
                 .buf,
-            sizeof(struct in_addr));
+                TEID_GRE_KEY_LENGTH);
         memcpy(
             &dl_teid.ipv4_address,
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel
                 ->transportLayerAddress.buf,
             4);
 
-        dl_teid.teid_gre_key = ntohl(dl_teid.teid_gre_key);
-        dl_teid.interface_type = S1_U_ENODEB_GTP_U;
+        dl_teid.teid = ntohl(dl_teid.teid);
         dl_teid.v4 = 1;  //Only v4 for now
         smreq->req.set_dl_fteid(dl_teid);
 

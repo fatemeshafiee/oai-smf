@@ -451,6 +451,38 @@ struct fteid_s {
         and (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3])
         and (v4 == f.v4) and (v6 == f.v6);
   }
+
+  bool operator=(const struct fteid_s &f) {
+    v4 == f.v4;
+    v6 == f.v6;
+    chid == f.chid;
+    ch == f.ch;
+    choose_id == f.choose_id;
+    teid == f.teid;
+    ipv4_address.s_addr = f.ipv4_address.s_addr;
+    ipv6_address = f.ipv6_address;
+    //ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0];
+    //ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1];
+    //ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2];
+    //ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3];
+  }
+
+  std::string toString() const {
+    std::string s = { };
+    if ((v4) || (v6)) {
+      s.append("TEID=").append(std::to_string(teid));
+      if (v4) {
+        s.append(", IPv4=").append(conv::toString(ipv4_address));
+      }
+      if (v6) {
+        s.append(", IPv6=").append(conv::toString(ipv6_address));
+      }
+    } else {
+      s.append("null_fteid");
+    }
+    return s;
+  }
+
   bool is_zero() const {
     return ((!v4) and (!v6));
   }

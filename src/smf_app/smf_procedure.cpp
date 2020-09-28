@@ -263,8 +263,7 @@ int session_create_sm_context_procedure::run(
   qos_rule.qosflowidentifer = flow.qfi.qfi;
   sps->add_qos_rule(qos_rule);
 
-  smf_qos_flow flow2 = flow;
-  sps->add_qos_flow(flow2);
+  sps->add_qos_flow(flow);
   sps->set_default_qos_flow(flow.qfi);
 
   // for finding procedure when receiving response
@@ -305,15 +304,10 @@ void session_create_sm_context_procedure::handle_itti_msg(
     if (it.get(pdr_id)) {
       smf_qos_flow flow = { };
       if (sps->get_qos_flow(pdr_id, flow)) {
-        pfcp::fteid_t local_up_fteid = { };
-        if (it.get(local_up_fteid)) {
-          //set tunnel id
-          xgpp_conv::pfcp_to_core_fteid(local_up_fteid, flow.ul_fteid);
-          //TODO: should be updated to 5G N3/N9 interface
-          flow.ul_fteid.interface_type = S1_U_SGW_GTP_U;  //UPF's N3 interface
+        //pfcp::fteid_t local_up_fteid = { };
+        if (it.get(flow.ul_fteid)) {
           //Update Qos Flow
-          smf_qos_flow flow2 = flow;
-          sps->add_qos_flow(flow2);
+          sps->add_qos_flow(flow);
         }
       } else {
         Logger::smf_app().error("Could not get QoS Flow for created_pdr %d",
@@ -523,7 +517,7 @@ int session_update_sm_context_procedure::run(
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_AN_REQUESTED:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
 
-      ::fteid_t dl_fteid = { };
+      pfcp::fteid_t dl_fteid = { };
       sm_context_req_msg.get_dl_fteid(dl_fteid);  //eNB's fteid
 
       for (auto qfi : list_of_qfis_to_be_modified) {
@@ -565,7 +559,7 @@ int session_update_sm_context_procedure::run(
           update_far.set(flow.far_id_dl.second);
           outer_header_creation.outer_header_creation_description =
               OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
-          outer_header_creation.teid = dl_fteid.teid_gre_key;
+          outer_header_creation.teid = dl_fteid.teid;
           outer_header_creation.ipv4_address.s_addr = dl_fteid.ipv4_address
               .s_addr;
           update_forwarding_parameters.set(outer_header_creation);
@@ -608,7 +602,7 @@ int session_update_sm_context_procedure::run(
           forwarding_parameters.set(destination_interface);
           outer_header_creation.outer_header_creation_description =
               OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
-          outer_header_creation.teid = dl_fteid.teid_gre_key;
+          outer_header_creation.teid = dl_fteid.teid;
           outer_header_creation.ipv4_address.s_addr = dl_fteid.ipv4_address
               .s_addr;
           forwarding_parameters.set(outer_header_creation);
@@ -748,8 +742,7 @@ int session_update_sm_context_procedure::run(
         if (not flow.dl_fteid.is_zero()) {
         }
         // may be modified
-        smf_qos_flow flow2 = flow;
-        sps->add_qos_flow(flow2);
+        sps->add_qos_flow(flow);
 
         qos_flow_context_updated qcu = { };
         qcu.set_cause(REQUEST_ACCEPTED);
@@ -816,8 +809,7 @@ int session_update_sm_context_procedure::run(
 
         //update in the PDU Session
         flow.mark_as_released();
-        smf_qos_flow flow2 = flow;
-        sps->add_qos_flow(flow2);
+        sps->add_qos_flow(flow);
       }
     }
       break;
@@ -885,11 +877,11 @@ void session_update_sm_context_procedure::handle_itti_msg(
     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
 
-      ::fteid_t dl_fteid = { };
+      pfcp::fteid_t dl_fteid = { };
       n11_trigger->req.get_dl_fteid(dl_fteid);
 
       Logger::smf_app().debug("AN F-TEID ID" "0x%" PRIx32 ", IP Addr %s",
-                              dl_fteid.teid_gre_key,
+                              dl_fteid.teid,
                               conv::toString(dl_fteid.ipv4_address).c_str());
 
       std::map<uint8_t, qos_flow_context_updated> qos_flow_context_to_be_updateds =
@@ -910,12 +902,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
             Logger::smf_app().debug("QoS Flow, QFI %d", flow.qfi.qfi);
             for (auto it : qos_flow_context_to_be_updateds) {
               flow.dl_fteid = dl_fteid;
-              flow.dl_fteid.interface_type = S1_U_ENODEB_GTP_U;  //eNB's N3 interface
-              // flow.ul_fteid = it.second.ul_fteid;
-              pfcp::fteid_t local_up_fteid = { };
-              if (it_created_pdr.get(local_up_fteid)) {
-                xgpp_conv::pfcp_to_core_fteid(local_up_fteid, flow.ul_fteid);
-                flow.ul_fteid.interface_type = S1_U_SGW_GTP_U;  //UPF's N3 interface, TODO: should be modified
+              if (it_created_pdr.get(flow.ul_fteid)) {
                 Logger::smf_app().debug(
                     "Got local_up_fteid from created_pdr %s",
                     flow.ul_fteid.toString().c_str());
@@ -926,15 +913,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
               }
 
               flow.released = false;
-              smf_qos_flow flow2 = flow;
-              sps->add_qos_flow(flow2);
-
-              /*
-               //add another flow for testing purpose, TODO: SHOULD BE REMOVED
-               smf_qos_flow flow3 = flow;
-               flow3.qfi = 7;
-               sps->add_qos_flow(flow3);
-               */
+              sps->add_qos_flow(flow);
 
               qos_flow_context_updated qcu = { };
               qcu.set_cause(REQUEST_ACCEPTED);
@@ -964,8 +943,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
               for (auto it : qos_flow_context_to_be_updateds) {
                 if (it.first == flow.qfi.qfi) {
                   flow.dl_fteid = dl_fteid;
-                  smf_qos_flow flow2 = flow;
-                  sps->add_qos_flow(flow2);
+                  sps->add_qos_flow(flow);
 
                   qos_flow_context_updated qcu = { };
                   qcu.set_cause(REQUEST_ACCEPTED);

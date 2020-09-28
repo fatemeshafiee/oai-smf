@@ -104,8 +104,8 @@ class smf_qos_flow {
   std::string toString() const;
 
   pfcp::qfi_t qfi;  //QoS Flow Identifier
-  fteid_t ul_fteid;  //fteid of UPF
-  fteid_t dl_fteid;  //fteid of AN
+  pfcp::fteid_t ul_fteid;  //fteid of UPF
+  pfcp::fteid_t dl_fteid;  //fteid of AN
   pfcp::pdr_id_t pdr_id_ul;   // Packet Detection Rule ID, UL
   pfcp::pdr_id_t pdr_id_dl;   // Packet Detection Rule ID, DL
   pfcp::precedence_t precedence;
