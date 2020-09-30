@@ -277,6 +277,8 @@ void smf_n4::handle_receive_pfcp_msg(pfcp_msg &msg,
     case PFCP_ASSOCIATION_UPDATE_RESPONSE:
     case PFCP_ASSOCIATION_RELEASE_REQUEST:
     case PFCP_ASSOCIATION_RELEASE_RESPONSE:
+      handle_receive_association_release_response(msg, remote_endpoint);
+      break;
     case PFCP_VERSION_NOT_SUPPORTED_RESPONSE:
     case PFCP_NODE_REPORT_REQUEST:
     case PFCP_NODE_REPORT_RESPONSE:
@@ -460,6 +462,8 @@ void smf_n4::handle_receive_association_update_request(
 
   handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
   if (error) {
+    Logger::smf_n4().warn(
+            "Received N4 ASSOCIATION UPDATE REQUEST, error in handle_receive_message_cb!");
     return;
   }
 
@@ -521,6 +525,53 @@ void smf_n4::handle_receive_association_update_request(
     Logger::smf_n4().warn(
         "Received N4 ASSOCIATION UPDATE REQUEST TODO node_id IPV6, FQDN!, ignore message");
     return;
+  }
+
+}
+
+//------------------------------------------------------------------------------
+void smf_n4::handle_receive_association_release_response(
+    pfcp::pfcp_msg &msg, const endpoint &remote_endpoint) {
+  //TODO: To be completed
+  Logger::smf_n4().info("Received N4 ASSOCIATION RELEASE RESPONSE from an UPF");
+  bool error = true;
+  uint64_t trxn_id = 0;
+  pfcp_association_release_response msg_ies_container = { };
+  msg.to_core_type(msg_ies_container);
+
+  handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
+  if (error) {
+    Logger::smf_n4().warn(
+        "Received N4 ASSOCIATION RELEASE RESPONSE, error in handle_receive_message_cb!");
+    return;
+  }
+
+  if (not msg_ies_container.node_id.first) {
+    Logger::smf_n4().warn(
+        "Received N4 ASSOCIATION RELEASE RESPONSE without node id IE!, ignore message");
+    return;
+  }
+
+  pfcp::node_id_t node_id = { };
+  if (smf_cfg.get_pfcp_node_id(node_id) != RETURNok) {
+    Logger::smf_n4().warn(
+        "Received N4 ASSOCIATION RELEASE RESPONSE with an invalid node ID!, ignore message");
+    return;
+  }
+
+  if (not msg_ies_container.cause.first) {
+    Logger::smf_n4().warn(
+        "Received N4 ASSOCIATION RELEASE RESPONSE without cause IE!, ignore message");
+  } else {
+    if (msg_ies_container.cause.second.cause_value
+        == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
+      std::shared_ptr<pfcp_association> sa = std::shared_ptr < pfcp_association
+          > (nullptr);
+      if (pfcp_associations::get_instance().get_association(node_id, sa)) {
+        //Delete locally all the PFCP sessions related to that PFCP association
+        sa->del_sessions();
+      }
+    }
   }
 
 }

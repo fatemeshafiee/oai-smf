@@ -158,6 +158,8 @@ class smf_n4 : public pfcp::pfcp_l4_stack {
       pfcp::pfcp_msg &msg, const endpoint &remote_endpoint);
   void handle_receive_association_update_request(
       pfcp::pfcp_msg &msg, const endpoint &remote_endpoint);
+  void handle_receive_association_release_response(
+      pfcp::pfcp_msg &msg, const endpoint &remote_endpoint);
   void handle_receive_session_establishment_response(
       pfcp::pfcp_msg &msg, const endpoint &r_endpoint);
   void handle_receive_session_modification_response(pfcp::pfcp_msg &msg,

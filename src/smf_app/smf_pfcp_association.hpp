@@ -126,7 +126,7 @@ class pfcp_association {
   void notify_add_session(const pfcp::fseid_t &cp_fseid);
   bool has_session(const pfcp::fseid_t &cp_fseid);
   void notify_del_session(const pfcp::fseid_t &cp_fseid);
-  //void del_sessions();
+  void del_sessions();
   void restore_n4_sessions();
   void set(const pfcp::up_function_features_s &ff) {
     function_features.first = true;

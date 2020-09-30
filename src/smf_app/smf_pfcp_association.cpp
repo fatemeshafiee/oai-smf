@@ -58,16 +58,15 @@ void pfcp_association::notify_del_session(const pfcp::fseid_t &cp_fseid) {
   std::unique_lock<std::mutex> l(m_sessions);
   sessions.erase(cp_fseid);
 }
-// //------------------------------------------------------------------------------
-// void pfcp_association::del_sessions()
-// {
-//   std::unique_lock<std::mutex> l(m_sessions);
-//   for (std::set<pfcp::fseid_t>::iterator it=sessions.begin(); it!=sessions.end();) {
-//     ???->remove_pfcp_session(*it);
-//     sessions.erase(it++);
-//   }
-// }
+
 //------------------------------------------------------------------------------
+ void pfcp_association::del_sessions()
+ {
+   std::unique_lock<std::mutex> l(m_sessions);
+   sessions.clear();
+ }
+
+ //------------------------------------------------------------------------------
 void pfcp_association::restore_n4_sessions() {
   std::unique_lock<std::mutex> l(m_sessions);
   if (sessions.size()) {
