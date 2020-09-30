@@ -176,6 +176,10 @@ void smf_n4_task(void *args_p) {
               pfcp_associations::get_instance().timeout_heartbeat_request(
                   to->timer_id, to->arg2_user);
               break;
+            case TASK_SMF_N4_TIMEOUT_GRACEFUL_RELEASE_PERIOD:
+              pfcp_associations::get_instance().timeout_release_request(
+                  to->timer_id, to->arg2_user);
+              break;
             default:
               ;
           }
@@ -211,7 +215,7 @@ smf_n4::smf_n4()
   tm_epoch.tm_mon = 2 - 1;    // months count from January=0
   tm_epoch.tm_mday = 8;         // days count from 1
   std::time_t time_epoch = std::mktime(&tm_epoch);
-  std::chrono::time_point<std::chrono::system_clock> now =
+  std::chrono::time_point < std::chrono::system_clock > now =
       std::chrono::system_clock::now();
   std::time_t now_c = std::chrono::system_clock::to_time_t(now);
   std::time_t ellapsed = now_c - time_epoch;
@@ -221,7 +225,7 @@ smf_n4::smf_n4()
   std::time_t time_epoch_ntp = std::time(nullptr);
   uint64_t tv_ntp = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
   recovery_time_stamp = tv_ntp;
-  
+
   // TODO may load this from config
   cp_function_features = { };
   cp_function_features.ovrl = 0;
@@ -268,6 +272,8 @@ void smf_n4::handle_receive_pfcp_msg(pfcp_msg &msg,
       handle_receive_association_setup_response(msg, remote_endpoint);
       break;
     case PFCP_ASSOCIATION_UPDATE_REQUEST:
+      handle_receive_association_update_request(msg, remote_endpoint);
+      break;
     case PFCP_ASSOCIATION_UPDATE_RESPONSE:
     case PFCP_ASSOCIATION_RELEASE_REQUEST:
     case PFCP_ASSOCIATION_RELEASE_RESPONSE:
@@ -442,6 +448,84 @@ void smf_n4::handle_receive_association_setup_response(
 }
 
 //------------------------------------------------------------------------------
+void smf_n4::handle_receive_association_update_request(
+    pfcp::pfcp_msg &msg, const endpoint &remote_endpoint) {
+  bool error = true;
+  uint64_t trxn_id = 0;
+  pfcp_association_update_request msg_ies_container = { };
+  msg.to_core_type(msg_ies_container);
+  pfcp::cause_t cause = { .cause_value = pfcp::CAUSE_VALUE_REQUEST_ACCEPTED };
+  uint32_t graceful_release_period = PFCP_ASSOCIATION_GRACEFUL_RELEASE_PERIOD;
+  pfcp::node_id_t node_id = { };
+
+  handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
+  if (error) {
+    return;
+  }
+
+  if (not msg_ies_container.node_id.first) {
+    Logger::smf_n4().warn(
+        "Received N4 ASSOCIATION UPDATE REQUEST without node id IE!, ignore message");
+    cause.cause_value = pfcp::CAUSE_VALUE_MANDATORY_IE_MISSING;
+  }
+
+  if (smf_cfg.get_pfcp_node_id(node_id) != RETURNok) {
+    Logger::smf_n4().warn(
+        "Received N4 ASSOCIATION UPDATE REQUEST could not set node id!, ignore message");
+    cause.cause_value = pfcp::CAUSE_VALUE_NO_ESTABLISHED_PFCP_ASSOCIATION;
+  }
+
+  if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
+    if (msg_ies_container.up_function_features.first) {
+      //Update features and set cause accordingly
+      if (pfcp_associations::get_instance().update_association(
+          node_id, msg_ies_container.up_function_features.second))
+        cause.cause_value = pfcp::CAUSE_VALUE_REQUEST_ACCEPTED;
+      else
+        cause.cause_value = pfcp::CAUSE_VALUE_REQUEST_REJECTED;
+    }
+
+    //If the UP function has requested to release the PFCP association
+    if (msg_ies_container.pfcp_association_release_request.first) {
+      //Graceful Release Period
+      if (msg_ies_container.graceful_release_period.first) {
+        //TODO:
+        //max (PFCP_ASSOCIATION_GRACEFUL_RELEASE_PERIOD, graceful_release_period)
+      }
+
+      //Schedule PFCP Association Release Request to release the PFCP association
+      std::shared_ptr<pfcp_association> sa = std::shared_ptr < pfcp_association
+          > (nullptr);
+      if (pfcp_associations::get_instance().get_association(node_id, sa)) {
+        sa->timer_graceful_release = itti_inst->timer_setup(
+            graceful_release_period, 0, TASK_SMF_N4,
+            TASK_SMF_N4_TIMEOUT_GRACEFUL_RELEASE_PERIOD,
+            sa->hash_node_id);
+      }
+    }
+
+    if (msg_ies_container.user_plane_ip_resource_information.first) {
+      //TODO:
+    }
+  }
+
+  // send an PFCP Association Update Response
+  itti_n4_association_update_response a(TASK_SMF_N4, TASK_SMF_N4);
+  a.trxn_id = trxn_id;
+  a.pfcp_ies.set(cause);
+  a.pfcp_ies.set(node_id);
+  if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+    a.r_endpoint = remote_endpoint;
+    send_n4_msg(a);
+  } else {
+    Logger::smf_n4().warn(
+        "Received N4 ASSOCIATION UPDATE REQUEST TODO node_id IPV6, FQDN!, ignore message");
+    return;
+  }
+
+}
+
+//------------------------------------------------------------------------------
 void smf_n4::handle_receive_session_establishment_response(
     pfcp::pfcp_msg &msg, const endpoint &remote_endpoint) {
   bool error = true;
@@ -457,8 +541,8 @@ void smf_n4::handle_receive_session_establishment_response(
     itti_msg->r_endpoint = remote_endpoint;
     itti_msg->trxn_id = trxn_id;
     itti_msg->seid = msg.get_seid();
-    std::shared_ptr<itti_n4_session_establishment_response> i = std::shared_ptr<
-        itti_n4_session_establishment_response>(itti_msg);
+    std::shared_ptr<itti_n4_session_establishment_response> i = std::shared_ptr
+        < itti_n4_session_establishment_response > (itti_msg);
     int ret = itti_inst->send_msg(i);
     if (RETURNok != ret) {
       Logger::smf_n4().error(
@@ -485,8 +569,8 @@ void smf_n4::handle_receive_session_modification_response(
     itti_msg->r_endpoint = remote_endpoint;
     itti_msg->trxn_id = trxn_id;
     itti_msg->seid = msg.get_seid();
-    std::shared_ptr<itti_n4_session_modification_response> i = std::shared_ptr<
-        itti_n4_session_modification_response>(itti_msg);
+    std::shared_ptr<itti_n4_session_modification_response> i = std::shared_ptr
+        < itti_n4_session_modification_response > (itti_msg);
     int ret = itti_inst->send_msg(i);
     if (RETURNok != ret) {
       Logger::smf_n4().error(
@@ -513,8 +597,8 @@ void smf_n4::handle_receive_session_deletion_response(
     itti_msg->r_endpoint = remote_endpoint;
     itti_msg->trxn_id = trxn_id;
     itti_msg->seid = msg.get_seid();
-    std::shared_ptr<itti_n4_session_deletion_response> i = std::shared_ptr<
-        itti_n4_session_deletion_response>(itti_msg);
+    std::shared_ptr<itti_n4_session_deletion_response> i = std::shared_ptr
+        < itti_n4_session_deletion_response > (itti_msg);
     int ret = itti_inst->send_msg(i);
     if (RETURNok != ret) {
       Logger::smf_n4().error(
@@ -541,8 +625,8 @@ void smf_n4::handle_receive_session_report_request(
     itti_msg->r_endpoint = remote_endpoint;
     itti_msg->trxn_id = trxn_id;
     itti_msg->seid = msg.get_seid();
-    std::shared_ptr<itti_n4_session_report_request> i = std::shared_ptr<
-        itti_n4_session_report_request>(itti_msg);
+    std::shared_ptr<itti_n4_session_report_request> i = std::shared_ptr
+        < itti_n4_session_report_request > (itti_msg);
     int ret = itti_inst->send_msg(i);
     if (RETURNok != ret) {
       Logger::smf_n4().error(
@@ -569,8 +653,7 @@ void smf_n4::send_heartbeat_request(std::shared_ptr<pfcp_association> &a) {
   uint64_t tv_ntp = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
 
   pfcp::pfcp_heartbeat_request h = { };
-  pfcp::recovery_time_stamp_t r = { .recovery_time_stamp =
-      (uint32_t) tv_ntp };
+  pfcp::recovery_time_stamp_t r = { .recovery_time_stamp = (uint32_t) tv_ntp };
   h.set(r);
 
   pfcp::node_id_t &node_id = a->node_id;
@@ -647,3 +730,19 @@ void smf_n4::send_association_setup_request(
   send_request(i.r_endpoint, i.pfcp_ies, TASK_SMF_N4, i.trxn_id);
 }
 
+//------------------------------------------------------------------------------
+void smf_n4::send_release_request(std::shared_ptr<pfcp_association> &a) {
+  Logger::smf_n4().debug("Send N4 ASSOCIATION RELEASE REQUEST");
+  pfcp::pfcp_association_release_request release_request = { };
+
+  pfcp::node_id_t &node_id = a->node_id;
+  if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+    endpoint r_endpoint = endpoint(node_id.u1.ipv4_address, pfcp::default_port);
+    uint64_t trxn_id = generate_trxn_id();
+    release_request.set(node_id);
+    send_request(r_endpoint, release_request, TASK_SMF_N4, trxn_id);
+  } else {
+    Logger::smf_n4().warn("TODO send_release_request() node_id IPV6, FQDN!");
+  }
+
+}

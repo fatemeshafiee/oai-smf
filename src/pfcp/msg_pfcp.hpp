@@ -2648,20 +2648,24 @@ public:
   std::pair<bool, pfcp::cause_t>                cause;
   std::pair<bool, pfcp::up_function_features_s> up_function_features;
   std::pair<bool, pfcp::cp_function_features_t> cp_function_features;
-
+  std::pair<bool, pfcp::pfcpaureq_flags_t> pfcpaureq_flags;
+  std::pair<bool, pfcp::alternative_smf_ip_address_t> alternative_smf_ip_address;
 
   pfcp_association_update_response() :
     node_id(),
     cause(),
     up_function_features(),
-    cp_function_features() {}
+    cp_function_features(),
+    pfcpaureq_flags(),
+    alternative_smf_ip_address() {}
 
   pfcp_association_update_response(const pfcp_association_update_response& i) {
     node_id = i.node_id;
     cause = i.cause;
     up_function_features = i.up_function_features;
     cp_function_features = i.cp_function_features;
-
+    pfcpaureq_flags = i.pfcpaureq_flags;
+    alternative_smf_ip_address = i.alternative_smf_ip_address;
   }
   const char* get_msg_name() const {return "PFCP_ASSOCIATION_UPDATE_RESPONSE";};
 
@@ -2669,11 +2673,15 @@ public:
   bool get(pfcp::cause_t& v) const {if (cause.first) {v = cause.second;return true;}return false;}
   bool get(pfcp::up_function_features_s& v) const {if (up_function_features.first) {v = up_function_features.second;return true;}return false;}
   bool get(pfcp::cp_function_features_t& v) const {if (cp_function_features.first) {v = cp_function_features.second;return true;}return false;}
+  bool get(pfcp::pfcpaureq_flags_t& v) const {if (pfcpaureq_flags.first) {v = pfcpaureq_flags.second;return true;}return false;}
+  bool get(pfcp::alternative_smf_ip_address_t& v) const {if (alternative_smf_ip_address.first) {v = alternative_smf_ip_address.second;return true;}return false;}
 
   void set(const pfcp::node_id_t& v) {node_id.first = true; node_id.second = v;}
   void set(const pfcp::cause_t& v) {cause.first = true; cause.second = v;}
   void set(const pfcp::up_function_features_s& v) {up_function_features.first = true; up_function_features.second = v;}
   void set(const pfcp::cp_function_features_t& v) {cp_function_features.first = true; cp_function_features.second = v;}
+  void set(const pfcp::pfcpaureq_flags_t& v) {pfcpaureq_flags.first = true; pfcpaureq_flags.second = v;}
+  void set(const pfcp::alternative_smf_ip_address_t& v) {alternative_smf_ip_address.first = true; alternative_smf_ip_address.second = v;}
 };
 
 //------------------------------------------------------------------------------

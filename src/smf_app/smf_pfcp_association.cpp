@@ -136,6 +136,22 @@ bool pfcp_associations::add_association(
   }
   return true;
 }
+
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::update_association(
+    pfcp::node_id_t &node_id, pfcp::up_function_features_s &function_features) {
+  std::shared_ptr<pfcp_association> sa = std::shared_ptr<pfcp_association>(
+      nullptr);
+  if (get_association(node_id, sa)) {
+    sa->function_features.first = true;
+    sa->function_features.second = function_features;
+  } else {
+    return false;
+  }
+  return true;
+}
+
 //------------------------------------------------------------------------------
 bool pfcp_associations::get_association(
     const pfcp::node_id_t &node_id,
@@ -193,6 +209,7 @@ void pfcp_associations::initiate_heartbeat_request(timer_id_t timer_id,
     smf_n4_inst->send_heartbeat_request(pit->second);
   }
 }
+
 //------------------------------------------------------------------------------
 void pfcp_associations::timeout_heartbeat_request(timer_id_t timer_id,
                                                   uint64_t arg2_user) {
@@ -215,6 +232,20 @@ void pfcp_associations::timeout_heartbeat_request(timer_id_t timer_id,
     }
   }
 }
+
+//------------------------------------------------------------------------------
+void pfcp_associations::timeout_release_request(timer_id_t timer_id,
+                                                uint64_t arg2_user) {
+  size_t hash_node_id = (size_t) arg2_user;
+  auto pit = associations.find((int32_t) hash_node_id);
+  if (pit == associations.end())
+    return;
+  else {
+    Logger::smf_n4().info("PFCP RELEASE REQUEST hash %u", hash_node_id);
+    smf_n4_inst->send_release_request(pit->second);
+  }
+}
+
 //------------------------------------------------------------------------------
 void pfcp_associations::handle_receive_heartbeat_response(
     const uint64_t trxn_id) {
