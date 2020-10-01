@@ -453,18 +453,18 @@ struct fteid_s {
   }
 
   bool operator=(const struct fteid_s &f) {
-    v4 == f.v4;
-    v6 == f.v6;
-    chid == f.chid;
-    ch == f.ch;
-    choose_id == f.choose_id;
-    teid == f.teid;
+    v4 = f.v4;
+    v6 = f.v6;
+    chid = f.chid;
+    ch = f.ch;
+    choose_id = f.choose_id;
+    teid = f.teid;
     ipv4_address.s_addr = f.ipv4_address.s_addr;
     ipv6_address = f.ipv6_address;
-    //ipv6_address.s6_addr32[0] == f.ipv6_address.s6_addr32[0];
-    //ipv6_address.s6_addr32[1] == f.ipv6_address.s6_addr32[1];
-    //ipv6_address.s6_addr32[2] == f.ipv6_address.s6_addr32[2];
-    //ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3];
+    //ipv6_address.s6_addr32[0] = f.ipv6_address.s6_addr32[0];
+    //ipv6_address.s6_addr32[1] = f.ipv6_address.s6_addr32[1];
+    //ipv6_address.s6_addr32[2] = f.ipv6_address.s6_addr32[2];
+    //ipv6_address.s6_addr32[3] = f.ipv6_address.s6_addr32[3];
   }
 
   std::string toString() const {
