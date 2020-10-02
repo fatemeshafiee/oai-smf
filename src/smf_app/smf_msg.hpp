@@ -226,6 +226,7 @@ class pdu_session_sm_context_response : public pdu_session_msg {
       pdu_session_msg(msg_type) {
     m_cause = 0;
     m_http_code = 0;
+    m_json_format = "application/json";
   }
   pdu_session_sm_context_response(pdu_session_msg_type_t msg_type, supi_t supi,
                                   pdu_session_id_t pdi, std::string dnn,
@@ -234,6 +235,7 @@ class pdu_session_sm_context_response : public pdu_session_msg {
       pdu_session_msg(msg_type, supi, pdi, dnn, snssai) {
     m_cause = 0;
     m_http_code = 0;
+    m_json_format = "application/json";
   }
 
   void set_cause(const uint8_t cause);
@@ -242,10 +244,13 @@ class pdu_session_sm_context_response : public pdu_session_msg {
   uint32_t get_http_code() const;
   void set_json_data(const nlohmann::json &data);
   void get_json_data(nlohmann::json &data) const;
+  void set_json_format(const std::string &format);
+  void get_json_format(std::string &format) const;
 
  private:
   uint8_t m_cause;
   nlohmann::json m_json_data;
+  std::string m_json_format;
   uint32_t m_http_code;
 };
 
@@ -442,6 +447,8 @@ class pdu_session_modification_network_requested :
   pdu_session_modification_network_requested()
       :
       pdu_session_sm_context_request(PDU_SESSION_MODIFICATION_SMF_REQUESTED) {
+    m_json_data = {};
+    m_json_format = "application/json";
   }
 
   void set_amf_url(const std::string &value);
@@ -451,6 +458,8 @@ class pdu_session_modification_network_requested :
   void get_qfis(std::vector<pfcp::qfi_t> &q);
   void set_json_data(const nlohmann::json &data);
   void get_json_data(nlohmann::json &data) const;
+  void set_json_format(const std::string &format);
+  void get_json_format(std::string &format) const;
   void add_qos_flow_context_updated(const qos_flow_context_updated &qos_flow);
   bool get_qos_flow_context_updated(const pfcp::qfi_t &qfi,
                                     qos_flow_context_updated &qos_flow);
@@ -460,6 +469,7 @@ class pdu_session_modification_network_requested :
   std::vector<pfcp::qfi_t> qfis;
   std::map<uint8_t, qos_flow_context_updated> qos_flow_context_updateds;
   nlohmann::json m_json_data;
+  std::string m_json_format;
 };
 
 //---------------------------------------------------------------------------------------

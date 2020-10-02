@@ -1497,6 +1497,7 @@ void smf_app::trigger_http_response(
   nlohmann::json json_data = { };
   to_json(json_data, smContextCreateError);
   sm_context_response.set_json_data(json_data);
+  sm_context_response.set_json_format("application/problem+json");
   sm_context_response.set_n1_sm_message(n1_sm_msg);
   sm_context_response.set_http_code(http_code);
   itti_msg->res = sm_context_response;
@@ -1524,6 +1525,7 @@ void smf_app::trigger_http_response(
   nlohmann::json json_data = { };
   to_json(json_data, smContextUpdateError);
   sm_context_response.set_json_data(json_data);
+  sm_context_response.set_json_format("application/problem+json");
   sm_context_response.set_http_code(http_code);
   itti_msg->res = sm_context_response;
   int ret = itti_inst->send_msg(itti_msg);
@@ -1552,6 +1554,7 @@ void smf_app::trigger_http_response(
   nlohmann::json json_data = { };
   to_json(json_data, smContextUpdateError);
   sm_context_response.set_json_data(json_data);
+  sm_context_response.set_json_format("application/problem+json");
   sm_context_response.set_n1_sm_message(n1_sm_msg);
   sm_context_response.set_http_code(http_code);
   itti_msg->res = sm_context_response;

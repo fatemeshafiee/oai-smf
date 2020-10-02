@@ -280,6 +280,17 @@ void pdu_session_sm_context_response::get_json_data(nlohmann::json &data) const 
   data = m_json_data;
 }
 
+//-----------------------------------------------------------------------------
+void pdu_session_sm_context_response::set_json_format(const std::string &format) {
+  m_json_format = format;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_sm_context_response::get_json_format(std::string &format) const {
+  format = m_json_format;
+}
+
+
 /*
  * class: PDU Session Create SM Context Request
  */
@@ -567,6 +578,16 @@ void pdu_session_modification_network_requested::set_json_data(const nlohmann::j
 //-----------------------------------------------------------------------------
 void pdu_session_modification_network_requested::get_json_data(nlohmann::json &data) const {
   data = m_json_data;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::set_json_format(const std::string &format) {
+  m_json_format = format;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_modification_network_requested::get_json_format(std::string &format) const {
+  format = m_json_format;
 }
 
 //-----------------------------------------------------------------------------

@@ -191,7 +191,9 @@ void IndividualSMContextApiImpl::update_sm_context(
   nlohmann::json json_data = { };
   mime_parser parser = { };
   std::string body = { };
+  std::string json_format;
 
+  sm_context_response.get_json_format(json_format);
   sm_context_response.get_json_data(json_data);
   Logger::smf_api_server().debug("Json data %s", json_data.dump().c_str());
 
@@ -200,7 +202,8 @@ void IndividualSMContextApiImpl::update_sm_context(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n1_sm_message(),
-        sm_context_response.get_n2_sm_information());
+        sm_context_response.get_n2_sm_information(),
+        json_format);
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(
             "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
@@ -208,7 +211,8 @@ void IndividualSMContextApiImpl::update_sm_context(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n1_sm_message(),
-        multipart_related_content_part_e::NAS);
+        multipart_related_content_part_e::NAS,
+        json_format);
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(
             "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
@@ -216,13 +220,14 @@ void IndividualSMContextApiImpl::update_sm_context(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n2_sm_information(),
-        multipart_related_content_part_e::NGAP);
+        multipart_related_content_part_e::NGAP,
+        json_format);
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(
             "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
   } else if (json_data.size() > 0 ){
     response.headers().add<Pistache::Http::Header::ContentType>(
-        Pistache::Http::Mime::MediaType("application/json"));
+        Pistache::Http::Mime::MediaType(json_format));
     body = json_data.dump().c_str();
   } else {
     response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
