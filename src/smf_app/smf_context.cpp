@@ -2541,7 +2541,7 @@ void smf_context::handle_pdu_session_release_sm_context_request(
           n11_sm_context_resp);
 
   n11_sm_context_resp->res.set_http_code(
-      http_status_code_e::HTTP_STATUS_CODE_200_OK);  //default http response code
+      http_status_code_e::HTTP_STATUS_CODE_200_OK); //default http response code
   n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
   n11_sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
   n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);

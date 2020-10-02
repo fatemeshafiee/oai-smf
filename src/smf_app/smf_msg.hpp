@@ -417,6 +417,15 @@ class pdu_session_release_sm_context_request : public pdu_session_msg {
   }
   ;
  private:
+  //From smContextReleaseData
+  // cause:
+  // ngApCause:
+  // 5gMmCauseValue:
+  // ueLocation:
+  //ueTimeZone:
+  //addUeLocation:
+  //vsmfReleaseOnly:
+  //ismfReleaseOnly:
 };
 
 //---------------------------------------------------------------------------------------
