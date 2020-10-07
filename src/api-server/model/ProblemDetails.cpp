@@ -61,7 +61,7 @@ void to_json(nlohmann::json& j, const ProblemDetails& o)
         j["instance"] = o.m_Instance;
     if(o.causeIsSet())
         j["cause"] = o.m_Cause;
-    if(o.invalidParamsIsSet())
+    if(o.invalidParamsIsSet() || !o.m_InvalidParams.empty())
         j["invalidParams"] = o.m_InvalidParams;
     if(o.supportedFeaturesIsSet())
         j["supportedFeatures"] = o.m_SupportedFeatures;
@@ -216,6 +216,11 @@ void ProblemDetails::unsetCause()
 std::vector<InvalidParam>& ProblemDetails::getInvalidParams()
 {
     return m_InvalidParams;
+}
+void ProblemDetails::setInvalidParams(std::vector<InvalidParam> const& value)
+{
+    m_InvalidParams = value;
+    m_InvalidParamsIsSet = true;
 }
 bool ProblemDetails::invalidParamsIsSet() const
 {

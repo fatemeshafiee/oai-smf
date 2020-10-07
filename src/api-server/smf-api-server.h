@@ -47,6 +47,9 @@
 #include "IndividualSMContextApiImpl.h"
 #include "PDUSessionsCollectionApiImpl.h"
 #include "SMContextsCollectionApiImpl.h"
+#include "IndividualSubscriptionDocumentApiImpl.h"
+#include "SubscriptionsCollectionApiImpl.h"
+
 #include "smf_app.hpp"
 
 using namespace oai::smf_server::api;
@@ -66,6 +69,12 @@ class SMFApiServer {
     m_smContextsCollectionApiImpl =
         std::make_shared<SMContextsCollectionApiImpl>(m_router, smf_app_inst,
                                                       m_address);
+    m_individualSubscriptionDocumentApiImpl = std::make_shared
+        < IndividualSubscriptionDocumentApiImpl
+        > (m_router, smf_app_inst, m_address);
+    m_subscriptionsCollectionApiImpl = std::make_shared
+        < SubscriptionsCollectionApiImpl > (m_router, smf_app_inst, m_address);
+
   }
   void init(size_t thr = 1);
   void start();
@@ -78,6 +87,8 @@ class SMFApiServer {
   std::shared_ptr<IndividualSMContextApiImpl> m_individualSMContextApiImpl;
   std::shared_ptr<PDUSessionsCollectionApiImpl> m_pduSessionsCollectionApiImpl;
   std::shared_ptr<SMContextsCollectionApiImpl> m_smContextsCollectionApiImpl;
+  std::shared_ptr<IndividualSubscriptionDocumentApiImpl> m_individualSubscriptionDocumentApiImpl;
+  std::shared_ptr<SubscriptionsCollectionApiImpl> m_subscriptionsCollectionApiImpl;
   std::string m_address;
 };
 
