@@ -234,6 +234,12 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   void remove_qos_flow(smf_qos_flow &flow);
 
   /*
+   * Remove all QoS flow associated with this PDU Session
+   * @return void
+   */
+  void remove_qos_flows();
+
+  /*
    * Set current status of PDU Session
    * @param [const pdu_session_status_e &] status: status to be set
    * @return void
@@ -428,8 +434,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint8_t number_of_supported_packet_filters;  //number_of_supported_packet_filters
   util::uint_generator<uint32_t> qos_rule_id_generator;
 
-  // Recursive lock
-  mutable std::recursive_mutex m_pdu_session_mutex;
+   mutable std::shared_mutex m_pdu_session_mutex;
 
 };
 
@@ -438,7 +443,8 @@ class session_management_subscription {
   session_management_subscription(snssai_t snssai)
       :
       single_nssai(snssai),
-      dnn_configurations() {
+      dnn_configurations(),
+      m_mutex() {
   }
 
   /*
@@ -471,6 +477,7 @@ class session_management_subscription {
  private:
   snssai_t single_nssai;
   std::map<std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;  //dnn <->dnn_configuration
+  mutable std::shared_mutex m_mutex;
 };
 
 /*
@@ -514,6 +521,14 @@ class dnn_context {
   void insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp);
 
   /*
+   * Delete a PDU Session identified by its ID
+   * @param [const uint32_t] pdu_session_id
+   * @return bool: return true if the pdu session is deleted, otherwise, return false
+   */
+  bool remove_pdu_session(const uint32_t pdu_session_id);
+
+
+  /*
    * Get number of pdu sessions associated with this context (dnn and Nssai)
    * @param void
    * @return size_t: number of PDU sessions
@@ -531,7 +546,7 @@ class dnn_context {
   std::string dnn_in_use;   // The DNN currently used, as received from the AMF
   snssai_t nssai;
   std::vector<std::shared_ptr<smf_pdu_session>> pdu_sessions;  //Store all PDU Sessions associated with this DNN context
-  mutable std::recursive_mutex m_context;
+  mutable std::shared_mutex m_context;
 };
 
 class smf_context;

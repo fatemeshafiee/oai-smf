@@ -770,23 +770,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  //Step 4. Verify the session is already existed
-  if (is_scid_2_smf_context(supi64, dnn, snssai, pdu_session_id)) {
-    //TODO: should delete the local context (including and any associated resources in the UPF and PCF) and create a new one
-    Logger::smf_app().warn(
-        "PDU Session already existed (SUPI " SUPI_64_FMT ", DNN %s, NSSAI (sst %d, sd %s), PDU Session ID %d)",
-        supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);
-    //TODO: temporary disable this action to test with AMF
-    /*
-    //trigger to send reply to AMF
-   trigger_http_response(
-        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
-        N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
-    return;
-    */
-  }
-
-  //Step 5. create a context for this supi if not existed, otherwise update
+  //Step 4. create a context for this supi if not existed, otherwise update
   std::shared_ptr<smf_context> sc = { };
   if (is_supi_2_smf_context(supi64)) {
     Logger::smf_app().debug("Update SMF context with SUPI " SUPI_64_FMT "",
@@ -802,7 +786,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     set_supi_2_smf_context(supi64, sc);
   }
 
-  //Step 6. Create/update context with dnn information
+  //Step 5. Create/update context with dnn information
   std::shared_ptr<dnn_context> sd = { };
 
   if (!sc.get()->find_dnn_context(snssai, dnn, sd)) {
@@ -816,6 +800,16 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       sd.get()->nssai = snssai;
       sc.get()->insert_dnn(sd);
     }
+  }
+
+  //Step 6. if colliding with an existing SM context (session is already existed and request type is INITIAL_REQUEST)
+  //Delete the local context (including and any associated resources in the UPF and PCF) and create a new one
+  if (is_scid_2_smf_context(supi64, dnn, snssai, pdu_session_id) && (request_type.compare("INITIAL_REQUEST") == 0)) {
+    //remove smf_pdu_session (including all flows associated to this session)
+    sd.get()->remove_pdu_session(pdu_session_id);
+    Logger::smf_app().warn(
+        "PDU Session already existed (SUPI " SUPI_64_FMT ", DNN %s, NSSAI (sst %d, sd %s), PDU Session ID %d)",
+        supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);
   }
 
   //Step 7. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
