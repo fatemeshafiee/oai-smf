@@ -41,7 +41,7 @@ public:
     virtual ~IndividualSubscriptionDocumentApi() {}
     void init();
 
-    const std::string base = "/nsmf_event-exposure/v1";
+    const std::string base = "/nsmf_event-exposure/";
 
 private:
     void setupRoutes();

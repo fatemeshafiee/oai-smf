@@ -12,6 +12,9 @@
 
 #include "SubscriptionsCollectionApi.h"
 #include "Helpers.h"
+#include "smf_config.hpp"
+
+extern smf::smf_config smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -31,7 +34,7 @@ void SubscriptionsCollectionApi::init() {
 void SubscriptionsCollectionApi::setupRoutes() {
     using namespace Pistache::Rest;
 
-    Routes::Post(*router, base + "/subscriptions", Routes::bind(&SubscriptionsCollectionApi::create_individual_subcription_handler, this));
+    Routes::Post(*router, base + smf_cfg.sbi_api_version +  "/subscriptions", Routes::bind(&SubscriptionsCollectionApi::create_individual_subcription_handler, this));
 
     // Default handler, called when a route is not found
     router->addCustomHandler(Routes::bind(&SubscriptionsCollectionApi::subscriptions_collection_api_default_handler, this));

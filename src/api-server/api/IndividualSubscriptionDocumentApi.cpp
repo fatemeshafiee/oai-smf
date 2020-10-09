@@ -12,6 +12,9 @@
 
 #include "IndividualSubscriptionDocumentApi.h"
 #include "Helpers.h"
+#include "smf_config.hpp"
+
+extern smf::smf_config smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -31,9 +34,9 @@ void IndividualSubscriptionDocumentApi::init() {
 void IndividualSubscriptionDocumentApi::setupRoutes() {
     using namespace Pistache::Rest;
 
-    Routes::Delete(*router, base + "/subscriptions/:subId", Routes::bind(&IndividualSubscriptionDocumentApi::delete_individual_subcription_handler, this));
-    Routes::Get(*router, base + "/subscriptions/:subId", Routes::bind(&IndividualSubscriptionDocumentApi::get_individual_subcription_handler, this));
-    Routes::Put(*router, base + "/subscriptions/:subId", Routes::bind(&IndividualSubscriptionDocumentApi::replace_individual_subcription_handler, this));
+    Routes::Delete(*router, base + smf_cfg.sbi_api_version +  "/subscriptions/:subId", Routes::bind(&IndividualSubscriptionDocumentApi::delete_individual_subcription_handler, this));
+    Routes::Get(*router, base + smf_cfg.sbi_api_version +  "/subscriptions/:subId", Routes::bind(&IndividualSubscriptionDocumentApi::get_individual_subcription_handler, this));
+    Routes::Put(*router, base + smf_cfg.sbi_api_version +  "/subscriptions/:subId", Routes::bind(&IndividualSubscriptionDocumentApi::replace_individual_subcription_handler, this));
 
     // Default handler, called when a route is not found
     router->addCustomHandler(Routes::bind(&IndividualSubscriptionDocumentApi::individual_subscription_document_api_default_handler, this));
