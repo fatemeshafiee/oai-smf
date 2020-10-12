@@ -30,8 +30,6 @@
 #ifndef FILE_SMF_EVENT_HPP_SEEN
 #define FILE_SMF_EVENT_HPP_SEEN
 
-#include <thread>
-#include <map>
 #include <boost/signals2.hpp>
 
 #include "smf.h"
@@ -47,7 +45,20 @@ class smf_event {
   smf_event(smf_event const&) = delete;
   void operator=(smf_event const&) = delete;
 
+  /*
+   * Subscribe to SM Context Status Notification signal
+   * @param [const sm_context_status_sig_t::slot_type&] context_status_st:  slot_type parameter
+   * @return boost::signals2::connection: the connection between the signal and the slot
+   */
   boost::signals2::connection subscribe_sm_context_status_notification(const sm_context_status_sig_t::slot_type& context_status_st);
+
+  /*
+   * Send SM Context Status Notification to AMF
+   * @param [scid_t] scid: SMF Context ID
+   * @param [uint32_t] status: Updated status
+   * @param [uint8_t] http_version: HTTP version
+   * @return void
+   */
   void trigger_sm_context_status_notification(scid_t scid, uint32_t status, uint8_t http_version);
 
  private:
