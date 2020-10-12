@@ -820,6 +820,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
                         std::shared_ptr<dnn_context> &sd,
                         std::shared_ptr<smf_pdu_session> &sp);
 
+  void send_sm_context_status_notification(scid_t scid, uint32_t status, uint8_t http_version);
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;

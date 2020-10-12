@@ -327,6 +327,17 @@ std::string pdu_session_create_sm_context_request::get_dnn_selection_mode() cons
   return m_dnn_selection_mode;
 }
 
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::set_sm_context_status_uri(
+    const std::string &value) {
+  m_sm_context_status_uri = value;
+}
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_create_sm_context_request::get_sm_context_status_uri() const {
+  return m_sm_context_status_uri;
+}
+
 /*
  * class: PDU Session Create SM Context Response
  */

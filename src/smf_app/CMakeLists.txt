@@ -58,6 +58,7 @@ add_library (SMF STATIC
   smf_n4.cpp
   smf_n10.cpp
   smf_n11.cpp
+  smf_event.cpp
   smf_msg.cpp
 )
 

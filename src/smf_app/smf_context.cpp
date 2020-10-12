@@ -46,6 +46,7 @@
 #include "3gpp_24.501.h"
 #include "SmContextCreatedData.h"
 #include "smf_pfcp_association.hpp"
+#include "smf_event.hpp"
 
 extern "C" {
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
@@ -63,6 +64,7 @@ using namespace smf;
 
 extern itti_mw *itti_inst;
 extern smf::smf_app *smf_app_inst;
+extern smf::smf_event *smf_event_inst;
 extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
@@ -1385,7 +1387,19 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       //TODO:
     }
 
-    //Step 5 (4.3.2.2.1 TS 23.502): Trigger SMF APP to send response to SMF-HTTP-API-SERVER
+    //Store AMF callback URI and subscribe to the status notification: AMF will be notified when SM context changes
+    std::shared_ptr<smf_context_ref> scf = { };
+     if (smf_app_inst->is_scid_2_smf_context(smreq->scid)) {
+       scf = smf_app_inst->scid_2_smf_context(smreq->scid);
+     } else {
+       Logger::smf_app().warn(
+           "SM Context associated with this id " SCID_FMT " does not exit!", smreq->scid);
+       //TODO: return;
+     }
+    scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
+    smf_event_inst->subscribe_sm_context_status_notification(boost::bind(&smf_context::send_sm_context_status_notification, this, _1, _1, _1));
+
+    //Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step 5, 4.3.2.2.1 TS 23.502)
     Logger::smf_app().debug(
         "Send ITTI msg to SMF APP to trigger the response of Server");
     std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
@@ -2067,6 +2081,16 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //don't need to create a procedure to update UPF
 
         //TODO: SMF invokes Nsmf_PDUSession_SMContextStatusNotify to notify AMF that the SM context for this PDU Session is released
+        scid_t scid = { };
+        try {
+          scid = std::stoi(smreq->scid);
+        } catch (const std::exception &err) {
+          Logger::smf_app().warn(
+              "Received a PDU Session Update SM Context Request, couldn't retrieve the corresponding SMF context, ignore message!");
+         //TODO: return;
+        }
+        smf_event_inst->trigger_sm_context_status_notification(scid, static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED), smreq->http_version);
+
         //TODO: if dynamic PCC applied, SMF invokes an SM Policy Association Termination
         //TODO: SMF unsubscribes from Session Management Subscription data changes notification from UDM by invoking Numd_SDM_Unsubscribe
         if (sd.get()->get_number_pdu_sessions() == 0) {
@@ -2843,6 +2867,38 @@ bool smf_context::find_pdu_session(const pfcp::pdr_id_t &pdr_id,
     }
   }
   return false;
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_context::send_sm_context_status_notification(scid_t scid,
+                                                      uint32_t status, uint8_t http_version) {
+  Logger::smf_app().debug("Send request to N11 to triger SM Context Status Notification, SMF Context ID " SCID_FMT " ", scid);
+  std::shared_ptr<smf_context_ref> scf = { };
+
+  if (smf_app_inst->is_scid_2_smf_context(scid)) {
+    scf = smf_app_inst->scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "SM Context associated with this id " SCID_FMT " does not exit!", scid);
+    //TODO:
+    return;
+  }
+
+  //Send request to N11 to trigger the notification
+  Logger::smf_app().debug(
+      "Send ITTI msg to SMF N11 to trigger the status notification");
+  std::shared_ptr<itti_n11_notify_sm_context_status> itti_msg = std::make_shared
+      < itti_n11_notify_sm_context_status > (TASK_SMF_APP, TASK_SMF_N11);
+  itti_msg->scid = scid;
+  itti_msg->sm_context_status = sm_context_status_e2str[status];
+  itti_msg->amf_status_uri = scf.get()->amf_status_uri;
+  itti_msg->http_version = http_version;
+
+  int ret = itti_inst->send_msg(itti_msg);
+  if (RETURNok != ret) {
+    Logger::smf_app().error("Could not send ITTI message %s to task TASK_SMF_N11",
+                            itti_msg->get_msg_name());
+  }
 }
 
 //------------------------------------------------------------------------------

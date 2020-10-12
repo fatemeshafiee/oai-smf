@@ -49,6 +49,7 @@
 #include "smf_n4.hpp"
 #include "smf_n10.hpp"
 #include "smf_n11.hpp"
+#include "smf_event.hpp"
 #include "pfcp.hpp"
 #include "itti_msg_nx.hpp"
 #include "SmContextCreatedData.h"
@@ -71,6 +72,7 @@ extern smf_config smf_cfg;
 smf_n4 *smf_n4_inst = nullptr;
 smf_n10 *smf_n10_inst = nullptr;
 smf_n11 *smf_n11_inst = nullptr;
+smf_event *smf_event_inst = nullptr;
 extern itti_mw *itti_inst;
 
 void smf_app_task(void*);
@@ -299,6 +301,7 @@ smf_app::smf_app(const std::string &config_file)
     smf_n4_inst = new smf_n4();
     smf_n10_inst = new smf_n10();
     smf_n11_inst = new smf_n11();
+    smf_event_inst = new smf_event();
   } catch (std::exception &e) {
     Logger::smf_app().error("Cannot create SMF_APP: %s", e.what());
     throw;
@@ -1625,5 +1628,4 @@ void smf_app::trigger_http_response(const uint32_t &http_code,
       //TODO:
     }
   }
-
 }

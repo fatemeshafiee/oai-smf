@@ -89,12 +89,14 @@ class smf_context_ref {
     nssai = { };
     dnn = "";
     pdu_session_id = 0;
+    amf_status_uri = "";
   }
 
   supi_t supi;
   std::string dnn;
   pdu_session_id_t pdu_session_id;
   snssai_t nssai;
+  std::string amf_status_uri;
 };
 
 class smf_app {
@@ -116,6 +118,7 @@ class smf_app {
   util::uint_generator<uint32_t> sm_context_ref_generator;
 
   std::map<scid_t, std::shared_ptr<smf_context_ref>> scid2smf_context;
+
   mutable std::shared_mutex m_scid2smf_context;
   //Store promise IDs for Create/Update session
   mutable std::shared_mutex m_sm_context_create_promises;

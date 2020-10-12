@@ -132,6 +132,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   //anType
   //UETimeZone
   //SMContextStatusUri
+  sm_context_req_msg.set_sm_context_status_uri(smContextCreateData.getSmContextStatusUri());
   //PCFId
 
   // DNN Selection Mode

@@ -75,6 +75,14 @@ class smf_n11 {
   void send_n1n2_message_transfer_request(
       std::shared_ptr<itti_n11_session_report_request> report_msg);
 
+  /*
+   * Send SM Context Status Notification to AMF
+   * @param [std::shared_ptr<itti_n11_notify_sm_context_status>] sm_context_status: Content of message to be sent
+   * @return void
+   */
+  void send_sm_context_status_notification(
+      std::shared_ptr<itti_n11_notify_sm_context_status> sm_context_status);
+
 };
 }
 #endif /* FILE_SMF_N11_HPP_SEEN */

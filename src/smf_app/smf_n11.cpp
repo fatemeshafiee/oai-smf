@@ -94,6 +94,13 @@ void smf_n11_task(void *args_p) {
             std::static_pointer_cast<itti_n11_session_report_request>(
                 shared_msg));
         break;
+
+      case N11_SESSION_NOTIFY_SM_CONTEXT_STATUS:
+        smf_n11_inst->send_sm_context_status_notification(
+            std::static_pointer_cast<itti_n11_notify_sm_context_status>(
+                shared_msg));
+        break;
+
       case TERMINATE:
         if (itti_msg_terminate *terminate =
             dynamic_cast<itti_msg_terminate*>(msg)) {
@@ -437,3 +444,57 @@ void smf_n11::send_n1n2_message_transfer_request(
   curl_global_cleanup();
   free_wrapper((void**) &data);
 }
+
+
+//------------------------------------------------------------------------------
+void smf_n11::send_sm_context_status_notification(
+    std::shared_ptr<itti_n11_notify_sm_context_status> sm_context_status) {
+  Logger::smf_n11().debug("Send SM Context Status Notification to AMF(HTTP version %d)", sm_context_status->http_version);
+
+  nlohmann::json json_data = { };
+  //Fill the json part
+  json_data["statusInfo"]["resourceStatus"] = sm_context_status->sm_context_status;
+  //json_data["statusInfo"]["cause"] =
+  std::string body = json_data.dump();
+
+  curl_global_init(CURL_GLOBAL_ALL);
+  CURL *curl = curl = curl_easy_init();
+
+  if (curl) {
+    CURLcode res = { };
+    struct curl_slist *headers = nullptr;
+    //headers = curl_slist_append(headers, "charsets: utf-8");
+    headers = curl_slist_append(headers, "content-type: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, sm_context_status->amf_status_uri.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
+
+    if (sm_context_status->http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      // we use a self-signed test server, skip verification during debugging
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+    }
+
+    // Response information.
+    long httpCode = { 0 };
+    std::unique_ptr<std::string> httpData(new std::string());
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, body.length());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
+    res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    Logger::smf_n11().debug("Response from AMF, Http Code: %d", httpCode);
+    //TODO: in case of "307 temporary redirect"
+
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+}
+
