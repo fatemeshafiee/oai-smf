@@ -704,3 +704,177 @@ seid_t pdu_session_report_response::get_seid() const {
 uint64_t pdu_session_report_response::get_trxn_id() const {
   return trxn_id;
 }
+
+/*
+ * class: Event Exposure
+ */
+//-----------------------------------------------------------------------------
+supi_t event_exposure_msg::get_supi() const {
+  return m_supi;
+}
+
+//-----------------------------------------------------------------------------
+void event_exposure_msg::set_supi(const supi_t &value) {
+  m_supi = value;
+  m_supi_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool event_exposure_msg::is_supi_is_set() const {
+  return m_supi_is_set;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_exposure_msg::get_supi_prefix() const {
+  return m_supi_prefix;
+}
+
+//-----------------------------------------------------------------------------
+void event_exposure_msg::set_supi_prefix(const std::string &prefix) {
+  m_supi_prefix = prefix;
+}
+//-----------------------------------------------------------------------------
+pdu_session_id_t event_exposure_msg::get_pdu_session_id() const {
+  return m_pdu_session_id;
+}
+
+//-----------------------------------------------------------------------------
+void event_exposure_msg::set_pdu_session_id(
+    const pdu_session_id_t value) {
+  m_pdu_session_id = value;
+  m_psi_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool event_exposure_msg::is_psi_is_set() const {
+  return m_psi_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void event_exposure_msg::set_sub_id(std::string const &value) {
+   m_sub_id =  value;
+   m_sub_id_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_exposure_msg::get_sub_id() const {
+  return m_sub_id;
+}
+
+//-----------------------------------------------------------------------------
+bool event_exposure_msg::is_sub_id_is_set() const {
+  return m_sub_id_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void event_exposure_msg::set_notif_uri(std::string const &value){
+  m_notif_uri = value;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_exposure_msg::get_notif_uri() const {
+  return m_notif_uri;
+}
+
+//-----------------------------------------------------------------------------
+void event_exposure_msg::set_notif_id(std::string const &value) {
+  m_notif_id = value;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_exposure_msg::get_notif_id() const {
+  return m_notif_id;
+}
+
+//-----------------------------------------------------------------------------
+std::vector<event_subscription_t> event_exposure_msg::get_event_subs() const {
+  return m_event_subs;
+}
+
+//-----------------------------------------------------------------------------
+void event_exposure_msg::set_event_subs(std::vector<event_subscription_t> const &value) {
+  m_event_subs.clear();
+  for (auto it: value) {
+    m_event_subs.push_back(it);
+  }
+}
+
+/*
+ * class: Event Notification
+ */
+//-----------------------------------------------------------------------------
+
+void event_notification::set_smf_event(const smf_event_t &ev) {
+  m_event = ev;
+}
+//-----------------------------------------------------------------------------
+smf_event_t event_notification::get_smf_event() const {
+  return m_event;
+}
+
+//-----------------------------------------------------------------------------
+supi_t event_notification::get_supi() const {
+  return m_supi;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_supi(const supi_t &value) {
+  m_supi = value;
+  m_supi_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool event_notification::is_supi_is_set() const {
+  return m_supi_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_ad_ipv4_addr(std::string const &value) {
+  m_ad_ipv4_addr = value;
+  m_ad_ipv4_addr_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_ad_ipv4_addr() const {
+  return m_ad_ipv4_addr;
+}
+
+//-----------------------------------------------------------------------------
+bool event_notification::is_ad_ipv4_addr_is_set() const {
+  return m_ad_ipv4_addr_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_re_ipv4_addr(std::string const &value) {
+  m_re_ipv4_addr = value;
+  m_re_ipv4_addr_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_re_ipv4_addr() const {
+  return m_re_ipv4_addr;
+}
+
+//-----------------------------------------------------------------------------
+bool event_notification::is_re_ipv4_addr_is_set() const {
+  return m_re_ipv4_addr_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_pdu_session_id(const pdu_session_id_t value) {
+  m_pdu_session_id = value;
+  m_psi_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+pdu_session_id_t event_notification::get_pdu_session_id() const {
+  return m_pdu_session_id;
+}
+
+//-----------------------------------------------------------------------------
+bool event_notification::is_psi_is_set() const {
+  return m_psi_is_set;
+}
+
+
+

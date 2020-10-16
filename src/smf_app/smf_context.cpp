@@ -1397,7 +1397,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
        //TODO: return;
      }
     scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
-    smf_event_inst->subscribe_sm_context_status_notification(boost::bind(&smf_context::send_sm_context_status_notification, this, _1, _1, _1));
+    //smf_event_inst->subscribe_sm_context_status_notification(boost::bind(&smf_context::send_sm_context_status_notification, this, _1, _1, _1));
+    //smf_event_inst->subscribe_sm_context_status_notification(boost::bind(&smf_subscription_management::send_sm_context_status_notification, smf_subscription_management_inst, _1, _1, _1));
+
 
     //Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step 5, 4.3.2.2.1 TS 23.502)
     Logger::smf_app().debug(
@@ -2090,6 +2092,10 @@ void smf_context::handle_pdu_session_update_sm_context_request(
          //TODO: return;
         }
         smf_event_inst->trigger_sm_context_status_notification(scid, static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED), smreq->http_version);
+        //Get SUPI
+        supi64_t supi64 = smf_supi_to_u64(sm_context_req_msg.get_supi());
+        //Trigger PDU Session Release event notification
+        smf_event_inst->trigger_ee_pdu_session_release(supi64, sm_context_req_msg.get_pdu_session_id(), smreq->http_version);
 
         //TODO: if dynamic PCC applied, SMF invokes an SM Policy Association Termination
         //TODO: SMF unsubscribes from Session Management Subscription data changes notification from UDM by invoking Numd_SDM_Unsubscribe

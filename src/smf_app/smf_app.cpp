@@ -129,6 +129,16 @@ scid_t smf_app::generate_smf_context_ref() {
 }
 
 //------------------------------------------------------------------------------
+void smf_app::generate_ev_subscription_id(std::string &sub_id) {
+  sub_id = std::to_string(evsub_id_generator.get_uid());
+}
+
+//------------------------------------------------------------------------------
+evsub_id_t smf_app::generate_ev_subscription_id() {
+  return evsub_id_generator.get_uid();
+}
+
+//------------------------------------------------------------------------------
 bool smf_app::is_seid_n4_exist(const uint64_t &seid) const {
   return bool { set_seid_n4.count(seid) > 0 };
 }
@@ -1121,6 +1131,37 @@ void smf_app::trigger_pdu_session_modification(
 }
 
 //------------------------------------------------------------------------------
+evsub_id_t smf_app::handle_event_exposure_subscription(
+    std::shared_ptr<itti_sbi_event_exposure_request> msg) {
+
+  Logger::smf_app().info(
+      "Handle an Event Exposure Subscription Request from an AMF (HTTP version %d)",
+      msg->http_version);
+
+  // Generate a subscription ID Id and store the corresponding information in a map (subscription id, info)
+  evsub_id_t evsub_id = generate_ev_subscription_id();
+  //std::string evsubid_str = "SubId" + std::to_string(evsub_id);
+
+  std::shared_ptr<smf_subscription> ss = std::shared_ptr<smf_subscription>(
+      new smf_subscription());
+  ss.get()->sub_id = evsub_id;
+  if (msg->event_exposure.is_supi_is_set()){
+    supi64_t supi64 = smf_supi_to_u64(msg->event_exposure.get_supi());
+    ss.get()->supi = supi64;
+  }
+  ss.get()->notif_id = msg->event_exposure.get_notif_id();
+  ss.get()->notif_uri = msg->event_exposure.get_notif_uri();
+
+  std::vector<event_subscription_t> event_subscriptions = msg->event_exposure.get_event_subs();
+  //store subscription
+  for (auto i: event_subscriptions) {
+    ss.get()->ev_type = i.smf_event;
+    add_event_subscription(evsub_id, i.smf_event, ss);
+  }
+  //smf_event_inst->subscribe_sm_context_status_notification(boost::bind(&smf_context::send_sm_context_status_notification, this, _1, _1, _1));
+}
+
+//------------------------------------------------------------------------------
 bool smf_app::is_supi_2_smf_context(const supi64_t &supi) const {
   std::shared_lock lock(m_supi2smf_context);
   return bool { supi2smf_context.count(supi) > 0 };
@@ -1185,6 +1226,13 @@ bool smf_app::scid_2_smf_context(const scid_t &scid,
   }
   return false;
 }
+
+//------------------------------------------------------------------------------
+//void smf_app::set_evsubid_2_smf_subscription(const evsub_id_t &id,
+//                                     std::shared_ptr<smf_subscription> ss) {
+//  std::unique_lock lock(m_evsubid2smf_context);
+//  evsub_id2smf_subscription[id] = ss;
+//}
 
 //------------------------------------------------------------------------------
 bool smf_app::use_local_configuration_subscription_data(
@@ -1629,3 +1677,38 @@ void smf_app::trigger_http_response(const uint32_t &http_code,
     }
   }
 }
+
+//---------------------------------------------------------------------------------------------
+void smf_app::add_event_subscription(evsub_id_t sub_id, smf_event_t ev, std::shared_ptr<smf_subscription> ss) {
+  std::unique_lock lock(m_smf_event_subscriptions);
+  smf_event_subscriptions.emplace(std::make_pair(sub_id,ev), ss);
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::get_ee_subscriptions(smf_event_t ev, std::vector<std::shared_ptr<smf_subscription>> subscriptions) {
+  for (auto const& i : smf_event_subscriptions) {
+    if (i.first.second == ev){
+      subscriptions.push_back(i.second);
+    }
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_ptr<smf_subscription>> subscriptions) {
+  for (auto const& i : smf_event_subscriptions) {
+    if (i.first.first == sub_id){
+      subscriptions.push_back(i.second);
+    }
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> subscription) {
+  for (auto const& i : smf_event_subscriptions) {
+    if ((i.first.second == ev) && (i.second->supi == supi) && (i.second->pdu_session_id == pdu_session_id)){
+      subscription = i.second;
+    }
+  }
+}
+
+

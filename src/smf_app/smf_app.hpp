@@ -45,7 +45,9 @@
 #include "3gpp_29.502.h"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_n11.hpp"
+#include "itti_msg_sbi.hpp"
 #include "smf_context.hpp"
+#include "smf_subscription.hpp"
 #include "smf_pco.hpp"
 #include "smf_msg.hpp"
 #include "SmContextCreateData.h"
@@ -116,10 +118,14 @@ class smf_app {
   mutable std::shared_mutex m_supi2smf_context;
 
   util::uint_generator<uint32_t> sm_context_ref_generator;
-
   std::map<scid_t, std::shared_ptr<smf_context_ref>> scid2smf_context;
 
+  util::uint_generator<uint32_t> evsub_id_generator;
+  std::map<std::pair<evsub_id_t, smf_event_t>, std::shared_ptr<smf_subscription>> smf_event_subscriptions;
+
+
   mutable std::shared_mutex m_scid2smf_context;
+  mutable std::shared_mutex m_smf_event_subscriptions;
   //Store promise IDs for Create/Update session
   mutable std::shared_mutex m_sm_context_create_promises;
   mutable std::shared_mutex m_sm_context_update_promises;
@@ -131,6 +137,7 @@ class smf_app {
       boost::shared_ptr<boost::promise<pdu_session_update_sm_context_response>>> sm_context_update_promises;
   std::map<uint32_t,
       boost::shared_ptr<boost::promise<pdu_session_release_sm_context_response>>> sm_context_release_promises;
+
 
   /*
    * Apply the config from the configuration file for DNN pools
@@ -374,6 +381,21 @@ class smf_app {
   scid_t generate_smf_context_ref();
 
   /*
+   * Generate an Event Exposure Subscription ID in a form of string
+   * @param [std::string &] sub_id: Store the generated reference
+   * @return void
+   */
+  void generate_ev_subscription_id(std::string &sub_id);
+
+  /*
+   * Generate an Event Exposure Subscription ID
+   * @param [void]
+   * @return the generated reference
+   */
+  evsub_id_t generate_ev_subscription_id();
+
+
+  /*
    * Set the association betwen a SMF Context Reference and a SMF Context
    * @param [const scid_t &] id: SMF Context Reference Id
    * @param [std::shared_ptr<smf_context_ref>] scf: SMF Context
@@ -440,6 +462,13 @@ class smf_app {
   void handle_pdu_session_release_sm_context_request(
       std::shared_ptr<itti_n11_release_sm_context_request> smreq);
 
+  /*
+   * Handle Event Exposure Msg from AMF
+   * @param [std::shared_ptr<itti_sbi_event_exposure_request>&] Request message
+   * @return [evsub_id_t] ID of the created subscription
+   */
+  evsub_id_t handle_event_exposure_subscription(
+      std::shared_ptr<itti_sbi_event_exposure_request> msg);
   /*
    * Trigger pdu session modification
    * @param [const supi_t &] supi
@@ -653,6 +682,29 @@ class smf_app {
    */
   void trigger_http_response(const uint32_t &http_code, uint32_t &promise_id,
                              uint8_t msg_type);
+
+  /*
+   * Add an Event Subscription to the list
+   * @param [const evsub_id_t&] sub_id: Subscription ID
+   * @param [smf_event_t] ev: Event type
+   * @param [std::shared_ptr<smf_subscription>] ss: a shared pointer stored information of the subscription
+   * @return void
+   */
+  void add_event_subscription(evsub_id_t sub_id, smf_event_t ev, std::shared_ptr<smf_subscription> ss);
+
+  /*
+   * Get a list of subscription associated with a particular event
+   * @param [smf_event_t] ev: Event type
+   * @param [std::vector<std::shared_ptr<smf_subscription>>] subscriptions: list of the subscription associated with this event type
+   * @return vector
+   */
+  void get_ee_subscriptions(smf_event_t ev, std::vector<std::shared_ptr<smf_subscription>> subscriptions);
+  void get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_ptr<smf_subscription>> subscriptions);
+
+  void get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> subscription);
+
+
+
 };
 }
 #include "smf_config.hpp"
