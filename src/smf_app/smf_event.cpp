@@ -118,28 +118,29 @@ void smf_event::send_ee_pdu_session_release(supi64_t supi,
                                             uint8_t http_version) {
   Logger::smf_app().debug("Send request to N11 to triger PDU Session Release Notification, SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d", supi, pdu_session_id, http_version);
 
-  std::vector < std::shared_ptr < smf_subscription >> subscriptions;
-  std::shared_ptr<smf_subscription> subscription;
+ //std::vector < std::shared_ptr < smf_subscription >> subscriptions;
+  std::shared_ptr<smf_subscription> subscription = {};
   smf_app_inst->get_ee_subscriptions(smf_event_t::SMF_EVENT_PDU_SES_REL, supi,
                                      pdu_session_id, subscription);
 
-  //Send request to N11 to trigger the notification to the subscribed event
-  Logger::smf_app().debug(
+  if (subscription.get() != nullptr) { 
+    //Send request to N11 to trigger the notification to the subscribed event
+    Logger::smf_app().debug(
       "Send ITTI msg to SMF N11 to trigger the event notification");
-  std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg = std::make_shared
+    std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg = std::make_shared
       < itti_n11_notify_subscribed_event > (TASK_SMF_APP, TASK_SMF_N11);
 
-  event_notification ev_notif = { };
-  ev_notif.set_pdu_session_id(pdu_session_id);
-  itti_msg->notif_id = std::to_string(subscription->sub_id);
-  itti_msg->event_notifs.push_back(ev_notif);
-  itti_msg->http_version = http_version;
+    event_notification ev_notif = { };
+    ev_notif.set_pdu_session_id(pdu_session_id);
+    itti_msg->notif_id = std::to_string(subscription->sub_id);
+    itti_msg->event_notifs.push_back(ev_notif);
+    itti_msg->http_version = http_version;
 
-  int ret = itti_inst->send_msg(itti_msg);
-  if (RETURNok != ret) {
-    Logger::smf_app().error(
+    int ret = itti_inst->send_msg(itti_msg);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_N11",
         itti_msg->get_msg_name());
+    }
   }
-
 }
