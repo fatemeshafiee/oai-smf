@@ -534,15 +534,6 @@ namespace pfcp {
     //  PFCP_IE_ADDITIONAL_MONITORING_TIME
     virtual bool get(pfcp::additional_monitoring_time& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_ADDITIONAL_MONITORING_TIME, __FILE__, __LINE__);}
     virtual void set(const pfcp::additional_monitoring_time& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_ADDITIONAL_MONITORING_TIME, __FILE__, __LINE__);}
-    //  PFCP_IE_EVENT_INFORMATION
-    //virtual bool get(pfcp::event_information& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_INFORMATION, __FILE__, __LINE__);}
-    //virtual void set(const pfcp::event_information& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_INFORMATION, __FILE__, __LINE__);}
-    //  PFCP_IE_EVENT_REPORTING
-    //virtual bool get(pfcp::event_reporting& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_REPORTING, __FILE__, __LINE__);}
-    //virtual void set(const pfcp::event_reporting& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_REPORTING, __FILE__, __LINE__);}
-    //  PFCP_IE_EVENT_ID
-    //virtual bool get(pfcp::event_id_t& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_ID, __FILE__, __LINE__);}
-    //virtual void set(const pfcp::event_id_t& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_ID, __FILE__, __LINE__);}
     //  PFCP_IE_EVENT_THRESHOLD
     virtual bool get(pfcp::event_threshold_t& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_THRESHOLD, __FILE__, __LINE__);}
     virtual void set(const pfcp::event_threshold_t& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_THRESHOLD, __FILE__, __LINE__);}

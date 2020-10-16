@@ -230,7 +230,6 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const pfcp_heartbeat_
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
   udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -256,8 +255,6 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const pfcp_associatio
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
   udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -283,8 +280,6 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const pfcp_associatio
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
   udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-
   return msg.get_sequence_number();
 }
 ////------------------------------------------------------------------------------
@@ -362,7 +357,6 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
   udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -389,7 +383,6 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
   udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -416,7 +409,6 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
   udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 ////------------------------------------------------------------------------------
@@ -469,7 +461,6 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
   udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -496,7 +487,6 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
   udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
