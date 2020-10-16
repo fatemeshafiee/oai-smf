@@ -229,8 +229,8 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const pfcp_heartbeat_
   pending_procedures.insert(std::pair<uint32_t, pfcp_procedure>(msg.get_sequence_number(), proc));
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
-  //udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -255,10 +255,8 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const pfcp_associatio
   pending_procedures.insert(std::pair<uint32_t, pfcp_procedure>(msg.get_sequence_number(), proc));
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
-  //TTN: temporary fix to be able to work with UPF from dsTester (should be removed later)
-  //TTN: temporary fix to be able to work with UPF from dsTester (should be removed later)
-  //udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
 
   return msg.get_sequence_number();
 }
@@ -284,9 +282,8 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const pfcp_associatio
   pending_procedures.insert(std::pair<uint32_t, pfcp_procedure>(msg.get_sequence_number(), proc));
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
-  //TTN: temporary fix to be able to work with UPF from dsTester (should be removed later)
-  //udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
 
   return msg.get_sequence_number();
 }
@@ -364,9 +361,8 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   pending_procedures.insert(std::pair<uint32_t, pfcp_procedure>(msg.get_sequence_number(), proc));
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
-  //TTN: temporary fix to be able to work with UPF from dsTester (should be removed later)
-  //udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -392,9 +388,8 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   pending_procedures.insert(std::pair<uint32_t, pfcp_procedure>(msg.get_sequence_number(), proc));
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
-  //TTN: temporary fix to be able to work with UPF from dsTester (should be removed later)
-  //udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -420,9 +415,8 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   pending_procedures.insert(std::pair<uint32_t, pfcp_procedure>(msg.get_sequence_number(), proc));
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
-  //TTN: temporary fix to be able to work with UPF from dsTester (should be removed later)
-  //udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 ////------------------------------------------------------------------------------
@@ -474,9 +468,8 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   pending_procedures.insert(std::pair<uint32_t, pfcp_procedure>(msg.get_sequence_number(), proc));
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
-  //TTN: temporary fix to be able to work with UPF from dsTester (should be removed later)
-  //udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
@@ -502,9 +495,8 @@ uint32_t pfcp_l4_stack::send_request(const endpoint& dest, const uint64_t seid, 
   pending_procedures.insert(std::pair<uint32_t, pfcp_procedure>(msg.get_sequence_number(), proc));
   trxn_id2seq_num.insert(std::pair<uint64_t, uint32_t>(proc.trxn_id, msg.get_sequence_number()));
 
-  //TTN: temporary fix to be able to work with UPF from dsTester (should be removed later)
-  //udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
-  udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  udp_s_allocated.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
+  //udp_s_8805.async_send_to(reinterpret_cast<const char*>(bstream.c_str()), bstream.length(), dest);
   return msg.get_sequence_number();
 }
 //------------------------------------------------------------------------------
