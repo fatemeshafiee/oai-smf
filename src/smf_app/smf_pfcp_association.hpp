@@ -40,6 +40,8 @@ namespace smf {
 
 #define PFCP_ASSOCIATION_HEARTBEAT_INTERVAL_SEC 10
 #define PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES 2
+#define PFCP_ASSOCIATION_GRACEFUL_RELEASE_PERIOD 5
+
 class pfcp_association {
  public:
   pfcp::node_id_t node_id;
@@ -57,6 +59,7 @@ class pfcp_association {
   bool is_restore_sessions_pending;
 
   timer_id_t timer_association;
+  timer_id_t timer_graceful_release;
 
   explicit pfcp_association(const pfcp::node_id_t &node_id)
       :
@@ -71,6 +74,7 @@ class pfcp_association {
     trxn_id_heartbeat = 0;
     is_restore_sessions_pending = false;
     timer_association = ITTI_INVALID_TIMER_ID;
+    timer_graceful_release = ITTI_INVALID_TIMER_ID;
   }
   pfcp_association(const pfcp::node_id_t &node_id,
                    pfcp::recovery_time_stamp_t &recovery_time_stamp)
@@ -86,6 +90,7 @@ class pfcp_association {
     trxn_id_heartbeat = 0;
     timer_association = ITTI_INVALID_TIMER_ID;
     is_restore_sessions_pending = false;
+    timer_graceful_release = ITTI_INVALID_TIMER_ID;
   }
   pfcp_association(const pfcp::node_id_t &ni, pfcp::recovery_time_stamp_t &rts,
                    pfcp::up_function_features_s &uff)
@@ -102,6 +107,7 @@ class pfcp_association {
     trxn_id_heartbeat = 0;
     is_restore_sessions_pending = false;
     timer_association = ITTI_INVALID_TIMER_ID;
+    timer_graceful_release = ITTI_INVALID_TIMER_ID;
   }
   pfcp_association(pfcp_association const &p)
       :
@@ -113,13 +119,14 @@ class pfcp_association {
       num_retries_timer_heartbeat(p.num_retries_timer_heartbeat),
       trxn_id_heartbeat(p.trxn_id_heartbeat),
       is_restore_sessions_pending(p.is_restore_sessions_pending),
-      timer_association(0) {
+      timer_association(0),
+      timer_graceful_release(0) {
   }
 
   void notify_add_session(const pfcp::fseid_t &cp_fseid);
   bool has_session(const pfcp::fseid_t &cp_fseid);
   void notify_del_session(const pfcp::fseid_t &cp_fseid);
-  //void del_sessions();
+  void del_sessions();
   void restore_n4_sessions();
   void set(const pfcp::up_function_features_s &ff) {
     function_features.first = true;
@@ -168,6 +175,8 @@ class pfcp_associations {
                        pfcp::recovery_time_stamp_t &recovery_time_stamp,
                        pfcp::up_function_features_s &function_features,
                        bool &restore_n4_sessions);
+  bool update_association(
+      pfcp::node_id_t &node_id, pfcp::up_function_features_s &function_features);
   bool get_association(const pfcp::node_id_t &node_id,
                        std::shared_ptr<pfcp_association> &sa) const;
   bool get_association(const pfcp::fseid_t &cp_fseid,
@@ -181,6 +190,7 @@ class pfcp_associations {
 
   void initiate_heartbeat_request(timer_id_t timer_id, uint64_t arg2_user);
   void timeout_heartbeat_request(timer_id_t timer_id, uint64_t arg2_user);
+  void timeout_release_request(timer_id_t timer_id, uint64_t arg2_user);
   void handle_receive_heartbeat_response(const uint64_t trxn_id);
 
   bool select_up_node(pfcp::node_id_t &node_id,

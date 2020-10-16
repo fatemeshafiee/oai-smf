@@ -104,8 +104,8 @@ class smf_qos_flow {
   std::string toString() const;
 
   pfcp::qfi_t qfi;  //QoS Flow Identifier
-  fteid_t ul_fteid;  //fteid of UPF
-  fteid_t dl_fteid;  //fteid of AN
+  pfcp::fteid_t ul_fteid;  //fteid of UPF
+  pfcp::fteid_t dl_fteid;  //fteid of AN
   pfcp::pdr_id_t pdr_id_ul;   // Packet Detection Rule ID, UL
   pfcp::pdr_id_t pdr_id_dl;   // Packet Detection Rule ID, DL
   pfcp::precedence_t precedence;
@@ -429,7 +429,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   util::uint_generator<uint32_t> qos_rule_id_generator;
 
   // Recursive lock
-  mutable std::recursive_mutex m_pdu_session_mutex;
+  mutable std::shared_mutex m_pdu_session_mutex;
 
 };
 
@@ -438,7 +438,8 @@ class session_management_subscription {
   session_management_subscription(snssai_t snssai)
       :
       single_nssai(snssai),
-      dnn_configurations() {
+      dnn_configurations(),
+      m_dnn_configuration_mutex() {
   }
 
   /*
@@ -471,6 +472,8 @@ class session_management_subscription {
  private:
   snssai_t single_nssai;
   std::map<std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;  //dnn <->dnn_configuration
+  // Recursive lock
+  mutable std::shared_mutex m_dnn_configuration_mutex;
 };
 
 /*
@@ -531,7 +534,7 @@ class dnn_context {
   std::string dnn_in_use;   // The DNN currently used, as received from the AMF
   snssai_t nssai;
   std::vector<std::shared_ptr<smf_pdu_session>> pdu_sessions;  //Store all PDU Sessions associated with this DNN context
-  mutable std::recursive_mutex m_context;
+  mutable std::shared_mutex m_context;
 };
 
 class smf_context;

@@ -156,9 +156,9 @@ int session_create_sm_context_procedure::run(
 
   destination_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;  // ACCESS is for downlink, CORE for uplink
   forwarding_parameters.set(destination_interface);
-
-  //TODO
-  //Network instance
+  //TODO: Network Instance
+  //TODO: Redirect Information
+  //TODO: Outer Header Creation (e.g., in case of N9)
 
   create_far.set(far_id);
   create_far.set(apply_action);
@@ -179,14 +179,7 @@ int session_create_sm_context_procedure::run(
   pfcp::sdf_filter_t sdf_filter = { };
   pfcp::application_id_t application_id = { };
   pfcp::qfi_t qfi = { };
-
-  source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
-  local_fteid.ch = 1;
-  //TODO required?: local_fteid.v4 = 1;
-  //local_fteid.chid = 1;
-
-  xgpp_conv::paa_to_pfcp_ue_ip_address(sm_context_resp->res.get_paa(),
-                                       ue_ip_address);
+  pfcp::_3gpp_interface_type_t source_interface_type = { };
 
   // DOIT simple
   // shall uniquely identify the PDR among all the PDRs configured for that PFCP session.
@@ -201,16 +194,32 @@ int session_create_sm_context_procedure::run(
   qfi.qfi = default_qos._5qi;
   Logger::smf_app().info("Default qfi %d", qfi.qfi);
 
-  //Packet detection information
-  pdi.set(source_interface);  //source interface
-  pdi.set(ue_ip_address);  //UE IP address
-  //TODO: Network Instance (no need in this version)
-  pdi.set(local_fteid);  // CN tunnel info
-  //TODO: Packet Filter Set
+  //Packet detection information (see Table 7.5.2.2-2: PDI IE within PFCP Session Establishment Request, 3GPP TS 29.244 V16.0.0)
+  //source interface
+  source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
+  pdi.set(source_interface);
+  // CN tunnel info
+  local_fteid.ch = 1; // SMF requests the UPF to assign a local F-TEID to the PDR
+  //TODO required?: local_fteid.v4 = 1;
+  //local_fteid.chid = 1;
+  pdi.set(local_fteid);
+  //TODO: Network Instance
+  //UE IP address
+  xgpp_conv::paa_to_pfcp_ue_ip_address(sm_context_resp->res.get_paa(),
+                                       ue_ip_address);
+  pdi.set(ue_ip_address);
+  //TODO: Traffic Endpoint ID
+  //TODO: SDF Filter
   //TODO: Application ID
-  pdi.set(qfi);  //QoS Flow ID
   //TODO: Ethernet PDU Session Information
+  //TODO: Ethernet Packet Filter
+  pdi.set(qfi);  //QFI - QoS Flow ID
   //TODO: Framed Route Information
+  //TODO: Framed-Routing
+  //TODO: Framed-IPv6-Route
+  //Source Interface Type - N3
+  source_interface_type.interface_type_value = pfcp::_3GPP_INTERFACE_TYPE_N3;
+  pdi.set(source_interface_type);
 
   outer_header_removal.outer_header_removal_description =
   OUTER_HEADER_REMOVAL_GTPU_UDP_IPV4;
@@ -254,21 +263,8 @@ int session_create_sm_context_procedure::run(
   qos_rule.qosflowidentifer = flow.qfi.qfi;
   sps->add_qos_rule(qos_rule);
 
-  smf_qos_flow flow2 = flow;
-  sps->add_qos_flow(flow2);
+  sps->add_qos_flow(flow);
   sps->set_default_qos_flow(flow.qfi);
-
-  /*
-   //add another flow for testing purpose, TODO: SHOULD BE REMOVED
-   smf_qos_flow flow3 = flow;
-   flow3.qfi = 7;
-   sps->add_qos_flow(flow3);
-   QOSRulesIE qos_rule2 = qos_rule;
-   qos_rule2.qosruleidentifer = 10;
-   qos_rule2.qosflowidentifer = 7;
-   qos_rule2.dqrbit = THE_QOS_RULE_IS_NOT_THE_DEFAULT_QOS_RULE;
-   sps->add_qos_rule(qos_rule2);
-   */
 
   // for finding procedure when receiving response
   smf_app_inst->set_seid_2_smf_context(cp_fseid.seid, sc);
@@ -308,22 +304,10 @@ void session_create_sm_context_procedure::handle_itti_msg(
     if (it.get(pdr_id)) {
       smf_qos_flow flow = { };
       if (sps->get_qos_flow(pdr_id, flow)) {
-        pfcp::fteid_t local_up_fteid = { };
-        if (it.get(local_up_fteid)) {
-          //set tunnel id
-          xgpp_conv::pfcp_to_core_fteid(local_up_fteid, flow.ul_fteid);
-          //TODO: should be updated to 5G N3/N9 interface
-          flow.ul_fteid.interface_type = S1_U_SGW_GTP_U;  //UPF's N3 interface
+        //pfcp::fteid_t local_up_fteid = { };
+        if (it.get(flow.ul_fteid)) {
           //Update Qos Flow
-          smf_qos_flow flow2 = flow;
-          sps->add_qos_flow(flow2);
-
-          /*
-           //add another flow for testing purpose, TODO: SHOULD BE REMOVED
-           smf_qos_flow flow3 = flow;
-           flow3.qfi = 7;
-           sps->add_qos_flow(flow3);
-           */
+          sps->add_qos_flow(flow);
         }
       } else {
         Logger::smf_app().error("Could not get QoS Flow for created_pdr %d",
@@ -352,8 +336,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
     }
     if (sps->get_default_qos_rule(qos_rule)) {
       flow_updated.add_qos_rule(qos_rule);
-//      qos_rule.qosruleidentifer = 2;
-//      flow_updated.add_qos_rule(qos_rule);
     }
     flow_updated.set_qfi(default_qos_flow.qfi);
     qos_profile_t profile = { };
@@ -368,7 +350,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
   n11_triggered_pending->res.set_qos_flow_context(flow_updated);
 
   //fill content for N1N2MessageTransfer (including N1, N2 SM)
-
   // Create N1 SM container & N2 SM Information
   smf_n1 smf_n1_inst = { };
   smf_n2 smf_n2_inst = { };
@@ -464,7 +445,6 @@ void session_create_sm_context_procedure::handle_itti_msg(
         + fmt::format(NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE,
                       supi_str.c_str());
     json_data["n1n2FailureTxfNotifURI"] = callback_uri.c_str();
-    //json_data["n1n2FailureTxfNotifURI"] = "http://192.168.122.1/namf-comm/callback/N1N2MsgTxfrFailureNotification/imsi-310410000000001-1";
   }
   //Others information
   //n11_triggered_pending->res.n1n2_message_transfer_data["pti"] = 1;  //Don't need this info for the moment
@@ -537,7 +517,7 @@ int session_update_sm_context_procedure::run(
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_AN_REQUESTED:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
 
-      ::fteid_t dl_fteid = { };
+      pfcp::fteid_t dl_fteid = { };
       sm_context_req_msg.get_dl_fteid(dl_fteid);  //eNB's fteid
 
       for (auto qfi : list_of_qfis_to_be_modified) {
@@ -579,7 +559,7 @@ int session_update_sm_context_procedure::run(
           update_far.set(flow.far_id_dl.second);
           outer_header_creation.outer_header_creation_description =
               OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
-          outer_header_creation.teid = dl_fteid.teid_gre_key;
+          outer_header_creation.teid = dl_fteid.teid;
           outer_header_creation.ipv4_address.s_addr = dl_fteid.ipv4_address
               .s_addr;
           update_forwarding_parameters.set(outer_header_creation);
@@ -622,7 +602,7 @@ int session_update_sm_context_procedure::run(
           forwarding_parameters.set(destination_interface);
           outer_header_creation.outer_header_creation_description =
               OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
-          outer_header_creation.teid = dl_fteid.teid_gre_key;
+          outer_header_creation.teid = dl_fteid.teid;
           outer_header_creation.ipv4_address.s_addr = dl_fteid.ipv4_address
               .s_addr;
           forwarding_parameters.set(outer_header_creation);
@@ -762,8 +742,7 @@ int session_update_sm_context_procedure::run(
         if (not flow.dl_fteid.is_zero()) {
         }
         // may be modified
-        smf_qos_flow flow2 = flow;
-        sps->add_qos_flow(flow2);
+        sps->add_qos_flow(flow);
 
         qos_flow_context_updated qcu = { };
         qcu.set_cause(REQUEST_ACCEPTED);
@@ -830,8 +809,7 @@ int session_update_sm_context_procedure::run(
 
         //update in the PDU Session
         flow.mark_as_released();
-        smf_qos_flow flow2 = flow;
-        sps->add_qos_flow(flow2);
+        sps->add_qos_flow(flow);
       }
     }
       break;
@@ -899,11 +877,11 @@ void session_update_sm_context_procedure::handle_itti_msg(
     case session_management_procedures_type_e::SERVICE_REQUEST_UE_TRIGGERED_STEP2:
     case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
 
-      ::fteid_t dl_fteid = { };
+      pfcp::fteid_t dl_fteid = { };
       n11_trigger->req.get_dl_fteid(dl_fteid);
 
       Logger::smf_app().debug("AN F-TEID ID" "0x%" PRIx32 ", IP Addr %s",
-                              dl_fteid.teid_gre_key,
+                              dl_fteid.teid,
                               conv::toString(dl_fteid.ipv4_address).c_str());
 
       std::map<uint8_t, qos_flow_context_updated> qos_flow_context_to_be_updateds =
@@ -924,12 +902,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
             Logger::smf_app().debug("QoS Flow, QFI %d", flow.qfi.qfi);
             for (auto it : qos_flow_context_to_be_updateds) {
               flow.dl_fteid = dl_fteid;
-              flow.dl_fteid.interface_type = S1_U_ENODEB_GTP_U;  //eNB's N3 interface
-              // flow.ul_fteid = it.second.ul_fteid;
-              pfcp::fteid_t local_up_fteid = { };
-              if (it_created_pdr.get(local_up_fteid)) {
-                xgpp_conv::pfcp_to_core_fteid(local_up_fteid, flow.ul_fteid);
-                flow.ul_fteid.interface_type = S1_U_SGW_GTP_U;  //UPF's N3 interface, TODO: should be modified
+              if (it_created_pdr.get(flow.ul_fteid)) {
                 Logger::smf_app().debug(
                     "Got local_up_fteid from created_pdr %s",
                     flow.ul_fteid.toString().c_str());
@@ -940,15 +913,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
               }
 
               flow.released = false;
-              smf_qos_flow flow2 = flow;
-              sps->add_qos_flow(flow2);
-
-              /*
-               //add another flow for testing purpose, TODO: SHOULD BE REMOVED
-               smf_qos_flow flow3 = flow;
-               flow3.qfi = 7;
-               sps->add_qos_flow(flow3);
-               */
+              sps->add_qos_flow(flow);
 
               qos_flow_context_updated qcu = { };
               qcu.set_cause(REQUEST_ACCEPTED);
@@ -978,8 +943,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
               for (auto it : qos_flow_context_to_be_updateds) {
                 if (it.first == flow.qfi.qfi) {
                   flow.dl_fteid = dl_fteid;
-                  smf_qos_flow flow2 = flow;
-                  sps->add_qos_flow(flow2);
+                  sps->add_qos_flow(flow);
 
                   qos_flow_context_updated qcu = { };
                   qcu.set_cause(REQUEST_ACCEPTED);

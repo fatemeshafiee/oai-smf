@@ -7782,6 +7782,60 @@ public:
 //  }
 //};
 
+
+// IE 3gpp_interface_type
+class pfcp_3gpp_interface_type_ie : public pfcp_ie {
+ public:
+  struct {
+    uint8_t spare :2;
+    uint8_t  _3gpp_interface_type :6;
+  } interface_type;
+
+  union {
+      struct {
+        uint8_t spare :2;
+        uint8_t  _3gpp_interface_type :6;
+     } bf;
+     uint8_t b;
+    } u1;
+
+
+  //--------
+  explicit pfcp_3gpp_interface_type_ie(const pfcp::_3gpp_interface_type_t& b) : pfcp_ie(PFCP_IE_3GPP_INTERFACE_TYPE){
+    u1.b = b.interface_type_value;
+    tlv.set_length(1);
+  }
+  //--------
+  pfcp_3gpp_interface_type_ie() : pfcp_ie(PFCP_IE_3GPP_INTERFACE_TYPE){
+  }
+  //--------
+  pfcp_3gpp_interface_type_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+  };
+  //--------
+  void to_core_type(pfcp::_3gpp_interface_type_t& b) {
+    b.interface_type_value = u1.bf._3gpp_interface_type;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    os.write(reinterpret_cast<const char*>(&u1.b), sizeof(u1.b));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    if (tlv.get_length() != sizeof(interface_type)) {
+      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&u1.b), sizeof(u1.b));
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::_3gpp_interface_type_t v = {};
+    to_core_type(v);
+    s.set(v);
+  }
+
+};
+
 //-------------------------------------
 // IE PDI
 class pfcp_pdi_ie : public pfcp_grouped_ie {
