@@ -241,7 +241,8 @@ void IndividualSMContextApiImpl::update_sm_context(
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(
             "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
-  } else if (sm_context_response.n2_sm_info_is_set()) {
+  }
+  if (sm_context_response.n2_sm_info_is_set()) {
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n2_sm_information(),

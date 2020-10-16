@@ -109,7 +109,7 @@ boost::signals2::connection smf_event::subscribe_ee_pdu_session_release(
 void smf_event::trigger_ee_pdu_session_release(supi64_t supi,
                                                pdu_session_id_t pdu_session_id,
                                                uint8_t http_version) {
-  sm_context_status_sig(supi, pdu_session_id, http_version);
+  pdu_session_release_sig(supi, pdu_session_id, http_version);
 }
 
 //------------------------------------------------------------------------------
