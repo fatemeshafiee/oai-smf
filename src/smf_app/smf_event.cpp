@@ -38,8 +38,11 @@ extern smf_event *smf_event_inst;
 extern smf::smf_app *smf_app_inst;
 extern itti_mw *itti_inst;
 
-//------------------------------------------------------------------------------
 smf_event::smf_event() {
+
+}
+//------------------------------------------------------------------------------
+void smf_event::bind() {
   //by default, subscribe to the events
   smf_event_inst->subscribe_sm_context_status_notification(
       boost::bind(&smf_event::send_sm_context_status_notification, this, _1, _1,

@@ -54,6 +54,8 @@ class smf_event {
   smf_event(smf_event const&) = delete;
   void operator=(smf_event const&) = delete;
 
+  void bind();
+
   /*
    * Subscribe to SM Context Status Notification signal
    * @param [const sm_context_status_sig_t::slot_type&] context_status_st:  slot_type parameter
@@ -107,6 +109,7 @@ class smf_event {
  private:
   sm_context_status_sig_t sm_context_status_sig; //Signal for SM Context status update
   ee_pdu_session_release_sig_t pdu_session_release_sig; //Signal for PDU session release event
+  bool pdu_session_release_sig_is_connected;
 
 };
 }
