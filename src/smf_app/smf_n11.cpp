@@ -450,6 +450,7 @@ void smf_n11::send_n1n2_message_transfer_request(
 void smf_n11::send_sm_context_status_notification(
     std::shared_ptr<itti_n11_notify_sm_context_status> sm_context_status) {
   Logger::smf_n11().debug("Send SM Context Status Notification to AMF(HTTP version %d)", sm_context_status->http_version);
+  Logger::smf_n11().debug("AMF URI: %s", sm_context_status->amf_status_uri.c_str());
 
   nlohmann::json json_data = { };
   //Fill the json part

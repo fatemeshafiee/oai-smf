@@ -39,15 +39,16 @@ extern smf::smf_app *smf_app_inst;
 extern itti_mw *itti_inst;
 
 smf_event::smf_event() {
-
+ //bind signal to slot type	
+ bind();
 }
 //------------------------------------------------------------------------------
 void smf_event::bind() {
   //by default, subscribe to the events
-  smf_event_inst->subscribe_sm_context_status_notification(
+  subscribe_sm_context_status_notification(
       boost::bind(&smf_event::send_sm_context_status_notification, this, _1, _1,
                   _1));
-  smf_event_inst->subscribe_ee_pdu_session_release(
+  subscribe_ee_pdu_session_release(
       boost::bind(&smf_event::send_ee_pdu_session_release, this, _1, _1, _1));
 }
 
