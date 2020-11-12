@@ -55,6 +55,8 @@ install_fmt() {
     git clone https://github.com/fmtlib/fmt.git
     ret=$?;[[ $ret -ne 0 ]] && return $ret
     cd fmt
+    # Looks like since Nov 11 commits, we cannot build
+    git checkout -f 1936dddc3c53c1c0db55a665cf419dc7a257ba62
     cmake -DFMT_TEST=FALSE  .
     ret=$?;[[ $ret -ne 0 ]] && return $ret
     make -j `nproc`
