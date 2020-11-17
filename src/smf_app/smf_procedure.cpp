@@ -1139,7 +1139,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
         n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
         //fill the content of SmContextUpdatedData
-        sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+        sm_context_updated_data["n2InfoContainer"] = //["smInfo"]["n2InfoContent"]["ngapIeType"] =
             "PDU_RES_REL_CMD";  //NGAP message
         n11_triggered_pending->res.set_json_data(sm_context_updated_data);
       } else {
