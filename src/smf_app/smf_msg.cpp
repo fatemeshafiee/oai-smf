@@ -813,12 +813,12 @@ smf_event_t event_notification::get_smf_event() const {
 }
 
 //-----------------------------------------------------------------------------
-supi_t event_notification::get_supi() const {
+supi64_t event_notification::get_supi() const {
   return m_supi;
 }
 
 //-----------------------------------------------------------------------------
-void event_notification::set_supi(const supi_t &value) {
+void event_notification::set_supi(const supi64_t &value) {
   m_supi = value;
   m_supi_is_set = true;
 }
@@ -876,5 +876,25 @@ bool event_notification::is_psi_is_set() const {
   return m_psi_is_set;
 }
 
+
+//-----------------------------------------------------------------------------
+void event_notification::set_notif_uri(std::string const &value){
+  m_notif_uri = value;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_notif_uri() const {
+  return m_notif_uri;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_notif_id(std::string const &value) {
+  m_notif_id = value;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_notif_id() const {
+  return m_notif_id;
+}
 
 

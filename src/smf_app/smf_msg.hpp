@@ -584,8 +584,8 @@ class event_notification {
   void set_smf_event(const smf_event_t &ev);
   smf_event_t get_smf_event() const;
 
-  void set_supi(const supi_t &supi);
-  supi_t get_supi() const;
+  void set_supi(const supi64_t &supi);
+  supi64_t get_supi() const;
   bool is_supi_is_set() const;
   //m_AdIpv4Addr
   void set_ad_ipv4_addr(std::string const &value);
@@ -600,11 +600,19 @@ class event_notification {
   pdu_session_id_t get_pdu_session_id() const;
   bool is_psi_is_set() const;
 
+  void set_notif_uri(std::string const &value);
+  std::string get_notif_uri() const;
+  void set_notif_id(std::string const &value);
+  std::string get_notif_id() const;
+
  private:
+  std::string m_notif_uri; //m_NotifUri;
+  std::string m_notif_id; //m_NotifId;
+
   smf_event_t m_event; //SmfEvent
   //std::string m_TimeStamp;
 
-  supi_t m_supi;
+  supi64_t m_supi;
   bool m_supi_is_set;
 
   //for a UE IP address change

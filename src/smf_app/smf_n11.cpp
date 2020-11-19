@@ -57,6 +57,7 @@ using json = nlohmann::json;
 extern itti_mw *itti_inst;
 extern smf_n11 *smf_n11_inst;
 extern smf_config smf_cfg;
+extern smf_app *smf_app_inst;
 void smf_n11_task(void*);
 
 // To read content of the response from AMF
@@ -98,6 +99,12 @@ void smf_n11_task(void *args_p) {
       case N11_SESSION_NOTIFY_SM_CONTEXT_STATUS:
         smf_n11_inst->send_sm_context_status_notification(
             std::static_pointer_cast<itti_n11_notify_sm_context_status>(
+                shared_msg));
+        break;
+
+      case N11_NOTIFY_SUBSCRIBED_EVENT:
+        smf_n11_inst->notify_subscribed_event(
+            std::static_pointer_cast<itti_n11_notify_subscribed_event>(
                 shared_msg));
         break;
 
@@ -498,4 +505,117 @@ void smf_n11::send_sm_context_status_notification(
   }
   curl_global_cleanup();
 }
+
+
+void smf_n11::notify_subscribed_event(
+    std::shared_ptr<itti_n11_notify_subscribed_event> msg) {
+  Logger::smf_n11().debug("Send notification for the subscribed event to the subscription");
+
+  int still_running = 0, numfds = 0, res = 0;
+  CURLMsg *curl_msg = nullptr;
+  CURL *curl = nullptr;
+  CURLcode return_code;
+  int http_status_code = 0, msgs_left = 0;
+  CURLM* m_curl_multi;
+  char *url = nullptr;
+
+  std::unique_ptr<std::string> httpData(new std::string());
+  std::string data;
+
+  //init curl
+  curl_global_init(CURL_GLOBAL_ALL);
+  m_curl_multi = curl_multi_init();
+  //init header
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+  headers = curl_slist_append(headers, "charsets: utf-8");
+
+  //create and add an easy handle to a  multi curl request
+  for (auto i: msg->event_notifs) {
+    //CURL *temp = curl_create_handle(i.get_notif_uri(), &data );
+    //CURL *temp = curl_create_handle(i, &data );
+    //curl_multi_add_handle(m_curl_multi, temp);
+
+    CURL *curl = curl_easy_init();
+    if (curl){
+      std::string url = i.get_notif_uri() ;
+      Logger::smf_n11().debug("Send notification to NF with URI: %s", url);
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
+      curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
+      curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
+      // Hook up data handling function.
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    }
+    curl_multi_add_handle(m_curl_multi, curl);
+  }
+
+  curl_multi_perform(m_curl_multi, &still_running);
+  //block until activity is detected on at least one of the handles or MAX_WAIT_MSECS has passed.
+  do {
+    res = curl_multi_wait(m_curl_multi, NULL, 0, 1000, &numfds);
+    if(res != CURLM_OK) {
+      Logger::smf_n11().debug("Error: curl_multi_wait() returned %d!", res);
+    }
+    curl_multi_perform(m_curl_multi, &still_running);
+  } while(still_running);
+
+  //process multiple curl
+  //read the messages
+  while ((curl_msg = curl_multi_info_read(m_curl_multi, &msgs_left))) {
+    if (curl_msg->msg == CURLMSG_DONE) {
+      curl = curl_msg->easy_handle;
+      return_code = curl_msg->data.result;
+      res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url);
+
+      if(return_code != CURLE_OK) {
+        Logger::smf_n11().debug("Error: CURL error code  %d!", curl_msg->data.result);
+        continue;
+      }
+      // Get HTTP status code
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status_code);
+      Logger::smf_n11().info("HTTP status code  %d!", http_status_code);
+
+      //remove this handle from the multi session and end this handle
+      curl_multi_remove_handle(m_curl_multi, curl);
+      curl_easy_cleanup(curl);
+    } else {
+      Logger::smf_n11().debug("error after curl_multi_info_read(), CURLMsg %s", curl_msg->msg);
+    }
+  }
+
+}
+
+
+CURL * smf_n11::curl_create_handle (event_notification &ev_notif, std::string *httpData){
+  //create handle for a curl request
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+  headers = curl_slist_append(headers, "charsets: utf-8");
+
+  CURL *curl = curl_easy_init();
+
+  if (curl){
+    std::string url = ev_notif.get_notif_uri() ;
+    Logger::smf_n11().debug("Send notification to NF with URI: %s", url);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
+    //curl_easy_setopt(curl, CURLOPT_PRIVATE, str);
+    //curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+    curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
+    // Hook up data handling function.
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  }
+  return curl;
+}
+
+
+
 

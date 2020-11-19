@@ -1135,7 +1135,7 @@ evsub_id_t smf_app::handle_event_exposure_subscription(
     std::shared_ptr<itti_sbi_event_exposure_request> msg) {
 
   Logger::smf_app().info(
-      "Handle an Event Exposure Subscription Request from an AMF (HTTP version %d)",
+      "Handle an Event Exposure Subscription Request from a NF (HTTP version %d)",
       msg->http_version);
 
   // Generate a subscription ID Id and store the corresponding information in a map (subscription id, info)
@@ -1703,6 +1703,7 @@ void smf_app::get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_pt
 }
 
 //---------------------------------------------------------------------------------------------
+//std::vector<std::shared_ptr<smf_subscription>> subscriptions
 void smf_app::get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> subscription) {
   for (auto const& i : smf_event_subscriptions) {
     if ((i.first.second == ev) && (i.second->supi == supi) && (i.second->pdu_session_id == pdu_session_id)){
