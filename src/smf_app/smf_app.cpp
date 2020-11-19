@@ -1680,21 +1680,23 @@ void smf_app::trigger_http_response(const uint32_t &http_code,
 
 //---------------------------------------------------------------------------------------------
 void smf_app::add_event_subscription(evsub_id_t sub_id, smf_event_t ev, std::shared_ptr<smf_subscription> ss) {
+  Logger::smf_app().debug("Add an Event subscription (Sub ID %d, Event %d)", sub_id, (uint8_t) ev);
   std::unique_lock lock(m_smf_event_subscriptions);
   smf_event_subscriptions.emplace(std::make_pair(sub_id,ev), ss);
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::get_ee_subscriptions(smf_event_t ev, std::vector<std::shared_ptr<smf_subscription>> subscriptions) {
+void smf_app::get_ee_subscriptions(smf_event_t ev, std::vector<std::shared_ptr<smf_subscription>> &subscriptions) {
   for (auto const& i : smf_event_subscriptions) {
-    if (i.first.second == ev){
-      subscriptions.push_back(i.second);
+    if ((uint8_t)std::get<1> (i.first) == (uint8_t) ev){
+	Logger::smf_app().debug("Found an event subscription (Event ID %d, Event %d)", (uint8_t) std::get<0>(i.first), (uint8_t) ev);
+	subscriptions.push_back(i.second);
     }
   }
 }
 
 //---------------------------------------------------------------------------------------------
-void smf_app::get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_ptr<smf_subscription>> subscriptions) {
+void smf_app::get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_ptr<smf_subscription>> &subscriptions) {
   for (auto const& i : smf_event_subscriptions) {
     if (i.first.first == sub_id){
       subscriptions.push_back(i.second);
@@ -1704,7 +1706,7 @@ void smf_app::get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_pt
 
 //---------------------------------------------------------------------------------------------
 //std::vector<std::shared_ptr<smf_subscription>> subscriptions
-void smf_app::get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> subscription) {
+void smf_app::get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> &subscription) {
   for (auto const& i : smf_event_subscriptions) {
     if ((i.first.second == ev) && (i.second->supi == supi) && (i.second->pdu_session_id == pdu_session_id)){
       subscription = i.second;

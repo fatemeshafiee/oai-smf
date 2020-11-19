@@ -531,6 +531,24 @@ void smf_n11::notify_subscribed_event(
   headers = curl_slist_append(headers, "Content-Type: application/json");
   headers = curl_slist_append(headers, "charsets: utf-8");
 
+  std::vector<std::string> bodys = {}; //store body for all the request
+  for (auto i: msg->event_notifs) {
+    //Fill the json part
+    nlohmann::json json_data = {};
+    json_data["notifId"] = i.get_notif_id();
+    auto event_notifs = nlohmann::json::array();
+    nlohmann::json event_notif = {};
+    event_notif["event"] =  i.get_smf_event();
+    event_notif["pduSeId"] = i.get_pdu_session_id();
+    event_notif["timeStamp"] = "timestamp"; //TODO: remove hardcoded  
+    event_notifs.push_back(event_notif);
+    json_data["eventNotifs"] = event_notifs;
+    std::string body = json_data.dump();
+    bodys.push_back(body);
+  }
+
+   int index = 0;
+
   //create and add an easy handle to a  multi curl request
   for (auto i: msg->event_notifs) {
     //CURL *temp = curl_create_handle(i.get_notif_uri(), &data );
@@ -540,17 +558,20 @@ void smf_n11::notify_subscribed_event(
     CURL *curl = curl_easy_init();
     if (curl){
       std::string url = i.get_notif_uri() ;
-      Logger::smf_n11().debug("Send notification to NF with URI: %s", url);
+      Logger::smf_n11().debug("Send notification to NF with URI: %s", url.c_str());
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
-      curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
+      curl_easy_setopt(curl, CURLOPT_HTTPPOST,1);
       curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
       // Hook up data handling function.
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
       curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, bodys.at(index).length());
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodys.at(index).c_str());
     }
     curl_multi_add_handle(m_curl_multi, curl);
+    index++;
   }
 
   curl_multi_perform(m_curl_multi, &still_running);

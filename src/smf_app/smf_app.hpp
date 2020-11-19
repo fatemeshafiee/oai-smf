@@ -698,10 +698,10 @@ class smf_app {
    * @param [std::vector<std::shared_ptr<smf_subscription>>] subscriptions: list of the subscription associated with this event type
    * @return vector
    */
-  void get_ee_subscriptions(smf_event_t ev, std::vector<std::shared_ptr<smf_subscription>> subscriptions);
-  void get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_ptr<smf_subscription>> subscriptions);
+  void get_ee_subscriptions(smf_event_t ev, std::vector<std::shared_ptr<smf_subscription>> &subscriptions);
+  void get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_ptr<smf_subscription>> &subscriptions);
 
-  void get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> subscription);
+  void get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> &subscription);
 
 
 

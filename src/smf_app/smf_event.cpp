@@ -109,6 +109,7 @@ boost::signals2::connection smf_event::subscribe_ee_pdu_session_release(
 void smf_event::trigger_ee_pdu_session_release(supi64_t supi,
                                                pdu_session_id_t pdu_session_id,
                                                uint8_t http_version) {
+  Logger::smf_app().debug("Trigger Event Exposure PDU Session Release event notification");
   pdu_session_release_sig(supi, pdu_session_id, http_version);
 }
 
@@ -118,7 +119,7 @@ void smf_event::send_ee_pdu_session_release(supi64_t supi,
                                             uint8_t http_version) {
   Logger::smf_app().debug("Send request to N11 to triger PDU Session Release Notification, SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d", supi, pdu_session_id, http_version);
 
-  std::vector < std::shared_ptr < smf_subscription >> subscriptions;
+  std::vector < std::shared_ptr < smf_subscription >> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(smf_event_t::SMF_EVENT_PDU_SES_REL, subscriptions);
 
   if (subscriptions.size() > 0) {
@@ -148,5 +149,7 @@ void smf_event::send_ee_pdu_session_release(supi64_t supi,
           "Could not send ITTI message %s to task TASK_SMF_N11",
           itti_msg->get_msg_name());
     }
+  } else {
+    Logger::smf_app().debug("No suscription available for this event");
   }
 }
