@@ -480,7 +480,6 @@ void smf_pdu_session::update_qos_rule(const QOSRulesIE &qos_rule) {
   uint8_t rule_id = qos_rule.qosruleidentifer;
   if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
       and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
-    std::unique_lock lock(m_pdu_session_mutex);
     if (qos_rules.count(rule_id) > 0) {
       lock.lock(); // Lock it here
       qos_rules.erase(rule_id);
@@ -504,7 +503,6 @@ void smf_pdu_session::mark_qos_rule_to_be_synchronised(const uint8_t rule_id) {
   std::unique_lock lock(m_pdu_session_mutex, std::defer_lock); // Do not lock it first
   if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
       and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
-    std::unique_lock lock(m_pdu_session_mutex);
     if (qos_rules.count(rule_id) > 0) {
       lock.lock(); // Lock it here
       qos_rules_to_be_synchronised.push_back(rule_id);
@@ -533,7 +531,6 @@ void smf_pdu_session::add_qos_rule(const QOSRulesIE &qos_rule) {
 
   if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
       and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
-    std::unique_lock lock(m_pdu_session_mutex);
     if (qos_rules.count(rule_id) > 0) {
       Logger::smf_app().error("Failed to add rule (Id %d), rule existed",
                               rule_id);
