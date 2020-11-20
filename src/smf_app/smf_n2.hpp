@@ -58,6 +58,12 @@ class smf_n2 {
   smf_n2(smf_n2 const&) = delete;
   void operator=(smf_n2 const&) = delete;
 
+ public:
+  static smf_n2& get_instance() {
+    static smf_n2 instance;
+    return instance;
+  }
+
   /*
    * Create N2 SM Information: PDU Session Resource Setup Request Transfer
    * This IE is included in N1N2MessageTransfer Request (Accept, PDU Session Establishment procedure - UE initiated)

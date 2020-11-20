@@ -54,6 +54,12 @@ class smf_event {
   smf_event(smf_event const&) = delete;
   void operator=(smf_event const&) = delete;
 
+  static smf_event& get_instance() {
+    static smf_event instance;
+    return instance;
+  }
+
+
   /*
    * Bind the signals to corresponding slot for each event
    * @return void

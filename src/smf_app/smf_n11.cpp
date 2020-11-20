@@ -57,7 +57,6 @@ using json = nlohmann::json;
 extern itti_mw *itti_inst;
 extern smf_n11 *smf_n11_inst;
 extern smf_config smf_cfg;
-extern smf_app *smf_app_inst;
 void smf_n11_task(void*);
 
 // To read content of the response from AMF
@@ -452,7 +451,6 @@ void smf_n11::send_n1n2_message_transfer_request(
   free_wrapper((void**) &data);
 }
 
-
 //------------------------------------------------------------------------------
 void smf_n11::send_sm_context_status_notification(
     std::shared_ptr<itti_n11_notify_sm_context_status> sm_context_status) {
@@ -462,7 +460,6 @@ void smf_n11::send_sm_context_status_notification(
   nlohmann::json json_data = { };
   //Fill the json part
   json_data["statusInfo"]["resourceStatus"] = sm_context_status->sm_context_status;
-  //json_data["statusInfo"]["cause"] =
   std::string body = json_data.dump();
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -506,7 +503,7 @@ void smf_n11::send_sm_context_status_notification(
   curl_global_cleanup();
 }
 
-
+//-----------------------------------------------------------------------------------------------------
 void smf_n11::notify_subscribed_event(
     std::shared_ptr<itti_n11_notify_subscribed_event> msg) {
   Logger::smf_n11().debug("Send notification for the subscribed event to the subscription");
@@ -514,9 +511,9 @@ void smf_n11::notify_subscribed_event(
   int still_running = 0, numfds = 0, res = 0;
   CURLMsg *curl_msg = nullptr;
   CURL *curl = nullptr;
-  CURLcode return_code;
+  CURLcode return_code = {};
   int http_status_code = 0, msgs_left = 0;
-  CURLM* m_curl_multi;
+  CURLM* m_curl_multi = nullptr;
   char *url = nullptr;
 
   std::unique_ptr<std::string> httpData(new std::string());
@@ -540,7 +537,11 @@ void smf_n11::notify_subscribed_event(
     nlohmann::json event_notif = {};
     event_notif["event"] =  i.get_smf_event();
     event_notif["pduSeId"] = i.get_pdu_session_id();
-    event_notif["timeStamp"] = "timestamp"; //TODO: remove hardcoded  
+    event_notif["supi"] = std::to_string(i.get_supi());
+    //timestamp
+    std::time_t time_epoch_ntp = std::time(nullptr);
+    uint64_t tv_ntp = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
+    event_notif["timeStamp"] = std::to_string(tv_ntp);
     event_notifs.push_back(event_notif);
     json_data["eventNotifs"] = event_notifs;
     std::string body = json_data.dump();
@@ -548,13 +549,8 @@ void smf_n11::notify_subscribed_event(
   }
 
    int index = 0;
-
   //create and add an easy handle to a  multi curl request
   for (auto i: msg->event_notifs) {
-    //CURL *temp = curl_create_handle(i.get_notif_uri(), &data );
-    //CURL *temp = curl_create_handle(i, &data );
-    //curl_multi_add_handle(m_curl_multi, temp);
-
     CURL *curl = curl_easy_init();
     if (curl){
       std::string url = i.get_notif_uri() ;
@@ -579,7 +575,7 @@ void smf_n11::notify_subscribed_event(
   do {
     res = curl_multi_wait(m_curl_multi, NULL, 0, 1000, &numfds);
     if(res != CURLM_OK) {
-      Logger::smf_n11().debug("Error: curl_multi_wait() returned %d!", res);
+      Logger::smf_n11().debug("curl_multi_wait() returned %d!", res);
     }
     curl_multi_perform(m_curl_multi, &still_running);
   } while(still_running);
@@ -593,24 +589,24 @@ void smf_n11::notify_subscribed_event(
       res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url);
 
       if(return_code != CURLE_OK) {
-        Logger::smf_n11().debug("Error: CURL error code  %d!", curl_msg->data.result);
+        Logger::smf_n11().debug("CURL error code  %d!", curl_msg->data.result);
         continue;
       }
       // Get HTTP status code
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status_code);
-      Logger::smf_n11().info("HTTP status code  %d!", http_status_code);
+      Logger::smf_n11().debug("HTTP status code  %d!", http_status_code);
 
       //remove this handle from the multi session and end this handle
       curl_multi_remove_handle(m_curl_multi, curl);
       curl_easy_cleanup(curl);
     } else {
-      Logger::smf_n11().debug("error after curl_multi_info_read(), CURLMsg %s", curl_msg->msg);
+      Logger::smf_n11().debug("Error after curl_multi_info_read(), CURLMsg %s", curl_msg->msg);
     }
   }
 
 }
 
-
+//-----------------------------------------------------------------------------------------------------
 CURL * smf_n11::curl_create_handle (event_notification &ev_notif, std::string *httpData){
   //create handle for a curl request
   struct curl_slist *headers = NULL;
@@ -636,7 +632,3 @@ CURL * smf_n11::curl_create_handle (event_notification &ev_notif, std::string *h
   }
   return curl;
 }
-
-
-
-

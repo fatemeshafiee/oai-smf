@@ -72,7 +72,6 @@ extern smf_config smf_cfg;
 smf_n4 *smf_n4_inst = nullptr;
 smf_n10 *smf_n10_inst = nullptr;
 smf_n11 *smf_n11_inst = nullptr;
-smf_event *smf_event_inst = nullptr;
 extern itti_mw *itti_inst;
 
 void smf_app_task(void*);
@@ -311,7 +310,6 @@ smf_app::smf_app(const std::string &config_file)
     smf_n4_inst = new smf_n4();
     smf_n10_inst = new smf_n10();
     smf_n11_inst = new smf_n11();
-    smf_event_inst = new smf_event();
   } catch (std::exception &e) {
     Logger::smf_app().error("Cannot create SMF_APP: %s", e.what());
     throw;
@@ -560,7 +558,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   oai::smf_server::model::ProblemDetails problem_details = { };
   oai::smf_server::model::RefToBinaryData refToBinaryData = { };
   std::string n1_sm_message, n1_sm_message_hex;
-  smf_n1 smf_n1_inst = { };
   nas_message_t decoded_nas_msg = { };
   cause_value_5gsm_e cause_n1 = { cause_value_5gsm_e::CAUSE_0_UNKNOWN };
   pdu_session_type_t pdu_session_type = { .pdu_session_type =
@@ -569,7 +566,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //Step 1. Decode NAS and get the necessary information
   std::string n1_sm_msg = smreq->req.get_n1_sm_message();
 
-  int decoder_rc = smf_n1_inst.decode_n1_sm_container(decoded_nas_msg,
+  int decoder_rc = smf_n1::get_instance().decode_n1_sm_container(decoded_nas_msg,
                                                          n1_sm_msg);
 
   //Failed to decode, send reply to AMF with PDU Session Establishment Reject
@@ -580,7 +577,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           smreq->req, n1_sm_message,
           cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -636,7 +633,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(smreq->req,
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(smreq->req,
                                                  n1_sm_message, cause_n1)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       //trigger to send reply to AMF
@@ -687,7 +684,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject including cause "#81 Invalid PTI value" (section 7.3.1 @3GPP TS 24.501)
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           smreq->req, n1_sm_message,
           cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -727,7 +724,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
     //(24.501 (section 7.4)) implementation dependent->do similar to UE: response with a 5GSM STATUS message including cause "#98 message type not compatible with protocol state."
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           smreq->req,
           n1_sm_message,
           cause_value_5gsm_e::CAUSE_98_MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE)) {
@@ -767,7 +764,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject, 24.501 cause "#27 Missing or unknown DNN"
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           smreq->req, n1_sm_message,
           cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -853,7 +850,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
         smContextCreateError.setN1SmMsg(refToBinaryData);
         //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"
-        if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+        if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req,
             n1_sm_message,
             cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
@@ -1158,7 +1155,6 @@ evsub_id_t smf_app::handle_event_exposure_subscription(
     ss.get()->ev_type = i.smf_event;
     add_event_subscription(evsub_id, i.smf_event, ss);
   }
-  //smf_event_inst->subscribe_sm_context_status_notification(boost::bind(&smf_context::send_sm_context_status_notification, this, _1, _1, _1));
 }
 
 //------------------------------------------------------------------------------
@@ -1705,11 +1701,10 @@ void smf_app::get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_pt
 }
 
 //---------------------------------------------------------------------------------------------
-//std::vector<std::shared_ptr<smf_subscription>> subscriptions
-void smf_app::get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> &subscription) {
+void smf_app::get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::vector<std::shared_ptr<smf_subscription>> &subscriptions) {
   for (auto const& i : smf_event_subscriptions) {
     if ((i.first.second == ev) && (i.second->supi == supi) && (i.second->pdu_session_id == pdu_session_id)){
-      subscription = i.second;
+      subscriptions.push_back(i.second);
     }
   }
 }

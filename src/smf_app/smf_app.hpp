@@ -695,15 +695,28 @@ class smf_app {
   /*
    * Get a list of subscription associated with a particular event
    * @param [smf_event_t] ev: Event type
-   * @param [std::vector<std::shared_ptr<smf_subscription>>] subscriptions: list of the subscription associated with this event type
-   * @return vector
+   * @param [std::vector<std::shared_ptr<smf_subscription>>&] subscriptions: store the list of the subscription associated with this event type
+   * @return void
    */
   void get_ee_subscriptions(smf_event_t ev, std::vector<std::shared_ptr<smf_subscription>> &subscriptions);
+
+  /*
+   * Get a list of subscription associated with a particular event
+   * @param [evsub_id_t] sub_id: Subscription ID
+   * @param [std::vector<std::shared_ptr<smf_subscription>>&] subscriptions: store the list of the subscription associated with this event type
+   * @return void
+   */
   void get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_ptr<smf_subscription>> &subscriptions);
 
-  void get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::shared_ptr<smf_subscription> &subscription);
-
-
+  /*
+   * Get a list of subscription associated with a particular event
+   * @param [smf_event_t] ev: Event type
+   * @param [supi64_t] supi: SUPI
+   * @param [pdu_session_id_t] pdu_session_id: PDU Session ID
+   * @param [std::vector<std::shared_ptr<smf_subscription>>&] subscriptions: store the list of the subscription associated with this event type
+   * @return void
+   */
+  void get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::vector<std::shared_ptr<smf_subscription>> &subscriptions);
 
 };
 }
