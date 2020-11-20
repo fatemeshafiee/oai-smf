@@ -82,7 +82,8 @@ class mime_parser {
                                         const std::string &json_part,
                                         const std::string boundary,
                                         const std::string &n1_message,
-                                        const std::string &n2_message);
+                                        const std::string &n2_message,
+                                        std::string json_format="application/json");
 
   /*
    * Create HTTP body content for multipart/related message
@@ -96,7 +97,8 @@ class mime_parser {
   void create_multipart_related_content(
       std::string &body, const std::string &json_part,
       const std::string boundary, const std::string &message,
-      const multipart_related_content_part_e content_type);
+      const multipart_related_content_part_e content_type,
+      std::string json_format="application/json");
 
  private:
   std::vector<mime_part> mime_parts;

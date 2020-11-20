@@ -88,6 +88,7 @@ public:
     /// 
     /// </summary>
     std::vector<InvalidParam>& getInvalidParams();
+    void setInvalidParams(std::vector<InvalidParam> const& value);
     bool invalidParamsIsSet() const;
     void unsetInvalidParams();
     /// <summary>

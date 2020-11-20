@@ -53,6 +53,12 @@ class smf_n1 {
   smf_n1(smf_n1 const&) = delete;
   void operator=(smf_n1 const&) = delete;
 
+ public:
+  static smf_n1& get_instance() {
+    static smf_n1 instance;
+    return instance;
+  }
+
   /*
    * Create N1 SM Container: PDU Session Establishment Accept
    * @param [pdu_session_create_sm_context_response] sm_context_res: include necessary information for encoding NGAP msg

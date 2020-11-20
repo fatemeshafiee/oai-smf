@@ -49,6 +49,7 @@
 #include "smf_n4.hpp"
 #include "smf_n10.hpp"
 #include "smf_n11.hpp"
+#include "smf_event.hpp"
 #include "pfcp.hpp"
 #include "itti_msg_nx.hpp"
 #include "SmContextCreatedData.h"
@@ -124,6 +125,16 @@ void smf_app::generate_smf_context_ref(std::string &smf_ref) {
 //------------------------------------------------------------------------------
 scid_t smf_app::generate_smf_context_ref() {
   return sm_context_ref_generator.get_uid();
+}
+
+//------------------------------------------------------------------------------
+void smf_app::generate_ev_subscription_id(std::string &sub_id) {
+  sub_id = std::to_string(evsub_id_generator.get_uid());
+}
+
+//------------------------------------------------------------------------------
+evsub_id_t smf_app::generate_ev_subscription_id() {
+  return evsub_id_generator.get_uid();
 }
 
 //------------------------------------------------------------------------------
@@ -547,7 +558,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   oai::smf_server::model::ProblemDetails problem_details = { };
   oai::smf_server::model::RefToBinaryData refToBinaryData = { };
   std::string n1_sm_message, n1_sm_message_hex;
-  smf_n1 smf_n1_inst = { };
   nas_message_t decoded_nas_msg = { };
   cause_value_5gsm_e cause_n1 = { cause_value_5gsm_e::CAUSE_0_UNKNOWN };
   pdu_session_type_t pdu_session_type = { .pdu_session_type =
@@ -556,7 +566,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //Step 1. Decode NAS and get the necessary information
   std::string n1_sm_msg = smreq->req.get_n1_sm_message();
 
-  int decoder_rc = smf_n1_inst.decode_n1_sm_container(decoded_nas_msg,
+  int decoder_rc = smf_n1::get_instance().decode_n1_sm_container(decoded_nas_msg,
                                                          n1_sm_msg);
 
   //Failed to decode, send reply to AMF with PDU Session Establishment Reject
@@ -567,7 +577,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setError(problem_details);
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           smreq->req, n1_sm_message,
           cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -623,7 +633,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(smreq->req,
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(smreq->req,
                                                  n1_sm_message, cause_n1)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       //trigger to send reply to AMF
@@ -674,7 +684,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject including cause "#81 Invalid PTI value" (section 7.3.1 @3GPP TS 24.501)
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           smreq->req, n1_sm_message,
           cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -714,7 +724,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject
     //(24.501 (section 7.4)) implementation dependent->do similar to UE: response with a 5GSM STATUS message including cause "#98 message type not compatible with protocol state."
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           smreq->req,
           n1_sm_message,
           cause_value_5gsm_e::CAUSE_98_MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE)) {
@@ -754,7 +764,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     refToBinaryData.setContentId(N1_SM_CONTENT_ID);
     smContextCreateError.setN1SmMsg(refToBinaryData);
     //PDU Session Establishment Reject, 24.501 cause "#27 Missing or unknown DNN"
-    if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+    if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           smreq->req, n1_sm_message,
           cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
@@ -770,23 +780,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  //Step 4. Verify the session is already existed
-  if (is_scid_2_smf_context(supi64, dnn, snssai, pdu_session_id)) {
-    //TODO: should delete the local context (including and any associated resources in the UPF and PCF) and create a new one
-    Logger::smf_app().warn(
-        "PDU Session already existed (SUPI " SUPI_64_FMT ", DNN %s, NSSAI (sst %d, sd %s), PDU Session ID %d)",
-        supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);
-    //TODO: temporary disable this action to test with AMF
-    /*
-    //trigger to send reply to AMF
-   trigger_http_response(
-        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE, smreq->pid,
-        N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
-    return;
-    */
-  }
-
-  //Step 5. create a context for this supi if not existed, otherwise update
+  //Step 4. create a context for this supi if not existed, otherwise update
   std::shared_ptr<smf_context> sc = { };
   if (is_supi_2_smf_context(supi64)) {
     Logger::smf_app().debug("Update SMF context with SUPI " SUPI_64_FMT "",
@@ -802,7 +796,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     set_supi_2_smf_context(supi64, sc);
   }
 
-  //Step 6. Create/update context with dnn information
+  //Step 5. Create/update context with dnn information
   std::shared_ptr<dnn_context> sd = { };
 
   if (!sc.get()->find_dnn_context(snssai, dnn, sd)) {
@@ -816,6 +810,16 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       sd.get()->nssai = snssai;
       sc.get()->insert_dnn(sd);
     }
+  }
+
+  //Step 6. if colliding with an existing SM context (session is already existed and request type is INITIAL_REQUEST)
+  //Delete the local context (including and any associated resources in the UPF and PCF) and create a new one
+  if (is_scid_2_smf_context(supi64, dnn, snssai, pdu_session_id) && (request_type.compare("INITIAL_REQUEST") == 0)) {
+    //remove smf_pdu_session (including all flows associated to this session)
+    sd.get()->remove_pdu_session(pdu_session_id);
+    Logger::smf_app().warn(
+        "PDU Session already existed (SUPI " SUPI_64_FMT ", DNN %s, NSSAI (sst %d, sd %s), PDU Session ID %d)",
+        supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);
   }
 
   //Step 7. retrieve Session Management Subscription data from UDM if not available (step 4, section 4.3.2 3GPP TS 23.502)
@@ -846,7 +850,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         refToBinaryData.setContentId(N1_SM_CONTENT_ID);
         smContextCreateError.setN1SmMsg(refToBinaryData);
         //PDU Session Establishment Reject, with cause "29 User authentication or authorization failed"
-        if (smf_n1_inst.create_n1_pdu_session_establishment_reject(
+        if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req,
             n1_sm_message,
             cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
@@ -1124,6 +1128,36 @@ void smf_app::trigger_pdu_session_modification(
 }
 
 //------------------------------------------------------------------------------
+evsub_id_t smf_app::handle_event_exposure_subscription(
+    std::shared_ptr<itti_sbi_event_exposure_request> msg) {
+
+  Logger::smf_app().info(
+      "Handle an Event Exposure Subscription Request from a NF (HTTP version %d)",
+      msg->http_version);
+
+  // Generate a subscription ID Id and store the corresponding information in a map (subscription id, info)
+  evsub_id_t evsub_id = generate_ev_subscription_id();
+  //std::string evsubid_str = "SubId" + std::to_string(evsub_id);
+
+  std::shared_ptr<smf_subscription> ss = std::shared_ptr<smf_subscription>(
+      new smf_subscription());
+  ss.get()->sub_id = evsub_id;
+  if (msg->event_exposure.is_supi_is_set()){
+    supi64_t supi64 = smf_supi_to_u64(msg->event_exposure.get_supi());
+    ss.get()->supi = supi64;
+  }
+  ss.get()->notif_id = msg->event_exposure.get_notif_id();
+  ss.get()->notif_uri = msg->event_exposure.get_notif_uri();
+
+  std::vector<event_subscription_t> event_subscriptions = msg->event_exposure.get_event_subs();
+  //store subscription
+  for (auto i: event_subscriptions) {
+    ss.get()->ev_type = i.smf_event;
+    add_event_subscription(evsub_id, i.smf_event, ss);
+  }
+}
+
+//------------------------------------------------------------------------------
 bool smf_app::is_supi_2_smf_context(const supi64_t &supi) const {
   std::shared_lock lock(m_supi2smf_context);
   return bool { supi2smf_context.count(supi) > 0 };
@@ -1188,6 +1222,13 @@ bool smf_app::scid_2_smf_context(const scid_t &scid,
   }
   return false;
 }
+
+//------------------------------------------------------------------------------
+//void smf_app::set_evsubid_2_smf_subscription(const evsub_id_t &id,
+//                                     std::shared_ptr<smf_subscription> ss) {
+//  std::unique_lock lock(m_evsubid2smf_context);
+//  evsub_id2smf_subscription[id] = ss;
+//}
 
 //------------------------------------------------------------------------------
 bool smf_app::use_local_configuration_subscription_data(
@@ -1497,6 +1538,7 @@ void smf_app::trigger_http_response(
   nlohmann::json json_data = { };
   to_json(json_data, smContextCreateError);
   sm_context_response.set_json_data(json_data);
+  sm_context_response.set_json_format("application/problem+json");
   sm_context_response.set_n1_sm_message(n1_sm_msg);
   sm_context_response.set_http_code(http_code);
   itti_msg->res = sm_context_response;
@@ -1524,6 +1566,7 @@ void smf_app::trigger_http_response(
   nlohmann::json json_data = { };
   to_json(json_data, smContextUpdateError);
   sm_context_response.set_json_data(json_data);
+  sm_context_response.set_json_format("application/problem+json");
   sm_context_response.set_http_code(http_code);
   itti_msg->res = sm_context_response;
   int ret = itti_inst->send_msg(itti_msg);
@@ -1552,6 +1595,7 @@ void smf_app::trigger_http_response(
   nlohmann::json json_data = { };
   to_json(json_data, smContextUpdateError);
   sm_context_response.set_json_data(json_data);
+  sm_context_response.set_json_format("application/problem+json");
   sm_context_response.set_n1_sm_message(n1_sm_msg);
   sm_context_response.set_http_code(http_code);
   itti_msg->res = sm_context_response;
@@ -1628,5 +1672,41 @@ void smf_app::trigger_http_response(const uint32_t &http_code,
       //TODO:
     }
   }
-
 }
+
+//---------------------------------------------------------------------------------------------
+void smf_app::add_event_subscription(evsub_id_t sub_id, smf_event_t ev, std::shared_ptr<smf_subscription> ss) {
+  Logger::smf_app().debug("Add an Event subscription (Sub ID %d, Event %d)", sub_id, (uint8_t) ev);
+  std::unique_lock lock(m_smf_event_subscriptions);
+  smf_event_subscriptions.emplace(std::make_pair(sub_id,ev), ss);
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::get_ee_subscriptions(smf_event_t ev, std::vector<std::shared_ptr<smf_subscription>> &subscriptions) {
+  for (auto const& i : smf_event_subscriptions) {
+    if ((uint8_t)std::get<1> (i.first) == (uint8_t) ev){
+	Logger::smf_app().debug("Found an event subscription (Event ID %d, Event %d)", (uint8_t) std::get<0>(i.first), (uint8_t) ev);
+	subscriptions.push_back(i.second);
+    }
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::get_ee_subscriptions(evsub_id_t sub_id, std::vector<std::shared_ptr<smf_subscription>> &subscriptions) {
+  for (auto const& i : smf_event_subscriptions) {
+    if (i.first.first == sub_id){
+      subscriptions.push_back(i.second);
+    }
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::get_ee_subscriptions(smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id, std::vector<std::shared_ptr<smf_subscription>> &subscriptions) {
+  for (auto const& i : smf_event_subscriptions) {
+    if ((i.first.second == ev) && (i.second->supi == supi) && (i.second->pdu_session_id == pdu_session_id)){
+      subscriptions.push_back(i.second);
+    }
+  }
+}
+
+

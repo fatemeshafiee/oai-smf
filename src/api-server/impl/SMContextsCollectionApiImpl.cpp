@@ -132,6 +132,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   //anType
   //UETimeZone
   //SMContextStatusUri
+  sm_context_req_msg.set_sm_context_status_uri(smContextCreateData.getSmContextStatusUri());
   //PCFId
 
   // DNN Selection Mode
@@ -180,9 +181,11 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   response.headers().add < Pistache::Http::Header::Location
       > (sm_context_response.get_smf_context_uri());  //Location header
   sm_context_response.get_json_data(json_data);
+  std::string json_format;
+  sm_context_response.get_json_format(json_format);
   if (!json_data.empty()) {
     response.headers().add < Pistache::Http::Header::ContentType
-        > (Pistache::Http::Mime::MediaType("application/json"));
+        > (Pistache::Http::Mime::MediaType(json_format));
     response.send(Pistache::Http::Code(sm_context_response.get_http_code()),
                   json_data.dump().c_str());
   } else {

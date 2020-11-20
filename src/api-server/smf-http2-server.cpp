@@ -392,6 +392,8 @@ void smf_http2_server::create_sm_contexts_handler(
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
   nlohmann::json json_data = { };
   sm_context_response.get_json_data(json_data);
+  std::string json_format;
+  sm_context_response.get_json_format(json_format);
 
   //Add header
   header_map h;
@@ -404,7 +406,7 @@ void smf_http2_server::create_sm_contexts_handler(
                   sm_context_response.get_smf_context_uri().c_str() });
   }
   //content-type header
-  h.emplace("content-type", header_value {"application/json"});
+  h.emplace("content-type", header_value {json_format});
   response.write_head(sm_context_response.get_http_code(), h);
 
   response.end(json_data.dump().c_str());
@@ -506,7 +508,9 @@ void smf_http2_server::update_sm_context_handler(
   mime_parser parser = { };
   std::string body = { };
   header_map h = { };
+  std::string json_format;
 
+  sm_context_response.get_json_format(json_format);
   sm_context_response.get_json_data(json_data);
   Logger::smf_api_server().debug("Json data %s", json_data.dump().c_str());
 
@@ -515,7 +519,8 @@ void smf_http2_server::update_sm_context_handler(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n1_sm_message(),
-        sm_context_response.get_n2_sm_information());
+        sm_context_response.get_n2_sm_information(),
+        json_format);
     h.emplace(
         "content-type",
         header_value { "multipart/related; boundary="
@@ -524,7 +529,8 @@ void smf_http2_server::update_sm_context_handler(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n1_sm_message(),
-        multipart_related_content_part_e::NAS);
+        multipart_related_content_part_e::NAS,
+        json_format);
     h.emplace(
         "content-type",
         header_value { "multipart/related; boundary="
@@ -533,13 +539,14 @@ void smf_http2_server::update_sm_context_handler(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n2_sm_information(),
-        multipart_related_content_part_e::NGAP);
+        multipart_related_content_part_e::NGAP,
+        json_format);
     h.emplace(
         "content-type",
         header_value { "multipart/related; boundary="
             + std::string(CURL_MIME_BOUNDARY) });
   } else {
-    h.emplace("content-type", header_value { "application/json" });
+    h.emplace("content-type", header_value { json_format });
     body = json_data.dump().c_str();
   }
 

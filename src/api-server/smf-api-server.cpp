@@ -82,6 +82,8 @@ void SMFApiServer::init(size_t thr) {
   m_individualSMContextApiImpl->init();
   m_pduSessionsCollectionApiImpl->init();
   m_smContextsCollectionApiImpl->init();
+  m_individualSubscriptionDocumentApiImpl->init();
+  m_subscriptionsCollectionApiImpl->init();
 
 }
 void SMFApiServer::start() {

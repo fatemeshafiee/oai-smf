@@ -87,25 +87,61 @@ void IndividualSMContextApi::setupRoutes() {
 void IndividualSMContextApi::release_sm_context_handler(
     const Pistache::Rest::Request &request,
     Pistache::Http::ResponseWriter response) {
-  // Getting the path params
-  auto smContextRef = request.param(":smContextRef").as<std::string>();
+
+  Logger::smf_api_server().debug("");
+  Logger::smf_api_server().info(
+      "Received a SM context Release request from AMF.");
+  Logger::smf_api_server().debug("Request body: %s\n", request.body().c_str());
+  SmContextReleaseMessage smContextReleaseMessage = { };
+
+  //simple parser
+  mime_parser sp = { };
+  sp.parse(request.body());
+
+  std::vector<mime_part> parts = { };
+  sp.get_mime_parts(parts);
+  uint8_t size = parts.size();
+  Logger::smf_api_server().debug("Number of MIME parts %d", size);
 
   // Getting the body param
-
-  SmContextReleaseData smContextReleaseData;
+  SmContextReleaseData smContextReleaseData = { };
 
   try {
-    nlohmann::json::parse(request.body()).get_to(smContextReleaseData);
-    this->release_sm_context(smContextRef, smContextReleaseData, response);
+    if (size > 0) {
+      nlohmann::json::parse(parts[0].body.c_str()).get_to(smContextReleaseData);
+    } else {
+      nlohmann::json::parse(request.body().c_str()).get_to(
+          smContextReleaseData);
+    }
+
+    smContextReleaseMessage.setJsonData(smContextReleaseData);
+
+    for (int i = 1; i < size; i++) {
+      if (parts[i].content_type.compare("application/vnd.3gpp.ngap") == 0) {
+        smContextReleaseMessage.setBinaryDataN2SmInformation(parts[i].body);
+        Logger::smf_api_server().debug("N2 SM information is set");
+      }
+    }
+
+    // Getting the path params
+    auto smContextRef = request.param(":smContextRef").as<std::string>();
+    this->release_sm_context(smContextRef, smContextReleaseMessage, response);
+
   } catch (nlohmann::detail::exception &e) {
     //send a 400 error
+    Logger::smf_api_server().warn(
+        "Error in parsing json (error: %s), send a msg with a 400 error code to AMF",
+        e.what());
     response.send(Pistache::Http::Code::Bad_Request, e.what());
     return;
   } catch (std::exception &e) {
     //send a 500 error
+    Logger::smf_api_server().warn(
+        "Error (%s ), send a msg with a 500 error code to AMF", e.what());
     response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
     return;
   }
+
 }
 
 void IndividualSMContextApi::retrieve_sm_context_handler(

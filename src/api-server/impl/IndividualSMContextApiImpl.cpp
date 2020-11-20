@@ -52,13 +52,41 @@ IndividualSMContextApiImpl::IndividualSMContextApiImpl(
 
 void IndividualSMContextApiImpl::release_sm_context(
     const std::string &smContextRef,
-    const SmContextReleaseData &smContextReleaseData,
+    const SmContextReleaseMessage &smContextReleaseMessage,
     Pistache::Http::ResponseWriter &response) {
 
-  //TODO: to be updated as update_sm_context_handler
-  Logger::smf_api_server().info("release_sm_context...");
+  //Get the SmContextReleaseData from this message and process in smf_app
+  Logger::smf_api_server().info(
+      "Received a PDUSession_ReleaseSMContext Request from AMF.");
 
-  boost::shared_ptr<boost::promise<smf::pdu_session_release_sm_context_response> > p =
+  smf::pdu_session_release_sm_context_request sm_context_req_msg = { };
+  SmContextReleaseData smContextReleaseData = smContextReleaseMessage
+      .getJsonData();
+
+  if (smContextReleaseData.n2SmInfoIsSet()) {
+    //N2 SM (for Session establishment)
+    std::string n2_sm_information = smContextReleaseMessage
+        .getBinaryDataN2SmInformation();
+    Logger::smf_api_server().debug("N2 SM Information %s",
+                                   n2_sm_information.c_str());
+
+    std::string n2_sm_info_type = smContextReleaseData.getN2SmInfoType();
+    sm_context_req_msg.set_n2_sm_information(n2_sm_information);
+    sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
+  }
+
+  //Step 2. TODO: initialize necessary values for sm context req from smContextReleaseData
+  // cause:
+  // ngApCause:
+  // 5gMmCauseValue:
+  // ueLocation:
+  //ueTimeZone:
+  //addUeLocation:
+  //vsmfReleaseOnly:
+  //ismfReleaseOnly:
+
+  boost::shared_ptr
+      < boost::promise<smf::pdu_session_release_sm_context_response> > p =
       boost::make_shared<
           boost::promise<smf::pdu_session_release_sm_context_response> >();
   boost::shared_future<smf::pdu_session_release_sm_context_response> f;
@@ -69,16 +97,11 @@ void IndividualSMContextApiImpl::release_sm_context(
   Logger::smf_api_server().debug("Promise ID generated %d", promise_id);
   m_smf_app->add_promise(promise_id, p);
 
-  //handle Nsmf_PDUSession_UpdateSMContext Request
-  Logger::smf_api_server().info(
-      "Received a PDUSession_ReleaseSMContext Request: PDU Session Release request from AMF.");
+  //Step 3. Handle the itti_n11_release_sm_context_request message in smf_app
   std::shared_ptr<itti_n11_release_sm_context_request> itti_msg =
-      std::make_shared<itti_n11_release_sm_context_request>(TASK_SMF_N11,
-                                                            TASK_SMF_APP,
-                                                            promise_id,
-                                                            smContextRef);
-
-  itti_msg->scid = smContextRef;
+      std::make_shared < itti_n11_release_sm_context_request
+          > (TASK_SMF_N11, TASK_SMF_APP, promise_id, smContextRef);
+  itti_msg->req = sm_context_req_msg;
   itti_msg->http_version = 1;
   m_smf_app->handle_pdu_session_release_sm_context_request(itti_msg);
 
@@ -86,7 +109,9 @@ void IndividualSMContextApiImpl::release_sm_context(
   smf::pdu_session_release_sm_context_response sm_context_response = f.get();
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
+  //TODO: process the response
   response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
+
 }
 
 void IndividualSMContextApiImpl::retrieve_sm_context(
@@ -121,7 +146,8 @@ void IndividualSMContextApiImpl::update_sm_context(
     sm_context_req_msg.set_n2_sm_information(n2_sm_information);
     sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
 
-  } else if (smContextUpdateData.n1SmMsgIsSet()) {
+  }
+  if (smContextUpdateData.n1SmMsgIsSet()) {
     //N1 SM (for session modification)
     std::string n1_sm_message =
         smContextUpdateMessage.getBinaryDataN1SmMessage();
@@ -191,7 +217,9 @@ void IndividualSMContextApiImpl::update_sm_context(
   nlohmann::json json_data = { };
   mime_parser parser = { };
   std::string body = { };
+  std::string json_format;
 
+  sm_context_response.get_json_format(json_format);
   sm_context_response.get_json_data(json_data);
   Logger::smf_api_server().debug("Json data %s", json_data.dump().c_str());
 
@@ -200,7 +228,8 @@ void IndividualSMContextApiImpl::update_sm_context(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n1_sm_message(),
-        sm_context_response.get_n2_sm_information());
+        sm_context_response.get_n2_sm_information(),
+        json_format);
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(
             "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
@@ -208,7 +237,8 @@ void IndividualSMContextApiImpl::update_sm_context(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n1_sm_message(),
-        multipart_related_content_part_e::NAS);
+        multipart_related_content_part_e::NAS,
+        json_format);
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(
             "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
@@ -216,13 +246,14 @@ void IndividualSMContextApiImpl::update_sm_context(
     parser.create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n2_sm_information(),
-        multipart_related_content_part_e::NGAP);
+        multipart_related_content_part_e::NGAP,
+        json_format);
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(
             "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
   } else if (json_data.size() > 0 ){
     response.headers().add<Pistache::Http::Header::ContentType>(
-        Pistache::Http::Mime::MediaType("application/json"));
+        Pistache::Http::Mime::MediaType(json_format));
     body = json_data.dump().c_str();
   } else {
     response.send(Pistache::Http::Code(sm_context_response.get_http_code()));

@@ -234,6 +234,12 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   void remove_qos_flow(smf_qos_flow &flow);
 
   /*
+   * Remove all QoS flow associated with this PDU Session
+   * @return void
+   */
+  void remove_qos_flows();
+
+  /*
    * Set current status of PDU Session
    * @param [const pdu_session_status_e &] status: status to be set
    * @return void
@@ -428,7 +434,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint8_t number_of_supported_packet_filters;  //number_of_supported_packet_filters
   util::uint_generator<uint32_t> qos_rule_id_generator;
 
-  // Recursive lock
+  // Shared lock
   mutable std::shared_mutex m_pdu_session_mutex;
 
 };
@@ -439,7 +445,7 @@ class session_management_subscription {
       :
       single_nssai(snssai),
       dnn_configurations(),
-      m_dnn_configuration_mutex() {
+      m_mutex() {
   }
 
   /*
@@ -472,8 +478,9 @@ class session_management_subscription {
  private:
   snssai_t single_nssai;
   std::map<std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;  //dnn <->dnn_configuration
-  // Recursive lock
-  mutable std::shared_mutex m_dnn_configuration_mutex;
+
+  // Shared lock
+  mutable std::shared_mutex m_mutex;
 };
 
 /*
@@ -515,6 +522,14 @@ class dnn_context {
    * @return void
    */
   void insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp);
+
+  /*
+   * Delete a PDU Session identified by its ID
+   * @param [const uint32_t] pdu_session_id
+   * @return bool: return true if the pdu session is deleted, otherwise, return false
+   */
+  bool remove_pdu_session(const uint32_t pdu_session_id);
+
 
   /*
    * Get number of pdu sessions associated with this context (dnn and Nssai)
@@ -807,6 +822,15 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bool find_pdu_session(const pfcp::pdr_id_t &pdr_id, pfcp::qfi_t &qfi,
                         std::shared_ptr<dnn_context> &sd,
                         std::shared_ptr<smf_pdu_session> &sp);
+
+  /*
+   * Send ITTI msg to N11 to trigger the SM Context Status Notification to AMF
+   * @param [scid_t] scid: SMF Context ID
+   * @param [uint32_t] status: Updated status
+   * @param [uint8_t] http_version: HTTP version
+   * @return void
+   */
+  void send_sm_context_status_notification(scid_t scid, uint32_t status, uint8_t http_version);
 
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;

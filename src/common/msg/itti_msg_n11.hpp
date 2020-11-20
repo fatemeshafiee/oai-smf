@@ -466,4 +466,90 @@ class itti_n11_session_report_request : public itti_n11_msg {
 
 };
 
+//-----------------------------------------------------------------------------
+class itti_n11_notify_sm_context_status : public itti_n11_msg {
+ public:
+  itti_n11_notify_sm_context_status(const task_id_t orig, const task_id_t dest)
+      :
+      itti_n11_msg(N11_SESSION_NOTIFY_SM_CONTEXT_STATUS, orig, dest),
+      scid(0),
+      sm_context_status(),
+      amf_status_uri(),
+      http_version() {
+  }
+
+  itti_n11_notify_sm_context_status(
+      const itti_n11_notify_sm_context_status &i)
+      :
+      itti_n11_msg(i),
+      scid(i.scid),
+      sm_context_status(i.sm_context_status),
+      amf_status_uri (i.amf_status_uri),
+      http_version(i.http_version) {
+  }
+  itti_n11_notify_sm_context_status(
+      const itti_n11_notify_sm_context_status &i, const task_id_t orig,
+      const task_id_t dest)
+      :
+      itti_n11_msg(i, orig, dest),
+      scid(i.scid),
+      sm_context_status(i.sm_context_status),
+      amf_status_uri(i.amf_status_uri),
+      http_version(i.http_version) {
+  }
+  const char* get_msg_name() {
+    return "N11_SESSION_NOTIFY_SM_CONTEXT_STATUS";
+  }
+  ;
+  void set_scid(scid_t id) {
+    scid = id;
+  }
+  ;
+  void set_sm_context_status(std::string status) {
+    sm_context_status = status;
+  }
+  ;
+  scid_t scid;  //SM Context ID
+  std::string sm_context_status;
+  std::string amf_status_uri;
+  uint8_t http_version;
+};
+
+
+//-----------------------------------------------------------------------------
+class itti_n11_notify_subscribed_event : public itti_n11_msg {
+ public:
+  itti_n11_notify_subscribed_event(const task_id_t orig, const task_id_t dest)
+      :
+      itti_n11_msg(N11_NOTIFY_SUBSCRIBED_EVENT, orig, dest),
+      notif_id(),
+      http_version() {
+  }
+
+  itti_n11_notify_subscribed_event(
+      const itti_n11_notify_subscribed_event &i)
+      :
+      itti_n11_msg(i),
+      notif_id(i.notif_id),
+      http_version(i.http_version) {
+  }
+  itti_n11_notify_subscribed_event(
+      const itti_n11_notify_subscribed_event &i, const task_id_t orig,
+      const task_id_t dest)
+      :
+      itti_n11_msg(i, orig, dest),
+      notif_id(i.notif_id),
+      http_version(i.http_version) {
+  }
+  const char* get_msg_name() {
+    return "N11_NOTIFY_SUBSCRIBED_EVENT";
+  }
+  ;
+
+  std::string notif_id;
+  std::vector<smf::event_notification>  event_notifs;
+  uint8_t http_version;
+};
+
+
 #endif /* ITTI_MSG_N11_HPP_INCLUDED_ */

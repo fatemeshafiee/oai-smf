@@ -63,6 +63,13 @@ typedef uint32_t scid_t;
 #define INVALID_SCID             ((scid_t)0x00000000)
 #define UNASSIGNED_SCID          ((scid_t)0x00000000)
 
+// Event Subscription IDs)
+typedef uint32_t evsub_id_t;
+#define EVSUB_ID_FMT             "0x%" PRIx32
+#define EVSUB_ID_SCAN_FMT         SCNx32
+#define INVALID_EVSUB_ID          ((evsub_id_t)0x00000000)
+#define UNASSIGNED_EVSUB_ID       ((evsub_id_t)0x00000000)
+
 //------------------------------------------------------------------------------
 // IMSI
 typedef uint64_t imsi64_t;
