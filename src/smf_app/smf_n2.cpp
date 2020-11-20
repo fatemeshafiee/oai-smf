@@ -77,7 +77,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_c
 
   Logger::smf_n2().debug(
       "UL F-TEID, TEID " "0x%" PRIx32 ", IP Address %s",
-      qos_flow.ul_fteid.teid_gre_key,
+      qos_flow.ul_fteid.teid,
       conv::toString(qos_flow.ul_fteid.ipv4_address).c_str());
   Logger::smf_n2().info(
       "QoS parameters: QFI %d, Priority level %d, ARP priority level %d",
@@ -129,11 +129,10 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_c
                    pduSessionAggregateMaximumBitRate);
 
   //UPTransportLayerInformation
-  fteid_t ul_fteid = { };
-  ul_fteid.interface_type = qos_flow.ul_fteid.interface_type;
+  pfcp::fteid_t ul_fteid = { };
   ul_fteid.v4 = qos_flow.ul_fteid.v4;
 
-  ul_fteid.teid_gre_key = htonl(qos_flow.ul_fteid.teid_gre_key);
+  ul_fteid.teid = htonl(qos_flow.ul_fteid.teid);
   ul_fteid.ipv4_address = qos_flow.ul_fteid.ipv4_address;
 
   Ngap_PDUSessionResourceSetupRequestTransferIEs_t *upTransportLayerInformation =
@@ -153,26 +152,26 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_c
       .choice.gTPTunnel = (Ngap_GTPTunnel_t*) calloc(
       1, sizeof(Ngap_GTPTunnel_t));
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
-      .choice.gTPTunnel->transportLayerAddress.size = 4;
+      .choice.gTPTunnel->transportLayerAddress.size = sizeof(struct in_addr);
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
       .choice.gTPTunnel->transportLayerAddress.buf = (uint8_t*) calloc(
-      4, sizeof(uint8_t));
+          sizeof(struct in_addr), sizeof(uint8_t));
   memcpy(
       upTransportLayerInformation->value.choice.UPTransportLayerInformation
           .choice.gTPTunnel->transportLayerAddress.buf,
-      &ul_fteid.ipv4_address, 4);
+      &ul_fteid.ipv4_address, sizeof(struct in_addr));
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
       .choice.gTPTunnel->transportLayerAddress.bits_unused = 0;
 
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
-      .choice.gTPTunnel->gTP_TEID.size = sizeof(struct in_addr);
+      .choice.gTPTunnel->gTP_TEID.size = TEID_GRE_KEY_LENGTH;
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
       .choice.gTPTunnel->gTP_TEID.buf = (uint8_t*) calloc(
-      sizeof(struct in_addr), sizeof(uint8_t));
+          TEID_GRE_KEY_LENGTH, sizeof(uint8_t));
   memcpy(
       upTransportLayerInformation->value.choice.UPTransportLayerInformation
           .choice.gTPTunnel->gTP_TEID.buf,
-      &ul_fteid.teid_gre_key, sizeof(struct in_addr));
+      &ul_fteid.teid, TEID_GRE_KEY_LENGTH);
 
   ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list,
                    upTransportLayerInformation);
@@ -343,7 +342,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_u
 
   Logger::smf_n2().debug(
       "UL F-TEID, TEID " "0x%" PRIx32 ", IP Address %s",
-      qos_flow.ul_fteid.teid_gre_key,
+      qos_flow.ul_fteid.teid,
       conv::toString(qos_flow.ul_fteid.ipv4_address).c_str());
   Logger::smf_n2().info(
       "QoS parameters: QFI %d, Priority level %d, ARP priority level %d",
@@ -396,11 +395,10 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_u
                    pduSessionAggregateMaximumBitRate);
 
   //UPTransportLayerInformation
-  fteid_t ul_fteid = { };
-  ul_fteid.interface_type = qos_flow.ul_fteid.interface_type;
+  pfcp::fteid_t ul_fteid = { };
   ul_fteid.v4 = qos_flow.ul_fteid.v4;
 
-  ul_fteid.teid_gre_key = htonl(qos_flow.ul_fteid.teid_gre_key);
+  ul_fteid.teid = htonl(qos_flow.ul_fteid.teid);
   ul_fteid.ipv4_address = qos_flow.ul_fteid.ipv4_address;
 
   Ngap_PDUSessionResourceSetupRequestTransferIEs_t *upTransportLayerInformation =
@@ -420,26 +418,26 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_u
       .choice.gTPTunnel = (Ngap_GTPTunnel_t*) calloc(
       1, sizeof(Ngap_GTPTunnel_t));
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
-      .choice.gTPTunnel->transportLayerAddress.size = 4;
+      .choice.gTPTunnel->transportLayerAddress.size = sizeof(struct in_addr);
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
       .choice.gTPTunnel->transportLayerAddress.buf = (uint8_t*) calloc(
-      4, sizeof(uint8_t));
+          sizeof(struct in_addr), sizeof(uint8_t));
   memcpy(
       upTransportLayerInformation->value.choice.UPTransportLayerInformation
           .choice.gTPTunnel->transportLayerAddress.buf,
-      &ul_fteid.ipv4_address, 4);
+      &ul_fteid.ipv4_address, sizeof(struct in_addr));
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
       .choice.gTPTunnel->transportLayerAddress.bits_unused = 0;
 
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
-      .choice.gTPTunnel->gTP_TEID.size = sizeof(struct in_addr);
+      .choice.gTPTunnel->gTP_TEID.size = TEID_GRE_KEY_LENGTH;
   upTransportLayerInformation->value.choice.UPTransportLayerInformation
       .choice.gTPTunnel->gTP_TEID.buf = (uint8_t*) calloc(
-      sizeof(struct in_addr), sizeof(uint8_t));
+          TEID_GRE_KEY_LENGTH, sizeof(uint8_t));
   memcpy(
       upTransportLayerInformation->value.choice.UPTransportLayerInformation
           .choice.gTPTunnel->gTP_TEID.buf,
-      &ul_fteid.teid_gre_key, sizeof(struct in_addr));
+      &ul_fteid.teid, TEID_GRE_KEY_LENGTH);
 
   ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list,
                    upTransportLayerInformation);
@@ -609,11 +607,11 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(pdu_session_
 
   Logger::smf_n2().debug(
       "QoS Flow, UL F-TEID ID " "0x%" PRIx32 ", IP Address %s ",
-      qos_flow.ul_fteid.teid_gre_key,
+      qos_flow.ul_fteid.teid,
       conv::toString(qos_flow.ul_fteid.ipv4_address).c_str());
   Logger::smf_n2().debug(
       "QoS Flow, DL F-TEID ID" "0x%" PRIx32 ", IP Address %s",
-      qos_flow.dl_fteid.teid_gre_key,
+      qos_flow.dl_fteid.teid,
       conv::toString(qos_flow.dl_fteid.ipv4_address).c_str());
 
   Ngap_PDUSessionResourceModifyRequestTransfer_t *ngap_IEs = nullptr;
@@ -653,16 +651,14 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(pdu_session_
 
   //Ngap_UL_NGU_UP_TNLModifyList_t (included if the PDU Session modification was requested by the UE for a
   //PDU Session that has no established User Plane resources)
-  fteid_t ul_fteid = { };
-  ul_fteid.interface_type = qos_flow.ul_fteid.interface_type;
+  pfcp::fteid_t ul_fteid = { };
   ul_fteid.v4 = qos_flow.ul_fteid.v4;
-  ul_fteid.teid_gre_key = htonl(qos_flow.ul_fteid.teid_gre_key);
+  ul_fteid.teid = htonl(qos_flow.ul_fteid.teid);
   ul_fteid.ipv4_address = qos_flow.ul_fteid.ipv4_address;
 
-  fteid_t dl_fteid = { };
-  dl_fteid.interface_type = qos_flow.dl_fteid.interface_type;
+  pfcp::fteid_t dl_fteid = { };
   dl_fteid.v4 = qos_flow.dl_fteid.v4;
-  dl_fteid.teid_gre_key = htonl(qos_flow.dl_fteid.teid_gre_key);
+  dl_fteid.teid = htonl(qos_flow.dl_fteid.teid);
   dl_fteid.ipv4_address = qos_flow.dl_fteid.ipv4_address;
 
   Ngap_PDUSessionResourceModifyRequestTransferIEs_t *ul_NGU_UP_TNLModifyList =
@@ -683,50 +679,50 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(pdu_session_
   ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel =
       (Ngap_GTPTunnel_t*) calloc(1, sizeof(Ngap_GTPTunnel_t));
   ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel
-      ->transportLayerAddress.buf = (uint8_t*) calloc(4, sizeof(uint8_t));
+      ->transportLayerAddress.buf = (uint8_t*) calloc(sizeof(struct in_addr), sizeof(uint8_t));
   memcpy(
       ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice
           .gTPTunnel->transportLayerAddress.buf,
-      &ul_fteid.ipv4_address, 4);
+      &ul_fteid.ipv4_address, sizeof(struct in_addr));
   ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel
-      ->transportLayerAddress.size = 4;
+      ->transportLayerAddress.size = sizeof(struct in_addr);
   ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel
       ->transportLayerAddress.bits_unused = 0;
 
   ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel
-      ->gTP_TEID.size = sizeof(struct in_addr);
+      ->gTP_TEID.size = TEID_GRE_KEY_LENGTH;
   ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice.gTPTunnel
-      ->gTP_TEID.buf = (uint8_t*) calloc(sizeof(struct in_addr),
+      ->gTP_TEID.buf = (uint8_t*) calloc(TEID_GRE_KEY_LENGTH,
                                          sizeof(uint8_t));
   memcpy(
       ngap_UL_NGU_UP_TNLModifyItem->uL_NGU_UP_TNLInformation.choice
           .gTPTunnel->gTP_TEID.buf,
-      &ul_fteid.teid_gre_key, sizeof(struct in_addr));
+      &ul_fteid.teid, TEID_GRE_KEY_LENGTH);
 
   ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.present =
       Ngap_UPTransportLayerInformation_PR_gTPTunnel;
   ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel =
       (Ngap_GTPTunnel_t*) calloc(1, sizeof(Ngap_GTPTunnel_t));
   ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel
-      ->transportLayerAddress.buf = (uint8_t*) calloc(4, sizeof(uint8_t));
+      ->transportLayerAddress.buf = (uint8_t*) calloc(sizeof(struct in_addr), sizeof(uint8_t));
   memcpy(
       ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice
           .gTPTunnel->transportLayerAddress.buf,
-      &dl_fteid.ipv4_address, 4);
+      &dl_fteid.ipv4_address, sizeof(struct in_addr));
   ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel
-      ->transportLayerAddress.size = 4;
+      ->transportLayerAddress.size = sizeof(struct in_addr);
   ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel
       ->transportLayerAddress.bits_unused = 0;
 
   ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel
-      ->gTP_TEID.size = sizeof(struct in_addr);
+      ->gTP_TEID.size = TEID_GRE_KEY_LENGTH;
   ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice.gTPTunnel
-      ->gTP_TEID.buf = (uint8_t*) calloc(sizeof(struct in_addr),
+      ->gTP_TEID.buf = (uint8_t*) calloc(TEID_GRE_KEY_LENGTH,
                                          sizeof(uint8_t));
   memcpy(
       ngap_UL_NGU_UP_TNLModifyItem->dL_NGU_UP_TNLInformation.choice
           .gTPTunnel->gTP_TEID.buf,
-      &dl_fteid.teid_gre_key, 4);
+      &dl_fteid.teid, TEID_GRE_KEY_LENGTH);
   ASN_SEQUENCE_ADD(
       &ul_NGU_UP_TNLModifyList->value.choice.UL_NGU_UP_TNLModifyList.list,
       ngap_UL_NGU_UP_TNLModifyItem);

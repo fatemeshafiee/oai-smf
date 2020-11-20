@@ -969,6 +969,13 @@ pfcp_ie * pfcp_ie::new_pfcp_ie_from_stream(std::istream& is) {
 //        return ie;
 //      }
 //      break;
+      case PFCP_IE_3GPP_INTERFACE_TYPE: {
+        pfcp_3gpp_interface_type_ie *ie = new pfcp_3gpp_interface_type_ie(tlv);
+          ie->load_from(is);
+          return ie;
+      }
+      break;
+
     default:
       Logger::pfcp().error("Unknown PFCP IE type %d (length %d)", tlv.get_type(), tlv.get_length());
       return nullptr;

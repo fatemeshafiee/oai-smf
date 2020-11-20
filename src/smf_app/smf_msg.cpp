@@ -44,12 +44,12 @@ void qos_flow_context_updated::set_qfi(const pfcp::qfi_t &q) {
 }
 
 //-----------------------------------------------------------------------------
-void qos_flow_context_updated::set_ul_fteid(const fteid_t &teid) {
+void qos_flow_context_updated::set_ul_fteid(const pfcp::fteid_t &teid) {
   ul_fteid = teid;
 }
 
 //-----------------------------------------------------------------------------
-void qos_flow_context_updated::set_dl_fteid(const fteid_t &teid) {
+void qos_flow_context_updated::set_dl_fteid(const pfcp::fteid_t &teid) {
   dl_fteid = teid;
 }
 
@@ -407,12 +407,12 @@ void pdu_session_update_sm_context_request::get_qfis(
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_request::set_dl_fteid(const fteid_t &t) {
+void pdu_session_update_sm_context_request::set_dl_fteid(const pfcp::fteid_t &t) {
   dl_fteid = t;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_update_sm_context_request::get_dl_fteid(fteid_t &t) {
+void pdu_session_update_sm_context_request::get_dl_fteid(pfcp::fteid_t &t) {
   t = dl_fteid;
 }
 

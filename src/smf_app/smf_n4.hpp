@@ -37,10 +37,10 @@
 
 namespace smf {
 
-#define TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST     (0)
-#define TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST     (1)
-#define TASK_SMF_N4_TIMEOUT_ASSOCIATION_REQUEST   (2)
-
+#define TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST       (0)
+#define TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST       (1)
+#define TASK_SMF_N4_TIMEOUT_ASSOCIATION_REQUEST     (2)
+#define TASK_SMF_N4_TIMEOUT_GRACEFUL_RELEASE_PERIOD (3)
 class smf_n4 : public pfcp::pfcp_l4_stack {
  private:
   std::thread::id thread_id;
@@ -142,6 +142,8 @@ class smf_n4 : public pfcp::pfcp_l4_stack {
   void send_heartbeat_response(const endpoint &r_endpoint,
                                const uint64_t trxn_id);
 
+  void send_release_request(std::shared_ptr<pfcp_association> &a);
+
   void handle_receive_pfcp_msg(pfcp::pfcp_msg &msg, const endpoint &r_endpoint);
   void handle_receive(char *recv_buffer, const std::size_t bytes_transferred,
                       const endpoint &r_endpoint);
@@ -154,7 +156,10 @@ class smf_n4 : public pfcp::pfcp_l4_stack {
                                                 const endpoint &r_endpoint);
   void handle_receive_association_setup_response(
       pfcp::pfcp_msg &msg, const endpoint &remote_endpoint);
-
+  void handle_receive_association_update_request(
+      pfcp::pfcp_msg &msg, const endpoint &remote_endpoint);
+  void handle_receive_association_release_response(
+      pfcp::pfcp_msg &msg, const endpoint &remote_endpoint);
   void handle_receive_session_establishment_response(
       pfcp::pfcp_msg &msg, const endpoint &r_endpoint);
   void handle_receive_session_modification_response(pfcp::pfcp_msg &msg,

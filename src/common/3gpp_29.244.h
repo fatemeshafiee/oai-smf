@@ -312,14 +312,39 @@ struct pfcp_ie_value_exception : public pfcp_ie_exception {
 #define PFCP_IE_MAC_ADDRESSES_REMOVED                                                  (145)
 #define PFCP_IE_ETHERNET_INACTIVITY_TIMER                                              (146)
 #define PFCP_IE_ADDITIONAL_MONITORING_TIME                                             (147)
-#define PFCP_IE_EVENT_INFORMATION                                                      (148)
-#define PFCP_IE_EVENT_REPORTING                                                        (149)
-#define PFCP_IE_EVENT_ID                                                               (150)
-#define PFCP_IE_EVENT_THRESHOLD                                                        (151)
+#define PFCP_IE_EVENT_QUOTA                                                            (148)
+#define PFCP_IE_EVENT_THRESHOLD                                                        (149)
+#define PFCP_IE_SUBSEQUENT_EVENT_QUOTA                                                 (150)
+#define PFCP_IE_SUBSEQUENT_EVENT_THRESHOLD                                             (151)
 #define PFCP_IE_TRACE_INFORMATION                                                      (152)
 #define PFCP_IE_FRAMED_ROUTE                                                           (153)
 #define PFCP_IE_FRAMED_ROUTING                                                         (154)
 #define PFCP_IE_FRAMED_IPV6_ROUTE                                                      (155)
+#define PFCP_IE_EVENT_TIME_STAMP                                                       (156)
+#define PFCP_IE_AVERAGING_WINDOW                                                       (157)
+#define PFCP_IE_PAGING_POLICY_INDICATOR                                                (158)
+#define PFCP_IE_APN_DNN                                                                (159)
+#define PFCP_IE_3GPP_INTERFACE_TYPE                                                    (160)
+
+#define PFCP_IE_PFCPSRREQ_FLAGS_3GPP                                                   (161)
+#define PFCP_IE_PFCPAUREQ_FLAGS                                                        (162)
+#define PFCP_IE_ACTIVATION_TIME                                                        (163)
+#define PFCP_IE_DEACTIVATION_TIME                                                      (164)
+#define PFCP_IE_CREATE_MAR                                                             (165)
+#define PFCP_IE_ACCESS_FORWARDING_ACTION_INFORMATION_1                                 (166)
+#define PFCP_IE_ACCESS_FORWARDING_ACTION_INFORMATION_2                                 (167)
+#define PFCP_IE_REMOVE_MAR                                                             (168)
+#define PFCP_IE_UPDATE_MAR                                                             (169)
+#define PFCP_IE_MAR_ID                                                                 (170)
+#define PFCP_IE_STEERING_FUNCTIONALITY                                                 (171)
+#define PFCP_IE_STEERING_MODE                                                          (172)
+#define PFCP_IE_WEIGHT                                                                 (173)
+#define PFCP_IE_PRIORITY                                                               (174)
+#define PFCP_IE_UPDATE_ACCESS_FORWARDING_ACTION_INFORMATION_1                          (175)
+#define PFCP_IE_UPDATE_ACCESS_FORWARDING_ACTION_INFORMATION_2                          (176)
+#define PFCP_IE_UE_IP_ADDRESS_POOL_IDENTITY                                            (177)
+#define PFCP_IE_ALTERNATIVE_SMF_IP_ADDRESS                                             (178)
+#define PFCP_IE_SPARED                                                                 (179)
 
 #define PFCP_MESSAGE_RESERVED                                                (0)
 // PFCP_NODE_RELATED_MESSAGES
@@ -369,7 +394,8 @@ enum cause_value_e {
   CAUSE_VALUE_PFCP_ENTITY_IN_CONGESTION = 74,
   CAUSE_VALUE_NO_RESOURCES_AVAILABLE = 75,
   CAUSE_VALUE_SERVICE_NOT_SUPPORTED = 76,
-  CAUSE_VALUE_SYSTEM_FAILURE = 77
+  CAUSE_VALUE_SYSTEM_FAILURE = 77,
+  CAUSE_VALUE_REDIRECTION_REQUESTED = 78
 };
 
 typedef struct cause_s {
@@ -409,8 +435,8 @@ typedef struct source_interface_s {
 struct fteid_s {
   uint8_t chid :1;
   uint8_t ch :1;
-  uint8_t v4 :1;
   uint8_t v6 :1;
+  uint8_t v4 :1;
   teid_t teid;
   struct in_addr ipv4_address;
   struct in6_addr ipv6_address;
@@ -425,6 +451,38 @@ struct fteid_s {
         and (ipv6_address.s6_addr32[3] == f.ipv6_address.s6_addr32[3])
         and (v4 == f.v4) and (v6 == f.v6);
   }
+
+  bool operator=(const struct fteid_s &f) {
+    v4 = f.v4;
+    v6 = f.v6;
+    chid = f.chid;
+    ch = f.ch;
+    choose_id = f.choose_id;
+    teid = f.teid;
+    ipv4_address.s_addr = f.ipv4_address.s_addr;
+    ipv6_address = f.ipv6_address;
+    //ipv6_address.s6_addr32[0] = f.ipv6_address.s6_addr32[0];
+    //ipv6_address.s6_addr32[1] = f.ipv6_address.s6_addr32[1];
+    //ipv6_address.s6_addr32[2] = f.ipv6_address.s6_addr32[2];
+    //ipv6_address.s6_addr32[3] = f.ipv6_address.s6_addr32[3];
+  }
+
+  std::string toString() const {
+    std::string s = { };
+    if ((v4) || (v6)) {
+      s.append("TEID=").append(std::to_string(teid));
+      if (v4) {
+        s.append(", IPv4=").append(conv::toString(ipv4_address));
+      }
+      if (v6) {
+        s.append(", IPv6=").append(conv::toString(ipv6_address));
+      }
+    } else {
+      s.append("null_fteid");
+    }
+    return s;
+  }
+
   bool is_zero() const {
     return ((!v4) and (!v6));
   }
@@ -1567,16 +1625,16 @@ typedef struct ethernet_inactivity_timer_s {
 } ethernet_inactivity_timer_t;
 
 //-------------------------------------
-// 8.2.106 Event ID
-typedef struct event_id_s {
-  uint32_t event_id;
-} event_id_t;
+// 8.2.106 Subsequent Event Quota
+typedef struct subsequent_event_quota_s {
+  uint32_t subsequent_event_quota;
+} subsequent_event_quota_t;
 
 //-------------------------------------
-// 8.2.107 Event Threshold
-typedef struct event_threshold_s {
-  uint32_t event_threshold;
-} event_threshold_t;
+// 8.2.107 Subsequent Event Threshold
+typedef struct subsequent_event_threshold_s {
+  uint32_t subsequent_event_threshold;
+} subsequent_event_threshold_t;
 
 //-------------------------------------
 // 8.2.108 Trace Information
@@ -1591,6 +1649,22 @@ typedef struct trace_information_s {
   uint8_t length_of_triggered_events;
   // TODO CONTINUE
 } trace_information_t;
+
+
+//-------------------------------------
+// TO BE REMOVED: Event ID
+typedef struct event_id_s {
+  uint32_t event_id;
+} event_id_t;
+
+/*
+//-------------------------------------
+// 8.2.107 Event Threshold
+typedef struct event_threshold_s {
+  uint32_t event_threshold;
+} event_threshold_t;
+*/
+
 
 //-------------------------------------
 // 8.2.109 Framed-Route
@@ -1609,6 +1683,165 @@ typedef struct framed_routing_s {
 typedef struct framed_ipv6_route_s {
   std::string framed_ipv6_route;
 } framed_ipv6_route_t;
+
+//-------------------------------------
+// 8.2.112 Event Quota
+typedef struct event_quota_s {
+  uint32_t event_quota;
+} event_quota_t;
+
+//-------------------------------------
+// 8.2.113 Event Threshold
+typedef struct event_threshold_s {
+  uint32_t event_threshold;
+} event_threshold_t;
+
+//-------------------------------------
+// 8.2.114 Event Time Stamp
+typedef struct event_time_stamp_s {
+  uint32_t event_time_stamp;
+} event_time_stamp_t;
+
+//-------------------------------------
+// 8.2.115 Averaging Window
+typedef struct averaging_window_s {
+  uint32_t averaging_window;
+} averaging_window_t;
+
+//-------------------------------------
+// 8.2.116 Paging Policy Indicator (PPI)
+typedef struct paging_policy_indicator_s {
+  uint8_t spare :4;
+  uint8_t ppi_value :4;
+} paging_policy_indicator_t;
+
+//-------------------------------------
+// 8.2.117 APN/DNN
+typedef struct apn_dnn_s {
+  std::string apn_dnn;
+} apn_dnn_t;
+
+//-------------------------------------
+// 8.2.118. 3GPP Interface Type
+enum _3gpp_interface_type_e {
+  _3GPP_INTERFACE_TYPE_S1_U = 0,
+  _3GPP_INTERFACE_TYPE_S5_S8_U = 1,
+  _3GPP_INTERFACE_TYPE_S4_U = 2,
+  _3GPP_INTERFACE_TYPE_S11_U = 3,
+  _3GPP_INTERFACE_TYPE_S12_U = 4,
+  _3GPP_INTERFACE_TYPE_GN_GP_U = 5,
+  _3GPP_INTERFACE_TYPE_S2A_U = 6,
+  _3GPP_INTERFACE_TYPE_S2B_U = 7,
+  _3GPP_INTERFACE_TYPE_ENODEB_GTP_U_DL = 8,
+  _3GPP_INTERFACE_TYPE_ENODEB_GTP_U_UL = 9,
+  _3GPP_INTERFACE_TYPE_SGW_UPF_GTP_U_DL = 10,
+  _3GPP_INTERFACE_TYPE_N3_3GPP_ACCESS = 11,
+  _3GPP_INTERFACE_TYPE_N3_TRUSTED_NON_3GPP_ACCESS = 12,
+  _3GPP_INTERFACE_TYPE_N3_UNTRUSTED_NON_3GPP_ACCESS = 13,
+  _3GPP_INTERFACE_TYPE_N3 = 14,
+  _3GPP_INTERFACE_TYPE_N9 = 15
+};
+
+typedef struct _3gpp_interface_type_s {
+  uint8_t spare :2;
+  uint8_t interface_type_value :6;
+} _3gpp_interface_type_t;
+
+//-------------------------------------
+// 8.2.119 PFCPSRReq-Flags
+typedef struct pfcpsrreq_flags_s {
+  uint8_t spare: 7;
+  uint8_t psdbu: 1;
+} pfcpsrreq_flags_t;
+
+//-------------------------------------
+// 8.2.120 PFCPAUReq-Flags
+typedef struct pfcpaureq_flags_s {
+  uint8_t spare: 7;
+  uint8_t parps: 1;
+} pfcpaureq_flags_t;
+
+//-------------------------------------
+// 8.2.121 Activation Time
+typedef struct activation_time_s {
+  uint32_t activation_time;
+} activation_time_t;
+
+//-------------------------------------
+//8.2.122 Deactivation Time
+typedef struct deactivation_time_s {
+  uint32_t deactivation_time;
+} deactivation_time_t;
+
+//-------------------------------------
+//8.2.123 MAR ID
+typedef struct mar_id_s {
+  uint8_t mar_id;
+} mar_id_t;
+
+//-------------------------------------
+// 8.2.124 Steering Functionality
+typedef struct steering_functionality_s {
+  uint8_t spare: 4;
+  uint8_t steering_functionality_value: 4;
+} steering_functionality_t;
+
+enum steering_functionality_value_e {
+  STEERING_FUNCTIONALITY_ATSSS_LL = 0,
+  STEERING_FUNCTIONALITY_MPTCP = 1,
+  STEERING_FUNCTIONALITY_SPARE = 2
+};
+
+//-------------------------------------
+// 8.2.125 Steering Mode
+typedef struct steering_mode_s {
+  uint8_t spare: 4;
+  uint8_t steering_mode_value: 4;
+} steering_mode_t;
+
+enum steering_mode_value_e {
+  STEERING_MODE_ACTIVE_STANDBY = 0,
+  STEERING_MODE_SMALLEST_DELAY = 1,
+  STEERING_MODE_LOAD_BALANCING = 2,
+  STEERING_MODE_PRIORITY_BASED = 3,
+  STEERING_MODE_SPARED = 4
+};
+
+//-------------------------------------
+// 8.2.126 Weight
+typedef struct weight_s {
+  uint8_t weight_value;
+} weight_t;
+
+//-------------------------------------
+// 8.2.127 Priority
+typedef struct priority_s {
+  uint8_t spare: 4;
+  uint8_t priority_value: 4;
+} priority_t;
+enum priority_value_e {
+  PRIORITY_VALUE_ACTIVE = 0,
+  PRIORITY_VALUE_STANDBY = 1,
+  PRIORITY_VALUE_HIGH = 2,
+  PRIORITY_VALUE_LOW = 3,
+  PRIORITY_VALUE_SPARED = 4
+};
+
+//-------------------------------------
+// 8.2.128 UE IP address Pool Identity
+typedef struct ue_ip_address_pool_identity_s {
+  std::string ue_ip_address_pool_identity;
+} ue_ip_address_pool_identity_t;
+
+//-------------------------------------
+// 8.2.129 Alternative SMF IP Address
+typedef struct alternative_smf_ip_address_s {
+  uint8_t spare :6;
+  uint8_t v4 :1;
+  uint8_t v6 :1;
+  struct in_addr ipv4_address;
+  struct in6_addr ipv6_address;
+} alternative_smf_ip_address_t;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Specific IEs

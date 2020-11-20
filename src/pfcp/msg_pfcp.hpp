@@ -79,8 +79,8 @@ namespace pfcp {
   class remove_traffic_endpoint;
   class ethernet_traffic_information;
   class additional_monitoring_time;
-  class event_information;
-  class event_reporting;
+//  class event_information;
+//  class event_reporting;
   class ethernet_packet_filter;
 }
 
@@ -534,15 +534,6 @@ namespace pfcp {
     //  PFCP_IE_ADDITIONAL_MONITORING_TIME
     virtual bool get(pfcp::additional_monitoring_time& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_ADDITIONAL_MONITORING_TIME, __FILE__, __LINE__);}
     virtual void set(const pfcp::additional_monitoring_time& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_ADDITIONAL_MONITORING_TIME, __FILE__, __LINE__);}
-    //  PFCP_IE_EVENT_INFORMATION
-    virtual bool get(pfcp::event_information& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_INFORMATION, __FILE__, __LINE__);}
-    virtual void set(const pfcp::event_information& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_INFORMATION, __FILE__, __LINE__);}
-    //  PFCP_IE_EVENT_REPORTING
-    virtual bool get(pfcp::event_reporting& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_REPORTING, __FILE__, __LINE__);}
-    virtual void set(const pfcp::event_reporting& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_REPORTING, __FILE__, __LINE__);}
-    //  PFCP_IE_EVENT_ID
-    virtual bool get(pfcp::event_id_t& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_ID, __FILE__, __LINE__);}
-    virtual void set(const pfcp::event_id_t& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_ID, __FILE__, __LINE__);}
     //  PFCP_IE_EVENT_THRESHOLD
     virtual bool get(pfcp::event_threshold_t& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_THRESHOLD, __FILE__, __LINE__);}
     virtual void set(const pfcp::event_threshold_t& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_EVENT_THRESHOLD, __FILE__, __LINE__);}
@@ -558,6 +549,10 @@ namespace pfcp {
     //  PFCP_IE_FRAMED_IPV6_ROUTE
     virtual bool get(pfcp::framed_ipv6_route_t& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_FRAMED_IPV6_ROUTE, __FILE__, __LINE__);}
     virtual void set(const pfcp::framed_ipv6_route_t& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_FRAMED_IPV6_ROUTE, __FILE__, __LINE__);}
+    //  PFCP_IE_3GPP_INTERFACE_TYPE
+    virtual bool get(pfcp::_3gpp_interface_type_t& v) const {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_3GPP_INTERFACE_TYPE, __FILE__, __LINE__);}
+    virtual void set(const pfcp::_3gpp_interface_type_t& v) {throw pfcp_msg_illegal_ie_exception(0, PFCP_IE_3GPP_INTERFACE_TYPE, __FILE__, __LINE__);}
+
 
     virtual ~pfcp_ies_container() {};
   };
@@ -692,6 +687,8 @@ namespace pfcp {
       std::pair<bool, pfcp::framed_route_t>           framed_route;
       std::pair<bool, pfcp::framed_routing_t>         framed_routing;
       std::pair<bool, pfcp::framed_ipv6_route_t>      framed_ipv6_route;
+      std::pair<bool, pfcp::_3gpp_interface_type_t>   _3gpp_interface_type;
+
 
 
       pdi() :
@@ -737,6 +734,7 @@ namespace pfcp {
       void set(const pfcp::framed_route_t& v) {framed_route.first = true; framed_route.second = v;}
       void set(const pfcp::framed_routing_t& v) {framed_routing.first = true; framed_routing.second = v;}
       void set(const pfcp::framed_ipv6_route_t& v) {framed_ipv6_route.first = true; framed_ipv6_route.second = v;}
+      void set(const pfcp::_3gpp_interface_type_t& v) {_3gpp_interface_type.first = true; _3gpp_interface_type.second = v;}
 
       bool get(pfcp::source_interface_t& v) const {if (source_interface.first) {v = source_interface.second;return true;}return false;}
       bool get(pfcp::fteid_t& v) const {if (local_fteid.first) {v = local_fteid.second;return true;}return false;}
@@ -750,6 +748,7 @@ namespace pfcp {
       bool get(pfcp::framed_route_t& v) const {if (framed_route.first) {v = framed_route.second;return true;}return false;}
       bool get(pfcp::framed_routing_t& v) const {if (framed_routing.first) {v = framed_routing.second;return true;}return false;}
       bool get(pfcp::framed_ipv6_route_t& v) const {if (framed_ipv6_route.first) {v = framed_ipv6_route.second;return true;}return false;}
+      bool get(pfcp::_3gpp_interface_type_t& v) const {if (_3gpp_interface_type.first) {v = _3gpp_interface_type.second;return true;}return false;}
   };
 
   //------------------------------------------------------------------------------
@@ -2245,7 +2244,7 @@ namespace pfcp {
       bool get(pfcp::application_instance_id_t& v) const {if (application_instance_id.first) {v = application_instance_id.second;return true;}return false;}
       bool get(pfcp::flow_information_t& v) const {if (flow_information.first) {v = flow_information.second;return true;}return false;}
   };
-
+/*
   //------------------------------------------------------------------------------
   // Table 7.5.8.3-2A: Event Reporting IE within Usage Report IE
   class event_reporting : public pfcp::pfcp_ies_container {
@@ -2263,6 +2262,7 @@ namespace pfcp {
 
       bool get(pfcp::event_id_t& v) const {if (event_id.first) {v = event_id.second;return true;}return false;}
   };
+  */
 
   //------------------------------------------------------------------------------
   // Table 7.5.8.3-1: Usage Report IE within PFCP Session Report Request
@@ -2282,7 +2282,7 @@ namespace pfcp {
       std::pair<bool, pfcp::time_of_last_packet_t>             time_of_last_packet;
       std::pair<bool, pfcp::usage_information_t>               usage_information;
       std::pair<bool, pfcp::query_urr_reference_t>             query_urr_reference;
-      std::pair<bool, pfcp::event_reporting>                   event_reporting;
+     //std::pair<bool, pfcp::event_reporting>                   event_reporting;
       std::pair<bool, pfcp::ethernet_traffic_information>      ethernet_traffic_information;
 
       usage_report_within_pfcp_session_report_request() :
@@ -2300,7 +2300,7 @@ namespace pfcp {
         time_of_last_packet(),
         usage_information(),
         query_urr_reference(),
-        event_reporting(),
+        //event_reporting(),
         ethernet_traffic_information() {}
 
       usage_report_within_pfcp_session_report_request(const usage_report_within_pfcp_session_report_request& u) :
@@ -2318,7 +2318,7 @@ namespace pfcp {
         time_of_last_packet(u.time_of_last_packet),
         usage_information(u.usage_information),
         query_urr_reference(u.query_urr_reference),
-        event_reporting(u.event_reporting),
+        //event_reporting(u.event_reporting),
         ethernet_traffic_information(u.ethernet_traffic_information) {}
 
 
@@ -2337,7 +2337,7 @@ namespace pfcp {
       void set(const pfcp::time_of_last_packet_t& v) {time_of_last_packet.first = true; time_of_last_packet.second = v;}
       void set(const pfcp::usage_information_t& v) {usage_information.first = true; usage_information.second = v;}
       void set(const pfcp::query_urr_reference_t& v) {query_urr_reference.first = true; query_urr_reference.second = v;}
-      void set(const pfcp::event_reporting& v) {event_reporting.first = true; event_reporting.second = v;}
+      //void set(const pfcp::event_reporting& v) {event_reporting.first = true; event_reporting.second = v;}
       void set(const pfcp::ethernet_traffic_information& v) {ethernet_traffic_information.first = true; ethernet_traffic_information.second = v;}
 
       bool get(pfcp::urr_id_t& v) const {if (urr_id.first) {v = urr_id.second;return true;}return false;}
@@ -2354,7 +2354,7 @@ namespace pfcp {
       bool get(pfcp::time_of_last_packet_t& v) const {if (time_of_last_packet.first) {v = time_of_last_packet.second;return true;}return false;}
       bool get(pfcp::usage_information_t& v) const {if (usage_information.first) {v = usage_information.second;return true;}return false;}
       bool get(pfcp::query_urr_reference_t& v) const {if (query_urr_reference.first) {v = query_urr_reference.second;return true;}return false;}
-      bool get(pfcp::event_reporting& v) const {if (event_reporting.first) {v = event_reporting.second;return true;}return false;}
+      //bool get(pfcp::event_reporting& v) const {if (event_reporting.first) {v = event_reporting.second;return true;}return false;}
       bool get(pfcp::ethernet_traffic_information& v) const {if (ethernet_traffic_information.first) {v = ethernet_traffic_information.second;return true;}return false;}
   };
 
@@ -2639,20 +2639,24 @@ public:
   std::pair<bool, pfcp::cause_t>                cause;
   std::pair<bool, pfcp::up_function_features_s> up_function_features;
   std::pair<bool, pfcp::cp_function_features_t> cp_function_features;
-
+  std::pair<bool, pfcp::pfcpaureq_flags_t> pfcpaureq_flags;
+  std::pair<bool, pfcp::alternative_smf_ip_address_t> alternative_smf_ip_address;
 
   pfcp_association_update_response() :
     node_id(),
     cause(),
     up_function_features(),
-    cp_function_features() {}
+    cp_function_features(),
+    pfcpaureq_flags(),
+    alternative_smf_ip_address() {}
 
   pfcp_association_update_response(const pfcp_association_update_response& i) {
     node_id = i.node_id;
     cause = i.cause;
     up_function_features = i.up_function_features;
     cp_function_features = i.cp_function_features;
-
+    pfcpaureq_flags = i.pfcpaureq_flags;
+    alternative_smf_ip_address = i.alternative_smf_ip_address;
   }
   const char* get_msg_name() const {return "PFCP_ASSOCIATION_UPDATE_RESPONSE";};
 
@@ -2660,11 +2664,15 @@ public:
   bool get(pfcp::cause_t& v) const {if (cause.first) {v = cause.second;return true;}return false;}
   bool get(pfcp::up_function_features_s& v) const {if (up_function_features.first) {v = up_function_features.second;return true;}return false;}
   bool get(pfcp::cp_function_features_t& v) const {if (cp_function_features.first) {v = cp_function_features.second;return true;}return false;}
+  bool get(pfcp::pfcpaureq_flags_t& v) const {if (pfcpaureq_flags.first) {v = pfcpaureq_flags.second;return true;}return false;}
+  bool get(pfcp::alternative_smf_ip_address_t& v) const {if (alternative_smf_ip_address.first) {v = alternative_smf_ip_address.second;return true;}return false;}
 
   void set(const pfcp::node_id_t& v) {node_id.first = true; node_id.second = v;}
   void set(const pfcp::cause_t& v) {cause.first = true; cause.second = v;}
   void set(const pfcp::up_function_features_s& v) {up_function_features.first = true; up_function_features.second = v;}
   void set(const pfcp::cp_function_features_t& v) {cp_function_features.first = true; cp_function_features.second = v;}
+  void set(const pfcp::pfcpaureq_flags_t& v) {pfcpaureq_flags.first = true; pfcpaureq_flags.second = v;}
+  void set(const pfcp::alternative_smf_ip_address_t& v) {alternative_smf_ip_address.first = true; alternative_smf_ip_address.second = v;}
 };
 
 //------------------------------------------------------------------------------

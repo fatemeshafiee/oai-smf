@@ -245,7 +245,8 @@ bool smf_pdu_session::get_default_qos_flow(smf_qos_flow &flow) {
 
 //------------------------------------------------------------------------------
 void smf_pdu_session::get_qos_flows(std::vector<smf_qos_flow> &flows) {
-  std::unique_lock lock(m_pdu_session_mutex);
+
+  std::shared_lock lock(m_pdu_session_mutex);
   flows.clear();
   for (auto it : qos_flows) {
     flows.push_back(it.second);
@@ -479,7 +480,7 @@ void smf_pdu_session::update_qos_rule(const QOSRulesIE &qos_rule) {
   uint8_t rule_id = qos_rule.qosruleidentifer;
   if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
       and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
-
+    std::unique_lock lock(m_pdu_session_mutex);
     if (qos_rules.count(rule_id) > 0) {
       lock.lock(); // Lock it here
       qos_rules.erase(rule_id);
@@ -503,6 +504,7 @@ void smf_pdu_session::mark_qos_rule_to_be_synchronised(const uint8_t rule_id) {
   std::unique_lock lock(m_pdu_session_mutex, std::defer_lock); // Do not lock it first
   if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
       and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
+    std::unique_lock lock(m_pdu_session_mutex);
     if (qos_rules.count(rule_id) > 0) {
       lock.lock(); // Lock it here
       qos_rules_to_be_synchronised.push_back(rule_id);
@@ -531,6 +533,7 @@ void smf_pdu_session::add_qos_rule(const QOSRulesIE &qos_rule) {
 
   if ((rule_id >= QOS_RULE_IDENTIFIER_FIRST )
       and (rule_id <= QOS_RULE_IDENTIFIER_LAST )) {
+    std::unique_lock lock(m_pdu_session_mutex);
     if (qos_rules.count(rule_id) > 0) {
       Logger::smf_app().error("Failed to add rule (Id %d), rule existed",
                               rule_id);
@@ -2180,25 +2183,24 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         }
 
         //store AN Tunnel Info + list of accepted QFIs
-        fteid_t dl_teid = { };
+        pfcp::fteid_t dl_teid = { };
         memcpy(
-            &dl_teid.teid_gre_key,
+            &dl_teid.teid,
             decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
                 .choice.gTPTunnel->gTP_TEID.buf,
-            sizeof(struct in_addr));
+                TEID_GRE_KEY_LENGTH);
         memcpy(
             &dl_teid.ipv4_address,
             decoded_msg->dLQosFlowPerTNLInformation.uPTransportLayerInformation
                 .choice.gTPTunnel->transportLayerAddress.buf,
             4);
 
-        dl_teid.teid_gre_key = ntohl(dl_teid.teid_gre_key);
-        dl_teid.interface_type = S1_U_ENODEB_GTP_U;
+        dl_teid.teid = ntohl(dl_teid.teid);
         dl_teid.v4 = 1;  //Only V4 for now
         smreq->req.set_dl_fteid(dl_teid);
 
         Logger::smf_app().debug("DL GTP F-TEID (AN F-TEID) " "0x%" PRIx32 " ",
-                                dl_teid.teid_gre_key);
+                                dl_teid.teid);
         Logger::smf_app().debug("uPTransportLayerInformation (AN IP Addr) %s",
                                 conv::toString(dl_teid.ipv4_address).c_str());
 
@@ -2301,20 +2303,19 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         //see section 8.2.3 (PDU Session Resource Modify) @3GPP TS 38.413
         //if dL_NGU_UP_TNLInformation is included, it shall be considered as the new DL transport layer addr for the PDU session (should be verified)
         //TODO: may include uL_NGU_UP_TNLInformation (mapping between each new DL transport layer address and the corresponding UL transport layer address)
-        fteid_t dl_teid;
+        pfcp::fteid_t dl_teid;
         memcpy(
-            &dl_teid.teid_gre_key,
+            &dl_teid.teid,
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID
                 .buf,
-            sizeof(struct in_addr));
+                TEID_GRE_KEY_LENGTH);
         memcpy(
             &dl_teid.ipv4_address,
             decoded_msg->dL_NGU_UP_TNLInformation->choice.gTPTunnel
                 ->transportLayerAddress.buf,
             4);
 
-        dl_teid.teid_gre_key = ntohl(dl_teid.teid_gre_key);
-        dl_teid.interface_type = S1_U_ENODEB_GTP_U;
+        dl_teid.teid = ntohl(dl_teid.teid);
         dl_teid.v4 = 1;  //Only v4 for now
         smreq->req.set_dl_fteid(dl_teid);
 
@@ -2754,6 +2755,7 @@ void smf_context::insert_dnn_subscription(
 //------------------------------------------------------------------------------
 bool smf_context::is_dnn_snssai_subscription_data(const std::string &dnn,
                                                   const snssai_t &snssai) {
+  std::unique_lock<std::recursive_mutex> lock(m_context);
   if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
     std::shared_ptr<session_management_subscription> ss = dnn_subscriptions.at(
         (uint8_t) snssai.sST);
@@ -2771,7 +2773,7 @@ bool smf_context::find_dnn_subscription(
     std::shared_ptr<session_management_subscription> &ss) {
   Logger::smf_app().info("Find a DNN Subscription with key: %d, map size %d",
                          (uint8_t) snssai.sST, dnn_subscriptions.size());
-  //std::unique_lock<std::recursive_mutex> lock(m_context);
+  std::unique_lock<std::recursive_mutex> lock(m_context);
   if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
     ss = dnn_subscriptions.at((uint8_t) snssai.sST);
     return true;
@@ -2851,6 +2853,7 @@ bool smf_context::find_pdu_session(const pfcp::pdr_id_t &pdr_id,
                                    pfcp::qfi_t &qfi,
                                    std::shared_ptr<dnn_context> &sd,
                                    std::shared_ptr<smf_pdu_session> &sp) {
+  std::unique_lock<std::recursive_mutex> lock(m_context);
   for (auto it : dnns) {
     for (auto session : it.get()->pdu_sessions) {
       smf_qos_flow flow = { };
@@ -2902,7 +2905,6 @@ bool dnn_context::find_pdu_session(
     const uint32_t pdu_session_id,
     std::shared_ptr<smf_pdu_session> &pdu_session) {
   pdu_session = { };
-
   std::shared_lock lock(m_context);
   for (auto it : pdu_sessions) {
     if (pdu_session_id == it->pdu_session_id) {

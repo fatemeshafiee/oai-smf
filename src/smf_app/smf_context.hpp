@@ -104,8 +104,8 @@ class smf_qos_flow {
   std::string toString() const;
 
   pfcp::qfi_t qfi;  //QoS Flow Identifier
-  fteid_t ul_fteid;  //fteid of UPF
-  fteid_t dl_fteid;  //fteid of AN
+  pfcp::fteid_t ul_fteid;  //fteid of UPF
+  pfcp::fteid_t dl_fteid;  //fteid of AN
   pfcp::pdr_id_t pdr_id_ul;   // Packet Detection Rule ID, UL
   pfcp::pdr_id_t pdr_id_dl;   // Packet Detection Rule ID, DL
   pfcp::precedence_t precedence;
@@ -434,7 +434,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint8_t number_of_supported_packet_filters;  //number_of_supported_packet_filters
   util::uint_generator<uint32_t> qos_rule_id_generator;
 
-   mutable std::shared_mutex m_pdu_session_mutex;
+  // Recursive lock
+  mutable std::shared_mutex m_pdu_session_mutex;
 
 };
 
@@ -477,6 +478,8 @@ class session_management_subscription {
  private:
   snssai_t single_nssai;
   std::map<std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;  //dnn <->dnn_configuration
+
+  // Recursive lock
   mutable std::shared_mutex m_mutex;
 };
 

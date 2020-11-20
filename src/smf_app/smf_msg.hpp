@@ -77,16 +77,16 @@ class qos_flow_context_updated {
 
   void set_cause(const uint8_t cause);
   void set_qfi(const pfcp::qfi_t &q);
-  void set_ul_fteid(const fteid_t &teid);
-  void set_dl_fteid(const fteid_t &teid);
+  void set_ul_fteid(const pfcp::fteid_t &teid);
+  void set_dl_fteid(const pfcp::fteid_t &teid);
   void add_qos_rule(const QOSRulesIE &rule);
   void set_qos_profile(const qos_profile_t &profile);
   void set_priority_level(uint8_t p);
 
   uint8_t cause_value;
   pfcp::qfi_t qfi;
-  fteid_t ul_fteid;
-  fteid_t dl_fteid;
+  pfcp::fteid_t ul_fteid;
+  pfcp::fteid_t dl_fteid;
   std::map<uint8_t, QOSRulesIE> qos_rules;
   qos_profile_t qos_profile;
   bool to_be_removed;
@@ -351,8 +351,8 @@ class pdu_session_update_sm_context_request :
   void add_qfi(const pfcp::qfi_t &qfi);
   void add_qfi(const uint8_t &qfi);
   void get_qfis(std::vector<pfcp::qfi_t> &q);
-  void set_dl_fteid(const fteid_t &t);
-  void get_dl_fteid(fteid_t &t);
+  void set_dl_fteid(const pfcp::fteid_t &t);
+  void get_dl_fteid(pfcp::fteid_t &t);
   void set_upCnx_state(const std::string &value);
   bool upCnx_state_is_set() const;
   void set_rat_type(const std::string &value);
@@ -364,7 +364,7 @@ class pdu_session_update_sm_context_request :
 
  private:
   std::vector<pfcp::qfi_t> qfis;
-  fteid_t dl_fteid;  //AN Tunnel Info
+  pfcp::fteid_t dl_fteid;  //AN Tunnel Info
   std::string m_nf_instanceId;
   std::string m_an_type;
   bool m_an_type_is_set;
