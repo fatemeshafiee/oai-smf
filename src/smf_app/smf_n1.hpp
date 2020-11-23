@@ -100,11 +100,6 @@ class smf_n1 {
                               cause_value_5gsm_e sm_cause);
 */
 
-  //For testing purpose
-  bool create_n1_pdu_session_modification_request(pdu_session_update_sm_context_response &msg,
-                              std::string &nas_msg_str,
-                              cause_value_5gsm_e sm_cause);
-
   /*
    * Create N1 SM Container: PDU Session Modification Command
    * Included in PDU Session Update SM Context Response (PDU Session Modification UE-Initiated procedure - step 1)

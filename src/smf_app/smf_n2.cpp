@@ -349,7 +349,6 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(pdu_session_u
       qos_flow.qfi.qfi, qos_flow.qos_profile.priority_level,
       qos_flow.qos_profile.arp.priority_level);
 
-
   //check the QoS Flow
   if ((qos_flow.qfi.qfi < QOS_FLOW_IDENTIFIER_FIRST )
       or (qos_flow.qfi.qfi > QOS_FLOW_IDENTIFIER_LAST )) {
@@ -869,21 +868,6 @@ bool smf_n2::create_n2_pdu_session_resource_release_command_transfer(pdu_session
           1, sizeof(Ngap_PDUSessionResourceReleaseCommandTransfer_t));
 
   //TODO: To be completed, here's an example
-  /*
-   typedef struct Ngap_Cause {
-   Ngap_Cause_PR present;
-   union Ngap_Cause_u {
-   Ngap_CauseRadioNetwork_t   radioNetwork;
-   Ngap_CauseTransport_t  transport;
-   Ngap_CauseNas_t  nas;
-   Ngap_CauseProtocol_t   protocol;
-   Ngap_CauseMisc_t   misc;
-   struct Ngap_ProtocolIE_SingleContainer  *choice_Extensions;
-   } choice;
-
-   asn_struct_ctx_t _asn_ctx;
-   } Ngap_Cause_t;
-   */
   ngap_resource_release_command_transfer->cause.present =
       Ngap_Cause_PR_radioNetwork;
   ngap_resource_release_command_transfer->cause.choice.radioNetwork = 1;
@@ -943,12 +927,6 @@ bool smf_n2::create_n2_pdu_session_resource_modify_response_transfer(pdu_session
   //PDU Session Resource Modify Response Transfer IE for testing purpose
   Logger::smf_n2().debug("Create N2 SM Information: NGAP PDU Session Resource Modify Response Transfer IE");
   bool result = false;
-
-  //struct Ngap_UPTransportLayerInformation *dL_NGU_UP_TNLInformation;  /* OPTIONAL */
-  //struct Ngap_UPTransportLayerInformation *uL_NGU_UP_TNLInformation;  /* OPTIONAL */
-  //struct Ngap_QosFlowAddOrModifyResponseList  *qosFlowAddOrModifyResponseList;  /* OPTIONAL */
-  //struct Ngap_QosFlowPerTNLInformationList  *additionalDLQosFlowPerTNLInformation;  /* OPTIONAL */
-  // struct Ngap_QosFlowListWithCause  *qosFlowFailedToAddOrModifyList;  /* OPTIONAL */
 
   Ngap_PDUSessionResourceModifyResponseTransfer_t *ngap_resource_response_transfer =
       nullptr;
@@ -1052,15 +1030,6 @@ bool smf_n2::create_n2_pdu_session_resource_modify_response_transfer(pdu_session
 
   return result;
 }
-
-//------------------------------------------------------------------------------
-/*
-bool smf_n2::create_n2_pdu_session_resource_modify_response_transfer(pdu_session_modification_network_requested &msg,
-                                                                     n2_sm_info_type_e ngap_info_type,
-                                                                     std::string &ngap_msg_str) {
-  //TODO:
-}
-*/
 
 //---------------------------------------------------------------------------------------------
 int smf_n2::decode_n2_sm_information(

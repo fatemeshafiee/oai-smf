@@ -1015,27 +1015,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
   N2_SM_CONTENT_ID;
 
   switch (session_procedure_type) {
-    //FOR TESTING PURPOSE
-    case session_management_procedures_type_e::PDU_SESSION_TEST: {
-      //N1 SM
-      smf_n1::get_instance().create_n1_pdu_session_modification_request(
-          n11_triggered_pending->res, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN);
-      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-      n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
-      //N2 SM Information
-      smf_n2::get_instance().create_n2_pdu_session_resource_modify_response_transfer(
-          n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_MOD_RSP,
-          n2_sm_info);
-      smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
-
-      //fill the content of SmContextUpdatedData
-      sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PDU_RES_MOD_RSP";  //NGAP message
-      n11_triggered_pending->res.set_json_data(sm_context_updated_data);
-    }
-      break;
-
       //PDU Session Establishment UE-Requested
     case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
       //No need to create N1/N2 Container, just Cause

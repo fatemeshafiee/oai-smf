@@ -265,7 +265,6 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(pdu_session_msg &msg,
   //Message Type
   sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_REJECT;
   Logger::smf_n1().debug("NAS header, Extended Protocol Discriminator  0x%x, Security Header Type: 0x%x", nas_msg.header.extended_protocol_discriminator, nas_msg.header.security_header_type);
-
   Logger::smf_n1().debug("SM header, PDU Session Identity 0x%x, Procedure Transaction Identity 0x%x, Message Type 0x%x", sm_msg->header.pdu_session_identity, sm_msg->header.procedure_transaction_identity, sm_msg->header.message_type);
 
   //5GSM Cause
@@ -286,30 +285,6 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(pdu_session_msg &msg,
   SSC_MODE2_NOT_ALLOWED;
   sm_msg->pdu_session_establishment_reject.allowedsscmode.is_ssc3_allowed =
   SSC_MODE3_NOT_ALLOWED;
-
-  /*
-   //EAPMessage
-   unsigned char bitStream_eapmessage[2] = {0x01,0x02};
-   bstring eapmessage_tmp = bfromcstralloc(2, "\0");
-   eapmessage_tmp->slen = 2;
-   memcpy(eapmessage_tmp->data,bitStream_eapmessage,sizeof(bitStream_eapmessage));
-   sm_msg->pdu_session_establishment_reject.eapmessage = bfromcstralloc(2, "\0");
-   sm_msg->pdu_session_establishment_reject.eapmessage->slen = 2;
-
-   //ExtendedProtocolConfigurationOptions
-   unsigned char bitStream_extendedprotocolconfigurationoptions[4];
-   bitStream_extendedprotocolconfigurationoptions[0] = 0x12;
-   bitStream_extendedprotocolconfigurationoptions[1] = 0x13;
-   bitStream_extendedprotocolconfigurationoptions[2] = 0x14;
-   bitStream_extendedprotocolconfigurationoptions[3] = 0x15;
-   bstring extendedprotocolconfigurationoptions_tmp = bfromcstralloc(4, "\0");
-   extendedprotocolconfigurationoptions_tmp->slen = 4;
-   memcpy(extendedprotocolconfigurationoptions_tmp->data,bitStream_extendedprotocolconfigurationoptions,sizeof(bitStream_extendedprotocolconfigurationoptions));
-   sm_msg->pdu_session_establishment_reject.extendedprotocolconfigurationoptions = extendedprotocolconfigurationoptions_tmp;
-
-   //5GSM CongestionReattemptIndicator
-   sm_msg->pdu_session_establishment_reject._5gsmcongestionreattemptindicator.abo = THE_BACKOFF_TIMER_IS_APPLIED_IN_ALL_PLMNS;
-   */
 
   Logger::smf_n1().debug("SM MSG, 5GSM Cause: 0x%x", sm_msg->pdu_session_establishment_reject._5gsmcause);
   Logger::smf_n1().debug("SM MSG, Allowed SSC Mode, SSC1 allowed 0x%x, SSC2 allowed 0x%x, SSC3 allowed 0x%x", sm_msg->pdu_session_establishment_reject.allowedsscmode.is_ssc1_allowed, sm_msg->pdu_session_establishment_reject.allowedsscmode.is_ssc2_allowed,
@@ -334,16 +309,6 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(pdu_session_msg &msg,
   }
 
   return result;
-}
-
-//-----------------------------------------------------------------------------------------------------
-//For testing purpose
-bool smf_n1::create_n1_pdu_session_modification_request(pdu_session_update_sm_context_response &msg,
-                                                        std::string &nas_msg_str,
-                                                        cause_value_5gsm_e sm_cause) {
-  //TODO:
-  Logger::smf_n1().info("Create N1 SM Container, PDU Session Modification Request");
-  return true;
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -411,7 +376,6 @@ bool smf_n1::create_n1_pdu_session_modification_command(pdu_session_update_sm_co
   sm_msg->pdu_session_modification_command.presence = 0xff;  //TODO: to be updated
   //5GSMCause
   sm_msg->pdu_session_modification_command._5gsmcause = static_cast<uint8_t>(sm_cause);
-
   //SessionAMBR (default)
   sc.get()->get_session_ambr(sm_msg->pdu_session_modification_command.sessionambr, sm_context_res.get_snssai(), sm_context_res.get_dnn());
 
@@ -539,7 +503,6 @@ bool smf_n1::create_n1_pdu_session_modification_command(pdu_session_modification
   sm_msg->pdu_session_modification_command.presence = 0xff;  //TODO: to be updated
   //5GSMCause
   sm_msg->pdu_session_modification_command._5gsmcause = static_cast<uint8_t>(sm_cause);
-
   //SessionAMBR (default)
   sc.get()->get_session_ambr(sm_msg->pdu_session_modification_command.sessionambr, msg.get_snssai(), msg.get_dnn());
 

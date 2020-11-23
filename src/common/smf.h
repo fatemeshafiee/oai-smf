@@ -201,7 +201,6 @@ typedef struct qos_profile_s {
 #define NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL        "/sm-contexts"
 #define NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL        "/sm-contexts/"
 
-
 //for CURL
 #define AMF_CURL_TIMEOUT_MS 100L
 #define AMF_NUMBER_RETRIES 3

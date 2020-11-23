@@ -136,8 +136,6 @@ smf_n11::smf_n11() {
 void smf_n11::send_n1n2_message_transfer_request(
     std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res) {
   //Transfer N1/N2 message via AMF by using N_amf_Communication_N1N2MessageTransfer (see TS29518_Namf_Communication.yaml)
-  //TODO: use RestSDK for client, use curl to send data for the moment
-
   Logger::smf_n11().debug("Send Communication_N1N2MessageTransfer to AMF (HTTP version %d)", sm_context_res->http_version);
 
   mime_parser parser = {};
