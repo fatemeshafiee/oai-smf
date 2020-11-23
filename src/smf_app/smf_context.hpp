@@ -130,7 +130,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     ipv6 = false;
     ipv4_address.s_addr = INADDR_ANY;
     ipv6_address = in6addr_any;
-    pdn_type = { };
+    pdu_session_type = { };
     seid = 0;
     up_fseid = { };
     qos_flows.clear();
@@ -392,15 +392,15 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   /*
    * Get PDN Type of this PDU session
    * @param void
-   * @return pdn_type_t: PDN Type
+   * @return pdu_session_type_t: PDN Type
    */
-  pdn_type_t get_pdn_type() const;
+  pdu_session_type_t get_pdu_session_type() const;
 
   bool ipv4;                  // IP Address(es): IPv4 address and/or IPv6 prefix
   bool ipv6;                  // IP Address(es): IPv4 address and/or IPv6 prefix
   struct in_addr ipv4_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
   struct in6_addr ipv6_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
-  pdn_type_t pdn_type;            // IPv4, IPv6, IPv4v6 or Non-IP
+  pdu_session_type_t pdu_session_type;            // IPv4, IPv6, IPv4v6 or Non-IP
 
   bool released;  //(release access bearers request)
 

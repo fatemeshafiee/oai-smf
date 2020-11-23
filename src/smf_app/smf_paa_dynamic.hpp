@@ -240,17 +240,17 @@ class paa_dynamic {
   bool get_free_paa(const std::string &dnn_label, paa_t &paa) {
     if (dnns.count(dnn_label)) {
       dnn_dynamic_pools &dnn_pool = dnns[dnn_label];
-      if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4) {
+      if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
         for (std::vector<uint32_t>::const_iterator it4 = dnn_pool.ipv4_pool_ids
             .begin(); it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].alloc_address(paa.ipv4_address)) {
             return true;
           }
         }
-        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4 for DNN %s",
+        Logger::smf_app().warn("Could not get PAA PDU_SESSION_TYPE_E_IPV4 for DNN %s",
                                dnn_label.c_str());
         return false;
-      } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4V6) {
+      } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
         bool success = false;
         std::vector<uint32_t>::const_iterator it4 = { };
         for (it4 = dnn_pool.ipv4_pool_ids.begin();
@@ -269,17 +269,17 @@ class paa_dynamic {
           }
           ipv4_pools[*it4].free_address(paa.ipv4_address);
         }
-        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV4V6 for DNN %s",
+        Logger::smf_app().warn("Could not get PAA PDU_SESSION_TYPE_E_IPV4V6 for DNN %s",
                                dnn_label.c_str());
         return false;
-      } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV6) {
+      } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
         for (std::vector<uint32_t>::const_iterator it6 = dnn_pool.ipv6_pool_ids
             .begin(); it6 != dnn_pool.ipv6_pool_ids.end(); ++it6) {
           if (ipv6_pools[*it6].alloc_address(paa.ipv6_address)) {
             return true;
           }
         }
-        Logger::smf_app().warn("Could not get PAA PDN_TYPE_E_IPV6 for DNN %s",
+        Logger::smf_app().warn("Could not get PAA PDU_SESSION_TYPE_E_IPV6 for DNN %s",
                                dnn_label.c_str());
         return false;
       }
@@ -291,7 +291,7 @@ class paa_dynamic {
   bool release_paa(const std::string &dnn_label, const paa_t &paa) {
     if (dnns.count(dnn_label)) {
       dnn_dynamic_pools &dnn_pool = dnns[dnn_label];
-      if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4) {
+      if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
         for (std::vector<uint32_t>::const_iterator it4 = dnn_pool.ipv4_pool_ids
             .begin(); it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].free_address(paa.ipv4_address)) {
@@ -299,7 +299,7 @@ class paa_dynamic {
           }
         }
         return false;
-      } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV4V6) {
+      } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
         bool success = false;
         std::vector<uint32_t>::const_iterator it4 = { };
         for (it4 = dnn_pool.ipv4_pool_ids.begin();
@@ -309,7 +309,7 @@ class paa_dynamic {
           }
         }
         return false;
-      } else if (paa.pdn_type.pdn_type == PDN_TYPE_E_IPV6) {
+      } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
         return true;
       }
     }

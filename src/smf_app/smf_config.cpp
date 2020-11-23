@@ -409,20 +409,24 @@ int smf_config::load(const string &config_file) {
       dnn_cfg.lookupValue(SMF_CONFIG_STRING_DNN_NI, astring);
       dnn[dnn_idx].dnn = astring;
       dnn[dnn_idx].dnn_label = EPC::Utility::dnn_label(astring);
-      dnn_cfg.lookupValue(SMF_CONFIG_STRING_PDN_TYPE, astring);
+      dnn_cfg.lookupValue(SMF_CONFIG_STRING_PDU_SESSION_TYPE, astring);
       if (boost::iequals(astring, "IPv4")) {
-        dnn[dnn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV4;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4;
       } else if (boost::iequals(astring, "IPv6") == 0) {
-        dnn[dnn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV6;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV6;
       } else if (boost::iequals(astring, "IPv4IPv6") == 0) {
-        dnn[dnn_idx].pdn_type.pdn_type = PDN_TYPE_E_IPV4V6;
-      } else if (boost::iequals(astring, "Non-IP") == 0) {
-        dnn[dnn_idx].pdn_type.pdn_type = PDN_TYPE_E_NON_IP;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4V6;
+      } else if (boost::iequals(astring, "Unstructured") == 0) {
+        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_UNSTRUCTURED;
+      } else if (boost::iequals(astring, "Ethernet") == 0) {
+        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_ETHERNET;
+      } else if (boost::iequals(astring, "Reserved") == 0) {
+        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_RESERVED;
       } else {
         Logger::smf_app().error(
-            " " SMF_CONFIG_STRING_PDN_TYPE " in %d'th DNN :%s", i + 1,
+            " " SMF_CONFIG_STRING_PDU_SESSION_TYPE " in %d'th DNN :%s", i + 1,
             astring.c_str());
-        throw("Error PDN_TYPE in config file");
+        throw("Error PDU_SESSION_TYPE in config file");
       }
       dnn_cfg.lookupValue(SMF_CONFIG_STRING_IPV4_POOL,
                           dnn[dnn_idx].pool_id_iv4);
@@ -430,16 +434,16 @@ int smf_config::load(const string &config_file) {
                           dnn[dnn_idx].pool_id_iv6);
 
       if ((0 <= dnn[dnn_idx].pool_id_iv4)
-          && (dnn[dnn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV6)) {
+          && (dnn[dnn_idx].pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6)) {
         Logger::smf_app().error(
-            "PDN_TYPE versus pool identifier %d 'th DNN in config file", i + 1);
-        throw("PDN_TYPE versus pool identifier DNN");
+            "PDU_SESSION_TYPE versus pool identifier %d 'th DNN in config file", i + 1);
+        throw("PDU_SESSION_TYPE versus pool identifier DNN");
       }
       if ((0 <= dnn[dnn_idx].pool_id_iv6)
-          && (dnn[dnn_idx].pdn_type.pdn_type == PDN_TYPE_E_IPV4)) {
+          && (dnn[dnn_idx].pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4)) {
         Logger::smf_app().error(
-            "PDN_TYPE versus pool identifier %d 'th DNN in config file", i + 1);
-        throw("PDN_TYPE versus pool identifier DNN");
+            "PDU_SESSION_TYPE versus pool identifier %d 'th DNN in config file", i + 1);
+        throw("PDU_SESSION_TYPE versus pool identifier DNN");
       }
 
       if (((0 <= dnn[dnn_idx].pool_id_iv4) || (0 <= dnn[dnn_idx].pool_id_iv6))
@@ -756,8 +760,8 @@ void smf_config::display() {
     Logger::smf_app().info("    DNN %d:", i);
     Logger::smf_app().info("        " SMF_CONFIG_STRING_DNN_NI ":  %s",
                            dnn[i].dnn.c_str());
-    Logger::smf_app().info("        " SMF_CONFIG_STRING_PDN_TYPE ":  %s",
-                           dnn[i].pdn_type.toString().c_str());
+    Logger::smf_app().info("        " SMF_CONFIG_STRING_PDU_SESSION_TYPE ":  %s",
+                           dnn[i].pdu_session_type.toString().c_str());
     if (dnn[i].pool_id_iv4 >= 0) {
       std::string range_low(inet_ntoa(ue_pool_range_low[dnn[i].pool_id_iv4]));
       std::string range_high(inet_ntoa(ue_pool_range_high[dnn[i].pool_id_iv4]));
@@ -831,20 +835,6 @@ void smf_config::display() {
 }
 
 //------------------------------------------------------------------------------
-bool smf_config::is_dotted_dnn_handled(const string &dnn,
-                                       const pdn_type_t &pdn_type) {
-  for (int i = 0; i < smf_cfg.num_dnn; i++) {
-    if (0 == dnn.compare(smf_cfg.dnn[i].dnn_label)) {
-      // TODO refine
-      if (pdn_type.pdn_type == smf_cfg.dnn[i].pdn_type.pdn_type) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
 int smf_config::get_pfcp_node_id(pfcp::node_id_t &node_id) {
   node_id = { };
   if (n4.addr4.s_addr) {
@@ -895,9 +885,9 @@ bool smf_config::is_dotted_dnn_handled(
       Logger::smf_app().debug("DNN matched!");
       Logger::smf_app().debug("PDU Session Type %d, PDN Type %d",
                               pdn_session_type.pdu_session_type,
-                              smf_cfg.dnn[i].pdn_type.pdn_type);
+                              smf_cfg.dnn[i].pdu_session_type.pdu_session_type);
       if (pdn_session_type.pdu_session_type
-          == smf_cfg.dnn[i].pdn_type.pdn_type) {
+          == smf_cfg.dnn[i].pdu_session_type.pdu_session_type) {
         return true;
       }
     }

@@ -28,7 +28,6 @@
 #ifndef FILE_3GPP_23_003_SEEN
 #define FILE_3GPP_23_003_SEEN
 
-//#include "3gpp_29.274.h"
 #include <stdint.h>
 
 typedef struct plmn_s {

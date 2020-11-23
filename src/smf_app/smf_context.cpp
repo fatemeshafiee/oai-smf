@@ -106,66 +106,70 @@ void smf_qos_flow::deallocate_ressources() {
 
 //------------------------------------------------------------------------------
 void smf_pdu_session::set(const paa_t &paa) {
-  switch (paa.pdn_type.pdn_type) {
-    case PDN_TYPE_E_IPV4:
+  switch (paa.pdu_session_type.pdu_session_type) {
+    case PDU_SESSION_TYPE_E_IPV4:
       ipv4 = true;
       ipv6 = false;
       ipv4_address = paa.ipv4_address;
-      pdn_type.pdn_type = paa.pdn_type.pdn_type;
+      pdu_session_type.pdu_session_type = paa.pdu_session_type.pdu_session_type;
       break;
-    case PDN_TYPE_E_IPV6:
+    case PDU_SESSION_TYPE_E_IPV6:
       ipv4 = false;
       ipv6 = true;
       ipv6_address = paa.ipv6_address;
-      pdn_type.pdn_type = paa.pdn_type.pdn_type;
+      pdu_session_type.pdu_session_type = paa.pdu_session_type.pdu_session_type;
       break;
-    case PDN_TYPE_E_IPV4V6:
+    case PDU_SESSION_TYPE_E_IPV4V6:
       ipv4 = true;
       ipv6 = true;
       ipv4_address = paa.ipv4_address;
       ipv6_address = paa.ipv6_address;
-      pdn_type.pdn_type = paa.pdn_type.pdn_type;
+      pdu_session_type.pdu_session_type = paa.pdu_session_type.pdu_session_type;
       break;
-    case PDN_TYPE_E_NON_IP:
+    case PDU_SESSION_TYPE_E_UNSTRUCTURED:
+    case PDU_SESSION_TYPE_E_ETHERNET:
+    case PDU_SESSION_TYPE_E_RESERVED:
       ipv4 = false;
       ipv6 = false;
-      pdn_type.pdn_type = paa.pdn_type.pdn_type;
+      pdu_session_type.pdu_session_type = paa.pdu_session_type.pdu_session_type;
       break;
     default:
       Logger::smf_app().error("smf_pdu_session::set(paa_t) Unknown PDN type %d",
-                              paa.pdn_type.pdn_type);
+                              paa.pdu_session_type.pdu_session_type);
   }
 }
 
 //------------------------------------------------------------------------------
 void smf_pdu_session::get_paa(paa_t &paa) {
-  switch (pdn_type.pdn_type) {
-    case PDN_TYPE_E_IPV4:
+  switch (pdu_session_type.pdu_session_type) {
+    case PDU_SESSION_TYPE_E_IPV4:
       ipv4 = true;
       ipv6 = false;
       paa.ipv4_address = ipv4_address;
       break;
-    case PDN_TYPE_E_IPV6:
+    case PDU_SESSION_TYPE_E_IPV6:
       ipv4 = false;
       ipv6 = true;
       paa.ipv6_address = ipv6_address;
       break;
-    case PDN_TYPE_E_IPV4V6:
+    case PDU_SESSION_TYPE_E_IPV4V6:
       ipv4 = true;
       ipv6 = true;
       paa.ipv4_address = ipv4_address;
       paa.ipv6_address = ipv6_address;
       break;
-    case PDN_TYPE_E_NON_IP:
+    case PDU_SESSION_TYPE_E_UNSTRUCTURED:
+    case PDU_SESSION_TYPE_E_ETHERNET:
+    case PDU_SESSION_TYPE_E_RESERVED:
       ipv4 = false;
       ipv6 = false;
       break;
     default:
       Logger::smf_app().error(
           "smf_pdu_session::get_paa (paa_t) Unknown PDN type %d",
-          pdn_type.pdn_type);
+          pdu_session_type.pdu_session_type);
   }
-  paa.pdn_type.pdn_type = pdn_type.pdn_type;
+  paa.pdu_session_type.pdu_session_type = pdu_session_type.pdu_session_type;
 }
 
 //------------------------------------------------------------------------------
@@ -361,7 +365,7 @@ std::string smf_pdu_session::toString() const {
   smf_qos_flow flow = { };
 
   s.append("PDN CONNECTION:\n");
-  s.append("\tPDN type:\t\t\t").append(pdn_type.toString()).append("\n");
+  s.append("\tPDN type:\t\t\t").append(pdu_session_type.toString()).append("\n");
   if (ipv4)
     s.append("\tPAA IPv4:\t\t\t").append(conv::toString(ipv4_address)).append(
         "\n");
@@ -420,8 +424,8 @@ upCnx_state_e smf_pdu_session::get_upCnx_state() const {
 }
 
 //------------------------------------------------------------------------------
-pdn_type_t smf_pdu_session::get_pdn_type() const {
-  return pdn_type;
+pdu_session_type_t smf_pdu_session::get_pdu_session_type() const {
+  return pdu_session_type;
 }
 
 //------------------------------------------------------------------------------
@@ -737,7 +741,7 @@ void smf_context::handle_itti_msg(
             session_report_msg.set_snssai(sd.get()->nssai);  //s-nssai
             session_report_msg.set_dnn(sd.get()->dnn_in_use);  //dnn
             session_report_msg.set_pdu_session_type(
-                sp.get()->get_pdn_type().pdn_type);  //pdu session type
+                sp.get()->get_pdu_session_type().pdu_session_type);  //pdu session type
             //get supi and put into URL
             std::string supi_prefix = { };
             get_supi_prefix(supi_prefix);
@@ -1255,7 +1259,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   if (nullptr == sp.get()) {
     Logger::smf_app().debug("Create a new PDU session");
     sp = std::shared_ptr<smf_pdu_session>(new smf_pdu_session());
-    sp.get()->pdn_type.pdn_type = smreq->req.get_pdu_session_type();
+    sp.get()->pdu_session_type.pdu_session_type = smreq->req.get_pdu_session_type();
     sp.get()->pdu_session_id = pdu_session_id;
     sp.get()->amf_id = smreq->req.get_serving_nf_id();  //amf id
     sd->insert_pdu_session(sp);
@@ -1294,8 +1298,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
   //Step 7. Address allocation based on PDN type
   Logger::smf_app().debug("UE Address Allocation");
-  switch (sp->pdn_type.pdn_type) {
-    case PDN_TYPE_E_IPV4: {
+  switch (sp->pdu_session_type.pdu_session_type) {
+    case PDU_SESSION_TYPE_E_IPV4: {
       if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) {  //use SM NAS signalling
         //static or dynamic address allocation
         bool paa_res = false;  //how to define static or dynamic
@@ -1308,7 +1312,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         if (nullptr != ss.get()) {
           ss.get()->find_dnn_configuration(sd->dnn_in_use, sdc);
           if (nullptr != sdc.get()) {
-            paa.pdn_type.pdn_type = sdc.get()->pdu_session_types
+            paa.pdu_session_type.pdu_session_type = sdc.get()->pdu_session_types
                 .default_session_type.pdu_session_type;
             //TODO: static ip address
           }
@@ -1337,18 +1341,18 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     }
       break;
 
-    case PDN_TYPE_E_IPV6: {
+    case PDU_SESSION_TYPE_E_IPV6: {
       //TODO:
     }
       break;
 
-    case PDN_TYPE_E_IPV4V6: {
+    case PDU_SESSION_TYPE_E_IPV4V6: {
       //TODO:
     }
       break;
 
     default:
-      Logger::smf_app().error("Unknown PDN type %d", sp->pdn_type.pdn_type);
+      Logger::smf_app().error("Unknown PDN type %d", sp->pdu_session_type.pdu_session_type);
       problem_details.setCause(
           pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PDUTYPE_DENIED]);
       smContextCreateError.setError(problem_details);
@@ -1458,15 +1462,17 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     paa_t free_paa = { };
     free_paa = sm_context_resp->res.get_paa();
     if (free_paa.is_ip_assigned()) {
-      switch (sp->pdn_type.pdn_type) {
-        case PDN_TYPE_E_IPV4:
-        case PDN_TYPE_E_IPV4V6:
+      switch (sp->pdu_session_type.pdu_session_type) {
+        case PDU_SESSION_TYPE_E_IPV4:
+        case PDU_SESSION_TYPE_E_IPV4V6:
           paa_dynamic::get_instance().release_paa(sd->dnn_in_use,
                                                   free_paa.ipv4_address);
           break;
 
-        case PDN_TYPE_E_IPV6:
-        case PDN_TYPE_E_NON_IP:
+        case PDU_SESSION_TYPE_E_IPV6:
+        case PDU_SESSION_TYPE_E_UNSTRUCTURED:
+        case PDU_SESSION_TYPE_E_ETHERNET:
+        case PDU_SESSION_TYPE_E_RESERVED:
         default:
           ;
       }
@@ -1583,7 +1589,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
   n11_sm_context_resp->res.set_snssai(sm_context_req_msg.get_snssai());
   n11_sm_context_resp->res.set_dnn(sm_context_req_msg.get_dnn());
   n11_sm_context_resp->res.set_pdu_session_type(
-      sp.get()->get_pdn_type().pdn_type);
+      sp.get()->get_pdu_session_type().pdu_session_type);
 
   //Step 2.1. Decode N1 (if content is available)
   if (sm_context_req_msg.n1_sm_msg_is_set()) {

@@ -80,7 +80,7 @@
 
 #define SMF_CONFIG_STRING_DNN_LIST                              "DNN_LIST"
 #define SMF_CONFIG_STRING_DNN_NI                                "DNN_NI"
-#define SMF_CONFIG_STRING_PDN_TYPE                              "PDU_SESSION_TYPE"
+#define SMF_CONFIG_STRING_PDU_SESSION_TYPE                      "PDU_SESSION_TYPE"
 #define SMF_CONFIG_STRING_IPV4_POOL                             "IPV4_POOL"
 #define SMF_CONFIG_STRING_IPV6_POOL                             "IPV6_POOL"
 
@@ -178,7 +178,7 @@ class smf_config {
     std::string dnn_label;
     int pool_id_iv4;
     int pool_id_iv6;
-    pdn_type_t pdn_type;
+    pdu_session_type_t pdu_session_type;
   } dnn[SMF_NUM_DNN_MAX];
 
   int num_ue_pool;
@@ -298,8 +298,6 @@ class smf_config {
   int load(const std::string &config_file);
   int finalize();
   void display();
-  bool is_dotted_dnn_handled(const std::string &dnn,
-                             const pdn_type_t &pdn_type);
   int get_pfcp_node_id(pfcp::node_id_t &node_id);
   int get_pfcp_fseid(pfcp::fseid_t &fseid);
   bool is_dotted_dnn_handled(const std::string &dnn,
