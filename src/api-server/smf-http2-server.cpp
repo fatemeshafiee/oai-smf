@@ -593,3 +593,8 @@ void smf_http2_server::release_sm_context_handler(
   response.write_head(sm_context_response.get_http_code());
   response.end();
 }
+
+//------------------------------------------------------------------------------
+void smf_http2_server::stop() {
+  server.stop();
+}

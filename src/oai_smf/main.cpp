@@ -45,8 +45,9 @@ itti_mw *itti_inst = nullptr;
 async_shell_cmd *async_shell_cmd_inst = nullptr;
 smf_app *smf_app_inst = nullptr;
 smf_config smf_cfg;
-//SMFApiServer *smf_api_server_1 = nullptr;
-//smf_http2_server *smf_api_server_2 = nullptr;
+SMFApiServer *smf_api_server_1 = nullptr;
+smf_http2_server *smf_api_server_2 = nullptr;
+
 
 void send_heartbeat_to_tasks(const uint32_t sequence);
 
@@ -71,9 +72,16 @@ void my_app_signal_handler(int s)
   std::cout << "Freeing Allocated memory..." << std::endl;
   if (async_shell_cmd_inst) delete async_shell_cmd_inst; async_shell_cmd_inst = nullptr;
   std::cout << "Async Shell CMD memory done." << std::endl;
-  //smf_api_server_1->shutdown();
-  //if (smf_api_server_1) delete smf_api_server_1; smf_api_server_1 = nullptr;
-  //if (smf_api_server_2) delete smf_api_server_2; smf_api_server_2 = nullptr;
+  if (smf_api_server_1) {
+    smf_api_server_1->shutdown();
+    delete smf_api_server_1;
+    smf_api_server_1 = nullptr;
+  }
+  if (smf_api_server_2) {
+    smf_api_server_2->stop();
+    delete smf_api_server_2;
+    smf_api_server_2 = nullptr;
+  }
   std::cout << "SMF API Server memory done." << std::endl;
   if (itti_inst) delete itti_inst; itti_inst = nullptr;
   std::cout << "ITTI memory done." << std::endl;
@@ -129,14 +137,15 @@ int main(int argc, char **argv)
 
   //SMF Pistache API server (HTTP1)
   Pistache::Address addr(std::string(inet_ntoa (*((struct in_addr *)&smf_cfg.sbi.addr4))) , Pistache::Port(smf_cfg.sbi.port));
-  SMFApiServer *smf_api_server_1 = new SMFApiServer(addr, smf_app_inst);
+  smf_api_server_1 = new SMFApiServer(addr, smf_app_inst);
   smf_api_server_1->init(2);
   //smf_api_server_1->start();
   std::thread smf_http1_manager(&SMFApiServer::start, smf_api_server_1);
   //SMF NGHTTP API server (HTTP2)
-  smf_http2_server *smf_api_server_2 = new smf_http2_server(conv::toString(smf_cfg.sbi.addr4), smf_cfg.sbi_http2_port, smf_app_inst);
+  smf_api_server_2 = new smf_http2_server(conv::toString(smf_cfg.sbi.addr4), smf_cfg.sbi_http2_port, smf_app_inst);
   //smf_api_server_2->start();
   std::thread smf_http2_manager(&smf_http2_server::start, smf_api_server_2);
+
   smf_http1_manager.join();
   smf_http2_manager.join();
 
