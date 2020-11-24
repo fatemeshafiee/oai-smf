@@ -34,7 +34,6 @@
 #include <set>
 
 #include "3gpp_29.244.hpp"
-//#include "3gpp_29.274.hpp"
 #include "itti_msg_n11.hpp"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_n4_restore.hpp"

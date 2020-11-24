@@ -850,12 +850,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
       n11_trigger.get()->req.get_pdu_session_id());
 
   pfcp::cause_t cause = { };
-  ::cause_t cause_gtp = { .cause_value = REQUEST_ACCEPTED };
-
-  // must be there
-  if (resp.pfcp_ies.get(cause)) {
-    xgpp_conv::pfcp_cause_to_core_cause(cause, cause_gtp);
-  }
+  resp.pfcp_ies.get(cause);
 
   //list of accepted QFI(s) and AN Tunnel Info corresponding to the PDU Session
   std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified = { };
@@ -1246,12 +1241,7 @@ void session_release_sm_context_procedure::handle_itti_msg(
       n11_trigger.get()->req.get_pdu_session_id());
 
   pfcp::cause_t cause = { };
-  ::cause_t cause_gtp = { .cause_value = REQUEST_ACCEPTED };
-
-  // must be there
-  if (resp.pfcp_ies.get(cause)) {
-    xgpp_conv::pfcp_cause_to_core_cause(cause, cause_gtp);
-  }
+  resp.pfcp_ies.get(cause);
 
   if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
     Logger::smf_app().info("PDU Session Release SM Context accepted by UPF");
