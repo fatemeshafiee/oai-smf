@@ -2089,11 +2089,14 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               "Received a PDU Session Update SM Context Request, couldn't retrieve the corresponding SMF context, ignore message!");
          //TODO: return;
         }
-        smf_event::get_instance().trigger_sm_context_status_notification(scid, static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED), smreq->http_version);
+        //smf_event::get_instance().trigger_sm_context_status_notification(scid, static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED), smreq->http_version);
+        event_sub.sm_context_status(scid, static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED), smreq->http_version);
+
         //Get SUPI
         supi64_t supi64 = smf_supi_to_u64(sm_context_req_msg.get_supi());
         //Trigger PDU Session Release event notification
-        smf_event::get_instance().trigger_ee_pdu_session_release(supi64, sm_context_req_msg.get_pdu_session_id(), smreq->http_version);
+        //smf_event::get_instance().trigger_ee_pdu_session_release(supi64, sm_context_req_msg.get_pdu_session_id(), smreq->http_version);
+        event_sub.ee_pdu_session_release(supi64, sm_context_req_msg.get_pdu_session_id(), smreq->http_version);
 
         //TODO: if dynamic PCC applied, SMF invokes an SM Policy Association Termination
         //TODO: SMF unsubscribes from Session Management Subscription data changes notification from UDM by invoking Numd_SDM_Unsubscribe
@@ -2871,10 +2874,11 @@ bool smf_context::find_pdu_session(const pfcp::pdr_id_t &pdr_id,
   return false;
 }
 
-//---------------------------------------------------------------------------------------------
-void smf_context::send_sm_context_status_notification(scid_t scid,
-                                                      uint32_t status, uint8_t http_version) {
-  Logger::smf_app().debug("Send request to N11 to triger SM Context Status Notification, SMF Context ID " SCID_FMT " ", scid);
+//------------------------------------------------------------------------------
+void smf_context::handle_sm_context_status_change(scid_t scid,
+                                                    uint8_t status,
+                                                    uint8_t http_version) {
+  Logger::smf_app().debug("Send request to N11 to triger SM Context Status Notification to AMF, SMF Context ID " SCID_FMT " ", scid);
   std::shared_ptr<smf_context_ref> scf = { };
 
   if (smf_app_inst->is_scid_2_smf_context(scid)) {
@@ -2898,8 +2902,49 @@ void smf_context::send_sm_context_status_notification(scid_t scid,
 
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
-    Logger::smf_app().error("Could not send ITTI message %s to task TASK_SMF_N11",
-                            itti_msg->get_msg_name());
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N11",
+        itti_msg->get_msg_name());
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_context::handle_ee_pdu_session_release(supi64_t supi,
+                                                pdu_session_id_t pdu_session_id,
+                                                uint8_t http_version) {
+  Logger::smf_app().debug("Send request to N11 to triger PDU Session Release Notification (Event Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d", supi, pdu_session_id, http_version);
+
+  std::vector < std::shared_ptr < smf_subscription >> subscriptions = {};
+  smf_app_inst->get_ee_subscriptions(smf_event_t::SMF_EVENT_PDU_SES_REL, subscriptions);
+
+  if (subscriptions.size() > 0) {
+    //Send request to N11 to trigger the notification to the subscribed event
+    Logger::smf_app().debug(
+        "Send ITTI msg to SMF N11 to trigger the event notification");
+    std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg = std::make_shared
+        < itti_n11_notify_subscribed_event > (TASK_SMF_APP, TASK_SMF_N11);
+
+    for (auto i: subscriptions) {
+      event_notification ev_notif = { };
+      ev_notif.set_supi(supi);
+      ev_notif.set_pdu_session_id(pdu_session_id);
+      ev_notif.set_smf_event(smf_event_t::SMF_EVENT_PDU_SES_REL);
+      ev_notif.set_supi(supi);
+      ev_notif.set_notif_uri(i.get()->notif_uri);
+      ev_notif.set_notif_id(i.get()->notif_id);
+      itti_msg->event_notifs.push_back(ev_notif);
+    }
+
+    itti_msg->http_version = http_version;
+
+    int ret = itti_inst->send_msg(itti_msg);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_N11",
+          itti_msg->get_msg_name());
+    }
+  } else {
+    Logger::smf_app().debug("No subscription available for this event");
   }
 }
 
@@ -2954,4 +2999,3 @@ std::string dnn_context::toString() const {
   }
   return s;
 }
-

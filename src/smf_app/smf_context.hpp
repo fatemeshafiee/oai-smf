@@ -52,6 +52,7 @@
 #include "uint_generator.hpp"
 #include "SmContextCreateData.h"
 #include "SmContextCreateError.h"
+#include "smf_event.hpp"
 
 extern "C" {
 #include "QOSRules.h"
@@ -562,8 +563,14 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       m_context(),
       pending_procedures(),
       dnn_subscriptions(),
-      scid(0) {
+      scid(0), event_sub(smf_event::get_instance()) {
     supi_prefix = { };
+    // subscribe to sm context status change
+    event_sub.subscribe_sm_context_status(boost::bind(
+        &smf_context::handle_sm_context_status_change, this, _1, _1, _1));
+    // subscribe to pdu session release (event exposure)
+    event_sub.subscribe_ee_pdu_session_release(boost::bind(
+        &smf_context::handle_ee_pdu_session_release, this, _1, _1, _1));
   }
 
   smf_context(smf_context &b) = delete;
@@ -824,13 +831,25 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
                         std::shared_ptr<smf_pdu_session> &sp);
 
   /*
-   * Send ITTI msg to N11 to trigger the SM Context Status Notification to AMF
+   * Handle SM Context Status Change (Send notification AMF)
    * @param [scid_t] scid: SMF Context ID
    * @param [uint32_t] status: Updated status
    * @param [uint8_t] http_version: HTTP version
    * @return void
    */
-  void send_sm_context_status_notification(scid_t scid, uint32_t status, uint8_t http_version);
+  void handle_sm_context_status_change(scid_t scid, uint8_t status,
+                                       uint8_t http_version);
+
+  /*
+   * Handle SM Context Status Change (Send notification AMF)
+   * @param [scid_t] scid: SMF Context ID
+   * @param [uint32_t] status: Updated status
+   * @param [uint8_t] http_version: HTTP version
+   * @return void
+   */
+  void handle_ee_pdu_session_release(supi64_t supi,
+                                     pdu_session_id_t pdu_session_id,
+                                     uint8_t http_version);
 
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
@@ -842,6 +861,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   scid_t scid;  //SM Context ID
   // Big recursive lock
   mutable std::recursive_mutex m_context;
+  //for Event Handling
+  smf_event &event_sub;
+
 };
 }
 
