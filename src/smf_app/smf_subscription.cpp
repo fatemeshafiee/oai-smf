@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -28,8 +28,8 @@
  */
 
 #include "smf_subscription.hpp"
-#include "smf_app.hpp"
 #include "itti.hpp"
+#include "smf_app.hpp"
 
 #include "common_defs.h"
 #include "itti_msg_sbi.hpp"
@@ -38,5 +38,3 @@ using namespace smf;
 
 extern smf::smf_app *smf_app_inst;
 extern itti_mw *itti_inst;
-
-

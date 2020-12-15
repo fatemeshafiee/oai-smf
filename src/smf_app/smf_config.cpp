@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * icense at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -82,7 +82,6 @@ int smf_config::finalize() {
 //------------------------------------------------------------------------------
 int smf_config::load_thread_sched_params(const Setting &thread_sched_params_cfg,
                                          util::thread_sched_params &cfg) {
-
   try {
     thread_sched_params_cfg.lookupValue(SMF_CONFIG_STRING_THREAD_RD_CPU_ID,
                                         cfg.cpu_id);
@@ -93,8 +92,7 @@ int smf_config::load_thread_sched_params(const Setting &thread_sched_params_cfg,
   try {
     std::string thread_rd_sched_policy;
     thread_sched_params_cfg.lookupValue(
-    SMF_CONFIG_STRING_THREAD_RD_SCHED_POLICY,
-                                        thread_rd_sched_policy);
+        SMF_CONFIG_STRING_THREAD_RD_SCHED_POLICY, thread_rd_sched_policy);
     util::trim(thread_rd_sched_policy);
     if (boost::iequals(thread_rd_sched_policy, "SCHED_OTHER")) {
       cfg.sched_policy = SCHED_OTHER;
@@ -110,7 +108,7 @@ int smf_config::load_thread_sched_params(const Setting &thread_sched_params_cfg,
       Logger::smf_app().error(
           "thread_rd_sched_policy: %s, unknown in config file",
           thread_rd_sched_policy.c_str());
-      return RETURNerror ;
+      return RETURNerror;
     }
   } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(),
@@ -119,19 +117,19 @@ int smf_config::load_thread_sched_params(const Setting &thread_sched_params_cfg,
 
   try {
     thread_sched_params_cfg.lookupValue(
-    SMF_CONFIG_STRING_THREAD_RD_SCHED_PRIORITY,
-                                        cfg.sched_priority);
+        SMF_CONFIG_STRING_THREAD_RD_SCHED_PRIORITY, cfg.sched_priority);
     if ((cfg.sched_priority > 99) || (cfg.sched_priority < 1)) {
       Logger::smf_app().error(
-          "thread_rd_sched_priority: %d, must be in interval [1..99] in config file",
+          "thread_rd_sched_priority: %d, must be in interval [1..99] in config "
+          "file",
           cfg.sched_priority);
-      return RETURNerror ;
+      return RETURNerror;
     }
   } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().info("%s : %s, using defaults", nfex.what(),
                            nfex.getPath());
   }
-  return RETURNok ;
+  return RETURNok;
 }
 //------------------------------------------------------------------------------
 int smf_config::load_itti(const Setting &itti_cfg, itti_cfg_t &cfg) {
@@ -174,7 +172,7 @@ int smf_config::load_itti(const Setting &itti_cfg, itti_cfg_t &cfg) {
                            nfex.getPath());
   }
 
-  return RETURNok ;
+  return RETURNok;
 }
 
 //------------------------------------------------------------------------------
@@ -182,7 +180,7 @@ int smf_config::load_interface(const Setting &if_cfg, interface_cfg_t &cfg) {
   if_cfg.lookupValue(SMF_CONFIG_STRING_INTERFACE_NAME, cfg.if_name);
   util::trim(cfg.if_name);
   if (not boost::iequals(cfg.if_name, "none")) {
-    std::string address = { };
+    std::string address = {};
     if_cfg.lookupValue(SMF_CONFIG_STRING_IPV4_ADDRESS, address);
     util::trim(address);
     if (boost::iequals(address, "read")) {
@@ -190,31 +188,32 @@ int smf_config::load_interface(const Setting &if_cfg, interface_cfg_t &cfg) {
                                          cfg.mtu)) {
         Logger::smf_app().error(
             "Could not read %s network interface configuration", cfg.if_name);
-        return RETURNerror ;
+        return RETURNerror;
       }
     } else {
       std::vector<std::string> words;
       boost::split(words, address, boost::is_any_of("/"),
                    boost::token_compress_on);
       if (words.size() != 2) {
-        Logger::smf_app().error(
-            "Bad value " SMF_CONFIG_STRING_IPV4_ADDRESS " = %s in config file",
-            address.c_str());
-        return RETURNerror ;
+        Logger::smf_app().error("Bad value " SMF_CONFIG_STRING_IPV4_ADDRESS
+                                " = %s in config file",
+                                address.c_str());
+        return RETURNerror;
       }
       unsigned char buf_in_addr[sizeof(struct in6_addr)];  // you never know...
-      if (inet_pton(AF_INET, util::trim(words.at(0)).c_str(), buf_in_addr)
-          == 1) {
+      if (inet_pton(AF_INET, util::trim(words.at(0)).c_str(), buf_in_addr) ==
+          1) {
         memcpy(&cfg.addr4, buf_in_addr, sizeof(struct in_addr));
       } else {
         Logger::smf_app().error(
-            "In conversion: Bad value " SMF_CONFIG_STRING_IPV4_ADDRESS " = %s in config file",
+            "In conversion: Bad value " SMF_CONFIG_STRING_IPV4_ADDRESS
+            " = %s in config file",
             util::trim(words.at(0)).c_str());
-        return RETURNerror ;
+        return RETURNerror;
       }
-      cfg.network4.s_addr = htons(
-          ntohs(cfg.addr4.s_addr)
-              & 0xFFFFFFFF << (32 - std::stoi(util::trim(words.at(1)))));
+      cfg.network4.s_addr =
+          htons(ntohs(cfg.addr4.s_addr) &
+                0xFFFFFFFF << (32 - std::stoi(util::trim(words.at(1)))));
     }
     if_cfg.lookupValue(SMF_CONFIG_STRING_PORT, cfg.port);
 
@@ -226,7 +225,7 @@ int smf_config::load_interface(const Setting &if_cfg, interface_cfg_t &cfg) {
                              nfex.getPath());
     }
   }
-  return RETURNok ;
+  return RETURNok;
 }
 
 //------------------------------------------------------------------------------
@@ -253,7 +252,7 @@ int smf_config::load(const string &config_file) {
     const Setting &smf_cfg = root[SMF_CONFIG_STRING_SMF_CONFIG];
   } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
-    return RETURNerror ;
+    return RETURNerror;
   }
 
   const Setting &smf_cfg = root[SMF_CONFIG_STRING_SMF_CONFIG];
@@ -289,21 +288,23 @@ int smf_config::load(const string &config_file) {
     const Setting &sbi_cfg = nw_if_cfg[SMF_CONFIG_STRING_INTERFACE_SBI];
     load_interface(sbi_cfg, sbi);
 
-    //HTTP2 port
-    if (!(sbi_cfg.lookupValue(SMF_CONFIG_STRING_SBI_HTTP2_PORT, sbi_http2_port))) {
+    // HTTP2 port
+    if (!(sbi_cfg.lookupValue(SMF_CONFIG_STRING_SBI_HTTP2_PORT,
+                              sbi_http2_port))) {
       Logger::smf_app().error(SMF_CONFIG_STRING_SBI_HTTP2_PORT "failed");
       throw(SMF_CONFIG_STRING_SBI_HTTP2_PORT "failed");
     }
 
-    //SBI API VERSION
-    if (!(sbi_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION, sbi_api_version))) {
+    // SBI API VERSION
+    if (!(sbi_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION,
+                              sbi_api_version))) {
       Logger::smf_app().error(SMF_CONFIG_STRING_API_VERSION "failed");
       throw(SMF_CONFIG_STRING_API_VERSION "failed");
     }
 
   } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
-    return RETURNerror ;
+    return RETURNerror;
   }
 
   try {
@@ -311,7 +312,8 @@ int smf_config::load(const string &config_file) {
 
     const Setting &pool_cfg = smf_cfg[SMF_CONFIG_STRING_IP_ADDRESS_POOL];
 
-    const Setting &ipv4_pool_cfg = pool_cfg[SMF_CONFIG_STRING_IPV4_ADDRESS_LIST];
+    const Setting &ipv4_pool_cfg =
+        pool_cfg[SMF_CONFIG_STRING_IPV4_ADDRESS_LIST];
     int count = ipv4_pool_cfg.getLength();
     for (int i = 0; i < count; i++) {
       const Setting &ipv4_cfg = ipv4_pool_cfg[i];
@@ -326,10 +328,11 @@ int smf_config::load(const string &config_file) {
           boost::token_compress_on);
       if (ips.size() != 2) {
         Logger::smf_app().error("Bad value %s : %s in config file %s",
-        SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER,
+                                SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER,
                                 ipv4_range.c_str(), config_file.c_str());
-        throw("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER, ipv4_range
-            .c_str(), config_file.c_str());
+        throw("Bad value %s : %s in config file %s",
+              SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER,
+              ipv4_range.c_str(), config_file.c_str());
       }
 
       memset(buf_in_addr, 0, sizeof(buf_in_addr));
@@ -338,9 +341,12 @@ int smf_config::load(const string &config_file) {
                sizeof(struct in_addr));
       } else {
         Logger::smf_app().error(
-            "CONFIG POOL ADDR IPV4: BAD LOWER ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d",
+            "CONFIG POOL ADDR IPV4: BAD LOWER ADDRESS "
+            "in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d",
             i);
-        throw("CONFIG POOL ADDR IPV4: BAD ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
+        throw(
+            "CONFIG POOL ADDR IPV4: BAD ADDRESS "
+            "in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
       }
 
       memset(buf_in_addr, 0, sizeof(buf_in_addr));
@@ -349,21 +355,28 @@ int smf_config::load(const string &config_file) {
                sizeof(struct in_addr));
       } else {
         Logger::smf_app().error(
-            "CONFIG POOL ADDR IPV4: BAD HIGHER ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d",
+            "CONFIG POOL ADDR IPV4: BAD HIGHER ADDRESS "
+            "in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d",
             i);
-        throw("CONFIG POOL ADDR IPV4: BAD ADDRESS in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
+        throw(
+            "CONFIG POOL ADDR IPV4: BAD ADDRESS "
+            "in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
       }
-      if (htonl(ue_pool_range_low[num_ue_pool].s_addr)
-          >= htonl(ue_pool_range_high[num_ue_pool].s_addr)) {
+      if (htonl(ue_pool_range_low[num_ue_pool].s_addr) >=
+          htonl(ue_pool_range_high[num_ue_pool].s_addr)) {
         Logger::smf_app().error(
-            "CONFIG POOL ADDR IPV4: BAD RANGE in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d",
+            "CONFIG POOL ADDR IPV4: BAD RANGE "
+            "in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST " pool %d",
             i);
-        throw("CONFIG POOL ADDR IPV4: BAD RANGE in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
+        throw(
+            "CONFIG POOL ADDR IPV4: BAD RANGE "
+            "in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
       }
       num_ue_pool += 1;
     }
 
-    const Setting &ipv6_pool_cfg = pool_cfg[SMF_CONFIG_STRING_IPV6_ADDRESS_LIST];
+    const Setting &ipv6_pool_cfg =
+        pool_cfg[SMF_CONFIG_STRING_IPV6_ADDRESS_LIST];
     int count6 = ipv6_pool_cfg.getLength();
     for (int i = 0; i < count6; i++) {
       const Setting &ipv6_cfg = ipv6_pool_cfg[i];
@@ -376,10 +389,10 @@ int smf_config::load(const string &config_file) {
           boost::token_compress_on);
       if (ips6.size() != 2) {
         Logger::smf_app().error("Bad value %s : %s in config file %s",
-        SMF_CONFIG_STRING_PREFIX,
-                                ipv6_prefix.c_str(), config_file.c_str());
-        throw("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_PREFIX, ipv6_prefix
-            .c_str(), config_file.c_str());
+                                SMF_CONFIG_STRING_PREFIX, ipv6_prefix.c_str(),
+                                config_file.c_str());
+        throw("Bad value %s : %s in config file %s", SMF_CONFIG_STRING_PREFIX,
+              ipv6_prefix.c_str(), config_file.c_str());
       }
 
       std::string addr = ips6.at(0);
@@ -389,9 +402,12 @@ int smf_config::load(const string &config_file) {
                sizeof(struct in6_addr));
       } else {
         Logger::smf_app().error(
-            "CONFIG POOL ADDR IPV6: BAD ADDRESS in " SMF_CONFIG_STRING_IPV6_ADDRESS_LIST " pool %d",
+            "CONFIG POOL ADDR IPV6: BAD ADDRESS "
+            "in " SMF_CONFIG_STRING_IPV6_ADDRESS_LIST " pool %d",
             i);
-        throw("CONFIG POOL ADDR IPV6: BAD ADDRESS in " SMF_CONFIG_STRING_IPV6_ADDRESS_LIST);
+        throw(
+            "CONFIG POOL ADDR IPV6: BAD ADDRESS "
+            "in " SMF_CONFIG_STRING_IPV6_ADDRESS_LIST);
       }
 
       std::string prefix = ips6.at(1);
@@ -411,21 +427,27 @@ int smf_config::load(const string &config_file) {
       dnn[dnn_idx].dnn_label = EPC::Utility::dnn_label(astring);
       dnn_cfg.lookupValue(SMF_CONFIG_STRING_PDU_SESSION_TYPE, astring);
       if (boost::iequals(astring, "IPv4")) {
-        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type =
+            PDU_SESSION_TYPE_E_IPV4;
       } else if (boost::iequals(astring, "IPv6") == 0) {
-        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV6;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type =
+            PDU_SESSION_TYPE_E_IPV6;
       } else if (boost::iequals(astring, "IPv4IPv6") == 0) {
-        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4V6;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type =
+            PDU_SESSION_TYPE_E_IPV4V6;
       } else if (boost::iequals(astring, "Unstructured") == 0) {
-        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_UNSTRUCTURED;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type =
+            PDU_SESSION_TYPE_E_UNSTRUCTURED;
       } else if (boost::iequals(astring, "Ethernet") == 0) {
-        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_ETHERNET;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type =
+            PDU_SESSION_TYPE_E_ETHERNET;
       } else if (boost::iequals(astring, "Reserved") == 0) {
-        dnn[dnn_idx].pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_RESERVED;
+        dnn[dnn_idx].pdu_session_type.pdu_session_type =
+            PDU_SESSION_TYPE_E_RESERVED;
       } else {
-        Logger::smf_app().error(
-            " " SMF_CONFIG_STRING_PDU_SESSION_TYPE " in %d'th DNN :%s", i + 1,
-            astring.c_str());
+        Logger::smf_app().error(" " SMF_CONFIG_STRING_PDU_SESSION_TYPE
+                                " in %d'th DNN :%s",
+                                i + 1, astring.c_str());
         throw("Error PDU_SESSION_TYPE in config file");
       }
       dnn_cfg.lookupValue(SMF_CONFIG_STRING_IPV4_POOL,
@@ -433,27 +455,33 @@ int smf_config::load(const string &config_file) {
       dnn_cfg.lookupValue(SMF_CONFIG_STRING_IPV6_POOL,
                           dnn[dnn_idx].pool_id_iv6);
 
-      if ((0 <= dnn[dnn_idx].pool_id_iv4)
-          && (dnn[dnn_idx].pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6)) {
+      if ((0 <= dnn[dnn_idx].pool_id_iv4) &&
+          (dnn[dnn_idx].pdu_session_type.pdu_session_type ==
+           PDU_SESSION_TYPE_E_IPV6)) {
         Logger::smf_app().error(
-            "PDU_SESSION_TYPE versus pool identifier %d 'th DNN in config file", i + 1);
+            "PDU_SESSION_TYPE versus pool identifier %d 'th DNN in config file",
+            i + 1);
         throw("PDU_SESSION_TYPE versus pool identifier DNN");
       }
-      if ((0 <= dnn[dnn_idx].pool_id_iv6)
-          && (dnn[dnn_idx].pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4)) {
+      if ((0 <= dnn[dnn_idx].pool_id_iv6) &&
+          (dnn[dnn_idx].pdu_session_type.pdu_session_type ==
+           PDU_SESSION_TYPE_E_IPV4)) {
         Logger::smf_app().error(
-            "PDU_SESSION_TYPE versus pool identifier %d 'th DNN in config file", i + 1);
+            "PDU_SESSION_TYPE versus pool identifier %d 'th DNN in config file",
+            i + 1);
         throw("PDU_SESSION_TYPE versus pool identifier DNN");
       }
 
-      if (((0 <= dnn[dnn_idx].pool_id_iv4) || (0 <= dnn[dnn_idx].pool_id_iv6))
-          && (not boost::iequals(dnn[dnn_idx].dnn, "none"))) {
+      if (((0 <= dnn[dnn_idx].pool_id_iv4) ||
+           (0 <= dnn[dnn_idx].pool_id_iv6)) &&
+          (not boost::iequals(dnn[dnn_idx].dnn, "none"))) {
         bool doublon = false;
         for (int j = 0; j < dnn_idx; j++) {
           if (boost::iequals(dnn[j].dnn, dnn[dnn_idx].dnn)) {
             doublon = true;
             Logger::smf_app().info(
-                "%d'th dnn %s already found in config file (%d 'th DNN %s), bypassing",
+                "%d'th dnn %s already found in config file (%d 'th DNN %s), "
+                "bypassing",
                 i + 1, dnn[dnn_idx].dnn.c_str(), j + 1, dnn[j].dnn.c_str());
           }
         }
@@ -480,10 +508,13 @@ int smf_config::load(const string &config_file) {
       memcpy(&default_dnsv6, buf_in6_addr, sizeof(struct in6_addr));
     } else {
       Logger::smf_app().error(
-          "CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS " %s",
+          "CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS
+          " %s",
           astring.c_str());
-      throw("CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS " %s", astring
-          .c_str());
+      throw(
+          "CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS
+          " %s",
+          astring.c_str());
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS,
                         astring);
@@ -491,10 +522,13 @@ int smf_config::load(const string &config_file) {
       memcpy(&default_dns_secv6, buf_in6_addr, sizeof(struct in6_addr));
     } else {
       Logger::smf_app().error(
-          "CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS " %s",
+          "CONFIG : BAD ADDRESS "
+          "in " SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS " %s",
           astring.c_str());
-      throw("CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS " %s", astring
-          .c_str());
+      throw(
+          "CONFIG : BAD ADDRESS "
+          "in " SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS " %s",
+          astring.c_str());
     }
 
     smf_cfg.lookupValue(SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO, astring);
@@ -505,7 +539,7 @@ int smf_config::load(const string &config_file) {
     }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_UE_MTU, ue_mtu);
 
-    //AMF
+    // AMF
     const Setting &amf_cfg = smf_cfg[SMF_CONFIG_STRING_AMF];
     struct in_addr amf_ipv4_addr;
     unsigned int amf_port = 0;
@@ -520,13 +554,14 @@ int smf_config::load(const string &config_file) {
     }
     amf_addr.port = amf_port;
 
-    if (!(amf_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION, amf_api_version))) {
+    if (!(amf_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION,
+                              amf_api_version))) {
       Logger::smf_app().error(SMF_CONFIG_STRING_API_VERSION "failed");
       throw(SMF_CONFIG_STRING_API_VERSION "failed");
     }
     amf_addr.api_version = amf_api_version;
 
-    //UDM
+    // UDM
     const Setting &udm_cfg = smf_cfg[SMF_CONFIG_STRING_UDM];
     struct in_addr udm_ipv4_addr;
     unsigned int udm_port = 0;
@@ -541,44 +576,45 @@ int smf_config::load(const string &config_file) {
     }
     udm_addr.port = udm_port;
 
-    if (!(udm_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION, udm_api_version))) {
+    if (!(udm_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION,
+                              udm_api_version))) {
       Logger::smf_app().error(SMF_CONFIG_STRING_API_VERSION "failed");
       throw(SMF_CONFIG_STRING_API_VERSION "failed");
     }
     udm_addr.api_version = udm_api_version;
 
-
-    //UPF list
+    // UPF list
     unsigned char buf_in_addr[sizeof(struct in_addr) + 1];
     const Setting &upf_list_cfg = smf_cfg[SMF_CONFIG_STRING_UPF_LIST];
     count = upf_list_cfg.getLength();
     for (int i = 0; i < count; i++) {
       const Setting &upf_cfg = upf_list_cfg[i];
 
-      string address = { };
+      string address = {};
       if (upf_cfg.lookupValue(SMF_CONFIG_STRING_UPF_IPV4_ADDRESS, address)) {
-        pfcp::node_id_t n = { };
+        pfcp::node_id_t n = {};
         n.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;  // actually
         if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) == 1) {
           memcpy(&n.u1.ipv4_address, buf_in_addr, sizeof(struct in_addr));
         } else {
           Logger::smf_app().error(
-              "CONFIG: BAD IPV4 ADDRESS in " SMF_CONFIG_STRING_UPF_LIST " item %d",
+              "CONFIG: BAD IPV4 ADDRESS in " SMF_CONFIG_STRING_UPF_LIST
+              " item %d",
               i);
           throw("CONFIG: BAD ADDRESS in " SMF_CONFIG_STRING_UPF_LIST);
         }
         upfs.push_back(n);
       } else {
         // TODO IPV6_ADDRESS, FQDN
-        throw("Bad value in section %s : item no %d in config file %s", SMF_CONFIG_STRING_UPF_LIST, i, config_file
-            .c_str());
+        throw("Bad value in section %s : item no %d in config file %s",
+              SMF_CONFIG_STRING_UPF_LIST, i, config_file.c_str());
       }
     }
 
-    //Local configuration
+    // Local configuration
     num_session_management_subscription = 0;
     const Setting &local_cfg = smf_cfg[SMF_CONFIG_STRING_LOCAL_CONFIGURATION];
-    string local_configuration_str = { };
+    string local_configuration_str = {};
 
     local_cfg.lookupValue(SMF_CONFIG_STRING_USE_LOCAL_CONFIGURATION,
                           local_configuration_str);
@@ -596,34 +632,29 @@ int smf_config::load(const string &config_file) {
           session_management_subscription_list_cfg[i];
 
       unsigned int nssai_sst = 0;
-      string nssai_sd = { };
-      string dnn = { };
-      string default_session_type = { };
+      string nssai_sd = {};
+      string dnn = {};
+      string default_session_type = {};
       unsigned int default_ssc_mode = 0;
       unsigned int qos_profile_5qi = 0;
       unsigned int qos_profile_priority_level = 0;
       unsigned int qos_profile_arp_priority_level = 0;
-      string qos_profile_arp_preemptcap = { };
-      string qos_profile_arp_preemptvuln = { };
-      string session_ambr_ul = { };
-      string session_ambr_dl = { };
+      string qos_profile_arp_preemptcap = {};
+      string qos_profile_arp_preemptvuln = {};
+      string session_ambr_ul = {};
+      string session_ambr_dl = {};
       session_management_subscription_cfg.lookupValue(
-      SMF_CONFIG_STRING_NSSAI_SST,
-                                                      nssai_sst);
+          SMF_CONFIG_STRING_NSSAI_SST, nssai_sst);
       session_management_subscription_cfg.lookupValue(
-      SMF_CONFIG_STRING_NSSAI_SD,
-                                                      nssai_sd);
+          SMF_CONFIG_STRING_NSSAI_SD, nssai_sd);
       session_management_subscription_cfg.lookupValue(SMF_CONFIG_STRING_DNN,
                                                       dnn);
       session_management_subscription_cfg.lookupValue(
-      SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE,
-                                                      default_session_type);
+          SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE, default_session_type);
       session_management_subscription_cfg.lookupValue(
-      SMF_CONFIG_STRING_DEFAULT_SSC_MODE,
-                                                      default_ssc_mode);
+          SMF_CONFIG_STRING_DEFAULT_SSC_MODE, default_ssc_mode);
       session_management_subscription_cfg.lookupValue(
-      SMF_CONFIG_STRING_QOS_PROFILE_5QI,
-                                                      qos_profile_5qi);
+          SMF_CONFIG_STRING_QOS_PROFILE_5QI, qos_profile_5qi);
       session_management_subscription_cfg.lookupValue(
           SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL,
           qos_profile_priority_level);
@@ -637,11 +668,9 @@ int smf_config::load(const string &config_file) {
           SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN,
           qos_profile_arp_preemptvuln);
       session_management_subscription_cfg.lookupValue(
-      SMF_CONFIG_STRING_SESSION_AMBR_UL,
-                                                      session_ambr_ul);
+          SMF_CONFIG_STRING_SESSION_AMBR_UL, session_ambr_ul);
       session_management_subscription_cfg.lookupValue(
-      SMF_CONFIG_STRING_SESSION_AMBR_DL,
-                                                      session_ambr_dl);
+          SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
 
       session_management_subscription[i].single_nssai.sST = nssai_sst;
       session_management_subscription[i].single_nssai.sD = nssai_sd;
@@ -665,7 +694,7 @@ int smf_config::load(const string &config_file) {
 
   } catch (const SettingNotFoundException &nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
-    return RETURNerror ;
+    return RETURNerror;
   }
   return finalize();
 }
@@ -685,12 +714,11 @@ void smf_config::display() {
 
   Logger::smf_app().info("- SBI Networking:");
   Logger::smf_app().info("    Interface name ......: %s", sbi.if_name.c_str());
-  Logger::smf_app().info("    IPv4 Addr ...........: %s",
-                         inet_ntoa(sbi.addr4));
+  Logger::smf_app().info("    IPv4 Addr ...........: %s", inet_ntoa(sbi.addr4));
   Logger::smf_app().info("    Port ................: %d", sbi.port);
   Logger::smf_app().info("    HTTP2 port ..........: %d", sbi_http2_port);
-  Logger::smf_app().info("    API version..........: %s", sbi_api_version.c_str());
-
+  Logger::smf_app().info("    API version..........: %s",
+                         sbi_api_version.c_str());
 
   Logger::smf_app().info("- N4 Threading:");
   Logger::smf_app().info("    CPU id ..............: %d",
@@ -745,9 +773,9 @@ void smf_config::display() {
   }
   Logger::smf_app().info("- DEFAULT DNS:");
   Logger::smf_app().info("    Primary DNS .........: %s",
-                         inet_ntoa(*((struct in_addr*) &default_dnsv4)));
+                         inet_ntoa(*((struct in_addr *)&default_dnsv4)));
   Logger::smf_app().info("    Secondary DNS .......: %s",
-                         inet_ntoa(*((struct in_addr*) &default_dns_secv4)));
+                         inet_ntoa(*((struct in_addr *)&default_dns_secv4)));
   if (inet_ntop(AF_INET6, &default_dnsv6, str_addr6, sizeof(str_addr6))) {
     Logger::smf_app().info("    Primary DNS v6 ......: %s", str_addr6);
   }
@@ -760,7 +788,8 @@ void smf_config::display() {
     Logger::smf_app().info("    DNN %d:", i);
     Logger::smf_app().info("        " SMF_CONFIG_STRING_DNN_NI ":  %s",
                            dnn[i].dnn.c_str());
-    Logger::smf_app().info("        " SMF_CONFIG_STRING_PDU_SESSION_TYPE ":  %s",
+    Logger::smf_app().info("        " SMF_CONFIG_STRING_PDU_SESSION_TYPE
+                           ":  %s",
                            dnn[i].pdu_session_type.toString().c_str());
     if (dnn[i].pool_id_iv4 >= 0) {
       std::string range_low(inet_ntoa(ue_pool_range_low[dnn[i].pool_id_iv4]));
@@ -777,15 +806,17 @@ void smf_config::display() {
 
   Logger::smf_app().info("- AMF:");
   Logger::smf_app().info("    IPv4 Addr ...........: %s",
-                         inet_ntoa(*((struct in_addr*) &amf_addr.ipv4_addr)));
+                         inet_ntoa(*((struct in_addr *)&amf_addr.ipv4_addr)));
   Logger::smf_app().info("    Port ................: %lu  ", amf_addr.port);
-  Logger::smf_app().info("    API version .........: %s", amf_addr.api_version.c_str());
+  Logger::smf_app().info("    API version .........: %s",
+                         amf_addr.api_version.c_str());
 
   Logger::smf_app().info("- UDM:");
   Logger::smf_app().info("    IPv4 Addr ...........: %s",
-                         inet_ntoa(*((struct in_addr*) &udm_addr.ipv4_addr)));
+                         inet_ntoa(*((struct in_addr *)&udm_addr.ipv4_addr)));
   Logger::smf_app().info("    Port ................: %lu  ", udm_addr.port);
-  Logger::smf_app().info("    API version .........: %s", udm_addr.api_version.c_str());
+  Logger::smf_app().info("    API version .........: %s",
+                         udm_addr.api_version.c_str());
 
   Logger::smf_app().info("- Helpers:");
   Logger::smf_app().info("    Push PCO (DNS+MTU) ..: %s",
@@ -797,7 +828,8 @@ void smf_config::display() {
     for (int i = 0; i < num_session_management_subscription; i++) {
       Logger::smf_app().info("    Session Management Subscription Data %d:", i);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_NSSAI_SST ":  %d, " SMF_CONFIG_STRING_NSSAI_SD " %s",
+          "        " SMF_CONFIG_STRING_NSSAI_SST
+          ":  %d, " SMF_CONFIG_STRING_NSSAI_SD " %s",
           session_management_subscription[i].single_nssai.sST,
           session_management_subscription[i].single_nssai.sD.c_str());
       Logger::smf_app().info("        " SMF_CONFIG_STRING_DNN ":  %s",
@@ -805,24 +837,26 @@ void smf_config::display() {
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE ":  %s",
           session_management_subscription[i].session_type.c_str());
-      Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE ":  %d",
-          session_management_subscription[i].ssc_mode);
+      Logger::smf_app().info("        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE
+                             ":  %d",
+                             session_management_subscription[i].ssc_mode);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_5QI ":  %d",
           session_management_subscription[i].default_qos._5qi);
       Logger::smf_app().info(
-           "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ":  %d",
-           session_management_subscription[i].default_qos.priority_level);
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ":  %d",
+          session_management_subscription[i].default_qos.priority_level);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL ":  %d",
           session_management_subscription[i].default_qos.arp.priority_level);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP ":  %s",
-          session_management_subscription[i].default_qos.arp.preempt_cap.c_str());
+          session_management_subscription[i]
+              .default_qos.arp.preempt_cap.c_str());
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN ":  %s",
-          session_management_subscription[i].default_qos.arp.preempt_vuln.c_str());
+          session_management_subscription[i]
+              .default_qos.arp.preempt_vuln.c_str());
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_SESSION_AMBR_UL ":  %s",
           session_management_subscription[i].session_ambr.uplink.c_str());
@@ -831,36 +865,35 @@ void smf_config::display() {
           session_management_subscription[i].session_ambr.downlink.c_str());
     }
   }
-
 }
 
 //------------------------------------------------------------------------------
 int smf_config::get_pfcp_node_id(pfcp::node_id_t &node_id) {
-  node_id = { };
+  node_id = {};
   if (n4.addr4.s_addr) {
     node_id.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
     node_id.u1.ipv4_address = n4.addr4;
-    return RETURNok ;
+    return RETURNok;
   }
-  if (n4.addr6.s6_addr32[0] | n4.addr6.s6_addr32[1] | n4.addr6.s6_addr32[2]
-      | n4.addr6.s6_addr32[3]) {
+  if (n4.addr6.s6_addr32[0] | n4.addr6.s6_addr32[1] | n4.addr6.s6_addr32[2] |
+      n4.addr6.s6_addr32[3]) {
     node_id.node_id_type = pfcp::NODE_ID_TYPE_IPV6_ADDRESS;
     node_id.u1.ipv6_address = n4.addr6;
-    return RETURNok ;
+    return RETURNok;
   }
-  return RETURNerror ;
+  return RETURNerror;
 }
 //------------------------------------------------------------------------------
 int smf_config::get_pfcp_fseid(pfcp::fseid_t &fseid) {
   int rc = RETURNerror;
-  fseid = { };
+  fseid = {};
   if (n4.addr4.s_addr) {
     fseid.v4 = 1;
     fseid.ipv4_address = n4.addr4;
     rc = RETURNok;
   }
-  if (n4.addr6.s6_addr32[0] | n4.addr6.s6_addr32[1] | n4.addr6.s6_addr32[2]
-      | n4.addr6.s6_addr32[3]) {
+  if (n4.addr6.s6_addr32[0] | n4.addr6.s6_addr32[1] | n4.addr6.s6_addr32[2] |
+      n4.addr6.s6_addr32[3]) {
     fseid.v6 = 1;
     fseid.ipv6_address = n4.addr6;
     rc = RETURNok;
@@ -869,8 +902,7 @@ int smf_config::get_pfcp_fseid(pfcp::fseid_t &fseid) {
 }
 
 //------------------------------------------------------------------------------
-smf_config::~smf_config() {
-}
+smf_config::~smf_config() {}
 
 //------------------------------------------------------------------------------
 bool smf_config::is_dotted_dnn_handled(
@@ -880,14 +912,14 @@ bool smf_config::is_dotted_dnn_handled(
     Logger::smf_app().debug("DNN label: %s, dnn: %s",
                             smf_cfg.dnn[i].dnn_label.c_str(),
                             smf_cfg.dnn[i].dnn.c_str());
-    //if (0 == dnn.compare(smf_cfg.dnn[i].dnn_label)) {
+    // if (0 == dnn.compare(smf_cfg.dnn[i].dnn_label)) {
     if (0 == dnn.compare(smf_cfg.dnn[i].dnn)) {
       Logger::smf_app().debug("DNN matched!");
       Logger::smf_app().debug("PDU Session Type %d, PDN Type %d",
                               pdn_session_type.pdu_session_type,
                               smf_cfg.dnn[i].pdu_session_type.pdu_session_type);
-      if (pdn_session_type.pdu_session_type
-          == smf_cfg.dnn[i].pdu_session_type.pdu_session_type) {
+      if (pdn_session_type.pdu_session_type ==
+          smf_cfg.dnn[i].pdu_session_type.pdu_session_type) {
         return true;
       }
     }
@@ -900,4 +932,3 @@ std::string smf_config::get_default_dnn() {
   Logger::smf_app().debug("Default DNN: %s", smf_cfg.dnn[0].dnn.c_str());
   return smf_cfg.dnn[0].dnn;
 }
-

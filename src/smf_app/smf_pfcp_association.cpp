@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -30,8 +30,8 @@
 
 #include "common_defs.h"
 #include "logger.hpp"
-#include "smf_procedure.hpp"
 #include "smf_n4.hpp"
+#include "smf_procedure.hpp"
 
 using namespace smf;
 using namespace std;
@@ -60,13 +60,12 @@ void pfcp_association::notify_del_session(const pfcp::fseid_t &cp_fseid) {
 }
 
 //------------------------------------------------------------------------------
- void pfcp_association::del_sessions()
- {
-   std::unique_lock<std::mutex> l(m_sessions);
-   sessions.clear();
- }
+void pfcp_association::del_sessions() {
+  std::unique_lock<std::mutex> l(m_sessions);
+  sessions.clear();
+}
 
- //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void pfcp_association::restore_n4_sessions() {
   std::unique_lock<std::mutex> l(m_sessions);
   if (sessions.size()) {
@@ -80,8 +79,8 @@ void pfcp_association::restore_n4_sessions() {
 bool pfcp_associations::add_association(
     pfcp::node_id_t &node_id, pfcp::recovery_time_stamp_t &recovery_time_stamp,
     bool &restore_n4_sessions) {
-  std::shared_ptr<pfcp_association> sa = std::shared_ptr<pfcp_association>(
-      nullptr);
+  std::shared_ptr<pfcp_association> sa =
+      std::shared_ptr<pfcp_association>(nullptr);
   if (get_association(node_id, sa)) {
     itti_inst->timer_remove(sa->timer_heartbeat);
     if (sa->recovery_time_stamp == recovery_time_stamp) {
@@ -90,15 +89,15 @@ bool pfcp_associations::add_association(
       restore_n4_sessions = true;
     }
     sa->recovery_time_stamp = recovery_time_stamp;
-    sa->function_features = { };
+    sa->function_features = {};
   } else {
     restore_n4_sessions = false;
-    pfcp_association *association = new pfcp_association(node_id,
-                                                         recovery_time_stamp);
+    pfcp_association *association =
+        new pfcp_association(node_id, recovery_time_stamp);
     sa = std::shared_ptr<pfcp_association>(association);
     sa->recovery_time_stamp = recovery_time_stamp;
-    std::size_t hash_node_id = std::hash<pfcp::node_id_t> { }(node_id);
-    associations.insert((int32_t) hash_node_id, sa);
+    std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
+    associations.insert((int32_t)hash_node_id, sa);
     trigger_heartbeat_request_procedure(sa);
   }
   return true;
@@ -108,8 +107,8 @@ bool pfcp_associations::add_association(
     pfcp::node_id_t &node_id, pfcp::recovery_time_stamp_t &recovery_time_stamp,
     pfcp::up_function_features_s &function_features,
     bool &restore_n4_sessions) {
-  std::shared_ptr<pfcp_association> sa = std::shared_ptr<pfcp_association>(
-      nullptr);
+  std::shared_ptr<pfcp_association> sa =
+      std::shared_ptr<pfcp_association>(nullptr);
   if (get_association(node_id, sa)) {
     itti_inst->timer_remove(sa->timer_heartbeat);
     if (sa->recovery_time_stamp == recovery_time_stamp) {
@@ -122,26 +121,24 @@ bool pfcp_associations::add_association(
     sa->function_features.second = function_features;
   } else {
     restore_n4_sessions = false;
-    pfcp_association *association = new pfcp_association(node_id,
-                                                         recovery_time_stamp,
-                                                         function_features);
+    pfcp_association *association =
+        new pfcp_association(node_id, recovery_time_stamp, function_features);
     sa = std::shared_ptr<pfcp_association>(association);
     sa->recovery_time_stamp = recovery_time_stamp;
     sa->function_features.first = true;
     sa->function_features.second = function_features;
-    std::size_t hash_node_id = std::hash<pfcp::node_id_t> { }(node_id);
-    associations.insert((int32_t) hash_node_id, sa);
+    std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
+    associations.insert((int32_t)hash_node_id, sa);
     trigger_heartbeat_request_procedure(sa);
   }
   return true;
 }
 
-
 //------------------------------------------------------------------------------
 bool pfcp_associations::update_association(
     pfcp::node_id_t &node_id, pfcp::up_function_features_s &function_features) {
-  std::shared_ptr<pfcp_association> sa = std::shared_ptr<pfcp_association>(
-      nullptr);
+  std::shared_ptr<pfcp_association> sa =
+      std::shared_ptr<pfcp_association>(nullptr);
   if (get_association(node_id, sa)) {
     sa->function_features.first = true;
     sa->function_features.second = function_features;
@@ -155,8 +152,8 @@ bool pfcp_associations::update_association(
 bool pfcp_associations::get_association(
     const pfcp::node_id_t &node_id,
     std::shared_ptr<pfcp_association> &sa) const {
-  std::size_t hash_node_id = std::hash<pfcp::node_id_t> { }(node_id);
-  auto pit = associations.find((int32_t) hash_node_id);
+  std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
+  auto pit = associations.find((int32_t)hash_node_id);
   if (pit == associations.end())
     return false;
   else {
@@ -170,7 +167,7 @@ bool pfcp_associations::get_association(
     std::shared_ptr<pfcp_association> &sa) const {
   folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
 
-  FOR_EACH (it, associations) {
+  FOR_EACH(it, associations) {
     std::shared_ptr<pfcp_association> a = it->second;
     if (it->second->has_session(cp_fseid)) {
       sa = it->second;
@@ -182,7 +179,7 @@ bool pfcp_associations::get_association(
 
 //------------------------------------------------------------------------------
 void pfcp_associations::restore_n4_sessions(const pfcp::node_id_t &node_id) {
-  std::shared_ptr<pfcp_association> sa = { };
+  std::shared_ptr<pfcp_association> sa = {};
   if (get_association(node_id, sa)) {
     sa->restore_n4_sessions();
   }
@@ -197,8 +194,8 @@ void pfcp_associations::trigger_heartbeat_request_procedure(
 //------------------------------------------------------------------------------
 void pfcp_associations::initiate_heartbeat_request(timer_id_t timer_id,
                                                    uint64_t arg2_user) {
-  size_t hash_node_id = (size_t) arg2_user;
-  auto pit = associations.find((int32_t) hash_node_id);
+  size_t hash_node_id = (size_t)arg2_user;
+  auto pit = associations.find((int32_t)hash_node_id);
   if (pit == associations.end())
     return;
   else {
@@ -212,13 +209,13 @@ void pfcp_associations::initiate_heartbeat_request(timer_id_t timer_id,
 //------------------------------------------------------------------------------
 void pfcp_associations::timeout_heartbeat_request(timer_id_t timer_id,
                                                   uint64_t arg2_user) {
-  size_t hash_node_id = (size_t) arg2_user;
-  auto pit = associations.find((int32_t) hash_node_id);
+  size_t hash_node_id = (size_t)arg2_user;
+  auto pit = associations.find((int32_t)hash_node_id);
   if (pit == associations.end())
     return;
   else {
-    if (pit->second->num_retries_timer_heartbeat
-        < PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES) {
+    if (pit->second->num_retries_timer_heartbeat <
+        PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES) {
       Logger::smf_n4().info(
           "PFCP HEARTBEAT PROCEDURE hash %u TIMED OUT (retrie %d)",
           hash_node_id, pit->second->num_retries_timer_heartbeat);
@@ -235,8 +232,8 @@ void pfcp_associations::timeout_heartbeat_request(timer_id_t timer_id,
 //------------------------------------------------------------------------------
 void pfcp_associations::timeout_release_request(timer_id_t timer_id,
                                                 uint64_t arg2_user) {
-  size_t hash_node_id = (size_t) arg2_user;
-  auto pit = associations.find((int32_t) hash_node_id);
+  size_t hash_node_id = (size_t)arg2_user;
+  auto pit = associations.find((int32_t)hash_node_id);
   if (pit == associations.end())
     return;
   else {
@@ -250,7 +247,7 @@ void pfcp_associations::handle_receive_heartbeat_response(
     const uint64_t trxn_id) {
   folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
 
-  FOR_EACH (it, associations) {
+  FOR_EACH(it, associations) {
     std::shared_ptr<pfcp_association> a = it->second;
     if (it->second->trxn_id_heartbeat == trxn_id) {
       itti_inst->timer_remove(it->second->timer_heartbeat);
@@ -263,12 +260,12 @@ void pfcp_associations::handle_receive_heartbeat_response(
 //------------------------------------------------------------------------------
 bool pfcp_associations::select_up_node(pfcp::node_id_t &node_id,
                                        const int node_selection_criteria) {
-  node_id = { };
+  node_id = {};
   if (associations.empty()) {
     return false;
   }
   folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
-  FOR_EACH (it, associations) {
+  FOR_EACH(it, associations) {
     std::shared_ptr<pfcp_association> a = it->second;
     // TODO
     switch (node_selection_criteria) {
@@ -288,14 +285,14 @@ bool pfcp_associations::select_up_node(pfcp::node_id_t &node_id,
 //------------------------------------------------------------------------------
 void pfcp_associations::notify_add_session(const pfcp::node_id_t &node_id,
                                            const pfcp::fseid_t &cp_fseid) {
-  std::shared_ptr<pfcp_association> sa = { };
+  std::shared_ptr<pfcp_association> sa = {};
   if (get_association(node_id, sa)) {
     sa->notify_add_session(cp_fseid);
   }
 }
 //------------------------------------------------------------------------------
 void pfcp_associations::notify_del_session(const pfcp::fseid_t &cp_fseid) {
-  std::shared_ptr<pfcp_association> sa = { };
+  std::shared_ptr<pfcp_association> sa = {};
   if (get_association(cp_fseid, sa)) {
     sa->notify_del_session(cp_fseid);
   }
@@ -305,7 +302,8 @@ void pfcp_associations::notify_del_session(const pfcp::fseid_t &cp_fseid) {
 bool pfcp_associations::add_peer_candidate_node(
     const pfcp::node_id_t &node_id) {
   for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
-      pending_associations.begin(); it < pending_associations.end(); ++it) {
+           pending_associations.begin();
+       it < pending_associations.end(); ++it) {
     if ((*it)->node_id == node_id) {
       // TODO purge sessions of this node
       Logger::smf_app().info("TODO purge sessions of this node");
@@ -314,8 +312,8 @@ bool pfcp_associations::add_peer_candidate_node(
     }
   }
   pfcp_association *association = new pfcp_association(node_id);
-  std::shared_ptr<pfcp_association> s = std::shared_ptr<pfcp_association>(
-      association);
+  std::shared_ptr<pfcp_association> s =
+      std::shared_ptr<pfcp_association>(association);
   pending_associations.push_back(s);
   return true;
 }

@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -29,16 +29,16 @@
 #ifndef FILE_SMF_N11_HPP_SEEN
 #define FILE_SMF_N11_HPP_SEEN
 
-#include <thread>
 #include <map>
+#include <thread>
 
-#include "smf.h"
 #include <curl/curl.h>
 #include "3gpp_29.503.h"
-#include "smf_context.hpp"
 #include "SmContextCreatedData.h"
-#include "SmContextUpdatedData.h"
 #include "SmContextUpdateError.h"
+#include "SmContextUpdatedData.h"
+#include "smf.h"
+#include "smf_context.hpp"
 
 namespace smf {
 
@@ -49,12 +49,13 @@ class smf_n11 {
 
  public:
   smf_n11();
-  smf_n11(smf_n11 const&) = delete;
-  void operator=(smf_n11 const&) = delete;
+  smf_n11(smf_n11 const &) = delete;
+  void operator=(smf_n11 const &) = delete;
 
   /*
    * Send N1N2 Message Transfer Request to AMF
-   * @param [std::shared_ptr<itti_n11_create_sm_context_response>] sm_context_res: Content of message to be sent
+   * @param [std::shared_ptr<itti_n11_create_sm_context_response>]
+   * sm_context_res: Content of message to be sent
    * @return void
    */
   void send_n1n2_message_transfer_request(
@@ -62,15 +63,18 @@ class smf_n11 {
 
   /*
    * Send N1N2 Message Transfer Request to AMF
-   * @param [std::shared_ptr<itti_nx_trigger_pdu_session_modification>] sm_session_modification: Content of message to be sent
+   * @param [std::shared_ptr<itti_nx_trigger_pdu_session_modification>]
+   * sm_session_modification: Content of message to be sent
    * @return void
    */
   void send_n1n2_message_transfer_request(
-      std::shared_ptr<itti_nx_trigger_pdu_session_modification> sm_session_modification);
+      std::shared_ptr<itti_nx_trigger_pdu_session_modification>
+          sm_session_modification);
 
   /*
    * Send N1N2 Message Transfer Request to AMF
-   * @param [std::shared_ptr<itti_n11_session_report_request>] n11_msg: Content of message to be sent
+   * @param [std::shared_ptr<itti_n11_session_report_request>] n11_msg: Content
+   * of message to be sent
    * @return void
    */
   void send_n1n2_message_transfer_request(
@@ -78,7 +82,8 @@ class smf_n11 {
 
   /*
    * Send SM Context Status Notification to AMF
-   * @param [std::shared_ptr<itti_n11_notify_sm_context_status>] sm_context_status: Content of message to be sent
+   * @param [std::shared_ptr<itti_n11_notify_sm_context_status>]
+   * sm_context_status: Content of message to be sent
    * @return void
    */
   void send_sm_context_status_notification(
@@ -86,7 +91,8 @@ class smf_n11 {
 
   /*
    * Send Notification for the associated event to the subscribers
-   * @param [std::shared_ptr<itti_n11_notify_subscribed_event>] msg: Content of message to be sent
+   * @param [std::shared_ptr<itti_n11_notify_subscribed_event>] msg: Content of
+   * message to be sent
    * @return void
    */
   void notify_subscribed_event(
@@ -98,8 +104,7 @@ class smf_n11 {
    * @param [std::string *] data: data
    * @return pointer to the created curl
    */
-  CURL * curl_create_handle (event_notification &ev_notif, std::string *data);
-
+  CURL *curl_create_handle(event_notification &ev_notif, std::string *data);
 };
-}
+}  // namespace smf
 #endif /* FILE_SMF_N11_HPP_SEEN */

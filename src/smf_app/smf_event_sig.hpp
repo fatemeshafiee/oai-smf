@@ -4,8 +4,8 @@
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
  * the OAI Public License, Version 1.1  (the "License"); you may not use this
- *file except in compliance with the License. You may obtain a copy of the
- *License at
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -38,15 +38,14 @@ namespace smf {
 
 // Signal for PDU session status
 // SCID, PDU Session Status, HTTP version
-typedef bs2::signal_type<
-    void(scid_t, uint8_t, uint8_t),
-    bs2::keywords::mutex_type<bs2::dummy_mutex>>::type sm_context_status_sig_t;
+typedef bs2::signal_type<void(scid_t, uint8_t, uint8_t),
+                         bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    sm_context_status_sig_t;
 
 // Signal for Event exposure
 // PDU session Release, SUPI, PDU SessionID, HTTP version
-typedef bs2::signal_type<
-    void(supi64_t, pdu_session_id_t, uint8_t),
-    bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+typedef bs2::signal_type<void(supi64_t, pdu_session_id_t, uint8_t),
+                         bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
     ee_pdu_session_release_sig_t;
 
 // ee_ue_ip_address_change_sig_t; //UI IP Address, UE ID

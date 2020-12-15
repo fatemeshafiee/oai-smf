@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -29,8 +29,8 @@
 #ifndef FILE_SMF_PAA_DYNAMIC_HPP_SEEN
 #define FILE_SMF_PAA_DYNAMIC_HPP_SEEN
 
-#include <map>
 #include <bitset>
+#include <map>
 
 #include "logger.hpp"
 
@@ -39,30 +39,21 @@ class ipv6_pool {
   struct in6_addr prefix;
   int prefix_len;
 
-  ipv6_pool()
-      :
-      prefix(),
-      prefix_len(0) {
-  }
+  ipv6_pool() : prefix(), prefix_len(0) {}
 
   ipv6_pool(const struct in6_addr prfix, const int prfix_len) {
     prefix = prfix;
     prefix_len = prfix_len;
   }
 
-  ipv6_pool(const ipv6_pool &p)
-      :
-      prefix(p.prefix),
-      prefix_len(p.prefix_len) {
-  }
+  ipv6_pool(const ipv6_pool &p) : prefix(p.prefix), prefix_len(p.prefix_len) {}
 
   bool alloc_address(struct in6_addr &allocated) {
     allocated = prefix;
     return true;
   }
 
-  void free_address(const struct in_addr &allocated) {
-  }
+  void free_address(const struct in_addr &allocated) {}
 };
 
 class ipv4_pool {
@@ -103,17 +94,9 @@ class ipv4_pool {
   }
 
  public:
-  ipv4_pool()
-      :
-      num(0),
-      alloc() {
-    start.s_addr = 0;
-  }
-  ;
+  ipv4_pool() : num(0), alloc() { start.s_addr = 0; };
 
-  ipv4_pool(const struct in_addr first, const uint32_t range)
-      :
-      alloc() {
+  ipv4_pool(const struct in_addr first, const uint32_t range) : alloc() {
     start.s_addr = first.s_addr;
     num = range;
     int range32 = range >> 5;
@@ -124,16 +107,11 @@ class ipv4_pool {
     if (range & 0x0000001F) {
       alloc[i] = std::numeric_limits<uint32_t>::max() << (range & 0x0000001F);
     }
-  }
-  ;
+  };
 
-  ipv4_pool(const ipv4_pool &p)
-      :
-      num(p.num),
-      alloc(p.alloc) {
+  ipv4_pool(const ipv4_pool &p) : num(p.num), alloc(p.alloc) {
     start.s_addr = p.start.s_addr;
-  }
-  ;
+  };
 
   bool alloc_address(struct in_addr &allocated) {
     int bit_pos = 0;
@@ -162,23 +140,14 @@ class ipv4_pool {
 };
 
 class dnn_dynamic_pools {
-
  public:
   std::vector<uint32_t> ipv4_pool_ids;
   std::vector<uint32_t> ipv6_pool_ids;
 
-  dnn_dynamic_pools()
-      :
-      ipv4_pool_ids(),
-      ipv6_pool_ids() {
-  }
+  dnn_dynamic_pools() : ipv4_pool_ids(), ipv6_pool_ids() {}
 
-  void add_ipv4_pool_id(const uint32_t id) {
-    ipv4_pool_ids.push_back(id);
-  }
-  void add_ipv6_pool_id(const uint32_t id) {
-    ipv6_pool_ids.push_back(id);
-  }
+  void add_ipv4_pool_id(const uint32_t id) { ipv4_pool_ids.push_back(id); }
+  void add_ipv6_pool_id(const uint32_t id) { ipv6_pool_ids.push_back(id); }
 };
 
 class paa_dynamic {
@@ -188,22 +157,16 @@ class paa_dynamic {
 
   std::map<std::string, dnn_dynamic_pools> dnns;
 
-  paa_dynamic()
-      :
-      ipv4_pools(),
-      ipv6_pools(),
-      dnns() {
-  }
-  ;
+  paa_dynamic() : ipv4_pools(), ipv6_pools(), dnns(){};
 
  public:
-  static paa_dynamic& get_instance() {
+  static paa_dynamic &get_instance() {
     static paa_dynamic instance;
     return instance;
   }
 
-  paa_dynamic(paa_dynamic const&) = delete;
-  void operator=(paa_dynamic const&) = delete;
+  paa_dynamic(paa_dynamic const &) = delete;
+  void operator=(paa_dynamic const &) = delete;
 
   void add_pool(const std::string &dnn_label, const int pool_id,
                 const struct in_addr &first, const int range) {
@@ -214,7 +177,7 @@ class paa_dynamic {
         ipv4_pools[uint32pool_id] = pool;
       }
       if (!dnns.count(dnn_label)) {
-        dnn_dynamic_pools adp = { };
+        dnn_dynamic_pools adp = {};
         adp.add_ipv4_pool_id(uint32pool_id);
         dnns[dnn_label] = adp;
       }
@@ -230,7 +193,7 @@ class paa_dynamic {
         ipv6_pools[uint32pool_id] = pool;
       }
       if (!dnns.count(dnn_label)) {
-        dnn_dynamic_pools adp = { };
+        dnn_dynamic_pools adp = {};
         adp.add_ipv6_pool_id(uint32pool_id);
         dnns[dnn_label] = adp;
       }
@@ -241,46 +204,53 @@ class paa_dynamic {
     if (dnns.count(dnn_label)) {
       dnn_dynamic_pools &dnn_pool = dnns[dnn_label];
       if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
-        for (std::vector<uint32_t>::const_iterator it4 = dnn_pool.ipv4_pool_ids
-            .begin(); it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (std::vector<uint32_t>::const_iterator it4 =
+                 dnn_pool.ipv4_pool_ids.begin();
+             it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].alloc_address(paa.ipv4_address)) {
             return true;
           }
         }
-        Logger::smf_app().warn("Could not get PAA PDU_SESSION_TYPE_E_IPV4 for DNN %s",
-                               dnn_label.c_str());
+        Logger::smf_app().warn(
+            "Could not get PAA PDU_SESSION_TYPE_E_IPV4 for DNN %s",
+            dnn_label.c_str());
         return false;
-      } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
+      } else if (paa.pdu_session_type.pdu_session_type ==
+                 PDU_SESSION_TYPE_E_IPV4V6) {
         bool success = false;
-        std::vector<uint32_t>::const_iterator it4 = { };
+        std::vector<uint32_t>::const_iterator it4 = {};
         for (it4 = dnn_pool.ipv4_pool_ids.begin();
-            it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
+             it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].alloc_address(paa.ipv4_address)) {
             success = true;
           }
         }
         if (success) {
-          for (std::vector<uint32_t>::const_iterator it6 = dnn_pool
-              .ipv6_pool_ids.begin(); it6 != dnn_pool.ipv6_pool_ids.end();
-              ++it6) {
+          for (std::vector<uint32_t>::const_iterator it6 =
+                   dnn_pool.ipv6_pool_ids.begin();
+               it6 != dnn_pool.ipv6_pool_ids.end(); ++it6) {
             if (ipv6_pools[*it6].alloc_address(paa.ipv6_address)) {
               return true;
             }
           }
           ipv4_pools[*it4].free_address(paa.ipv4_address);
         }
-        Logger::smf_app().warn("Could not get PAA PDU_SESSION_TYPE_E_IPV4V6 for DNN %s",
-                               dnn_label.c_str());
+        Logger::smf_app().warn(
+            "Could not get PAA PDU_SESSION_TYPE_E_IPV4V6 for DNN %s",
+            dnn_label.c_str());
         return false;
-      } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
-        for (std::vector<uint32_t>::const_iterator it6 = dnn_pool.ipv6_pool_ids
-            .begin(); it6 != dnn_pool.ipv6_pool_ids.end(); ++it6) {
+      } else if (paa.pdu_session_type.pdu_session_type ==
+                 PDU_SESSION_TYPE_E_IPV6) {
+        for (std::vector<uint32_t>::const_iterator it6 =
+                 dnn_pool.ipv6_pool_ids.begin();
+             it6 != dnn_pool.ipv6_pool_ids.end(); ++it6) {
           if (ipv6_pools[*it6].alloc_address(paa.ipv6_address)) {
             return true;
           }
         }
-        Logger::smf_app().warn("Could not get PAA PDU_SESSION_TYPE_E_IPV6 for DNN %s",
-                               dnn_label.c_str());
+        Logger::smf_app().warn(
+            "Could not get PAA PDU_SESSION_TYPE_E_IPV6 for DNN %s",
+            dnn_label.c_str());
         return false;
       }
     }
@@ -292,24 +262,27 @@ class paa_dynamic {
     if (dnns.count(dnn_label)) {
       dnn_dynamic_pools &dnn_pool = dnns[dnn_label];
       if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
-        for (std::vector<uint32_t>::const_iterator it4 = dnn_pool.ipv4_pool_ids
-            .begin(); it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
+        for (std::vector<uint32_t>::const_iterator it4 =
+                 dnn_pool.ipv4_pool_ids.begin();
+             it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].free_address(paa.ipv4_address)) {
             return true;
           }
         }
         return false;
-      } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
+      } else if (paa.pdu_session_type.pdu_session_type ==
+                 PDU_SESSION_TYPE_E_IPV4V6) {
         bool success = false;
-        std::vector<uint32_t>::const_iterator it4 = { };
+        std::vector<uint32_t>::const_iterator it4 = {};
         for (it4 = dnn_pool.ipv4_pool_ids.begin();
-            it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
+             it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].free_address(paa.ipv4_address)) {
             return true;
           }
         }
         return false;
-      } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
+      } else if (paa.pdu_session_type.pdu_session_type ==
+                 PDU_SESSION_TYPE_E_IPV6) {
         return true;
       }
     }
@@ -322,8 +295,9 @@ class paa_dynamic {
                    const struct in_addr &ipv4_address) {
     if (dnns.count(dnn_label)) {
       dnn_dynamic_pools &dnn_pool = dnns[dnn_label];
-      for (std::vector<uint32_t>::const_iterator it4 = dnn_pool.ipv4_pool_ids
-          .begin(); it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
+      for (std::vector<uint32_t>::const_iterator it4 =
+               dnn_pool.ipv4_pool_ids.begin();
+           it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
         if (ipv4_pools[*it4].free_address(ipv4_address)) {
           return true;
         }
@@ -333,7 +307,6 @@ class paa_dynamic {
                            dnn_label.c_str());
     return false;
   }
-
 };
 
 #endif /* FILE_SMF_PAA_DYNAMIC_HPP_SEEN */

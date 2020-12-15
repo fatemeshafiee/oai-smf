@@ -48,7 +48,6 @@ smf_config smf_cfg;
 SMFApiServer *smf_api_server_1 = nullptr;
 smf_http2_server *smf_api_server_2 = nullptr;
 
-
 void send_heartbeat_to_tasks(const uint32_t sequence);
 
 //------------------------------------------------------------------------------
