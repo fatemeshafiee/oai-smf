@@ -959,16 +959,10 @@ void session_update_sm_context_procedure::handle_itti_msg(
       } else {
         Logger::smf_app().info(
             "PDU Session Update SM Context, rejected by UPF");
-        //send response to AMF
-        oai::smf_server::model::SmContextUpdateError smContextUpdateError = { };
-        oai::smf_server::model::ProblemDetails problem_details = { };
-        problem_details.setCause(
-            pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);
-        smContextUpdateError.setError(problem_details);
         //trigger to send reply to AMF
-        smf_app_inst->trigger_http_response(
+        smf_app_inst->trigger_update_context_error_response(
             http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-            smContextUpdateError, n11_triggered_pending->pid);
+			PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE, n11_triggered_pending->pid);
         return;
       }
     }

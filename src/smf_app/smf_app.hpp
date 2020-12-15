@@ -636,42 +636,43 @@ class smf_app {
   /*
    * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
    * @param [const uint32_t &] http_code: Status code of HTTP response
-   * @param [const oai::smf_server::model::SmContextCreateError &] smContextCreateError: store the json content of response message
+   * @param [const uint8_t&] cause: Error cause
    * @param [const std::string &] n1_sm_msg: N1 SM message
    * @param [uint32_t &] promise_id: Promise Id
    * @return void
    */
-  void trigger_http_response(
+  void trigger_create_context_error_response(
       const uint32_t &http_code,
-      const oai::smf_server::model::SmContextCreateError &smContextCreateError,
+      const uint8_t &cause,
       const std::string &n1_sm_msg, uint32_t &promise_id);
 
   /*
    * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
    * @param [const uint32_t &] http_code: Status code of HTTP response
-   * @param [const oai::smf_server::model::SmContextCreateError &] smContextCreateError: store the json content of response message
+   * @param [const uint8_t &] cause: Error cause
    * @param [uint32_t &] promise_id: Promise Id
    * @param [uint8_t] msg_type: Type of HTTP message (Update/Release)
    * @return void
    */
-  void trigger_http_response(
+  void trigger_update_context_error_response(
       const uint32_t &http_code,
-      const oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+      const uint8_t &cause,
       uint32_t &promise_id);
 
   /*
    * To trigger the response to the HTTP server by set the value of the corresponding promise to ready
    * @param [const uint32_t &] http_code: Status code of HTTP response
-   * @param [const oai::smf_server::model::SmContextUpdateError &] smContextUpdateError: store the json content of response message
+   * @param [const uint8_t &] cause: cause
    * @param [const std::string &] n1_sm_msg: N1 SM message
    * @param [uint32_t &] promise_id: Promise Id
    * @param [uint8_t] msg_type: Type of HTTP message (Update/Release)
    * @return void
    */
-  void trigger_http_response(
+  void trigger_update_context_error_response(
       const uint32_t &http_code,
-      const oai::smf_server::model::SmContextUpdateError &smContextUpdateError,
+      const uint8_t &cause,
       const std::string &n1_sm_msg, uint32_t &promise_id);
+
 
   /*
    * To trigger the response to the HTTP server by set the value of the corresponding promise to ready

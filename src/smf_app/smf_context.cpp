@@ -40,7 +40,6 @@
 #include "smf_n2.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "smf_procedure.hpp"
-#include "ProblemDetails.h"
 #include "3gpp_29.500.h"
 #include "3gpp_29.502.h"
 #include "3gpp_24.501.h"
@@ -1167,9 +1166,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       "Handle a PDU Session Create SM Context Request message from AMF (HTTP version %d)",
       smreq->http_version);
 
-  oai::smf_server::model::SmContextCreateError smContextCreateError = { };
-  oai::smf_server::model::ProblemDetails problem_details = { };
-  oai::smf_server::model::RefToBinaryData refToBinaryData = { };
   std::string n1_sm_message, n1_sm_msg_hex;
   bool request_accepted = true;
 
@@ -1186,20 +1182,15 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // Not a valid request...
     Logger::smf_app().warn(
         "Received a PDU Session Create SM Context Request, the request is not valid!");
-    problem_details.setCause(
-        pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED]);
-    smContextCreateError.setError(problem_details);
-    refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-    smContextCreateError.setN1SmMsg(refToBinaryData);
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
         smreq->req,
         n1_sm_message,
         cause_value_5gsm_e::CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
       //trigger to send reply to AMF
-      smf_app_inst->trigger_http_response(
-          http_status_code_e::HTTP_STATUS_CODE_401_UNAUTHORIZED,
-          smContextCreateError, n1_sm_msg_hex, smreq->pid);
+            smf_app_inst->trigger_create_context_error_response(
+                http_status_code_e::HTTP_STATUS_CODE_401_UNAUTHORIZED,
+				PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED, n1_sm_msg_hex, smreq->pid);
 
     } else {
       smf_app_inst->trigger_http_response(
@@ -1353,20 +1344,16 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     default:
       Logger::smf_app().error("Unknown PDN type %d", sp->pdu_session_type.pdu_session_type);
-      problem_details.setCause(
-          pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PDUTYPE_DENIED]);
-      smContextCreateError.setError(problem_details);
-      refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-      smContextCreateError.setN1SmMsg(refToBinaryData);
       //PDU Session Establishment Reject
       if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE)) {
         smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
-        //trigger to send reply to AMF
-        smf_app_inst->trigger_http_response(
+         //trigger to send reply to AMF
+        smf_app_inst->trigger_create_context_error_response(
             http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-            smContextCreateError, n1_sm_msg_hex, smreq->pid);
+			PDU_SESSION_APPLICATION_ERROR_PDUTYPE_DENIED, n1_sm_msg_hex, smreq->pid);
+
       } else {
         smf_app_inst->trigger_http_response(
             http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
@@ -1538,10 +1525,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       "Handle a PDU Session Update SM Context Request message from an AMF (HTTP version %d)",
       smreq->http_version);
   pdu_session_update_sm_context_request sm_context_req_msg = smreq->req;
-  oai::smf_server::model::SmContextUpdateError smContextUpdateError = { };
-  oai::smf_server::model::SmContextUpdatedData smContextUpdatedData = { };
-  oai::smf_server::model::ProblemDetails problem_details = { };
-  oai::smf_server::model::RefToBinaryData refToBinaryData = { };
   std::string n1_sm_msg, n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
   bool update_upf = false;
@@ -1561,13 +1544,10 @@ void smf_context::handle_pdu_session_update_sm_context_request(
   if (!find_dnn or !find_pdu) {
     //error, send reply to AMF with error code "Context Not Found"
     Logger::smf_app().warn("DNN or PDU session context does not exist!");
-    problem_details.setCause(
-        pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND]);
-    smContextUpdateError.setError(problem_details);
     //trigger to send reply to AMF
-    smf_app_inst->trigger_http_response(
-        http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND,
-        smContextUpdateError, smreq->pid);
+    smf_app_inst->trigger_update_context_error_response(
+            http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND,
+			PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND, smreq->pid);
     return;
   }
 
@@ -1604,13 +1584,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     if (decoder_rc != RETURNok) {
       //error, send reply to AMF with error code!!
       Logger::smf_app().warn("N1 SM container cannot be decoded correctly!");
-      problem_details.setCause(
-          pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR]);
-      smContextUpdateError.setError(problem_details);
-      //trigger to send reply to AMF
-      smf_app_inst->trigger_http_response(
+      smf_app_inst->trigger_update_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-          smContextUpdateError, smreq->pid);
+		  PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR, smreq->pid);
       return;
     }
 
@@ -1986,19 +1962,14 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             == pdu_session_status_e::PDU_SESSION_INACTIVE) {
           Logger::smf_app().warn(
               "PDU Session status: INACTIVE, send PDU Session Release Reject to UE!");
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);  //TODO: which cause?
-          smContextUpdateError.setError(problem_details);
-          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-          smContextUpdateError.setN1SmMsg(refToBinaryData);
           if (smf_n1::get_instance().create_n1_pdu_session_release_reject(
                 sm_context_req_msg, n1_sm_msg,
                 cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY)) {
             smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
             //trigger to send reply to AMF
-            smf_app_inst->trigger_http_response(
+            smf_app_inst->trigger_update_context_error_response(
                 http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                smContextUpdateError, n1_sm_msg_hex, smreq->pid);
+				PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE, n1_sm_msg_hex, smreq->pid);
           } else {
             smf_app_inst->trigger_http_response(
                 http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
@@ -2165,11 +2136,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           //error, send error to AMF
           Logger::smf_app().warn(
               "Decode N2 SM (Ngap_PDUSessionResourceSetupResponseTransfer) failed!");
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
-          smContextUpdateError.setError(problem_details);
-          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-          smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
           //24.501: response with a 5GSM STATUS message including cause "#95 Semantically incorrect message"
           if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
@@ -2177,9 +2143,10 @@ void smf_context::handle_pdu_session_update_sm_context_request(
                 cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
             smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);  //TODO: need N1SM?
             //trigger to send reply to AMF
-            smf_app_inst->trigger_http_response(
+            smf_app_inst->trigger_update_context_error_response(
                 http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                smContextUpdateError, smreq->pid);
+				PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR, smreq->pid);
+
           } else {
             smf_app_inst->trigger_http_response(
                 http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
@@ -2244,32 +2211,25 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         if (decode_status == RETURNerror) {
           Logger::smf_app().warn(
               "Decode N2 SM (Ngap_PDUSessionResourceSetupUnsuccessfulTransfer) failed!");
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
-          smContextUpdateError.setError(problem_details);
           //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
+          smf_app_inst->trigger_update_context_error_response(
               http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, smreq->pid);
+			  PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR, smreq->pid);
           return;
 
         }
 
         //Logger::smf_app().info("PDU Session Resource Setup Unsuccessful Transfer cause %d",decoded_msg->cause );
-        problem_details.setCause(
-            pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_UE_NOT_RESPONDING]);
-        smContextUpdateError.setError(problem_details);
-        refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-        smContextUpdateError.setN1SmMsg(refToBinaryData);
         //PDU Session Establishment Reject, 24.501 cause "#26 Insufficient resources"
         if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
               smreq->req, n1_sm_msg,
               cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES)) {
           smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
           //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
+          smf_app_inst->trigger_update_context_error_response(
               http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, n1_sm_msg_hex, smreq->pid);
+			  PDU_SESSION_APPLICATION_ERROR_UE_NOT_RESPONDING, n1_sm_msg_hex, smreq->pid);
+
           //TODO: Need release established resources?
         } else {
           smf_app_inst->trigger_http_response(
@@ -2296,13 +2256,10 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         if (decode_status == RETURNerror) {
           Logger::smf_app().warn(
               "Decode N2 SM (Ngap_PDUSessionResourceModifyResponseTransfer) failed!");
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
-          smContextUpdateError.setError(problem_details);
           //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
+          smf_app_inst->trigger_update_context_error_response(
               http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, smreq->pid);
+			  PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR, smreq->pid);
           return;
         }
 
@@ -2367,13 +2324,11 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         if (decode_status == RETURNerror) {
           Logger::smf_app().warn(
               "Decode N2 SM (Ngap_PDUSessionResourceReleaseResponseTransfer) failed!");
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR]);
-          smContextUpdateError.setError(problem_details);
           //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
+          smf_app_inst->trigger_update_context_error_response(
               http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, smreq->pid);
+			  PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR, smreq->pid);
+
           return;
         }
 
@@ -2488,21 +2443,15 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       //send error to AMF according to the procedure
       switch (procedure_type) {
         case session_management_procedures_type_e::PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING]);
-          smContextUpdateError.setError(problem_details);
-          //TODO: need to verify with/without N1 SM
-          refToBinaryData.setContentId(N1_SM_CONTENT_ID);
-          smContextUpdateError.setN1SmMsg(refToBinaryData);
           //PDU Session Establishment Reject
           if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
               sm_context_req_msg, n1_sm_msg,
               cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE)) {
             smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
             //trigger to send reply to AMF
-            smf_app_inst->trigger_http_response(
+            smf_app_inst->trigger_update_context_error_response(
                 http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                smContextUpdateError, smreq->pid);
+				PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING, smreq->pid);
           } else {
             smf_app_inst->trigger_http_response(
                 http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
@@ -2517,25 +2466,19 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         case session_management_procedures_type_e::PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2:
         case session_management_procedures_type_e::PDU_SESSION_RELEASE_AMF_INITIATED:
         case session_management_procedures_type_e::PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING]);
-          smContextUpdateError.setError(problem_details);
           //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
+          smf_app_inst->trigger_update_context_error_response(
               http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, smreq->pid);
+			  PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING, smreq->pid);
         }
           break;
 
         default: {
           //TODO: to be updated
-          problem_details.setCause(
-              pdu_session_application_error_e2str[PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING]);
-          smContextUpdateError.setError(problem_details);
           //trigger to send reply to AMF
-          smf_app_inst->trigger_http_response(
+          smf_app_inst->trigger_update_context_error_response(
               http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              smContextUpdateError, smreq->pid);
+			  PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING, smreq->pid);
         }
       }
       return;
@@ -2627,10 +2570,6 @@ void smf_context::handle_pdu_session_modification_network_requested(
   Logger::smf_app().info(
       "Handle a PDU Session Modification Request (SMF-Requested)");
 
-  oai::smf_server::model::SmContextUpdateError smContextUpdateError = { };
-  oai::smf_server::model::SmContextUpdatedData smContextUpdatedData = { };
-  oai::smf_server::model::ProblemDetails problem_details = { };
-  oai::smf_server::model::RefToBinaryData refToBinaryData = { };
   std::string n1_sm_msg, n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
 
