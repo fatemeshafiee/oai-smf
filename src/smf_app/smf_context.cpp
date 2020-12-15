@@ -1718,6 +1718,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         // TODO: IntergrityProtectionMaximumDataRate
 
         // Process QoS rules and Qos Flow descriptions
+
+        update_qos_info(sp, sm_context_resp_pending->res, decoded_nas_msg);
+/* TODO: REMOVED
         uint16_t length_of_rule_ie =
             decoded_nas_msg.plain.sm.pdu_session_modification_request.qosrules
                 .lengthofqosrulesie;
@@ -1877,6 +1880,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
                                                       // rule identifier
           i++;
         }
+*/
 
         // TODO: MappedEPSBearerContexts
         // TODO: ExtendedProtocolConfigurationOptions
@@ -1884,8 +1888,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         // section 6.3.2. Network-requested PDU Session modification procedure @
         // 3GPP TS 24.501  requested QoS rules (including packet filters) and/or
         // requested QoS flow descriptions  session-AMBR, session TMBR
-        // PTI
-        // or UE capability
+        // PTI or UE capability
 
         // Create a N1 SM (PDU Session Modification Command) and N2 SM (PDU
         // Session Resource Modify Request Transfer IE)
@@ -2002,7 +2005,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           // TODO: PDU Session ID mismatch
         }
 
-        // PTI
         Logger::smf_app().info(
             "PTI %d",
             decoded_nas_msg.plain.sm.header.procedure_transaction_identity);
@@ -2086,7 +2088,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           return;
         }
 
-        // PTI
         Logger::smf_app().info(
             "PTI %d",
             decoded_nas_msg.plain.sm.header.procedure_transaction_identity);
@@ -2128,15 +2129,13 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             decoded_nas_msg.plain.sm.header.pdu_session_identity) {
           // TODO: PDU Session ID mismatch
         }
-        // PTI
+
         Logger::smf_app().info(
             "PTI %d",
             decoded_nas_msg.plain.sm.header.procedure_transaction_identity);
         procedure_transaction_id_t pti = {
             .procedure_transaction_id =
                 decoded_nas_msg.plain.sm.header.procedure_transaction_identity};
-
-        // Message Type
         if (decoded_nas_msg.plain.sm.header.message_type !=
             PDU_SESSION_RELEASE_COMPLETE) {
           // TODO: Message Type mismatch
@@ -2678,8 +2677,7 @@ void smf_context::handle_pdu_session_release_sm_context_request(
               n11_sm_context_resp);
 
   n11_sm_context_resp->res.set_http_code(
-      http_status_code_e::HTTP_STATUS_CODE_200_OK);  // default http response
-                                                     // code
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);
   n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
   n11_sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
   n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
@@ -2693,7 +2691,6 @@ void smf_context::handle_pdu_session_release_sm_context_request(
 
   insert_procedure(sproc);
   if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
-    // error !
     Logger::smf_app().info("PDU Release SM Context Request procedure failed");
     // trigger to send reply to AMF
     smf_app_inst->trigger_http_response(
@@ -3024,6 +3021,159 @@ void smf_context::handle_ee_pdu_session_release(supi64_t supi,
   }
 }
 
+//------------------------------------------------------------------------------
+void smf_context::update_qos_info(std::shared_ptr<smf_pdu_session> &sp,
+                     smf::pdu_session_update_sm_context_response &res,
+                     const nas_message_t &nas_msg)
+{
+  // Process QoS rules and Qos Flow descriptions
+  uint16_t length_of_rule_ie =
+      nas_msg.plain.sm.pdu_session_modification_request.qosrules
+          .lengthofqosrulesie;
+
+  pfcp::qfi_t generated_qfi = {.qfi = 0};
+
+  // QOSFlowDescriptions
+  uint8_t number_of_flow_descriptions =
+      nas_msg.plain.sm.pdu_session_modification_request
+          .qosflowdescriptions.qosflowdescriptionsnumber;
+  QOSFlowDescriptionsContents qos_flow_description_content = {};
+
+  // Only one flow description for new requested QoS Flow
+  QOSFlowDescriptionsContents *qos_flow_description =
+      (QOSFlowDescriptionsContents *)calloc(
+          number_of_flow_descriptions, sizeof(QOSFlowDescriptionsContents));
+
+  if (number_of_flow_descriptions > 0) {
+    qos_flow_description =
+        nas_msg.plain.sm.pdu_session_modification_request
+            .qosflowdescriptions.qosflowdescriptionscontents;
+
+    for (int i = 0; i < number_of_flow_descriptions; i++) {
+      if (qos_flow_description[i].qfi == NO_QOS_FLOW_IDENTIFIER_ASSIGNED) {
+        // TODO: generate new QFI
+        generated_qfi.qfi = (uint8_t)60;  // hardcoded for now
+        qos_flow_description_content = qos_flow_description[i];
+        qos_flow_description_content.qfi = generated_qfi.qfi;
+        break;
+      }
+    }
+  }
+
+  int i = 0;
+  int length_of_rule = 0;
+  while (length_of_rule_ie > 0) {
+    QOSRulesIE qos_rules_ie = {};
+    qos_rules_ie = nas_msg.plain.sm.pdu_session_modification_request
+                       .qosrules.qosrulesie[i];
+    uint8_t rule_id = {0};
+    pfcp::qfi_t qfi = {};
+    smf_qos_flow qos_flow = {};
+    length_of_rule = qos_rules_ie.LengthofQoSrule;
+
+    // If UE requested a new GBR flow
+    if ((qos_rules_ie.ruleoperationcode == CREATE_NEW_QOS_RULE) and
+        (qos_rules_ie.segregation == SEGREGATION_REQUESTED)) {
+      // Add a new QoS Flow
+      if (qos_rules_ie.qosruleidentifer == NO_QOS_RULE_IDENTIFIER_ASSIGNED) {
+        // Generate a new QoS rule
+        sp.get()->generate_qos_rule_id(rule_id);
+        Logger::smf_app().info("Create a new QoS rule (rule Id %d)", rule_id);
+        qos_rules_ie.qosruleidentifer = rule_id;
+      }
+      sp.get()->add_qos_rule(qos_rules_ie);
+
+      qfi.qfi = generated_qfi.qfi;
+      qos_flow.qfi = generated_qfi.qfi;
+
+      // set qos_profile from qos_flow_description_content
+      qos_flow.qos_profile = {};
+
+      for (int j = 0; j < qos_flow_description_content.numberofparameters;
+           j++) {
+        if (qos_flow_description_content.parameterslist[j]
+                .parameteridentifier == PARAMETER_IDENTIFIER_5QI) {
+          qos_flow.qos_profile._5qi =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents._5qi;
+        } else if (qos_flow_description_content.parameterslist[j]
+                       .parameteridentifier ==
+                   PARAMETER_IDENTIFIER_GFBR_UPLINK) {
+          qos_flow.qos_profile.parameter.qos_profile_gbr.gfbr.uplink.unit =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents.gfbrormfbr_uplinkordownlink.uint;
+          qos_flow.qos_profile.parameter.qos_profile_gbr.gfbr.uplink.value =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents.gfbrormfbr_uplinkordownlink.value;
+        } else if (qos_flow_description_content.parameterslist[j]
+                       .parameteridentifier ==
+                   PARAMETER_IDENTIFIER_GFBR_DOWNLINK) {
+          qos_flow.qos_profile.parameter.qos_profile_gbr.gfbr.donwlink.unit =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents.gfbrormfbr_uplinkordownlink.uint;
+          qos_flow.qos_profile.parameter.qos_profile_gbr.gfbr.donwlink.value =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents.gfbrormfbr_uplinkordownlink.value;
+        } else if (qos_flow_description_content.parameterslist[j]
+                       .parameteridentifier ==
+                   PARAMETER_IDENTIFIER_MFBR_UPLINK) {
+          qos_flow.qos_profile.parameter.qos_profile_gbr.mfbr.uplink.unit =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents.gfbrormfbr_uplinkordownlink.uint;
+          qos_flow.qos_profile.parameter.qos_profile_gbr.mfbr.uplink.value =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents.gfbrormfbr_uplinkordownlink.value;
+        } else if (qos_flow_description_content.parameterslist[j]
+                       .parameteridentifier ==
+                   PARAMETER_IDENTIFIER_MFBR_DOWNLINK) {
+          qos_flow.qos_profile.parameter.qos_profile_gbr.mfbr.donwlink.unit =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents.gfbrormfbr_uplinkordownlink.uint;
+          qos_flow.qos_profile.parameter.qos_profile_gbr.mfbr.donwlink.value =
+              qos_flow_description_content.parameterslist[j]
+                  .parametercontents.gfbrormfbr_uplinkordownlink.value;
+        }
+      }
+
+      Logger::smf_app().debug("Add new QoS Flow with new QRI %d",
+                              qos_rules_ie.qosruleidentifer);
+      // mark this rule to be synchronised with the UE
+      sp.get()->update_qos_rule(qos_rules_ie);
+      // Add new QoS flow
+      sp.get()->add_qos_flow(qos_flow);
+
+      // ADD QoS Flow to be updated
+      qos_flow_context_updated qcu = {};
+      qcu.set_qfi(pfcp::qfi_t(qos_flow.qfi));
+      // qcu.set_ul_fteid(flow.ul_fteid);
+      // qcu.set_dl_fteid(flow.dl_fteid);
+      qcu.set_qos_profile(qos_flow.qos_profile);
+      res.add_qos_flow_context_updated(qcu);
+
+    } else {  // update existing QRI
+      Logger::smf_app().debug("Update existing QRI %d",
+                              qos_rules_ie.qosruleidentifer);
+      qfi.qfi = qos_rules_ie.qosflowidentifer;
+      if (sp.get()->get_qos_flow(qfi, qos_flow)) {
+        sp.get()->update_qos_rule(qos_rules_ie);
+        // update QoS flow
+        sp.get()->add_qos_flow(qos_flow);
+
+        // ADD QoS Flow to be updated
+        qos_flow_context_updated qcu = {};
+        qcu.set_qfi(pfcp::qfi_t(qos_flow.qfi));
+        qcu.set_ul_fteid(qos_flow.ul_fteid);
+        qcu.set_dl_fteid(qos_flow.dl_fteid);
+        qcu.set_qos_profile(qos_flow.qos_profile);
+        res.add_qos_flow_context_updated(qcu);
+      }
+    }
+    length_of_rule_ie -= (length_of_rule + 3);  // 2 for Length of QoS
+                                                // rules IE and 1 for QoS
+                                                // rule identifier
+    i++;
+  }
+}
 //------------------------------------------------------------------------------
 bool dnn_context::find_pdu_session(
     const uint32_t pdu_session_id,

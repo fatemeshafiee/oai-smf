@@ -59,6 +59,7 @@ extern "C" {
 #include "PDUSessionEstablishmentAccept.h"
 #include "QOSFlowDescriptions.h"
 #include "QOSRules.h"
+#include "nas_message.h"
 }
 
 namespace smf {
@@ -847,6 +848,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void handle_ee_pdu_session_release(supi64_t supi,
                                      pdu_session_id_t pdu_session_id,
                                      uint8_t http_version);
+
+  void update_qos_info(std::shared_ptr<smf_pdu_session> &sp, smf::pdu_session_update_sm_context_response &res, const nas_message_t &nas_msg);
 
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
