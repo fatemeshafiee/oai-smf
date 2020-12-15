@@ -464,7 +464,6 @@ void smf_app::handle_itti_msg(
            http_response_codes_e::HTTP_RESPONSE_CODE_OK) and
           (static_cast<http_response_codes_e>(m.response_code) !=
            http_response_codes_e::HTTP_RESPONSE_CODE_ACCEPTED)) {
-        // send failure indication to UPF
         Logger::smf_app().debug("Send failure indication to UPF");
         // TODO: to be completed
         pfcp::node_id_t up_node_id = {};
@@ -591,16 +590,13 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  // Extended protocol discriminator (Mandatory)
+  //Fill the mandatory IEs
   smreq->req.set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
-  // PDUSessionIdentity
   pdu_session_id_t pdu_session_id =
       decoded_nas_msg.plain.sm.header.pdu_session_identity;
-  // ProcedureTransactionIdentity
   procedure_transaction_id_t pti = {
       .procedure_transaction_id =
           decoded_nas_msg.plain.sm.header.procedure_transaction_identity};
-  // Message type (Mandatory)
   smreq->req.set_message_type(decoded_nas_msg.plain.sm.header.message_type);
   // TODO: Integrity protection maximum data rate (Mandatory)
 
@@ -739,8 +735,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     Logger::smf_app().warn("Invalid request type (request type = %s)",
                            request_type.c_str());
     //"Existing PDU Session", AMF should use PDUSession_UpdateSMContext instead
-    //(see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0)  ignore the
-    // message
+    //(see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0) ignore the message
     return;
   }
 
@@ -754,8 +749,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         "Received a PDU Session Create SM Context Request: unknown requested "
         "DNN %s, ignore message!",
         dnn.c_str());
-    // PDU Session Establishment Reject, 24.501 cause "#27 Missing or unknown
-    // DNN"
+    // PDU Session Establishment Reject
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN)) {
@@ -846,8 +840,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
             "Received a PDU Session Create SM Context Request, couldn't "
             "retrieve the Session Management Subscription from UDM, ignore "
             "message!");
-        // PDU Session Establishment Reject, with cause "29 User authentication
-        // or authorization failed"
+        // PDU Session Establishment Reject
         if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
                 smreq->req, n1_sm_message,
                 cause_value_5gsm_e::
@@ -973,8 +966,6 @@ void smf_app::handle_pdu_session_update_sm_context_request(
 
   if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
     if (nullptr == sd.get()) {
-      // Error, DNN context doesn't exist, send PDUSession_SMUpdateContext
-      // Response to AMF
       Logger::smf_app().warn(
           "Received PDU Session Update SM Context Request, couldn't retrieve "
           "the corresponding SMF context, ignore message!");
@@ -982,7 +973,6 @@ void smf_app::handle_pdu_session_update_sm_context_request(
       trigger_update_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND,
           PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND, smreq->pid);
-
       return;
     }
   }
@@ -1094,20 +1084,6 @@ void smf_app::trigger_pdu_session_modification(
   itti_msg->http_version = http_version;
 
   // step 1. collect the necessary information
-  /*
-   //For testing purpose
-   supi_t supi = { };
-   std::string dnn("default");
-   pdu_session_id_t pdu_session_id = { 1 };
-   snssai_t snssai = { };
-   pfcp::qfi_t qfi = { };
-   qfi.qfi = 7;
-   std::string supi_str("200000000000001");
-   smf_string_to_supi(&supi, supi_str.c_str());
-   snssai.sST = 222;
-   snssai.sD = "0000D4";
-   */
-
   itti_msg->msg.set_supi(supi);
   itti_msg->msg.set_dnn(dnn);
   itti_msg->msg.set_pdu_session_id(pdu_session_id);
@@ -1143,7 +1119,6 @@ evsub_id_t smf_app::handle_event_exposure_subscription(
   // Generate a subscription ID Id and store the corresponding information in a
   // map (subscription id, info)
   evsub_id_t evsub_id = generate_ev_subscription_id();
-  // std::string evsubid_str = "SubId" + std::to_string(evsub_id);
 
   std::shared_ptr<smf_subscription> ss =
       std::shared_ptr<smf_subscription>(new smf_subscription());
@@ -1229,13 +1204,6 @@ bool smf_app::scid_2_smf_context(const scid_t &scid,
   }
   return false;
 }
-
-//------------------------------------------------------------------------------
-// void smf_app::set_evsubid_2_smf_subscription(const evsub_id_t &id,
-//                                     std::shared_ptr<smf_subscription> ss) {
-//  std::unique_lock lock(m_evsubid2smf_context);
-//  evsub_id2smf_subscription[id] = ss;
-//}
 
 //------------------------------------------------------------------------------
 bool smf_app::use_local_configuration_subscription_data(
@@ -1324,7 +1292,6 @@ void smf_app::update_pdu_session_status(const scid_t &scid,
 
   if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
     if (nullptr == sd.get()) {
-      // Error, DNN context doesn't exist
       Logger::smf_app().warn(
           "Could not retrieve the corresponding DNN context!");
     }
@@ -1381,7 +1348,6 @@ void smf_app::update_pdu_session_upCnx_state(const scid_t &scid,
 
   if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
     if (nullptr == sd.get()) {
-      // Error, DNN context doesn't exist
       Logger::smf_app().warn(
           "Could not retrieve the corresponding DNN context!");
     }

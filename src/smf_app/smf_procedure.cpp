@@ -33,6 +33,7 @@
 #include "3gpp_29.244.h"
 #include "3gpp_29.274.h"
 #include "3gpp_29.500.h"
+#include "3gpp_29.502.h"
 #include "3gpp_conversions.hpp"
 #include "SmContextCreatedData.h"
 #include "common_defs.h"
@@ -432,7 +433,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
         n11_triggered_pending->res.get_pdu_session_id();
     // N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
     json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-        "PDU_RES_SETUP_REQ";  // NGAP message type
+    		"PDU_RES_SETUP_REQ";  // NGAP message type
     json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
              ["contentId"] = N2_SM_CONTENT_ID;  // NGAP part
     json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
@@ -1093,7 +1094,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
       json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
                ["contentId"] = N2_SM_CONTENT_ID;
       json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PDU_RES_SETUP_REQ";  // NGAP message
+    		  "PDU_RES_SETUP_REQ";  // NGAP message
       json_data["upCnxState"] = "ACTIVATING";
       n11_triggered_pending->res.set_json_data(json_data);
       // TODO: verify whether cause is needed (as in 23.502 but not in 3GPP
