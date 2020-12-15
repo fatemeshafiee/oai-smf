@@ -48,5 +48,6 @@ std::string& trim(std::string &s);
 
 void ipv4_to_bstring(struct in_addr ipv4_address, bstring str);
 
+void string_to_bstring(const std::string &str, bstring bstr);
 }
 #endif

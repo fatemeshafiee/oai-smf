@@ -64,7 +64,6 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
   SM_msg *sm_msg = &nas_msg.plain.sm;
 
   // Fill the content of SM header
-  // Extended Protocol Discriminator
   sm_msg->header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   // PDU Session Identity
@@ -84,10 +83,8 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
   Logger::smf_n1().info("PDU_SESSION_ESTABLISHMENT_ACCEPT, encode starting...");
 
   // Fill the rest of SM header
-  // PTI
   sm_msg->header.procedure_transaction_identity =
       sm_context_res.get_pti().procedure_transaction_id;
-  // Message Type
   sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_ACCEPT;
 
   Logger::smf_n1().debug(
@@ -99,14 +96,12 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       sm_msg->header.message_type);
 
   // Fill the content of PDU Session Establishment Accept message
-  // PDU Session Type
   sm_msg->pdu_session_establishment_accept._pdusessiontype
       .pdu_session_type_value = sm_context_res.get_pdu_session_type();
   Logger::smf_n1().debug("PDU Session Type: %d",
                          sm_msg->pdu_session_establishment_accept
                              ._pdusessiontype.pdu_session_type_value);
 
-  // SSC Mode
   sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value =
       SSC_MODE_1;  // TODO: get from sm_context_res
   Logger::smf_n1().debug(
@@ -115,10 +110,9 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
 
   // authorized QoS rules of the PDU session: QOSRules (Section 6.2.5@3GPP
   // TS 24.501) (Section 6.4.1.3@3GPP TS 24.501 V16.1.0) Make sure that the
-  //number of the packet filters used in the authorized QoS rules of the PDU
-  //Session does not
-  // exceed the maximum number of packet filters supported by the UE for the PDU
-  // session
+  // number of the packet filters used in the authorized QoS rules of the PDU
+  // Session does not exceed the maximum number of packet filters supported by
+  // the UE for the PDU session
   if (qos_flow.qos_rules.size() > 0) {
     sm_msg->pdu_session_establishment_accept.qosrules.lengthofqosrulesie =
         qos_flow.qos_rules.size();
@@ -158,10 +152,8 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
     return false;
   }
 
-  // Presence
   sm_msg->pdu_session_establishment_accept.presence =
       0xffff;  // TODO: To be updated
-  //_5GSMCause
   sm_msg->pdu_session_establishment_accept._5gsmcause =
       static_cast<uint8_t>(sm_cause);
   Logger::smf_n1().debug("5GSM Cause: %d",
@@ -169,30 +161,8 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
 
   // PDUAddress
   paa_t paa = sm_context_res.get_paa();
-  /*  unsigned char bitStream_pdu_address_information[4];
-  bitStream_pdu_address_information[0] =
-      (uint8_t)((paa.ipv4_address.s_addr) & 0x000000ff);
-  bitStream_pdu_address_information[1] =
-      (uint8_t)(((paa.ipv4_address.s_addr) & 0x0000ff00) >> 8);
-  bitStream_pdu_address_information[2] =
-      (uint8_t)(((paa.ipv4_address.s_addr) & 0x00ff0000) >> 16);
-  bitStream_pdu_address_information[3] =
-      (uint8_t)(((paa.ipv4_address.s_addr) & 0xff000000) >> 24);
-
-  sm_msg->pdu_session_establishment_accept.pduaddress.pdu_address_information =
-      bfromcstralloc(4, "\0");
-  sm_msg->pdu_session_establishment_accept.pduaddress.pdu_address_information
-      ->slen = 4;
-
-  memcpy(sm_msg->pdu_session_establishment_accept.pduaddress
-             .pdu_address_information->data,
-         bitStream_pdu_address_information,
-         sizeof(bitStream_pdu_address_information));
-*/
-
   util::ipv4_to_bstring(paa.ipv4_address, sm_msg->pdu_session_establishment_accept.pduaddress
           .pdu_address_information);
-
   sm_msg->pdu_session_establishment_accept.pduaddress.pdu_session_type_value =
       static_cast<uint8_t>(PDU_SESSION_TYPE_E_IPV4);
   Logger::smf_n1().debug("UE Address %s",
@@ -249,17 +219,22 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
   // ExtendedProtocolConfigurationOptions
 
   // DNN
-  sm_msg->pdu_session_establishment_accept.dnn =
+  util::string_to_bstring(sm_context_res.get_dnn(), sm_msg->pdu_session_establishment_accept.dnn);
+  /* sm_msg->pdu_session_establishment_accept.dnn =
       bfromcstralloc(sm_context_res.get_dnn().length(), "\0");
   sm_msg->pdu_session_establishment_accept.dnn->slen =
       sm_context_res.get_dnn().length();
   memcpy((void *)sm_msg->pdu_session_establishment_accept.dnn->data,
          (void *)sm_context_res.get_dnn().c_str(),
          sm_context_res.get_dnn().length());
+
   std::string dnn_str(
       (char *)sm_msg->pdu_session_establishment_accept.dnn->data,
       sm_msg->pdu_session_establishment_accept.dnn->slen);
   Logger::smf_n1().debug("DNN %s", dnn_str.c_str());
+  */
+  Logger::smf_n1().debug("DNN %s", sm_context_res.get_dnn().c_str());
+
 
   Logger::smf_n1().info("Encode PDU Session Establishment Accept");
   // Encode NAS message
@@ -279,6 +254,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
   } else {
     result = false;
   }
+
   // free memory
   if (qos_flow.qos_rules.size() > 0) {
     free_wrapper(
@@ -304,16 +280,12 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(
   nas_msg.header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
-  // nas_msg.header.sequence_number = 0xfe;
-  // nas_msg.header.message_authentication_code = 0xffee;
 
   SM_msg *sm_msg = &nas_msg.plain.sm;
 
   // Fill the content of SM header
-  // Extended Protocol Discriminator
   sm_msg->header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
-  // PDU Session Identity
   sm_msg->header.pdu_session_identity = msg.get_pdu_session_id();
 
   // PDU Session Establishment Reject is included in the following messages:
@@ -327,12 +299,9 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(
   Logger::smf_n1().info("PDU_SESSION_ESTABLISHMENT_REJECT, encode starting...");
 
   // Fill the content of PDU Session Establishment Reject message
-  // PDU Session ID
   sm_msg->header.pdu_session_identity = msg.get_pdu_session_id();
-  // PTI
   sm_msg->header.procedure_transaction_identity =
       msg.get_pti().procedure_transaction_id;
-  // Message Type
   sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_REJECT;
   Logger::smf_n1().debug(
       "NAS header, Extended Protocol Discriminator  0x%x, Security Header "
@@ -346,17 +315,11 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(
       sm_msg->header.procedure_transaction_identity,
       sm_msg->header.message_type);
 
-  // 5GSM Cause
   sm_msg->pdu_session_establishment_reject._5gsmcause =
       static_cast<uint8_t>(sm_cause);
-  // Presence
+  // Presence, should be updated according to the following IEs
   sm_msg->pdu_session_establishment_reject.presence =
-      PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_PRESENCE;  // Should be
-                                                                   // updated
-                                                                   // according
-                                                                   // to the
-                                                                   // following
-                                                                   // IEs
+      PDU_SESSION_ESTABLISHMENT_REJECT_ALLOWED_SSC_MODE_PRESENCE;
   /*
    //GPRSTimer3
    sm_msg->pdu_session_establishment_reject.gprstimer3.unit =
@@ -417,20 +380,15 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   nas_msg.header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
-  // nas_msg.header.sequence_number = 0xfe;
-  // nas_msg.header.message_authentication_code = 0xffee;
 
   SM_msg *sm_msg = &nas_msg.plain.sm;
 
   // Fill the content of SM header
-  // Extended Protocol Discriminator
   sm_msg->header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
-  // PDU Session Identity
   sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
 
   Logger::smf_n1().debug("PDU Session Modification Command");
-
   Logger::smf_n1().info("PDU_SESSION_MODIFICATION_COMMAND, encode starting...");
 
   // Get the SMF_PDU_Session
@@ -462,15 +420,12 @@ bool smf_n1::create_n1_pdu_session_modification_command(
     return false;
   }
 
-  // PTI
   sm_msg->header.procedure_transaction_identity =
       sm_context_res.get_pti().procedure_transaction_id;
-  // Message Type
   sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
-  // Presence
+  // TODO: to be updated
   sm_msg->pdu_session_modification_command.presence =
-      0xff;  // TODO: to be updated
-  // 5GSMCause
+      0xff;
   sm_msg->pdu_session_modification_command._5gsmcause =
       static_cast<uint8_t>(sm_cause);
   // SessionAMBR (default)
@@ -498,8 +453,6 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   for (int i = 0; i < qos_rules.size(); i++) {
     Logger::smf_n1().debug("QoS Rule to be updated (Id %d)",
                            qos_rules[i].qosruleidentifer);
-    // sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i] =
-    // qos_rules[i];
     memcpy(&sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i],
            &qos_rules[i], sizeof(QOSRulesIE));
   }
@@ -507,7 +460,8 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   // MappedEPSBearerContexts
   // TODO:
 
-  // QOSFlowDescriptions, TODO: get authorized QoS flow descriptions IE
+  // QOSFlowDescriptions
+  //TODO: get authorized QoS flow descriptions IE
   if (smf_app_inst->is_supi_2_smf_context(supi64)) {
     Logger::smf_n1().debug("Get SMF context with SUPI " SUPI_64_FMT "", supi64);
     sc = smf_app_inst->supi_2_smf_context(supi64);
@@ -565,20 +519,15 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   nas_msg.header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
-  // nas_msg.header.sequence_number = 0xfe;
-  // nas_msg.header.message_authentication_code = 0xffee;
 
   SM_msg *sm_msg = &nas_msg.plain.sm;
 
   // Fill the content of SM header
-  // Extended Protocol Discriminator
   sm_msg->header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
-  // PDU Session Identity
   sm_msg->header.pdu_session_identity = msg.get_pdu_session_id();
 
   Logger::smf_n1().debug("PDU Session Modification Command");
-
   Logger::smf_n1().info("PDU_SESSION_MODIFICATION_COMMAND, encode starting...");
 
   // Get the SMF_PDU_Session
@@ -609,15 +558,12 @@ bool smf_n1::create_n1_pdu_session_modification_command(
     return false;
   }
 
-  // PTI
   sm_msg->header.procedure_transaction_identity =
       msg.get_pti().procedure_transaction_id;
-  // Message Type
   sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
-  // Presence
+  // TODO: to be updated
   sm_msg->pdu_session_modification_command.presence =
-      0xff;  // TODO: to be updated
-  // 5GSMCause
+      0xff;
   sm_msg->pdu_session_modification_command._5gsmcause =
       static_cast<uint8_t>(sm_cause);
   // SessionAMBR (default)
@@ -645,8 +591,6 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   for (int i = 0; i < qos_rules.size(); i++) {
     Logger::smf_n1().debug("QoS Rule to be updated (Id %d)",
                            qos_rules[i].qosruleidentifer);
-    // sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i] =
-    // qos_rules[i];
     memcpy(&sm_msg->pdu_session_modification_command.qosrules.qosrulesie[i],
            &qos_rules[i], sizeof(QOSRulesIE));
   }
@@ -708,33 +652,24 @@ bool smf_n1::create_n1_pdu_session_release_reject(
   nas_msg.header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
-  // nas_msg.header.sequence_number = 0xfe;
-  // nas_msg.header.message_authentication_code = 0xffee;
 
   SM_msg *sm_msg = &nas_msg.plain.sm;
 
   // Fill the content of SM header
-  // Extended Protocol Discriminator
   sm_msg->header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
-  // PDU Session Identity
   sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
 
   // Fill the content of PDU Session Release Reject
-  // PDU Session ID
   sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
-  // PTI
   sm_msg->header.procedure_transaction_identity =
       sm_context_res.get_pti().procedure_transaction_id;
-  // Message Type
   sm_msg->header.message_type = PDU_SESSION_RELEASE_REJECT;
-  // 5GSMCause
   sm_msg->pdu_session_release_reject._5gsmcause =
-      static_cast<uint8_t>(sm_cause);  // sm_context_res.get_cause();
-
-  // Presence
+      static_cast<uint8_t>(sm_cause);
+  // TODO: to be updated when adding the following IE
   sm_msg->pdu_session_release_command.presence =
-      0x00;  // TODO: to be updated when adding the following IE
+      0x00;
   // Extended protocol configuration options
 
   // Encode NAS message
@@ -771,33 +706,25 @@ bool smf_n1::create_n1_pdu_session_release_command(
   nas_msg.header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
-  // nas_msg.header.sequence_number = 0xfe;
-  // nas_msg.header.message_authentication_code = 0xffee;
 
   SM_msg *sm_msg = &nas_msg.plain.sm;
 
   // Fill the content of SM header
-  // Extended Protocol Discriminator
   sm_msg->header.extended_protocol_discriminator =
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
-  // PDU Session Identity
   sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
 
   Logger::smf_n1().info("PDU_SESSION_RELEASE_COMMAND, encode starting...");
   // Fill the content of PDU Session Release Command
-  // PDU Session ID
   sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
-  // PTI
   sm_msg->header.procedure_transaction_identity =
       sm_context_res.get_pti().procedure_transaction_id;
-  // Message Type
   sm_msg->header.message_type = PDU_SESSION_RELEASE_COMMAND;
-  // 5GSMCause
   sm_msg->pdu_session_release_command._5gsmcause =
-      static_cast<uint8_t>(sm_cause);  // sm_context_res.get_cause();
-  // Presence
+      static_cast<uint8_t>(sm_cause);
+  // TODO: to be updated when adding the following IEs
   sm_msg->pdu_session_release_command.presence =
-      0x00;  // TODO: to be updated when adding the following IEs
+      0x00;
   // GPRSTimer3
   // EAPMessage
   //_5GSMCongestionReattemptIndicator
