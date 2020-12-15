@@ -134,9 +134,6 @@ smf_n11::smf_n11() {
 //------------------------------------------------------------------------------
 void smf_n11::send_n1n2_message_transfer_request(
     std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res) {
-  // Transfer N1/N2 message via AMF by using
-  // N_amf_Communication_N1N2MessageTransfer (see
-  // TS29518_Namf_Communication.yaml)
   Logger::smf_n11().debug(
       "Send Communication_N1N2MessageTransfer to AMF (HTTP version %d)",
       sm_context_res->http_version);
@@ -256,10 +253,6 @@ void smf_n11::send_n1n2_message_transfer_request(
 void smf_n11::send_n1n2_message_transfer_request(
     std::shared_ptr<itti_nx_trigger_pdu_session_modification>
         sm_session_modification) {
-  // Transfer N1/N2 message via AMF by using
-  // N_amf_Communication_N1N2MessageTransfer (see
-  // TS29518_Namf_Communication.yaml)
-
   Logger::smf_n11().debug("Send Communication_N1N2MessageTransfer to AMF");
 
   mime_parser parser = {};
@@ -531,7 +524,6 @@ void smf_n11::notify_subscribed_event(
   std::unique_ptr<std::string> httpData(new std::string());
   std::string data;
 
-  // init curl
   curl_global_init(CURL_GLOBAL_ALL);
   m_curl_multi = curl_multi_init();
   // init header
@@ -647,3 +639,5 @@ CURL *smf_n11::curl_create_handle(event_notification &ev_notif,
   }
   return curl;
 }
+
+

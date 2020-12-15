@@ -68,10 +68,6 @@ void smf_n10_task(void *args_p) {
     auto *msg = shared_msg.get();
     switch (msg->msg_type) {
       case N10_SESSION_GET_SESSION_MANAGEMENT_SUBSCRIPTION:
-        // if (itti_n10_get_session_management_subscription* m =
-        // dynamic_cast<itti_n10_get_session_management_subscription*>(msg)) {
-        //  smf_n10_inst->send_sm_data_get_msg(ref(*m));
-        //}
         break;
 
       case TERMINATE:
@@ -104,8 +100,6 @@ bool smf_n10::get_sm_data(
     const supi64_t &supi, const std::string &dnn, const snssai_t &snssai,
     std::shared_ptr<session_management_subscription> subscription) {
   // retrieve a UE's Session Management Subscription Data
-  // (TS29503_Nudm_SDM.yaml: /{supi}/sm-data)  use curl to send data for the
-  // moment
 
   nlohmann::json jsonData = {};
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -138,7 +132,6 @@ bool smf_n10::get_sm_data(
     // Hook up data handling function.
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
-    // curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData);
     int numRetries = 0;
     while (numRetries < UDM_NUMBER_RETRIES) {
       res = curl_easy_perform(curl);
@@ -151,7 +144,6 @@ bool smf_n10::get_sm_data(
                                 url.c_str());
         try {
           jsonData = nlohmann::json::parse(*httpData.get());
-          // curl_easy_cleanup(curl);
           break;
         } catch (json::exception &e) {
           Logger::smf_n10().warn("Could not parse json data from UDM");
@@ -178,7 +170,6 @@ bool smf_n10::get_sm_data(
       try {
         std::shared_ptr<dnn_configuration_t> dnn_configuration =
             std::make_shared<dnn_configuration_t>();
-        // PDU Session Type
         pdu_session_type_t pdu_session_type(
             pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
         std::string default_session_type =
