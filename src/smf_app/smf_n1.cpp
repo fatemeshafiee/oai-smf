@@ -169,7 +169,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
 
   // PDUAddress
   paa_t paa = sm_context_res.get_paa();
-  unsigned char bitStream_pdu_address_information[4];
+  /*  unsigned char bitStream_pdu_address_information[4];
   bitStream_pdu_address_information[0] =
       (uint8_t)((paa.ipv4_address.s_addr) & 0x000000ff);
   bitStream_pdu_address_information[1] =
@@ -188,6 +188,10 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
              .pdu_address_information->data,
          bitStream_pdu_address_information,
          sizeof(bitStream_pdu_address_information));
+*/
+
+  util::ipv4_to_bstring(paa.ipv4_address, sm_msg->pdu_session_establishment_accept.pduaddress
+          .pdu_address_information);
 
   sm_msg->pdu_session_establishment_accept.pduaddress.pdu_session_type_value =
       static_cast<uint8_t>(PDU_SESSION_TYPE_E_IPV4);
