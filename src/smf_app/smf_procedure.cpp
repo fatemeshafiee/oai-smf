@@ -48,6 +48,7 @@
 #include "smf_n11.hpp"
 #include "smf_n2.hpp"
 #include "smf_pfcp_association.hpp"
+#include "ProblemDetails.h"
 
 using namespace pfcp;
 using namespace smf;

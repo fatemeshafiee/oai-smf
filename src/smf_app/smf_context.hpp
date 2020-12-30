@@ -31,7 +31,6 @@
 #define FILE_SMF_CONTEXT_HPP_SEEN
 
 #include <map>
-//#include <mutex>
 #include <memory>
 #include <shared_mutex>
 #include <utility>
@@ -42,8 +41,6 @@
 #include "3gpp_29.274.h"
 #include "3gpp_29.502.h"
 #include "3gpp_29.503.h"
-#include "SmContextCreateData.h"
-#include "SmContextCreateError.h"
 #include "common_root_types.h"
 #include "itti.hpp"
 #include "msg_pfcp.hpp"

@@ -38,7 +38,6 @@
 #include "3gpp_29.571.h"
 #include "3gpp_29.508.h"
 #include "Guami.h"
-#include "RefToBinaryData.h"
 #include "NgRanTargetId.h"
 
 extern "C" {

@@ -31,8 +31,9 @@
 #define FILE_SMF_EVENT_SIG_HPP_SEEN
 
 #include <boost/signals2.hpp>
-namespace bs2 = boost::signals2;
 #include "3gpp_24.007.h"
+
+namespace bs2 = boost::signals2;
 
 namespace smf {
 

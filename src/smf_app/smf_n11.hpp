@@ -34,9 +34,6 @@
 
 #include <curl/curl.h>
 #include "3gpp_29.503.h"
-#include "SmContextCreatedData.h"
-#include "SmContextUpdateError.h"
-#include "SmContextUpdatedData.h"
 #include "smf.h"
 #include "smf_context.hpp"
 

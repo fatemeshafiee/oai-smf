@@ -36,13 +36,11 @@
 #include <shared_mutex>
 #include <string>
 #include <thread>
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
 
 #include "3gpp_29.274.h"
 #include "3gpp_29.502.h"
-#include "SmContextCreateData.h"
-#include "SmContextCreateError.h"
-#include "SmContextUpdateData.h"
-#include "SmContextUpdateError.h"
 #include "itti_msg_n11.hpp"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_sbi.hpp"
@@ -54,10 +52,6 @@
 #include "smf_msg.hpp"
 #include "smf_pco.hpp"
 #include "smf_subscription.hpp"
-
-#define BOOST_THREAD_PROVIDES_FUTURE
-#include <boost/thread.hpp>
-#include <boost/thread/future.hpp>
 
 namespace smf {
 
