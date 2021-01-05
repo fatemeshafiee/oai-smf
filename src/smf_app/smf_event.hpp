@@ -51,6 +51,7 @@ class smf_event {
   // class register/handle event
   friend class smf_app;
   friend class smf_context;
+  friend class smf_profile;
 
   /*
    * Subscribe to SM Context Status Notification signal

@@ -208,15 +208,28 @@ typedef struct qos_profile_s {
 #define UDM_NUMBER_RETRIES 3
 constexpr auto CURL_MIME_BOUNDARY = "----Boundary";
 
-//for N1N2
+// for N1N2
 #define BUF_LEN 512
 
-//for PFCP
+// for PFCP
 constexpr uint64_t SECONDS_SINCE_FIRST_EPOCH = 2208988800;
-//8.22  Fully Qualified TEID (F-TEID) - 3GPP TS 29.274 V16.0.0
+// 8.22  Fully Qualified TEID (F-TEID) - 3GPP TS 29.274 V16.0.0
 #define TEID_GRE_KEY_LENGTH 4
 
+#define DEFAULT_QFI 6
 
+typedef struct dnn_smf_info_item_s {
+  std::string dnn;
+} dnn_smf_info_item_t;
 
+typedef struct snssai_smf_info_item_s {
+  snssai_t snssai;
+  std::vector<dnn_smf_info_item_t> dnn_smf_info_list;
+
+} snssai_smf_info_item_t;
+
+typedef struct smf_info_s {
+  std::vector<snssai_smf_info_item_t> snssai_smf_info_list;
+} smf_info_t;
 
 #endif
