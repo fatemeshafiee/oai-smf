@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -31,54 +31,50 @@
 #define FILE_SMF_CONTEXT_HPP_SEEN
 
 #include <map>
-//#include <mutex>
-#include <shared_mutex>
 #include <memory>
+#include <shared_mutex>
 #include <utility>
 #include <vector>
 
-#include "pistache/endpoint.h"
-#include "pistache/http.h"
-#include "pistache/router.h"
 #include "3gpp_24.008.h"
-#include "3gpp_29.274.h"
 #include "3gpp_29.244.h"
-#include "3gpp_29.503.h"
+#include "3gpp_29.274.h"
 #include "3gpp_29.502.h"
+#include "3gpp_29.503.h"
 #include "common_root_types.h"
 #include "itti.hpp"
 #include "msg_pfcp.hpp"
+#include "pistache/endpoint.h"
+#include "pistache/http.h"
+#include "pistache/router.h"
+#include "smf_event.hpp"
 #include "smf_procedure.hpp"
 #include "uint_generator.hpp"
-#include "SmContextCreateData.h"
-#include "SmContextCreateError.h"
 
 extern "C" {
-#include "QOSRules.h"
-#include "QOSFlowDescriptions.h"
-#include "PDUSessionEstablishmentAccept.h"
 #include "Ngap_PDUSessionAggregateMaximumBitRate.h"
-
+#include "PDUSessionEstablishmentAccept.h"
+#include "QOSFlowDescriptions.h"
+#include "QOSRules.h"
+#include "nas_message.h"
 }
 
 namespace smf {
 
 class smf_qos_flow {
  public:
-  smf_qos_flow() {
-    clear();
-  }
+  smf_qos_flow() { clear(); }
 
   void clear() {
-    ul_fteid = { };
-    dl_fteid = { };
-    pdr_id_ul = { };
-    pdr_id_dl = { };
-    precedence = { };
-    far_id_ul = { };
-    far_id_dl = { };
+    ul_fteid = {};
+    dl_fteid = {};
+    pdr_id_ul = {};
+    pdr_id_dl = {};
+    precedence = {};
+    far_id_ul = {};
+    far_id_dl = {};
     released = false;
-    qos_profile = { };
+    qos_profile = {};
     cause_value = 0;
   }
 
@@ -103,36 +99,32 @@ class smf_qos_flow {
    */
   std::string toString() const;
 
-  pfcp::qfi_t qfi;  //QoS Flow Identifier
-  pfcp::fteid_t ul_fteid;  //fteid of UPF
-  pfcp::fteid_t dl_fteid;  //fteid of AN
-  pfcp::pdr_id_t pdr_id_ul;   // Packet Detection Rule ID, UL
-  pfcp::pdr_id_t pdr_id_dl;   // Packet Detection Rule ID, DL
+  pfcp::qfi_t qfi;           // QoS Flow Identifier
+  pfcp::fteid_t ul_fteid;    // fteid of UPF
+  pfcp::fteid_t dl_fteid;    // fteid of AN
+  pfcp::pdr_id_t pdr_id_ul;  // Packet Detection Rule ID, UL
+  pfcp::pdr_id_t pdr_id_dl;  // Packet Detection Rule ID, DL
   pfcp::precedence_t precedence;
-  std::pair<bool, pfcp::far_id_t> far_id_ul;  //FAR ID, UL
-  std::pair<bool, pfcp::far_id_t> far_id_dl;  //FAR ID, DL
+  std::pair<bool, pfcp::far_id_t> far_id_ul;  // FAR ID, UL
+  std::pair<bool, pfcp::far_id_t> far_id_dl;  // FAR ID, DL
   bool released;  // finally seems necessary, TODO try to find heuristic ?
   pdu_session_id_t pdu_session_id;
-  qos_profile_t qos_profile;   //QoS profile
-  uint8_t cause_value;   //cause
+  qos_profile_t qos_profile;  // QoS profile
+  uint8_t cause_value;        // cause
 };
 
 class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
  public:
-  smf_pdu_session()
-      :
-      m_pdu_session_mutex() {
-    clear();
-  }
+  smf_pdu_session() : m_pdu_session_mutex() { clear(); }
 
   void clear() {
     ipv4 = false;
     ipv6 = false;
     ipv4_address.s_addr = INADDR_ANY;
     ipv6_address = in6addr_any;
-    pdn_type = { };
+    pdu_session_type = {};
     seid = 0;
-    up_fseid = { };
+    up_fseid = {};
     qos_flows.clear();
     released = false;
     default_qfi.qfi = NO_QOS_FLOW_IDENTIFIER_ASSIGNED;
@@ -140,7 +132,6 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     timer_T3590 = ITTI_INVALID_TIMER_ID;
     timer_T3591 = ITTI_INVALID_TIMER_ID;
     timer_T3592 = ITTI_INVALID_TIMER_ID;
-
   }
 
   smf_pdu_session(smf_pdu_session &b) = delete;
@@ -192,7 +183,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   /*
    * Get all QoS Flows associated with this PDU Session
-   * @param [std::vector<smf_qos_flow> &] flows: list of Flows associated with this session
+   * @param [std::vector<smf_qos_flow> &] flows: list of Flows associated with
+   * this session
    * @return void
    */
   void get_qos_flows(std::vector<smf_qos_flow> &flows);
@@ -268,9 +260,11 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   upCnx_state_e get_upCnx_state() const;
 
   // Called by GTPV2-C DELETE_SESSION_REQUEST
-  // deallocate_ressources is for releasing related-resources prior to the deletion of objects
-  // since shared_ptr is actually heavy used for handling objects, deletion of object instances cannot be always guaranteed
-  // when removing them from a collection, so that is why actually the deallocation of resources is not done in the destructor of objects.
+  // deallocate_ressources is for releasing related-resources prior to the
+  // deletion of objects since shared_ptr is actually heavy used for handling
+  // objects, deletion of object instances cannot be always guaranteed when
+  // removing them from a collection, so that is why actually the deallocation
+  // of resources is not done in the destructor of objects.
   void deallocate_ressources(const std::string &dnn);
 
   /*
@@ -345,7 +339,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   /*
    * Get all QoS Rules to be synchronised with UE
-   * @param [std::vector<QOSRulesIE> &]: qos_rules: List of QoS Rules to be synchronised with UE
+   * @param [std::vector<QOSRulesIE> &]: qos_rules: List of QoS Rules to be
+   * synchronised with UE
    * @return void
    */
   void get_qos_rules_to_be_synchronised(
@@ -392,15 +387,17 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   /*
    * Get PDN Type of this PDU session
    * @param void
-   * @return pdn_type_t: PDN Type
+   * @return pdu_session_type_t: PDN Type
    */
-  pdn_type_t get_pdn_type() const;
+  pdu_session_type_t get_pdu_session_type() const;
 
-  bool ipv4;                  // IP Address(es): IPv4 address and/or IPv6 prefix
-  bool ipv6;                  // IP Address(es): IPv4 address and/or IPv6 prefix
-  struct in_addr ipv4_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
-  struct in6_addr ipv6_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
-  pdn_type_t pdn_type;            // IPv4, IPv6, IPv4v6 or Non-IP
+  bool ipv4;  // IP Address(es): IPv4 address and/or IPv6 prefix
+  bool ipv6;  // IP Address(es): IPv4 address and/or IPv6 prefix
+  struct in_addr
+      ipv4_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
+  struct in6_addr
+      ipv6_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
+  pdu_session_type_t pdu_session_type;  // IPv4, IPv6, IPv4v6 or Non-IP
 
   bool released;  //(release access bearers request)
 
@@ -417,36 +414,34 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint32_t pdu_session_id;
   std::string amf_id;
   pdu_session_status_e pdu_session_status;
-  upCnx_state_e upCnx_state;  //N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
+  upCnx_state_e
+      upCnx_state;  // N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
   timer_id_t timer_T3590;
   timer_id_t timer_T3591;
   timer_id_t timer_T3592;
 
-  pfcp::qfi_t default_qfi;  //Default QFI for this session
-  std::map<uint8_t, smf_qos_flow> qos_flows;   // QFI <-> QoS Flow
-  std::map<uint8_t, QOSRulesIE> qos_rules;   // QRI <-> QoS Rules
+  pfcp::qfi_t default_qfi;                    // Default QFI for this session
+  std::map<uint8_t, smf_qos_flow> qos_flows;  // QFI <-> QoS Flow
+  std::map<uint8_t, QOSRulesIE> qos_rules;    // QRI <-> QoS Rules
   std::vector<uint8_t> qos_rules_to_be_synchronised;
   std::vector<uint8_t> qos_rules_to_be_removed;
-  //5GSM parameters and capabilities
+  // 5GSM parameters and capabilities
   uint8_t maximum_number_of_supported_packet_filters;
-  //TODO: 5GSM Capability (section 9.11.4.1@3GPP TS 24.501 V16.1.0)
-  //TODO: Integrity protection maximum data rate (section 9.11.4.7@@3GPP TS 24.501 V16.1.0)
-  uint8_t number_of_supported_packet_filters;  //number_of_supported_packet_filters
+  // TODO: 5GSM Capability (section 9.11.4.1@3GPP TS 24.501 V16.1.0)
+  // TODO: Integrity protection maximum data rate (section 9.11.4.7@@3GPP
+  // TS 24.501 V16.1.0)
+  uint8_t
+      number_of_supported_packet_filters;  // number_of_supported_packet_filters
   util::uint_generator<uint32_t> qos_rule_id_generator;
 
   // Shared lock
   mutable std::shared_mutex m_pdu_session_mutex;
-
 };
 
 class session_management_subscription {
  public:
   session_management_subscription(snssai_t snssai)
-      :
-      single_nssai(snssai),
-      dnn_configurations(),
-      m_mutex() {
-  }
+      : single_nssai(snssai), dnn_configurations(), m_mutex() {}
 
   /*
    * Insert a DNN configuration into the subscription
@@ -471,13 +466,15 @@ class session_management_subscription {
   /*
    * Verify whether DNN configuration with a given DNN exist
    * @param [std::string &] dnn
-   * @return bool: return true if the configuration exist, otherwise return false
+   * @return bool: return true if the configuration exist, otherwise return
+   * false
    */
   bool dnn_configuration(const std::string &dnn) const;
 
  private:
   snssai_t single_nssai;
-  std::map<std::string, std::shared_ptr<dnn_configuration_t>> dnn_configurations;  //dnn <->dnn_configuration
+  std::map<std::string, std::shared_ptr<dnn_configuration_t>>
+      dnn_configurations;  // dnn <->dnn_configuration
 
   // Shared lock
   mutable std::shared_mutex m_mutex;
@@ -487,24 +484,11 @@ class session_management_subscription {
  * Manage the DNN context
  */
 class dnn_context {
-
  public:
-  dnn_context()
-      :
-      m_context(),
-      in_use(false),
-      pdu_sessions(),
-      nssai() {
-  }
+  dnn_context() : m_context(), in_use(false), pdu_sessions(), nssai() {}
 
   dnn_context(std::string dnn)
-      :
-      m_context(),
-      in_use(false),
-      pdu_sessions(),
-      nssai(),
-      dnn_in_use(dnn) {
-  }
+      : m_context(), in_use(false), pdu_sessions(), nssai(), dnn_in_use(dnn) {}
   dnn_context(dnn_context &b) = delete;
 
   /*
@@ -518,7 +502,8 @@ class dnn_context {
 
   /*
    * Insert a PDU Session into the DNN context
-   * @param [std::shared_ptr<smf_pdu_session> &] sp: shared pointer to a PDU Session
+   * @param [std::shared_ptr<smf_pdu_session> &] sp: shared pointer to a PDU
+   * Session
    * @return void
    */
   void insert_pdu_session(std::shared_ptr<smf_pdu_session> &sp);
@@ -526,10 +511,10 @@ class dnn_context {
   /*
    * Delete a PDU Session identified by its ID
    * @param [const uint32_t] pdu_session_id
-   * @return bool: return true if the pdu session is deleted, otherwise, return false
+   * @return bool: return true if the pdu session is deleted, otherwise, return
+   * false
    */
   bool remove_pdu_session(const uint32_t pdu_session_id);
-
 
   /*
    * Get number of pdu sessions associated with this context (dnn and Nssai)
@@ -546,24 +531,30 @@ class dnn_context {
   std::string toString() const;
 
   bool in_use;
-  std::string dnn_in_use;   // The DNN currently used, as received from the AMF
+  std::string dnn_in_use;  // The DNN currently used, as received from the AMF
   snssai_t nssai;
-  std::vector<std::shared_ptr<smf_pdu_session>> pdu_sessions;  //Store all PDU Sessions associated with this DNN context
+  std::vector<std::shared_ptr<smf_pdu_session>>
+      pdu_sessions;  // Store all PDU Sessions associated with this DNN context
   mutable std::shared_mutex m_context;
 };
 
 class smf_context;
 
 class smf_context : public std::enable_shared_from_this<smf_context> {
-
  public:
   smf_context()
-      :
-      m_context(),
-      pending_procedures(),
-      dnn_subscriptions(),
-      scid(0) {
-    supi_prefix = { };
+      : m_context(),
+        pending_procedures(),
+        dnn_subscriptions(),
+        scid(0),
+        event_sub(smf_event::get_instance()) {
+    supi_prefix = {};
+    // subscribe to sm context status change
+    event_sub.subscribe_sm_context_status(boost::bind(
+        &smf_context::handle_sm_context_status_change, this, _1, _1, _1));
+    // subscribe to pdu session release (event exposure)
+    event_sub.subscribe_ee_pdu_session_release(boost::bind(
+        &smf_context::handle_ee_pdu_session_release, this, _1, _1, _1));
   }
 
   smf_context(smf_context &b) = delete;
@@ -592,46 +583,48 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void remove_procedure(smf_procedure *proc);
 
 #define IS_FIND_PDN_WITH_LOCAL_TEID true
-#define IS_FIND_PDN_WITH_PEER_TEID  false
+#define IS_FIND_PDN_WITH_PEER_TEID false
 
   /*
    * Handle N4 message (session establishment response) from UPF
    * @param [itti_n4_session_establishment_responset&]
    * @return void
    */
-  void handle_itti_msg(itti_n4_session_establishment_response&);
+  void handle_itti_msg(itti_n4_session_establishment_response &);
 
   /*
    * Handle N4 message (session modification response) from UPF
    * @param [itti_n4_session_modification_response&]
    * @return void
    */
-  void handle_itti_msg(itti_n4_session_modification_response&);
+  void handle_itti_msg(itti_n4_session_modification_response &);
 
   /*
    * Handle N4 message (session deletion response) from UPF
    * @param [itti_n4_session_deletion_response&]
    * @return void
    */
-  void handle_itti_msg(itti_n4_session_deletion_response&);
+  void handle_itti_msg(itti_n4_session_deletion_response &);
 
   /*
    * Handle N4 message (session report) from UPF
    * @param [itti_n4_session_report_request&]
    * @return void
    */
-  void handle_itti_msg(std::shared_ptr<itti_n4_session_report_request>&);
+  void handle_itti_msg(std::shared_ptr<itti_n4_session_report_request> &);
 
   /*
    * Handle messages from AMF (e.g., PDU_SESSION_CreateSMContextRequest)
-   * @param [std::shared_ptr<itti_n11_create_sm_context_request] smreq Request message
+   * @param [std::shared_ptr<itti_n11_create_sm_context_request] smreq Request
+   * message
    * @return void
    */
   void handle_pdu_session_create_sm_context_request(
       std::shared_ptr<itti_n11_create_sm_context_request> smreq);
   /*
    * Handle messages from AMF (e.g., PDU_SESSION_UpdateSMContextRequest)
-   * @param [std::shared_ptr<itti_n11_update_sm_context_request] smreq Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request] smreq Request
+   * message
    * @return void
    */
   void handle_pdu_session_update_sm_context_request(
@@ -639,7 +632,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   /*
    * Handle messages from AMF (e.g., PDU_SESSION_ReleaseSMContextRequest)
-   * @param [std::shared_ptr<itti_n11_release_sm_context_request] smreq Request message
+   * @param [std::shared_ptr<itti_n11_release_sm_context_request] smreq Request
+   * message
    * @return void
    */
   void handle_pdu_session_release_sm_context_request(
@@ -647,7 +641,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   /*
    * Handle network-requested session modification (SMF, AN, AMF -requested)
-   * @param [std::shared_ptr<itti_nx_trigger_pdu_session_modification] msg: Request message
+   * @param [std::shared_ptr<itti_nx_trigger_pdu_session_modification] msg:
+   * Request message
    * @return void
    */
   void handle_pdu_session_modification_network_requested(
@@ -664,13 +659,15 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   /*
    * Insert a DNN context into SMF context
-   * @param [std::shared_ptr<dnn_context>&] sd Shared_ptr pointer to a DNN context
+   * @param [std::shared_ptr<dnn_context>&] sd Shared_ptr pointer to a DNN
+   * context
    * @return void
    */
   void insert_dnn(std::shared_ptr<dnn_context> &sd);
 
   /*
-   * Check the validity of the request according to user subscription and local policies
+   * Check the validity of the request according to user subscription and local
+   * policies
    * @param [std::shared_ptr<itti_n11_create_sm_context_request>] smreq
    * @return true if the request is valid, otherwise return false
    *
@@ -681,7 +678,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   /*
    * Insert a session management subscription into the SMF context
    * @param [const snssai_t&] snssai
-   * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to the subscription
+   * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to
+   * the subscription
    * @return void
    */
   void insert_dnn_subscription(
@@ -692,7 +690,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * Verify whether a subscription data exist with a given dnn and snssai
    * @param [const std::string &] dnn: DNN
    * @param [const snssai_t&] snssai: single NSSAI
-   *@return bool: Return true if a subscription data corresponding with dnn and snssai exist, otherwise return false
+   *@return bool: Return true if a subscription data corresponding with dnn and
+   *snssai exist, otherwise return false
    */
   bool is_dnn_snssai_subscription_data(const std::string &dnn,
                                        const snssai_t &snssai);
@@ -700,7 +699,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   /*
    * Find a session management subscription from a SMF context
    * @param [const snssai_t&] snssai
-   * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to the subscription
+   * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to
+   * the subscription
    * @return void
    */
   bool find_dnn_subscription(
@@ -775,7 +775,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   /*
    * Get the default QoS Rule for all QFIs
    * @param [QOSRulesIE] qos_rule
-   * @param [const uint8_t] pdu_session_type: PDU session type (e.g., Ipv4, Ipv6)
+   * @param [const uint8_t] pdu_session_type: PDU session type (e.g., Ipv4,
+   * Ipv6)
    * @return void
    */
   void get_default_qos_rule(QOSRulesIE &qos_rule, uint8_t pdu_session_type);
@@ -802,7 +803,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
                         const std::string &dnn);
 
   /*
-   * Get the default value of Session-AMBR and stored as Ngap_PDUSessionAggregateMaximumBitRate
+   * Get the default value of Session-AMBR and stored as
+   * Ngap_PDUSessionAggregateMaximumBitRate
    * @param [Ngap_PDUSessionAggregateMaximumBitRate_t &] session_ambr
    * @param [const snssai_t &] snssai
    * @param [const std::string &] dnn
@@ -824,25 +826,42 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
                         std::shared_ptr<smf_pdu_session> &sp);
 
   /*
-   * Send ITTI msg to N11 to trigger the SM Context Status Notification to AMF
+   * Handle SM Context Status Change (Send notification AMF)
    * @param [scid_t] scid: SMF Context ID
    * @param [uint32_t] status: Updated status
    * @param [uint8_t] http_version: HTTP version
    * @return void
    */
-  void send_sm_context_status_notification(scid_t scid, uint32_t status, uint8_t http_version);
+  void handle_sm_context_status_change(scid_t scid, uint8_t status,
+                                       uint8_t http_version);
+
+  /*
+   * Handle SM Context Status Change (Send notification AMF)
+   * @param [scid_t] scid: SMF Context ID
+   * @param [uint32_t] status: Updated status
+   * @param [uint8_t] http_version: HTTP version
+   * @return void
+   */
+  void handle_ee_pdu_session_release(supi64_t supi,
+                                     pdu_session_id_t pdu_session_id,
+                                     uint8_t http_version);
+
+  void update_qos_info(std::shared_ptr<smf_pdu_session> &sp, smf::pdu_session_update_sm_context_response &res, const nas_message_t &nas_msg);
 
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
   // snssai-sst <-> session management subscription
-  std::map<uint8_t, std::shared_ptr<session_management_subscription>> dnn_subscriptions;
+  std::map<uint8_t, std::shared_ptr<session_management_subscription>>
+      dnn_subscriptions;
   supi_t supi;
   std::string supi_prefix;
-  scid_t scid;  //SM Context ID
+  scid_t scid;  // SM Context ID
   // Big recursive lock
   mutable std::recursive_mutex m_context;
+  // for Event Handling
+  smf_event &event_sub;
 };
-}
+}  // namespace smf
 
 #endif

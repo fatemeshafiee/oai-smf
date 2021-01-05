@@ -22,7 +22,6 @@
 include_directories(${SRC_TOP_DIR}/common)
 include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/utils)
-include_directories(${SRC_TOP_DIR}/common/ngap)
 include_directories(${SRC_TOP_DIR}/common/nas)
 include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/pfcp)
@@ -46,7 +45,6 @@ include_directories(${SRC_TOP_DIR}/api-server/model)
 include_directories(${SRC_TOP_DIR}/api-server/)
 
 add_library (SMF STATIC
-  ${SRC_TOP_DIR}/common/ngap/ngap_common.c
   smf_app.cpp
   smf_config.cpp
   smf_context.cpp

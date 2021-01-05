@@ -19,34 +19,42 @@
  *      contact@openairinterface.org
  */
 
-/*! \file smf_pco.hpp
+/*! \file smf_event_sig.hpp
  \brief
- \author Lionel Gauthier
+ \author  Tien-Thinh NGUYEN
  \company Eurecom
- \email: lionel.gauthier@eurecom.fr
+ \date 2019
+ \email: tien-thinh.nguyen@eurecom.fr
  */
-#ifndef FILE_SMF_PCO_HPP_SEEN
-#define FILE_SMF_PCO_HPP_SEEN
 
-#include <stdint.h>
+#ifndef FILE_SMF_EVENT_SIG_HPP_SEEN
+#define FILE_SMF_EVENT_SIG_HPP_SEEN
 
-/**
- * protocol_configuration_options_ids_t
- *
- * Container for caching which protocol/container identifiers have been set in
- * the message sent by the UE.
- *
- * ID specifications based on 3GPP #24.008.
- */
-typedef struct protocol_configuration_options_ids_s {
-  // Protocol identifiers (from configuration protocol options list)
-  uint8_t pi_ipcp : 1;
+#include <boost/signals2.hpp>
+#include "3gpp_24.007.h"
 
-  // Container identifiers (from additional parameters list)
-  uint8_t ci_dns_server_ipv4_address_request : 1;
-  uint8_t ci_ip_address_allocation_via_nas_signalling : 1;
-  uint8_t ci_ipv4_address_allocation_via_dhcpv4 : 1;
-  uint8_t ci_ipv4_link_mtu_request : 1;
-} protocol_configuration_options_ids_t;
+namespace bs2 = boost::signals2;
 
-#endif
+namespace smf {
+
+// Signal for PDU session status
+// SCID, PDU Session Status, HTTP version
+typedef bs2::signal_type<void(scid_t, uint8_t, uint8_t),
+                         bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    sm_context_status_sig_t;
+
+// Signal for Event exposure
+// PDU session Release, SUPI, PDU SessionID, HTTP version
+typedef bs2::signal_type<void(supi64_t, pdu_session_id_t, uint8_t),
+                         bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    ee_pdu_session_release_sig_t;
+
+// ee_ue_ip_address_change_sig_t; //UI IP Address, UE ID
+// TODO:
+// Access Type Change
+// UP Path Change
+// PLMN Change
+// Downlink data delivery status
+
+}  // namespace smf
+#endif /* FILE_SMF_EVENT_SIG_HPP_SEEN */

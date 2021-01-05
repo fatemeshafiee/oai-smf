@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -31,8 +31,8 @@
 #define FILE_SMF_SUBSCRIPTION_HPP_SEEN
 
 #include <map>
-#include <shared_mutex>
 #include <memory>
+#include <shared_mutex>
 #include <utility>
 #include <vector>
 
@@ -47,10 +47,8 @@ namespace smf {
  * Manage the Subscription Info
  */
 class smf_subscription {
-
  public:
-  smf_subscription() {
-  }
+  smf_subscription() {}
 
  public:
   evsub_id_t sub_id;
@@ -59,9 +57,7 @@ class smf_subscription {
   std::string notif_id;
   std::string notif_uri;
   pdu_session_id_t pdu_session_id;
-  //mutable std::shared_mutex m_context;
 };
 
-
-}
+}  // namespace smf
 #endif

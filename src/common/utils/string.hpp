@@ -29,6 +29,12 @@
 #define FILE_STRING_HPP_FILE_SEEN
 
 #include <string>
+#include <arpa/inet.h>
+
+extern "C" {
+# include "bstrlib.h"
+}
+
 
 namespace util {
 
@@ -39,5 +45,9 @@ std::string& ltrim(std::string &s);
 std::string& rtrim(std::string &s);
 // trim from both ends
 std::string& trim(std::string &s);
+
+void ipv4_to_bstring(struct in_addr ipv4_address, bstring str);
+
+void string_to_bstring(const std::string &str, bstring bstr);
 }
 #endif

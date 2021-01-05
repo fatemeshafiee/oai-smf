@@ -55,7 +55,6 @@ bool Options::validateOptions(){
             (options & libconfigcfg)
          );
 
-
 }
 
 bool Options::parseInputOptions( int argc, char **argv )

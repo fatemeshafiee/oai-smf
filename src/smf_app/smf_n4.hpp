@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -37,101 +37,51 @@
 
 namespace smf {
 
-#define TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST       (0)
-#define TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST       (1)
-#define TASK_SMF_N4_TIMEOUT_ASSOCIATION_REQUEST     (2)
+#define TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST (0)
+#define TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST (1)
+#define TASK_SMF_N4_TIMEOUT_ASSOCIATION_REQUEST (2)
 #define TASK_SMF_N4_TIMEOUT_GRACEFUL_RELEASE_PERIOD (3)
 class smf_n4 : public pfcp::pfcp_l4_stack {
  private:
   std::thread::id thread_id;
   std::thread thread;
 
-  uint64_t recovery_time_stamp;  //timestamp in seconds
+  uint64_t recovery_time_stamp;  // timestamp in seconds
 
   pfcp::cp_function_features_t cp_function_features;
 
  public:
   smf_n4();
-  smf_n4(smf_n4 const&) = delete;
-  void operator=(smf_n4 const&) = delete;
+  smf_n4(smf_n4 const &) = delete;
+  void operator=(smf_n4 const &) = delete;
 
-  void handle_itti_msg(itti_n4_heartbeat_request &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_heartbeat_response &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_association_setup_request &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_association_setup_response &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_association_update_request &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_association_update_response &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_association_release_request &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_association_release_response &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_version_not_supported_response &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_node_report_response &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_session_set_deletion_request &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_session_establishment_request &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_session_modification_request &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_session_deletion_request &s) {
-  }
-  ;
-  void handle_itti_msg(itti_n4_session_report_response &s) {
-  }
-  ;
+  void handle_itti_msg(itti_n4_heartbeat_request &s){};
+  void handle_itti_msg(itti_n4_heartbeat_response &s){};
+  void handle_itti_msg(itti_n4_association_setup_request &s){};
+  void handle_itti_msg(itti_n4_association_setup_response &s){};
+  void handle_itti_msg(itti_n4_association_update_request &s){};
+  void handle_itti_msg(itti_n4_association_update_response &s){};
+  void handle_itti_msg(itti_n4_association_release_request &s){};
+  void handle_itti_msg(itti_n4_association_release_response &s){};
+  void handle_itti_msg(itti_n4_version_not_supported_response &s){};
+  void handle_itti_msg(itti_n4_node_report_response &s){};
+  void handle_itti_msg(itti_n4_session_set_deletion_request &s){};
+  void handle_itti_msg(itti_n4_session_establishment_request &s){};
+  void handle_itti_msg(itti_n4_session_modification_request &s){};
+  void handle_itti_msg(itti_n4_session_deletion_request &s){};
+  void handle_itti_msg(itti_n4_session_report_response &s){};
 
-  void send_n4_msg(itti_n4_heartbeat_request &s) {
-  }
-  ;
-  void send_n4_msg(itti_n4_heartbeat_response &s) {
-  }
-  ;
-  void send_n4_msg(itti_n4_association_setup_request &s) {
-  }
-  ;
+  void send_n4_msg(itti_n4_heartbeat_request &s){};
+  void send_n4_msg(itti_n4_heartbeat_response &s){};
+  void send_n4_msg(itti_n4_association_setup_request &s){};
   void send_n4_msg(itti_n4_association_setup_response &s);
-  void send_n4_msg(itti_n4_association_update_request &s) {
-  }
-  ;
-  void send_n4_msg(itti_n4_association_update_response &s) {
-  }
-  ;
-  void send_n4_msg(itti_n4_association_release_request &s) {
-  }
-  ;
-  void send_n4_msg(itti_n4_association_release_response &s) {
-  }
-  ;
-  void send_n4_msg(itti_n4_version_not_supported_response &s) {
-  }
-  ;
-  void send_n4_msg(itti_n4_node_report_request &s) {
-  }
-  ;
-  void send_n4_msg(itti_n4_session_set_deletion_response &s) {
-  }
-  ;
+  void send_n4_msg(itti_n4_association_update_request &s){};
+  void send_n4_msg(itti_n4_association_update_response &s){};
+  void send_n4_msg(itti_n4_association_release_request &s){};
+  void send_n4_msg(itti_n4_association_release_response &s){};
+  void send_n4_msg(itti_n4_version_not_supported_response &s){};
+  void send_n4_msg(itti_n4_node_report_request &s){};
+  void send_n4_msg(itti_n4_session_set_deletion_response &s){};
   void send_n4_msg(itti_n4_session_establishment_request &s);
   void send_n4_msg(itti_n4_session_modification_request &s);
   void send_n4_msg(itti_n4_session_deletion_request &s);

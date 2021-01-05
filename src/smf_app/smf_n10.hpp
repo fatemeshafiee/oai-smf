@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -29,11 +29,11 @@
 #ifndef FILE_SMF_N10_HPP_SEEN
 #define FILE_SMF_N10_HPP_SEEN
 
-#include <thread>
 #include <map>
+#include <thread>
 
-#include "smf.h"
 #include "3gpp_29.503.h"
+#include "smf.h"
 #include "smf_context.hpp"
 
 namespace smf {
@@ -45,8 +45,8 @@ class smf_n10 {
 
  public:
   smf_n10();
-  smf_n10(smf_n10 const&) = delete;
-  void operator=(smf_n10 const&) = delete;
+  smf_n10(smf_n10 const &) = delete;
+  void operator=(smf_n10 const &) = delete;
 
   /*
    * Get SM subscription data from UDM
@@ -68,8 +68,7 @@ class smf_n10 {
    *
    */
   void subscribe_sm_data();
-
 };
 
-}
+}  // namespace smf
 #endif /* FILE_SMF_N10_HPP_SEEN */

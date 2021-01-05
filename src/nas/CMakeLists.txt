@@ -34,7 +34,6 @@ include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/utils)
 include_directories(${SRC_TOP_DIR}/common/utils/bstr)
 include_directories(${SRC_TOP_DIR}/common/nas)
-include_directories(${SRC_TOP_DIR}/common/ngap)
   
 file(GLOB NAS_src_files
     ${NAS_DIR}/*.c

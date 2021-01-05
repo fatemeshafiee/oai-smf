@@ -65,6 +65,7 @@ class smf_http2_server {
       const std::string &smf_ref,
       const SmContextReleaseData &smContextReleaseData,
       const response &response);
+  void stop();
 
  private:
   util::uint_generator<uint32_t> m_promise_id_generator;
