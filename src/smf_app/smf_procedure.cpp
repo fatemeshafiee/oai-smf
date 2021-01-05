@@ -105,7 +105,6 @@ int session_create_sm_context_procedure::run(
   pfcp::node_id_t up_node_id = {};
   if (not pfcp_associations::get_instance().select_up_node(
           up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-    // TODO
     sm_context_resp->res.set_cause(
         PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
     return RETURNerror;
@@ -690,8 +689,7 @@ int session_update_sm_context_procedure::run(
           // that PFCP session.
           sps->generate_pdr_id(pdr_id);
           precedence.precedence =
-              flow.precedence.precedence;  // TODO: should be verified
-
+              flow.precedence.precedence;
           pdi.set(source_interface);
           // pdi.set(local_fteid);
           pdi.set(ue_ip_address);
@@ -748,7 +746,7 @@ int session_update_sm_context_procedure::run(
             ue_ip_address.ipv6_address = sps->ipv6_address;
           }
           precedence.precedence =
-              flow.precedence.precedence;  // TODO: should be verified
+              flow.precedence.precedence;
 
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
           pdi.set(source_interface);
@@ -973,7 +971,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
           if (it_update_far.get(far_id)) {
             smf_qos_flow flow = {};
             if (sps->get_qos_flow(far_id, flow)) {
-              // for (auto qfi: list_of_qfis_to_be_modified){
               for (auto it : qos_flow_context_to_be_updateds) {
                 if (it.first == flow.qfi.qfi) {
                   flow.dl_fteid = dl_fteid;
@@ -1032,8 +1029,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
   n11_triggered_pending->res.set_http_code(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);
 
-  // TODO
-  // check we got all responses vs
+  // TODO: check we got all responses vs
   // n11_triggered_pending->res.flow_context_modified
 
   // TODO: Optional: send ITTI message to N10 to trigger UDM registration
@@ -1255,7 +1251,6 @@ int session_release_sm_context_procedure::run(
   pfcp::node_id_t up_node_id = {};
   if (not pfcp_associations::get_instance().select_up_node(
           up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-    // TODO
     sm_context_res->res.set_cause(
         PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
     Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");

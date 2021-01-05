@@ -393,7 +393,7 @@ void smf_n4::handle_receive_association_setup_request(
         send_n4_msg(a);
       } else {
         Logger::smf_n4().warn(
-            "Received N4 ASSOCIATION SETUP REQUEST TODO node_id IPV6, FQDN!, "
+            "Received N4 ASSOCIATION SETUP REQUEST node_id IPV6, FQDN!, "
             "ignore message");
         return;
       }

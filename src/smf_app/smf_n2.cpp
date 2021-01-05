@@ -173,8 +173,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(
 
   ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, upTransportLayerInformation);
 
-  // DataForwardingNotPossible
-  // TODO:
+  // TODO: DataForwardingNotPossible
 
   // PDUSessionType
   Ngap_PDUSessionResourceSetupRequestTransferIEs_t *pduSessionType = nullptr;
@@ -203,8 +202,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(
   //   securityIndication->value.choice.SecurityIndication.confidentialityProtectionIndication
   //   = Ngap_ConfidentialityProtectionIndication_not_needed;
 
-  // NetworkInstance
-  // TODO:
+  // TODO: NetworkInstance
 
   // QosFlowSetupRequestList
   Ngap_PDUSessionResourceSetupRequestTransferIEs_t *qosFlowSetupRequestList =
@@ -435,8 +433,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(
 
   ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, upTransportLayerInformation);
 
-  // DataForwardingNotPossible
-  // TODO:
+  // TODO: DataForwardingNotPossible
 
   // PDUSessionType
   Ngap_PDUSessionResourceSetupRequestTransferIEs_t *pduSessionType = nullptr;
@@ -465,8 +462,7 @@ bool smf_n2::create_n2_pdu_session_resource_setup_request_transfer(
   //   securityIndication->value.choice.SecurityIndication.confidentialityProtectionIndication
   //   = Ngap_ConfidentialityProtectionIndication_not_needed;
 
-  // NetworkInstance
-  // TODO:
+  // TODO: NetworkInstance
 
   // QosFlowSetupRequestList
   Ngap_PDUSessionResourceSetupRequestTransferIEs_t *qosFlowSetupRequestList =
@@ -721,8 +717,7 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(
       ngap_UL_NGU_UP_TNLModifyItem);
   ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, ul_NGU_UP_TNLModifyList);
 
-  // Ngap_NetworkInstance_t
-  // TODO
+  // TODO: Ngap_NetworkInstance_t
 
   // Ngap_QosFlowAddOrModifyRequestList_t
   // TODO: to be completed
@@ -783,10 +778,8 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(
   // Ngap_E_RAB_ID_t *e_RAB_ID;  //optional
   ASN_SEQUENCE_ADD(&ngap_IEs->protocolIEs.list, qosFlowAddOrModifyRequestList);
 
-  // Ngap_QosFlowList_t - QoS to release list??
-  // TODO
-  // Ngap_UPTransportLayerInformation_t
-  // TODO
+  // TODO: Ngap_QosFlowList_t - QoS to release list??
+  // TODO: Ngap_UPTransportLayerInformation_t
 
   // encode
   size_t buffer_size = BUF_LEN;

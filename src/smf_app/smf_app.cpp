@@ -355,7 +355,7 @@ void smf_app::start_upf_association(const pfcp::node_id_t &node_id) {
             n4_asc.get()->get_msg_name());
       }
     } else {
-      Logger::smf_app().warn("TODO start_association() node_id IPV6, FQDN!");
+      Logger::smf_app().warn("Start_association() node_id IPV6, FQDN!");
     }
   }
 }
@@ -495,7 +495,7 @@ void smf_app::handle_itti_msg(
       }
     } break;
     default: {
-      // TODO:
+      Logger::smf_app().warn("Unknown procedure type %d", m.procedure_type);
     }
   }
 }
@@ -1280,11 +1280,10 @@ void smf_app::update_pdu_session_status(const scid_t &scid,
     Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
                             supi64);
   } else {
-    Logger::smf_app().error(
+    Logger::smf_app().warn(
         "Could not retrieve the corresponding SMF context with "
         "Supi " SUPI_64_FMT "!",
         supi64);
-    // TODO:
   }
 
   // get dnn context
@@ -1336,11 +1335,10 @@ void smf_app::update_pdu_session_upCnx_state(const scid_t &scid,
     Logger::smf_app().debug("Retrieve SMF context with SUPI " SUPI_64_FMT "",
                             supi64);
   } else {
-    Logger::smf_app().error(
+    Logger::smf_app().warn(
         "Could not retrieve the corresponding SMF context with "
         "Supi " SUPI_64_FMT "!",
         supi64);
-    // TODO:
   }
 
   // get dnn context
@@ -1625,9 +1623,7 @@ void smf_app::trigger_http_response(const uint32_t &http_code,
       }
     } break;
 
-    default: {
-      // TODO:
-    }
+    default: { Logger::smf_app().debug("Unknown message type %d", msg_type); }
   }
 }
 

@@ -49,12 +49,11 @@ typedef bs2::signal_type<void(supi64_t, pdu_session_id_t, uint8_t),
                          bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
     ee_pdu_session_release_sig_t;
 
-// ee_ue_ip_address_change_sig_t; //UI IP Address, UE ID
-// TODO:
-// Access Type Change
-// UP Path Change
-// PLMN Change
-// Downlink data delivery status
+// TODO: ee_ue_ip_address_change_sig_t; //UI IP Address, UE ID
+// TODO: Access Type Change
+// TODO: UP Path Change
+// TODO: PLMN Change
+// TODO: Downlink data delivery status
 
 }  // namespace smf
 #endif /* FILE_SMF_EVENT_SIG_HPP_SEEN */

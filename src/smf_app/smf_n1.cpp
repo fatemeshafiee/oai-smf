@@ -131,7 +131,6 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
 
   // SessionAMBR
   Logger::smf_n1().debug("Get default values for Session-AMBR");
-  // TODO: get from subscription DB
   supi_t supi = sm_context_res.get_supi();
   supi64_t supi64 = smf_supi_to_u64(supi);
   std::shared_ptr<smf_context> sc = {};
@@ -423,9 +422,8 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   sm_msg->header.procedure_transaction_identity =
       sm_context_res.get_pti().procedure_transaction_id;
   sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
-  // TODO: to be updated
   sm_msg->pdu_session_modification_command.presence =
-      0xff;
+      0xff; // TODO: to be updated
   sm_msg->pdu_session_modification_command._5gsmcause =
       static_cast<uint8_t>(sm_cause);
   // SessionAMBR (default)
@@ -457,8 +455,7 @@ bool smf_n1::create_n1_pdu_session_modification_command(
            &qos_rules[i], sizeof(QOSRulesIE));
   }
 
-  // MappedEPSBearerContexts
-  // TODO:
+  // TODO: MappedEPSBearerContexts
 
   // QOSFlowDescriptions
   //TODO: get authorized QoS flow descriptions IE
@@ -561,9 +558,8 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   sm_msg->header.procedure_transaction_identity =
       msg.get_pti().procedure_transaction_id;
   sm_msg->header.message_type = PDU_SESSION_MODIFICATION_COMMAND;
-  // TODO: to be updated
   sm_msg->pdu_session_modification_command.presence =
-      0xff;
+      0xff;   // TODO: to be updated
   sm_msg->pdu_session_modification_command._5gsmcause =
       static_cast<uint8_t>(sm_cause);
   // SessionAMBR (default)
@@ -595,8 +591,7 @@ bool smf_n1::create_n1_pdu_session_modification_command(
            &qos_rules[i], sizeof(QOSRulesIE));
   }
 
-  // MappedEPSBearerContexts
-  // TODO:
+  // TODO: MappedEPSBearerContexts
 
   // QOSFlowDescriptions, TODO: get authorized QoS flow descriptions IE
   if (smf_app_inst->is_supi_2_smf_context(supi64)) {
@@ -667,9 +662,9 @@ bool smf_n1::create_n1_pdu_session_release_reject(
   sm_msg->header.message_type = PDU_SESSION_RELEASE_REJECT;
   sm_msg->pdu_session_release_reject._5gsmcause =
       static_cast<uint8_t>(sm_cause);
-  // TODO: to be updated when adding the following IE
+
   sm_msg->pdu_session_release_command.presence =
-      0x00;
+      0x00; // TODO: to be updated
   // Extended protocol configuration options
 
   // Encode NAS message

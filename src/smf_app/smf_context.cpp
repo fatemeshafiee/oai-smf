@@ -324,15 +324,13 @@ void smf_pdu_session::generate_seid() {}
 void smf_pdu_session::set_seid(const uint64_t &s) { seid = s; }
 
 //------------------------------------------------------------------------------
-// TODO check if prd_id should be uniq in the UPF or in the context of a pdn
+// TODO check if far_id should be uniq in the UPF or in the context of a pdn
 // connection
 void smf_pdu_session::generate_far_id(pfcp::far_id_t &far_id) {
   far_id.far_id = far_id_generator.get_uid();
 }
 
 //------------------------------------------------------------------------------
-// TODO check if prd_id should be uniq in the UPF or in the context of a pdn
-// connection
 void smf_pdu_session::release_far_id(const pfcp::far_id_t &far_id) {
   far_id_generator.free_uid(far_id.far_id);
 }
@@ -824,17 +822,20 @@ void smf_context::handle_itti_msg(
     }
     // Usage Report
     if (report_type.usar) {
-      Logger::smf_app().debug("TODO PFCP_SESSION_REPORT_REQUEST/Usage Report");
+      // TODO
+      Logger::smf_app().debug("PFCP_SESSION_REPORT_REQUEST/Usage Report");
     }
     // Error Indication Report
     if (report_type.erir) {
+      // TODO
       Logger::smf_app().debug(
-          "TODO PFCP_SESSION_REPORT_REQUEST/Error Indication Report");
+          "PFCP_SESSION_REPORT_REQUEST/Error Indication Report");
     }
     // User Plane Inactivity Report
     if (report_type.upir) {
+      // TODO
       Logger::smf_app().debug(
-          "TODO PFCP_SESSION_REPORT_REQUEST/User Plane Inactivity Report");
+          "PFCP_SESSION_REPORT_REQUEST/User Plane Inactivity Report");
     }
   }
 }
@@ -909,7 +910,7 @@ void smf_context::get_default_qos_rule(QOSRulesIE &qos_rule,
   }
 
   qos_rule.segregation = SEGREGATION_NOT_REQUESTED;
-  qos_rule.qosflowidentifer = 6;  // TODO: default value
+  qos_rule.qosflowidentifer = DEFAULT_QFI;
 
   Logger::smf_app().debug(
       "Default QoSRules: %x %x %x %x %x %x %x %x %x", qos_rule.qosruleidentifer,
@@ -1364,13 +1365,15 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     case PDU_SESSION_TYPE_E_IPV6: {
       // TODO:
+      Logger::smf_app().debug("IPv6 has not been supported yet!");
     } break;
 
     case PDU_SESSION_TYPE_E_IPV4V6: {
       // TODO:
+      Logger::smf_app().debug("IPv4/v6 has not been supported yet!");
     } break;
 
-    default:
+    default: {
       Logger::smf_app().error("Unknown PDN type %d",
                               sp->pdu_session_type.pdu_session_type);
       // PDU Session Establishment Reject
@@ -1389,7 +1392,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
             smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
       }
       request_accepted = false;
-      break;
+    }
   }
 
   // TODO: Step 8. SMF-initiated SM Policy Modification (with PCF)
@@ -1690,167 +1693,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
 
         // Process QoS rules and Qos Flow descriptions
         update_qos_info(sp, sm_context_resp_pending->res, decoded_nas_msg);
-/* TODO: REMOVED
-        uint16_t length_of_rule_ie =
-            decoded_nas_msg.plain.sm.pdu_session_modification_request.qosrules
-                .lengthofqosrulesie;
-
-        pfcp::qfi_t generated_qfi = {.qfi = 0};
-
-        // QOSFlowDescriptions
-        uint8_t number_of_flow_descriptions =
-            decoded_nas_msg.plain.sm.pdu_session_modification_request
-                .qosflowdescriptions.qosflowdescriptionsnumber;
-        QOSFlowDescriptionsContents qos_flow_description_content = {};
-
-        // Only one flow description for new requested QoS Flow
-        QOSFlowDescriptionsContents *qos_flow_description =
-            (QOSFlowDescriptionsContents *)calloc(
-                number_of_flow_descriptions,
-                sizeof(QOSFlowDescriptionsContents));
-
-        if (number_of_flow_descriptions > 0) {
-          qos_flow_description =
-              decoded_nas_msg.plain.sm.pdu_session_modification_request
-                  .qosflowdescriptions.qosflowdescriptionscontents;
-
-          for (int i = 0; i < number_of_flow_descriptions; i++) {
-            if (qos_flow_description[i].qfi ==
-                NO_QOS_FLOW_IDENTIFIER_ASSIGNED) {
-              // TODO: generate new QFI
-              generated_qfi.qfi = (uint8_t)60;  // hardcoded for now
-              qos_flow_description_content = qos_flow_description[i];
-              qos_flow_description_content.qfi = generated_qfi.qfi;
-              break;
-            }
-          }
-        }
-
-        int i = 0;
-        int length_of_rule = 0;
-        while (length_of_rule_ie > 0) {
-          QOSRulesIE qos_rules_ie = {};
-          qos_rules_ie =
-              decoded_nas_msg.plain.sm.pdu_session_modification_request.qosrules
-                  .qosrulesie[i];
-          uint8_t rule_id = {0};
-          pfcp::qfi_t qfi = {};
-          smf_qos_flow qos_flow = {};
-          length_of_rule = qos_rules_ie.LengthofQoSrule;
-
-          // If UE requested a new GBR flow
-          if ((qos_rules_ie.ruleoperationcode == CREATE_NEW_QOS_RULE) and
-              (qos_rules_ie.segregation == SEGREGATION_REQUESTED)) {
-            // Add a new QoS Flow
-            if (qos_rules_ie.qosruleidentifer ==
-                NO_QOS_RULE_IDENTIFIER_ASSIGNED) {
-              // Generate a new QoS rule
-              sp.get()->generate_qos_rule_id(rule_id);
-              Logger::smf_app().info("Create a new QoS rule (rule Id %d)",
-                                     rule_id);
-              qos_rules_ie.qosruleidentifer = rule_id;
-            }
-            sp.get()->add_qos_rule(qos_rules_ie);
-
-            qfi.qfi = generated_qfi.qfi;
-            qos_flow.qfi = generated_qfi.qfi;
-
-            // set qos_profile from qos_flow_description_content
-            qos_flow.qos_profile = {};
-
-            for (int j = 0; j < qos_flow_description_content.numberofparameters;
-                 j++) {
-              if (qos_flow_description_content.parameterslist[j]
-                      .parameteridentifier == PARAMETER_IDENTIFIER_5QI) {
-                qos_flow.qos_profile._5qi =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents._5qi;
-              } else if (qos_flow_description_content.parameterslist[j]
-                             .parameteridentifier ==
-                         PARAMETER_IDENTIFIER_GFBR_UPLINK) {
-                qos_flow.qos_profile.parameter.qos_profile_gbr.gfbr.uplink
-                    .unit =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents.gfbrormfbr_uplinkordownlink.uint;
-                qos_flow.qos_profile.parameter.qos_profile_gbr.gfbr.uplink
-                    .value =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents.gfbrormfbr_uplinkordownlink.value;
-              } else if (qos_flow_description_content.parameterslist[j]
-                             .parameteridentifier ==
-                         PARAMETER_IDENTIFIER_GFBR_DOWNLINK) {
-                qos_flow.qos_profile.parameter.qos_profile_gbr.gfbr.donwlink
-                    .unit =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents.gfbrormfbr_uplinkordownlink.uint;
-                qos_flow.qos_profile.parameter.qos_profile_gbr.gfbr.donwlink
-                    .value =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents.gfbrormfbr_uplinkordownlink.value;
-              } else if (qos_flow_description_content.parameterslist[j]
-                             .parameteridentifier ==
-                         PARAMETER_IDENTIFIER_MFBR_UPLINK) {
-                qos_flow.qos_profile.parameter.qos_profile_gbr.mfbr.uplink
-                    .unit =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents.gfbrormfbr_uplinkordownlink.uint;
-                qos_flow.qos_profile.parameter.qos_profile_gbr.mfbr.uplink
-                    .value =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents.gfbrormfbr_uplinkordownlink.value;
-              } else if (qos_flow_description_content.parameterslist[j]
-                             .parameteridentifier ==
-                         PARAMETER_IDENTIFIER_MFBR_DOWNLINK) {
-                qos_flow.qos_profile.parameter.qos_profile_gbr.mfbr.donwlink
-                    .unit =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents.gfbrormfbr_uplinkordownlink.uint;
-                qos_flow.qos_profile.parameter.qos_profile_gbr.mfbr.donwlink
-                    .value =
-                    qos_flow_description_content.parameterslist[j]
-                        .parametercontents.gfbrormfbr_uplinkordownlink.value;
-              }
-            }
-
-            Logger::smf_app().debug("Add new QoS Flow with new QRI %d",
-                                    qos_rules_ie.qosruleidentifer);
-            // mark this rule to be synchronised with the UE
-            sp.get()->update_qos_rule(qos_rules_ie);
-            // Add new QoS flow
-            sp.get()->add_qos_flow(qos_flow);
-
-            // ADD QoS Flow to be updated
-            qos_flow_context_updated qcu = {};
-            qcu.set_qfi(pfcp::qfi_t(qos_flow.qfi));
-            // qcu.set_ul_fteid(flow.ul_fteid);
-            // qcu.set_dl_fteid(flow.dl_fteid);
-            qcu.set_qos_profile(qos_flow.qos_profile);
-            sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
-
-          } else {  // update existing QRI
-            Logger::smf_app().debug("Update existing QRI %d",
-                                    qos_rules_ie.qosruleidentifer);
-            qfi.qfi = qos_rules_ie.qosflowidentifer;
-            if (sp.get()->get_qos_flow(qfi, qos_flow)) {
-              sp.get()->update_qos_rule(qos_rules_ie);
-              // update QoS flow
-              sp.get()->add_qos_flow(qos_flow);
-
-              // ADD QoS Flow to be updated
-              qos_flow_context_updated qcu = {};
-              qcu.set_qfi(pfcp::qfi_t(qos_flow.qfi));
-              qcu.set_ul_fteid(qos_flow.ul_fteid);
-              qcu.set_dl_fteid(qos_flow.dl_fteid);
-              qcu.set_qos_profile(qos_flow.qos_profile);
-              sm_context_resp_pending->res.add_qos_flow_context_updated(qcu);
-            }
-          }
-          length_of_rule_ie -= (length_of_rule + 3);  // 2 for Length of QoS
-                                                      // rules IE and 1 for QoS
-                                                      // rule identifier
-          i++;
-        }
-*/
 
         // TODO: MappedEPSBearerContexts
         // TODO: ExtendedProtocolConfigurationOptions
@@ -1923,7 +1765,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         sm_context_resp_pending->session_procedure_type = procedure_type;
         // don't need to create a procedure to update UPF
 
-        //free_wrapper((void **)&qos_flow_description);
         free_wrapper(
             (void **)&decoded_nas_msg.plain.sm.pdu_session_modification_request
                 .qosflowdescriptions.qosflowdescriptionscontents);
@@ -2132,9 +1973,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
               "retrieve the corresponding SMF context, ignore message!");
           // TODO: return;
         }
-        // smf_event::get_instance().trigger_sm_context_status_notification(scid,
-        // static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED),
-        // smreq->http_version);
+
         event_sub.sm_context_status(
             scid,
             static_cast<uint32_t>(
@@ -2144,8 +1983,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         // Get SUPI
         supi64_t supi64 = smf_supi_to_u64(sm_context_req_msg.get_supi());
         // Trigger PDU Session Release event notification
-        // smf_event::get_instance().trigger_ee_pdu_session_release(supi64,
-        // sm_context_req_msg.get_pdu_session_id(), smreq->http_version);
         event_sub.ee_pdu_session_release(
             supi64, sm_context_req_msg.get_pdu_session_id(),
             smreq->http_version);
@@ -2579,7 +2416,6 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         } break;
 
         default: {
-          // TODO: to be updated
           // trigger to send reply to AMF
           smf_app_inst->trigger_update_context_error_response(
               http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -2665,7 +2501,7 @@ void smf_context::handle_pdu_session_release_sm_context_request(
     smf_app_inst->trigger_http_response(
         http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
         smreq->pid,
-        N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);  // TODO: check code
+        N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
     return;
   }
 }
@@ -2922,7 +2758,6 @@ void smf_context::handle_sm_context_status_change(scid_t scid, uint8_t status,
   } else {
     Logger::smf_app().warn(
         "SM Context associated with this id " SCID_FMT " does not exit!", scid);
-    // TODO:
     return;
   }
 
@@ -3142,7 +2977,10 @@ void smf_context::update_qos_info(std::shared_ptr<smf_pdu_session> &sp,
                                                 // rule identifier
     i++;
   }
+
+  free_wrapper((void **)&qos_flow_description);
 }
+
 //------------------------------------------------------------------------------
 bool dnn_context::find_pdu_session(
     const uint32_t pdu_session_id,
