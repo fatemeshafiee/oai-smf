@@ -1424,14 +1424,16 @@ bool smf_app::get_session_management_subscription_data(
       dnn_configuration->_5g_qos_profile._5qi =
           smf_cfg.session_management_subscription[i].default_qos._5qi;
       dnn_configuration->_5g_qos_profile.arp.priority_level =
-          smf_cfg.session_management_subscription[i].default_qos.priority_level;
+          smf_cfg.session_management_subscription[i].default_qos.arp.priority_level;
       dnn_configuration->_5g_qos_profile.arp.preempt_cap =
           smf_cfg.session_management_subscription[i]
               .default_qos.arp.preempt_cap;
       dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
           smf_cfg.session_management_subscription[i]
               .default_qos.arp.preempt_vuln;
-      dnn_configuration->_5g_qos_profile.priority_level = 1;  // TODO: hardcoded
+      dnn_configuration->_5g_qos_profile.priority_level =
+          smf_cfg.session_management_subscription[i]
+              .default_qos.priority_level;
 
       // session_ambr
       dnn_configuration->session_ambr.uplink =
