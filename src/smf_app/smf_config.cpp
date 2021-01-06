@@ -611,6 +611,28 @@ int smf_config::load(const string &config_file) {
       }
     }
 
+    // NRF
+    const Setting &nrf_cfg = smf_cfg[SMF_CONFIG_STRING_NRF];
+    struct in_addr nrf_ipv4_addr;
+    unsigned int nrf_port = 0;
+    std::string nrf_api_version;
+    nrf_cfg.lookupValue(SMF_CONFIG_STRING_NRF_IPV4_ADDRESS, astring);
+    IPV4_STR_ADDR_TO_INADDR(util::trim(astring).c_str(), nrf_ipv4_addr,
+                            "BAD IPv4 ADDRESS FORMAT FOR NRF !");
+    nrf_addr.ipv4_addr = nrf_ipv4_addr;
+    if (!(nrf_cfg.lookupValue(SMF_CONFIG_STRING_NRF_PORT, nrf_port))) {
+      Logger::smf_app().error(SMF_CONFIG_STRING_NRF_PORT "failed");
+      throw(SMF_CONFIG_STRING_NRF_PORT "failed");
+    }
+    nrf_addr.port = nrf_port;
+
+    if (!(nrf_cfg.lookupValue(SMF_CONFIG_STRING_API_VERSION,
+                              nrf_api_version))) {
+      Logger::smf_app().error(SMF_CONFIG_STRING_API_VERSION "failed");
+      throw(SMF_CONFIG_STRING_API_VERSION "failed");
+    }
+    nrf_addr.api_version = nrf_api_version;
+
     // Local configuration
     num_session_management_subscription = 0;
     const Setting &local_cfg = smf_cfg[SMF_CONFIG_STRING_LOCAL_CONFIGURATION];
@@ -817,6 +839,13 @@ void smf_config::display() {
   Logger::smf_app().info("    Port ................: %lu  ", udm_addr.port);
   Logger::smf_app().info("    API version .........: %s",
                          udm_addr.api_version.c_str());
+
+  Logger::smf_app().info("- NRF:");
+  Logger::smf_app().info("    IPv4 Addr ...........: %s",
+                         inet_ntoa(*((struct in_addr *)&nrf_addr.ipv4_addr)));
+  Logger::smf_app().info("    Port ................: %lu  ", nrf_addr.port);
+  Logger::smf_app().info("    API version .........: %s",
+                         nrf_addr.api_version.c_str());
 
   Logger::smf_app().info("- Helpers:");
   Logger::smf_app().info("    Push PCO (DNS+MTU) ..: %s",

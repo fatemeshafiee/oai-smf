@@ -110,6 +110,10 @@
 #define SMF_CONFIG_STRING_UPF_LIST "UPF_LIST"
 #define SMF_CONFIG_STRING_UPF_IPV4_ADDRESS "IPV4_ADDRESS"
 
+#define SMF_CONFIG_STRING_NRF "NRF"
+#define SMF_CONFIG_STRING_NRF_IPV4_ADDRESS "IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_NRF_PORT "PORT"
+
 #define SMF_CONFIG_STRING_LOCAL_CONFIGURATION "LOCAL_CONFIGURATION"
 #define SMF_CONFIG_STRING_USE_LOCAL_CONFIGURATION "USE_LOCAL_CONFIGURATION"
 #define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST \
@@ -221,6 +225,12 @@ class smf_config {
 
   std::vector<pfcp::node_id_t> upfs;
 
+  struct {
+    struct in_addr ipv4_addr;
+    unsigned int port;
+    std::string api_version;
+  } nrf_addr;
+
   // Local configuration
   bool local_configuration;
 #define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 5
@@ -283,6 +293,10 @@ class smf_config {
     udm_addr.ipv4_addr.s_addr = INADDR_ANY;
     udm_addr.port = 80;
     udm_addr.api_version = "v1";
+
+    nrf_addr.ipv4_addr.s_addr = INADDR_ANY;
+    nrf_addr.port = 80;
+    nrf_addr.api_version = "v1";
 
     local_configuration = false;
     num_session_management_subscription = 0;
