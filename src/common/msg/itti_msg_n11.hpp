@@ -32,6 +32,8 @@
 #include "itti_msg.hpp"
 #include "smf_msg.hpp"
 #include "pistache/http.h"
+#include "smf_profile.hpp"
+#include "PatchItem.h"
 
 class itti_n11_msg : public itti_msg {
  public:
@@ -549,6 +551,48 @@ class itti_n11_notify_subscribed_event : public itti_n11_msg {
   std::string notif_id;
   std::vector<smf::event_notification>  event_notifs;
   uint8_t http_version;
+};
+
+//-----------------------------------------------------------------------------
+class itti_n11_register_nf_instance_request : public itti_n11_msg {
+ public:
+  itti_n11_register_nf_instance_request(const task_id_t orig,
+                                        const task_id_t dest)
+      : itti_n11_msg(N11_REGISTER_NF_INSTANCE_REQUEST, orig, dest),
+        http_version(1) {}
+  const char *get_msg_name() { return "N11_REGISTER_NF_INSTANCE_REQUEST"; };
+
+  smf::smf_profile profile;
+  uint8_t http_version;
+};
+
+//-----------------------------------------------------------------------------
+class itti_n11_register_nf_instance_response : public itti_n11_msg {
+ public:
+	itti_n11_register_nf_instance_response(const task_id_t orig,
+                                        const task_id_t dest)
+      : itti_n11_msg(N11_REGISTER_NF_INSTANCE_RESPONSE, orig, dest),
+        http_version(1) {}
+  const char *get_msg_name() { return "N11_REGISTER_NF_INSTANCE_RESPONSE"; };
+
+  smf::smf_profile profile;
+  uint8_t http_version;
+  uint8_t http_response_code;
+};
+
+
+//-----------------------------------------------------------------------------
+class itti_n11_update_nf_instance_request : public itti_n11_msg {
+ public:
+	itti_n11_update_nf_instance_request(const task_id_t orig,
+                                        const task_id_t dest)
+      : itti_n11_msg(N11_UPDATE_NF_INSTANCE_REQUEST, orig, dest),
+        http_version(1) {}
+  const char *get_msg_name() { return "N11_UPDATE_NF_INSTANCE_REQUEST"; };
+
+  std::vector<oai::smf_server::model::PatchItem> patch_items;
+  uint8_t http_version;
+  std::string smf_instance_id;
 };
 
 
