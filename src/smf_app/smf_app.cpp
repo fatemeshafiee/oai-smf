@@ -32,6 +32,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include "3gpp_24.007.h"
 #include "3gpp_24.501.h"
@@ -252,12 +254,22 @@ void smf_app_task(void *) {
         }
         break;
 
+      case N11_REGISTER_NF_INSTANCE_RESPONSE:
+        if (itti_n11_register_nf_instance_response *m =
+                dynamic_cast<itti_n11_register_nf_instance_response *>(msg)) {
+          smf_app_inst->handle_itti_msg(std::ref(*m));
+        }
+        break;
+
       case TIME_OUT:
         if (itti_msg_timeout *to = dynamic_cast<itti_msg_timeout *>(msg)) {
           Logger::smf_app().info("TIME-OUT event timer id %d", to->timer_id);
           switch (to->arg1_user) {
             case TASK_SMF_APP_TRIGGER_T3591:
               smf_app_inst->timer_t3591_timeout(to->timer_id, to->arg2_user);
+              break;
+            case TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT:
+              smf_app_inst->timer_nrf_heartbeat_timeout(to->timer_id, to->arg2_user);
               break;
             default:;
           }
@@ -317,6 +329,9 @@ smf_app::smf_app(const std::string &config_file)
        it != smf_cfg.upfs.end(); ++it) {
     start_upf_association(*it);
   }
+
+  //Register to NRF
+  register_to_nrf();
 
   Logger::smf_app().startup("Started");
 }
@@ -547,6 +562,15 @@ void smf_app::handle_itti_msg(itti_n11_release_sm_context_response &m) {
   }
 }
 
+
+void smf_app::handle_itti_msg(itti_n11_register_nf_instance_response &r) {
+  Logger::smf_app().debug("NF Instance Registration response");
+  //Set heartbeat timer
+  timer_nrf_heartbeat = itti_inst->timer_setup(
+      r.profile.get_nf_heartBeat_timer(), 0, TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
+      0); //TODO arg2_user
+
+}
 //------------------------------------------------------------------------------
 void smf_app::handle_pdu_session_create_sm_context_request(
     std::shared_ptr<itti_n11_create_sm_context_request> smreq) {
@@ -1368,6 +1392,32 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
 }
 
 //---------------------------------------------------------------------------------------------
+void smf_app::timer_nrf_heartbeat_timeout(timer_id_t timer_id,
+                                          uint64_t arg2_user) {
+  // TODO: send Heatbeat to NRF
+  Logger::smf_app().debug("Send ITTI msg to N11 task to trigger NRF Heartbeat");
+
+  std::shared_ptr<itti_n11_update_nf_instance_request> itti_msg =
+      std::make_shared<itti_n11_update_nf_instance_request>(TASK_SMF_APP,
+                                                            TASK_SMF_N11);
+
+  oai::smf_server::model::PatchItem patch_item = {};
+  //{"op":"replace","path":"/nfInstanceName", "value": "OAI-SMF"}
+  patch_item.setOp("replace");
+  patch_item.setPath("/nfInstanceName");
+  patch_item.setValue("OAI-SMF");
+  itti_msg->patch_items.push_back(patch_item);
+  itti_msg->smf_instance_id = smf_instance_id;
+
+  int ret = itti_inst->send_msg(itti_msg);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N11",
+        itti_msg->get_msg_name());
+  }
+}
+
+//---------------------------------------------------------------------------------------------
 n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(
     const std::string &n2_info_type) const {
   std::size_t number_of_types = n2_sm_info_type_e2str.size();
@@ -1670,5 +1720,65 @@ void smf_app::get_ee_subscriptions(
         (i.second->pdu_session_id == pdu_session_id)) {
       subscriptions.push_back(i.second);
     }
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::generate_smf_profile() {
+  // generate UUID
+  generate_uuid();
+  nf_profile.set_nf_instance_id(smf_instance_id);
+  nf_profile.set_nf_instance_name("OAI-SMF");
+  nf_profile.set_nf_type("SMF");
+  nf_profile.set_nf_status("REGISTERED");
+  nf_profile.set_nf_heartBeat_timer(50);
+  nf_profile.set_nf_priority(1);
+  nf_profile.set_nf_capacity(100);
+  nf_profile.add_nf_ipv4_addresses(smf_cfg.sbi.addr4);
+  // custom info
+  for (auto s : smf_cfg.session_management_subscription) {
+    // SNSSAIS
+    snssai_t snssai = {};
+    snssai.sD = s.single_nssai.sD;
+    snssai.sST = s.single_nssai.sST;
+    nf_profile.add_snssai(snssai);
+
+    // SMF info
+    dnn_smf_info_item_t dnn_item = {.dnn = s.dnn};
+    snssai_smf_info_item_t smf_info_item = {};
+    smf_info_item.dnn_smf_info_list.push_back(dnn_item);
+    smf_info_item.snssai.sD = s.single_nssai.sD;
+    smf_info_item.snssai.sST = s.single_nssai.sST;
+    nf_profile.add_smf_info_item(smf_info_item);
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::register_to_nrf() {
+  // create a NF profile to this instance
+  generate_smf_profile();
+  // send request to N11 to send NF registration to NRF
+  trigger_nf_registration_request();
+}
+
+//------------------------------------------------------------------------------
+void smf_app::generate_uuid() {
+  smf_instance_id = to_string(boost::uuids::random_generator()());
+}
+
+//------------------------------------------------------------------------------
+void smf_app::trigger_nf_registration_request() {
+  Logger::smf_app().debug(
+      "Send ITTI msg to N11 task to trigger the registration request to NRF");
+
+  std::shared_ptr<itti_n11_register_nf_instance_request> itti_msg =
+      std::make_shared<itti_n11_register_nf_instance_request>(TASK_SMF_APP,
+                                                              TASK_SMF_N11);
+  itti_msg->profile = nf_profile;
+  int ret = itti_inst->send_msg(itti_msg);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N11",
+        itti_msg->get_msg_name());
   }
 }

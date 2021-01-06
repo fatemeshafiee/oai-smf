@@ -39,6 +39,8 @@
 
 namespace smf {
 
+#define TASK_SMF_N11_TIMEOUT_NRF_HEARTBEAT_REQUEST  1
+
 class smf_n11 {
  private:
   std::thread::id thread_id;
@@ -95,6 +97,11 @@ class smf_n11 {
   void notify_subscribed_event(
       std::shared_ptr<itti_n11_notify_subscribed_event> msg);
 
+  void register_nf_instance(
+      std::shared_ptr<itti_n11_register_nf_instance_request> msg);
+
+  void update_nf_instance(
+      std::shared_ptr<itti_n11_update_nf_instance_request> msg);
   /*
    * Create Curl handle for multi curl
    * @param [event_notification&] ev_notif: content of the event notification

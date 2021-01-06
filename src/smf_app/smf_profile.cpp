@@ -147,6 +147,21 @@ void smf_profile::set_custom_info(const nlohmann::json &c) { custom_info = c; }
 void smf_profile::get_custom_info(nlohmann::json &c) const { c = custom_info; }
 
 //------------------------------------------------------------------------------
+void smf_profile::set_smf_info(const smf_info_t &s) {
+    smf_info = s;
+}
+
+//------------------------------------------------------------------------------
+void smf_profile::add_smf_info_item(const  snssai_smf_info_item_t &s) {
+    smf_info.snssai_smf_info_list.push_back(s);
+}
+
+//------------------------------------------------------------------------------
+void smf_profile::get_smf_info(smf_info_t &s) const {
+    s = smf_info;
+}
+
+//------------------------------------------------------------------------------
 void smf_profile::display() {
   Logger::smf_app().debug("NF instance info");
 
@@ -199,6 +214,84 @@ void smf_profile::to_json(nlohmann::json &data) const {
   data["priority"] = priority;
   data["capacity"] = capacity;
   data["custom_info"] = custom_info;
+}
+
+//------------------------------------------------------------------------------
+void smf_profile::from_json(const nlohmann::json &data) {
+
+  if (data.find("nfInstanceId") != data.end()) {
+    nf_instance_id = data["nfInstanceId"].get<std::string>();
+  }
+
+  if (data.find("nfInstanceName") != data.end()) {
+    nf_instance_name = data["nfInstanceName"].get<std::string>();
+  }
+
+  if (data.find("nfType") != data.end()) {
+    nf_type = data["nfType"].get<std::string>();
+  }
+
+  if (data.find("nfStatus") != data.end()) {
+    nf_status = data["nfStatus"].get<std::string>();
+  }
+
+  if (data.find("smfInfo") != data.end()) {
+    nlohmann::json info = data["smfInfo"];
+
+    dnn_smf_info_item_t dnn_item = {};
+    snssai_smf_info_item_t smf_info_item = {};
+
+    if (info.find("sNssaiSmfInfoList") != info.end()) {
+      nlohmann::json snssai_smf_info_list =
+          data["smfInfo"]["sNssaiSmfInfoList"];
+
+      for (auto it : snssai_smf_info_list) {
+        if (it.find("sNssai") != it.end()) {
+          if (it["sNssai"].find("sst") != it["sNssai"].end())
+            smf_info_item.snssai.sST = it["sNssai"]["sst"].get<int>();
+          if (it["sNssai"].find("sd") != it["sNssai"].end())
+            smf_info_item.snssai.sD = it["sNssai"]["sd"].get<std::string>();
+        }
+        if (it.find("dnnSmfInfoList") != it.end()) {
+          for (auto d : it["dnnSmfInfoList"]) {
+            if (it.find("dnn") != it.end()) {
+              dnn_item.dnn = d["dnn"].get<std::string>();
+              smf_info_item.dnn_smf_info_list.push_back(dnn_item);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (data.find("ipv4Addresses") != data.end()) {
+    nlohmann::json ipv4_addresses = data["ipv4Addresses"];
+
+    for (auto it : ipv4_addresses) {
+      struct in_addr addr4 = {};
+      std::string address =  it.get<std::string>();
+      unsigned char buf_in_addr[sizeof(struct in_addr)];
+      if (inet_pton(AF_INET, util::trim(address).c_str(),
+                    buf_in_addr) == 1) {
+        memcpy(&addr4, buf_in_addr, sizeof(struct in_addr));
+      } else {
+        Logger::smf_app().warn("Address conversion: Bad value %s",
+                               util::trim(address).c_str());
+      }
+      Logger::smf_app().debug("\tIPv4 Addr: %s", address.c_str());
+      add_nf_ipv4_addresses(addr4);
+    }
+  }
+
+  if (data.find("priority") != data.end()) {
+    priority = data["priority"].get<int>();
+  }
+
+  if (data.find("capacity") != data.end()) {
+    capacity = data["capacity"].get<int>();
+  }
+
+  //TODO: custom_info;
 }
 
 //------------------------------------------------------------------------------

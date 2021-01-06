@@ -52,6 +52,7 @@
 #include "smf_msg.hpp"
 #include "smf_pco.hpp"
 #include "smf_subscription.hpp"
+#include "smf_profile.hpp"
 
 namespace smf {
 
@@ -59,6 +60,7 @@ namespace smf {
 #define TASK_SMF_APP_TIMEOUT_T3591 (1)
 #define TASK_SMF_APP_TRIGGER_T3592 (2)
 #define TASK_SMF_APP_TIMEOUT_T3592 (3)
+#define TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT (4)
 
 // Table 10.3.2 @3GPP TS 24.501 V16.1.0 (2019-06)
 #define T3591_TIMER_VALUE_SEC 16
@@ -135,6 +137,10 @@ class smf_app {
   std::map<uint32_t, boost::shared_ptr<boost::promise<
                          pdu_session_release_sm_context_response>>>
       sm_context_release_promises;
+
+  smf_profile nf_profile; //SMF profile
+  std::string smf_instance_id;  // SMF instance id
+  timer_id_t timer_nrf_heartbeat;
 
   /*
    * Apply the config from the configuration file for DNN pools
@@ -339,6 +345,13 @@ class smf_app {
    * @return void
    */
   void handle_itti_msg(itti_n11_n1n2_message_transfer_response_status &snm);
+
+  /*
+   * Handle ITTI message from N11 (NFRegiser Response)
+   * @param [itti_n11_register_nf_instance_response&] r
+   * @return void
+   */
+  void handle_itti_msg(itti_n11_register_nf_instance_response &r);
 
   /*
    * Restore a N4 Session
@@ -603,6 +616,8 @@ class smf_app {
    */
   void timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user);
 
+  void timer_nrf_heartbeat_timeout(timer_id_t timer_id, uint64_t arg2_user);
+
   /*
    * To start an association with a UPF (SMF-initiated association)
    * @param [const pfcp::node_id_t] node_id: UPF Node ID
@@ -750,6 +765,35 @@ class smf_app {
   void get_ee_subscriptions(
       smf_event_t ev, supi64_t supi, pdu_session_id_t pdu_session_id,
       std::vector<std::shared_ptr<smf_subscription>> &subscriptions);
+
+  /*
+   * Trigger NF instance registration to NRF
+   * @param [void]
+   * @return void
+   */
+  void register_to_nrf();
+
+  /*
+   * Generate a random UUID for SMF instance
+   * @param [void]
+   * @return void
+   */
+  void generate_uuid();
+
+  /*
+   * Generate a SMF profile for this instance
+   * @param [void]
+   * @return void
+   */
+  void generate_smf_profile();
+
+  /*
+   * Send request to N11 task to trigger NF instance registration to NRF
+   * @param [void]
+   * @return void
+   */
+  void trigger_nf_registration_request();
+
 };
 }
 #include "smf_config.hpp"

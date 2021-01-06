@@ -91,7 +91,9 @@ typedef uint8_t pdu_session_id;
 //SMF + AMF + 3GPP TS 29.571 (Common data)
 enum class http_response_codes_e {
   HTTP_RESPONSE_CODE_OK = 200,
+  HTTP_RESPONSE_CODE_CREATED = 201,
   HTTP_RESPONSE_CODE_ACCEPTED = 202,
+  HTTP_RESPONSE_CODE_NO_CONTENT = 204,
   HTTP_RESPONSE_CODE_BAD_REQUEST = 400,
   HTTP_RESPONSE_CODE_UNAUTHORIZED = 401,
   HTTP_RESPONSE_CODE_FORBIDDEN = 403,
@@ -201,6 +203,10 @@ typedef struct qos_profile_s {
 #define NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL        "/sm-contexts"
 #define NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL        "/sm-contexts/"
 
+//NRF
+#define NNRF_NFM_BASE                                 "/nnrf-nfm/"
+#define NNRF_NF_REGISTER_URL                          "/nf-instances/"
+
 //for CURL
 #define AMF_CURL_TIMEOUT_MS 100L
 #define AMF_NUMBER_RETRIES 3
@@ -225,7 +231,6 @@ typedef struct dnn_smf_info_item_s {
 typedef struct snssai_smf_info_item_s {
   snssai_t snssai;
   std::vector<dnn_smf_info_item_t> dnn_smf_info_list;
-
 } snssai_smf_info_item_t;
 
 typedef struct smf_info_s {
