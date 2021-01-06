@@ -30,14 +30,14 @@
 #ifndef FILE_SMF_APP_HPP_SEEN
 #define FILE_SMF_APP_HPP_SEEN
 
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
 #include <future>
 #include <map>
 #include <set>
 #include <shared_mutex>
 #include <string>
 #include <thread>
-#include <boost/thread.hpp>
-#include <boost/thread/future.hpp>
 
 #include "3gpp_29.274.h"
 #include "3gpp_29.502.h"
@@ -51,8 +51,8 @@
 #include "smf_context.hpp"
 #include "smf_msg.hpp"
 #include "smf_pco.hpp"
-#include "smf_subscription.hpp"
 #include "smf_profile.hpp"
+#include "smf_subscription.hpp"
 
 namespace smf {
 
@@ -138,7 +138,7 @@ class smf_app {
                          pdu_session_release_sm_context_response>>>
       sm_context_release_promises;
 
-  smf_profile nf_profile; //SMF profile
+  smf_profile nf_profile;       // SMF profile
   std::string smf_instance_id;  // SMF instance id
   timer_id_t timer_nrf_heartbeat;
 
@@ -616,6 +616,12 @@ class smf_app {
    */
   void timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user);
 
+  /*
+   * will be executed when NRF Heartbeat timer expires
+   * @param [timer_id_t] timer_id
+   * @param [uint64_t] arg2_user
+   * @return void
+   */
   void timer_nrf_heartbeat_timeout(timer_id_t timer_id, uint64_t arg2_user);
 
   /*
@@ -793,7 +799,6 @@ class smf_app {
    * @return void
    */
   void trigger_nf_registration_request();
-
 };
 }
 #include "smf_config.hpp"

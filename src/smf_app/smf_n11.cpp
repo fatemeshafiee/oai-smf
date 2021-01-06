@@ -745,7 +745,6 @@ void smf_n11::register_nf_instance(
   curl_global_cleanup();
 }
 
-
 //-----------------------------------------------------------------------------------------------------
 void smf_n11::update_nf_instance(
     std::shared_ptr<itti_n11_update_nf_instance_request> msg) {
@@ -754,10 +753,10 @@ void smf_n11::update_nf_instance(
       msg->http_version);
 
   nlohmann::json json_data = nlohmann::json::array();
-  for (auto i: msg->patch_items) {
-	  nlohmann::json item = {};
-	  to_json(item, i);
-	  json_data.push_back(item);
+  for (auto i : msg->patch_items) {
+    nlohmann::json item = {};
+    to_json(item, i);
+    json_data.push_back(item);
   }
   std::string body = json_data.dump();
   Logger::smf_n11().debug("Send NF Instance Registration to NRF (Msg body %s)",
@@ -769,8 +768,7 @@ void smf_n11::update_nf_instance(
       smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
       msg->smf_instance_id;
 
-  Logger::smf_n11().debug("Send NF Update to NRF (NRF URL %s)",
-                          url.c_str());
+  Logger::smf_n11().debug("Send NF Update to NRF (NRF URL %s)", url.c_str());
 
   curl_global_init(CURL_GLOBAL_ALL);
   CURL *curl = curl = curl_easy_init();
