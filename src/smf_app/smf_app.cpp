@@ -29,11 +29,11 @@
 
 #include "smf_app.hpp"
 
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 #include "3gpp_24.007.h"
 #include "3gpp_24.501.h"
@@ -261,6 +261,13 @@ void smf_app_task(void *) {
         }
         break;
 
+      case N11_UPDATE_NF_INSTANCE_RESPONSE:
+        if (itti_n11_update_nf_instance_response *m =
+                dynamic_cast<itti_n11_update_nf_instance_response *>(msg)) {
+          smf_app_inst->handle_itti_msg(std::ref(*m));
+        }
+        break;
+
       case TIME_OUT:
         if (itti_msg_timeout *to = dynamic_cast<itti_msg_timeout *>(msg)) {
           Logger::smf_app().info("TIME-OUT event timer id %d", to->timer_id);
@@ -269,7 +276,8 @@ void smf_app_task(void *) {
               smf_app_inst->timer_t3591_timeout(to->timer_id, to->arg2_user);
               break;
             case TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT:
-              smf_app_inst->timer_nrf_heartbeat_timeout(to->timer_id, to->arg2_user);
+              smf_app_inst->timer_nrf_heartbeat_timeout(to->timer_id,
+                                                        to->arg2_user);
               break;
             default:;
           }
@@ -330,7 +338,7 @@ smf_app::smf_app(const std::string &config_file)
     start_upf_association(*it);
   }
 
-  //Register to NRF
+  // Register to NRF
   register_to_nrf();
 
   Logger::smf_app().startup("Started");
@@ -562,15 +570,34 @@ void smf_app::handle_itti_msg(itti_n11_release_sm_context_response &m) {
   }
 }
 
-
+//------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(itti_n11_register_nf_instance_response &r) {
   Logger::smf_app().debug("NF Instance Registration response");
-  //Set heartbeat timer
-  timer_nrf_heartbeat = itti_inst->timer_setup(
-      r.profile.get_nf_heartBeat_timer(), 0, TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
-      0); //TODO arg2_user
 
+  // TODO: Update profile if necessary
+  nf_profile = r.profile;
+  // Set heartbeat timer
+  Logger::smf_app().debug("Set NRF Heartbeat timer (%d)",
+                          r.profile.get_nf_heartBeat_timer());
+  timer_nrf_heartbeat =
+      itti_inst->timer_setup(r.profile.get_nf_heartBeat_timer(), 0,
+                             TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
+                             0);  // TODO arg2_user
 }
+
+//------------------------------------------------------------------------------
+void smf_app::handle_itti_msg(itti_n11_update_nf_instance_response &u) {
+  Logger::smf_app().debug("NF Update NF response");
+
+  Logger::smf_app().debug("Set NRF Heartbeat timer (%d)",
+                          nf_profile.get_nf_heartBeat_timer());
+
+  // Set heartbeat timer
+  //  timer_nrf_heartbeat = itti_inst->timer_setup(
+  //      nf_profile.get_nf_heartBeat_timer(), 0, TASK_SMF_APP,
+  //      TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT, 0); //TODO arg2_user
+}
+
 //------------------------------------------------------------------------------
 void smf_app::handle_pdu_session_create_sm_context_request(
     std::shared_ptr<itti_n11_create_sm_context_request> smreq) {
@@ -614,7 +641,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  //Fill the mandatory IEs
+  // Fill the mandatory IEs
   smreq->req.set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
   pdu_session_id_t pdu_session_id =
       decoded_nas_msg.plain.sm.header.pdu_session_identity;
@@ -759,7 +786,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     Logger::smf_app().warn("Invalid request type (request type = %s)",
                            request_type.c_str());
     //"Existing PDU Session", AMF should use PDUSession_UpdateSMContext instead
-    //(see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0) ignore the message
+    //(see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0) ignore the
+    //message
     return;
   }
 
@@ -1402,10 +1430,10 @@ void smf_app::timer_nrf_heartbeat_timeout(timer_id_t timer_id,
                                                             TASK_SMF_N11);
 
   oai::smf_server::model::PatchItem patch_item = {};
-  //{"op":"replace","path":"/nfInstanceName", "value": "OAI-SMF"}
+  //{"op":"replace","path":"/nfStatus", "value": "REGISTERED"}
   patch_item.setOp("replace");
-  patch_item.setPath("/nfInstanceName");
-  patch_item.setValue("OAI-SMF");
+  patch_item.setPath("/nfStatus");
+  patch_item.setValue("REGISTERED");
   itti_msg->patch_items.push_back(patch_item);
   itti_msg->smf_instance_id = smf_instance_id;
 
@@ -1414,6 +1442,21 @@ void smf_app::timer_nrf_heartbeat_timeout(timer_id_t timer_id,
     Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_N11",
         itti_msg->get_msg_name());
+  } else {
+    uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                      std::chrono::system_clock::now().time_since_epoch())
+                      .count();
+
+    Logger::smf_app().debug(
+        "Subscribe to task tick to be noticed when the Heartbearttimer (%d) "
+        "expires (after NF update) %ld, %d",
+        10, ms, ms % (10 * 1000));
+
+    // Set heartbeat timer
+    timer_nrf_heartbeat =
+        itti_inst->timer_setup(nf_profile.get_nf_heartBeat_timer(), 0,
+                               TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
+                               0);  // TODO arg2_user
   }
 }
 
@@ -1472,7 +1515,8 @@ bool smf_app::get_session_management_subscription_data(
       dnn_configuration->_5g_qos_profile._5qi =
           smf_cfg.session_management_subscription[i].default_qos._5qi;
       dnn_configuration->_5g_qos_profile.arp.priority_level =
-          smf_cfg.session_management_subscription[i].default_qos.arp.priority_level;
+          smf_cfg.session_management_subscription[i]
+              .default_qos.arp.priority_level;
       dnn_configuration->_5g_qos_profile.arp.preempt_cap =
           smf_cfg.session_management_subscription[i]
               .default_qos.arp.preempt_cap;
@@ -1480,8 +1524,7 @@ bool smf_app::get_session_management_subscription_data(
           smf_cfg.session_management_subscription[i]
               .default_qos.arp.preempt_vuln;
       dnn_configuration->_5g_qos_profile.priority_level =
-          smf_cfg.session_management_subscription[i]
-              .default_qos.priority_level;
+          smf_cfg.session_management_subscription[i].default_qos.priority_level;
 
       // session_ambr
       dnn_configuration->session_ambr.uplink =
@@ -1735,8 +1778,15 @@ void smf_app::generate_smf_profile() {
   nf_profile.set_nf_priority(1);
   nf_profile.set_nf_capacity(100);
   nf_profile.add_nf_ipv4_addresses(smf_cfg.sbi.addr4);
-  // custom info
+  // TODO: custom info
+
+  int i = 0;
   for (auto s : smf_cfg.session_management_subscription) {
+    if (i < smf_cfg.num_session_management_subscription)
+      i++;
+    else
+      break;
+
     // SNSSAIS
     snssai_t snssai = {};
     snssai.sD = s.single_nssai.sD;
@@ -1751,6 +1801,9 @@ void smf_app::generate_smf_profile() {
     smf_info_item.snssai.sST = s.single_nssai.sST;
     nf_profile.add_smf_info_item(smf_info_item);
   }
+
+  // Display the profile
+  nf_profile.display();
 }
 
 //---------------------------------------------------------------------------------------------

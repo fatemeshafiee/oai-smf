@@ -595,5 +595,18 @@ class itti_n11_update_nf_instance_request : public itti_n11_msg {
   std::string smf_instance_id;
 };
 
+//-----------------------------------------------------------------------------
+class itti_n11_update_nf_instance_response : public itti_n11_msg {
+ public:
+	itti_n11_update_nf_instance_response(const task_id_t orig,
+                                        const task_id_t dest)
+      : itti_n11_msg(N11_UPDATE_NF_INSTANCE_RESPONSE, orig, dest),
+        http_version(1) {}
+  const char *get_msg_name() { return "N11_UPDATE_NF_INSTANCE_RESPONSE"; };
+
+  uint8_t http_version;
+  std::string smf_instance_id;
+  uint8_t http_response_code;
+};
 
 #endif /* ITTI_MSG_N11_HPP_INCLUDED_ */

@@ -41,7 +41,6 @@
 
 #include "logger.hpp"
 #include "smf.h"
-#include "smf_event.hpp"
 
 namespace smf {
 
@@ -56,7 +55,6 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
         ipv4_addresses(),
         priority(0),
         capacity(0)
-  //      event_sub(smf_event::get_instance())
   {
     nf_instance_name = "";
     nf_status = "";
@@ -71,7 +69,6 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
         priority(0),
         capacity(0),
         nf_type("NF_TYPE_UNKNOWN")
-//      event_sub(smf_event::get_instance())
   {
     nf_instance_name = "";
     nf_status = "";
@@ -79,21 +76,19 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
   }
 
   smf_profile &operator=(const smf_profile &s) {
-
-      nf_instance_id = s.nf_instance_id;
-        heartBeat_timer = s.heartBeat_timer;
-        snssais = s.snssais;
-        ipv4_addresses = s.ipv4_addresses;
-        priority = s.priority;
-        capacity = s.capacity;
-        nf_type = s.nf_type;
-       // event_sub = s.event_sub;
+    nf_instance_id = s.nf_instance_id;
+    heartBeat_timer = s.heartBeat_timer;
+    snssais = s.snssais;
+    ipv4_addresses = s.ipv4_addresses;
+    priority = s.priority;
+    capacity = s.capacity;
+    nf_type = s.nf_type;
     nf_instance_name = s.nf_instance_name;
     nf_status = s.nf_status;
     custom_info = s.custom_info;
-
+    smf_info = s.smf_info;
   }
-  //smf_profile(smf_profile &b) = delete;
+  // smf_profile(smf_profile &b) = delete;
 
   virtual ~smf_profile() {
     Logger::smf_app().debug("Delete SMF Profile instance...");
@@ -294,7 +289,6 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
    */
   void get_custom_info(nlohmann::json &c) const;
 
-
   /*
    * Set smf info
    * @param [smf_info_t &] s: smf info
@@ -315,7 +309,6 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
    * @return void:
    */
   void get_smf_info(smf_info_t &s) const;
-
 
   /*
    * Print related-information for NF profile
@@ -346,8 +339,6 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
   void handle_heartbeart_timeout(uint64_t ms);
 
  protected:
-  // for Event Handling
-  //smf_event &event_sub;
   // From NFProfile (Section 6.1.6.2.2@3GPP TS 29.510 V16.0.0 (2019-06))
   std::string nf_instance_id;
   std::string nf_instance_name;

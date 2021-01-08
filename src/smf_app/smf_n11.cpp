@@ -671,7 +671,7 @@ void smf_n11::register_nf_instance(
                           url.c_str());
 
   std::string body = json_data.dump();
-  Logger::smf_n11().debug("Send NF Instance Registration to NRF (Msg body %s)",
+  Logger::smf_n11().debug("Send NF Instance Registration to NRF, msg body: \n %s",
                           body.c_str());
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -707,19 +707,17 @@ void smf_n11::register_nf_instance(
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
-    Logger::smf_n11().debug("Response from AMF, Http Code: %d", httpCode);
+    Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
 
     if (static_cast<http_response_codes_e>(httpCode) ==
         http_response_codes_e::HTTP_RESPONSE_CODE_CREATED) {
-      Logger::smf_n11().debug("Got successful response from NRF");
-
       json response_data = {};
       try {
         response_data = json::parse(*httpData.get());
       } catch (json::exception &e) {
         Logger::smf_n11().warn("Could not parse json from the NRF response");
       }
-      Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
+      Logger::smf_n11().debug("Response from NRF, Json data: \n %s", response_data.dump().c_str());
 
       // send response to APP to process
       std::shared_ptr<itti_n11_register_nf_instance_response> itti_msg =
@@ -727,6 +725,7 @@ void smf_n11::register_nf_instance(
               TASK_SMF_N11, TASK_SMF_APP);
       itti_msg->http_response_code = httpCode;
       itti_msg->http_version = msg->http_version;
+      Logger::smf_app().debug("Registered SMF profile (from NRF)");
       itti_msg->profile.from_json(response_data);
 
       int ret = itti_inst->send_msg(itti_msg);
@@ -749,7 +748,7 @@ void smf_n11::register_nf_instance(
 void smf_n11::update_nf_instance(
     std::shared_ptr<itti_n11_update_nf_instance_request> msg) {
   Logger::smf_n11().debug(
-      "Send NF Instance Registration to NRF (HTTP version %d)",
+      "Send NF Update to NRF (HTTP version %d)",
       msg->http_version);
 
   nlohmann::json json_data = nlohmann::json::array();
@@ -759,7 +758,7 @@ void smf_n11::update_nf_instance(
     json_data.push_back(item);
   }
   std::string body = json_data.dump();
-  Logger::smf_n11().debug("Send NF Instance Registration to NRF (Msg body %s)",
+  Logger::smf_n11().debug("Send NF Update to NRF (Msg body %s)",
                           body.c_str());
 
   std::string url =
@@ -804,6 +803,31 @@ void smf_n11::update_nf_instance(
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
     Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
+
+    if ((static_cast<http_response_codes_e>(httpCode) ==
+          http_response_codes_e::HTTP_RESPONSE_CODE_OK) or  (static_cast<http_response_codes_e>(httpCode) ==
+                  http_response_codes_e::HTTP_RESPONSE_CODE_NO_CONTENT)) {
+        Logger::smf_n11().debug("Got successful response from NRF");
+
+        //TODO: in case of response containing NF profile
+        // send response to APP to process
+        std::shared_ptr<itti_n11_update_nf_instance_response> itti_msg =
+            std::make_shared<itti_n11_update_nf_instance_response>(
+                TASK_SMF_N11, TASK_SMF_APP);
+        itti_msg->http_response_code = httpCode;
+        itti_msg->http_version = msg->http_version;
+        itti_msg->smf_instance_id = msg->smf_instance_id;
+
+        int ret = itti_inst->send_msg(itti_msg);
+        if (RETURNok != ret) {
+          Logger::smf_n11().error(
+              "Could not send ITTI message %s to task TASK_SMF_APP",
+              itti_msg->get_msg_name());
+        }
+      } else {
+        Logger::smf_n11().warn("Could not get response from NRF");
+      }
+
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
   }

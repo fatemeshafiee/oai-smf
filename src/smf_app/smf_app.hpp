@@ -354,6 +354,13 @@ class smf_app {
   void handle_itti_msg(itti_n11_register_nf_instance_response &r);
 
   /*
+   * Handle ITTI message from N11 (NFUpdate Response)
+   * @param [itti_n11_update_nf_instance_response&] u
+   * @return void
+   */
+  void handle_itti_msg(itti_n11_update_nf_instance_response &u);
+
+  /*
    * Restore a N4 Session
    * @param [const seid_t &] seid: Session ID to be restored
    * @return void
