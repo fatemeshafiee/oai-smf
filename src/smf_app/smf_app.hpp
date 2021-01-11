@@ -61,6 +61,7 @@ namespace smf {
 #define TASK_SMF_APP_TRIGGER_T3592 (2)
 #define TASK_SMF_APP_TIMEOUT_T3592 (3)
 #define TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT (4)
+#define TASK_SMF_APP_TIMEOUT_NRF_DEREGISTRATION (5)
 
 // Table 10.3.2 @3GPP TS 24.501 V16.1.0 (2019-06)
 #define T3591_TIMER_VALUE_SEC 16
@@ -193,6 +194,14 @@ class smf_app {
  public:
   explicit smf_app(const std::string &config_file);
   smf_app(smf_app const &) = delete;
+
+  virtual ~smf_app() {
+    Logger::smf_app().debug("Delete SMF_APP instance...");
+    //TODO: disconnect connections
+    //Unregister NRF
+
+  }
+
   void operator=(smf_app const &) = delete;
 
   /*
@@ -631,6 +640,7 @@ class smf_app {
    */
   void timer_nrf_heartbeat_timeout(timer_id_t timer_id, uint64_t arg2_user);
 
+  void timer_nrf_deregistration(timer_id_t timer_id, uint64_t arg2_user);
   /*
    * To start an association with a UPF (SMF-initiated association)
    * @param [const pfcp::node_id_t] node_id: UPF Node ID
@@ -806,6 +816,14 @@ class smf_app {
    * @return void
    */
   void trigger_nf_registration_request();
+
+  /*
+   * Send request to N11 task to trigger NF instance deregistration to NRF
+   * @param [void]
+   * @return void
+   */
+  void trigger_nf_deregistration();
+
 };
 }
 #include "smf_config.hpp"

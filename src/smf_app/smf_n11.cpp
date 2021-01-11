@@ -118,6 +118,12 @@ void smf_n11_task(void *args_p) {
                 shared_msg));
         break;
 
+      case N11_DEREGISTER_NF_INSTANCE:
+        smf_n11_inst->deregister_nf_instance(
+            std::static_pointer_cast<itti_n11_deregister_nf_instance>(
+                shared_msg));
+        break;
+
       case TERMINATE:
         if (itti_msg_terminate *terminate =
                 dynamic_cast<itti_msg_terminate *>(msg)) {
@@ -671,8 +677,8 @@ void smf_n11::register_nf_instance(
                           url.c_str());
 
   std::string body = json_data.dump();
-  Logger::smf_n11().debug("Send NF Instance Registration to NRF, msg body: \n %s",
-                          body.c_str());
+  Logger::smf_n11().debug(
+      "Send NF Instance Registration to NRF, msg body: \n %s", body.c_str());
 
   curl_global_init(CURL_GLOBAL_ALL);
   CURL *curl = curl = curl_easy_init();
@@ -686,7 +692,7 @@ void smf_n11::register_nf_instance(
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NRF_CURL_TIMEOUT_MS);
 
     if (msg->http_version == 2) {
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -717,7 +723,8 @@ void smf_n11::register_nf_instance(
       } catch (json::exception &e) {
         Logger::smf_n11().warn("Could not parse json from the NRF response");
       }
-      Logger::smf_n11().debug("Response from NRF, Json data: \n %s", response_data.dump().c_str());
+      Logger::smf_n11().debug("Response from NRF, Json data: \n %s",
+                              response_data.dump().c_str());
 
       // send response to APP to process
       std::shared_ptr<itti_n11_register_nf_instance_response> itti_msg =
@@ -747,9 +754,8 @@ void smf_n11::register_nf_instance(
 //-----------------------------------------------------------------------------------------------------
 void smf_n11::update_nf_instance(
     std::shared_ptr<itti_n11_update_nf_instance_request> msg) {
-  Logger::smf_n11().debug(
-      "Send NF Update to NRF (HTTP version %d)",
-      msg->http_version);
+  Logger::smf_n11().debug("Send NF Update to NRF (HTTP version %d)",
+                          msg->http_version);
 
   nlohmann::json json_data = nlohmann::json::array();
   for (auto i : msg->patch_items) {
@@ -758,8 +764,7 @@ void smf_n11::update_nf_instance(
     json_data.push_back(item);
   }
   std::string body = json_data.dump();
-  Logger::smf_n11().debug("Send NF Update to NRF (Msg body %s)",
-                          body.c_str());
+  Logger::smf_n11().debug("Send NF Update to NRF (Msg body %s)", body.c_str());
 
   std::string url =
       std::string(inet_ntoa(*((struct in_addr *)&smf_cfg.nrf_addr.ipv4_addr))) +
@@ -781,7 +786,7 @@ void smf_n11::update_nf_instance(
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NRF_CURL_TIMEOUT_MS);
 
     if (msg->http_version == 2) {
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -805,28 +810,93 @@ void smf_n11::update_nf_instance(
     Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
 
     if ((static_cast<http_response_codes_e>(httpCode) ==
-          http_response_codes_e::HTTP_RESPONSE_CODE_OK) or  (static_cast<http_response_codes_e>(httpCode) ==
-                  http_response_codes_e::HTTP_RESPONSE_CODE_NO_CONTENT)) {
-        Logger::smf_n11().debug("Got successful response from NRF");
+         http_response_codes_e::HTTP_RESPONSE_CODE_OK) or
+        (static_cast<http_response_codes_e>(httpCode) ==
+         http_response_codes_e::HTTP_RESPONSE_CODE_NO_CONTENT)) {
+      Logger::smf_n11().debug("Got successful response from NRF");
 
-        //TODO: in case of response containing NF profile
-        // send response to APP to process
-        std::shared_ptr<itti_n11_update_nf_instance_response> itti_msg =
-            std::make_shared<itti_n11_update_nf_instance_response>(
-                TASK_SMF_N11, TASK_SMF_APP);
-        itti_msg->http_response_code = httpCode;
-        itti_msg->http_version = msg->http_version;
-        itti_msg->smf_instance_id = msg->smf_instance_id;
+      // TODO: in case of response containing NF profile
+      // send response to APP to process
+      std::shared_ptr<itti_n11_update_nf_instance_response> itti_msg =
+          std::make_shared<itti_n11_update_nf_instance_response>(TASK_SMF_N11,
+                                                                 TASK_SMF_APP);
+      itti_msg->http_response_code = httpCode;
+      itti_msg->http_version = msg->http_version;
+      itti_msg->smf_instance_id = msg->smf_instance_id;
 
-        int ret = itti_inst->send_msg(itti_msg);
-        if (RETURNok != ret) {
-          Logger::smf_n11().error(
-              "Could not send ITTI message %s to task TASK_SMF_APP",
-              itti_msg->get_msg_name());
-        }
-      } else {
-        Logger::smf_n11().warn("Could not get response from NRF");
+      int ret = itti_inst->send_msg(itti_msg);
+      if (RETURNok != ret) {
+        Logger::smf_n11().error(
+            "Could not send ITTI message %s to task TASK_SMF_APP",
+            itti_msg->get_msg_name());
       }
+    } else {
+      Logger::smf_n11().warn("Could not get response from NRF");
+    }
+
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+}
+
+//-----------------------------------------------------------------------------------------------------
+void smf_n11::deregister_nf_instance(
+    std::shared_ptr<itti_n11_deregister_nf_instance> msg) {
+  Logger::smf_n11().debug("Send NF De-register to NRF (HTTP version %d)",
+                          msg->http_version);
+
+  std::string url =
+      std::string(inet_ntoa(*((struct in_addr *)&smf_cfg.nrf_addr.ipv4_addr))) +
+      ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
+      smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
+      msg->smf_instance_id;
+
+  Logger::smf_n11().debug("Send NF De-register to NRF (NRF URL %s)",
+                          url.c_str());
+
+  curl_global_init(CURL_GLOBAL_ALL);
+  CURL *curl = curl = curl_easy_init();
+
+  if (curl) {
+    CURLcode res = {};
+    struct curl_slist *headers = nullptr;
+    // headers = curl_slist_append(headers, "charsets: utf-8");
+    headers = curl_slist_append(headers, "content-type: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NRF_CURL_TIMEOUT_MS);
+
+    if (msg->http_version == 2) {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      // we use a self-signed test server, skip verification during debugging
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                       CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+    }
+
+    // Response information.
+    long httpCode = {0};
+    std::unique_ptr<std::string> httpData(new std::string());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+    res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
+
+    if ((static_cast<http_response_codes_e>(httpCode) ==
+         http_response_codes_e::HTTP_RESPONSE_CODE_OK) or
+        (static_cast<http_response_codes_e>(httpCode) ==
+         http_response_codes_e::HTTP_RESPONSE_CODE_NO_CONTENT)) {
+      Logger::smf_n11().debug("Got successful response from NRF");
+
+    } else {
+      Logger::smf_n11().warn("Could not get response from NRF");
+    }
 
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);

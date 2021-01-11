@@ -609,4 +609,18 @@ class itti_n11_update_nf_instance_response : public itti_n11_msg {
   uint8_t http_response_code;
 };
 
+
+//-----------------------------------------------------------------------------
+class itti_n11_deregister_nf_instance : public itti_n11_msg {
+ public:
+	itti_n11_deregister_nf_instance(const task_id_t orig,
+                                        const task_id_t dest)
+      : itti_n11_msg(N11_DEREGISTER_NF_INSTANCE, orig, dest),
+        http_version(1) {}
+  const char *get_msg_name() { return "N11_DEREGISTER_NF_INSTANCE"; };
+
+  uint8_t http_version;
+  std::string smf_instance_id;
+};
+
 #endif /* ITTI_MSG_N11_HPP_INCLUDED_ */

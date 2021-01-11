@@ -279,6 +279,10 @@ void smf_app_task(void *) {
               smf_app_inst->timer_nrf_heartbeat_timeout(to->timer_id,
                                                         to->arg2_user);
               break;
+            case TASK_SMF_APP_TIMEOUT_NRF_DEREGISTRATION:
+              smf_app_inst->timer_nrf_deregistration(to->timer_id,
+                                                        to->arg2_user);
+              break;
             default:;
           }
         }
@@ -574,7 +578,6 @@ void smf_app::handle_itti_msg(itti_n11_release_sm_context_response &m) {
 void smf_app::handle_itti_msg(itti_n11_register_nf_instance_response &r) {
   Logger::smf_app().debug("NF Instance Registration response");
 
-  // TODO: Update profile if necessary
   nf_profile = r.profile;
   // Set heartbeat timer
   Logger::smf_app().debug("Set NRF Heartbeat timer (%d)",
@@ -583,6 +586,12 @@ void smf_app::handle_itti_msg(itti_n11_register_nf_instance_response &r) {
       itti_inst->timer_setup(r.profile.get_nf_heartBeat_timer(), 0,
                              TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
                              0);  // TODO arg2_user
+
+  //Set timer to send NF Deregistration (for testing purpose)
+/*  itti_inst->timer_setup(50, 0,
+                             TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_DEREGISTRATION,
+                             0);  // TODO arg2_user
+*/
 }
 
 //------------------------------------------------------------------------------
@@ -1422,7 +1431,6 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_nrf_heartbeat_timeout(timer_id_t timer_id,
                                           uint64_t arg2_user) {
-  // TODO: send Heatbeat to NRF
   Logger::smf_app().debug("Send ITTI msg to N11 task to trigger NRF Heartbeat");
 
   std::shared_ptr<itti_n11_update_nf_instance_request> itti_msg =
@@ -1443,21 +1451,21 @@ void smf_app::timer_nrf_heartbeat_timeout(timer_id_t timer_id,
         "Could not send ITTI message %s to task TASK_SMF_N11",
         itti_msg->get_msg_name());
   } else {
-    uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                      std::chrono::system_clock::now().time_since_epoch())
-                      .count();
-
-    Logger::smf_app().debug(
-        "Subscribe to task tick to be noticed when the Heartbearttimer (%d) "
-        "expires (after NF update) %ld, %d",
-        10, ms, ms % (10 * 1000));
-
-    // Set heartbeat timer
+    Logger::smf_app().debug("Set a timer to the next Heart-beat (%d)",
+                            nf_profile.get_nf_heartBeat_timer());
     timer_nrf_heartbeat =
         itti_inst->timer_setup(nf_profile.get_nf_heartBeat_timer(), 0,
                                TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
                                0);  // TODO arg2_user
   }
+}
+
+
+//---------------------------------------------------------------------------------------------
+void smf_app::timer_nrf_deregistration(timer_id_t timer_id,
+                                          uint64_t arg2_user) {
+  Logger::smf_app().debug("Send ITTI msg to N11 task to trigger NRF Deregistratino");
+  trigger_nf_deregistration();
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1835,3 +1843,21 @@ void smf_app::trigger_nf_registration_request() {
         itti_msg->get_msg_name());
   }
 }
+
+//------------------------------------------------------------------------------
+void smf_app::trigger_nf_deregistration() {
+  Logger::smf_app().debug(
+      "Send ITTI msg to N11 task to trigger the deregistration request to NRF");
+
+  std::shared_ptr<itti_n11_deregister_nf_instance> itti_msg =
+      std::make_shared<itti_n11_deregister_nf_instance>(TASK_SMF_APP,
+                                                              TASK_SMF_N11);
+  itti_msg->smf_instance_id = smf_instance_id;
+  int ret = itti_inst->send_msg(itti_msg);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N11",
+        itti_msg->get_msg_name());
+  }
+}
+

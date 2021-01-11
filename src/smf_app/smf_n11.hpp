@@ -116,6 +116,14 @@ class smf_n11 {
       std::shared_ptr<itti_n11_update_nf_instance_request> msg);
 
   /*
+   * Send NF deregister to NRF
+   * @param [std::shared_ptr<itti_n11_deregister_nf_instance>] msg: Content
+   * of message to be sent
+   * @return void
+   */
+  void deregister_nf_instance(
+      std::shared_ptr<itti_n11_deregister_nf_instance> msg);
+  /*
    * Create Curl handle for multi curl
    * @param [event_notification&] ev_notif: content of the event notification
    * @param [std::string *] data: data
