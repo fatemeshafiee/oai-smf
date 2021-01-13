@@ -85,6 +85,7 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
     nf_status = s.nf_status;
     custom_info = s.custom_info;
     smf_info = s.smf_info;
+    nf_services = s.nf_services;
   }
   // smf_profile(smf_profile &b) = delete;
 
@@ -334,7 +335,7 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
    * @param void
    * @return void:
    */
-  void display();
+  void display() const;
 
   /*
    * Represent NF profile as json object

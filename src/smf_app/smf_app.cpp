@@ -1793,7 +1793,7 @@ void smf_app::generate_smf_profile() {
   nf_service.service_name = "nsmf-pdusession";
   nf_service_version_t version = {};
   version.api_version_in_uri = "v1";
-  version.api_version_in_uri = "1.0.0";  // TODO: to be updated
+  version.api_full_version = "1.0.0";  // TODO: to be updated
   nf_service.versions.push_back(version);
   nf_service.scheme = "http";
   nf_service.nf_service_status = "REGISTERED";

@@ -173,7 +173,7 @@ void smf_profile::add_smf_info_item(const snssai_smf_info_item_t &s) {
 void smf_profile::get_smf_info(smf_info_t &s) const { s = smf_info; }
 
 //------------------------------------------------------------------------------
-void smf_profile::display() {
+void smf_profile::display() const {
   Logger::smf_app().debug("NF instance info");
 
   Logger::smf_app().debug("\tInstance ID: %s", nf_instance_id.c_str());
@@ -228,6 +228,7 @@ void smf_profile::display() {
 
 //------------------------------------------------------------------------------
 void smf_profile::to_json(nlohmann::json &data) const {
+   display();
   data["nfInstanceId"] = nf_instance_id;
   data["nfInstanceName"] = nf_instance_name;
   data["nfType"] = nf_type;
