@@ -141,6 +141,21 @@ void smf_profile::get_nf_ipv4_addresses(std::vector<struct in_addr> &a) const {
 }
 
 //------------------------------------------------------------------------------
+void smf_profile::set_nf_services(const std::vector<nf_service_t> &n) {
+  nf_services = n;
+}
+
+//------------------------------------------------------------------------------
+void smf_profile::add_nf_service(const nf_service_t &n) {
+  nf_services.push_back(n);
+}
+
+//------------------------------------------------------------------------------
+void smf_profile::get_nf_services(std::vector<nf_service_t> &n) const {
+  n = nf_services;
+}
+
+//------------------------------------------------------------------------------
 void smf_profile::set_custom_info(const nlohmann::json &c) { custom_info = c; }
 
 //------------------------------------------------------------------------------
@@ -183,6 +198,14 @@ void smf_profile::display() {
   }
   for (auto address : ipv4_addresses) {
     Logger::smf_app().debug("\t\t %s", inet_ntoa(address));
+  }
+
+  // NF services
+  if (nf_services.size() > 0) {
+    Logger::smf_app().debug("\tNF Service");
+  }
+  for (auto service : nf_services) {
+    Logger::smf_app().debug("\t\t%s", service.to_string().c_str());
   }
 
   if (!custom_info.empty()) {
@@ -228,6 +251,25 @@ void smf_profile::to_json(nlohmann::json &data) const {
 
   data["priority"] = priority;
   data["capacity"] = capacity;
+
+  // NF services
+  data["nfServices"] = nlohmann::json::array();
+  for (auto service : nf_services) {
+    nlohmann::json srv_tmp = {};
+    srv_tmp["serviceInstanceId"] = service.service_instance_id;
+    srv_tmp["serviceName"] = service.service_name;
+    srv_tmp["versions"] = nlohmann::json::array();
+    for (auto v : service.versions) {
+      nlohmann::json v_tmp = {};
+      v_tmp["apiVersionInUri"] = v.api_version_in_uri;
+      v_tmp["apiFullVersion"] = v.api_full_version;
+      srv_tmp["versions"].push_back(v_tmp);
+    }
+    srv_tmp["scheme"] = service.scheme;
+    srv_tmp["nfServiceStatus"] = service.nf_service_status;
+    data["nfServices"].push_back(srv_tmp);
+  }
+
   data["custom_info"] = custom_info;
 
   // SMF info

@@ -281,7 +281,7 @@ void smf_app_task(void *) {
               break;
             case TASK_SMF_APP_TIMEOUT_NRF_DEREGISTRATION:
               smf_app_inst->timer_nrf_deregistration(to->timer_id,
-                                                        to->arg2_user);
+                                                     to->arg2_user);
               break;
             default:;
           }
@@ -587,11 +587,11 @@ void smf_app::handle_itti_msg(itti_n11_register_nf_instance_response &r) {
                              TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
                              0);  // TODO arg2_user
 
-  //Set timer to send NF Deregistration (for testing purpose)
-/*  itti_inst->timer_setup(50, 0,
-                             TASK_SMF_APP, TASK_SMF_APP_TIMEOUT_NRF_DEREGISTRATION,
-                             0);  // TODO arg2_user
-*/
+  /*  //Set timer to send NF Deregistration (for testing purpose)
+    itti_inst->timer_setup(50, 0,
+                               TASK_SMF_APP,
+    TASK_SMF_APP_TIMEOUT_NRF_DEREGISTRATION, 0);  // TODO arg2_user
+  */
 }
 
 //------------------------------------------------------------------------------
@@ -796,7 +796,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
                            request_type.c_str());
     //"Existing PDU Session", AMF should use PDUSession_UpdateSMContext instead
     //(see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0) ignore the
-    //message
+    // message
     return;
   }
 
@@ -1460,11 +1460,11 @@ void smf_app::timer_nrf_heartbeat_timeout(timer_id_t timer_id,
   }
 }
 
-
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_nrf_deregistration(timer_id_t timer_id,
-                                          uint64_t arg2_user) {
-  Logger::smf_app().debug("Send ITTI msg to N11 task to trigger NRF Deregistratino");
+                                       uint64_t arg2_user) {
+  Logger::smf_app().debug(
+      "Send ITTI msg to N11 task to trigger NRF Deregistratino");
   trigger_nf_deregistration();
 }
 
@@ -1786,6 +1786,19 @@ void smf_app::generate_smf_profile() {
   nf_profile.set_nf_priority(1);
   nf_profile.set_nf_capacity(100);
   nf_profile.add_nf_ipv4_addresses(smf_cfg.sbi.addr4);
+
+  // NF services
+  nf_service_t nf_service = {};
+  nf_service.service_instance_id = smf_instance_id;
+  nf_service.service_name = "nsmf-pdusession";
+  nf_service_version_t version = {};
+  version.api_version_in_uri = "v1";
+  version.api_version_in_uri = "1.0.0";  // TODO: to be updated
+  nf_service.versions.push_back(version);
+  nf_service.scheme = "http";
+  nf_service.nf_service_status = "REGISTERED";
+  nf_profile.add_nf_service(nf_service);
+
   // TODO: custom info
 
   int i = 0;
@@ -1851,7 +1864,7 @@ void smf_app::trigger_nf_deregistration() {
 
   std::shared_ptr<itti_n11_deregister_nf_instance> itti_msg =
       std::make_shared<itti_n11_deregister_nf_instance>(TASK_SMF_APP,
-                                                              TASK_SMF_N11);
+                                                        TASK_SMF_N11);
   itti_msg->smf_instance_id = smf_instance_id;
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
@@ -1860,4 +1873,3 @@ void smf_app::trigger_nf_deregistration() {
         itti_msg->get_msg_name());
   }
 }
-

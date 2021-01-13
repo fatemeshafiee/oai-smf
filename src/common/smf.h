@@ -238,4 +238,49 @@ typedef struct smf_info_s {
   std::vector<snssai_smf_info_item_t> snssai_smf_info_list;
 } smf_info_t;
 
+typedef struct nf_service_version_s {
+  std::string api_version_in_uri;  // apiVersionInUri
+  std::string api_full_version;    // apiFullVersion
+
+  nf_service_version_s &operator=(const nf_service_version_s &s) {
+    api_version_in_uri = s.api_version_in_uri;
+    api_full_version = s.api_full_version;
+  }
+
+  std::string to_string() const {
+    std::string s = {};
+    s.append(", Version (");
+    s.append("apiVersionInUri: ");
+    s.append(api_version_in_uri);
+    s.append(", apiFullVersion: ");
+    s.append(api_full_version);
+    s.append(" )");
+    return s;
+  }
+} nf_service_version_t;
+
+typedef struct nf_service_s {
+  std::string service_instance_id;
+  std::string service_name;
+  std::vector<nf_service_version_t> versions;
+  std::string scheme;
+  std::string nf_service_status;
+
+  std::string to_string() const {
+    std::string s = {};
+    s.append("Service Instance ID: ");
+    s.append(service_instance_id);
+    s.append(", Service name: ");
+    s.append(service_name);
+    for (auto v : versions) {
+      s.append(v.to_string());
+    }
+    s.append(", Scheme: ");
+    s.append(scheme);
+    s.append(", Service status: ");
+    s.append(nf_service_status);
+    return s;
+  }
+} nf_service_t;
+
 #endif

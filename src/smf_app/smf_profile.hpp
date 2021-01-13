@@ -54,8 +54,7 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
         snssais(),
         ipv4_addresses(),
         priority(0),
-        capacity(0)
-  {
+        capacity(0) {
     nf_instance_name = "";
     nf_status = "";
     custom_info = {};
@@ -68,8 +67,7 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
         ipv4_addresses(),
         priority(0),
         capacity(0),
-        nf_type("NF_TYPE_UNKNOWN")
-  {
+        nf_type("NF_TYPE_UNKNOWN") {
     nf_instance_name = "";
     nf_status = "";
     custom_info = {};
@@ -276,6 +274,27 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
   void get_nf_ipv4_addresses(std::vector<struct in_addr> &a) const;
 
   /*
+   * Set NF instance services
+   * @param [std::vector<nf_service_t> &] n: nf_service
+   * @return void
+   */
+  void set_nf_services(const std::vector<nf_service_t> &n);
+
+  /*
+   * Add nf service
+   * @param [snssai_t &] n: nf service
+   * @return void
+   */
+  void add_nf_service(const nf_service_t &n);
+
+  /*
+   * Get NF services
+   * @param [std::vector<snssai_t> &] n: store instance's nf services
+   * @return void:
+   */
+  void get_nf_services(std::vector<nf_service_t> &n) const;
+
+  /*
    * Set custom info
    * @param [const nlohmann::json &] c: custom info to be set
    * @return void
@@ -349,6 +368,7 @@ class smf_profile : public std::enable_shared_from_this<smf_profile> {
   std::vector<struct in_addr> ipv4_addresses;
   uint16_t priority;
   uint16_t capacity;
+  std::vector<nf_service_t> nf_services;
   nlohmann::json custom_info;  // store extra json data
   smf_info_t smf_info;
 };
