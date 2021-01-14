@@ -228,7 +228,6 @@ void smf_profile::display() const {
 
 //------------------------------------------------------------------------------
 void smf_profile::to_json(nlohmann::json &data) const {
-   display();
   data["nfInstanceId"] = nf_instance_id;
   data["nfInstanceName"] = nf_instance_name;
   data["nfType"] = nf_type;
