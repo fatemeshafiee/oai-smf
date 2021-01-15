@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -29,18 +29,19 @@
 #include "secu_defs.h"
 #include "dynamic_memory_check.h"
 
-void kdf(const uint8_t *key, const unsigned key_len, uint8_t *s, const unsigned s_len, uint8_t *out, const unsigned out_len) {
-  struct hmac_sha256_ctx *ctx = calloc(1, sizeof(struct hmac_sha256_ctx));
-
-  //memset (&ctx, 0, sizeof (ctx));
+void kdf(
+    const uint8_t* key, const unsigned key_len, uint8_t* s,
+    const unsigned s_len, uint8_t* out, const unsigned out_len) {
+  struct hmac_sha256_ctx* ctx = calloc(1, sizeof(struct hmac_sha256_ctx));
   hmac_sha256_set_key(ctx, key_len, key);
   hmac_sha256_update(ctx, s_len, s);
   hmac_sha256_digest(ctx, out_len, out);
   free_wrapper((void**) &ctx);
 }
 
-int derive_keNB(const uint8_t *kasme_32, const uint32_t nas_count, uint8_t *keNB) {
-  uint8_t s[7] = { 0 };
+int derive_keNB(
+    const uint8_t* kasme_32, const uint32_t nas_count, uint8_t* keNB) {
+  uint8_t s[7] = {0};
 
   // FC
   s[0] = FC_KENB;
