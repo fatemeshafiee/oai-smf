@@ -45,8 +45,8 @@ class NotificationData {
   /// <summary>
   /// 
   /// </summary>
-  NotificationEventType getEvent() const;
-  void setEvent(NotificationEventType const &value);
+  std::string getEvent() const;
+  void setEvent(std::string const &value);
   /// <summary>
   /// 
   /// </summary>
@@ -70,7 +70,7 @@ class NotificationData {
   friend void to_json(nlohmann::json &j, const NotificationData &o);
   friend void from_json(const nlohmann::json &j, NotificationData &o);
  protected:
-  NotificationEventType m_Event;
+  std::string m_Event;
 
   std::string m_NfInstanceUri;
 

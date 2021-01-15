@@ -53,10 +53,10 @@ void from_json(const nlohmann::json &j, NotificationData &o) {
   }
 }
 
-NotificationEventType NotificationData::getEvent() const {
+std::string NotificationData::getEvent() const {
   return m_Event;
 }
-void NotificationData::setEvent(NotificationEventType const &value) {
+void NotificationData::setEvent(std::string const &value) {
   m_Event = value;
 }
 std::string NotificationData::getNfInstanceUri() const {
