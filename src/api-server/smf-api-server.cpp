@@ -84,6 +84,7 @@ void SMFApiServer::init(size_t thr) {
   m_smContextsCollectionApiImpl->init();
   m_individualSubscriptionDocumentApiImpl->init();
   m_subscriptionsCollectionApiImpl->init();
+  m_nfStatusNotifyApiImpl->init();
 
 }
 void SMFApiServer::start() {

@@ -1957,7 +1957,7 @@ void smf_app::trigger_upf_status_notification_subscribe() {
   //TODO: remove hardcoded values
   json_data["nfStatusNotificationUri"] =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))) +
-      ":" + std::to_string(smf_cfg.sbi.port) + "/nsmf_nfstatus_notify/" +
+      ":" + std::to_string(smf_cfg.sbi.port) + "/nsmf-nfstatus-notify/" +
       smf_cfg.sbi_api_version + "/subscriptions";
 
   json_data["subscrCond"]["NfTypeCond"]["nfType"] = "UPF";

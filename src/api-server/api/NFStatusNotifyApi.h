@@ -39,7 +39,7 @@ class NFStatusNotifyApi {
   virtual ~NFStatusNotifyApi() {}
   void init();
 
-  const std::string base = "/nsmf_nfstatus_notify/";
+  const std::string base = "/nsmf-nfstatus-notify/";
 
  private:
   void setupRoutes();
