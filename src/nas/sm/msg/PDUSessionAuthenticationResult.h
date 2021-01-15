@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -31,36 +31,22 @@
 #include "EAPMessage.h"
 #include "ExtendedProtocolConfigurationOptions.h"
 
-#if 0
-/* Minimum length macro. Formed by minimum length of each mandatory field */
-#define PDU_SESSION_AUTHENTICATION_RESULT_MINIMUM_LENGTH ( \
-		EXTENDED_PROTOCOL_DISCRIMINATOR_MINIMUM_LENGTH + \
-		PDU_SESSION_IDENTITY_MINIMUM_LENGTH + \
-		PROCEDURE_TRANSACTION_IDENTITY_MINIMUM_LENGTH + \
-		MESSAGE_TYPE_MINIMUM_LENGTH + \
-		EAP_MESSAGE_MINIMUM_LENGTH + \
-		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MINIMUM_LENGTH + \
-0)
-#endif
-
 /* Minimum length macro. Formed by minimum length of each mandatory field */
 #define PDU_SESSION_AUTHENTICATION_RESULT_MINIMUM_LENGTH 0
 
 /* Maximum length macro. Formed by maximum length of each field */
-#define PDU_SESSION_AUTHENTICATION_RESULT_MAXIMUM_LENGTH ( \
-		EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH + \
-		PDU_SESSION_IDENTITY_MAXIMUM_LENGTH + \
-		PROCEDURE_TRANSACTION_IDENTITY_MAXIMUM_LENGTH + \
-		MESSAGE_TYPE_MAXIMUM_LENGTH + \
-		EAP_MESSAGE_MAXIMUM_LENGTH_TLVE + \
-		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + \
-0)
+#define PDU_SESSION_AUTHENTICATION_RESULT_MAXIMUM_LENGTH                       \
+  (EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH +                            \
+   PDU_SESSION_IDENTITY_MAXIMUM_LENGTH +                                       \
+   PROCEDURE_TRANSACTION_IDENTITY_MAXIMUM_LENGTH +                             \
+   MESSAGE_TYPE_MAXIMUM_LENGTH + EAP_MESSAGE_MAXIMUM_LENGTH_TLVE +             \
+   EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + 0)
 
-#define PDU_SESSION_AUTHENTICATION_RESULT_EAP_MESSAGE_IEI 		0x78
-#define PDU_SESSION_AUTHENTICATION_RESULT_EPCO_IEI			      0x7B
+#define PDU_SESSION_AUTHENTICATION_RESULT_EAP_MESSAGE_IEI 0x78
+#define PDU_SESSION_AUTHENTICATION_RESULT_EPCO_IEI 0x7B
 
-#define PDU_SESSION_AUTHENTICATION_RESULT_EAP_MESSAGE_PRESENCE 	(1<<0)
-#define PDU_SESSION_AUTHENTICATION_RESULT_EPCO_PRESENCE		      (1<<1)
+#define PDU_SESSION_AUTHENTICATION_RESULT_EAP_MESSAGE_PRESENCE (1 << 0)
+#define PDU_SESSION_AUTHENTICATION_RESULT_EPCO_PRESENCE (1 << 1)
 
 typedef struct pdu_session_authentication_result_msg_tag {
   ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
@@ -73,10 +59,10 @@ typedef struct pdu_session_authentication_result_msg_tag {
 } pdu_session_authentication_result_msg;
 
 int decode_pdu_session_authentication_result(
-    pdu_session_authentication_result_msg *pdusessionauthenticationresult,
-    uint8_t *buffer, uint32_t len);
+    pdu_session_authentication_result_msg* pdusessionauthenticationresult,
+    uint8_t* buffer, uint32_t len);
 int encode_pdu_session_authentication_result(
-    pdu_session_authentication_result_msg *pdusessionauthenticationresult,
-    uint8_t *buffer, uint32_t len);
+    pdu_session_authentication_result_msg* pdusessionauthenticationresult,
+    uint8_t* buffer, uint32_t len);
 
 #endif

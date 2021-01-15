@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ *file except in compliance with the License. You may obtain a copy of the
+ *License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -24,34 +24,36 @@
 #include "TLVDecoder.h"
 #include "TLVEncoder.h"
 
-//Local definitions
-static int _fivegsm_msg_decode_header(sm_msg_header_t *header,
-                                      const uint8_t *buffer, uint32_t len);
-static int _fivegsm_msg_encode_header(const sm_msg_header_t *header,
-                                      uint8_t *buffer, uint32_t len);
+/*
+ * Decode header of 5GS Mobility Management message. The protocol discriminator
+ * and the security header type have already been decoded.
+ * @param [sm_msg_header_t* ] header: The ESM message header to be filled
+ * @param [const uint8_t* ] buffer: Pointer to the buffer containing the 5GS SM
+ * message
+ * @param [uint32_t ] len:  Number of bytes that should be decoded
+ * @return The size of the header if data have been successfully decoded; A
+ * negative error code otherwise.
+ */
+static int _fivegsm_msg_decode_header(
+    sm_msg_header_t* header, const uint8_t* buffer, uint32_t len);
 
-/****************************************************************************
- **                                                                        **
- ** Name:  sm_msg_decode()                                                 **
- **                                                                        **
- ** Description: Decode EPS Session Management messages                    **
- **                                                                        **
- ** Inputs:  buffer:  Pointer to the buffer containing the SM message      **
- **          len:     Number of bytes that should be decoded               **
- **          Others:  None                                                 **
- **                                                                        **
- ** Outputs: msg:     The SM message structure to be filled                **
- **          Return:  The number of bytes in the buffer if data            **
- **                   have been successfully decoded;                      **
- **                   A negative error code otherwise.                     **
- **          Others:  None                                                 **
- **                                                                        **
- ***************************************************************************/
-int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
+/*
+ * Decode header of 5GS Mobility Management message. The protocol discriminator
+ * and the security header type have already been decoded.
+ * @param [const sm_msg_header_t*] header: The 5G SM message header to encode
+ * @param [uint8_t* ] buffer: Pointer to the encoded data buffer
+ * @param [uint32_t ] len:  Maximal capacity of the output buffer
+ * @return The number of bytes in the buffer if data have been successfully
+ * encoded; A negative error code otherwise.
+ */
+static int _fivegsm_msg_encode_header(
+    const sm_msg_header_t* header, uint8_t* buffer, uint32_t len);
+
+//------------------------------------------------------------------------------
+int sm_msg_decode(SM_msg* msg, uint8_t* buffer, uint32_t len) {
   int header_result = 0;
   int decode_result = 0;
 
-  //OAILOG_FUNC_IN (LOG_NAS);
   /*
    * First decode the SM message header
    */
@@ -129,9 +131,7 @@ int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
     case _5GSM_STATUS:
       decode_result = decode__5gsm_status(&msg->_5gsm_status, buffer, len);
       break;
-
     default:
-      //OAILOG_ERROR (LOG_NAS, "SM-MSG   - Unexpected message type: 0x%x\n",msg->header.message_type);
       decode_result = TLV_WRONG_MESSAGE_TYPE;
       break;
   }
@@ -139,28 +139,11 @@ int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
   if (decode_result < 0) {
     return decode_result;
   }
-  //OAILOG_FUNC_RETURN (LOG_NAS, header_result + decode_result);
   return header_result + decode_result;
 }
 
-/****************************************************************************
- **                                                                        **
- ** Name: fivegsm_msg_encode()                                             **
- **                                                                        **
- ** Description: Encode 5GS Session Management messages                    **
- **                                                                        **
- ** Inputs:  msg:   The SM message structure to encode                     **
- **          len:   Maximal capacity of the output buffer                  **
- **          Others:  None                                                 **
- **                                                                        **
- ** Outputs:   buffer:  Pointer to the encoded data buffer                 **
- **            Return:  The number of bytes in the buffer if data          **
- **                     have been successfully encoded;                    **
- **                     A negative error code otherwise.                   **
- **            Others:  None                                               **
- **                                                                        **
- ***************************************************************************/
-int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
+//------------------------------------------------------------------------------
+int fivegsm_msg_encode(SM_msg* msg, uint8_t* buffer, uint32_t len) {
   int header_result = 0;
   int encode_result = 0;
   /*
@@ -169,8 +152,8 @@ int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
   header_result = _fivegsm_msg_encode_header(&msg->header, buffer, len);
 
   if (header_result < 0) {
-    //OAILOG_ERROR (LOG_NAS, "ESM-MSG   - Failed to encode ESM message header (%d)\n", header_result);
-    //OAILOG_FUNC_RETURN (LOG_NAS, header_result);
+    // OAILOG_ERROR (LOG_NAS, "ESM-MSG   - Failed to encode ESM message header
+    // (%d)\n", header_result); OAILOG_FUNC_RETURN (LOG_NAS, header_result);
     return header_result;
   }
 
@@ -243,42 +226,22 @@ int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len) {
     case _5GSM_STATUS:
       encode_result = encode__5gsm_status(&msg->_5gsm_status, buffer, len);
       break;
-
     default:
-      //OAILOG_ERROR (LOG_NAS, "SM-MSG   -  message type: 0x%x\n", msg->header.message_type);
       encode_result = TLV_WRONG_MESSAGE_TYPE;
       break;
   }
 
   if (encode_result < 0) {
-    //OAILOG_ERROR (LOG_NAS, "SM-MSG   - Failed to encode L3 ESM message 0x%x ""(%d)\n", msg->header.message_type, encode_result);
+    // OAILOG_ERROR (LOG_NAS, "SM-MSG   - Failed to encode L3 ESM message 0x%x
+    // ""(%d)\n", msg->header.message_type, encode_result);
     return encode_result;
   }
-  // OAILOG_FUNC_RETURN (LOG_NAS, header_result + encode_result);
   return header_result + encode_result;
 }
 
-/****************************************************************************
- **                                                                        **
- ** Name:  _fivegsm_msg_decode_header()                                    **
- **                                                                        **
- ** Description: Decode header of 5GS Mobility Management message.         **
- **    The protocol discriminator and the security header type             **
- **    have already been decoded.                                          **
- **                                                                        **
- ** Inputs:  buffer:  Pointer to the buffer containing the 5GS SM message  **
- **          len:     Number of bytes that should be decoded               **
- **          Others:  None                                                 **
- **                                                                        **
- ** Outputs:   header:  The ESM message header to be filled                **
- **            Return:  The size of the header if data have been           **
- **                     successfully decoded;                              **
- **                     A negative error code otherwise.                   **
- **            Others:  None                                               **
- **                                                                        **
- ***************************************************************************/
-static int _fivegsm_msg_decode_header(sm_msg_header_t *header,
-                                      const uint8_t *buffer, uint32_t len) {
+//------------------------------------------------------------------------------
+static int _fivegsm_msg_decode_header(
+    sm_msg_header_t* header, const uint8_t* buffer, uint32_t len) {
   int size = 0;
 
   /*
@@ -291,7 +254,6 @@ static int _fivegsm_msg_decode_header(sm_msg_header_t *header,
   /*
    * Decode the EPS bearer identity and the protocol discriminator
    */
-  //DECODE_U8 (buffer + size, *(uint8_t *) (header), size);
   DECODE_U8(buffer + size, header->extended_protocol_discriminator, size);
 
   /*
@@ -311,56 +273,37 @@ static int _fivegsm_msg_decode_header(sm_msg_header_t *header,
   /*
    * Check the protocol discriminator
    */
-  if (header->extended_protocol_discriminator
-      != EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
-    //OAILOG_ERROR (LOG_NAS, "SM-MSG   - extended protocol discriminator: 0x%x\n", header->extended_protocol_discriminator);
+  if (header->extended_protocol_discriminator !=
+      EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     return (TLV_PROTOCOL_NOT_SUPPORTED);
   }
 
   return (size);
 }
 
-/****************************************************************************
- **                                                                        **
- ** Name:  _fivegsm_msg_encode_header()                                    **
- **                                                                        **
- **    The protocol discriminator (and the security header type)           **
- **    have already been encoded.                                          **
- **                                                                        **
- ** Inputs:  header:  The 5G SM message header to encode                   **
- **          len:   Maximal capacity of the output buffer                  **
- **          Others:  None                                                 **
- **                                                                        **
- ** Outputs:   buffer:  Pointer to the encoded data buffer                 **
- **            Return:  The number of bytes in the buffer if data          **
- **                     have been successfully encoded;                    **
- **                     A negative error code otherwise.                   **
- **            Others:  None                                               **
- **                                                                        **
- ***************************************************************************/
-static int _fivegsm_msg_encode_header(const sm_msg_header_t *header,
-                                      uint8_t *buffer, uint32_t len) {
+//------------------------------------------------------------------------------
+static int _fivegsm_msg_encode_header(
+    const sm_msg_header_t* header, uint8_t* buffer, uint32_t len) {
   int size = 0;
 
   /*
    * Check the buffer length
    */
   if (len < sizeof(sm_msg_header_t)) {
-    //OAILOG_ERROR (LOG_NAS, "SM-MSG   - buffer too short\n");
     return (TLV_BUFFER_TOO_SHORT);
   }
   /*
    * Check the protocol discriminator
    */
-  else if (header->extended_protocol_discriminator
-      != EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
-    //OAILOG_ERROR (LOG_NAS, "SM-MSG   - Unexpected protocol discriminator: 0x%x\n", header->extended_protocol_discriminator);
+  else if (
+      header->extended_protocol_discriminator !=
+      EPD_5GS_SESSION_MANAGEMENT_MESSAGES) {
     return (TLV_PROTOCOL_NOT_SUPPORTED);
   }
   /*
    * Encode the EPS bearer identity and the protocol discriminator
    */
-  //ENCODE_U8 (buffer + size, *(uint8_t *) (header), size);
+  // ENCODE_U8 (buffer + size, *(uint8_t *) (header), size);
   ENCODE_U8(buffer + size, header->extended_protocol_discriminator, size);
   /*
    * Encode the procedure session identity

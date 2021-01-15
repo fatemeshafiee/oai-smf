@@ -1226,17 +1226,21 @@ bool smf_app::handle_nf_status_notification(
     notification_msg.get_profile(profile);
     if (profile.get() != nullptr) {
       std::string nf_type = profile.get()->get_nf_type();
-      if (nf_type.compare("UPF") == 0) {
-        // UPF
+      if (nf_type.compare("UPF") == 0) {  // UPF
         upf_info_t upf_info = {};
         std::static_pointer_cast<upf_profile>(profile).get()->get_upf_info(
             upf_info);
-
         // Verify if the UPF is already exist
         // if not, add to the DB and send Association request
         // UPF N4 ipv4 address
         std::vector<struct in_addr> ipv4_addrs = {};
         profile.get()->get_nf_ipv4_addresses(ipv4_addrs);
+
+        if (ipv4_addrs.size() < 1) {
+          Logger::smf_app().debug("No IP Addr found");
+          return false;
+        }
+
         bool found = false;
         for (auto node : smf_cfg.upfs) {
           if (node.u1.ipv4_address.s_addr == ipv4_addrs[0].s_addr) {
@@ -1254,6 +1258,9 @@ bool smf_app::handle_nf_status_notification(
           // memcpy(&n.u1.ipv4_address, &ipv4_addrs[0], sizeof(struct in_addr));
           smf_cfg.upfs.push_back(n);
           start_upf_association(n);
+        } else {
+          Logger::smf_app().debug(
+              "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
         }
       }
     } else {

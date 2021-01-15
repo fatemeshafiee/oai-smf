@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,15 +19,14 @@
  *      contact@openairinterface.org
  */
 
-/*****************************************************************************
- Source      networkDef.h
- Version     0.1
- Date        2019/08/05
- Product     NAS stack
- Subsystem   include
- Author      BUPT
- Description Contains network's global definitions
- *****************************************************************************/
+/*! \file networkDef.h
+ \brief Contains network's global definitions
+ \author  BUPT
+ \company
+ \date 2019
+ \email:
+ */
+
 #ifndef __NETWORK_DEF_H__
 #define __NETWORK_DEF_H__
 
@@ -37,15 +36,15 @@
  * --------------------------------------
  */
 
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_EMERGENCY             0
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_HIGH_PRIORITY_ACCESS  1
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_MT_ACCESS             2
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_SIGNALLING         3
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_DATA               4
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_VOICECALL          5
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_VIDEOCALL          6
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_SMS                7
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_MPS_PRIORITY_ACCESS   8
-#define NGAP_RRC_ESTABLISHMENT_CAUSE_MCS_PRIORITY_ACCESS   9
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_EMERGENCY 0
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_HIGH_PRIORITY_ACCESS 1
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_MT_ACCESS 2
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_SIGNALLING 3
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_DATA 4
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_VOICECALL 5
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_VIDEOCALL 6
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_MO_SMS 7
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_MPS_PRIORITY_ACCESS 8
+#define NGAP_RRC_ESTABLISHMENT_CAUSE_MCS_PRIORITY_ACCESS 9
 
 #endif
