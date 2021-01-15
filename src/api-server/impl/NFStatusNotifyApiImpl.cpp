@@ -48,7 +48,7 @@ void NFStatusNotifyApiImpl::receive_nf_status_notification(
     p = std::make_shared<smf::upf_profile>();
 
   nlohmann::json pj = {};
-  to_json(pj, notificationData);
+  to_json(pj, notificationData.getNfProfile());
   p.get()->from_json(pj);
   notification_msg.set_profile(p);
 

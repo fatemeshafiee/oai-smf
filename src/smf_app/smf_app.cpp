@@ -1221,7 +1221,7 @@ bool smf_app::handle_nf_status_notification(
   data_notification_msg notification_msg = msg.get()->notification_msg;
   std::string event_type;
   notification_msg.get_notification_event_type(event_type);
-  if (event_type.compare("REGISTERED") == 0) {
+  if (event_type.compare("NF_REGISTERED") == 0) {
     std::shared_ptr<nf_profile> profile = {};
     notification_msg.get_profile(profile);
     if (profile.get() != nullptr) {
@@ -1259,6 +1259,9 @@ bool smf_app::handle_nf_status_notification(
     } else {
       return false;
     }
+  } else {
+    Logger::smf_app().debug(
+        "This event (%s) has not been supported yet!", event_type);
   }
 
   return true;
@@ -1954,14 +1957,14 @@ void smf_app::trigger_upf_status_notification_subscribe() {
           TASK_SMF_APP, TASK_SMF_N11);
 
   nlohmann::json json_data = {};
-  //TODO: remove hardcoded values
+  // TODO: remove hardcoded values
   json_data["nfStatusNotificationUri"] =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))) +
-      ":" + std::to_string(smf_cfg.sbi.port) + "/nsmf-nfstatus-notify/" +
+      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))) + ":" +
+      std::to_string(smf_cfg.sbi.port) + "/nsmf-nfstatus-notify/" +
       smf_cfg.sbi_api_version + "/subscriptions";
 
   json_data["subscrCond"]["NfTypeCond"]["nfType"] = "UPF";
-  json_data["reqNotifEvents"] = nlohmann::json::array();
+  json_data["reqNotifEvents"]                     = nlohmann::json::array();
   json_data["reqNotifEvents"].push_back("NF_REGISTERED");
   json_data["reqNotifEvents"].push_back("NF_DEREGISTERED");
   json_data["validityTime"] = "20210531T235959";
@@ -1971,9 +1974,9 @@ void smf_app::trigger_upf_status_notification_subscribe() {
       ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
       smf_cfg.nrf_addr.api_version + NNRF_NF_STATUS_SUBSCRIBE_URL;
 
-  itti_msg->url = url;
+  itti_msg->url       = url;
   itti_msg->json_data = json_data;
-  int ret           = itti_inst->send_msg(itti_msg);
+  int ret             = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_N11",
