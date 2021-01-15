@@ -193,7 +193,7 @@ typedef struct qos_profile_s {
 // NRF
 #define NNRF_NFM_BASE "/nnrf-nfm/"
 #define NNRF_NF_REGISTER_URL "/nf-instances/"
-#define NNRF_NF_STATUS_SUBSCRIBE_URL "/subscriptions/"
+#define NNRF_NF_STATUS_SUBSCRIBE_URL "/subscriptions"
 #define NRF_CURL_TIMEOUT_MS 100L
 
 // for CURL

@@ -344,6 +344,10 @@ smf_app::smf_app(const std::string& config_file)
 
   // Register to NRF
   register_to_nrf();
+  // Trigger NFStatusNotify
+  unsigned int microsecond = 10000;  // 10ms
+  usleep(microsecond);
+  trigger_upf_status_notification_subscribe();
 
   Logger::smf_app().startup("Started");
 }
@@ -1950,6 +1954,7 @@ void smf_app::trigger_upf_status_notification_subscribe() {
           TASK_SMF_APP, TASK_SMF_N11);
 
   nlohmann::json json_data = {};
+  //TODO: remove hardcoded values
   json_data["nfStatusNotificationUri"] =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))) +
       ":" + std::to_string(smf_cfg.sbi.port) + "/nsmf_nfstatus_notify/" +

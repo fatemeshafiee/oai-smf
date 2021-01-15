@@ -921,11 +921,11 @@ void smf_n11::subscribe_upf_status_notify(
       msg->http_version);
 
   Logger::smf_n11().debug(
-      "Send NF De-register to NRF (NRF URL %s)", msg->url.c_str());
+      "Send NFStatusNotify to NRF, NRF URL %s)", msg->url.c_str());
 
   std::string body = msg->json_data.dump();
   Logger::smf_n11().debug(
-      "Send NF Instance Registration to NRF, msg body: \n %s", body.c_str());
+      "Send NFStatusNotify to NRF, msg body: %s", body.c_str());
 
   curl_global_init(CURL_GLOBAL_ALL);
   CURL* curl = curl = curl_easy_init();
@@ -938,7 +938,6 @@ void smf_n11::subscribe_upf_status_notify(
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, msg->url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NRF_CURL_TIMEOUT_MS);
 
     if (msg->http_version == 2) {
