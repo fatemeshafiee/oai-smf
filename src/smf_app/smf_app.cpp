@@ -581,12 +581,12 @@ void smf_app::handle_itti_msg(itti_n11_release_sm_context_response& m) {
 
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(itti_n11_register_nf_instance_response& r) {
-  Logger::smf_app().debug("NF Instance Registration response");
+  Logger::smf_app().debug("Handle NF Instance Registration response");
 
   nf_instance_profile = r.profile;
   // Set heartbeat timer
   Logger::smf_app().debug(
-      "Set NRF Heartbeat timer (%d)", r.profile.get_nf_heartBeat_timer());
+      "Set value of NRF Heartbeat timer to %d", r.profile.get_nf_heartBeat_timer());
   timer_nrf_heartbeat = itti_inst->timer_setup(
       r.profile.get_nf_heartBeat_timer(), 0, TASK_SMF_APP,
       TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
@@ -1881,7 +1881,7 @@ void smf_app::generate_smf_profile() {
   // TODO: custom info
 
   int i = 0;
-  for (auto s : smf_cfg.session_management_subscription) {
+  for (auto sms : smf_cfg.session_management_subscription) {
     if (i < smf_cfg.num_session_management_subscription)
       i++;
     else
@@ -1889,16 +1889,26 @@ void smf_app::generate_smf_profile() {
 
     // SNSSAIS
     snssai_t snssai = {};
-    snssai.sD       = s.single_nssai.sD;
-    snssai.sST      = s.single_nssai.sST;
-    nf_instance_profile.add_snssai(snssai);
+    snssai.sD       = sms.single_nssai.sD;
+    snssai.sST      = sms.single_nssai.sST;
+    // Verify if this SNSSAI exist
+    std::vector<snssai_t> ss = {};
+    nf_instance_profile.get_nf_snssais(ss);
+    bool found = false;
+    for (auto it : ss) {
+      if ((it.sD == snssai.sD) and (it.sST == snssai.sST)) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) nf_instance_profile.add_snssai(snssai);
 
     // SMF info
-    dnn_smf_info_item_t dnn_item         = {.dnn = s.dnn};
+    dnn_smf_info_item_t dnn_item         = {.dnn = sms.dnn};
     snssai_smf_info_item_t smf_info_item = {};
     smf_info_item.dnn_smf_info_list.push_back(dnn_item);
-    smf_info_item.snssai.sD  = s.single_nssai.sD;
-    smf_info_item.snssai.sST = s.single_nssai.sST;
+    smf_info_item.snssai.sD  = sms.single_nssai.sD;
+    smf_info_item.snssai.sST = sms.single_nssai.sST;
     nf_instance_profile.add_smf_info_item(smf_info_item);
   }
 
@@ -1956,8 +1966,8 @@ void smf_app::trigger_nf_deregistration() {
 //------------------------------------------------------------------------------
 void smf_app::trigger_upf_status_notification_subscribe() {
   Logger::smf_app().debug(
-      "Send ITTI msg to N11 task to trigger the UPF status notification "
-      "subscribe to NRF");
+      "Send ITTI msg to N11 task to subscribe to UPF status notification "
+      "from NRF");
 
   std::shared_ptr<itti_n11_subscribe_upf_status_notify> itti_msg =
       std::make_shared<itti_n11_subscribe_upf_status_notify>(

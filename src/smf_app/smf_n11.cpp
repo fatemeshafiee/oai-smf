@@ -682,7 +682,7 @@ void smf_n11::register_nf_instance(
       msg->profile.get_nf_instance_id();
 
   Logger::smf_n11().debug(
-      "Send NF Instance Registration to NRF (NRF URL %s)", url.c_str());
+      "Send NF Instance Registration to NRF, NRF URL %s", url.c_str());
 
   std::string body = json_data.dump();
   Logger::smf_n11().debug(
@@ -721,7 +721,7 @@ void smf_n11::register_nf_instance(
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
-    Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
+    Logger::smf_n11().debug("NF Instance Registration, response from NRF, HTTP Code: %d", httpCode);
 
     if (static_cast<http_response_codes_e>(httpCode) ==
         http_response_codes_e::HTTP_RESPONSE_CODE_CREATED) {
@@ -729,10 +729,10 @@ void smf_n11::register_nf_instance(
       try {
         response_data = json::parse(*httpData.get());
       } catch (json::exception& e) {
-        Logger::smf_n11().warn("Could not parse json from the NRF response");
+        Logger::smf_n11().warn("NF Instance Registration, could not parse json from the NRF response");
       }
       Logger::smf_n11().debug(
-          "Response from NRF, Json data: \n %s", response_data.dump().c_str());
+          "NF Instance Registration, response from NRF, json data: \n %s", response_data.dump().c_str());
 
       // send response to APP to process
       std::shared_ptr<itti_n11_register_nf_instance_response> itti_msg =
@@ -750,7 +750,7 @@ void smf_n11::register_nf_instance(
             itti_msg->get_msg_name());
       }
     } else {
-      Logger::smf_n11().warn("Could not get response from NRF");
+      Logger::smf_n11().warn("NF Instance Registration, could not get response from NRF");
     }
 
     curl_slist_free_all(headers);
@@ -772,7 +772,7 @@ void smf_n11::update_nf_instance(
     json_data.push_back(item);
   }
   std::string body = json_data.dump();
-  Logger::smf_n11().debug("Send NF Update to NRF (Msg body %s)", body.c_str());
+  Logger::smf_n11().debug("Send NF Update to NRF, Msg body %s", body.c_str());
 
   std::string url =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.nrf_addr.ipv4_addr))) +
@@ -780,7 +780,7 @@ void smf_n11::update_nf_instance(
       smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
       msg->smf_instance_id;
 
-  Logger::smf_n11().debug("Send NF Update to NRF (NRF URL %s)", url.c_str());
+  Logger::smf_n11().debug("Send NF Update to NRF, NRF URL %s", url.c_str());
 
   curl_global_init(CURL_GLOBAL_ALL);
   CURL* curl = curl = curl_easy_init();
@@ -815,13 +815,13 @@ void smf_n11::update_nf_instance(
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
-    Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
+    Logger::smf_n11().debug("NF Update, response from NRF, HTTP Code: %d", httpCode);
 
     if ((static_cast<http_response_codes_e>(httpCode) ==
          http_response_codes_e::HTTP_RESPONSE_CODE_OK) or
         (static_cast<http_response_codes_e>(httpCode) ==
          http_response_codes_e::HTTP_RESPONSE_CODE_NO_CONTENT)) {
-      Logger::smf_n11().debug("Got successful response from NRF");
+      Logger::smf_n11().debug("NF Update, got successful response from NRF");
 
       // TODO: in case of response containing NF profile
       // send response to APP to process
@@ -839,7 +839,7 @@ void smf_n11::update_nf_instance(
             itti_msg->get_msg_name());
       }
     } else {
-      Logger::smf_n11().warn("Could not get response from NRF");
+      Logger::smf_n11().warn("NF Update, could not get response from NRF");
     }
 
     curl_slist_free_all(headers);
@@ -894,16 +894,16 @@ void smf_n11::deregister_nf_instance(
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
-    Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
+    Logger::smf_n11().debug("NF De-register, response from NRF, HTTP Code: %d", httpCode);
 
     if ((static_cast<http_response_codes_e>(httpCode) ==
          http_response_codes_e::HTTP_RESPONSE_CODE_OK) or
         (static_cast<http_response_codes_e>(httpCode) ==
          http_response_codes_e::HTTP_RESPONSE_CODE_NO_CONTENT)) {
-      Logger::smf_n11().debug("Got successful response from NRF");
+      Logger::smf_n11().debug("NF De-register, got successful response from NRF");
 
     } else {
-      Logger::smf_n11().warn("Could not get response from NRF");
+      Logger::smf_n11().warn("NF De-register, could not get response from NRF");
     }
 
     curl_slist_free_all(headers);
@@ -921,7 +921,7 @@ void smf_n11::subscribe_upf_status_notify(
       msg->http_version);
 
   Logger::smf_n11().debug(
-      "Send NFStatusNotify to NRF, NRF URL %s)", msg->url.c_str());
+      "Send NFStatusNotify to NRF, NRF URL %s", msg->url.c_str());
 
   std::string body = msg->json_data.dump();
   Logger::smf_n11().debug(
@@ -960,16 +960,16 @@ void smf_n11::subscribe_upf_status_notify(
     res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
-    Logger::smf_n11().debug("Response from NRF, Http Code: %d", httpCode);
+    Logger::smf_n11().debug("NFSubscribeNotify, response from NRF, HTTP Code: %d", httpCode);
 
     if ((static_cast<http_response_codes_e>(httpCode) ==
-         http_response_codes_e::HTTP_RESPONSE_CODE_OK) or
+         http_response_codes_e::HTTP_RESPONSE_CODE_CREATED) or
         (static_cast<http_response_codes_e>(httpCode) ==
          http_response_codes_e::HTTP_RESPONSE_CODE_NO_CONTENT)) {
-      Logger::smf_n11().debug("Got successful response from NRF");
+      Logger::smf_n11().debug("NFSubscribeNotify, got successful response from NRF");
 
     } else {
-      Logger::smf_n11().warn("Could not get response from NRF");
+      Logger::smf_n11().warn("NFSubscribeNotify, could not get response from NRF");
     }
 
     curl_slist_free_all(headers);
