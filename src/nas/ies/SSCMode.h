@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -29,11 +29,13 @@
 #define SSC_MODE_MAXIMUM_LENGTH 1
 
 typedef struct {
-  uint8_t spare:5;
-  uint8_t ssc_mode_value:3;
-}__attribute__((__packed__)) SSCMode;
+  uint8_t spare : 5;
+  uint8_t ssc_mode_value : 3;
+} __attribute__((__packed__)) SSCMode;
 
-int encode_ssc_mode(SSCMode sscmode, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode_ssc_mode(SSCMode *sscmode, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode_ssc_mode(
+    SSCMode sscmode, uint8_t iei, uint8_t* buffer, uint32_t len);
+int decode_ssc_mode(
+    SSCMode* sscmode, uint8_t iei, uint8_t* buffer, uint32_t len);
 
 #endif

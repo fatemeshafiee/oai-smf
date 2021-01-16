@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -34,7 +34,11 @@ typedef struct {
   uint32_t tac;
 } _5GSTrackingAreaIdentity;
 
-int encode__5gs_tracking_area_identity(_5GSTrackingAreaIdentity _5gstrackingareaidentity, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode__5gs_tracking_area_identity(_5GSTrackingAreaIdentity *_5gstrackingareaidentity, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode__5gs_tracking_area_identity(
+    _5GSTrackingAreaIdentity _5gstrackingareaidentity, uint8_t iei,
+    uint8_t* buffer, uint32_t len);
+int decode__5gs_tracking_area_identity(
+    _5GSTrackingAreaIdentity* _5gstrackingareaidentity, uint8_t iei,
+    uint8_t* buffer, uint32_t len);
 
 #endif

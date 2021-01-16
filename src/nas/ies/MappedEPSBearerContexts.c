@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,19 +19,22 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "MappedEPSBearerContexts.h"
 
-int encode_mapped_eps_bearer_contexts(MappedEPSBearerContexts mappedepsbearercontexts, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  uint8_t *lenPtr;
+int encode_mapped_eps_bearer_contexts(
+    MappedEPSBearerContexts mappedepsbearercontexts, uint8_t iei,
+    uint8_t* buffer, uint32_t len) {
+  uint8_t* lenPtr;
   uint32_t encoded = 0;
   int encode_result;
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, MAPPED_EPS_BEARER_CONTEXTS_MINIMUM_LENGTH, len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer, MAPPED_EPS_BEARER_CONTEXTS_MINIMUM_LENGTH, len);
 
   if (iei > 0) {
     *buffer = iei;
@@ -42,21 +45,24 @@ int encode_mapped_eps_bearer_contexts(MappedEPSBearerContexts mappedepsbearercon
   encoded++;
   encoded++;
 
-  if ((encode_result = encode_bstring(mappedepsbearercontexts, buffer + encoded, len - encoded)) < 0)  //加密,实体,首地址,长度
+  if ((encode_result = encode_bstring(
+           mappedepsbearercontexts, buffer + encoded, len - encoded)) < 0)
     return encode_result;
   else
     encoded += encode_result;
 
   uint32_t res = encoded - 1 - ((iei > 0) ? 1 : 0);
-  *lenPtr = res / (1 << 8);
+  *lenPtr      = res / (1 << 8);
   lenPtr++;
   *lenPtr = res % (1 << 8);
 
   return encoded;
 }
 
-int decode_mapped_eps_bearer_contexts(MappedEPSBearerContexts *mappedepsbearercontexts, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
+int decode_mapped_eps_bearer_contexts(
+    MappedEPSBearerContexts* mappedepsbearercontexts, uint8_t iei,
+    uint8_t* buffer, uint32_t len) {
+  int decoded   = 0;
   uint8_t ielen = 0;
   int decode_result;
 
@@ -71,10 +77,11 @@ int decode_mapped_eps_bearer_contexts(MappedEPSBearerContexts *mappedepsbearerco
   decoded++;
   CHECK_LENGTH_DECODER(len - decoded, ielen);
 
-  if ((decode_result = decode_bstring(mappedepsbearercontexts, ielen, buffer + decoded, len - decoded)) < 0)
+  if ((decode_result = decode_bstring(
+           mappedepsbearercontexts, ielen, buffer + decoded, len - decoded)) <
+      0)
     return decode_result;
   else
     decoded += decode_result;
   return decoded;
 }
-

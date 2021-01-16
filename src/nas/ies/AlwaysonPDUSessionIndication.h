@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -29,14 +29,18 @@
 #define ALWAYSON_PDU_SESSION_INDICATION_MINIMUM_LENGTH 1
 #define ALWAYSON_PDU_SESSION_INDICATION_MAXIMUM_LENGTH 1
 
-#define ALWAYSON_PDU_SESSION_NOT_ALLOWED	0
-#define ALWAYSON_PDU_SESSION_REQUIRED		1
+#define ALWAYSON_PDU_SESSION_NOT_ALLOWED 0
+#define ALWAYSON_PDU_SESSION_REQUIRED 1
 
 typedef struct {
   bool apsi_indication;
 } AlwaysonPDUSessionIndication;
 
-int encode_alwayson_pdu_session_indication(AlwaysonPDUSessionIndication alwaysonpdusessionindication, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode_alwayson_pdu_session_indication(AlwaysonPDUSessionIndication *alwaysonpdusessionindication, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode_alwayson_pdu_session_indication(
+    AlwaysonPDUSessionIndication alwaysonpdusessionindication, uint8_t iei,
+    uint8_t* buffer, uint32_t len);
+int decode_alwayson_pdu_session_indication(
+    AlwaysonPDUSessionIndication* alwaysonpdusessionindication, uint8_t iei,
+    uint8_t* buffer, uint32_t len);
 
 #endif

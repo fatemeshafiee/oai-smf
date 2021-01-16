@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,21 +19,23 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "_5GSRegistrationType.h"
 
-int encode__5gs_registration_type(_5GSRegistrationType *_5gsregistrationtype, uint8_t iei, uint8_t *buffer, uint32_t len) {
+int encode__5gs_registration_type(
+    _5GSRegistrationType* _5gsregistrationtype, uint8_t iei, uint8_t* buffer,
+    uint32_t len) {
   uint32_t encoded = 0;
 
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, _5GS_REGISTRATION_TYPE_MINIMUM_LENGTH, len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer, _5GS_REGISTRATION_TYPE_MINIMUM_LENGTH, len);
   uint8_t registration_type = 0;
-  if (_5gsregistrationtype->is_for)
-    registration_type |= 0x08;
+  if (_5gsregistrationtype->is_for) registration_type |= 0x08;
 
   registration_type |= _5gsregistrationtype->registration_type & 0x07;
   ENCODE_U8(buffer, registration_type, encoded);
@@ -41,12 +43,14 @@ int encode__5gs_registration_type(_5GSRegistrationType *_5gsregistrationtype, ui
   return encoded;
 }
 
-int decode__5gs_registration_type(_5GSRegistrationType *_5gsregistrationtype, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
+int decode__5gs_registration_type(
+    _5GSRegistrationType* _5gsregistrationtype, uint8_t iei, uint8_t* buffer,
+    uint32_t len) {
+  int decoded               = 0;
   uint8_t registration_type = 0;
 
   DECODE_U8(buffer, registration_type, decoded);
-  //if(!(registration_type & 0x80))
+  // if(!(registration_type & 0x80))
   if (!(registration_type & 0x08))
     _5gsregistrationtype->is_for = false;
   else
@@ -55,4 +59,3 @@ int decode__5gs_registration_type(_5GSRegistrationType *_5gsregistrationtype, ui
 
   return decoded;
 }
-

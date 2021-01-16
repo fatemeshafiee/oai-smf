@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -31,17 +31,19 @@
 #define GPRS_TIMER_MINIMUM_LENGTH_TV 2
 #define GPRS_TIMER_MAXIMUM_LENGTH_TV 2
 
-#define GPRSTIMER_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_2_SECONDS	0b000
-#define	GPRSTIMER_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1_MINUTE		0b001
-#define GPRSTIMER_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_DECIHOURS	0b010
-#define GPRSTIMER_VALUE_INDICATES_THAT_THE_TIMER_IS_DEACTIVATED		0b111
+#define GPRSTIMER_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_2_SECONDS 0b000
+#define GPRSTIMER_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_1_MINUTE 0b001
+#define GPRSTIMER_VALUE_IS_INCREMENTED_IN_MULTIPLES_OF_DECIHOURS 0b010
+#define GPRSTIMER_VALUE_INDICATES_THAT_THE_TIMER_IS_DEACTIVATED 0b111
 
 typedef struct {
-  uint8_t unit :3;
-  uint8_t timeValue :5;
+  uint8_t unit : 3;
+  uint8_t timeValue : 5;
 } GPRSTimer;
 
-int encode_gprs_timer(GPRSTimer gprstimer, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode_gprs_timer(GPRSTimer *gprstimer, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode_gprs_timer(
+    GPRSTimer gprstimer, uint8_t iei, uint8_t* buffer, uint32_t len);
+int decode_gprs_timer(
+    GPRSTimer* gprstimer, uint8_t iei, uint8_t* buffer, uint32_t len);
 
 #endif

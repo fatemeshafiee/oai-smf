@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -43,7 +43,6 @@
 typedef struct {
   uint8_t IdentityType;
   uint8_t odd_even_indication;
-
   /*5g-guti*/
   uint16_t mcc;
   uint16_t mnc;
@@ -51,20 +50,22 @@ typedef struct {
   uint16_t amfSetID;
   uint8_t amfPointer;
   uint32_t _5g_tmsi;
-
   /*imei imeisv*/
-  uint8_t identity;  //???
-
+  uint8_t identity;
   /*suci supi imsi*/
   uint8_t supi;
   uint8_t routingIndicator;
   uint8_t protectionSchemeID;
   uint8_t homeNetworkPublicKeyIdentifier;
-  uint8_t msin;  //??? 
+  uint8_t msin;
 
 } _5GSMobileIdentity;
 
-int encode__5gs_mobile_identity(_5GSMobileIdentity _5gsmobileidentity, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode__5gs_mobile_identity(_5GSMobileIdentity *_5gsmobileidentity, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode__5gs_mobile_identity(
+    _5GSMobileIdentity _5gsmobileidentity, uint8_t iei, uint8_t* buffer,
+    uint32_t len);
+int decode__5gs_mobile_identity(
+    _5GSMobileIdentity* _5gsmobileidentity, uint8_t iei, uint8_t* buffer,
+    uint32_t len);
 
 #endif

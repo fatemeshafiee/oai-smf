@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -32,22 +32,22 @@
 #define SNSSAI_MAXIMUM_LENGTH_TLV 10
 
 typedef enum {
-  SST_LENGTH = 0b00000001,
-  SST_AND_MAPPEDHPLMNSST_LENGTH = 0b00000010,
-  SST_AND_SD_LENGTH = 0b00000100,
-  SST_AND_SD_AND_MAPPEDHPLMNSST_LENGTH = 0b00000101,
+  SST_LENGTH                                             = 0b00000001,
+  SST_AND_MAPPEDHPLMNSST_LENGTH                          = 0b00000010,
+  SST_AND_SD_LENGTH                                      = 0b00000100,
+  SST_AND_SD_AND_MAPPEDHPLMNSST_LENGTH                   = 0b00000101,
   SST_AND_SD_AND_MAPPEDHPLMNSST_AND_MAPPEDHPLMNSD_LENGTH = 0b00001000
 } length_of_snssai_contents;
 
 typedef struct {
   length_of_snssai_contents len;
   uint8_t sst;
-  uint32_t sd :24;
+  uint32_t sd : 24;
   uint8_t mappedhplmnsst;
   uint32_t mappedhplmnsd;
 } SNSSAI;
 
-int encode_snssai(SNSSAI snssai, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode_snssai(SNSSAI *snssai, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode_snssai(SNSSAI snssai, uint8_t iei, uint8_t* buffer, uint32_t len);
+int decode_snssai(SNSSAI* snssai, uint8_t iei, uint8_t* buffer, uint32_t len);
 
 #endif

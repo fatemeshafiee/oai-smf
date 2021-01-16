@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,19 +19,22 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "Additional5GSecurityInformation.h"
 
-int encode_additional_5g_security_information(Additional5GSecurityInformation additional5gsecurityinformation, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  uint8_t *lenPtr;
-  uint32_t encoded = 0;
+int encode_additional_5g_security_information(
+    Additional5GSecurityInformation additional5gsecurityinformation,
+    uint8_t iei, uint8_t* buffer, uint32_t len) {
+  uint8_t* lenPtr;
+  uint32_t encoded  = 0;
   uint8_t bitStream = 0x0;
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, ADDITIONAL_5G_SECURITY_INFORMATION_MINIMUM_LENGTH, len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer, ADDITIONAL_5G_SECURITY_INFORMATION_MINIMUM_LENGTH, len);
 
   if (iei > 0) {
     *buffer = iei;
@@ -41,10 +44,8 @@ int encode_additional_5g_security_information(Additional5GSecurityInformation ad
   lenPtr = (buffer + encoded);
   encoded++;
 
-  if (additional5gsecurityinformation.rinmr)
-    bitStream |= 0x02;
-  if (additional5gsecurityinformation.hdp)
-    bitStream |= 0x01;
+  if (additional5gsecurityinformation.rinmr) bitStream |= 0x02;
+  if (additional5gsecurityinformation.hdp) bitStream |= 0x01;
 
   ENCODE_U8(buffer + encoded, bitStream, encoded);
 
@@ -52,9 +53,11 @@ int encode_additional_5g_security_information(Additional5GSecurityInformation ad
   return encoded;
 }
 
-int decode_additional_5g_security_information(Additional5GSecurityInformation *additional5gsecurityinformation, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
-  uint8_t ielen = 0;
+int decode_additional_5g_security_information(
+    Additional5GSecurityInformation* additional5gsecurityinformation,
+    uint8_t iei, uint8_t* buffer, uint32_t len) {
+  int decoded       = 0;
+  uint8_t ielen     = 0;
   uint8_t bitStream = 0x0;
 
   if (iei > 0) {
@@ -79,4 +82,3 @@ int decode_additional_5g_security_information(Additional5GSecurityInformation *a
 
   return decoded;
 }
-

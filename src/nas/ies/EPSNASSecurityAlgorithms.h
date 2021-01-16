@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -47,11 +47,15 @@
 #define NAS_SECURITY_ALGORITHMS_EIA7 0b111
 
 typedef struct {
-  uint8_t typeOfCipheringAlgoithm :3;
-  uint8_t typeOfIntegrityProtectionAlgoithm :3;
+  uint8_t typeOfCipheringAlgoithm : 3;
+  uint8_t typeOfIntegrityProtectionAlgoithm : 3;
 } EPSNASSecurityAlgorithms;
 
-int encode_epsnas_security_algorithms(EPSNASSecurityAlgorithms epsnassecurityalgorithms, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode_epsnas_security_algorithms(EPSNASSecurityAlgorithms *epsnassecurityalgorithms, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode_epsnas_security_algorithms(
+    EPSNASSecurityAlgorithms epsnassecurityalgorithms, uint8_t iei,
+    uint8_t* buffer, uint32_t len);
+int decode_epsnas_security_algorithms(
+    EPSNASSecurityAlgorithms* epsnassecurityalgorithms, uint8_t iei,
+    uint8_t* buffer, uint32_t len);
 
 #endif

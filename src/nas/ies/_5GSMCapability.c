@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,20 +19,26 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "_5GSMCapability.h"
 
-int encode__5gsm_capability(_5GSMCapability _5gsmcapability, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  uint8_t *lenPtr = NULL;
-  uint32_t encoded = 0;
+int encode__5gsm_capability(
+    _5GSMCapability _5gsmcapability, uint8_t iei, uint8_t* buffer,
+    uint32_t len) {
+  uint8_t* lenPtr              = NULL;
+  uint32_t encoded             = 0;
   uint8_t _5gsmcapability_bits = 0;
 
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, ((iei > 0) ? _5GSM_CAPABILITY_MINIMUM_LENGTH_TLV : _5GSM_CAPABILITY_MINIMUM_LENGTH_TLV-1), len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer,
+      ((iei > 0) ? _5GSM_CAPABILITY_MINIMUM_LENGTH_TLV :
+                   _5GSM_CAPABILITY_MINIMUM_LENGTH_TLV - 1),
+      len);
 
   if (iei > 0) {
     *buffer = iei;
@@ -42,16 +48,11 @@ int encode__5gsm_capability(_5GSMCapability _5gsmcapability, uint8_t iei, uint8_
   lenPtr = (buffer + encoded);
   encoded++;
 
-  if (_5gsmcapability.is_MPTCP_supported)
-    _5gsmcapability_bits |= 0X10;
-  if (_5gsmcapability.is_ATSLL_supported)
-    _5gsmcapability_bits |= 0X08;
-  if (_5gsmcapability.is_EPTS1_supported)
-    _5gsmcapability_bits |= 0X04;
-  if (_5gsmcapability.is_MH6PDU_supported)
-    _5gsmcapability_bits |= 0X02;
-  if (_5gsmcapability.is_Rqos_supported)
-    _5gsmcapability_bits |= 0X01;
+  if (_5gsmcapability.is_MPTCP_supported) _5gsmcapability_bits |= 0X10;
+  if (_5gsmcapability.is_ATSLL_supported) _5gsmcapability_bits |= 0X08;
+  if (_5gsmcapability.is_EPTS1_supported) _5gsmcapability_bits |= 0X04;
+  if (_5gsmcapability.is_MH6PDU_supported) _5gsmcapability_bits |= 0X02;
+  if (_5gsmcapability.is_Rqos_supported) _5gsmcapability_bits |= 0X01;
 
   ENCODE_U8(buffer + encoded, _5gsmcapability_bits, encoded);
 
@@ -60,8 +61,10 @@ int encode__5gsm_capability(_5GSMCapability _5gsmcapability, uint8_t iei, uint8_
   return encoded;
 }
 
-int decode__5gsm_capability(_5GSMCapability *_5gsmcapability, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
+int decode__5gsm_capability(
+    _5GSMCapability* _5gsmcapability, uint8_t iei, uint8_t* buffer,
+    uint32_t len) {
+  int decoded   = 0;
   uint8_t ielen = 0;
 
   uint8_t _5gsmcapability_bits = 0;
@@ -104,4 +107,3 @@ int decode__5gsm_capability(_5GSMCapability *_5gsmcapability, uint8_t iei, uint8
 
   return decoded;
 }
-

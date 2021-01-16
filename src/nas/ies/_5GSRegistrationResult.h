@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -18,7 +18,6 @@
  * For more information about the OpenAirInterface (OAI) Software Alliance:
  *      contact@openairinterface.org
  */
-
 
 #ifndef __5GS_REGISTRATION_RESULT_H_
 #define __5GS_REGISTRATION_RESULT_H_
@@ -38,10 +37,14 @@
 
 typedef struct {
   bool is_SMS_allowed;
-  uint8_t registration_result_value :3;
+  uint8_t registration_result_value : 3;
 } _5GSRegistrationResult;
 
-int encode__5gs_registration_result(_5GSRegistrationResult _5gsregistrationresult, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode__5gs_registration_result(_5GSRegistrationResult *_5gsregistrationresult, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode__5gs_registration_result(
+    _5GSRegistrationResult _5gsregistrationresult, uint8_t iei, uint8_t* buffer,
+    uint32_t len);
+int decode__5gs_registration_result(
+    _5GSRegistrationResult* _5gsregistrationresult, uint8_t iei,
+    uint8_t* buffer, uint32_t len);
 
 #endif

@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -30,23 +30,28 @@
 #define SERVICE_AREA_LIST_MINIMUM_LENGTH 6
 #define SERVICE_AREA_LIST_MAXIMUM_LENGTH 114
 
-#define ALL_TAIS_BELONGING_TO_THE_PLMNS_IN_THE_REGISTRATION_AREA_ARE_IN_THE_ALLOWED_AREA 0b11
+#define ALL_TAIS_BELONGING_TO_THE_PLMNS_IN_THE_REGISTRATION_AREA_ARE_IN_THE_ALLOWED_AREA \
+  0b11
 
 struct PartialServiceAreaList {
   bool is_allowed;
   uint8_t typeOfList;
   uint8_t numberOfElements;
-  struct MccMnc *mcc_mnc;
-  struct TrackingAreaIdentity *tai;
-  struct PartialServiceAreaList *next;
+  struct MccMnc* mcc_mnc;
+  struct TrackingAreaIdentity* tai;
+  struct PartialServiceAreaList* next;
 };
 
 typedef struct {
   int listSize;
-  struct PartialServiceAreaList *partialServiceAreaList;
+  struct PartialServiceAreaList* partialServiceAreaList;
 } ServiceAreaList;
 
-int encode_service_area_list(ServiceAreaList servicearealist, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode_service_area_list(ServiceAreaList *servicearealist, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode_service_area_list(
+    ServiceAreaList servicearealist, uint8_t iei, uint8_t* buffer,
+    uint32_t len);
+int decode_service_area_list(
+    ServiceAreaList* servicearealist, uint8_t iei, uint8_t* buffer,
+    uint32_t len);
 
 #endif
