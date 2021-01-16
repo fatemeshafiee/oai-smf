@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -30,23 +30,14 @@ enum ssc_mode_e {
   SSC_MODE_2 = 2,
   SSC_MODE_3 = 3,
 };
-static const std::vector<std::string> ssc_mode_e2str = { "Error", "SSC_MODE_1",
-    "SSC_MODE_2", "SSC_MODE_3" };
+static const std::vector<std::string> ssc_mode_e2str = {
+    "Error", "SSC_MODE_1", "SSC_MODE_2", "SSC_MODE_3"};
 
 typedef struct ssc_mode_s {
   uint8_t ssc_mode;
-  ssc_mode_s()
-      :
-      ssc_mode(SSC_MODE_1) {
-  }
-  ssc_mode_s(ssc_mode_e mode)
-      :
-      ssc_mode(mode) {
-  }
-  ssc_mode_s(const struct ssc_mode_s &p)
-      :
-      ssc_mode(p.ssc_mode) {
-  }
+  ssc_mode_s() : ssc_mode(SSC_MODE_1) {}
+  ssc_mode_s(ssc_mode_e mode) : ssc_mode(mode) {}
+  ssc_mode_s(const struct ssc_mode_s& p) : ssc_mode(p.ssc_mode) {}
 } ssc_mode_t;
 
 typedef struct pdu_session_types_s {
@@ -64,7 +55,7 @@ typedef struct dnn_configuration_s {
   ssc_modes_t ssc_modes;
   session_ambr_t session_ambr;
   subscribed_default_qos_t _5g_qos_profile;
-  //staticIpAddresses
+  // staticIpAddresses
 } dnn_configuration_t;
 
 #endif

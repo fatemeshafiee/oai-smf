@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -31,7 +31,7 @@
 #include "3gpp_29.274.h"
 #include "3gpp_commons.h"
 #include "common_root_types.h"
-#include "logger.hpp" // for fmt::format in spdlog
+#include "logger.hpp"  // for fmt::format in spdlog
 
 #include <arpa/inet.h>
 #include <stdint.h>
@@ -60,7 +60,7 @@ typedef struct extension_header_type_list_s {
 } extension_header_type_list_t;
 
 // 8.6 Private Extension defined in 3gpp_29.274.h
-//typedef struct private_extension_s {
+// typedef struct private_extension_s {
 //  uint16_t  extension_identifier;
 //  std::string  extension_value;
 //} private_extension_t;

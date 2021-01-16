@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -31,47 +31,43 @@
 #include "bstrlib.h"
 #include "common_defs.h"
 
-#define IES_ENCODE_U8(buffer, encoded, value)   \
-    ENCODE_U8(buffer + encoded, value, encoded)
+#define IES_ENCODE_U8(buffer, encoded, value)                                  \
+  ENCODE_U8(buffer + encoded, value, encoded)
 
-#define IES_ENCODE_U16(buffer, encoded, value)    \
-    ENCODE_U16(buffer + encoded, value, encoded)
+#define IES_ENCODE_U16(buffer, encoded, value)                                 \
+  ENCODE_U16(buffer + encoded, value, encoded)
 
-#define IES_ENCODE_U24(buffer, encoded, value)    \
-    ENCODE_U24(buffer + encoded, value, encoded)
+#define IES_ENCODE_U24(buffer, encoded, value)                                 \
+  ENCODE_U24(buffer + encoded, value, encoded)
 
-#define IES_ENCODE_U32(buffer, encoded, value)    \
-    ENCODE_U32(buffer + encoded, value, encoded)
-
+#define IES_ENCODE_U32(buffer, encoded, value)                                 \
+  ENCODE_U32(buffer + encoded, value, encoded)
 
 /* Defines error code limit below which message should be sent because
  * it cannot be further processed */
-#define TLV_FATAL_ERROR  (TLV_VALUE_DOESNT_MATCH)
+#define TLV_FATAL_ERROR (TLV_VALUE_DOESNT_MATCH)
 
 extern int errorCodeEncoder;
 
-int encode_bstring (
-  const_bstring const str,
-  uint8_t * const buffer,
-  const uint32_t buflen);
+int encode_bstring(
+    const_bstring const str, uint8_t* const buffer, const uint32_t buflen);
 
 void tlv_encode_perror(void);
 
 #define CHECK_PDU_POINTER_AND_LENGTH_ENCODER(bUFFER, mINIMUMlENGTH, lENGTH)    \
-  if (bUFFER == NULL)  {                                             \
-    errorCodeEncoder = TLV_BUFFER_NULL;                              \
-    return TLV_BUFFER_NULL;                                          \
-  }                                                                  \
-  if (lENGTH < mINIMUMlENGTH) {                                      \
-    errorCodeEncoder = TLV_BUFFER_TOO_SHORT;                         \
-    return TLV_BUFFER_TOO_SHORT;                                     \
+  if (bUFFER == NULL) {                                                        \
+    errorCodeEncoder = TLV_BUFFER_NULL;                                        \
+    return TLV_BUFFER_NULL;                                                    \
+  }                                                                            \
+  if (lENGTH < mINIMUMlENGTH) {                                                \
+    errorCodeEncoder = TLV_BUFFER_TOO_SHORT;                                   \
+    return TLV_BUFFER_TOO_SHORT;                                               \
   }
 
-#define CHECK_PDU_POINTER_ENCODER(bUFFER)                          \
-  if (bUFFER == NULL) {                                            \
-    errorCodeEncoder = TLV_BUFFER_NULL;                            \
-    return TLV_BUFFER_NULL;                                        \
+#define CHECK_PDU_POINTER_ENCODER(bUFFER)                                      \
+  if (bUFFER == NULL) {                                                        \
+    errorCodeEncoder = TLV_BUFFER_NULL;                                        \
+    return TLV_BUFFER_NULL;                                                    \
   }
 
 #endif /* define (FILE_TLV_ENCODER_SEEN) */
-
