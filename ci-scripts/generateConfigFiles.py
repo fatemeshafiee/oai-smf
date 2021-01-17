@@ -38,9 +38,9 @@ class smfConfigGen():
 		self.udm_ip_addr = ''
 		self.udm_port = '80'
 		self.udm_api_version = 'v2'
-		self.nrf_ip_addr = ''
-		self.nrf_port = '80'
-		self.nrf_api_version = 'v1'
+#		self.nrf_ip_addr = ''
+#		self.nrf_port = '80'
+#		self.nrf_api_version = 'v1'
 		self.upf_ip_addr = ''
 		self.apn = 'carrier.com'
 		self.dns1_ip = '192.168.18.129'
@@ -88,9 +88,9 @@ class smfConfigGen():
 		smfFile.write('SMF_CONF[@UDM_IPV4_ADDRESS@]=\'' + self.udm_ip_addr + '\'\n')
 		smfFile.write('SMF_CONF[@UDM_PORT@]=' + self.udm_port + '\n')
 		smfFile.write('SMF_CONF[@UDM_API_VERSION@]=\'' + self.udm_api_version + '\'\n')
-		smfFile.write('SMF_CONF[@NRF_IPV4_ADDRESS@]=\'' + self.nrf_ip_addr + '\'\n')
-		smfFile.write('SMF_CONF[@NRF_PORT@]=' + self.nrf_port + '\n')
-		smfFile.write('SMF_CONF[@NRF_API_VERSION@]=\'' + self.nrf_api_version + '\'\n')		
+#		smfFile.write('SMF_CONF[@NRF_IPV4_ADDRESS@]=\'' + self.nrf_ip_addr + '\'\n')
+#		smfFile.write('SMF_CONF[@NRF_PORT@]=' + self.nrf_port + '\n')
+#		smfFile.write('SMF_CONF[@NRF_API_VERSION@]=\'' + self.nrf_api_version + '\'\n')		
 		smfFile.write('SMF_CONF[@UPF_IPV4_ADDRESS@]=\'' + self.upf_ip_addr + '\'\n')
 		smfFile.write('\n')
 		smfFile.write('for K in "${!SMF_CONF[@]}"; do \n')
@@ -117,7 +117,7 @@ def Usage():
 	print('  --n4=[SMF N4 Interface Name]')
 	print('  --amf_ip_addr=[AMF IP Address]')
 	print('  --udm_ip_addr=[UDM IP Address]')
-	print('  --nrf_ip_addr=[NRF IP Address]')
+#	print('  --nrf_ip_addr=[NRF IP Address]')
 	print('  --upf_ip_addr=[UPF IP Address]')
 	print('  --from_docker_file')
 	print('---------------------------------------------------------------------------------------------- SMF Not Mandatory -----')
@@ -151,9 +151,9 @@ while len(argvs) > 1:
 	elif re.match('^\-\-udm_ip_addr=(.+)$', myArgv, re.IGNORECASE):
 		matchReg = re.match('^\-\-udm_ip_addr=(.+)$', myArgv, re.IGNORECASE)
 		mySmfCfg.udm_ip_addr = matchReg.group(1)
-	elif re.match('^\-\-nrf_ip_addr=(.+)$', myArgv, re.IGNORECASE):
-		matchReg = re.match('^\-\-nrf_ip_addr=(.+)$', myArgv, re.IGNORECASE)
-		mySmfCfg.nrf_ip_addr = matchReg.group(1)
+#	elif re.match('^\-\-nrf_ip_addr=(.+)$', myArgv, re.IGNORECASE):
+#		matchReg = re.match('^\-\-nrf_ip_addr=(.+)$', myArgv, re.IGNORECASE)
+#		mySmfCfg.nrf_ip_addr = matchReg.group(1)
 	elif re.match('^\-\-upf_ip_addr=(.+)$', myArgv, re.IGNORECASE):
 		matchReg = re.match('^\-\-upf_ip_addr=(.+)$', myArgv, re.IGNORECASE)
 		mySmfCfg.upf_ip_addr = matchReg.group(1)
@@ -189,9 +189,9 @@ if mySmfCfg.kind == 'SMF':
 	elif mySmfCfg.udm_ip_addr == '':
 		Usage()
 		sys.exit('missing UDM IP address')
-	elif mySmfCfg.nrf_ip_addr == '':
-		Usage()
-		sys.exit('missing NRF IP address')
+#	elif mySmfCfg.nrf_ip_addr == '':
+#		Usage()
+#		sys.exit('missing NRF IP address')
 	elif mySmfCfg.upf_ip_addr == '':
 		Usage()
 		sys.exit('missing UPF IP address')
