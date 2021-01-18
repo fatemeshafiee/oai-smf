@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,7 +19,6 @@
  *      contact@openairinterface.org
  */
 
-
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,29 +31,22 @@
 #include "backtrace.h"
 
 /* Obtain a backtrace and print it to stdout. */
-void
-display_backtrace (
-  void)
-{
-  void                                   *array[10];
-  size_t                                  size;
-  char                                  **strings;
-  size_t                                  i;
+void display_backtrace(void) {
+  void* array[10];
+  size_t size;
+  char** strings;
+  size_t i;
 
-  size = backtrace (array, 10);
-  strings = backtrace_symbols (array, size);
-  printf ("Obtained %zu stack frames.\n", size);
+  size    = backtrace(array, 10);
+  strings = backtrace_symbols(array, size);
+  printf("Obtained %zu stack frames.\n", size);
 
-  for (i = 0; i < size; i++)
-    printf ("%s\n", strings[i]);
+  for (i = 0; i < size; i++) printf("%s\n", strings[i]);
 
-  free (strings);
+  free(strings);
 }
 
-void
-backtrace_handle_signal (
-  siginfo_t * info)
-{
-  display_backtrace ();
-  //exit(EXIT_FAILURE);
+void backtrace_handle_signal(siginfo_t* info) {
+  display_backtrace();
+  // exit(EXIT_FAILURE);
 }

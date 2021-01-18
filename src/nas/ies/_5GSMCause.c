@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,18 +19,23 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "_5GSMCause.h"
 
-int encode__5gsm_cause(_5GSMCause _5gsmcause, uint8_t iei, uint8_t *buffer, uint32_t len) {
+int encode__5gsm_cause(
+    _5GSMCause _5gsmcause, uint8_t iei, uint8_t* buffer, uint32_t len) {
   uint32_t encoded = 0;
 
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, ((iei > 0) ? _5GSM_CAUSE_MINIMUM_LENGTH_TV : _5GSM_CAUSE_MINIMUM_LENGTH_V), len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer,
+      ((iei > 0) ? _5GSM_CAUSE_MINIMUM_LENGTH_TV :
+                   _5GSM_CAUSE_MINIMUM_LENGTH_V),
+      len);
 
   if (iei > 0) {
     *buffer = iei;
@@ -42,7 +47,8 @@ int encode__5gsm_cause(_5GSMCause _5gsmcause, uint8_t iei, uint8_t *buffer, uint
   return encoded;
 }
 
-int decode__5gsm_cause(_5GSMCause *_5gsmcause, uint8_t iei, uint8_t *buffer, uint32_t len) {
+int decode__5gsm_cause(
+    _5GSMCause* _5gsmcause, uint8_t iei, uint8_t* buffer, uint32_t len) {
   int decoded = 0;
 
   if (iei > 0) {
@@ -54,4 +60,3 @@ int decode__5gsm_cause(_5GSMCause *_5gsmcause, uint8_t iei, uint8_t *buffer, uin
 
   return decoded;
 }
-

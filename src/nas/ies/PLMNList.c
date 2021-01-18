@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,19 +19,19 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "PLMNList.h"
 
-int encode_plmn_list(PLMNList plmnlist, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  printf("encode_plmn_list\n");
-  uint8_t *lenPtr;
-  uint32_t encoded = 0;
-  uint8_t plmn_index = 0;
+int encode_plmn_list(
+    PLMNList plmnlist, uint8_t iei, uint8_t* buffer, uint32_t len) {
+  uint8_t* lenPtr;
+  uint32_t encoded      = 0;
+  uint8_t plmn_index    = 0;
   uint8_t mcc_mnc_value = 0x0;
 
   CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, PLMN_LIST_MINIMUM_LENGTH, len);
@@ -49,7 +49,8 @@ int encode_plmn_list(PLMNList plmnlist, uint8_t iei, uint8_t *buffer, uint32_t l
     mcc_mnc_value |= (uint8_t)(plmnlist[plmn_index].mcc & 0x00ff);
     ENCODE_U8(buffer + encoded, mcc_mnc_value, encoded);
     mcc_mnc_value = 0x0;
-    mcc_mnc_value = (uint8_t)((plmnlist[plmn_index].mcc & 0x0f00) >> 8) | (uint8_t)((plmnlist[plmn_index].mnc & 0x0f00) >> 4);
+    mcc_mnc_value = (uint8_t)((plmnlist[plmn_index].mcc & 0x0f00) >> 8) |
+                    (uint8_t)((plmnlist[plmn_index].mnc & 0x0f00) >> 4);
     ENCODE_U8(buffer + encoded, mcc_mnc_value, encoded);
     mcc_mnc_value = 0x0;
     mcc_mnc_value |= (uint8_t)(plmnlist[plmn_index].mnc & 0x00ff);
@@ -60,11 +61,12 @@ int encode_plmn_list(PLMNList plmnlist, uint8_t iei, uint8_t *buffer, uint32_t l
   return encoded;
 }
 
-int decode_plmn_list(PLMNList plmnlist, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
-  uint8_t ielen = 0;
+int decode_plmn_list(
+    PLMNList plmnlist, uint8_t iei, uint8_t* buffer, uint32_t len) {
+  int decoded           = 0;
+  uint8_t ielen         = 0;
   uint8_t mcc_mnc_value = 0x0;
-  uint8_t octet_index = 0;
+  uint8_t octet_index   = 0;
 
   if (iei > 0) {
     CHECK_IEI_DECODER(iei, *buffer);
@@ -76,7 +78,6 @@ int decode_plmn_list(PLMNList plmnlist, uint8_t iei, uint8_t *buffer, uint32_t l
   CHECK_LENGTH_DECODER(len - decoded, ielen);
 
   for (; octet_index < 15; octet_index++) {
-
     DECODE_U8(buffer + decoded, mcc_mnc_value, decoded);
     plmnlist[octet_index].mcc = 0x0000 | mcc_mnc_value;
 
@@ -86,9 +87,7 @@ int decode_plmn_list(PLMNList plmnlist, uint8_t iei, uint8_t *buffer, uint32_t l
 
     DECODE_U8(buffer + decoded, mcc_mnc_value, decoded);
     plmnlist[octet_index].mnc |= mcc_mnc_value;
-
   }
 
   return decoded;
 }
-

@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,20 +19,26 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "SMPDUDNRequestContainer.h"
 
-int encode_smpdudn_request_container(SMPDUDNRequestContainer smpdudnrequestcontainer, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  uint8_t *lenPtr = NULL;
+int encode_smpdudn_request_container(
+    SMPDUDNRequestContainer smpdudnrequestcontainer, uint8_t iei,
+    uint8_t* buffer, uint32_t len) {
+  uint8_t* lenPtr  = NULL;
   uint32_t encoded = 0;
   int encode_result;
 
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, ((iei > 0) ? SMPDUDN_REQUEST_CONTAINER_MINIMUM_LENGTH_TLV : SMPDUDN_REQUEST_CONTAINER_MINIMUM_LENGTH_TLV-1), len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer,
+      ((iei > 0) ? SMPDUDN_REQUEST_CONTAINER_MINIMUM_LENGTH_TLV :
+                   SMPDUDN_REQUEST_CONTAINER_MINIMUM_LENGTH_TLV - 1),
+      len);
 
   if (iei > 0) {
     *buffer = iei;
@@ -42,7 +48,8 @@ int encode_smpdudn_request_container(SMPDUDNRequestContainer smpdudnrequestconta
   lenPtr = (buffer + encoded);
   encoded++;
 
-  if ((encode_result = encode_bstring(smpdudnrequestcontainer, buffer + encoded, len - encoded)) < 0)  //加密,实体,首地址,长度
+  if ((encode_result = encode_bstring(
+           smpdudnrequestcontainer, buffer + encoded, len - encoded)) < 0)
     return encode_result;
   else
     encoded += encode_result;
@@ -51,9 +58,11 @@ int encode_smpdudn_request_container(SMPDUDNRequestContainer smpdudnrequestconta
   return encoded;
 }
 
-int decode_smpdudn_request_container(SMPDUDNRequestContainer *smpdudnrequestcontainer, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
-  uint8_t ielen = 0;
+int decode_smpdudn_request_container(
+    SMPDUDNRequestContainer* smpdudnrequestcontainer, uint8_t iei,
+    uint8_t* buffer, uint32_t len) {
+  int decoded       = 0;
+  uint8_t ielen     = 0;
   int decode_result = 0;
 
   if (iei > 0) {
@@ -65,10 +74,11 @@ int decode_smpdudn_request_container(SMPDUDNRequestContainer *smpdudnrequestcont
   decoded++;
   CHECK_LENGTH_DECODER(len - decoded, ielen);
 
-  if ((decode_result = decode_bstring(smpdudnrequestcontainer, ielen, buffer + decoded, len - decoded)) < 0)
+  if ((decode_result = decode_bstring(
+           smpdudnrequestcontainer, ielen, buffer + decoded, len - decoded)) <
+      0)
     return decode_result;
   else
     decoded += decode_result;
   return decoded;
 }
-

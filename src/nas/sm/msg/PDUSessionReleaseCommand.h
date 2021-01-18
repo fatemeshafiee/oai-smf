@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -34,46 +34,31 @@
 #include "_5GSMCongestionReattemptIndicator.h"
 #include "ExtendedProtocolConfigurationOptions.h"
 
-#if 0
 /* Minimum length macro. Formed by minimum length of each mandatory field */
-#define PDU_SESSION_RELEASE_COMMAND_MINIMUM_LENGTH ( \
-		EXTENDED_PROTOCOL_DISCRIMINATOR_MINIMUM_LENGTH + \
-		PDU_SESSION_IDENTITY_MINIMUM_LENGTH + \
-		PROCEDURE_TRANSACTION_IDENTITY_MINIMUM_LENGTH + \
-		MESSAGE_TYPE_MINIMUM_LENGTH + \
-		_5GSM_CAUSE_MINIMUM_LENGTH + \
-		GPRS_TIMER3_MINIMUM_LENGTH + \
-		EAP_MESSAGE_MINIMUM_LENGTH + \
-		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MINIMUM_LENGTH + \
-0)
-#endif
-/* Minimum length macro. Formed by minimum length of each mandatory field */
-#define PDU_SESSION_RELEASE_COMMAND_MINIMUM_LENGTH ( \
-		_5GSM_CAUSE_MINIMUM_LENGTH_V + \
-0)
+#define PDU_SESSION_RELEASE_COMMAND_MINIMUM_LENGTH                             \
+  (_5GSM_CAUSE_MINIMUM_LENGTH_V + 0)
 
 /* Maximum length macro. Formed by maximum length of each field */
-#define PDU_SESSION_RELEASE_COMMAND_MAXIMUM_LENGTH ( \
-		EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH + \
-		PDU_SESSION_IDENTITY_MAXIMUM_LENGTH + \
-		PROCEDURE_TRANSACTION_IDENTITY_MAXIMUM_LENGTH + \
-		MESSAGE_TYPE_MAXIMUM_LENGTH + \
-		_5GSM_CAUSE_MAXIMUM_LENGTH_V + \
-		GPRS_TIMER3_MAXIMUM_LENGTH_TLV + \
-		EAP_MESSAGE_MAXIMUM_LENGTH_TLVE + \
-		_5GSM_CONGESTION_REATTEMPT_INDICATOR_MAXIMUM_LENGTH_TLV + \
-		EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + \
-0)
+#define PDU_SESSION_RELEASE_COMMAND_MAXIMUM_LENGTH                             \
+  (EXTENDED_PROTOCOL_DISCRIMINATOR_MAXIMUM_LENGTH +                            \
+   PDU_SESSION_IDENTITY_MAXIMUM_LENGTH +                                       \
+   PROCEDURE_TRANSACTION_IDENTITY_MAXIMUM_LENGTH +                             \
+   MESSAGE_TYPE_MAXIMUM_LENGTH + _5GSM_CAUSE_MAXIMUM_LENGTH_V +                \
+   GPRS_TIMER3_MAXIMUM_LENGTH_TLV + EAP_MESSAGE_MAXIMUM_LENGTH_TLVE +          \
+   _5GSM_CONGESTION_REATTEMPT_INDICATOR_MAXIMUM_LENGTH_TLV +                   \
+   EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE + 0)
 
-#define PDU_SESSION_RELEASE_COMMAND_GPRS_TIMER3_IEI						            		0x37
-#define PDU_SESSION_RELEASE_COMMAND_EAP_MESSAGE_IEI								            0x78
-#define PDU_SESSION_RELEASE_COMMAND__5GSM_CONGESTION_REATTEMPT_INDICATOR_IEI	0x61
-#define PDU_SESSION_RELEASE_COMMAND_E_P_C_O_IEI									              0x7B
+#define PDU_SESSION_RELEASE_COMMAND_GPRS_TIMER3_IEI 0x37
+#define PDU_SESSION_RELEASE_COMMAND_EAP_MESSAGE_IEI 0x78
+#define PDU_SESSION_RELEASE_COMMAND__5GSM_CONGESTION_REATTEMPT_INDICATOR_IEI   \
+  0x61
+#define PDU_SESSION_RELEASE_COMMAND_E_P_C_O_IEI 0x7B
 
-#define PDU_SESSION_RELEASE_COMMAND_GPRS_TIMER3_PRESENCE							            (1<<0)
-#define PDU_SESSION_RELEASE_COMMAND_EAP_MESSAGE_PRESENCE						             	(1<<1)
-#define PDU_SESSION_RELEASE_COMMAND__5GSM_CONGESTION_REATTEMPT_INDICATOR_PRESENCE	(1<<2)
-#define PDU_SESSION_RELEASE_COMMAND_E_P_C_O_PRESENCE							              	(1<<3)
+#define PDU_SESSION_RELEASE_COMMAND_GPRS_TIMER3_PRESENCE (1 << 0)
+#define PDU_SESSION_RELEASE_COMMAND_EAP_MESSAGE_PRESENCE (1 << 1)
+#define PDU_SESSION_RELEASE_COMMAND__5GSM_CONGESTION_REATTEMPT_INDICATOR_PRESENCE \
+  (1 << 2)
+#define PDU_SESSION_RELEASE_COMMAND_E_P_C_O_PRESENCE (1 << 3)
 
 typedef struct pdu_session_release_command_msg_tag {
   ExtendedProtocolDiscriminator extendedprotocoldiscriminator;
@@ -89,10 +74,10 @@ typedef struct pdu_session_release_command_msg_tag {
 } pdu_session_release_command_msg;
 
 int decode_pdu_session_release_command(
-    pdu_session_release_command_msg *pdusessionreleasecommand, uint8_t *buffer,
+    pdu_session_release_command_msg* pdusessionreleasecommand, uint8_t* buffer,
     uint32_t len);
 int encode_pdu_session_release_command(
-    pdu_session_release_command_msg *pdusessionreleasecommand, uint8_t *buffer,
+    pdu_session_release_command_msg* pdusessionreleasecommand, uint8_t* buffer,
     uint32_t len);
 
 #endif

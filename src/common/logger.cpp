@@ -22,18 +22,18 @@
 #include <string>
 #include <memory>
 
-Logger *Logger::m_singleton = NULL;
+Logger* Logger::m_singleton = NULL;
 
-void Logger::_init(const char *app, const bool log_stdout,
-                   bool const log_rot_file) {
+void Logger::_init(
+    const char* app, const bool log_stdout, bool const log_rot_file) {
   int num_sinks = 0;
   spdlog::set_async_mode(2048);
 #if TRACE_IS_ON
-   spdlog::level::level_enum llevel = spdlog::level::trace;
+  spdlog::level::level_enum llevel = spdlog::level::trace;
 #elif DEBUG_IS_ON
-   spdlog::level::level_enum llevel = spdlog::level::debug;
+  spdlog::level::level_enum llevel = spdlog::level::debug;
 #elif INFO_IS_ON
-   spdlog::level::level_enum llevel = spdlog::level::info;
+  spdlog::level::level_enum llevel = spdlog::level::info;
 #else
   spdlog::level::level_enum llevel = spdlog::level::warn;
 #endif
@@ -45,99 +45,97 @@ void Logger::_init(const char *app, const bool log_stdout,
   }
   if (log_rot_file) {
     std::string filename = fmt::format("./{}.log", app);
-    m_sinks.push_back(
-        std::make_shared<spdlog::sinks::rotating_file_sink_mt>(filename,
-                                                               5 * 1024 * 1024,
-                                                               3));
+    m_sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        filename, 5 * 1024 * 1024, 3));
     m_sinks[num_sinks++].get()->set_level(llevel);
   }
 
   std::stringstream ss;
   ss << "[%Y-%m-%dT%H:%M:%S.%f] [" << app << "] [%n] [%l] %v";
 
-  m_async_cmd = new _Logger("async_c", m_sinks, ss.str().c_str());
-  m_itti = new _Logger("itti   ", m_sinks, ss.str().c_str());
-  m_smf_app = new _Logger("smf_app", m_sinks, ss.str().c_str());
-  m_system = new _Logger("system ", m_sinks, ss.str().c_str());
-  m_udp = new _Logger("udp    ", m_sinks, ss.str().c_str());
-  m_pfcp = new _Logger("pfcp   ", m_sinks, ss.str().c_str());
-  m_pfcp_switch = new _Logger("pfcp_sw ", m_sinks, ss.str().c_str());
-  m_smf_n1 = new _Logger("smf_n1 ", m_sinks, ss.str().c_str());
-  m_smf_n2 = new _Logger("smf_n2 ", m_sinks, ss.str().c_str());
-  m_smf_n4 = new _Logger("smf_n4 ", m_sinks, ss.str().c_str());
-  m_smf_n10 = new _Logger("smf_n10", m_sinks, ss.str().c_str());
-  m_smf_n11 = new _Logger("smf_n11", m_sinks, ss.str().c_str());
+  m_async_cmd      = new _Logger("async_c", m_sinks, ss.str().c_str());
+  m_itti           = new _Logger("itti   ", m_sinks, ss.str().c_str());
+  m_smf_app        = new _Logger("smf_app", m_sinks, ss.str().c_str());
+  m_system         = new _Logger("system ", m_sinks, ss.str().c_str());
+  m_udp            = new _Logger("udp    ", m_sinks, ss.str().c_str());
+  m_pfcp           = new _Logger("pfcp   ", m_sinks, ss.str().c_str());
+  m_pfcp_switch    = new _Logger("pfcp_sw ", m_sinks, ss.str().c_str());
+  m_smf_n1         = new _Logger("smf_n1 ", m_sinks, ss.str().c_str());
+  m_smf_n2         = new _Logger("smf_n2 ", m_sinks, ss.str().c_str());
+  m_smf_n4         = new _Logger("smf_n4 ", m_sinks, ss.str().c_str());
+  m_smf_n10        = new _Logger("smf_n10", m_sinks, ss.str().c_str());
+  m_smf_n11        = new _Logger("smf_n11", m_sinks, ss.str().c_str());
   m_smf_api_server = new _Logger("sbi_srv", m_sinks, ss.str().c_str());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-_Logger::_Logger(const char *category, std::vector<spdlog::sink_ptr> &sinks,
-                 const char *pattern)
-    :
-    m_log(category, sinks.begin(), sinks.end()) {
+_Logger::_Logger(
+    const char* category, std::vector<spdlog::sink_ptr>& sinks,
+    const char* pattern)
+    : m_log(category, sinks.begin(), sinks.end()) {
   m_log.set_pattern(pattern);
 #if TRACE_IS_ON
-   m_log.set_level( spdlog::level::trace );
+  m_log.set_level(spdlog::level::trace);
 #elif DEBUG_IS_ON
-   m_log.set_level( spdlog::level::debug );
+  m_log.set_level(spdlog::level::debug);
 #elif INFO_IS_ON
-   m_log.set_level( spdlog::level::info );
+  m_log.set_level(spdlog::level::info);
 #else
   m_log.set_level(spdlog::level::warn);
 #endif
 }
 
-void _Logger::trace(const char *format, ...) {
+void _Logger::trace(const char* format, ...) {
 #if TRACE_IS_ON
-   va_list args;
-   va_start( args, format );
-   log( _ltTrace, format, args );
-   va_end( args );
+  va_list args;
+  va_start(args, format);
+  log(_ltTrace, format, args);
+  va_end(args);
 #endif
 }
 
-void _Logger::debug(const char *format, ...) {
+void _Logger::debug(const char* format, ...) {
 #if DEBUG_IS_ON
-   va_list args;
-   va_start( args, format );
-   log( _ltDebug, format, args );
-   va_end( args );
+  va_list args;
+  va_start(args, format);
+  log(_ltDebug, format, args);
+  va_end(args);
 #endif
 }
 
-void _Logger::info(const char *format, ...) {
+void _Logger::info(const char* format, ...) {
 #if INFO_IS_ON
-   va_list args;
-   va_start( args, format );
-   log( _ltInfo, format, args );
-   va_end( args );
+  va_list args;
+  va_start(args, format);
+  log(_ltInfo, format, args);
+  va_end(args);
 #endif
 }
 
-void _Logger::startup(const char *format, ...) {
+void _Logger::startup(const char* format, ...) {
   va_list args;
   va_start(args, format);
   log(_ltStartup, format, args);
   va_end(args);
 }
 
-void _Logger::warn(const char *format, ...) {
+void _Logger::warn(const char* format, ...) {
   va_list args;
   va_start(args, format);
   log(_ltWarn, format, args);
   va_end(args);
 }
 
-void _Logger::error(const char *format, ...) {
+void _Logger::error(const char* format, ...) {
   va_list args;
   va_start(args, format);
   log(_ltError, format, args);
   va_end(args);
 }
 
-void _Logger::log(_LogType lt, const char *format, va_list &args) {
+void _Logger::log(_LogType lt, const char* format, va_list& args) {
   char buffer[2048];
 
   vsnprintf(buffer, sizeof(buffer), format, args);

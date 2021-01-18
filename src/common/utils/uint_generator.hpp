@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -33,7 +33,8 @@
 
 namespace util {
 
-template<class UINT> class uint_generator {
+template<class UINT>
+class uint_generator {
  private:
   UINT uid_generator;
   std::mutex m_uid_generator;
@@ -42,14 +43,10 @@ template<class UINT> class uint_generator {
   std::mutex m_uid_generated;
 
  public:
-  uint_generator()
-      :
-      m_uid_generator(),
-      m_uid_generated() {
+  uint_generator() : m_uid_generator(), m_uid_generated() {
     uid_generator = 0;
-    uid_generated = { };
-  }
-  ;
+    uid_generated = {};
+  };
 
   uint_generator(uint_generator const&) = delete;
   void operator=(uint_generator const&) = delete;
@@ -77,7 +74,8 @@ template<class UINT> class uint_generator {
   }
 };
 
-template<class UINT> class uint_uid_generator {
+template<class UINT>
+class uint_uid_generator {
  private:
   UINT uid_generator;
   std::mutex m_uid_generator;
@@ -85,14 +83,10 @@ template<class UINT> class uint_uid_generator {
   std::set<UINT> uid_generated;
   std::mutex m_uid_generated;
 
-  uint_uid_generator()
-      :
-      m_uid_generator(),
-      m_uid_generated() {
+  uint_uid_generator() : m_uid_generator(), m_uid_generated() {
     uid_generator = 0;
-    uid_generated = { };
-  }
-  ;
+    uid_generated = {};
+  };
 
  public:
   static uint_uid_generator& get_instance() {
@@ -126,5 +120,5 @@ template<class UINT> class uint_uid_generator {
   }
 };
 
-}
-#endif // FILE_UINT_GENERATOR_HPP_SEEN
+}  // namespace util
+#endif  // FILE_UINT_GENERATOR_HPP_SEEN

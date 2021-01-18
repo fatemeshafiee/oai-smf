@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -32,16 +32,16 @@
 #define _5GSM_CAPABILITY_MINIMUM_LENGTH_TLV 3
 #define _5GSM_CAPABILITY_MAXIMUM_LENGTH_TLV 15
 
-#define REFLECTIVE_QOS_NOT_SUPPORTED 					0
-#define REFLECTIVE_QOS_SUPPORTED     					1
-#define MULTI_HOMED_IPV6_PDU_SESSION_NOT_SUPPORTED 		0
-#define MULTI_HOMED_IPV6_PDU_SESSION_SUPPORTED     		1
-#define ETHERNET_PDN_TYPE_IN_S1_MODE_NOT_SUPPORTED 		0
-#define ETHERNET_PDN_TYPE_IN_S1_MODE_SUPPORTED 			1
-#define EATSSS_LOW_LAYER_FUNCTIONALITY_NOT_SUPPORTED 	0
-#define EATSSS_LOW_LAYER_FUNCTIONALITY_SUPPORTED 		1
-#define MPTCP_FUNCTIONALITY_NOT_SUPPORTED 				0
-#define MPTCP_FUNCTIONALITY_SUPPORTED 					1
+#define REFLECTIVE_QOS_NOT_SUPPORTED 0
+#define REFLECTIVE_QOS_SUPPORTED 1
+#define MULTI_HOMED_IPV6_PDU_SESSION_NOT_SUPPORTED 0
+#define MULTI_HOMED_IPV6_PDU_SESSION_SUPPORTED 1
+#define ETHERNET_PDN_TYPE_IN_S1_MODE_NOT_SUPPORTED 0
+#define ETHERNET_PDN_TYPE_IN_S1_MODE_SUPPORTED 1
+#define EATSSS_LOW_LAYER_FUNCTIONALITY_NOT_SUPPORTED 0
+#define EATSSS_LOW_LAYER_FUNCTIONALITY_SUPPORTED 1
+#define MPTCP_FUNCTIONALITY_NOT_SUPPORTED 0
+#define MPTCP_FUNCTIONALITY_SUPPORTED 1
 
 typedef struct {
   bool is_Rqos_supported;
@@ -49,10 +49,14 @@ typedef struct {
   bool is_EPTS1_supported;
   bool is_ATSLL_supported;
   bool is_MPTCP_supported;
-  //bstring _5GSMCapability_spare;
+  // bstring _5GSMCapability_spare;
 } _5GSMCapability;
 
-int encode__5gsm_capability(_5GSMCapability _5gsmcapability, uint8_t iei, uint8_t *buffer, uint32_t len);
-int decode__5gsm_capability(_5GSMCapability *_5gsmcapability, uint8_t iei, uint8_t *buffer, uint32_t len);
+int encode__5gsm_capability(
+    _5GSMCapability _5gsmcapability, uint8_t iei, uint8_t* buffer,
+    uint32_t len);
+int decode__5gsm_capability(
+    _5GSMCapability* _5gsmcapability, uint8_t iei, uint8_t* buffer,
+    uint32_t len);
 
 #endif

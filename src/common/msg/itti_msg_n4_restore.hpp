@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -36,26 +36,16 @@
 class itti_n4_restore : public itti_msg {
  public:
   itti_n4_restore(const task_id_t origin, const task_id_t destination)
-      :
-      itti_msg(RESTORE_N4_SESSIONS, origin, destination),
-      sessions() {
-  }
-  itti_n4_restore(const itti_n4_restore &i)
-      :
-      itti_msg(i),
-      sessions(i.sessions) {
-  }
-  itti_n4_restore(const itti_n4_restore &i, const task_id_t orig,
-                  const task_id_t dest)
-      :
-      itti_n4_restore(i) {
-    origin = orig;
+      : itti_msg(RESTORE_N4_SESSIONS, origin, destination), sessions() {}
+  itti_n4_restore(const itti_n4_restore& i)
+      : itti_msg(i), sessions(i.sessions) {}
+  itti_n4_restore(
+      const itti_n4_restore& i, const task_id_t orig, const task_id_t dest)
+      : itti_n4_restore(i) {
+    origin      = orig;
     destination = dest;
   }
-  const char* get_msg_name() {
-    return "N4_RESTORE";
-  }
-  ;
+  const char* get_msg_name() { return "N4_RESTORE"; };
 
   std::set<pfcp::fseid_t> sessions;
 };

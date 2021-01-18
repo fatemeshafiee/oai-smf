@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,32 +19,39 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "EPSNASSecurityAlgorithms.h"
 
-int encode_epsnas_security_algorithms(EPSNASSecurityAlgorithms epsnassecurityalgorithms, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  uint32_t encoded = 0;
+int encode_epsnas_security_algorithms(
+    EPSNASSecurityAlgorithms epsnassecurityalgorithms, uint8_t iei,
+    uint8_t* buffer, uint32_t len) {
+  uint32_t encoded          = 0;
   uint8_t securityAlgorithm = 0x0;
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, EPSNAS_SECURITY_ALGORITHMS_MINIMUM_LENGTH, len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer, EPSNAS_SECURITY_ALGORITHMS_MINIMUM_LENGTH, len);
 
   if (iei > 0) {
     *buffer = iei;
     encoded++;
   }
 
-  securityAlgorithm = ((epsnassecurityalgorithms.typeOfCipheringAlgoithm) << 4) | (epsnassecurityalgorithms.typeOfIntegrityProtectionAlgoithm);
+  securityAlgorithm =
+      ((epsnassecurityalgorithms.typeOfCipheringAlgoithm) << 4) |
+      (epsnassecurityalgorithms.typeOfIntegrityProtectionAlgoithm);
   ENCODE_U8(buffer + encoded, securityAlgorithm, encoded);
 
   return encoded;
 }
 
-int decode_epsnas_security_algorithms(EPSNASSecurityAlgorithms *epsnassecurityalgorithms, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
+int decode_epsnas_security_algorithms(
+    EPSNASSecurityAlgorithms* epsnassecurityalgorithms, uint8_t iei,
+    uint8_t* buffer, uint32_t len) {
+  int decoded               = 0;
   uint8_t securityAlgorithm = 0x0;
   ;
 
@@ -54,9 +61,10 @@ int decode_epsnas_security_algorithms(EPSNASSecurityAlgorithms *epsnassecurityal
   }
 
   DECODE_U8(buffer + decoded, securityAlgorithm, decoded);
-  epsnassecurityalgorithms->typeOfCipheringAlgoithm = ((securityAlgorithm & 0x70) >> 4);
-  epsnassecurityalgorithms->typeOfIntegrityProtectionAlgoithm = (securityAlgorithm & 0x07);
+  epsnassecurityalgorithms->typeOfCipheringAlgoithm =
+      ((securityAlgorithm & 0x70) >> 4);
+  epsnassecurityalgorithms->typeOfIntegrityProtectionAlgoithm =
+      (securityAlgorithm & 0x07);
 
   return decoded;
 }
-

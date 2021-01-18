@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -36,12 +36,12 @@
 
 namespace xgpp_conv {
 
-void paa_to_pfcp_ue_ip_address(const paa_t &paa,
-                               pfcp::ue_ip_address_t &ue_ip_address);
-void pdn_ip_to_pfcp_ue_ip_address(const pdu_session_type_t &pdu_session_type,
-                                  const struct in_addr &ipv4_address,
-                                  const struct in6_addr ipv6_address,
-                                  pfcp::ue_ip_address_t &ue_ip_address);
-}
+void paa_to_pfcp_ue_ip_address(
+    const paa_t& paa, pfcp::ue_ip_address_t& ue_ip_address);
+void pdn_ip_to_pfcp_ue_ip_address(
+    const pdu_session_type_t& pdu_session_type,
+    const struct in_addr& ipv4_address, const struct in6_addr ipv6_address,
+    pfcp::ue_ip_address_t& ue_ip_address);
+}  // namespace xgpp_conv
 
 #endif /* FILE_3GPP_CONVERSIONS_HPP_SEEN */

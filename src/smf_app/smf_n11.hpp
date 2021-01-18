@@ -39,6 +39,8 @@
 
 namespace smf {
 
+#define TASK_SMF_N11_TIMEOUT_NRF_HEARTBEAT_REQUEST 1
+
 class smf_n11 {
  private:
   std::thread::id thread_id;
@@ -46,8 +48,8 @@ class smf_n11 {
 
  public:
   smf_n11();
-  smf_n11(smf_n11 const &) = delete;
-  void operator=(smf_n11 const &) = delete;
+  smf_n11(smf_n11 const&) = delete;
+  void operator=(smf_n11 const&) = delete;
 
   /*
    * Send N1N2 Message Transfer Request to AMF
@@ -96,12 +98,49 @@ class smf_n11 {
       std::shared_ptr<itti_n11_notify_subscribed_event> msg);
 
   /*
+   * Send NF instance registration to NRF
+   * @param [std::shared_ptr<itti_n11_register_nf_instance_request>] msg:
+   * Content of message to be sent
+   * @return void
+   */
+  void register_nf_instance(
+      std::shared_ptr<itti_n11_register_nf_instance_request> msg);
+
+  /*
+   * Send NF instance update to NRF
+   * @param [std::shared_ptr<itti_n11_update_nf_instance_request>] msg: Content
+   * of message to be sent
+   * @return void
+   */
+  void update_nf_instance(
+      std::shared_ptr<itti_n11_update_nf_instance_request> msg);
+
+  /*
+   * Send NF deregister to NRF
+   * @param [std::shared_ptr<itti_n11_deregister_nf_instance>] msg: Content
+   * of message to be sent
+   * @return void
+   */
+  void deregister_nf_instance(
+      std::shared_ptr<itti_n11_deregister_nf_instance> msg);
+
+  /*
+   * Send a NFStatusSubscribe to NRF (to be notified when a new UPF becomes
+   * available)
+   * @param [std::shared_ptr<itti_n11_subscribe_upf_status_notify>] msg: Content
+   * of message to be sent
+   * @return void
+   */
+  void subscribe_upf_status_notify(
+      std::shared_ptr<itti_n11_subscribe_upf_status_notify> msg);
+
+  /*
    * Create Curl handle for multi curl
    * @param [event_notification&] ev_notif: content of the event notification
    * @param [std::string *] data: data
    * @return pointer to the created curl
    */
-  CURL *curl_create_handle(event_notification &ev_notif, std::string *data);
+  CURL* curl_create_handle(event_notification& ev_notif, std::string* data);
 };
 }  // namespace smf
 #endif /* FILE_SMF_N11_HPP_SEEN */

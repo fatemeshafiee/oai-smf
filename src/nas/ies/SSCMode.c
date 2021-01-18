@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -19,16 +19,17 @@
  *      contact@openairinterface.org
  */
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "TLVEncoder.h"
 #include "TLVDecoder.h"
 #include "SSCMode.h"
 
-int encode_ssc_mode(SSCMode sscmode, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  uint32_t encoded = 0;
+int encode_ssc_mode(
+    SSCMode sscmode, uint8_t iei, uint8_t* buffer, uint32_t len) {
+  uint32_t encoded  = 0;
   uint8_t bitStream = 0x00;
   CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, SSC_MODE_MINIMUM_LENGTH, len);
 
@@ -42,8 +43,9 @@ int encode_ssc_mode(SSCMode sscmode, uint8_t iei, uint8_t *buffer, uint32_t len)
   return encoded;
 }
 
-int decode_ssc_mode(SSCMode *sscmode, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
+int decode_ssc_mode(
+    SSCMode* sscmode, uint8_t iei, uint8_t* buffer, uint32_t len) {
+  int decoded       = 0;
   uint8_t bitStream = 0x00;
 
   DECODE_U8(buffer + decoded, bitStream, decoded);
@@ -60,4 +62,3 @@ int decode_ssc_mode(SSCMode *sscmode, uint8_t iei, uint8_t *buffer, uint32_t len
 
   return decoded;
 }
-

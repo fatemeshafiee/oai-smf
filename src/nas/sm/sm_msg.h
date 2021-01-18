@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ *file except in compliance with the License. You may obtain a copy of the
+ *License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -54,7 +54,8 @@ typedef union {
   pdu_session_modification_reject_msg pdu_session_modification_reject;
   pdu_session_modification_complete_msg pdu_session_modification_complete;
   pdu_session_modification_command_msg pdu_session_modification_command;
-  pdu_session_modification_command_reject_msg pdu_session_modification_command_reject;
+  pdu_session_modification_command_reject_msg
+      pdu_session_modification_command_reject;
 
   pdu_session_release_request_msg pdu_session_release_request;
   pdu_session_release_reject_msg pdu_session_release_reject;
@@ -64,7 +65,23 @@ typedef union {
   _5gsm_status_msg _5gsm_status;
 } SM_msg;
 
-int sm_msg_decode(SM_msg *msg, uint8_t *buffer, uint32_t len);
+/*
+ * Decode EPS Session Management messages
+ * @param [SM_msg* ] msg: The SM message structure to be filled
+ * @param [uint8_t* ] buffer: Pointer to the buffer containing the SM message
+ * @param [uint32_t ] len: Number of bytes that should be decoded
+ * @return The number of bytes in the buffer if data have been successfully
+ * decoded; A negative error code otherwise.
+ */
+int sm_msg_decode(SM_msg* msg, uint8_t* buffer, uint32_t len);
 
-int fivegsm_msg_encode(SM_msg *msg, uint8_t *buffer, uint32_t len);
+/*
+ * Encode 5GS Session Management messages
+ * @param [SM_msg* ] msg: The SM message structure to encode
+ * @param [uint8_t* ] buffer: Pointer to the encoded data buffer
+ * @param [uint32_t ] len:  Maximal capacity of the output buffer
+ * @return The number of bytes in the buffer if data have been successfully
+ * encoded; A negative error code otherwise.
+ */
+int fivegsm_msg_encode(SM_msg* msg, uint8_t* buffer, uint32_t len);
 #endif

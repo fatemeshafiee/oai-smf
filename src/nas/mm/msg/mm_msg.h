@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -85,8 +85,8 @@ typedef union {
   _5gmm_status_msg _5gmm_status;
 } MM_msg;
 
-int mm_msg_decode(MM_msg *msg, uint8_t *buffer, uint32_t len);
+int mm_msg_decode(MM_msg* msg, uint8_t* buffer, uint32_t len);
 
-int fivegmm_msg_encode(MM_msg *msg, uint8_t *buffer, uint32_t len);
+int fivegmm_msg_encode(MM_msg* msg, uint8_t* buffer, uint32_t len);
 
 #endif

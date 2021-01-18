@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -27,29 +27,38 @@
 #include "TLVDecoder.h"
 #include "_5GMMStatus.h"
 
-int decode__5gmm_status(_5gmm_status_msg *_5gmm_status, uint8_t *buffer, uint32_t len) {
-  uint32_t decoded = 0;
+int decode__5gmm_status(
+    _5gmm_status_msg* _5gmm_status, uint8_t* buffer, uint32_t len) {
+  uint32_t decoded   = 0;
   int decoded_result = 0;
 
-  // Check if we got a NULL pointer and if buffer length is >= minimum length expected for the message.
-  CHECK_PDU_POINTER_AND_LENGTH_DECODER(buffer, _5GMM_STATUS_MINIMUM_LENGTH, len);
+  // Check if we got a NULL pointer and if buffer length is >= minimum length
+  // expected for the message.
+  CHECK_PDU_POINTER_AND_LENGTH_DECODER(
+      buffer, _5GMM_STATUS_MINIMUM_LENGTH, len);
 
-  if ((decoded_result = decode_extended_protocol_discriminator(&_5gmm_status->extendedprotocoldiscriminator, 0, buffer + decoded, len - decoded)) < 0)
+  if ((decoded_result = decode_extended_protocol_discriminator(
+           &_5gmm_status->extendedprotocoldiscriminator, 0, buffer + decoded,
+           len - decoded)) < 0)
     return decoded_result;
   else
     decoded += decoded_result;
 
-  if ((decoded_result = decode_security_header_type(&_5gmm_status->securityheadertype, 0, buffer + decoded, len - decoded)) < 0)
+  if ((decoded_result = decode_security_header_type(
+           &_5gmm_status->securityheadertype, 0, buffer + decoded,
+           len - decoded)) < 0)
     return decoded_result;
   else
     decoded += decoded_result;
 
-  if ((decoded_result = decode_message_type(&_5gmm_status->messagetype, 0, buffer + decoded, len - decoded)) < 0)
+  if ((decoded_result = decode_message_type(
+           &_5gmm_status->messagetype, 0, buffer + decoded, len - decoded)) < 0)
     return decoded_result;
   else
     decoded += decoded_result;
 
-  if ((decoded_result = decode__5gmm_cause(&_5gmm_status->_5gmmcause, 0, buffer + decoded, len - decoded)) < 0)
+  if ((decoded_result = decode__5gmm_cause(
+           &_5gmm_status->_5gmmcause, 0, buffer + decoded, len - decoded)) < 0)
     return decoded_result;
   else
     decoded += decoded_result;
@@ -57,29 +66,38 @@ int decode__5gmm_status(_5gmm_status_msg *_5gmm_status, uint8_t *buffer, uint32_
   return decoded;
 }
 
-int encode__5gmm_status(_5gmm_status_msg *_5gmm_status, uint8_t *buffer, uint32_t len) {
-  uint32_t encoded = 0;
+int encode__5gmm_status(
+    _5gmm_status_msg* _5gmm_status, uint8_t* buffer, uint32_t len) {
+  uint32_t encoded   = 0;
   int encoded_result = 0;
 
-  // Check if we got a NULL pointer and if buffer length is >= minimum length expected for the message.
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, _5GMM_STATUS_MINIMUM_LENGTH, len);
+  // Check if we got a NULL pointer and if buffer length is >= minimum length
+  // expected for the message.
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer, _5GMM_STATUS_MINIMUM_LENGTH, len);
 
-  if ((encoded_result = encode_extended_protocol_discriminator(_5gmm_status->extendedprotocoldiscriminator, 0, buffer + encoded, len - encoded)) < 0)
+  if ((encoded_result = encode_extended_protocol_discriminator(
+           _5gmm_status->extendedprotocoldiscriminator, 0, buffer + encoded,
+           len - encoded)) < 0)
     return encoded_result;
   else
     encoded += encoded_result;
 
-  if ((encoded_result = encode_security_header_type(_5gmm_status->securityheadertype, 0, buffer + encoded, len - encoded)) < 0)
+  if ((encoded_result = encode_security_header_type(
+           _5gmm_status->securityheadertype, 0, buffer + encoded,
+           len - encoded)) < 0)
     return encoded_result;
   else
     encoded += encoded_result;
 
-  if ((encoded_result = encode_message_type(_5gmm_status->messagetype, 0, buffer + encoded, len - encoded)) < 0)
+  if ((encoded_result = encode_message_type(
+           _5gmm_status->messagetype, 0, buffer + encoded, len - encoded)) < 0)
     return encoded_result;
   else
     encoded += encoded_result;
 
-  if ((encoded_result = encode__5gmm_cause(_5gmm_status->_5gmmcause, 0, buffer + encoded, len - encoded)) < 0)
+  if ((encoded_result = encode__5gmm_cause(
+           _5gmm_status->_5gmmcause, 0, buffer + encoded, len - encoded)) < 0)
     return encoded_result;
   else
     encoded += encoded_result;

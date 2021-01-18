@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -26,12 +26,19 @@
 #include "TLVDecoder.h"
 #include "_5GSMCongestionReattemptIndicator.h"
 
-int encode__5gsm_congestion_reattempt_indicator(_5GSMCongestionReattemptIndicator _5gsmcongestionreattemptindicator, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  uint8_t *lenPtr = NULL;
-  uint32_t encoded = 0;
+int encode__5gsm_congestion_reattempt_indicator(
+    _5GSMCongestionReattemptIndicator _5gsmcongestionreattemptindicator,
+    uint8_t iei, uint8_t* buffer, uint32_t len) {
+  uint8_t* lenPtr                               = NULL;
+  uint32_t encoded                              = 0;
   uint8_t _5gsmcongestionreattemptindicator_bit = 0;
 
-  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, ((iei > 0) ? _5GSM_CONGESTION_REATTEMPT_INDICATOR_MINIMUM_LENGTH_TLV : (_5GSM_CONGESTION_REATTEMPT_INDICATOR_MINIMUM_LENGTH_TLV-1)), len);
+  CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
+      buffer,
+      ((iei > 0) ?
+           _5GSM_CONGESTION_REATTEMPT_INDICATOR_MINIMUM_LENGTH_TLV :
+           (_5GSM_CONGESTION_REATTEMPT_INDICATOR_MINIMUM_LENGTH_TLV - 1)),
+      len);
 
   if (iei > 0) {
     *buffer = iei;
@@ -41,7 +48,8 @@ int encode__5gsm_congestion_reattempt_indicator(_5GSMCongestionReattemptIndicato
   lenPtr = (buffer + encoded);
   encoded++;
 
-  _5gsmcongestionreattemptindicator_bit |= _5gsmcongestionreattemptindicator.abo;
+  _5gsmcongestionreattemptindicator_bit |=
+      _5gsmcongestionreattemptindicator.abo;
 
   ENCODE_U8(buffer + encoded, _5gsmcongestionreattemptindicator_bit, encoded);
 
@@ -50,9 +58,11 @@ int encode__5gsm_congestion_reattempt_indicator(_5GSMCongestionReattemptIndicato
   return encoded;
 }
 
-int decode__5gsm_congestion_reattempt_indicator(_5GSMCongestionReattemptIndicator *_5gsmcongestionreattemptindicator, uint8_t iei, uint8_t *buffer, uint32_t len) {
-  int decoded = 0;
-  uint8_t ielen = 0;
+int decode__5gsm_congestion_reattempt_indicator(
+    _5GSMCongestionReattemptIndicator* _5gsmcongestionreattemptindicator,
+    uint8_t iei, uint8_t* buffer, uint32_t len) {
+  int decoded                                   = 0;
+  uint8_t ielen                                 = 0;
   uint8_t _5gsmcongestionreattemptindicator_bit = 0;
 
   if (iei > 0) {
@@ -66,8 +76,8 @@ int decode__5gsm_congestion_reattempt_indicator(_5GSMCongestionReattemptIndicato
 
   DECODE_U8(buffer + decoded, _5gsmcongestionreattemptindicator_bit, decoded);
 
-  _5gsmcongestionreattemptindicator->abo = _5gsmcongestionreattemptindicator_bit & 0x01;
+  _5gsmcongestionreattemptindicator->abo =
+      _5gsmcongestionreattemptindicator_bit & 0x01;
 
   return decoded;
 }
-

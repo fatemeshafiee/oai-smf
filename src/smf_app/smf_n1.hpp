@@ -84,26 +84,6 @@ class smf_n1 {
   bool create_n1_pdu_session_establishment_reject(pdu_session_msg &msg,
                                                   std::string &nas_msg_str,
                                                   cause_value_5gsm_e sm_cause);
-  // TODO: separate into 4 functions (verify if necessary)
-  /*
-    bool
-    create_n1_pdu_session_establishment_accept(pdu_session_create_sm_context_response
-    &sm_context_res, std::string &nas_msg_str, cause_value_5gsm_e sm_cause);
-
-    bool
-    create_n1_pdu_session_establishment_reject(pdu_session_create_sm_context_request
-    &msg, uint8_t msg_type, std::string &nas_msg_str, cause_value_5gsm_e
-    sm_cause);
-
-    bool
-    create_n1_pdu_session_establishment_reject(pdu_session_update_sm_context_response
-    &msg, uint8_t msg_type, std::string &nas_msg_str, cause_value_5gsm_e
-    sm_cause); bool
-    create_n1_pdu_session_establishment_reject(pdu_session_update_sm_context_request
-    &msg, uint8_t msg_type, std::string &nas_msg_str, cause_value_5gsm_e
-    sm_cause);
-  */
-
   /*
    * Create N1 SM Container: PDU Session Modification Command
    * Included in PDU Session Update SM Context Response (PDU Session

@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -44,27 +44,21 @@ using namespace oai::smf_server::model;
 
 class smf_http2_server {
  public:
-  smf_http2_server(std::string addr, uint32_t port, smf::smf_app *smf_app_inst)
-      :
-      m_address(addr),
-      m_port(port),
-      server(),
-      m_smf_app(smf_app_inst) {
-  }
+  smf_http2_server(std::string addr, uint32_t port, smf::smf_app* smf_app_inst)
+      : m_address(addr), m_port(port), server(), m_smf_app(smf_app_inst) {}
   void start();
-  void init(size_t thr) {
-  }
-  void create_sm_contexts_handler(const SmContextMessage &smContextMessage,
-                                  const response &response);
+  void init(size_t thr) {}
+  void create_sm_contexts_handler(
+      const SmContextMessage& smContextMessage, const response& response);
   void update_sm_context_handler(
-      const std::string &smf_ref,
-      const SmContextUpdateMessage &smContextUpdateMessage,
-      const response &response);
+      const std::string& smf_ref,
+      const SmContextUpdateMessage& smContextUpdateMessage,
+      const response& response);
 
   void release_sm_context_handler(
-      const std::string &smf_ref,
-      const SmContextReleaseData &smContextReleaseData,
-      const response &response);
+      const std::string& smf_ref,
+      const SmContextReleaseData& smContextReleaseData,
+      const response& response);
   void stop();
 
  private:
@@ -72,7 +66,7 @@ class smf_http2_server {
   std::string m_address;
   uint32_t m_port;
   http2 server;
-  smf::smf_app *m_smf_app;
+  smf::smf_app* m_smf_app;
 
  protected:
   static uint64_t generate_promise_id() {

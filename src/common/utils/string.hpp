@@ -3,9 +3,9 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The OpenAirInterface Software Alliance licenses this file to You under
- * the OAI Public License, Version 1.1  (the "License"); you may not use this file
- * except in compliance with the License.
- * You may obtain a copy of the License at
+ * the OAI Public License, Version 1.1  (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the
+ * License at
  *
  *      http://www.openairinterface.org/?page_id=698
  *
@@ -32,22 +32,21 @@
 #include <arpa/inet.h>
 
 extern "C" {
-# include "bstrlib.h"
+#include "bstrlib.h"
 }
-
 
 namespace util {
 
-std::string string_format(const char *format, ...);
+std::string string_format(const char* format, ...);
 
-std::string& ltrim(std::string &s);
+std::string& ltrim(std::string& s);
 // trim from end
-std::string& rtrim(std::string &s);
+std::string& rtrim(std::string& s);
 // trim from both ends
-std::string& trim(std::string &s);
+std::string& trim(std::string& s);
 
 void ipv4_to_bstring(struct in_addr ipv4_address, bstring str);
 
-void string_to_bstring(const std::string &str, bstring bstr);
-}
+void string_to_bstring(const std::string& str, bstring bstr);
+}  // namespace util
 #endif
