@@ -211,8 +211,7 @@ void nf_profile::to_json(nlohmann::json& data) const {
   // ipv4_addresses
   data["ipv4Addresses"] = nlohmann::json::array();
   for (auto address : ipv4_addresses) {
-    nlohmann::json tmp = inet_ntoa(address);
-    data["ipv4Addresses"].push_back(tmp);
+    data["ipv4Addresses"].push_back(inet_ntoa(address));
   }
 
   data["priority"] = priority;
@@ -371,6 +370,19 @@ void smf_profile::to_json(nlohmann::json& data) const {
     }
     srv_tmp["scheme"]          = service.scheme;
     srv_tmp["nfServiceStatus"] = service.nf_service_status;
+    // IP endpoints
+    srv_tmp["ipEndPoints"] = nlohmann::json::array();
+    for (auto endpoint : service.ip_endpoints) {
+      nlohmann::json ep_tmp = {};
+      ep_tmp["ipv4Address"] = nlohmann::json::array();
+      for (auto address : endpoint.ipv4_addresses) {
+        ep_tmp["ipv4Address"].push_back(inet_ntoa(address));
+      }
+      ep_tmp["transport"] = endpoint.transport;
+      ep_tmp["port"]      = endpoint.port;
+      srv_tmp["ipEndPoints"].push_back(ep_tmp);
+    }
+
     data["nfServices"].push_back(srv_tmp);
   }
 

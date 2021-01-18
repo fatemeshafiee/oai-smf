@@ -586,7 +586,8 @@ void smf_app::handle_itti_msg(itti_n11_register_nf_instance_response& r) {
   nf_instance_profile = r.profile;
   // Set heartbeat timer
   Logger::smf_app().debug(
-      "Set value of NRF Heartbeat timer to %d", r.profile.get_nf_heartBeat_timer());
+      "Set value of NRF Heartbeat timer to %d",
+      r.profile.get_nf_heartBeat_timer());
   timer_nrf_heartbeat = itti_inst->timer_setup(
       r.profile.get_nf_heartBeat_timer(), 0, TASK_SMF_APP,
       TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT,
@@ -1868,7 +1869,7 @@ void smf_app::generate_smf_profile() {
 
   // NF services
   nf_service_t nf_service        = {};
-  nf_service.service_instance_id = smf_instance_id;
+  nf_service.service_instance_id = "nsmf-pdusession";
   nf_service.service_name        = "nsmf-pdusession";
   nf_service_version_t version   = {};
   version.api_version_in_uri     = "v1";
@@ -1876,6 +1877,17 @@ void smf_app::generate_smf_profile() {
   nf_service.versions.push_back(version);
   nf_service.scheme            = "http";
   nf_service.nf_service_status = "REGISTERED";
+  // IP Endpoint
+  ip_endpoint_t endpoint = {};
+  std::vector<struct in_addr> addrs;
+  nf_instance_profile.get_nf_ipv4_addresses(addrs);
+  for (auto a : addrs) {
+    endpoint.ipv4_addresses.push_back(a);
+  }
+  endpoint.transport = "TCP";
+  endpoint.port      = smf_cfg.sbi.port;
+  nf_service.ip_endpoints.push_back(endpoint);
+
   nf_instance_profile.add_nf_service(nf_service);
 
   // TODO: custom info
