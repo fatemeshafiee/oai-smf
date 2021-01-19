@@ -789,7 +789,7 @@ void smf_n11::update_nf_instance(
     CURLcode res               = {};
     struct curl_slist* headers = nullptr;
     // headers = curl_slist_append(headers, "charsets: utf-8");
-    headers = curl_slist_append(headers, "content-type: application/json");
+    headers = curl_slist_append(headers, "content-type: application/json-patch+json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
