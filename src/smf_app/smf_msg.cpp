@@ -340,6 +340,18 @@ std::string pdu_session_create_sm_context_request::get_sm_context_status_uri()
   return m_sm_context_status_uri;
 }
 
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::set_pco(
+    const protocol_configuration_options_t& p) {
+  epco = p;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::get_pco(
+    protocol_configuration_options_t& p) const {
+  p = epco;
+}
+
 /*
  * class: PDU Session Create SM Context Response
  */

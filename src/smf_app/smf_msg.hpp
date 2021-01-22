@@ -262,6 +262,8 @@ class pdu_session_create_sm_context_request
   std::string get_dnn_selection_mode() const;
   void set_sm_context_status_uri(const std::string& value);
   std::string get_sm_context_status_uri() const;
+  void set_pco(const protocol_configuration_options_t& p);
+  void get_pco(protocol_configuration_options_t& p) const;
 
  private:
   bool m_unauthenticated_supi;
@@ -272,6 +274,7 @@ class pdu_session_create_sm_context_request
   std::string m_an_type;
   std::string m_dnn_selection_mode;  // SelMode
   std::string m_sm_context_status_uri;
+  protocol_configuration_options_t epco;
 };
 
 //---------------------------------------------------------------------------------------

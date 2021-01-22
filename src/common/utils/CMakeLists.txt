@@ -24,6 +24,7 @@ include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/utils)
 include_directories(${SRC_TOP_DIR}/common/utils/bstr)
 include_directories(${SRC_TOP_DIR}/itti)
+include_directories(${SRC_TOP_DIR}/common/nas)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
 

@@ -39,6 +39,7 @@
 #include "3gpp_24.501.h"
 #include "3gpp_29.500.h"
 #include "3gpp_29.502.h"
+#include "3gpp_conversions.hpp"
 #include "ProblemDetails.h"
 #include "RefToBinaryData.h"
 #include "SmContextCreateError.h"
@@ -712,6 +713,16 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   // TODO: AlwaysonPDUSessionRequested
   // TODO: SMPDUDNRequestContainer
   // TODO: ExtendedProtocolConfigurationOptions
+  if (decoded_nas_msg.plain.sm.pdu_session_establishment_request
+          .extendedprotocolconfigurationoptions.num_protocol_or_container_id >
+      0) {
+    protocol_configuration_options_t pco = {};
+    xgpp_conv::protocol_configuration_options_nas_to_core(
+        decoded_nas_msg.plain.sm.pdu_session_establishment_request
+            .extendedprotocolconfigurationoptions,
+        pco);
+    smreq->req.set_pco(pco);
+  }
 
   // Get necessary information
   supi_t supi              = smreq->req.get_supi();
