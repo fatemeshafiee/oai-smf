@@ -247,12 +247,16 @@ class pdu_session_create_sm_context_request
  public:
   pdu_session_create_sm_context_request()
       : pdu_session_sm_context_request(PDU_SESSION_CREATE_SM_CONTEXT_REQUEST),
-        m_unauthenticated_supi(true) {}
+        m_unauthenticated_supi(true) {
+    m_epco = {};
+  }
   pdu_session_create_sm_context_request(
       supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai)
       : pdu_session_sm_context_request(
             PDU_SESSION_CREATE_SM_CONTEXT_REQUEST, supi, pdi, dnn, snssai),
-        m_unauthenticated_supi(true) {}
+        m_unauthenticated_supi(true) {
+    m_epco = {};
+  }
 
   std::string get_serving_nf_id() const;
   void set_serving_nf_id(const std::string& value);
@@ -262,8 +266,8 @@ class pdu_session_create_sm_context_request
   std::string get_dnn_selection_mode() const;
   void set_sm_context_status_uri(const std::string& value);
   std::string get_sm_context_status_uri() const;
-  void set_pco(const protocol_configuration_options_t& p);
-  void get_pco(protocol_configuration_options_t& p) const;
+  void set_epco(const protocol_configuration_options_t& p);
+  void get_epco(protocol_configuration_options_t& p) const;
 
  private:
   bool m_unauthenticated_supi;
@@ -274,7 +278,7 @@ class pdu_session_create_sm_context_request
   std::string m_an_type;
   std::string m_dnn_selection_mode;  // SelMode
   std::string m_sm_context_status_uri;
-  protocol_configuration_options_t epco;
+  protocol_configuration_options_t m_epco;
 };
 
 //---------------------------------------------------------------------------------------
@@ -286,6 +290,7 @@ class pdu_session_create_sm_context_response
             PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE) {
     m_paa              = {};
     m_qos_flow_context = {};
+    m_epco             = {};
   }
   pdu_session_create_sm_context_response(
       supi_t supi, pdu_session_id_t pdi, std::string dnn, snssai_t snssai)
@@ -293,6 +298,7 @@ class pdu_session_create_sm_context_response
             PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE, supi, pdi, dnn, snssai) {
     m_paa              = {};
     m_qos_flow_context = {};
+    m_epco             = {};
   }
 
   void set_paa(const paa_t& paa);
@@ -303,12 +309,15 @@ class pdu_session_create_sm_context_response
   std::string get_amf_url() const;
   void set_smf_context_uri(const std::string& value);
   std::string get_smf_context_uri() const;
+  void set_epco(const protocol_configuration_options_t& p);
+  void get_epco(protocol_configuration_options_t& p) const;
 
  private:
   paa_t m_paa;
   qos_flow_context_updated m_qos_flow_context;
   std::string m_amf_url;
   std::string m_smf_context_uri;
+  protocol_configuration_options_t m_epco;
 };
 
 //---------------------------------------------------------------------------------------

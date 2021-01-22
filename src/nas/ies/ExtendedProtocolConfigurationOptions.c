@@ -45,17 +45,16 @@ int encode_extended_protocol_configuration_options(
     encoded++;
   }
 
-  lenPtr = (buffer + encoded);
+  lenPtr        = (buffer + encoded);
   uint16_t temp = 0;
-  encoded += 2; //ENCODE_U16
+  encoded += 2;  // ENCODE_U16
 
   encoded += encode_protocol_configuration_options(
       extendedprotocolconfigurationoptions, buffer + encoded, len - encoded);
 
   uint32_t len_ie = encoded - 2 - ((iei > 0) ? 1 : 0);
-  ENCODE_U16(lenPtr, len_ie , temp);
+  ENCODE_U16(lenPtr, len_ie, temp);
 
-  //*lenPtr = encoded - 2 - ((iei > 0) ? 1 : 0);
   return encoded;
 }
 
@@ -85,26 +84,25 @@ int encode_protocol_configuration_options(
             .protocol_or_container_ids[num_protocol_or_container_id]
             .length;
     encoded++;
-    if (        protocolconfigurationoptions
+    if (protocolconfigurationoptions
             .protocol_or_container_ids[num_protocol_or_container_id]
-            .length
- >0 ) {
-    if ((encode_result = encode_bstring(
-             protocolconfigurationoptions
-                 .protocol_or_container_ids[num_protocol_or_container_id]
-                 .contents,
-             buffer + encoded,         protocolconfigurationoptions
-            .protocol_or_container_ids[num_protocol_or_container_id]
-            .length
-)) < 0)
-      return encode_result;
-    else
-      encoded += encode_result;
-   } else {
-	encoded += protocolconfigurationoptions
-            .protocol_or_container_ids[num_protocol_or_container_id]
-            .length;   
-   }
+            .length > 0) {
+      if ((encode_result = encode_bstring(
+               protocolconfigurationoptions
+                   .protocol_or_container_ids[num_protocol_or_container_id]
+                   .contents,
+               buffer + encoded,
+               protocolconfigurationoptions
+                   .protocol_or_container_ids[num_protocol_or_container_id]
+                   .length)) < 0)
+        return encode_result;
+      else
+        encoded += encode_result;
+    } else {
+      encoded += protocolconfigurationoptions
+                     .protocol_or_container_ids[num_protocol_or_container_id]
+                     .length;
+    }
     num_protocol_or_container_id += 1;
   }
   return encoded;
@@ -122,7 +120,7 @@ int decode_extended_protocol_configuration_options(
     decoded++;
   }
 
-  DECODE_U16(buffer+decoded, ielen, decoded);
+  DECODE_U16(buffer + decoded, ielen, decoded);
 
   if (((*(buffer + decoded) >> 7) & 0x1) != 1) {
     return TLV_VALUE_DOESNT_MATCH;
@@ -155,19 +153,7 @@ int decode_protocol_configuration_options(
     const uint8_t* const buffer, const const uint32_t len) {
   int decoded       = 0;
   int decode_result = 0;
-/*
-  if (((*(buffer + decoded) >> 7) & 0x1) != 1) {
-    return TLV_VALUE_DOESNT_MATCH;
-  }
 
-  // Bits 7 to 4 of octet 3 are spare, read as 0
-  if (((*(buffer + decoded) & 0x78) >> 3) != 0) {
-    return TLV_VALUE_DOESNT_MATCH;
-  }
-*/
-//  protocolconfigurationoptions->configuration_protocol =
-//      (*(buffer + decoded) >> 1) & 0x7;
-//  decoded++;
   protocolconfigurationoptions->num_protocol_or_container_id = 0;
 
   while (3 <= ((int32_t) len - (int32_t) decoded)) {

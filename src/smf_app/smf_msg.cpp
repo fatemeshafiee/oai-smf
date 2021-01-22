@@ -341,15 +341,15 @@ std::string pdu_session_create_sm_context_request::get_sm_context_status_uri()
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_request::set_pco(
+void pdu_session_create_sm_context_request::set_epco(
     const protocol_configuration_options_t& p) {
-  epco = p;
+  m_epco = p;
 }
 
 //-----------------------------------------------------------------------------
-void pdu_session_create_sm_context_request::get_pco(
+void pdu_session_create_sm_context_request::get_epco(
     protocol_configuration_options_t& p) const {
-  p = epco;
+  p = m_epco;
 }
 
 /*
@@ -398,6 +398,18 @@ void pdu_session_create_sm_context_response::set_smf_context_uri(
 std::string pdu_session_create_sm_context_response::get_smf_context_uri()
     const {
   return m_smf_context_uri;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_response::set_epco(
+    const protocol_configuration_options_t& p) {
+  m_epco = p;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_response::get_epco(
+    protocol_configuration_options_t& p) const {
+  p = m_epco;
 }
 
 /*

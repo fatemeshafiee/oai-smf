@@ -35,6 +35,7 @@
 
 #include "smf.h"
 #include "smf_app.hpp"
+#include "3gpp_conversions.hpp"
 
 extern "C" {
 #include "dynamic_memory_check.h"
@@ -217,6 +218,12 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
   }
 
   // TODO: ExtendedProtocolConfigurationOptions
+  protocol_configuration_options_t pco_res = {};
+  sm_context_res.get_epco(pco_res);
+  // sm_msg->pdu_session_establishment_accept.
+  xgpp_conv::protocol_configuration_options_core_to_nas(
+      pco_res, sm_msg->pdu_session_establishment_accept
+                   .extendedprotocolconfigurationoptions);
 
   // DNN
   util::string_to_bstring(

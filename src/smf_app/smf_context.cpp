@@ -1316,7 +1316,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // TODO: PCO
 
   protocol_configuration_options_t pco_req = {};
-  smreq->req.get_pco(pco_req);
+  smreq->req.get_epco(pco_req);
   protocol_configuration_options_t pco_resp    = {};
   protocol_configuration_options_ids_t pco_ids = {
       .pi_ipcp                                     = 0,
@@ -1326,6 +1326,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       .ci_ipv4_link_mtu_request                    = 0};
 
   smf_app_inst->process_pco_request(pco_req, pco_resp, pco_ids);
+  sm_context_resp_pending->res.set_epco(pco_resp);
 
   // Step 7. Address allocation based on PDN type
   Logger::smf_app().debug("UE Address Allocation");

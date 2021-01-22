@@ -49,6 +49,9 @@ void protocol_configuration_options_nas_to_core(
     const protocol_configuration_options_nas_t& pco_nas,
     protocol_configuration_options_t& pco);
 
+void protocol_configuration_options_core_to_nas(
+    const protocol_configuration_options_t& pco,
+    protocol_configuration_options_nas_t& pco_nas);
 }  // namespace xgpp_conv
 
 #endif /* FILE_3GPP_CONVERSIONS_HPP_SEEN */

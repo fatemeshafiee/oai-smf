@@ -713,24 +713,28 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   // TODO: AlwaysonPDUSessionRequested
   // TODO: SMPDUDNRequestContainer
   // TODO: ExtendedProtocolConfigurationOptions
-    Logger::smf_app().debug(
-      "pco ext %d, spare %d, configuration protocol %d,number_ids %d", decoded_nas_msg.plain.sm.pdu_session_establishment_request
+  Logger::smf_app().debug(
+      "pco ext %d, spare %d, configuration protocol %d,number_ids %d",
+      decoded_nas_msg.plain.sm.pdu_session_establishment_request
           .extendedprotocolconfigurationoptions.ext,
-	  decoded_nas_msg.plain.sm.pdu_session_establishment_request
-	            .extendedprotocolconfigurationoptions.spare,decoded_nas_msg.plain.sm.pdu_session_establishment_request
-		          .extendedprotocolconfigurationoptions.configuration_protocol,decoded_nas_msg.plain.sm.pdu_session_establishment_request
-		          .extendedprotocolconfigurationoptions.num_protocol_or_container_id  );
+      decoded_nas_msg.plain.sm.pdu_session_establishment_request
+          .extendedprotocolconfigurationoptions.spare,
+      decoded_nas_msg.plain.sm.pdu_session_establishment_request
+          .extendedprotocolconfigurationoptions.configuration_protocol,
+      decoded_nas_msg.plain.sm.pdu_session_establishment_request
+          .extendedprotocolconfigurationoptions.num_protocol_or_container_id);
 
- // if (decoded_nas_msg.plain.sm.pdu_session_establishment_request
- //         .extendedprotocolconfigurationoptions.num_protocol_or_container_id >
- //     0) {
-    protocol_configuration_options_t pco = {};
-    xgpp_conv::protocol_configuration_options_nas_to_core(
-        decoded_nas_msg.plain.sm.pdu_session_establishment_request
-            .extendedprotocolconfigurationoptions,
-        pco);
-    smreq->req.set_pco(pco);
- // }
+  // if (decoded_nas_msg.plain.sm.pdu_session_establishment_request
+  //         .extendedprotocolconfigurationoptions.num_protocol_or_container_id
+  //         >
+  //     0) {
+  protocol_configuration_options_t pco = {};
+  xgpp_conv::protocol_configuration_options_nas_to_core(
+      decoded_nas_msg.plain.sm.pdu_session_establishment_request
+          .extendedprotocolconfigurationoptions,
+      pco);
+  smreq->req.set_epco(pco);
+  // }
 
   // Get necessary information
   supi_t supi              = smreq->req.get_supi();
