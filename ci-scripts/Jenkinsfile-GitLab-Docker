@@ -405,7 +405,7 @@ pipeline {
                   myShCmd('docker exec -d ci-test-amf-server /bin/bash -c "nohup ./bin/amf-server -i ' + AMF_IP_ADDRESS + ' > amf_server_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
 
                   sh "sleep 30"
-                  myShCmd('docker exec -it ci-test-amf-client /bin/bash -c "./bin/amf-client -i ' + SMF_SBI_IP_ADDRESS + ' > amf_client_check_run.log"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec ci-test-amf-client /bin/bash -c "./bin/amf-client -i ' + SMF_SBI_IP_ADDRESS + ' > amf_client_check_run.log"', new_host_flag, new_host_user, new_host)
                   sh "sleep 30"
 
                   myShCmd('docker exec ci-oai-smf /bin/bash -c "killall --signal SIGINT oai_smf"', new_host_flag, new_host_user, new_host)
