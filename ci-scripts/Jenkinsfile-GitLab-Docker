@@ -167,14 +167,14 @@ pipeline {
               gitlabCommitStatus(name: "Static Code Analysis") {
                 // Running on xenial to have 1.72 version of cppcheck
                 myShCmd('docker run --name ci-cn-cppcheck -d ubuntu:xenial /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
-                myShCmd('docker exec -it ci-cn-cppcheck /bin/bash -c "apt-get update && apt-get upgrade --yes" > archives/cppcheck_install.log', new_host_flag, new_host_user, new_host)
-                myShCmd('docker exec -it ci-cn-cppcheck /bin/bash -c "apt-get install --yes cppcheck bzip2" >> archives/cppcheck_install.log', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-cppcheck /bin/bash -c "apt-get update && apt-get upgrade --yes" > archives/cppcheck_install.log', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-cppcheck /bin/bash -c "apt-get install --yes cppcheck bzip2" >> archives/cppcheck_install.log', new_host_flag, new_host_user, new_host)
 
                 myShCmd('docker cp ./openair-smf.tar.bz2 ci-cn-cppcheck:/home', new_host_flag, new_host_user, new_host)
-                myShCmd('docker exec -it ci-cn-cppcheck /bin/bash -c "cd /home && tar -xjf openair-smf.tar.bz2"', new_host_flag, new_host_user, new_host)
-                myShCmd('docker exec -it ci-cn-cppcheck /bin/bash -c "rm -f /home/openair-smf.tar.bz2"', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-cppcheck /bin/bash -c "cd /home && tar -xjf openair-smf.tar.bz2"', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-cppcheck /bin/bash -c "rm -f /home/openair-smf.tar.bz2"', new_host_flag, new_host_user, new_host)
 
-                myShCmd('docker exec -it ci-cn-cppcheck /bin/bash -c "cd /home && cppcheck --enable=warning --force --xml --xml-version=2 --suppressions-list=ci-scripts/cppcheck_suppressions.list src 2> cppcheck.xml 1> cppcheck_build.log"', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-cppcheck /bin/bash -c "cd /home && cppcheck --enable=warning --force --xml --xml-version=2 --suppressions-list=ci-scripts/cppcheck_suppressions.list src 2> cppcheck.xml 1> cppcheck_build.log"', new_host_flag, new_host_user, new_host)
               }
             }
           }
@@ -202,19 +202,19 @@ pipeline {
             script {
               gitlabCommitStatus(name: "Code Formatting Checker") {
                 myShCmd('docker run --name ci-cn-clang-formatter -d ubuntu:bionic /bin/bash -c "sleep infinity"', new_host_flag, new_host_user, new_host)
-                myShCmd('docker exec -it ci-cn-clang-formatter /bin/bash -c "apt-get update && apt-get upgrade --yes" > archives/clang_format_install.log', new_host_flag, new_host_user, new_host)
-                myShCmd('docker exec -it ci-cn-clang-formatter /bin/bash -c "apt-get install --yes git tree bzip2" >> archives/clang_format_install.log', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-clang-formatter /bin/bash -c "apt-get update && apt-get upgrade --yes" > archives/clang_format_install.log', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-clang-formatter /bin/bash -c "apt-get install --yes git tree bzip2" >> archives/clang_format_install.log', new_host_flag, new_host_user, new_host)
 
                 myShCmd('docker cp ./openair-smf.tar.bz2 ci-cn-clang-formatter:/home', new_host_flag, new_host_user, new_host)
-                myShCmd('docker exec -it ci-cn-clang-formatter /bin/bash -c "cd /home && tar -xjf openair-smf.tar.bz2"', new_host_flag, new_host_user, new_host)
-                myShCmd('docker exec -it ci-cn-clang-formatter /bin/bash -c "rm -f /home/openair-smf.tar.bz2"', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-clang-formatter /bin/bash -c "cd /home && tar -xjf openair-smf.tar.bz2"', new_host_flag, new_host_user, new_host)
+                myShCmd('docker exec ci-cn-clang-formatter /bin/bash -c "rm -f /home/openair-smf.tar.bz2"', new_host_flag, new_host_user, new_host)
 
                 // We install a dedicated version (installed on our CI server).
                 myShCmd('docker cp /opt/clang-format/9.0.0/bin/clang-format ci-cn-clang-formatter:/usr/local/bin', new_host_flag, new_host_user, new_host)
                 if ("MERGE".equals(env.gitlabActionType)) {
-                  myShCmd('docker exec -it ci-cn-clang-formatter /bin/bash -c "cd /home && ./ci-scripts/checkCodingFormattingRules.sh --src-branch ' + env.gitlabSourceBranch +' --target-branch ' + env.gitlabTargetBranch + '"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec ci-cn-clang-formatter /bin/bash -c "cd /home && ./ci-scripts/checkCodingFormattingRules.sh --src-branch ' + env.gitlabSourceBranch +' --target-branch ' + env.gitlabTargetBranch + '"', new_host_flag, new_host_user, new_host)
                 } else {
-                  myShCmd('docker exec -it ci-cn-clang-formatter /bin/bash -c "cd /home && ./ci-scripts/checkCodingFormattingRules.sh"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec ci-cn-clang-formatter /bin/bash -c "cd /home && ./ci-scripts/checkCodingFormattingRules.sh"', new_host_flag, new_host_user, new_host)
                 }
               }
             }
@@ -355,16 +355,16 @@ pipeline {
               sh "echo 'OAI-AMF-CLIENT CONFIG: OK' >> archives/amf_client_config.log"
 
               // Configure containers
-              SMF_SBI_IP_ADDRESS=myShRetCmd('docker exec -it ci-oai-smf /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
-              SMF_N4_IP_ADDRESS=myShRetCmd('docker exec -it ci-oai-smf /bin/bash -c "ifconfig eth2 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
-              UPF_N4_IP_ADDRESS=myShRetCmd('docker exec -it ci-oai-spgwu /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
-              AMF_IP_ADDRESS=myShRetCmd('docker exec -it ci-test-amf-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
-              UDM_IP_ADDRESS=myShRetCmd('docker exec -it ci-test-udm-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+              SMF_SBI_IP_ADDRESS=myShRetCmd('docker exec ci-oai-smf /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+              SMF_N4_IP_ADDRESS=myShRetCmd('docker exec ci-oai-smf /bin/bash -c "ifconfig eth2 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+              UPF_N4_IP_ADDRESS=myShRetCmd('docker exec ci-oai-spgwu /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+              AMF_IP_ADDRESS=myShRetCmd('docker exec ci-test-amf-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+              UDM_IP_ADDRESS=myShRetCmd('docker exec ci-test-udm-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
 
               sh "python3 ci-scripts/generateConfigFiles.py --kind=SMF --sbi=eth1 --n4=eth2 --amf_ip_addr=${AMF_IP_ADDRESS} --udm_ip_addr=${UDM_IP_ADDRESS} --upf_ip_addr=${UPF_N4_IP_ADDRESS} --from_docker_file"
               copyTo2ndServer('smf-cfg.sh', new_host_flag, new_host_user, new_host)
               myShCmd('docker cp ./smf-cfg.sh ci-oai-smf:/openair-smf', new_host_flag, new_host_user, new_host)
-              myShCmd('docker exec -it ci-oai-smf /bin/bash -c "cd /openair-smf && chmod 777 smf-cfg.sh && ./smf-cfg.sh" >> archives/smf_config.log', new_host_flag, new_host_user, new_host)
+              myShCmd('docker exec ci-oai-smf /bin/bash -c "cd /openair-smf && chmod 777 smf-cfg.sh && ./smf-cfg.sh" >> archives/smf_config.log', new_host_flag, new_host_user, new_host)
               myShCmd('docker cp ci-oai-smf:/openair-smf/etc/. archives/oai-smf-cfg', new_host_flag, new_host_user, new_host)
               copyFrom2ndServer('archives/oai-smf-cfg/*.*', 'archives/oai-smf-cfg', new_host_flag, new_host_user, new_host)
               copyFrom2ndServer('archives/smf_config.log', 'archives', new_host_flag, new_host_user, new_host)
@@ -373,7 +373,7 @@ pipeline {
               sh "python3 ci-scripts/generateSpgwuConfigFiles.py --kind=SPGW-U --sxc_ip_addr=${SMF_N4_IP_ADDRESS} --sxu=eth1 --s1u=eth0 --from_docker_file"
               copyTo2ndServer('spgwu-cfg.sh', new_host_flag, new_host_user, new_host)
               myShCmd('docker cp ./spgwu-cfg.sh ci-oai-spgwu:/openair-spgwu-tiny', new_host_flag, new_host_user, new_host)
-              myShCmd('docker exec -it ci-oai-spgwu /bin/bash -c "cd /openair-spgwu-tiny && chmod 777 spgwu-cfg.sh && ./spgwu-cfg.sh" >> archives/spgwu_config.log', new_host_flag, new_host_user, new_host)
+              myShCmd('docker exec ci-oai-spgwu /bin/bash -c "cd /openair-spgwu-tiny && chmod 777 spgwu-cfg.sh && ./spgwu-cfg.sh" >> archives/spgwu_config.log', new_host_flag, new_host_user, new_host)
               copyFrom2ndServer('archives/spgwu_config.log', 'archives', new_host_flag, new_host_user, new_host)
             }
           }
@@ -392,9 +392,9 @@ pipeline {
           steps {
             script {
               gitlabCommitStatus(name: "Local SMF test") {
-                  SMF_SBI_IP_ADDRESS=myShRetCmd('docker exec -it ci-oai-smf /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
-                  AMF_IP_ADDRESS=myShRetCmd('docker exec -it ci-test-amf-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
-                  UDM_IP_ADDRESS=myShRetCmd('docker exec -it ci-test-udm-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+                  SMF_SBI_IP_ADDRESS=myShRetCmd('docker exec ci-oai-smf /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+                  AMF_IP_ADDRESS=myShRetCmd('docker exec ci-test-amf-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
+                  UDM_IP_ADDRESS=myShRetCmd('docker exec ci-test-udm-server /bin/bash -c "ifconfig eth1 | egrep inet" | sed -e "s@^.*inet @@" -e "s@  netmask.*@@"', new_host_flag, new_host_user, new_host)
 
                   myShCmd('docker exec -d ci-oai-smf /bin/bash -c "nohup ./bin/oai_smf -c ./etc/smf.conf -o > smf_check_run.log 2>&1"', new_host_flag, new_host_user, new_host)
                   sh "sleep 2"
@@ -408,18 +408,18 @@ pipeline {
                   myShCmd('docker exec -it ci-test-amf-client /bin/bash -c "./bin/amf-client -i ' + SMF_SBI_IP_ADDRESS + ' > amf_client_check_run.log"', new_host_flag, new_host_user, new_host)
                   sh "sleep 30"
 
-                  myShCmd('docker exec -it ci-oai-smf /bin/bash -c "killall --signal SIGINT oai_smf"', new_host_flag, new_host_user, new_host)
-                  myShCmd('docker exec -it ci-oai-spgwu /bin/bash -c "killall --signal SIGINT oai_spgwu"', new_host_flag, new_host_user, new_host)
-                  myShCmd('docker exec -it ci-test-amf-server /bin/bash -c "killall amf-server"', new_host_flag, new_host_user, new_host)
-                  myShCmd('docker exec -it ci-test-udm-server /bin/bash -c "killall udm-server"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec ci-oai-smf /bin/bash -c "killall --signal SIGINT oai_smf"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec ci-oai-spgwu /bin/bash -c "killall --signal SIGINT oai_spgwu"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec ci-test-amf-server /bin/bash -c "killall amf-server"', new_host_flag, new_host_user, new_host)
+                  myShCmd('docker exec ci-test-udm-server /bin/bash -c "killall udm-server"', new_host_flag, new_host_user, new_host)
                   sh "sleep 5"
                   try {
-                    myShCmd('docker exec -it ci-oai-smf /bin/bash -c "killall --signal SIGKILL oai_smf"', new_host_flag, new_host_user, new_host)
+                    myShCmd('docker exec ci-oai-smf /bin/bash -c "killall --signal SIGKILL oai_smf"', new_host_flag, new_host_user, new_host)
                   } catch (Exception e) {
                     echo "No residual oai_smf processes"
                   }
                   try {
-                    myShCmd('docker exec -it ci-oai-spgwu /bin/bash -c "killall --signal SIGKILL oai_spgwu"', new_host_flag, new_host_user, new_host)
+                    myShCmd('docker exec ci-oai-spgwu /bin/bash -c "killall --signal SIGKILL oai_spgwu"', new_host_flag, new_host_user, new_host)
                   } catch (Exception e) {
                     echo "No residual oai_spgwu processes"
                   }
@@ -495,7 +495,7 @@ pipeline {
       steps {
         script {
           gitlabCommitStatus(name: "Test with DsTester") {
-            localStatus = build job: 'CI-OpenAir-CN5G-FED',
+            localStatus = build job: params.CN5G_FED_PipelineName,
               parameters: [
                 string(name: 'SMF_TAG', value: String.valueOf(smf_tag)),
                 string(name: 'SMF_BRANCH', value: String.valueOf(smf_branch))
@@ -514,7 +514,7 @@ pipeline {
       post {
         always {
           script {
-            copyArtifacts(projectName: 'CI-OpenAir-CN5G-FED',
+            copyArtifacts(projectName: params.CN5G_FED_PipelineName,
                           filter: '*_results_oai_cn5g.html',
                           selector: lastCompleted())
           }
@@ -596,16 +596,22 @@ pipeline {
         }
 
         // Sending email to commiter
-        emailext attachmentsPattern: '*results*.html',
-          body: '''Hi,
+        if (params.sendToCommitterEmail != null) {
+          if (params.sendToCommitterEmail) {
+            emailext attachmentsPattern: '*results*.html',
+              body: '''Hi,
+
 
 Here are attached HTML report files for $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!
 
 Regards,
 OAI CI Team''',
-          replyTo: 'no-reply@openairinterface.org',
-          subject: '$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!',
-          to: gitCommitAuthorEmailAddr
+              replyTo: 'no-reply@openairinterface.org',
+              subject: '$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!',
+              to: gitCommitAuthorEmailAddr
+          }
+        }
+
       }
     }
   }
