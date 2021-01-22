@@ -115,7 +115,7 @@ int decode_extended_protocol_configuration_options(
   decoded++;
 
   decode_result = decode_protocol_configuration_options(
-      extendedprotocolconfigurationoptions, buffer + decoded, len - decoded);
+      extendedprotocolconfigurationoptions, buffer + decoded, ielen - decoded);
 
   if (decode_result < 0) {
     return decode_result;
