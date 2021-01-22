@@ -103,15 +103,18 @@ void xgpp_conv::protocol_configuration_options_nas_to_core(
     // pco_nas.protocol_or_container_ids[i].length;
     // pco.protocol_or_container_ids[i].protocol_id =
     // pco_nas.protocol_or_container_ids[i].id;
-    unsigned char data[512] = {'\0'};
-    memcpy(
-        (void*) &data,
-        (void*) pco_nas.protocol_or_container_ids[i].contents->data,
-        pco_nas.protocol_or_container_ids[i].contents->slen);
-    std::string msg_bstr(
-        (char*) data, pco_nas.protocol_or_container_ids[i].contents->slen);
-    // pco.protocol_or_container_ids[i].protocol_id_contents  = msg_bstr;
-    pco_item.protocol_id_contents = msg_bstr;
+    if (pco_nas.protocol_or_container_ids[i].contents != nullptr) {
+      unsigned char data[512] = {'\0'};
+      memcpy(
+          (void*) &data,
+          (void*) pco_nas.protocol_or_container_ids[i].contents->data,
+          pco_nas.protocol_or_container_ids[i].contents->slen);
+      std::string msg_bstr(
+          (char*) data, pco_nas.protocol_or_container_ids[i].contents->slen);
+      // pco.protocol_or_container_ids[i].protocol_id_contents  = msg_bstr;
+      pco_item.protocol_id_contents = msg_bstr;
+    }
+
     pco.protocol_or_container_ids.push_back(pco_item);
   }
 }
