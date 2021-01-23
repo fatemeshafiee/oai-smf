@@ -34,7 +34,7 @@
 #include <nghttp2/asio_http2_server.h>
 #include "SmContextUpdateMessage.h"
 #include "SmContextMessage.h"
-#include "SmContextReleaseData.h"
+#include "SmContextReleaseMessage.h"
 #include "uint_generator.hpp"
 #include "smf.h"
 
@@ -57,7 +57,7 @@ class smf_http2_server {
 
   void release_sm_context_handler(
       const std::string& smf_ref,
-      const SmContextReleaseData& smContextReleaseData,
+      const SmContextReleaseMessage& smContextReleaseMessage,
       const response& response);
   void stop();
 

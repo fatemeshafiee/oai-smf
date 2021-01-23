@@ -42,6 +42,7 @@
 #include "3gpp_29.500.h"
 #include "smf_config.hpp"
 #include "smf.h"
+#include "3gpp_conversions.hpp"
 
 using namespace nghttp2::asio_http2;
 using namespace nghttp2::asio_http2::server;
@@ -226,15 +227,45 @@ void smf_http2_server::start() {
               }
 
             } else if (
-                method.compare("release") == 0) {  // smContextReleaseData
+                method.compare("release") == 0) {  // smContextReleaseMessage
               Logger::smf_api_server().info(
                   "Handle Release SM Context Request from AMF");
 
+              SmContextReleaseMessage smContextReleaseMessage = {};
+
+              // simple parser
+              mime_parser sp = {};
+              sp.parse(msg);
+
+              std::vector<mime_part> parts = {};
+              sp.get_mime_parts(parts);
+              uint8_t size = parts.size();
+              Logger::smf_api_server().debug("Number of MIME parts %d", size);
+
+              // Getting the body param
               SmContextReleaseData smContextReleaseData = {};
               try {
-                nlohmann::json::parse(msg.c_str()).get_to(smContextReleaseData);
+                if (size > 0) {
+                  nlohmann::json::parse(parts[0].body.c_str())
+                      .get_to(smContextReleaseData);
+                } else {
+                  nlohmann::json::parse(msg.c_str())
+                      .get_to(smContextReleaseData);
+                }
+
+                smContextReleaseMessage.setJsonData(smContextReleaseData);
+
+                for (int i = 1; i < size; i++) {
+                  if (parts[i].content_type.compare(
+                          "application/vnd.3gpp.ngap") == 0) {
+                    smContextReleaseMessage.setBinaryDataN2SmInformation(
+                        parts[i].body);
+                    Logger::smf_api_server().debug("N2 SM information is set");
+                  }
+                }
+
                 this->release_sm_context_handler(
-                    smf_ref, smContextReleaseData, response);
+                    smf_ref, smContextReleaseMessage, response);
 
               } catch (nlohmann::detail::exception& e) {
                 Logger::smf_api_server().warn(
@@ -282,91 +313,22 @@ void smf_http2_server::create_sm_contexts_handler(
   std::string n1_sm_msg = smContextMessage.getBinaryDataN1SmMessage();
   Logger::smf_api_server().debug("N1 SM message: %s", n1_sm_msg.c_str());
 
-  // Step 1. Create a pdu_session_create_sm_context_request message and store
+  // Create a pdu_session_create_sm_context_request message and store
   // the necessary information
   Logger::smf_api_server().debug(
       "Create a pdu_session_create_sm_context_request message and store the "
       "necessary information");
   smf::pdu_session_create_sm_context_request sm_context_req_msg = {};
 
-  // set N1 SM Message
-  sm_context_req_msg.set_n1_sm_message(n1_sm_msg);
-  // set api root to be used as location header in HTTP response
+  // Convert from SmContextMessage to pdu_session_create_sm_context_request
+  xgpp_conv::sm_context_create_from_openapi(
+      smContextMessage, sm_context_req_msg);
+
+  // Set api root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
       // m_address + ":" + std::to_string(m_port) +
       NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version +
       NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL);
-
-  // supi
-  supi_t supi             = {.length = 0};
-  std::size_t pos         = smContextCreateData.getSupi().find("-");
-  std::string supi_str    = smContextCreateData.getSupi().substr(pos + 1);
-  std::string supi_prefix = smContextCreateData.getSupi().substr(0, pos);
-  smf_string_to_supi(&supi, supi_str.c_str());
-  sm_context_req_msg.set_supi(supi);
-  sm_context_req_msg.set_supi_prefix(supi_prefix);
-  Logger::smf_api_server().debug(
-      "SUPI %s, SUPI Prefix %s, IMSI %s", smContextCreateData.getSupi().c_str(),
-      supi_prefix.c_str(), supi_str.c_str());
-
-  // dnn
-  Logger::smf_api_server().debug(
-      "DNN %s", smContextCreateData.getDnn().c_str());
-  sm_context_req_msg.set_dnn(smContextCreateData.getDnn().c_str());
-
-  // S-Nssai
-  Logger::smf_api_server().debug(
-      "S-NSSAI SST %d, SD %s", smContextCreateData.getSNssai().getSst(),
-      smContextCreateData.getSNssai().getSd().c_str());
-  snssai_t snssai(
-      smContextCreateData.getSNssai().getSst(),
-      smContextCreateData.getSNssai().getSd());
-  sm_context_req_msg.set_snssai(snssai);
-
-  // PDU session ID
-  Logger::smf_api_server().debug(
-      "PDU Session ID %d", smContextCreateData.getPduSessionId());
-  sm_context_req_msg.set_pdu_session_id(smContextCreateData.getPduSessionId());
-
-  // AMF ID (ServingNFId)
-  Logger::smf_api_server().debug(
-      "ServingNfId %s", smContextCreateData.getServingNfId().c_str());
-  sm_context_req_msg.set_serving_nf_id(
-      smContextCreateData.getServingNfId().c_str());
-
-  // Request Type
-  Logger::smf_api_server().debug(
-      "RequestType %s", smContextCreateData.getRequestType().c_str());
-  sm_context_req_msg.set_request_type(smContextCreateData.getRequestType());
-  // PCF ID
-  // Priority Access
-  // User Location Information
-  // Access Type
-  // PEI
-  // GPSI
-  // UE presence in LADN service area
-  // Guami
-  // servingNetwork
-  // anType
-  // UETimeZone
-  // SMContextStatusUri
-  // PCFId
-
-  // DNN Selection Mode
-  Logger::smf_api_server().debug(
-      "SelMode %s", smContextCreateData.getSelMode().c_str());
-  sm_context_req_msg.set_dnn_selection_mode(
-      smContextCreateData.getSelMode().c_str());
-
-  // Subscription for PDU Session Status Notification
-  // Trace requirement
-  // SSC mode (Optional)
-  // 5GSM capability (Optional)
-  // Maximum number of supported (Optional)
-  // Maximum number of supported packet filters (Optional)
-  // Always-on PDU session requested (Optional)
-  // SM PDU DN request container (Optional)
-  // Extended protocol configuration options (Optional) e.g, FOR DHCP
 
   boost::shared_ptr<
       boost::promise<smf::pdu_session_create_sm_context_response> >
@@ -380,7 +342,7 @@ void smf_http2_server::create_sm_contexts_handler(
   Logger::smf_api_server().debug("Promise ID generated %d", promise_id);
   m_smf_app->add_promise(promise_id, p);
 
-  // Step 2. Handle the pdu_session_create_sm_context_request message in smf_app
+  // Handle the pdu_session_create_sm_context_request message in smf_app
   std::shared_ptr<itti_n11_create_sm_context_request> itti_msg =
       std::make_shared<itti_n11_create_sm_context_request>(
           TASK_SMF_N11, TASK_SMF_APP, promise_id);
@@ -388,7 +350,7 @@ void smf_http2_server::create_sm_contexts_handler(
   itti_msg->http_version = 2;
   m_smf_app->handle_pdu_session_create_sm_context_request(itti_msg);
 
-  // wait for the result from APP and send reply to AMF
+  // Wait for the result from APP and send reply to AMF
   smf::pdu_session_create_sm_context_response sm_context_response = f.get();
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
   nlohmann::json json_data = {};
@@ -427,72 +389,12 @@ void smf_http2_server::update_sm_context_handler(
       "Received a PDUSession_UpdateSMContext Request from AMF.");
 
   smf::pdu_session_update_sm_context_request sm_context_req_msg = {};
-  SmContextUpdateData smContextUpdateData =
-      smContextUpdateMessage.getJsonData();
 
-  if (smContextUpdateData.n2SmInfoIsSet()) {
-    // N2 SM (for Session establishment)
-    std::string n2_sm_information =
-        smContextUpdateMessage.getBinaryDataN2SmInformation();
-    Logger::smf_api_server().debug(
-        "N2 SM Information %s", n2_sm_information.c_str());
-    std::string n2_sm_info_type = smContextUpdateData.getN2SmInfoType();
-    sm_context_req_msg.set_n2_sm_information(n2_sm_information);
-    sm_context_req_msg.set_n2_sm_info_type(n2_sm_info_type);
+  // Convert from SmContextUpdateMessage to
+  // pdu_session_update_sm_context_request
+  xgpp_conv::sm_context_update_from_openapi(
+      smContextUpdateMessage, sm_context_req_msg);
 
-  } else if (smContextUpdateData.n1SmMsgIsSet()) {
-    // N1 SM (for session modification)
-    std::string n1_sm_message =
-        smContextUpdateMessage.getBinaryDataN1SmMessage();
-    Logger::smf_api_server().debug("N1 SM Message %s", n1_sm_message.c_str());
-    sm_context_req_msg.set_n1_sm_message(n1_sm_message);
-  }
-  // Step 2. TODO: initialize necessary values for sm context req from
-  // smContextUpdateData
-
-  /* UE-initiated Service Request Operation, section 4.2.3.2@3GPP TS 23.502 */
-  // Step 4: PDU Session IDs, Operation Type, UE location Info, Access Type, RAT
-  // Type, UE presence in LADN service area, Indication of Access Type can be
-  // changed PDU Session IDs UpCnxState, for activation of user plane
-  // (see 5.2.2.3.2.2@3GPP TS 29.502, step 1)
-  if (smContextUpdateData.upCnxStateIsSet())
-    sm_context_req_msg.set_upCnx_state(smContextUpdateData.getUpCnxState());
-  // Access Type (step 1 and 2)
-  if (smContextUpdateData.anTypeIsSet())
-    sm_context_req_msg.set_an_type(smContextUpdateData.getAnType());
-  // RAT Type (step 1 and 2)
-  if (smContextUpdateData.ratTypeIsSet())
-    sm_context_req_msg.set_rat_type(smContextUpdateData.getRatType());
-  // TODO:
-  // UE presence in LADN service area
-  // UE location information
-  // Indication of Access Type can be changed
-  // if (smContextUpdateData.anTypeCanBeChangedIsSet())
-  // sm_context_req_msg.set_access_type_can_be_changed(smContextUpdateData.isAnTypeCanBeChanged());
-  // Step 15: N2 SM Info (AN Tunnel Info, List of accepted QoS Flow, List of
-  // rejected Qos Flows, PDU Session ID), RAT Type, Access Type
-
-  /* UE-initiated PDU Session Establishment Operation - section 4.3.2.2.1@3GPP
-   * TS 23.502 */
-  // TODO: Existing PDU session, step 3, SUPI, DNN, S-NSSAIs, SM Context ID, AMF
-  // ID, Request Type, N1 SM Container (PDU Session Establishment Request), User
-  // location, Access Type, RAT Type, PEI step 15. (SM Context ID -> SCID, N2
-  // SM, Request Type)(Initial Request)
-  // TODO: verify why Request Type is not define in smContextUpdateData
-  /* AMF-initiated with a release indication to request the release of the PDU
-   * Session  (step 3.d, section 4.3.4.2@3GPP TS 23.502)*/
-  if (smContextUpdateData.releaseIsSet()) {
-    sm_context_req_msg.set_release(smContextUpdateData.isRelease());
-  }
-
-  /* PDU Session Modification (SM Context ID -> SCID, N1/N2),
-   * section 4.3.3.2@3GPP TS 23.502: */
-  // step 1.a,UE-initiated: SM Context ID + N1 (PDU Session Modification
-  // Request) step 1.e (AN initiated modification): SM Context ID, N2 SM
-  // information (QFI, User location Information and an indication that the QoS
-  // Flow is released) step 7a, SM Context ID, N2 SM information, UE location
-  // information Step 11, SM Context ID, N1 SM (PDU Session Modification Command
-  // ACK), User location
   boost::shared_ptr<
       boost::promise<smf::pdu_session_update_sm_context_response> >
       p = boost::make_shared<
@@ -505,7 +407,7 @@ void smf_http2_server::update_sm_context_handler(
   Logger::smf_api_server().debug("Promise ID generated %d", promise_id);
   m_smf_app->add_promise(promise_id, p);
 
-  // Step 3. Handle the itti_n11_update_sm_context_request message in smf_app
+  // Handle the itti_n11_update_sm_context_request message in smf_app
   std::shared_ptr<itti_n11_update_sm_context_request> itti_msg =
       std::make_shared<itti_n11_update_sm_context_request>(
           TASK_SMF_N11, TASK_SMF_APP, promise_id, smf_ref);
@@ -513,7 +415,7 @@ void smf_http2_server::update_sm_context_handler(
   itti_msg->http_version = 2;
   m_smf_app->handle_pdu_session_update_sm_context_request(itti_msg);
 
-  // wait for the result from APP and send reply to AMF
+  // Wait for the result from APP and send reply to AMF
   smf::pdu_session_update_sm_context_response sm_context_response = f.get();
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
@@ -521,7 +423,7 @@ void smf_http2_server::update_sm_context_handler(
   mime_parser parser       = {};
   std::string body         = {};
   header_map h             = {};
-  std::string json_format;
+  std::string json_format  = {};
 
   sm_context_response.get_json_format(json_format);
   sm_context_response.get_json_data(json_data);
@@ -564,10 +466,16 @@ void smf_http2_server::update_sm_context_handler(
 //------------------------------------------------------------------------------
 void smf_http2_server::release_sm_context_handler(
     const std::string& smf_ref,
-    const SmContextReleaseData& smContextReleaseData,
+    const SmContextReleaseMessage& smContextReleaseMessage,
     const response& response) {
   Logger::smf_api_server().info(
       "Handle PDU Session Release SM Context Request.");
+
+  smf::pdu_session_release_sm_context_request sm_context_req_msg = {};
+  // Convert from SmContextReleaseMessage to
+  // pdu_session_release_sm_context_request
+  xgpp_conv::sm_context_release_from_openapi(
+      smContextReleaseMessage, sm_context_req_msg);
 
   boost::shared_ptr<
       boost::promise<smf::pdu_session_release_sm_context_response> >
@@ -588,7 +496,7 @@ void smf_http2_server::release_sm_context_handler(
   std::shared_ptr<itti_n11_release_sm_context_request> itti_msg =
       std::make_shared<itti_n11_release_sm_context_request>(
           TASK_SMF_N11, TASK_SMF_APP, promise_id, smf_ref);
-
+  itti_msg->req          = sm_context_req_msg;
   itti_msg->scid         = smf_ref;
   itti_msg->http_version = 2;
   m_smf_app->handle_pdu_session_release_sm_context_request(itti_msg);
