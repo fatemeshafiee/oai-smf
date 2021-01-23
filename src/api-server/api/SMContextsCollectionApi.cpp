@@ -69,7 +69,8 @@ void SMContextsCollectionApi::setupRoutes() {
   using namespace Pistache::Rest;
 
   Routes::Post(
-      *router, base + smf_cfg.sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
+      *router,
+      base + smf_cfg.sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
       Routes::bind(&SMContextsCollectionApi::post_sm_contexts_handler, this));
 
   // Default handler, called when a route is not found

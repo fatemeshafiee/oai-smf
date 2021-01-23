@@ -32,7 +32,6 @@
  *      contact@openairinterface.org
  */
 
-
 #include "IndividualSubscriptionDocumentApiImpl.h"
 
 namespace oai {

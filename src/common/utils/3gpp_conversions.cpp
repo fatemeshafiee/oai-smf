@@ -148,7 +148,6 @@ void xgpp_conv::pco_core_to_nas(
 void xgpp_conv::sm_context_create_data_from_openapi(
     const oai::smf_server::model::SmContextMessage& scd,
     smf::pdu_session_create_sm_context_request& pcr) {
-
   Logger::smf_app().debug(
       "Convert SmContextMessage (OpenAPI) to "
       "pdu_session_create_sm_context_request");
@@ -156,7 +155,7 @@ void xgpp_conv::sm_context_create_data_from_openapi(
   oai::smf_server::model::SmContextCreateData context_data = scd.getJsonData();
 
   std::string n1_sm_msg = scd.getBinaryDataN1SmMessage();
-  //N1 SM Message
+  // N1 SM Message
   pcr.set_n1_sm_message(n1_sm_msg);
   Logger::smf_app().debug("N1 SM message: %s", n1_sm_msg.c_str());
 

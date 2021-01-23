@@ -225,7 +225,8 @@ void smf_http2_server::start() {
                 return;
               }
 
-            } else if (method.compare("release") == 0) {  // smContextReleaseData
+            } else if (
+                method.compare("release") == 0) {  // smContextReleaseData
               Logger::smf_api_server().info(
                   "Handle Release SM Context Request from AMF");
 
@@ -293,7 +294,8 @@ void smf_http2_server::create_sm_contexts_handler(
   // set api root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
       // m_address + ":" + std::to_string(m_port) +
-		  NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL);
+      NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version +
+      NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL);
 
   // supi
   supi_t supi             = {.length = 0};
@@ -474,8 +476,8 @@ void smf_http2_server::update_sm_context_handler(
    * TS 23.502 */
   // TODO: Existing PDU session, step 3, SUPI, DNN, S-NSSAIs, SM Context ID, AMF
   // ID, Request Type, N1 SM Container (PDU Session Establishment Request), User
-  // location, Access Type, RAT Type, PEI step 15. (SM Context ID -> SCID, N2 SM,
-  // Request Type)(Initial Request)
+  // location, Access Type, RAT Type, PEI step 15. (SM Context ID -> SCID, N2
+  // SM, Request Type)(Initial Request)
   // TODO: verify why Request Type is not define in smContextUpdateData
   /* AMF-initiated with a release indication to request the release of the PDU
    * Session  (step 3.d, section 4.3.4.2@3GPP TS 23.502)*/

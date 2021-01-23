@@ -53,9 +53,9 @@ int smf_app::pco_push_protocol_or_container_id(
   pco_item.length_of_protocol_id_contents =
       poc_id->length_of_protocol_id_contents;
   pco_item.protocol_id_contents = poc_id->protocol_id_contents;
-//  assert(pco_item.length_of_protocol_id_contents ==
-//    				pco_item.protocol_id_contents.size());
-//    pco_item.protocol_id_contents = nullptr;
+  //  assert(pco_item.length_of_protocol_id_contents ==
+  //    				pco_item.protocol_id_contents.size());
+  //    pco_item.protocol_id_contents = nullptr;
 
   pco.protocol_or_container_ids.push_back(pco_item);
   pco.num_protocol_or_container_id += 1;

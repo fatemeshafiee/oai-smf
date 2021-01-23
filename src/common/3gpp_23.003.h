@@ -45,7 +45,7 @@ typedef struct plmn_s {
 
 #define INVALID_TMSI                                                           \
   UINT32_MAX /*!< \brief  The network shall not allocate a TMSI with all 32    \
-                bits equal to 1 (this is because the TMSI must be stored in                                   \
+                bits equal to 1 (this is because the TMSI must be stored in    \
                 the SIM, and the SIM uses 4 octets with all bits               \
                             equal to 1 to indicate that no valid TMSI is       \
                 available).  */

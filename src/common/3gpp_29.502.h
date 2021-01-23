@@ -110,14 +110,14 @@ enum class n2_sm_info_type_e {
   PDU_RES_NTY_REL    = 10,  // PDU Session Resource Notify Released Transfer
   PDU_RES_MOD_IND    = 11,  // PDU Session Resource Modify Indication Transfer
   PDU_RES_MOD_CFM    = 12,  // PDU Session Resource Modify Confirm Transfer
-  PATH_SWITCH_REQ = 13,     // Path Switch Request Transfer
+  PATH_SWITCH_REQ    = 13,  // Path Switch Request Transfer
   PATH_SWITCH_SETUP_FAIL = 14,  // Path Switch Request Setup Failed Transfer
   PATH_SWITCH_REQ_ACK    = 15,  // Path Switch Request Acknowledge Transfer
   PATH_SWITCH_REQ_FAIL   = 16,  // Path Switch Request Unsuccessful Transfer
-  HANDOVER_REQUIRED = 17,       // Handover Required Transfer
-  HANDOVER_CMD = 18,            // Handover Command Transfer
-  HANDOVER_PREP_FAIL = 19,      // Handover Preparation Unsuccessful Transfer
-  HANDOVER_REQ_ACK   = 20,      // Handover Request Acknowledge Transfer
+  HANDOVER_REQUIRED      = 17,  // Handover Required Transfer
+  HANDOVER_CMD           = 18,  // Handover Command Transfer
+  HANDOVER_PREP_FAIL     = 19,  // Handover Preparation Unsuccessful Transfer
+  HANDOVER_REQ_ACK       = 20,  // Handover Request Acknowledge Transfer
   HANDOVER_RES_ALLOC_FAIL =
       21,  // Handover Resource Allocation Unsuccessful Transfer
   SECONDARY_RAT_USAGE = 22  // Secondary RAT Data Usage Report Transfer

@@ -180,8 +180,8 @@ void IndividualSMContextApiImpl::update_sm_context(
    * TS 23.502 */
   // TODO: Existing PDU session, step 3, SUPI, DNN, S-NSSAIs, SM Context ID, AMF
   // ID, Request Type, N1 SM Container (PDU Session Establishment Request), User
-  // location, Access Type, RAT Type, PEI step 15. (SM Context ID -> SCID, N2 SM,
-  // Request Type)(Initial Request)
+  // location, Access Type, RAT Type, PEI step 15. (SM Context ID -> SCID, N2
+  // SM, Request Type)(Initial Request)
   // TODO: verify why Request Type is not define in smContextUpdateData
   /* AMF-initiated with a release indication to request the release of the PDU
    * Session  (step 3.d, section 4.3.4.2@3GPP TS 23.502)*/

@@ -222,8 +222,8 @@ int encode_pdu_session_establishment_accept(
   else
     encoded += encoded_result;
   // TODO: In Wireshark Version 3.2.2 (Git commit a3efece3d640), SSC Mode (4
-  // bit) + PDU session type (4 bit) = 1 byte, so disable encode SSC Mode for the
-  // moment, Should be verified later
+  // bit) + PDU session type (4 bit) = 1 byte, so disable encode SSC Mode for
+  // the moment, Should be verified later
   /*  if((encoded_result = encode_ssc_mode
    (pdu_session_establishment_accept->sscmode, 0,
    buffer+encoded,len-encoded))<0) return encoded_result; else encoded +=

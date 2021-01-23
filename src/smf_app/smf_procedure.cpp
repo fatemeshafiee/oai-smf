@@ -331,7 +331,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
   smf_qos_flow default_qos_flow = {};
   // flow_updated info will be used to construct N1,N2 container
   qos_flow_context_updated flow_updated = {};
-  QOSRulesIE qos_rule = {};
+  QOSRulesIE qos_rule                   = {};
 
   flow_updated.set_cause(REQUEST_ACCEPTED);
   if (not sps->get_default_qos_flow(default_qos_flow)) {
