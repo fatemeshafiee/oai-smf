@@ -25,6 +25,10 @@ include_directories(${SRC_TOP_DIR}/common/utils)
 include_directories(${SRC_TOP_DIR}/common/utils/bstr)
 include_directories(${SRC_TOP_DIR}/itti)
 include_directories(${SRC_TOP_DIR}/common/nas)
+include_directories(${SRC_TOP_DIR}/api-server/model)
+include_directories(${SRC_TOP_DIR}/smf_app)
+include_directories(${SRC_TOP_DIR}/nas/ies)
+include_directories(${SRC_TOP_DIR}/ngap/asn1c)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 
 set(CN_UTILS_SRC STATIC

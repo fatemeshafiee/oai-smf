@@ -34,6 +34,8 @@
 #include "endpoint.hpp"
 #include "3gpp_24.008.h"
 #include "nas_lib.h"
+#include "SmContextMessage.h"
+#include "smf_msg.hpp"
 
 namespace xgpp_conv {
 
@@ -44,13 +46,17 @@ void pdn_ip_to_pfcp_ue_ip_address(
     const struct in_addr& ipv4_address, const struct in6_addr ipv6_address,
     pfcp::ue_ip_address_t& ue_ip_address);
 
-void protocol_configuration_options_nas_to_core(
+void pco_nas_to_core(
     const protocol_configuration_options_nas_t& pco_nas,
     protocol_configuration_options_t& pco);
 
-void protocol_configuration_options_core_to_nas(
+void pco_core_to_nas(
     const protocol_configuration_options_t& pco,
     protocol_configuration_options_nas_t& pco_nas);
+void sm_context_create_data_from_openapi(
+    const oai::smf_server::model::SmContextMessage& scd,
+    smf::pdu_session_create_sm_context_request& pcr);
+
 }  // namespace xgpp_conv
 
 #endif /* FILE_3GPP_CONVERSIONS_HPP_SEEN */

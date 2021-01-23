@@ -729,7 +729,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   //         >
   //     0) {
   protocol_configuration_options_t pco = {};
-  xgpp_conv::protocol_configuration_options_nas_to_core(
+  xgpp_conv::pco_nas_to_core(
       decoded_nas_msg.plain.sm.pdu_session_establishment_request
           .extendedprotocolconfigurationoptions,
       pco);

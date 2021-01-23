@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <inttypes.h>
+#include "SmContextCreateData.h"
 
 //------------------------------------------------------------------------------
 void xgpp_conv::paa_to_pfcp_ue_ip_address(
@@ -84,7 +85,7 @@ void xgpp_conv::pdn_ip_to_pfcp_ue_ip_address(
   }
 }
 
-void xgpp_conv::protocol_configuration_options_nas_to_core(
+void xgpp_conv::pco_nas_to_core(
     const protocol_configuration_options_nas_t& pco_nas,
     protocol_configuration_options_t& pco) {
   pco.ext                          = pco_nas.ext;
@@ -119,7 +120,7 @@ void xgpp_conv::protocol_configuration_options_nas_to_core(
   }
 }
 
-void xgpp_conv::protocol_configuration_options_core_to_nas(
+void xgpp_conv::pco_core_to_nas(
     const protocol_configuration_options_t& pco,
     protocol_configuration_options_nas_t& pco_nas) {
   pco_nas.ext                          = pco.ext;
@@ -142,4 +143,89 @@ void xgpp_conv::protocol_configuration_options_core_to_nas(
         (void*) pco.protocol_or_container_ids[i].protocol_id_contents.c_str(),
         pco.protocol_or_container_ids[i].protocol_id_contents.length());
   }
+}
+
+void xgpp_conv::sm_context_create_data_from_openapi(
+    const oai::smf_server::model::SmContextMessage& scd,
+    smf::pdu_session_create_sm_context_request& pcr) {
+
+  Logger::smf_app().debug(
+      "Convert SmContextMessage (OpenAPI) to "
+      "pdu_session_create_sm_context_request");
+
+  oai::smf_server::model::SmContextCreateData context_data = scd.getJsonData();
+
+  std::string n1_sm_msg = scd.getBinaryDataN1SmMessage();
+  //N1 SM Message
+  pcr.set_n1_sm_message(n1_sm_msg);
+  Logger::smf_app().debug("N1 SM message: %s", n1_sm_msg.c_str());
+
+  // supi
+  supi_t supi             = {.length = 0};
+  std::size_t pos         = context_data.getSupi().find("-");
+  std::string supi_str    = context_data.getSupi().substr(pos + 1);
+  std::string supi_prefix = context_data.getSupi().substr(0, pos);
+  smf_string_to_supi(&supi, supi_str.c_str());
+  pcr.set_supi(supi);
+  pcr.set_supi_prefix(supi_prefix);
+  Logger::smf_app().debug(
+      "SUPI %s, SUPI Prefix %s, IMSI %s", context_data.getSupi().c_str(),
+      supi_prefix.c_str(), supi_str.c_str());
+
+  // dnn
+  Logger::smf_app().debug("DNN %s", context_data.getDnn().c_str());
+  pcr.set_dnn(context_data.getDnn().c_str());
+
+  // S-Nssai
+  Logger::smf_app().debug(
+      "S-NSSAI SST %d, SD %s", context_data.getSNssai().getSst(),
+      context_data.getSNssai().getSd().c_str());
+  snssai_t snssai(
+      context_data.getSNssai().getSst(), context_data.getSNssai().getSd());
+  pcr.set_snssai(snssai);
+
+  // PDU session ID
+  Logger::smf_app().debug("PDU Session ID %d", context_data.getPduSessionId());
+  pcr.set_pdu_session_id(context_data.getPduSessionId());
+
+  // AMF ID (ServingNFId)
+  Logger::smf_app().debug(
+      "ServingNfId %s", context_data.getServingNfId().c_str());
+  pcr.set_serving_nf_id(context_data.getServingNfId()
+                            .c_str());  // TODO: should be verified that AMF ID
+                                        // is stored in GUAMI or ServingNfId
+
+  // Request Type
+  Logger::smf_app().debug(
+      "RequestType %s", context_data.getRequestType().c_str());
+  pcr.set_request_type(context_data.getRequestType());
+  // PCF ID
+  // Priority Access
+  // User Location Information
+  // Access Type
+  // PEI
+  // GPSI
+  // UE presence in LADN service area
+  // Guami
+  // servingNetwork
+  // anType
+  // UETimeZone
+  // SMContextStatusUri
+  pcr.set_sm_context_status_uri(context_data.getSmContextStatusUri());
+  // PCFId
+
+  // DNN Selection Mode
+  Logger::smf_app().debug("SelMode %s", context_data.getSelMode().c_str());
+  pcr.set_dnn_selection_mode(context_data.getSelMode().c_str());
+
+  // Subscription for PDU Session Status Notification
+  // Trace requirement
+
+  // SSC mode (Optional)
+  // 5GSM capability (Optional)
+  // Maximum number of supported (Optional)
+  // Maximum number of supported packet filters (Optional)
+  // Always-on PDU session requested (Optional)
+  // SM PDU DN request container (Optional)
+  // Extended protocol configuration options (Optional) e.g, FOR DHCP
 }

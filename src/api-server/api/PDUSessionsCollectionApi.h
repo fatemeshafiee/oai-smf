@@ -29,6 +29,7 @@
 #include "PduSessionCreateError.h"
 #include "PduSessionCreatedData.h"
 #include "ProblemDetails.h"
+#include "smf.h"
 
 namespace oai {
 namespace smf_server {
@@ -42,7 +43,7 @@ class PDUSessionsCollectionApi {
   virtual ~PDUSessionsCollectionApi() {}
   void init();
 
-  const std::string base = "/nsmf-pdusession/";
+  const std::string base = NSMF_PDU_SESSION_BASE;
 
  private:
   void setupRoutes();

@@ -41,6 +41,7 @@
 #include "mime_parser.hpp"
 #include "3gpp_29.500.h"
 #include "smf_config.hpp"
+#include "smf.h"
 
 using namespace nghttp2::asio_http2;
 using namespace nghttp2::asio_http2::server;
@@ -292,7 +293,7 @@ void smf_http2_server::create_sm_contexts_handler(
   // set api root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
       // m_address + ":" + std::to_string(m_port) +
-      "/nsmf-pdusession/" + smf_cfg.sbi_api_version + "/sm-contexts");
+		  NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL);
 
   // supi
   supi_t supi             = {.length = 0};
