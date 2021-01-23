@@ -36,5 +36,5 @@
 
 using namespace smf;
 
-extern smf::smf_app *smf_app_inst;
-extern itti_mw *itti_inst;
+extern smf::smf_app* smf_app_inst;
+extern itti_mw* itti_inst;

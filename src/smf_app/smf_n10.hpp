@@ -45,8 +45,8 @@ class smf_n10 {
 
  public:
   smf_n10();
-  smf_n10(smf_n10 const &) = delete;
-  void operator=(smf_n10 const &) = delete;
+  smf_n10(smf_n10 const&) = delete;
+  void operator=(smf_n10 const&) = delete;
 
   /*
    * Get SM subscription data from UDM
@@ -58,7 +58,7 @@ class smf_n10 {
    *
    */
   bool get_sm_data(
-      const supi64_t &supi, const std::string &dnn, const snssai_t &snssai,
+      const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
       std::shared_ptr<session_management_subscription> subscription);
 
   /*

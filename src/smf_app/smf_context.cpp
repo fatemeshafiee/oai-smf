@@ -2870,20 +2870,23 @@ void smf_context::update_qos_info(
   QOSFlowDescriptionsContents qos_flow_description_content = {};
 
   // Only one flow description for new requested QoS Flow
-//  QOSFlowDescriptionsContents* qos_flow_description =
-//      (QOSFlowDescriptionsContents*) calloc(
-//          number_of_flow_descriptions, sizeof(QOSFlowDescriptionsContents));
+  //  QOSFlowDescriptionsContents* qos_flow_description =
+  //      (QOSFlowDescriptionsContents*) calloc(
+  //          number_of_flow_descriptions, sizeof(QOSFlowDescriptionsContents));
 
   if (number_of_flow_descriptions > 0) {
-//    qos_flow_description = nas_msg.plain.sm.pdu_session_modification_request
-//                               .qosflowdescriptions.qosflowdescriptionscontents;
+    //    qos_flow_description =
+    //    nas_msg.plain.sm.pdu_session_modification_request
+    //                               .qosflowdescriptions.qosflowdescriptionscontents;
 
     for (int i = 0; i < number_of_flow_descriptions; i++) {
-      if (nas_msg.plain.sm.pdu_session_modification_request
-              .qosflowdescriptions.qosflowdescriptionscontents[i].qfi == NO_QOS_FLOW_IDENTIFIER_ASSIGNED) {
+      if (nas_msg.plain.sm.pdu_session_modification_request.qosflowdescriptions
+              .qosflowdescriptionscontents[i]
+              .qfi == NO_QOS_FLOW_IDENTIFIER_ASSIGNED) {
         // TODO: generate new QFI
-        generated_qfi.qfi                = (uint8_t) 60;  // hardcoded for now
-        qos_flow_description_content     = nas_msg.plain.sm.pdu_session_modification_request
+        generated_qfi.qfi = (uint8_t) 60;  // hardcoded for now
+        qos_flow_description_content =
+            nas_msg.plain.sm.pdu_session_modification_request
                 .qosflowdescriptions.qosflowdescriptionscontents[i];
         qos_flow_description_content.qfi = generated_qfi.qfi;
         break;
@@ -3005,7 +3008,7 @@ void smf_context::update_qos_info(
     i++;
   }
 
-//  free_wrapper((void**) &qos_flow_description);
+  //  free_wrapper((void**) &qos_flow_description);
 }
 
 //------------------------------------------------------------------------------

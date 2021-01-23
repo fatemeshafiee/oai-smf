@@ -55,7 +55,7 @@
 #define SMF_CONFIG_STRING_SBI_HTTP2_PORT "HTTP2_PORT"
 #define SMF_CONFIG_STRING_API_VERSION "API_VERSION"
 
-#define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO \
+#define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO                                   \
   "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 
 #define SMF_CONFIG_STRING_IP_ADDRESS_POOL "IP_ADDRESS_POOL"
@@ -70,10 +70,10 @@
 #define SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER "-"
 #define SMF_CONFIG_STRING_IPV6_ADDRESS_PREFIX_DELIMITER "/"
 #define SMF_CONFIG_STRING_DEFAULT_DNS_IPV4_ADDRESS "DEFAULT_DNS_IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV4_ADDRESS \
+#define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV4_ADDRESS                         \
   "DEFAULT_DNS_SEC_IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS "DEFAULT_DNS_IPV6_ADDRESS"
-#define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS \
+#define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS                         \
   "DEFAULT_DNS_SEC_IPV6_ADDRESS"
 #define SMF_CONFIG_STRING_UE_MTU "UE_MTU"
 
@@ -116,7 +116,7 @@
 
 #define SMF_CONFIG_STRING_LOCAL_CONFIGURATION "LOCAL_CONFIGURATION"
 #define SMF_CONFIG_STRING_USE_LOCAL_CONFIGURATION "USE_LOCAL_CONFIGURATION"
-#define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST \
+#define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST                 \
   "SESSION_MANAGEMENT_SUBSCRIPTION_LIST"
 #define SMF_CONFIG_STRING_NSSAI_SST "NSSAI_SST"
 #define SMF_CONFIG_STRING_NSSAI_SD "NSSAI_SD"
@@ -124,13 +124,13 @@
 #define SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE "DEFAULT_SESSION_TYPE"
 #define SMF_CONFIG_STRING_DEFAULT_SSC_MODE "DEFAULT_SSC_MODE"
 #define SMF_CONFIG_STRING_QOS_PROFILE_5QI "QOS_PROFILE_5QI"
-#define SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL \
+#define SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL                           \
   "QOS_PROFILE_PRIORITY_LEVEL"
-#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL \
+#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL                       \
   "QOS_PROFILE_ARP_PRIORITY_LEVEL"
-#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP \
+#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP                           \
   "QOS_PROFILE_ARP_PREEMPTCAP"
-#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN \
+#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN                          \
   "QOS_PROFILE_ARP_PREEMPTVULN"
 #define SMF_CONFIG_STRING_SESSION_AMBR_UL "SESSION_AMBR_UL"
 #define SMF_CONFIG_STRING_SESSION_AMBR_DL "SESSION_AMBR_DL"
@@ -158,11 +158,11 @@ typedef struct itti_cfg_s {
 
 class smf_config {
  private:
-  int load_itti(const libconfig::Setting &itti_cfg, itti_cfg_t &cfg);
-  int load_interface(const libconfig::Setting &if_cfg, interface_cfg_t &cfg);
+  int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
+  int load_interface(const libconfig::Setting& if_cfg, interface_cfg_t& cfg);
   int load_thread_sched_params(
-      const libconfig::Setting &thread_sched_params_cfg,
-      util::thread_sched_params &cfg);
+      const libconfig::Setting& thread_sched_params_cfg,
+      util::thread_sched_params& cfg);
 
  public:
   /* Reader/writer lock for this configuration */
@@ -257,66 +257,66 @@ class smf_config {
     for (int i = 0; i < SMF_NUM_DNN_MAX; i++) {
       dnn[i] = {};
     }
-    default_dnsv4.s_addr = INADDR_ANY;
+    default_dnsv4.s_addr     = INADDR_ANY;
     default_dns_secv4.s_addr = INADDR_ANY;
-    default_dnsv6 = in6addr_any;
-    default_dns_secv6 = in6addr_any;
+    default_dnsv6            = in6addr_any;
+    default_dns_secv6        = in6addr_any;
 
-    num_ue_pool = 0;
+    num_ue_pool   = 0;
     num_paa6_pool = 0;
     for (int i = 0; i < SMF_NUM_UE_POOL_MAX; i++) {
-      ue_pool_range_low[i] = {};
-      ue_pool_range_high[i] = {};
-      ue_pool_network[i] = {};
-      ue_pool_netmask[i] = {};
-      paa_pool6_prefix[i] = {};
+      ue_pool_range_low[i]    = {};
+      ue_pool_range_high[i]   = {};
+      ue_pool_network[i]      = {};
+      ue_pool_netmask[i]      = {};
+      paa_pool6_prefix[i]     = {};
       paa_pool6_prefix_len[i] = {};
-      ue_pool_excluded[i] = {};
+      ue_pool_excluded[i]     = {};
     }
     force_push_pco = true;
-    ue_mtu = 1500;
+    ue_mtu         = 1500;
 
     itti.itti_timer_sched_params.sched_priority = 85;
-    itti.n4_sched_params.sched_priority = 84;
-    itti.smf_app_sched_params.sched_priority = 84;
-    itti.async_cmd_sched_params.sched_priority = 84;
+    itti.n4_sched_params.sched_priority         = 84;
+    itti.smf_app_sched_params.sched_priority    = 84;
+    itti.async_cmd_sched_params.sched_priority  = 84;
 
     n4.thread_rd_sched_params.sched_priority = 90;
-    n4.port = pfcp::default_port;
+    n4.port                                  = pfcp::default_port;
 
     sbi.thread_rd_sched_params.sched_priority = 90;
-    sbi.port = 80;
+    sbi.port                                  = 80;
 
     amf_addr.ipv4_addr.s_addr = INADDR_ANY;
-    amf_addr.port = 80;
-    amf_addr.api_version = "v1";
+    amf_addr.port             = 80;
+    amf_addr.api_version      = "v1";
     udm_addr.ipv4_addr.s_addr = INADDR_ANY;
-    udm_addr.port = 80;
-    udm_addr.api_version = "v1";
+    udm_addr.port             = 80;
+    udm_addr.api_version      = "v1";
 
     nrf_addr.ipv4_addr.s_addr = INADDR_ANY;
-    nrf_addr.port = 80;
-    nrf_addr.api_version = "v1";
+    nrf_addr.port             = 80;
+    nrf_addr.api_version      = "v1";
 
-    local_configuration = false;
+    local_configuration                 = false;
     num_session_management_subscription = 0;
 
     for (int i = 0; i < SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX; i++) {
       session_management_subscription[i] = {};
     }
-    sbi_http2_port = 8080;
+    sbi_http2_port  = 8080;
     sbi_api_version = "v1";
   };
   ~smf_config();
   void lock() { m_rw_lock.lock(); };
   void unlock() { m_rw_lock.unlock(); };
-  int load(const std::string &config_file);
+  int load(const std::string& config_file);
   int finalize();
   void display();
-  int get_pfcp_node_id(pfcp::node_id_t &node_id);
-  int get_pfcp_fseid(pfcp::fseid_t &fseid);
-  bool is_dotted_dnn_handled(const std::string &dnn,
-                             const pdu_session_type_t &pdn_session_type);
+  int get_pfcp_node_id(pfcp::node_id_t& node_id);
+  int get_pfcp_fseid(pfcp::fseid_t& fseid);
+  bool is_dotted_dnn_handled(
+      const std::string& dnn, const pdu_session_type_t& pdn_session_type);
   std::string get_default_dnn();
 };
 

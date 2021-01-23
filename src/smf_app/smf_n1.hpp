@@ -46,127 +46,127 @@ class smf_n1 {
  private:
  public:
   smf_n1(){};
-  smf_n1(smf_n1 const &) = delete;
-  void operator=(smf_n1 const &) = delete;
+  smf_n1(smf_n1 const&) = delete;
+  void operator=(smf_n1 const&) = delete;
 
  public:
-  static smf_n1 &get_instance() {
+  static smf_n1& get_instance() {
     static smf_n1 instance;
     return instance;
   }
 
   /*
    * Create N1 SM Container: PDU Session Establishment Accept
-   * @param [pdu_session_create_sm_context_response] sm_context_res: include
+   * @param [pdu_session_create_sm_context_response&] sm_context_res: include
    * necessary information for encoding NGAP msg
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
-   * @param [uint8_t] sm_cause store NAS Cause
+   * @param [cause_value_5gsm_e] sm_cause store NAS Cause
    * @return boolean: True if the NGAP message has been created successfully,
    * otherwise return false
    *
    */
   bool create_n1_pdu_session_establishment_accept(
-      pdu_session_create_sm_context_response &sm_context_res,
-      std::string &nas_msg_str, cause_value_5gsm_e sm_cause);
+      pdu_session_create_sm_context_response& sm_context_res,
+      std::string& nas_msg_str, cause_value_5gsm_e sm_cause);
 
   /*
    * Create N1 SM Container: PDU Session Establishment Reject
-   * @param [pdu_session_msg] msg: include necessary information for encoding
+   * @param [pdu_session_msg&] msg: include necessary information for encoding
    * NGAP msg
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
-   * @param [uint8_t] sm_cause store NAS Cause
+   * @param [cause_value_5gsm_e] sm_cause store NAS Cause
    * @return boolean: True if the NGAP message has been created successfully,
    * otherwise return false
    *
    */
-  bool create_n1_pdu_session_establishment_reject(pdu_session_msg &msg,
-                                                  std::string &nas_msg_str,
-                                                  cause_value_5gsm_e sm_cause);
+  bool create_n1_pdu_session_establishment_reject(
+      pdu_session_msg& msg, std::string& nas_msg_str,
+      cause_value_5gsm_e sm_cause);
   /*
    * Create N1 SM Container: PDU Session Modification Command
    * Included in PDU Session Update SM Context Response (PDU Session
    * Modification UE-Initiated procedure - step 1)
-   * @param [pdu_session_msg] msg: include necessary information for encoding
-   * NGAP msg
+   * @param [pdu_session_update_sm_context_response&] msg: include necessary
+   * information for encoding NGAP msg
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
-   * @param [uint8_t] sm_cause store NAS Cause
+   * @param [cause_value_5gsm_e] sm_cause store NAS Cause
    * @return boolean: True if the NGAP message has been created successfully,
    * otherwise return false
    *
    */
   bool create_n1_pdu_session_modification_command(
-      pdu_session_update_sm_context_response &msg, std::string &nas_msg_str,
+      pdu_session_update_sm_context_response& msg, std::string& nas_msg_str,
       cause_value_5gsm_e sm_cause);
 
   /*
    * Create N1 SM Container: PDU Session Modification Command
    * Included in N1N2MessageTransfer Request (PDU Session Modification
    * SMF-Requested, step 1 (from SMF to AMF))
-   * @param [pdu_session_msg] msg: include necessary information for encoding
-   * NGAP msg
+   * @param [pdu_session_modification_network_requested&] msg: include necessary
+   * information for encoding NGAP msg
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
-   * @param [uint8_t] sm_cause store NAS Cause
+   * @param [cause_value_5gsm_e] sm_cause store NAS Cause
    * @return boolean: True if the NGAP message has been created successfully,
    * otherwise return false
    *
    */
   bool create_n1_pdu_session_modification_command(
-      pdu_session_modification_network_requested &msg, std::string &nas_msg_str,
+      pdu_session_modification_network_requested& msg, std::string& nas_msg_str,
       cause_value_5gsm_e sm_cause);
 
   /*
    * Create N1 SM Container: PDU Session Release Reject
    * Included in PDU Session Update SM Context Response (PDU Session Release
    * UE-Initiated, step 1)
-   * @param [pdu_session_msg] msg: include necessary information for encoding
-   * NGAP msg
+   * @param [pdu_session_update_sm_context_request&] msg: include necessary
+   * information for encoding NGAP msg
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
-   * @param [uint8_t] sm_cause store NAS Cause
+   * @param [cause_value_5gsm_e] sm_cause store NAS Cause
    * @return boolean: True if the NGAP message has been created successfully,
    * otherwise return false
    *
    */
   bool create_n1_pdu_session_release_reject(
-      pdu_session_update_sm_context_request &sm_context_res,
-      std::string &nas_msg_str, cause_value_5gsm_e sm_cause);
+      pdu_session_update_sm_context_request& sm_context_res,
+      std::string& nas_msg_str, cause_value_5gsm_e sm_cause);
 
   /*
    * Create N1 SM Container: PDU Session Release Command
    * Included in PDU Session Update SM Context Response (PDU Session Release
    * UE-Initiated, step 1)
-   * @param [pdu_session_msg] msg: include necessary information for encoding
-   * NGAP msg
+   * @param [pdu_session_update_sm_context_response&] msg: include necessary
+   * information for encoding NGAP msg
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
-   * @param [uint8_t] sm_cause store NAS Cause
+   * @param [cause_value_5gsm_e] sm_cause store NAS Cause
    * @return boolean: True if the NGAP message has been created successfully,
    * otherwise return false
    *
    */
   bool create_n1_pdu_session_release_command(
-      pdu_session_update_sm_context_response &msg, std::string &nas_msg_str,
+      pdu_session_update_sm_context_response& msg, std::string& nas_msg_str,
       cause_value_5gsm_e sm_cause);
 
   /*
    * Create N1 SM Container: PDU Session Release Command
    * Included in N1N2MessageTransfer Request (PDU Session Release SMF-Requested,
    * step 1)
-   * @param [pdu_session_msg] msg: include necessary information for encoding
-   * NGAP msg
+   * @param [pdu_session_modification_network_requested&] msg: include necessary
+   * information for encoding NGAP msg
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
-   * @param [uint8_t] sm_cause store NAS Cause
+   * @param [cause_value_5gsm_e] sm_cause store NAS Cause
    * @return boolean: True if the NGAP message has been created successfully,
    * otherwise return false
    *
    */
   bool create_n1_pdu_session_release_command(
-      pdu_session_modification_network_requested &msg, std::string &nas_msg_str,
+      pdu_session_modification_network_requested& msg, std::string& nas_msg_str,
       cause_value_5gsm_e sm_cause);
 
   /*
@@ -175,8 +175,8 @@ class smf_n1 {
    * @param [const std::string&] n1_sm_msg N1 SM Container
    * @return status of the decode process
    */
-  int decode_n1_sm_container(nas_message_t &nas_msg,
-                             const std::string &n1_sm_msg);
+  int decode_n1_sm_container(
+      nas_message_t& nas_msg, const std::string& n1_sm_msg);
 };
 
 }  // namespace smf

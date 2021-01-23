@@ -33,17 +33,17 @@
 #include "smf_subscription.hpp"
 
 using namespace smf;
-extern smf::smf_app *smf_app_inst;
-extern itti_mw *itti_inst;
+extern smf::smf_app* smf_app_inst;
+extern itti_mw* itti_inst;
 
 //------------------------------------------------------------------------------
 bs2::connection smf_event::subscribe_sm_context_status(
-    const sm_context_status_sig_t::slot_type &sig) {
+    const sm_context_status_sig_t::slot_type& sig) {
   return sm_context_status.connect(sig);
 }
 
 //------------------------------------------------------------------------------
 bs2::connection smf_event::subscribe_ee_pdu_session_release(
-    const ee_pdu_session_release_sig_t::slot_type &sig) {
+    const ee_pdu_session_release_sig_t::slot_type& sig) {
   return ee_pdu_session_release.connect(sig);
 }
