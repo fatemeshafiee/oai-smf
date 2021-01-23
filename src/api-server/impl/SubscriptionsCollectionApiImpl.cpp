@@ -39,6 +39,7 @@
 #include "3gpp_29.508.h"
 #include "itti_msg_sbi.hpp"
 #include "smf_config.hpp"
+#include "3gpp_conversions.hpp"
 
 extern smf::smf_config smf_cfg;
 
@@ -61,51 +62,16 @@ void SubscriptionsCollectionApiImpl::create_individual_subcription(
   Logger::smf_api_server().info(
       "SubscriptionsCollectionApiImpl::create_individual_subcription...");
 
-  // Step1. Create a  message and store the necessary information
+  // Create a  message and store the necessary information
   Logger::smf_api_server().debug(
       "Create a Event Exposure message and store the necessary information");
   smf::event_exposure_msg event_exposure = {};
 
-  // Supi
-  if (nsmfEventExposure.supiIsSet()) {
-    supi_t supi             = {.length = 0};
-    std::size_t pos         = nsmfEventExposure.getSupi().find("-");
-    std::string supi_str    = nsmfEventExposure.getSupi().substr(pos + 1);
-    std::string supi_prefix = nsmfEventExposure.getSupi().substr(0, pos);
-    smf_string_to_supi(&supi, supi_str.c_str());
+  // Convert from NsmfEventExposure to event_exposure_msg
+  xgpp_conv::smf_event_exposure_notification_from_openapi(
+      nsmfEventExposure, event_exposure);
 
-    event_exposure.set_supi(supi);
-    event_exposure.set_supi_prefix(supi_prefix);
-    Logger::smf_api_server().debug(
-        "SUPI %s, SUPI Prefix %s, IMSI %s", nsmfEventExposure.getSupi().c_str(),
-        supi_prefix.c_str(), supi_str.c_str());
-  }
-
-  // PDU session ID
-  if (nsmfEventExposure.pduSeIdIsSet()) {
-    Logger::smf_api_server().debug(
-        "PDU Session ID %d", nsmfEventExposure.getPduSeId());
-    event_exposure.set_pdu_session_id(nsmfEventExposure.getPduSeId());
-  }
-
-  event_exposure.set_notif_id(nsmfEventExposure.getNotifId());    // NotifId
-  event_exposure.set_notif_uri(nsmfEventExposure.getNotifUri());  // NotifUri
-
-  // EventSubscription: TODO
-  event_subscription_t event_subscription = {};
-  event_subscription.smf_event            = smf_event_t::SMF_EVENT_PDU_SES_REL;
-  std::vector<event_subscription_t> event_subscriptions = {};
-  event_subscriptions.push_back(event_subscription);
-  event_exposure.set_event_subs(event_subscriptions);
-
-  // std::vector<EventSubscription> eventSubscriptions;
-  // for (auto it: nsmfEventExposure.getEventSubs()){
-  // event_subscription.smf_event = it.getEvent();
-  // getDnaiChgType
-  // event_subscriptions.push_back(event_subscription);
-  //}
-
-  // Step 2. Handle the message in smf_app
+  // Handle the message in smf_app
   std::shared_ptr<itti_sbi_event_exposure_request> itti_msg =
       std::make_shared<itti_sbi_event_exposure_request>(
           TASK_SMF_N11, TASK_SMF_APP);
@@ -114,7 +80,7 @@ void SubscriptionsCollectionApiImpl::create_individual_subcription(
 
   evsub_id_t sub_id = m_smf_app->handle_event_exposure_subscription(itti_msg);
 
-  // send response
+  // Send response
   nlohmann::json json_data = {};
   to_json(json_data, nsmfEventExposure);
 

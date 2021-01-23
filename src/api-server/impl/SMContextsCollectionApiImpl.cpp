@@ -68,10 +68,11 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
       "necessary information");
   smf::pdu_session_create_sm_context_request sm_context_req_msg = {};
 
-  xgpp_conv::sm_context_create_data_from_openapi(
+  // convert from SmContextMessage to pdu_session_create_sm_context_request
+  xgpp_conv::sm_context_create_from_openapi(
       smContextMessage, sm_context_req_msg);
 
-  // Set api root to be used as location header in HTTP response
+  // Set API Root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
       m_address + base + smf_cfg.sbi_api_version +
       NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL);

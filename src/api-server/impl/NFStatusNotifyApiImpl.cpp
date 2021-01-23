@@ -38,6 +38,7 @@
 #include "smf_msg.hpp"
 #include "itti_msg_sbi.hpp"
 #include "smf_config.hpp"
+#include "3gpp_conversions.hpp"
 
 extern smf::smf_config smf_cfg;
 
@@ -59,21 +60,10 @@ void NFStatusNotifyApiImpl::receive_nf_status_notification(
       "NFStatusNotifyApiImpl, received a NF status notification...");
 
   smf::data_notification_msg notification_msg = {};
-  notification_msg.set_notification_event_type(notificationData.getEvent());
-  notification_msg.set_nf_instance_uri(notificationData.getNfInstanceUri());
+  // convert from NotificationData to data_notification_msg
+  xgpp_conv::data_notification_from_openapi(notificationData, notification_msg);
 
-  std::shared_ptr<smf::nf_profile> p = {};
-
-  // Only support UPF for now
-  if (notificationData.getNfProfile().getNfType() == "UPF")
-    p = std::make_shared<smf::upf_profile>();
-
-  nlohmann::json pj = {};
-  to_json(pj, notificationData.getNfProfile());
-  p.get()->from_json(pj);
-  notification_msg.set_profile(p);
-
-  // Step 2. Handle the message in smf_app
+  // Handle the message in smf_app
   std::shared_ptr<itti_sbi_notification_data> itti_msg =
       std::make_shared<itti_sbi_notification_data>(TASK_SMF_N11, TASK_SMF_APP);
   itti_msg->notification_msg = notification_msg;

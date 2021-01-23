@@ -33,6 +33,8 @@
 #include <ctype.h>
 #include <inttypes.h>
 #include "SmContextCreateData.h"
+#include "SmContextUpdateData.h"
+#include "SmContextReleaseData.h"
 
 //------------------------------------------------------------------------------
 void xgpp_conv::paa_to_pfcp_ue_ip_address(
@@ -145,12 +147,12 @@ void xgpp_conv::pco_core_to_nas(
   }
 }
 
-void xgpp_conv::sm_context_create_data_from_openapi(
+void xgpp_conv::sm_context_create_from_openapi(
     const oai::smf_server::model::SmContextMessage& scd,
     smf::pdu_session_create_sm_context_request& pcr) {
   Logger::smf_app().debug(
       "Convert SmContextMessage (OpenAPI) to "
-      "pdu_session_create_sm_context_request");
+      "PDUSession_CreateSMContext");
 
   oai::smf_server::model::SmContextCreateData context_data = scd.getJsonData();
 
@@ -227,4 +229,173 @@ void xgpp_conv::sm_context_create_data_from_openapi(
   // Always-on PDU session requested (Optional)
   // SM PDU DN request container (Optional)
   // Extended protocol configuration options (Optional) e.g, FOR DHCP
+}
+
+void xgpp_conv::sm_context_update_from_openapi(
+    const oai::smf_server::model::SmContextUpdateMessage& scu,
+    smf::pdu_session_update_sm_context_request& pur) {
+  Logger::smf_app().debug(
+      "Convert SmContextUpdateMessage (OpenAPI) to "
+      "PDUSession_UpdateSMContext");
+
+  oai::smf_server::model::SmContextUpdateData context_data = scu.getJsonData();
+
+  if (context_data.n2SmInfoIsSet()) {
+    // N2 SM (for Session establishment)
+    std::string n2_sm_information = scu.getBinaryDataN2SmInformation();
+    Logger::smf_app().debug("N2 SM Information %s", n2_sm_information.c_str());
+    pur.set_n2_sm_information(n2_sm_information);
+    pur.set_n2_sm_info_type(context_data.getN2SmInfoType());
+  }
+  if (context_data.n1SmMsgIsSet()) {
+    // N1 SM (for session modification)
+    std::string n1_sm_message = scu.getBinaryDataN1SmMessage();
+    Logger::smf_app().debug("N1 SM message %s", n1_sm_message.c_str());
+    pur.set_n1_sm_message(n1_sm_message);
+  }
+
+  /* UE-initiated Service Request Operation, section 4.2.3.2@3GPP TS 23.502 */
+  // PDU Session IDs, Operation Type, UE location Info, Access Type, RAT
+  // Type, UE presence in LADN service area, Indication of Access Type can be
+  // changed PDU Session IDs UpCnxState, for activation of user plane
+  // (see 5.2.2.3.2.2@3GPP TS 29.502, step 1)
+
+  if (context_data.upCnxStateIsSet())
+    pur.set_upCnx_state(context_data.getUpCnxState());
+
+  // Access Type (step 1 and 2)
+  if (context_data.anTypeIsSet()) pur.set_an_type(context_data.getAnType());
+
+  // RAT Type (step 1 and 2)
+  if (context_data.ratTypeIsSet()) pur.set_rat_type(context_data.getRatType());
+
+  // TODO:
+  // UE presence in LADN service area
+  // UE location information
+  // Indication of Access Type can be changed
+  // if (context_data.anTypeCanBeChangedIsSet())
+  // pur.set_access_type_can_be_changed(context_data.isAnTypeCanBeChanged());
+  // Step 15: N2 SM Info (AN Tunnel Info, List of accepted QoS Flow, List of
+  // rejected Qos Flows, PDU Session ID), RAT Type, Access Type
+
+  /* UE-initiated PDU Session Establishment Operation - section 4.3.2.2.1@3GPP
+   * TS 23.502 */
+  // TODO: Existing PDU session, step 3, SUPI, DNN, S-NSSAIs, SM Context ID, AMF
+  // ID, Request Type, N1 SM Container (PDU Session Establishment Request), User
+  // location, Access Type, RAT Type, PEI step 15. (SM Context ID -> SCID, N2
+  // SM, Request Type)(Initial Request)
+  // TODO: verify why Request Type is not define in context_data
+
+  /* AMF-initiated with a release indication to request the release of the PDU
+   * Session  (step 3.d, section 4.3.4.2@3GPP TS 23.502)*/
+  if (context_data.releaseIsSet()) {
+    pur.set_release(context_data.isRelease());
+  }
+
+  /* PDU Session Modification (SM Context ID -> SCID, N1/N2),
+   * section 4.3.3.2@3GPP TS 23.502: */
+  // step 1.a,UE-initiated: SM Context ID + N1 (PDU Session Modification
+  // Request) step 1.e (AN initiated modification): SM Context ID, N2 SM
+  // information (QFI, User location Information and an indication that the QoS
+  // Flow is released) step 7a, SM Context ID, N2 SM information, UE location
+  // information Step 11, SM Context ID, N1 SM (PDU Session Modification Command
+  // ACK), User location
+}
+
+void xgpp_conv::sm_context_release_from_openapi(
+    const oai::smf_server::model::SmContextReleaseMessage& srm,
+    smf::pdu_session_release_sm_context_request& prr) {
+  Logger::smf_app().debug(
+      "Convert SmContextReleaseMessage (OpenAPI) to "
+      "PDUSession_ReleaseSMContext");
+
+  oai::smf_server::model::SmContextReleaseData context_data = srm.getJsonData();
+
+  if (context_data.n2SmInfoIsSet()) {
+    // N2 SM (for Session establishment)
+    std::string n2_sm_information = srm.getBinaryDataN2SmInformation();
+    Logger::smf_app().debug("N2 SM Information %s", n2_sm_information.c_str());
+
+    std::string n2_sm_info_type = context_data.getN2SmInfoType();
+    prr.set_n2_sm_information(n2_sm_information);
+    prr.set_n2_sm_info_type(n2_sm_info_type);
+  }
+
+  // TODO: Initialize necessary values for sm context req from context_data
+  // cause:
+  // ngApCause:
+  // 5gMmCauseValue:
+  // ueLocation:
+  // ueTimeZone:
+  // addUeLocation:
+  // vsmfReleaseOnly:
+  // ismfReleaseOnly:
+}
+
+void xgpp_conv::data_notification_from_openapi(
+    const oai::smf_server::model::NotificationData& nd,
+    smf::data_notification_msg& dn_msg) {
+  Logger::smf_app().debug(
+      "Convert NotificationData (OpenAPI) to "
+      "Data Notification Msg");
+
+  dn_msg.set_notification_event_type(nd.getEvent());
+  dn_msg.set_nf_instance_uri(nd.getNfInstanceUri());
+
+  std::shared_ptr<smf::nf_profile> p = {};
+
+  // Only support UPF for now
+  if (nd.getNfProfile().getNfType() == "UPF")
+    p = std::make_shared<smf::upf_profile>();
+
+  nlohmann::json pj = {};
+  to_json(pj, nd.getNfProfile());
+  p.get()->from_json(pj);
+  dn_msg.set_profile(p);
+}
+
+void xgpp_conv::smf_event_exposure_notification_from_openapi(
+    const oai::smf_server::model::NsmfEventExposure& nee,
+    smf::event_exposure_msg& eem) {
+  Logger::smf_app().debug(
+      "Convert NsmfEventExposure (OpenAPI) to "
+      "Event Exposure Msg");
+
+  // Supi
+  if (nee.supiIsSet()) {
+    supi_t supi             = {.length = 0};
+    std::size_t pos         = nee.getSupi().find("-");
+    std::string supi_str    = nee.getSupi().substr(pos + 1);
+    std::string supi_prefix = nee.getSupi().substr(0, pos);
+    smf_string_to_supi(&supi, supi_str.c_str());
+
+    eem.set_supi(supi);
+    eem.set_supi_prefix(supi_prefix);
+    Logger::smf_api_server().debug(
+        "SUPI %s, SUPI Prefix %s, IMSI %s", nee.getSupi().c_str(),
+        supi_prefix.c_str(), supi_str.c_str());
+  }
+
+  // PDU session ID
+  if (nee.pduSeIdIsSet()) {
+    Logger::smf_api_server().debug("PDU Session ID %d", nee.getPduSeId());
+    eem.set_pdu_session_id(nee.getPduSeId());
+  }
+
+  eem.set_notif_id(nee.getNotifId());    // NotifId
+  eem.set_notif_uri(nee.getNotifUri());  // NotifUri
+
+  // EventSubscription: TODO
+  event_subscription_t event_subscription = {};
+  event_subscription.smf_event            = smf_event_t::SMF_EVENT_PDU_SES_REL;
+  std::vector<event_subscription_t> event_subscriptions = {};
+  event_subscriptions.push_back(event_subscription);
+  eem.set_event_subs(event_subscriptions);
+
+  // std::vector<EventSubscription> eventSubscriptions;
+  // for (auto it: nee.getEventSubs()){
+  // event_subscription.smf_event = it.getEvent();
+  // getDnaiChgType
+  // event_subscriptions.push_back(event_subscription);
+  //}
 }
