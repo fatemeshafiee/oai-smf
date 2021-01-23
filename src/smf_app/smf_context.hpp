@@ -259,7 +259,6 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    */
   upCnx_state_e get_upCnx_state() const;
 
-  // Called by GTPV2-C DELETE_SESSION_REQUEST
   // deallocate_ressources is for releasing related-resources prior to the
   // deletion of objects since shared_ptr is actually heavy used for handling
   // objects, deletion of object instances cannot be always guaranteed when

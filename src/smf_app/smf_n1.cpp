@@ -282,14 +282,6 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(
       EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
   sm_msg->header.pdu_session_identity = msg.get_pdu_session_id();
 
-  // PDU Session Establishment Reject is included in the following messages:
-  // 1 - PDU Session Create SM Context Response (PDU Session Establishment
-  // procedure - reject)  2 - N1N2MessageTransfer Request (PDU Session
-  // Establishment procedure - reject)  3-  PDU Session Update SM Context
-  // Response (PDU Session Establishment procedure - reject)​
-  // PDU_SESSION_CREATE_SM_CONTEXT_RESPONSE or
-  // PDU_SESSION_CREATE_SM_CONTEXT_REQUEST
-
   Logger::smf_n1().info("PDU_SESSION_ESTABLISHMENT_REJECT, encode starting...");
 
   // Fill the content of PDU Session Establishment Reject message
@@ -298,7 +290,7 @@ bool smf_n1::create_n1_pdu_session_establishment_reject(
       msg.get_pti().procedure_transaction_id;
   sm_msg->header.message_type = PDU_SESSION_ESTABLISHMENT_REJECT;
   Logger::smf_n1().debug(
-      "NAS header, Extended Protocol Discriminator  0x%x, Security Header "
+      "NAS header, Extended Protocol Discriminator 0x%x, Security Header "
       "Type: 0x%x",
       nas_msg.header.extended_protocol_discriminator,
       nas_msg.header.security_header_type);

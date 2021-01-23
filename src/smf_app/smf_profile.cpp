@@ -76,6 +76,7 @@ void nf_profile::set_nf_type(const std::string& type) {
 std::string nf_profile::get_nf_type() const {
   return nf_type;
 }
+
 //------------------------------------------------------------------------------
 void nf_profile::set_nf_status(const std::string& status) {
   nf_status = status;
@@ -150,6 +151,7 @@ void nf_profile::get_nf_snssais(std::vector<snssai_t>& s) const {
 void nf_profile::add_snssai(const snssai_t& s) {
   snssais.push_back(s);
 }
+
 //------------------------------------------------------------------------------
 void nf_profile::set_nf_ipv4_addresses(const std::vector<struct in_addr>& a) {
   ipv4_addresses = a;
@@ -159,6 +161,7 @@ void nf_profile::set_nf_ipv4_addresses(const std::vector<struct in_addr>& a) {
 void nf_profile::add_nf_ipv4_addresses(const struct in_addr& a) {
   ipv4_addresses.push_back(a);
 }
+
 //------------------------------------------------------------------------------
 void nf_profile::get_nf_ipv4_addresses(std::vector<struct in_addr>& a) const {
   a = ipv4_addresses;
@@ -205,7 +208,6 @@ void nf_profile::to_json(nlohmann::json& data) const {
     nlohmann::json tmp = {};
     tmp["sst"]         = s.sST;
     tmp["sd"]          = s.sD;
-    ;
     data["sNssais"].push_back(tmp);
   }
   // ipv4_addresses
@@ -216,8 +218,6 @@ void nf_profile::to_json(nlohmann::json& data) const {
 
   data["priority"] = priority;
   data["capacity"] = capacity;
-
-  // Logger::smf_app().debug("SMF profile to json:\n %s", data.dump().c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -248,8 +248,6 @@ void nf_profile::from_json(const nlohmann::json& data) {
       s.sST      = it["sst"].get<int>();
       s.sD       = it["sd"].get<std::string>();
       snssais.push_back(s);
-      // Logger::smf_app().debug("Added SNSSAI (SST %d, SD %s)", s.sST,
-      // s.sD.c_str());
     }
   }
 
@@ -266,7 +264,6 @@ void nf_profile::from_json(const nlohmann::json& data) {
         Logger::smf_app().warn(
             "Address conversion: Bad value %s", util::trim(address).c_str());
       }
-      // Logger::smf_app().debug("\tIPv4 Addr: %s", address.c_str());
       add_nf_ipv4_addresses(addr4);
     }
   }
