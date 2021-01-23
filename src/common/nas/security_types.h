@@ -53,14 +53,6 @@
 #define AUTN_LENGTH_BITS (128)
 #define AUTN_LENGTH_OCTETS (AUTN_LENGTH_BITS / 8)
 
-/* Some methods to convert a string to an int64_t */
-/*
- #define STRING_TO_64BITS(sTRING, cONTAINER)    \
-    sscanf(sTRING, "%" SCN64, cONTAINER)
- #define STRING_TO_U64BITS(sTRING, cONTAINER)    \
-    sscanf(sTRING, "%" SCNu64, cONTAINER)
- */
-
 /* Converts a string to 128 bits gmplib integer holder */
 #define STRING_TO_XBITS(sTRING, lENGTH, cONTAINER, rET)                        \
   do {                                                                         \

@@ -30,7 +30,6 @@
 #define FILE_3GPP_29_274_SEEN
 #include "common_root_types.h"
 #include "3gpp_24.008.h"
-#include "3gpp_commons.h"
 #include "conversions.hpp"
 #include "logger.hpp"  // for fmt::format in spdlog
 

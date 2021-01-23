@@ -1304,16 +1304,12 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   bool set_paa = false;
   paa_t paa    = {};
 
-  // Step 6. pco
+  // Step 6. PCO
   // section 6.2.4.2, TS 24.501
   // If the UE wants to use DHCPv4 for IPv4 address assignment, it shall
   // indicate that to the network within the Extended  protocol configuration
   // options IE in the PDU SESSION ESTABLISHMENT REQUEST  Extended protocol
   // configuration options: See subclause 10.5.6.3A in 3GPP TS 24.008.
-
-  // ExtendedProtocolConfigurationOptions epco =
-  // (sm_context_req_msg.get_nas_msg()).extendedprotocolconfigurationoptions;
-  // TODO: PCO
 
   protocol_configuration_options_t pco_req = {};
   smreq->req.get_epco(pco_req);
@@ -1374,7 +1370,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         Logger::smf_app().info(
             "UE requests to use DHCPv4 for IPv4 address assignment, this "
             "feature has not been supported yet!");
-        // TODO: DHCP
+        // TODO
       }
 
     } break;
@@ -2874,19 +2870,21 @@ void smf_context::update_qos_info(
   QOSFlowDescriptionsContents qos_flow_description_content = {};
 
   // Only one flow description for new requested QoS Flow
-  QOSFlowDescriptionsContents* qos_flow_description =
-      (QOSFlowDescriptionsContents*) calloc(
-          number_of_flow_descriptions, sizeof(QOSFlowDescriptionsContents));
+//  QOSFlowDescriptionsContents* qos_flow_description =
+//      (QOSFlowDescriptionsContents*) calloc(
+//          number_of_flow_descriptions, sizeof(QOSFlowDescriptionsContents));
 
   if (number_of_flow_descriptions > 0) {
-    qos_flow_description = nas_msg.plain.sm.pdu_session_modification_request
-                               .qosflowdescriptions.qosflowdescriptionscontents;
+//    qos_flow_description = nas_msg.plain.sm.pdu_session_modification_request
+//                               .qosflowdescriptions.qosflowdescriptionscontents;
 
     for (int i = 0; i < number_of_flow_descriptions; i++) {
-      if (qos_flow_description[i].qfi == NO_QOS_FLOW_IDENTIFIER_ASSIGNED) {
+      if (nas_msg.plain.sm.pdu_session_modification_request
+              .qosflowdescriptions.qosflowdescriptionscontents[i].qfi == NO_QOS_FLOW_IDENTIFIER_ASSIGNED) {
         // TODO: generate new QFI
         generated_qfi.qfi                = (uint8_t) 60;  // hardcoded for now
-        qos_flow_description_content     = qos_flow_description[i];
+        qos_flow_description_content     = nas_msg.plain.sm.pdu_session_modification_request
+                .qosflowdescriptions.qosflowdescriptionscontents[i];
         qos_flow_description_content.qfi = generated_qfi.qfi;
         break;
       }
@@ -3007,7 +3005,7 @@ void smf_context::update_qos_info(
     i++;
   }
 
-  free_wrapper((void**) &qos_flow_description);
+//  free_wrapper((void**) &qos_flow_description);
 }
 
 //------------------------------------------------------------------------------
