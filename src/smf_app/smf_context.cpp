@@ -46,6 +46,7 @@
 #include "smf_paa_dynamic.hpp"
 #include "smf_pfcp_association.hpp"
 #include "smf_procedure.hpp"
+#include "3gpp_conversions.hpp"
 
 extern "C" {
 #include "Ngap_AssociatedQosFlowItem.h"
@@ -1197,12 +1198,12 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   bool request_accepted = true;
 
   // Step 1. get necessary information
-  std::string dnn          = smreq->req.get_dnn();
-  snssai_t snssai          = smreq->req.get_snssai();
-  std::string request_type = smreq->req.get_request_type();
-  supi_t supi              = smreq->req.get_supi();
-  supi64_t supi64          = smf_supi_to_u64(supi);
-  uint32_t pdu_session_id  = smreq->req.get_pdu_session_id();
+  std::string dnn = smreq->req.get_dnn();
+  snssai_t snssai = smreq->req.get_snssai();
+  //  std::string request_type = smreq->req.get_request_type();
+  //  supi_t supi              = smreq->req.get_supi();
+  supi64_t supi64         = smf_supi_to_u64(smreq->req.get_supi());
+  uint32_t pdu_session_id = smreq->req.get_pdu_session_id();
 
   // Step 2. check the validity of the UE request, if valid send PDU Session
   // Accept, otherwise send PDU Session Reject to AMF
@@ -1220,7 +1221,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           http_status_code_e::HTTP_STATUS_CODE_401_UNAUTHORIZED,
           PDU_SESSION_APPLICATION_ERROR_SUBSCRIPTION_DENIED, n1_sm_msg_hex,
           smreq->pid);
-
     } else {
       smf_app_inst->trigger_http_response(
           http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
@@ -1240,18 +1240,24 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending =
       std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
 
-  sm_context_resp->http_version = smreq->http_version;
-  sm_context_resp->res.set_http_code(
-      http_status_code_e::HTTP_STATUS_CODE_200_OK);
-  sm_context_resp->res.set_supi(supi);
-  sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
-  sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
-  sm_context_resp->res.set_pdu_session_id(pdu_session_id);
-  sm_context_resp->res.set_snssai(snssai);
-  sm_context_resp->res.set_dnn(dnn);
-  sm_context_resp->res.set_pdu_session_type(smreq->req.get_pdu_session_type());
-  sm_context_resp->res.set_pti(smreq->req.get_pti());
-  sm_context_resp->set_scid(smreq->scid);
+  // Assign necessary information for the response
+  xgpp_conv::create_sm_context_response_from_ct_request(
+      smreq, sm_context_resp_pending);
+
+  /*
+    sm_context_resp->http_version = smreq->http_version;
+    sm_context_resp->res.set_http_code(
+        http_status_code_e::HTTP_STATUS_CODE_200_OK);
+    sm_context_resp->res.set_supi(supi);
+    sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
+    sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
+    sm_context_resp->res.set_pdu_session_id(pdu_session_id);
+    sm_context_resp->res.set_snssai(snssai);
+    sm_context_resp->res.set_dnn(dnn);
+    sm_context_resp->res.set_pdu_session_type(smreq->req.get_pdu_session_type());
+    sm_context_resp->res.set_pti(smreq->req.get_pti());
+    sm_context_resp->set_scid(smreq->scid);
+  */
 
   // Step 3. find pdu_session
   std::shared_ptr<dnn_context> sd = {};
@@ -1298,12 +1304,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // rules for this PDU session from PCF  For the moment, SMF uses the local
   // policy (e.g., default QoS rule)
 
-  // address allocation based on PDN type
-  // IP Address pool is controlled by SMF
-  // Step 6. paa
-  bool set_paa = false;
-  paa_t paa    = {};
-
   // Step 6. PCO
   // section 6.2.4.2, TS 24.501
   // If the UE wants to use DHCPv4 for IPv4 address assignment, it shall
@@ -1324,7 +1324,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   smf_app_inst->process_pco_request(pco_req, pco_resp, pco_ids);
   sm_context_resp_pending->res.set_epco(pco_resp);
 
-  // Step 7. Address allocation based on PDN type
+  // Step 7. Address allocation based on PDN type, IP Address pool is controlled
+  // by SMF
+  bool set_paa = false;
+  paa_t paa    = {};
   Logger::smf_app().debug("UE Address Allocation");
   switch (sp->pdu_session_type.pdu_session_type) {
     case PDU_SESSION_TYPE_E_IPV4: {
@@ -1490,7 +1493,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // for (SUPI, DNN, S-NSSAI)
   }
 
-  // step 10. if error when establishing the pdu session,
+  // Step 10. if error when establishing the pdu session,
   // send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs (PDU
   // Session Establishment Reject)
   if (sm_context_resp->res.get_cause() != REQUEST_ACCEPTED) {
@@ -1513,7 +1516,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         case PDU_SESSION_TYPE_E_RESERVED:
         default:;
       }
-      // sm_context_resp->res.clear_paa(); //TODO:
     }
     // clear the created context??
     // TODO:
@@ -1612,7 +1614,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
   std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp_pending =
       std::shared_ptr<itti_n11_update_sm_context_response>(n11_sm_context_resp);
 
-  sm_context_resp_pending->res.set_http_code(
+/*  sm_context_resp_pending->res.set_http_code(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);  // default status code
   n11_sm_context_resp->res.set_supi(sm_context_req_msg.get_supi());
   n11_sm_context_resp->res.set_supi_prefix(
@@ -1622,8 +1624,11 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       sm_context_req_msg.get_pdu_session_id());
   n11_sm_context_resp->res.set_snssai(sm_context_req_msg.get_snssai());
   n11_sm_context_resp->res.set_dnn(sm_context_req_msg.get_dnn());
+*/
   n11_sm_context_resp->res.set_pdu_session_type(
       sp.get()->get_pdu_session_type().pdu_session_type);
+
+  xgpp_conv::update_sm_context_response_from_ct_request(smreq, sm_context_resp_pending);
 
   // Step 2.1. Decode N1 (if content is available)
   if (sm_context_req_msg.n1_sm_msg_is_set()) {

@@ -354,7 +354,6 @@ smf_app::smf_app(const std::string& config_file)
 }
 
 //------------------------------------------------------------------------------
-// From SPGWU
 void smf_app::start_upf_association(const pfcp::node_id_t& node_id) {
   std::time_t time_epoch = std::time(nullptr);
   uint64_t tv_ntp        = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
@@ -452,7 +451,6 @@ void smf_app::handle_itti_msg(
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(
     itti_n11_n1n2_message_transfer_response_status& m) {
-  // see TS29518_Namf_Communication.yaml
   Logger::smf_app().info("Process N1N2MessageTransfer Response");
 
   switch (m.procedure_type) {
@@ -487,6 +485,7 @@ void smf_app::handle_itti_msg(
             "Got response from AMF (response code %d)", m.response_code);
       }
     } break;
+
     case session_management_procedures_type_e::
         SERVICE_REQUEST_NETWORK_TRIGGERED: {
       Logger::smf_app().debug(
@@ -527,6 +526,7 @@ void smf_app::handle_itti_msg(
         }
       }
     } break;
+
     default: {
       Logger::smf_app().warn("Unknown procedure type %d", m.procedure_type);
     }
@@ -658,28 +658,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  // Fill the mandatory IEs
-  smreq->req.set_epd(decoded_nas_msg.header.extended_protocol_discriminator);
-  pdu_session_id_t pdu_session_id =
-      decoded_nas_msg.plain.sm.header.pdu_session_identity;
-  procedure_transaction_id_t pti = {
-      .procedure_transaction_id =
-          decoded_nas_msg.plain.sm.header.procedure_transaction_identity};
-  smreq->req.set_message_type(decoded_nas_msg.plain.sm.header.message_type);
-  // TODO: Integrity protection maximum data rate (Mandatory)
-
-  // PDU session type (Optional)
-  if (decoded_nas_msg.plain.sm.header.message_type ==
-      PDU_SESSION_ESTABLISHMENT_REQUEST) {
-    Logger::smf_app().debug(
-        "PDU Session Type %d",
-        decoded_nas_msg.plain.sm.pdu_session_establishment_request
-            ._pdusessiontype.pdu_session_type_value);
-    pdu_session_type.pdu_session_type =
-        decoded_nas_msg.plain.sm.pdu_session_establishment_request
-            ._pdusessiontype.pdu_session_type_value;
-  }
-  smreq->req.set_pdu_session_type(pdu_session_type.pdu_session_type);
+  // Get necessary info from NAS
+  xgpp_conv::sm_context_request_from_nas(decoded_nas_msg, smreq->req);
 
   // TODO: Support IPv4 only for now
   if (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
@@ -707,55 +687,22 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  // TODO: SSCMode
-  // TODO: store UE 5GSM Capability
-  // TODO: MaximumNumberOfSupportedPacketFilters
-  // TODO: AlwaysonPDUSessionRequested
-  // TODO: SMPDUDNRequestContainer
-  // TODO: ExtendedProtocolConfigurationOptions
-  Logger::smf_app().debug(
-      "pco ext %d, spare %d, configuration protocol %d,number_ids %d",
-      decoded_nas_msg.plain.sm.pdu_session_establishment_request
-          .extendedprotocolconfigurationoptions.ext,
-      decoded_nas_msg.plain.sm.pdu_session_establishment_request
-          .extendedprotocolconfigurationoptions.spare,
-      decoded_nas_msg.plain.sm.pdu_session_establishment_request
-          .extendedprotocolconfigurationoptions.configuration_protocol,
-      decoded_nas_msg.plain.sm.pdu_session_establishment_request
-          .extendedprotocolconfigurationoptions.num_protocol_or_container_id);
-
-  // if (decoded_nas_msg.plain.sm.pdu_session_establishment_request
-  //         .extendedprotocolconfigurationoptions.num_protocol_or_container_id
-  //         >
-  //     0) {
-  protocol_configuration_options_t pco = {};
-  xgpp_conv::pco_nas_to_core(
-      decoded_nas_msg.plain.sm.pdu_session_establishment_request
-          .extendedprotocolconfigurationoptions,
-      pco);
-  smreq->req.set_epco(pco);
-  // }
-
-  // Get necessary information
-  supi_t supi              = smreq->req.get_supi();
-  std::string supi_prefix  = smreq->req.get_supi_prefix();
-  supi64_t supi64          = smf_supi_to_u64(supi);
-  std::string dnn          = smreq->req.get_dnn();
-  snssai_t snssai          = smreq->req.get_snssai();
-  uint8_t message_type     = decoded_nas_msg.plain.sm.header.message_type;
-  std::string request_type = smreq->req.get_request_type();
+  // Get SUPI, SNSSAI
+  supi_t supi             = smreq->req.get_supi();
+  std::string supi_prefix = smreq->req.get_supi_prefix();
+  supi64_t supi64         = smf_supi_to_u64(supi);
+  snssai_t snssai         = smreq->req.get_snssai();
   Logger::smf_app().info(
       "Handle a PDU Session Create SM Context Request message from AMF, "
-      "SUPI " SUPI_64_FMT ", DNN %s, SNSSAI SST %d, SD %s",
-      supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str());
-
-  // If no DNN information from UE, set to default value
-  if (dnn.length() == 0) {
-    dnn == smf_cfg.get_default_dnn();
-  }
+      "SUPI " SUPI_64_FMT ", SNSSAI SST %d, SD %s",
+      supi64, snssai.sST, snssai.sD.c_str());
 
   // Step 2. Verify Procedure transaction id, pdu session id, message type,
-  // request type, etc.  check pti
+  // request type, etc.
+  // Check PTI
+  procedure_transaction_id_t pti = {
+      .procedure_transaction_id =
+          decoded_nas_msg.plain.sm.header.procedure_transaction_identity};
   if ((pti.procedure_transaction_id ==
        PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED) ||
       (pti.procedure_transaction_id > PROCEDURE_TRANSACTION_IDENTITY_LAST)) {
@@ -779,9 +726,10 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     }
     return;
   }
-  smreq->req.set_pti(pti);
 
-  // check pdu session id
+  // Check pdu session id
+  pdu_session_id_t pdu_session_id =
+      decoded_nas_msg.plain.sm.header.pdu_session_identity;
   if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED) ||
       (pdu_session_id > PDU_SESSION_IDENTITY_LAST)) {
     Logger::smf_app().warn("Invalid PDU Session ID value (%d)", pdu_session_id);
@@ -793,7 +741,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  // check message type
+  // Check message type
+  uint8_t message_type = decoded_nas_msg.plain.sm.header.message_type;
   if (message_type != PDU_SESSION_ESTABLISHMENT_REQUEST) {
     Logger::smf_app().warn(
         "Invalid message type (message type = %d)", message_type);
@@ -819,7 +768,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  // check request type
+  // Check request type
+  std::string request_type = smreq->req.get_request_type();
   if (request_type.compare("INITIAL_REQUEST") != 0) {
     Logger::smf_app().warn(
         "Invalid request type (request type = %s)", request_type.c_str());
@@ -827,6 +777,12 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     //(see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0) ignore the
     // message
     return;
+  }
+
+  // If no DNN information from UE, set to default value
+  std::string dnn = smreq->req.get_dnn();
+  if (dnn.length() == 0) {
+    dnn == smf_cfg.get_default_dnn();
   }
 
   // TODO: For the moment, not support PDU session authentication and
@@ -1075,7 +1031,6 @@ void smf_app::handle_pdu_session_update_sm_context_request(
 //------------------------------------------------------------------------------
 void smf_app::handle_pdu_session_release_sm_context_request(
     std::shared_ptr<itti_n11_release_sm_context_request> smreq) {
-  // handle PDU Session Release SM Context Request
   Logger::smf_app().info(
       "Handle a PDU Session Release SM Context Request from an AMF");
 

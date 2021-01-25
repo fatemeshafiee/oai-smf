@@ -35,6 +35,7 @@
 #include "SmContextCreateData.h"
 #include "SmContextUpdateData.h"
 #include "SmContextReleaseData.h"
+#include "3gpp_29.500.h"
 
 //------------------------------------------------------------------------------
 void xgpp_conv::paa_to_pfcp_ue_ip_address(
@@ -60,6 +61,7 @@ void xgpp_conv::paa_to_pfcp_ue_ip_address(
     default:;
   }
 }
+
 //------------------------------------------------------------------------------
 void xgpp_conv::pdn_ip_to_pfcp_ue_ip_address(
     const pdu_session_type_t& pdu_session_type,
@@ -87,6 +89,7 @@ void xgpp_conv::pdn_ip_to_pfcp_ue_ip_address(
   }
 }
 
+//------------------------------------------------------------------------------
 void xgpp_conv::pco_nas_to_core(
     const protocol_configuration_options_nas_t& pco_nas,
     protocol_configuration_options_t& pco) {
@@ -122,6 +125,7 @@ void xgpp_conv::pco_nas_to_core(
   }
 }
 
+//------------------------------------------------------------------------------
 void xgpp_conv::pco_core_to_nas(
     const protocol_configuration_options_t& pco,
     protocol_configuration_options_nas_t& pco_nas) {
@@ -147,6 +151,7 @@ void xgpp_conv::pco_core_to_nas(
   }
 }
 
+//------------------------------------------------------------------------------
 void xgpp_conv::sm_context_create_from_openapi(
     const oai::smf_server::model::SmContextMessage& scd,
     smf::pdu_session_create_sm_context_request& pcr) {
@@ -231,6 +236,7 @@ void xgpp_conv::sm_context_create_from_openapi(
   // Extended protocol configuration options (Optional) e.g, FOR DHCP
 }
 
+//------------------------------------------------------------------------------
 void xgpp_conv::sm_context_update_from_openapi(
     const oai::smf_server::model::SmContextUpdateMessage& scu,
     smf::pdu_session_update_sm_context_request& pur) {
@@ -302,6 +308,7 @@ void xgpp_conv::sm_context_update_from_openapi(
   // ACK), User location
 }
 
+//------------------------------------------------------------------------------
 void xgpp_conv::sm_context_release_from_openapi(
     const oai::smf_server::model::SmContextReleaseMessage& srm,
     smf::pdu_session_release_sm_context_request& prr) {
@@ -332,6 +339,7 @@ void xgpp_conv::sm_context_release_from_openapi(
   // ismfReleaseOnly:
 }
 
+//------------------------------------------------------------------------------
 void xgpp_conv::data_notification_from_openapi(
     const oai::smf_server::model::NotificationData& nd,
     smf::data_notification_msg& dn_msg) {
@@ -354,6 +362,7 @@ void xgpp_conv::data_notification_from_openapi(
   dn_msg.set_profile(p);
 }
 
+//------------------------------------------------------------------------------
 void xgpp_conv::smf_event_exposure_notification_from_openapi(
     const oai::smf_server::model::NsmfEventExposure& nee,
     smf::event_exposure_msg& eem) {
@@ -398,4 +407,89 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
   // getDnaiChgType
   // event_subscriptions.push_back(event_subscription);
   //}
+}
+
+//------------------------------------------------------------------------------
+void xgpp_conv::sm_context_request_from_nas(
+    const nas_message_t& nas_msg,
+    smf::pdu_session_create_sm_context_request& pcr) {
+  pdu_session_type_t pdu_session_type = {.pdu_session_type =
+                                             PDU_SESSION_TYPE_E_IPV4};
+  // Extended Protocol Discriminator
+  pcr.set_epd(nas_msg.header.extended_protocol_discriminator);
+  // Message Type
+  pcr.set_message_type(nas_msg.plain.sm.header.message_type);
+  // TODO: Integrity protection maximum data rate (Mandatory)
+
+  // PDU session type (Optional)
+  if (nas_msg.plain.sm.header.message_type ==
+      PDU_SESSION_ESTABLISHMENT_REQUEST) {
+    Logger::smf_app().debug(
+        "PDU Session Type %d",
+        nas_msg.plain.sm.pdu_session_establishment_request._pdusessiontype
+            .pdu_session_type_value);
+    pdu_session_type.pdu_session_type =
+        nas_msg.plain.sm.pdu_session_establishment_request._pdusessiontype
+            .pdu_session_type_value;
+  }
+  pcr.set_pdu_session_type(pdu_session_type.pdu_session_type);
+
+  // TODO: SSCMode
+  // TODO: store UE 5GSM Capability
+  // TODO: MaximumNumberOfSupportedPacketFilters
+  // TODO: AlwaysonPDUSessionRequested
+  // TODO: SMPDUDNRequestContainer
+
+  // ExtendedProtocolConfigurationOptions
+  protocol_configuration_options_t pco = {};
+  pco_nas_to_core(
+      nas_msg.plain.sm.pdu_session_establishment_request
+          .extendedprotocolconfigurationoptions,
+      pco);
+  pcr.set_epco(pco);
+
+  // PTI
+  procedure_transaction_id_t pti = {
+      .procedure_transaction_id =
+          nas_msg.plain.sm.header.procedure_transaction_identity};
+
+  pcr.set_pti(pti);
+}
+
+//------------------------------------------------------------------------------
+void xgpp_conv::create_sm_context_response_from_ct_request(
+    const std::shared_ptr<itti_n11_create_sm_context_request>& ctx_request,
+    std::shared_ptr<itti_n11_create_sm_context_response>& ctx_response) {
+  ctx_response->http_version = ctx_request->http_version;
+  ctx_response->res.set_http_code(http_status_code_e::HTTP_STATUS_CODE_200_OK);
+  ctx_response->res.set_supi(ctx_request->req.get_supi());
+  ctx_response->res.set_supi_prefix(ctx_request->req.get_supi_prefix());
+  ctx_response->res.set_cause(REQUEST_ACCEPTED);
+  ctx_response->res.set_pdu_session_id(ctx_request->req.get_pdu_session_id());
+  ctx_response->res.set_snssai(ctx_request->req.get_snssai());
+  ctx_response->res.set_dnn(ctx_request->req.get_dnn());
+  ctx_response->res.set_pdu_session_type(
+      ctx_request->req.get_pdu_session_type());
+  ctx_response->res.set_pti(ctx_request->req.get_pti());
+  ctx_response->set_scid(ctx_request->scid);
+}
+
+//------------------------------------------------------------------------------
+void xgpp_conv::update_sm_context_response_from_ct_request(
+    const std::shared_ptr<itti_n11_update_sm_context_request>& ct_request,
+    std::shared_ptr<itti_n11_update_sm_context_response>& ct_response) {
+
+
+	ct_response->res.set_http_code(
+	      http_status_code_e::HTTP_STATUS_CODE_200_OK);  // default status code
+	ct_response->res.set_supi(ct_request->req.get_supi());
+	ct_response->res.set_supi_prefix(
+			ct_request->req.get_supi_prefix());
+	ct_response->res.set_cause(REQUEST_ACCEPTED);
+	ct_response->res.set_pdu_session_id(
+			ct_request->req.get_pdu_session_id());
+	ct_response->res.set_snssai(ct_request->req.get_snssai());
+	ct_response->res.set_dnn(ct_request->req.get_dnn());
+
+
 }

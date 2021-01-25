@@ -40,6 +40,11 @@
 #include "NotificationData.h"
 #include "NsmfEventExposure.h"
 #include "smf_msg.hpp"
+#include "itti_msg_n11.hpp"
+
+extern "C" {
+#include "nas_message.h"
+}
 
 namespace xgpp_conv {
 
@@ -145,6 +150,24 @@ void data_notification_from_openapi(
 void smf_event_exposure_notification_from_openapi(
     const oai::smf_server::model::NsmfEventExposure& nee,
     smf::event_exposure_msg& eem);
+
+/*
+ * Convert NAS to SM Context Request msg
+ * @param [const nas_message_t&] nm: NAS msg
+ * @param [smf::pdu_session_create_sm_context_request&] pcr: PDU
+ * SessionCreateSMContextRequest msg
+ * @return void
+ */
+void sm_context_request_from_nas(
+    const nas_message_t& nm, smf::pdu_session_create_sm_context_request& pcr);
+
+void create_sm_context_response_from_ct_request(
+    const std::shared_ptr<itti_n11_create_sm_context_request>& ct_request,
+    std::shared_ptr<itti_n11_create_sm_context_response>& ct_response);
+
+void update_sm_context_response_from_ct_request(
+    const std::shared_ptr<itti_n11_update_sm_context_request>& ct_request,
+    std::shared_ptr<itti_n11_update_sm_context_response>& ct_response);
 
 }  // namespace xgpp_conv
 
