@@ -152,7 +152,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
     return false;
   }
 
-  sm_msg->pdu_session_establishment_accept.presence = 0xff;
+  sm_msg->pdu_session_establishment_accept.presence = 0x03df;
   sm_msg->pdu_session_establishment_accept._5gsmcause =
       static_cast<uint8_t>(sm_cause);
   Logger::smf_n1().debug(
