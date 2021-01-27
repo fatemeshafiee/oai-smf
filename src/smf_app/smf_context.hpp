@@ -854,6 +854,56 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       smf::pdu_session_update_sm_context_response& res,
       const nas_message_t& nas_msg);
 
+  bool handle_pdu_session_modification_request(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  bool handle_pdu_session_modification_complete(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  bool handle_pdu_session_modification_command_reject(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  bool handle_pdu_session_release_request(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  bool handle_pdu_session_release_complete(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  bool handle_pdu_session_resource_setup_response_transfer(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+
+  bool handle_pdu_session_resource_setup_unsuccessful_transfer(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+  bool handle_pdu_session_resource_modify_response_transfer(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+  bool handle_pdu_session_resource_release_response_transfer(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+
+  bool handle_service_request(
+		  std::string &n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
