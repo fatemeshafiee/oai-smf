@@ -649,6 +649,146 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<itti_nx_trigger_pdu_session_modification> msg);
 
   /*
+   * Handle PDU Session Modification Request
+   * @param [nas_message_t&] nas_msg: NAS message received from AMF
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_modification_request(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
+   * Handle PDU Session Modification Complete
+   * @param [nas_message_t&] nas_msg: NAS message received from AMF
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_modification_complete(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
+   * Handle PDU Session Modification Command Reject
+   * @param [nas_message_t&] nas_msg: NAS message received from AMF
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_modification_command_reject(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
+   * Handle PDU Session Release Request
+   * @param [nas_message_t&] nas_msg: NAS message received from AMF
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_release_request(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
+   * Handle PDU Session Release Complete
+   * @param [nas_message_t&] nas_msg: NAS message received from AMF
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_release_complete(
+      nas_message_t& nas_msg,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
+   * Handle Service Request
+   * @param [std::string&] n2_sm_information: NGAP message in form of string
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_service_request(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
+   * Handle PDU Session Resource Setup Response Transfer
+   * @param [std::string&] n2_sm_information: NGAP message in form of string
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_resource_setup_response_transfer(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+
+  /*
+   * Handle PDU Session Resource Setup Unsuccessful Transfer
+   * @param [std::string&] n2_sm_information: NGAP message in form of string
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_resource_setup_unsuccessful_transfer(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+
+  /*
+   * Handle PDU Session Resource Modify Response Transfer
+   * @param [std::string&] n2_sm_information: NGAP message in form of string
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_resource_modify_response_transfer(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+
+  /*
+   * Handle PDU Session Resource Release Response Transfer
+   * @param [std::string&] n2_sm_information: NGAP message in form of string
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_pdu_session_resource_release_response_transfer(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+
+  /*
    * Find DNN context with name
    * @param [const std::string&] dnn
    * @param [std::shared_ptr<dnn_context>&] dnn_context dnn context to be found
@@ -849,60 +989,19 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void handle_ee_pdu_session_release(
       supi64_t supi, pdu_session_id_t pdu_session_id, uint8_t http_version);
 
+  /*
+   * Update QoS information in the Response message according to the content of
+   * decoded NAS msg
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @param [std::shared_ptr<pdu_session_update_sm_context_response>&] res:
+   * Response message
+   * @param [const nas_message_t] nas_msg: NAS message
+   * @return void
+   */
   void update_qos_info(
       std::shared_ptr<smf_pdu_session>& sp,
       smf::pdu_session_update_sm_context_response& res,
       const nas_message_t& nas_msg);
-
-  bool handle_pdu_session_modification_request(
-      nas_message_t& nas_msg,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
-      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
-      std::shared_ptr<smf_pdu_session>& sp);
-
-  bool handle_pdu_session_modification_complete(
-      nas_message_t& nas_msg,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
-      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
-      std::shared_ptr<smf_pdu_session>& sp);
-
-  bool handle_pdu_session_modification_command_reject(
-      nas_message_t& nas_msg,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
-      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
-      std::shared_ptr<smf_pdu_session>& sp);
-
-  bool handle_pdu_session_release_request(
-      nas_message_t& nas_msg,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
-      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
-      std::shared_ptr<smf_pdu_session>& sp);
-
-  bool handle_pdu_session_release_complete(
-      nas_message_t& nas_msg,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
-      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
-      std::shared_ptr<smf_pdu_session>& sp);
-
-  bool handle_pdu_session_resource_setup_response_transfer(
-      std::string& n2_sm_information,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
-
-  bool handle_pdu_session_resource_setup_unsuccessful_transfer(
-      std::string& n2_sm_information,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
-  bool handle_pdu_session_resource_modify_response_transfer(
-      std::string& n2_sm_information,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
-  bool handle_pdu_session_resource_release_response_transfer(
-      std::string& n2_sm_information,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
-
-  bool handle_service_request(
-		  std::string &n2_sm_information,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
-      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
-      std::shared_ptr<smf_pdu_session>& sp);
 
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
