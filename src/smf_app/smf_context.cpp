@@ -1882,21 +1882,22 @@ bool smf_context::handle_pdu_session_release_complete(
     // TODO: return;
   }
 
+  Logger::smf_app().debug("Signal the SM Context Status Change");
   event_sub.sm_context_status(
       scid,
       static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED),
       sm_context_request.get()->http_version);
 
-  // Get SUPI
-  supi64_t supi64 = smf_supi_to_u64(sm_context_request.get()->req.get_supi());
   // Trigger PDU Session Release event notification
+  supi64_t supi64 = smf_supi_to_u64(sm_context_request.get()->req.get_supi());
+  Logger::smf_app().debug("Signal the PDU Session Release Event notification");
   event_sub.ee_pdu_session_release(
       supi64, sm_context_request.get()->req.get_pdu_session_id(),
       sm_context_request.get()->http_version);
 
   // TODO: if dynamic PCC applied, SMF invokes an SM Policy Association
   // Termination
-  // TODO: SMF unsubscribes from Session Management Subscription data
+  // TODO: SMF un-subscribes from Session Management Subscription data
   // changes notification from UDM by invoking Numd_SDM_Unsubscribe
 
   // TODO: should check if sd context exist
@@ -2990,15 +2991,7 @@ void smf_context::update_qos_info(
   QOSFlowDescriptionsContents qos_flow_description_content = {};
 
   // Only one flow description for new requested QoS Flow
-  //  QOSFlowDescriptionsContents* qos_flow_description =
-  //      (QOSFlowDescriptionsContents*) calloc(
-  //          number_of_flow_descriptions, sizeof(QOSFlowDescriptionsContents));
-
   if (number_of_flow_descriptions > 0) {
-    //    qos_flow_description =
-    //    nas_msg.plain.sm.pdu_session_modification_request
-    //                               .qosflowdescriptions.qosflowdescriptionscontents;
-
     for (int i = 0; i < number_of_flow_descriptions; i++) {
       if (nas_msg.plain.sm.pdu_session_modification_request.qosflowdescriptions
               .qosflowdescriptionscontents[i]
@@ -3127,8 +3120,6 @@ void smf_context::update_qos_info(
                                                 // rule identifier
     i++;
   }
-
-  //  free_wrapper((void**) &qos_flow_description);
 }
 
 //------------------------------------------------------------------------------

@@ -549,15 +549,26 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
         scid(0),
         event_sub(smf_event::get_instance()) {
     supi_prefix = {};
-    // subscribe to sm context status change
-    event_sub.subscribe_sm_context_status(boost::bind(
-        &smf_context::handle_sm_context_status_change, this, _1, _1, _1));
-    // subscribe to pdu session release (event exposure)
-    event_sub.subscribe_ee_pdu_session_release(boost::bind(
-        &smf_context::handle_ee_pdu_session_release, this, _1, _1, _1));
+    // Subscribe to sm context status change
+    sm_context_status_connection =
+        event_sub.subscribe_sm_context_status(boost::bind(
+            &smf_context::handle_sm_context_status_change, this, _1, _1, _1));
+    // Subscribe to pdu session release (event exposure)
+    ee_pdu_session_release_connection =
+        event_sub.subscribe_ee_pdu_session_release(boost::bind(
+            &smf_context::handle_ee_pdu_session_release, this, _1, _1, _1));
   }
 
   smf_context(smf_context& b) = delete;
+
+  virtual ~smf_context() {
+    Logger::smf_app().debug("Delete SMF Context instance...");
+    // Disconnect the boost connection
+    if (sm_context_status_connection.connected())
+      sm_context_status_connection.disconnect();
+    if (ee_pdu_session_release_connection.connected())
+      ee_pdu_session_release_connection.disconnect();
+  }
 
   /*
    * Insert a procedure to be processed
@@ -1014,8 +1025,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   scid_t scid;  // SM Context ID
   // Big recursive lock
   mutable std::recursive_mutex m_context;
+
   // for Event Handling
   smf_event& event_sub;
+  bs2::connection sm_context_status_connection;
+  bs2::connection ee_pdu_session_release_connection;
 };
 }  // namespace smf
 
