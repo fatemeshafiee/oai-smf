@@ -40,10 +40,10 @@ namespace smf {
 class smf_event {
  public:
   smf_event(){};
-  smf_event(smf_event const &) = delete;
-  void operator=(smf_event const &) = delete;
+  smf_event(smf_event const&) = delete;
+  void operator=(smf_event const&) = delete;
 
-  static smf_event &get_instance() {
+  static smf_event& get_instance() {
     static smf_event instance;
     return instance;
   }
@@ -61,7 +61,7 @@ class smf_event {
    * the slot
    */
   bs2::connection subscribe_sm_context_status(
-      const sm_context_status_sig_t::slot_type &sig);
+      const sm_context_status_sig_t::slot_type& sig);
 
   /*
    * Subscribe to Event Exposure Event: PDU Session Release
@@ -71,7 +71,7 @@ class smf_event {
    * the slot
    */
   bs2::connection subscribe_ee_pdu_session_release(
-      const ee_pdu_session_release_sig_t::slot_type &sig);
+      const ee_pdu_session_release_sig_t::slot_type& sig);
 
  private:
   sm_context_status_sig_t

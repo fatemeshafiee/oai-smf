@@ -23,7 +23,8 @@
 #define _EXTENDEDPROTOCOLCONFIGURATIONOPTIONS_H_
 
 #include <stdint.h>
-#include "bstrlib.h"
+#include "nas_lib.h"
+#include <stdbool.h>
 
 #define EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MINIMUM_LENGTH 4
 #define EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH 65538
@@ -31,13 +32,22 @@
 #define EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MINIMUM_LENGTH_TLVE 4
 #define EXTENDED_PROTOCOL_CONFIGURATION_OPTIONS_MAXIMUM_LENGTH_TLVE 65538
 
-typedef bstring ExtendedProtocolConfigurationOptions;
+typedef protocol_configuration_options_nas_t
+    ExtendedProtocolConfigurationOptions;
 
 int encode_extended_protocol_configuration_options(
-    ExtendedProtocolConfigurationOptions extendedprotocolconfigurationoptions,
+    protocol_configuration_options_nas_t extendedprotocolconfigurationoptions,
     uint8_t iei, uint8_t* buffer, uint32_t len);
 int decode_extended_protocol_configuration_options(
-    ExtendedProtocolConfigurationOptions* extendedprotocolconfigurationoptions,
+    protocol_configuration_options_nas_t* extendedprotocolconfigurationoptions,
     uint8_t iei, uint8_t* buffer, uint32_t len);
+
+int decode_protocol_configuration_options(
+    protocol_configuration_options_nas_t* protocolconfigurationoptions,
+    const uint8_t* const buffer, const uint32_t len);
+
+int encode_protocol_configuration_options(
+    const protocol_configuration_options_nas_t protocolconfigurationoptions,
+    uint8_t* buffer, const uint32_t len);
 
 #endif

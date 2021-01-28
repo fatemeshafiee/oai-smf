@@ -247,12 +247,33 @@ typedef struct nf_service_version_s {
   }
 } nf_service_version_t;
 
+typedef struct ip_endpoint_s {
+  std::vector<struct in_addr> ipv4_addresses;
+  // std::vector<struct in6_addr> ipv6_addresses;
+  std::string transport;  // TCP
+  unsigned int port;
+  std::string to_string() const {
+    std::string s = {};
+    s.append("Ipv4 Addresses: ");
+    for (auto ipv4 : ipv4_addresses) {
+      s.append(inet_ntoa(ipv4));
+    }
+    s.append(", TransportProtocol: ");
+    s.append(transport);
+    s.append(", Port: ");
+    s.append(std::to_string(port));
+    return s;
+  }
+
+} ip_endpoint_t;
+
 typedef struct nf_service_s {
   std::string service_instance_id;
   std::string service_name;
   std::vector<nf_service_version_t> versions;
   std::string scheme;
   std::string nf_service_status;
+  std::vector<ip_endpoint_t> ip_endpoints;
 
   std::string to_string() const {
     std::string s = {};
@@ -267,6 +288,10 @@ typedef struct nf_service_s {
     s.append(scheme);
     s.append(", Service status: ");
     s.append(nf_service_status);
+    s.append(",  IpEndPoints: ");
+    for (auto endpoint : ip_endpoints) {
+      s.append(endpoint.to_string());
+    }
     return s;
   }
 } nf_service_t;

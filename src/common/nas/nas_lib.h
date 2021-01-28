@@ -19,21 +19,26 @@
  *      contact@openairinterface.org
  */
 
-/*! \file 3gpp_commons.h
- \brief
- \author Lionel Gauthier
- \company Eurecom
- \email: lionel.gauthier@eurecom.fr
- */
+#ifndef FILE_NAS_LIB_SEEN
+#define FILE_NAS_LIB_SEEN
+#include "bstrlib.h"
 
-#ifndef FILE_3GPP_COMMONS_SEEN
-#define FILE_3GPP_COMMONS_SEEN
+typedef struct pco_protocol_or_container_id_nas_s {
+  uint16_t id;
+  uint8_t length;
+  bstring contents;
+} pco_protocol_or_container_id_nas_t;
 
-#include <stdint.h>
-
-// 8.2 Recovery
-typedef struct recovery_s {
-  uint8_t restart_counter;
-} recovery_t;
-
-#endif /* FILE_3GPP_COMMONS_SEEN */
+typedef struct protocol_configuration_options_nas_s {
+  uint8_t ext : 1;
+  uint8_t spare : 4;
+  uint8_t configuration_protocol : 3;
+  uint8_t num_protocol_or_container_id;
+  // arbitrary value, can be greater than defined (250/3)
+  // Setting this value to 30 to support maximum possible number of protocol id
+  // or container id defined in 24.008 release 13
+#define PCO_UNSPEC_MAXIMUM_PROTOCOL_ID_OR_CONTAINER_ID 30
+  pco_protocol_or_container_id_nas_t
+      protocol_or_container_ids[PCO_UNSPEC_MAXIMUM_PROTOCOL_ID_OR_CONTAINER_ID];
+} protocol_configuration_options_nas_t;
+#endif

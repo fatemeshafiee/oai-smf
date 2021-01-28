@@ -160,7 +160,7 @@ int fivegsm_msg_encode(SM_msg* msg, uint8_t* buffer, uint32_t len) {
   buffer += header_result;
   len -= header_result;
 #if DEBUG_IS_ON
-  printf(", message type %d", msg->header.message_type);
+  printf("message type %d", msg->header.message_type);
 #endif
   switch (msg->header.message_type) {
     case PDU_SESSION_ESTABLISHMENT_REQUEST:

@@ -199,8 +199,7 @@ class smf_app {
 
   virtual ~smf_app() {
     Logger::smf_app().debug("Delete SMF_APP instance...");
-    // TODO: disconnect connections
-    // Unregister NRF
+    // TODO: Unregister NRF
   }
 
   void operator=(smf_app const&) = delete;
@@ -832,7 +831,6 @@ class smf_app {
    * @return void
    */
   void trigger_upf_status_notification_subscribe();
-
 };
 }  // namespace smf
 #include "smf_config.hpp"

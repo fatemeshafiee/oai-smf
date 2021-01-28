@@ -24,15 +24,25 @@ include_directories(${SRC_TOP_DIR}/common/msg)
 include_directories(${SRC_TOP_DIR}/common/utils)
 include_directories(${SRC_TOP_DIR}/common/utils/bstr)
 include_directories(${SRC_TOP_DIR}/itti)
+include_directories(${SRC_TOP_DIR}/common/nas)
+include_directories(${SRC_TOP_DIR}/api-server/model)
+include_directories(${SRC_TOP_DIR}/smf_app)
+include_directories(${SRC_TOP_DIR}/nas)
+include_directories(${SRC_TOP_DIR}/nas/ies)
+include_directories(${SRC_TOP_DIR}/nas/sm/msg)
+include_directories(${SRC_TOP_DIR}/nas/mm)
+include_directories(${SRC_TOP_DIR}/nas/mm/msg)
+include_directories(${SRC_TOP_DIR}/nas/sm)
+include_directories(${SRC_TOP_DIR}/nas/sm/msg)
+#include_directories(${SRC_TOP_DIR}/nas/security)
+include_directories(${SRC_TOP_DIR}/ngap/asn1c)
 include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
-
 
 set(CN_UTILS_SRC STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/3gpp_conversions.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/async_shell_cmd.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/conversions.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/epc.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/get_gateway_netlink.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/if.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/pid_file.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/string.cpp
@@ -40,7 +50,4 @@ set(CN_UTILS_SRC STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/mime_parser.cpp
     )
 
-
 add_library(CN_UTILS ${CN_UTILS_SRC})
-
-

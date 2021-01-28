@@ -44,7 +44,8 @@ int decode_authentication_reject(
       case AUTHENTICATION_REJECT_EAP_MESSAGE_IEI:
         // if((decoded_result = decode_message_type
         // (&authentication_reject->messagetype,
-        // AUTHENTICATION_REJECT_EAP_MESSAGE_IEI, buffer+decoded,len-decoded))<0)
+        // AUTHENTICATION_REJECT_EAP_MESSAGE_IEI,
+        // buffer+decoded,len-decoded))<0)
         if ((decoded_result = decode_eap_message(
                  &authentication_reject->eapmessage,
                  AUTHENTICATION_REJECT_EAP_MESSAGE_IEI, buffer + decoded,

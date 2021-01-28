@@ -38,7 +38,6 @@
  *      contact@openairinterface.org
  */
 
-
 #ifndef NF_STATUS_NOTIFY_API_IMPL_H_
 #define NF_STATUS_NOTIFY_API_IMPL_H_
 

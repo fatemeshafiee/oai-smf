@@ -94,19 +94,13 @@ void util::ipv4_to_bstring(struct in_addr ipv4_address, bstring str) {
   bitstream_addr[2] = (uint8_t)(((ipv4_address.s_addr) & 0x00ff0000) >> 16);
   bitstream_addr[3] = (uint8_t)(((ipv4_address.s_addr) & 0xff000000) >> 24);
 
-  str       = bfromcstralloc(4, "\0");
+//  str       = bfromcstralloc(4, "\0");
   str->slen = 4;
   memcpy(str->data, bitstream_addr, sizeof(bitstream_addr));
 }
 
 void util::string_to_bstring(const std::string& str, bstring bstr) {
-  bstr       = bfromcstralloc(str.length(), "\0");
+//  bstr       = bfromcstralloc(str.length(), "\0");
   bstr->slen = str.length();
   memcpy((void*) bstr->data, (void*) str.c_str(), str.length());
-  /*
-            std::string s(
-                (char *)bstr->data,
-                bstr->slen);
-            Logger::nrf_app().debug("Str %s", s.c_str());
-  */
 }

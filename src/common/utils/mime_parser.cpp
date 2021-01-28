@@ -53,7 +53,7 @@ bool mime_parser::parse(const std::string& str) {
         str.substr(content_type_pos + 14, crlf_pos - (content_type_pos + 14));
     Logger::smf_app().debug("Content Type: %s", p.content_type.c_str());
 
-    crlf_pos     = str.find(CRLF + CRLF, content_type_pos);  // beginning of content
+    crlf_pos = str.find(CRLF + CRLF, content_type_pos);  // beginning of content
     boundary_pos = str.find(boundary_full, crlf_pos);
     if (boundary_pos == std::string::npos) {
       boundary_pos = str.find(last_boundary, crlf_pos);
@@ -84,7 +84,7 @@ unsigned char* mime_parser::format_string_as_hex(const std::string& str) {
   conv::ascii_to_hex(data_hex, (const char*) data);
 
   Logger::smf_app().debug(
-      "[Format string as Hex] Input string (%d bytes): %s ", str_len,
+      "Input string (%d bytes): %s ", str_len,
       str.c_str());
   Logger::smf_app().debug("Data (formatted):");
 #if DEBUG_IS_ON

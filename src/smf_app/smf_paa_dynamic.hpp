@@ -42,18 +42,18 @@ class ipv6_pool {
   ipv6_pool() : prefix(), prefix_len(0) {}
 
   ipv6_pool(const struct in6_addr prfix, const int prfix_len) {
-    prefix = prfix;
+    prefix     = prfix;
     prefix_len = prfix_len;
   }
 
-  ipv6_pool(const ipv6_pool &p) : prefix(p.prefix), prefix_len(p.prefix_len) {}
+  ipv6_pool(const ipv6_pool& p) : prefix(p.prefix), prefix_len(p.prefix_len) {}
 
-  bool alloc_address(struct in6_addr &allocated) {
+  bool alloc_address(struct in6_addr& allocated) {
     allocated = prefix;
     return true;
   }
 
-  void free_address(const struct in_addr &allocated) {}
+  void free_address(const struct in_addr& allocated) {}
 };
 
 class ipv4_pool {
@@ -62,7 +62,7 @@ class ipv4_pool {
   int num;
   std::map<int, uint32_t> alloc;
 
-  bool alloc_free_bit(int &bit_pos) {
+  bool alloc_free_bit(int& bit_pos) {
     bit_pos = 0;
     for (int i = 0; i < alloc.size(); ++i) {
       if (alloc[i] != std::numeric_limits<uint32_t>::max()) {
@@ -83,7 +83,7 @@ class ipv4_pool {
 
   bool free_bit(const int bit_pos) {
     if (bit_pos < num) {
-      int bit_pos32 = bit_pos >> 5;
+      int bit_pos32    = bit_pos >> 5;
       int word_bit_pos = bit_pos & 0x0000001F;
       std::bitset<32> bs(alloc[bit_pos32]);
       bs.reset(word_bit_pos);
@@ -98,9 +98,9 @@ class ipv4_pool {
 
   ipv4_pool(const struct in_addr first, const uint32_t range) : alloc() {
     start.s_addr = first.s_addr;
-    num = range;
-    int range32 = range >> 5;
-    int i = 0;
+    num          = range;
+    int range32  = range >> 5;
+    int i        = 0;
     for (i = 0; i < range32; ++i) {
       alloc[i] = 0;
     }
@@ -109,11 +109,11 @@ class ipv4_pool {
     }
   };
 
-  ipv4_pool(const ipv4_pool &p) : num(p.num), alloc(p.alloc) {
+  ipv4_pool(const ipv4_pool& p) : num(p.num), alloc(p.alloc) {
     start.s_addr = p.start.s_addr;
   };
 
-  bool alloc_address(struct in_addr &allocated) {
+  bool alloc_address(struct in_addr& allocated) {
     int bit_pos = 0;
     if (alloc_free_bit(bit_pos)) {
       allocated.s_addr = be32toh(start.s_addr) + bit_pos;  // overflow
@@ -124,7 +124,7 @@ class ipv4_pool {
     return false;
   }
 
-  bool free_address(const struct in_addr &allocated) {
+  bool free_address(const struct in_addr& allocated) {
     if (in_pool(allocated)) {
       int bit_pos = be32toh(allocated.s_addr) - be32toh(start.s_addr);
       return free_bit(bit_pos);
@@ -132,9 +132,9 @@ class ipv4_pool {
     return false;
   }
 
-  bool in_pool(const struct in_addr &a) const {
+  bool in_pool(const struct in_addr& a) const {
     int addr_start = be32toh(start.s_addr);
-    int addr = be32toh(a.s_addr);
+    int addr       = be32toh(a.s_addr);
     return ((addr - addr_start) < num);
   }
 };
@@ -160,16 +160,17 @@ class paa_dynamic {
   paa_dynamic() : ipv4_pools(), ipv6_pools(), dnns(){};
 
  public:
-  static paa_dynamic &get_instance() {
+  static paa_dynamic& get_instance() {
     static paa_dynamic instance;
     return instance;
   }
 
-  paa_dynamic(paa_dynamic const &) = delete;
-  void operator=(paa_dynamic const &) = delete;
+  paa_dynamic(paa_dynamic const&) = delete;
+  void operator=(paa_dynamic const&) = delete;
 
-  void add_pool(const std::string &dnn_label, const int pool_id,
-                const struct in_addr &first, const int range) {
+  void add_pool(
+      const std::string& dnn_label, const int pool_id,
+      const struct in_addr& first, const int range) {
     if (pool_id >= 0) {
       uint32_t uint32pool_id = uint32_t(pool_id);
       if (!ipv4_pools.count(uint32pool_id)) {
@@ -184,8 +185,9 @@ class paa_dynamic {
     }
   }
 
-  void add_pool(const std::string &dnn_label, const int pool_id,
-                const struct in6_addr &prefix, const int prefix_len) {
+  void add_pool(
+      const std::string& dnn_label, const int pool_id,
+      const struct in6_addr& prefix, const int prefix_len) {
     if (pool_id >= 0) {
       uint32_t uint32pool_id = uint32_t(pool_id);
       if (!ipv6_pools.count(uint32pool_id)) {
@@ -200,9 +202,9 @@ class paa_dynamic {
     }
   }
 
-  bool get_free_paa(const std::string &dnn_label, paa_t &paa) {
+  bool get_free_paa(const std::string& dnn_label, paa_t& paa) {
     if (dnns.count(dnn_label)) {
-      dnn_dynamic_pools &dnn_pool = dnns[dnn_label];
+      dnn_dynamic_pools& dnn_pool = dnns[dnn_label];
       if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
         for (std::vector<uint32_t>::const_iterator it4 =
                  dnn_pool.ipv4_pool_ids.begin();
@@ -215,9 +217,9 @@ class paa_dynamic {
             "Could not get PAA PDU_SESSION_TYPE_E_IPV4 for DNN %s",
             dnn_label.c_str());
         return false;
-      } else if (paa.pdu_session_type.pdu_session_type ==
-                 PDU_SESSION_TYPE_E_IPV4V6) {
-        bool success = false;
+      } else if (
+          paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
+        bool success                              = false;
         std::vector<uint32_t>::const_iterator it4 = {};
         for (it4 = dnn_pool.ipv4_pool_ids.begin();
              it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
@@ -239,8 +241,8 @@ class paa_dynamic {
             "Could not get PAA PDU_SESSION_TYPE_E_IPV4V6 for DNN %s",
             dnn_label.c_str());
         return false;
-      } else if (paa.pdu_session_type.pdu_session_type ==
-                 PDU_SESSION_TYPE_E_IPV6) {
+      } else if (
+          paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
         for (std::vector<uint32_t>::const_iterator it6 =
                  dnn_pool.ipv6_pool_ids.begin();
              it6 != dnn_pool.ipv6_pool_ids.end(); ++it6) {
@@ -258,9 +260,9 @@ class paa_dynamic {
     return false;
   }
 
-  bool release_paa(const std::string &dnn_label, const paa_t &paa) {
+  bool release_paa(const std::string& dnn_label, const paa_t& paa) {
     if (dnns.count(dnn_label)) {
-      dnn_dynamic_pools &dnn_pool = dnns[dnn_label];
+      dnn_dynamic_pools& dnn_pool = dnns[dnn_label];
       if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
         for (std::vector<uint32_t>::const_iterator it4 =
                  dnn_pool.ipv4_pool_ids.begin();
@@ -270,9 +272,9 @@ class paa_dynamic {
           }
         }
         return false;
-      } else if (paa.pdu_session_type.pdu_session_type ==
-                 PDU_SESSION_TYPE_E_IPV4V6) {
-        bool success = false;
+      } else if (
+          paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
+        bool success                              = false;
         std::vector<uint32_t>::const_iterator it4 = {};
         for (it4 = dnn_pool.ipv4_pool_ids.begin();
              it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
@@ -281,20 +283,20 @@ class paa_dynamic {
           }
         }
         return false;
-      } else if (paa.pdu_session_type.pdu_session_type ==
-                 PDU_SESSION_TYPE_E_IPV6) {
+      } else if (
+          paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
         return true;
       }
     }
-    Logger::smf_app().warn("Could not release PAA for DNN %s",
-                           dnn_label.c_str());
+    Logger::smf_app().warn(
+        "Could not release PAA for DNN %s", dnn_label.c_str());
     return false;
   }
 
-  bool release_paa(const std::string &dnn_label,
-                   const struct in_addr &ipv4_address) {
+  bool release_paa(
+      const std::string& dnn_label, const struct in_addr& ipv4_address) {
     if (dnns.count(dnn_label)) {
-      dnn_dynamic_pools &dnn_pool = dnns[dnn_label];
+      dnn_dynamic_pools& dnn_pool = dnns[dnn_label];
       for (std::vector<uint32_t>::const_iterator it4 =
                dnn_pool.ipv4_pool_ids.begin();
            it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
@@ -303,8 +305,8 @@ class paa_dynamic {
         }
       }
     }
-    Logger::smf_app().warn("Could not release PAA for DNN %s",
-                           dnn_label.c_str());
+    Logger::smf_app().warn(
+        "Could not release PAA for DNN %s", dnn_label.c_str());
     return false;
   }
 };

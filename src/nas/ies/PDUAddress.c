@@ -59,7 +59,9 @@ int encode_pdu_address(
     encoded += encode_result;
 
   // set length
-  *(uint8_t*) (lenPtr) = encoded - len_pos;
+  uint16_t temp = 0;
+  //*(uint8_t*) (lenPtr) = encoded - len_pos;
+  ENCODE_U8(lenPtr, encoded - len_pos, temp);
 
   return encoded;
 }

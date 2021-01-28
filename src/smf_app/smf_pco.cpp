@@ -42,57 +42,57 @@ extern smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
 int smf_app::pco_push_protocol_or_container_id(
-    protocol_configuration_options_t &pco,
-    pco_protocol_or_container_id_t *const poc_id) {
+    protocol_configuration_options_t& pco,
+    pco_protocol_or_container_id_t* const poc_id) {
   if (PCO_UNSPEC_MAXIMUM_PROTOCOL_ID_OR_CONTAINER_ID <=
       pco.num_protocol_or_container_id) {
     return RETURNerror;
   }
-  pco.protocol_or_container_ids[pco.num_protocol_or_container_id].protocol_id =
-      poc_id->protocol_id;
-  pco.protocol_or_container_ids[pco.num_protocol_or_container_id]
-      .length_of_protocol_id_contents = poc_id->length_of_protocol_id_contents;
-  pco.protocol_or_container_ids[pco.num_protocol_or_container_id]
-      .protocol_id_contents = poc_id->protocol_id_contents;
-  assert(pco.protocol_or_container_ids[pco.num_protocol_or_container_id]
-             .length_of_protocol_id_contents ==
-         pco.protocol_or_container_ids[pco.num_protocol_or_container_id]
-             .protocol_id_contents.size());
-  // poc_id->protocol_id_contents = nullptr;
+  pco_protocol_or_container_id_t pco_item = {};
+  pco_item.protocol_id                    = poc_id->protocol_id;
+  pco_item.length_of_protocol_id_contents =
+      poc_id->length_of_protocol_id_contents;
+  pco_item.protocol_id_contents = poc_id->protocol_id_contents;
+  //  assert(pco_item.length_of_protocol_id_contents ==
+  //    				pco_item.protocol_id_contents.size());
+  //    pco_item.protocol_id_contents = nullptr;
+
+  pco.protocol_or_container_ids.push_back(pco_item);
   pco.num_protocol_or_container_id += 1;
   return RETURNok;
 }
 
 //------------------------------------------------------------------------------
 int smf_app::process_pco_request_ipcp(
-    protocol_configuration_options_t &pco_resp,
-    const pco_protocol_or_container_id_t *const poc_id) {
-  in_addr_t ipcp_dns_prim_ipv4_addr = INADDR_NONE;
-  in_addr_t ipcp_dns_sec_ipv4_addr = INADDR_NONE;
-  in_addr_t ipcp_out_dns_prim_ipv4_addr = INADDR_NONE;
-  in_addr_t ipcp_out_dns_sec_ipv4_addr = INADDR_NONE;
+    protocol_configuration_options_t& pco_resp,
+    const pco_protocol_or_container_id_t* const poc_id) {
+  in_addr_t ipcp_dns_prim_ipv4_addr          = INADDR_NONE;
+  in_addr_t ipcp_dns_sec_ipv4_addr           = INADDR_NONE;
+  in_addr_t ipcp_out_dns_prim_ipv4_addr      = INADDR_NONE;
+  in_addr_t ipcp_out_dns_sec_ipv4_addr       = INADDR_NONE;
   pco_protocol_or_container_id_t poc_id_resp = {0};
   size_t ipcp_req_remaining_length = poc_id->length_of_protocol_id_contents;
-  size_t pco_in_index = 0;
+  size_t pco_in_index              = 0;
 
-  uint8_t ipcp_req_code = 0;
-  uint8_t ipcp_req_identifier = 0;
-  uint16_t ipcp_req_length = 0;
-  uint8_t ipcp_req_option = 0;
+  uint8_t ipcp_req_code          = 0;
+  uint8_t ipcp_req_identifier    = 0;
+  uint16_t ipcp_req_length       = 0;
+  uint8_t ipcp_req_option        = 0;
   uint8_t ipcp_req_option_length = 0;
 
-  uint8_t ipcp_out_code = 0;
+  uint8_t ipcp_out_code    = 0;
   uint16_t ipcp_out_length = 0;
 
-  Logger::smf_app().debug("PCO: Protocol identifier IPCP length %u\n",
-                          poc_id->length_of_protocol_id_contents);
+  Logger::smf_app().debug(
+      "PCO: Protocol identifier IPCP length %u\n",
+      poc_id->length_of_protocol_id_contents);
 
   ipcp_req_code = poc_id->protocol_id_contents.at(pco_in_index++);
   UNUSED(ipcp_req_code);
   ipcp_req_identifier = poc_id->protocol_id_contents.at(pco_in_index++);
   ipcp_req_length =
-      (((uint16_t)poc_id->protocol_id_contents.at(pco_in_index)) << 8) |
-      ((uint16_t)poc_id->protocol_id_contents.at(pco_in_index + 1));
+      (((uint16_t) poc_id->protocol_id_contents.at(pco_in_index)) << 8) |
+      ((uint16_t) poc_id->protocol_id_contents.at(pco_in_index + 1));
   UNUSED(ipcp_req_length);
   Logger::smf_app().trace(
       "PCO: Protocol identifier IPCP (0x%x) code 0x%x identifier 0x%x length "
@@ -100,19 +100,20 @@ int smf_app::process_pco_request_ipcp(
       poc_id->protocol_id, ipcp_req_code, ipcp_req_identifier, ipcp_req_length);
   pco_in_index += 2;
   ipcp_req_remaining_length = ipcp_req_remaining_length - 1 - 1 - 2;
-  ipcp_out_length = 1 + 1 + 2;
+  ipcp_out_length           = 1 + 1 + 2;
 
   poc_id_resp.protocol_id = poc_id->protocol_id;
   poc_id_resp.length_of_protocol_id_contents =
       0;  // fill value after parsing req
   // 4 = length(code, identifier, length)
-  poc_id_resp.protocol_id_contents.resize(4,
-                                          0);  // fill values after parsing req
+  poc_id_resp.protocol_id_contents.resize(
+      4,
+      0);  // fill values after parsing req
 
   ipcp_out_code = IPCP_CODE_CONFIGURE_ACK;
 
   while (ipcp_req_remaining_length >= 2) {
-    ipcp_req_option = poc_id->protocol_id_contents.at(pco_in_index);
+    ipcp_req_option        = poc_id->protocol_id_contents.at(pco_in_index);
     ipcp_req_option_length = poc_id->protocol_id_contents.at(pco_in_index + 1);
     ipcp_req_remaining_length =
         ipcp_req_remaining_length - ipcp_req_option_length;
@@ -139,13 +140,13 @@ int smf_app::process_pco_request_ipcp(
             ipcp_req_option_length);
         if (ipcp_req_option_length >= 6) {
           ipcp_dns_prim_ipv4_addr = htonl(
-              (((uint32_t)poc_id->protocol_id_contents.at(pco_in_index + 2))
+              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2))
                << 24) |
-              (((uint32_t)poc_id->protocol_id_contents.at(pco_in_index + 3))
+              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3))
                << 16) |
-              (((uint32_t)poc_id->protocol_id_contents.at(pco_in_index + 4))
+              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4))
                << 8) |
-              (((uint32_t)poc_id->protocol_id_contents.at(pco_in_index + 5))));
+              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
           Logger::smf_app().debug(
               "PCO: Protocol identifier IPCP option "
               "SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_prim_ipv4_addr 0x%x",
@@ -161,7 +162,7 @@ int smf_app::process_pco_request_ipcp(
              *  provide the address information in a Config-Nak packet. */
             ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
           } else if (smf_cfg.default_dnsv4.s_addr != ipcp_dns_prim_ipv4_addr) {
-            ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
+            ipcp_out_code               = IPCP_CODE_CONFIGURE_NACK;
             ipcp_out_dns_prim_ipv4_addr = smf_cfg.default_dnsv4.s_addr;
           } else {
             ipcp_out_dns_prim_ipv4_addr = ipcp_dns_prim_ipv4_addr;
@@ -174,14 +175,14 @@ int smf_app::process_pco_request_ipcp(
               ipcp_out_dns_prim_ipv4_addr);
         }
         uint8_t idp[6] = {0};
-        idp[0] = IPCP_OPTION_PRIMARY_DNS_SERVER_IP_ADDRESS;
-        idp[1] = 6;
-        idp[2] = (uint8_t)(ipcp_out_dns_prim_ipv4_addr & 0x000000FF);
+        idp[0]         = IPCP_OPTION_PRIMARY_DNS_SERVER_IP_ADDRESS;
+        idp[1]         = 6;
+        idp[2]         = (uint8_t)(ipcp_out_dns_prim_ipv4_addr & 0x000000FF);
         idp[3] = (uint8_t)((ipcp_out_dns_prim_ipv4_addr >> 8) & 0x000000FF);
         idp[4] = (uint8_t)((ipcp_out_dns_prim_ipv4_addr >> 16) & 0x000000FF);
         idp[5] = (uint8_t)((ipcp_out_dns_prim_ipv4_addr >> 24) & 0x000000FF);
         ipcp_out_length += 6;
-        std::string tmp_s((const char *)&idp[0], 6);
+        std::string tmp_s((const char*) &idp[0], 6);
         poc_id_resp.protocol_id_contents.append(tmp_s);
       } break;
 
@@ -202,13 +203,13 @@ int smf_app::process_pco_request_ipcp(
 
         if (ipcp_req_option_length >= 6) {
           ipcp_dns_sec_ipv4_addr = htonl(
-              (((uint32_t)poc_id->protocol_id_contents.at(pco_in_index + 2))
+              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2))
                << 24) |
-              (((uint32_t)poc_id->protocol_id_contents.at(pco_in_index + 3))
+              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3))
                << 16) |
-              (((uint32_t)poc_id->protocol_id_contents.at(pco_in_index + 4))
+              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4))
                << 8) |
-              (((uint32_t)poc_id->protocol_id_contents.at(pco_in_index + 5))));
+              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
           Logger::smf_app().debug(
               "PCO: Protocol identifier IPCP option "
               "SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_sec_ipv4_addr 0x%x",
@@ -216,10 +217,10 @@ int smf_app::process_pco_request_ipcp(
 
           if (ipcp_dns_sec_ipv4_addr == INADDR_ANY) {
             ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
-            ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
-          } else if (smf_cfg.default_dns_secv4.s_addr !=
-                     ipcp_dns_sec_ipv4_addr) {
-            ipcp_out_code = IPCP_CODE_CONFIGURE_NACK;
+            ipcp_out_code              = IPCP_CODE_CONFIGURE_NACK;
+          } else if (
+              smf_cfg.default_dns_secv4.s_addr != ipcp_dns_sec_ipv4_addr) {
+            ipcp_out_code              = IPCP_CODE_CONFIGURE_NACK;
             ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
           } else {
             ipcp_out_dns_sec_ipv4_addr = ipcp_dns_sec_ipv4_addr;
@@ -231,14 +232,14 @@ int smf_app::process_pco_request_ipcp(
               ipcp_out_dns_sec_ipv4_addr);
         }
         uint8_t ids[6] = {0};
-        ids[0] = IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS;
-        ids[1] = 6;
-        ids[2] = (uint8_t)(ipcp_out_dns_sec_ipv4_addr & 0x000000FF);
+        ids[0]         = IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS;
+        ids[1]         = 6;
+        ids[2]         = (uint8_t)(ipcp_out_dns_sec_ipv4_addr & 0x000000FF);
         ids[3] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 8) & 0x000000FF);
         ids[4] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 16) & 0x000000FF);
         ids[5] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 24) & 0x000000FF);
         ipcp_out_length += 6;
-        std::string tmp_s((const char *)&ids[0], 6);
+        std::string tmp_s((const char*) &ids[0], 6);
         poc_id_resp.protocol_id_contents.append(tmp_s);
       } break;
 
@@ -263,9 +264,9 @@ int smf_app::process_pco_request_ipcp(
 
 //------------------------------------------------------------------------------
 int smf_app::process_pco_dns_server_request(
-    protocol_configuration_options_t &pco_resp,
-    const pco_protocol_or_container_id_t *const poc_id) {
-  in_addr_t ipcp_out_dns_prim_ipv4_addr = smf_cfg.default_dnsv4.s_addr;
+    protocol_configuration_options_t& pco_resp,
+    const pco_protocol_or_container_id_t* const poc_id) {
+  in_addr_t ipcp_out_dns_prim_ipv4_addr      = smf_cfg.default_dnsv4.s_addr;
   pco_protocol_or_container_id_t poc_id_resp = {0};
   uint8_t dns_array[4];
 
@@ -277,15 +278,15 @@ int smf_app::process_pco_dns_server_request(
   dns_array[1] = (uint8_t)((ipcp_out_dns_prim_ipv4_addr >> 8) & 0x000000FF);
   dns_array[2] = (uint8_t)((ipcp_out_dns_prim_ipv4_addr >> 16) & 0x000000FF);
   dns_array[3] = (uint8_t)((ipcp_out_dns_prim_ipv4_addr >> 24) & 0x000000FF);
-  std::string tmp_s((const char *)&dns_array[0], sizeof(dns_array));
+  std::string tmp_s((const char*) &dns_array[0], sizeof(dns_array));
   poc_id_resp.protocol_id_contents = tmp_s;
 
   return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
 }
 //------------------------------------------------------------------------------
 int smf_app::process_pco_link_mtu_request(
-    protocol_configuration_options_t &pco_resp,
-    const pco_protocol_or_container_id_t *const poc_id) {
+    protocol_configuration_options_t& pco_resp,
+    const pco_protocol_or_container_id_t* const poc_id) {
   pco_protocol_or_container_id_t poc_id_resp = {0};
   uint8_t mtu_array[2];
 
@@ -293,9 +294,9 @@ int smf_app::process_pco_link_mtu_request(
       "PCO: Protocol identifier IPCP option Link MTU Request");
   poc_id_resp.protocol_id = PCO_CONTAINER_IDENTIFIER_IPV4_LINK_MTU;
   poc_id_resp.length_of_protocol_id_contents = 2;
-  mtu_array[0] = (uint8_t)(smf_cfg.ue_mtu >> 8);
-  mtu_array[1] = (uint8_t)(smf_cfg.ue_mtu & 0xFF);
-  std::string tmp_s((const char *)&mtu_array[0], 2);
+  mtu_array[0]                               = (uint8_t)(smf_cfg.ue_mtu >> 8);
+  mtu_array[1]                               = (uint8_t)(smf_cfg.ue_mtu & 0xFF);
+  std::string tmp_s((const char*) &mtu_array[0], 2);
   poc_id_resp.protocol_id_contents = tmp_s;
 
   return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
@@ -303,15 +304,15 @@ int smf_app::process_pco_link_mtu_request(
 
 //------------------------------------------------------------------------------
 int smf_app::process_pco_request(
-    const protocol_configuration_options_t &pco_req,
-    protocol_configuration_options_t &pco_resp,
-    protocol_configuration_options_ids_t &pco_ids) {
+    const protocol_configuration_options_t& pco_req,
+    protocol_configuration_options_t& pco_resp,
+    protocol_configuration_options_ids_t& pco_ids) {
   switch (pco_req.configuration_protocol) {
     case PCO_CONFIGURATION_PROTOCOL_PPP_FOR_USE_WITH_IP_PDP_TYPE_OR_IP_PDN_TYPE:
-      pco_resp.ext = 1;
-      pco_resp.spare = 0;
+      pco_resp.ext                          = 1;
+      pco_resp.spare                        = 0;
       pco_resp.num_protocol_or_container_id = 0;
-      pco_resp.configuration_protocol = pco_req.configuration_protocol;
+      pco_resp.configuration_protocol       = pco_req.configuration_protocol;
       break;
 
     default:
@@ -324,14 +325,14 @@ int smf_app::process_pco_request(
   for (int id = 0; id < pco_req.num_protocol_or_container_id; id++) {
     switch (pco_req.protocol_or_container_ids[id].protocol_id) {
       case PCO_PROTOCOL_IDENTIFIER_IPCP:
-        process_pco_request_ipcp(pco_resp,
-                                 &pco_req.protocol_or_container_ids[id]);
+        process_pco_request_ipcp(
+            pco_resp, &pco_req.protocol_or_container_ids[id]);
         pco_ids.pi_ipcp = true;
         break;
 
       case PCO_CONTAINER_IDENTIFIER_DNS_SERVER_IPV4_ADDRESS_REQUEST:
-        process_pco_dns_server_request(pco_resp,
-                                       &pco_req.protocol_or_container_ids[id]);
+        process_pco_dns_server_request(
+            pco_resp, &pco_req.protocol_or_container_ids[id]);
         pco_ids.ci_dns_server_ipv4_address_request = true;
         break;
 
@@ -341,8 +342,8 @@ int smf_app::process_pco_request(
         break;
 
       case PCO_CONTAINER_IDENTIFIER_IPV4_LINK_MTU_REQUEST:
-        process_pco_link_mtu_request(pco_resp,
-                                     &pco_req.protocol_or_container_ids[id]);
+        process_pco_link_mtu_request(
+            pco_resp, &pco_req.protocol_or_container_ids[id]);
         pco_ids.ci_ipv4_link_mtu_request = true;
         break;
 

@@ -69,7 +69,8 @@ void SMContextsCollectionApi::setupRoutes() {
   using namespace Pistache::Rest;
 
   Routes::Post(
-      *router, base + smf_cfg.sbi_api_version + "/sm-contexts",
+      *router,
+      base + smf_cfg.sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
       Routes::bind(&SMContextsCollectionApi::post_sm_contexts_handler, this));
 
   // Default handler, called when a route is not found
@@ -116,13 +117,11 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
     this->post_sm_contexts(smContextMessage, response);
 
   } catch (nlohmann::detail::exception& e) {
-    // send a 400 error
     Logger::smf_api_server().warn(
         "Can not parse the json data (error: %s)!", e.what());
     response.send(Pistache::Http::Code::Bad_Request, e.what());
     return;
   } catch (std::exception& e) {
-    // send a 500 error
     Logger::smf_api_server().warn("Error: %s!", e.what());
     response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
     return;

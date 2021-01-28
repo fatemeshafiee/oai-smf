@@ -54,14 +54,14 @@ using namespace pfcp;
 using namespace smf;
 using namespace std;
 
-extern itti_mw *itti_inst;
-extern smf::smf_app *smf_app_inst;
+extern itti_mw* itti_inst;
+extern smf::smf_app* smf_app_inst;
 extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
 int n4_session_restore_procedure::run() {
   if (pending_sessions.size()) {
-    itti_n4_restore *itti_msg = nullptr;
+    itti_n4_restore* itti_msg = nullptr;
     for (std::set<pfcp::fseid_t>::iterator it = pending_sessions.begin();
          it != pending_sessions.end(); ++it) {
       if (!itti_msg) {
@@ -111,14 +111,14 @@ int session_create_sm_context_procedure::run(
   }
 
   //-------------------
-  n11_trigger = sm_context_req;
+  n11_trigger           = sm_context_req;
   n11_triggered_pending = sm_context_resp;
-  uint64_t seid = smf_app_inst->generate_seid();
+  uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
-  itti_n4_session_establishment_request *n4_ser =
+  itti_n4_session_establishment_request* n4_ser =
       new itti_n4_session_establishment_request(TASK_SMF_APP, TASK_SMF_N4);
-  n4_ser->seid = 0;
-  n4_ser->trxn_id = this->trxn_id;
+  n4_ser->seid       = 0;
+  n4_ser->trxn_id    = this->trxn_id;
   n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
   n4_triggered = std::shared_ptr<itti_n4_session_establishment_request>(n4_ser);
 
@@ -143,9 +143,9 @@ int session_create_sm_context_procedure::run(
   //-------------------
   // IE create_far (Forwarding Action Rules)
   //-------------------
-  pfcp::create_far create_far = {};
-  pfcp::far_id_t far_id = {};  // rule ID
-  pfcp::apply_action_t apply_action = {};
+  pfcp::create_far create_far                       = {};
+  pfcp::far_id_t far_id                             = {};  // rule ID
+  pfcp::apply_action_t apply_action                 = {};
   pfcp::forwarding_parameters forwarding_parameters = {};
 
   // forwarding_parameters IEs
@@ -163,25 +163,26 @@ int session_create_sm_context_procedure::run(
 
   create_far.set(far_id);
   create_far.set(apply_action);
-  create_far.set(forwarding_parameters);  // should check since destination
-                                          // interface is directly set to FAR (as
-                                          // described in Table 5.8.2.11.6-1)
+  create_far.set(
+      forwarding_parameters);  // should check since destination
+                               // interface is directly set to FAR (as
+                               // described in Table 5.8.2.11.6-1)
 
   //-------------------
   // IE create_pdr (section 5.8.2.11.3@TS 23.501)
   //-------------------
-  pfcp::create_pdr create_pdr = {};
-  pfcp::pdr_id_t pdr_id = {};  // rule ID?
+  pfcp::create_pdr create_pdr   = {};
+  pfcp::pdr_id_t pdr_id         = {};  // rule ID?
   pfcp::precedence_t precedence = {};
-  pfcp::pdi pdi = {};  // packet detection information
+  pfcp::pdi pdi                 = {};  // packet detection information
   pfcp::outer_header_removal_t outer_header_removal = {};
   // pdi IEs
-  pfcp::source_interface_t source_interface = {};
-  pfcp::fteid_t local_fteid = {};
-  pfcp::ue_ip_address_t ue_ip_address = {};
-  pfcp::sdf_filter_t sdf_filter = {};
-  pfcp::application_id_t application_id = {};
-  pfcp::qfi_t qfi = {};
+  pfcp::source_interface_t source_interface          = {};
+  pfcp::fteid_t local_fteid                          = {};
+  pfcp::ue_ip_address_t ue_ip_address                = {};
+  pfcp::sdf_filter_t sdf_filter                      = {};
+  pfcp::application_id_t application_id              = {};
+  pfcp::qfi_t qfi                                    = {};
   pfcp::_3gpp_interface_type_t source_interface_type = {};
 
   // DOIT simple
@@ -190,10 +191,11 @@ int session_create_sm_context_procedure::run(
   sps->generate_pdr_id(pdr_id);
 
   // get the default QoS profile
-  subscribed_default_qos_t default_qos = {};
+  subscribed_default_qos_t default_qos                = {};
   std::shared_ptr<session_management_subscription> ss = {};
-  sc.get()->get_default_qos(sm_context_req->req.get_snssai(),
-                            sm_context_req->req.get_dnn(), default_qos);
+  sc.get()->get_default_qos(
+      sm_context_req->req.get_snssai(), sm_context_req->req.get_dnn(),
+      default_qos);
   // Default QoS Flow - Non GBR, qfi = 5qi
   qfi.qfi = default_qos._5qi;
   Logger::smf_app().info("Default qfi %d", qfi.qfi);
@@ -210,8 +212,8 @@ int session_create_sm_context_procedure::run(
   pdi.set(local_fteid);
   // TODO: Network Instance
   // UE IP address
-  xgpp_conv::paa_to_pfcp_ue_ip_address(sm_context_resp->res.get_paa(),
-                                       ue_ip_address);
+  xgpp_conv::paa_to_pfcp_ue_ip_address(
+      sm_context_resp->res.get_paa(), ue_ip_address);
   pdi.set(ue_ip_address);
   // TODO: Traffic Endpoint ID
   // TODO: SDF Filter
@@ -248,21 +250,21 @@ int session_create_sm_context_procedure::run(
   // (Section 5.8.2.11@3GPP TS 23.501)
 
   // Create default QoS (Non-GBR) and associate far id and pdr id to this flow
-  smf_qos_flow flow = {};
-  flow.far_id_ul.first = true;
+  smf_qos_flow flow     = {};
+  flow.far_id_ul.first  = true;
   flow.far_id_ul.second = far_id;
-  flow.pdr_id_ul = pdr_id;
-  flow.pdu_session_id = sm_context_req->req.get_pdu_session_id();
+  flow.pdr_id_ul        = pdr_id;
+  flow.pdu_session_id   = sm_context_req->req.get_pdu_session_id();
   // default QoS profile
-  flow.qfi.qfi = default_qos._5qi;
-  flow.qos_profile._5qi = default_qos._5qi;
-  flow.qos_profile.arp = default_qos.arp;
+  flow.qfi.qfi                    = default_qos._5qi;
+  flow.qos_profile._5qi           = default_qos._5qi;
+  flow.qos_profile.arp            = default_qos.arp;
   flow.qos_profile.priority_level = default_qos.priority_level;
 
   // assign default QoS rule for this flow
   QOSRulesIE qos_rule = {};
-  sc.get()->get_default_qos_rule(qos_rule,
-                                 sm_context_req->req.get_pdu_session_type());
+  sc.get()->get_default_qos_rule(
+      qos_rule, sm_context_req->req.get_pdu_session_type());
   uint8_t rule_id = {0};
   sps->generate_qos_rule_id(rule_id);
   qos_rule.qosruleidentifer = rule_id;
@@ -275,8 +277,8 @@ int session_create_sm_context_procedure::run(
   // for finding procedure when receiving response
   smf_app_inst->set_seid_2_smf_context(cp_fseid.seid, sc);
 
-  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N4",
-                         n4_ser->get_msg_name());
+  Logger::smf_app().info(
+      "Sending ITTI message %s to task TASK_SMF_N4", n4_ser->get_msg_name());
   int ret = itti_inst->send_msg(n4_triggered);
   if (RETURNok != ret) {
     Logger::smf_app().error(
@@ -290,14 +292,14 @@ int session_create_sm_context_procedure::run(
 
 //------------------------------------------------------------------------------
 void session_create_sm_context_procedure::handle_itti_msg(
-    itti_n4_session_establishment_response &resp,
+    itti_n4_session_establishment_response& resp,
     std::shared_ptr<smf::smf_context> sc) {
   Logger::smf_app().info(
       "Handle N4 Session Establishment Response (PDU Session Id %d)",
       n11_trigger.get()->req.get_pdu_session_id());
 
   cause_value_5gsm_e cause_n1 = {cause_value_5gsm_e::CAUSE_0_UNKNOWN};
-  pfcp::cause_t cause = {};
+  pfcp::cause_t cause         = {};
   resp.pfcp_ies.get(cause);
   if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
     resp.pfcp_ies.get(sps->up_fseid);
@@ -316,20 +318,20 @@ void session_create_sm_context_procedure::handle_itti_msg(
           sps->add_qos_flow(flow);
         }
       } else {
-        Logger::smf_app().error("Could not get QoS Flow for created_pdr %d",
-                                pdr_id.rule_id);
+        Logger::smf_app().error(
+            "Could not get QoS Flow for created_pdr %d", pdr_id.rule_id);
       }
     } else {
-      Logger::smf_app().error("Could not get pdr_id for created_pdr in %s",
-                              resp.pfcp_ies.get_msg_name());
+      Logger::smf_app().error(
+          "Could not get pdr_id for created_pdr in %s",
+          resp.pfcp_ies.get_msg_name());
     }
   }
 
   smf_qos_flow default_qos_flow = {};
   // flow_updated info will be used to construct N1,N2 container
   qos_flow_context_updated flow_updated = {};
-  // smf_qos_flow flow = { };
-  QOSRulesIE qos_rule = {};
+  QOSRulesIE qos_rule                   = {};
 
   flow_updated.set_cause(REQUEST_ACCEPTED);
   if (not sps->get_default_qos_flow(default_qos_flow)) {
@@ -345,7 +347,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
     }
     flow_updated.set_qfi(default_qos_flow.qfi);
     qos_profile_t profile = {};
-    profile = default_qos_flow.qos_profile;
+    profile               = default_qos_flow.qos_profile;
     flow_updated.set_qos_profile(profile);
     flow_updated.set_priority_level(
         default_qos_flow.qos_profile.priority_level);
@@ -407,15 +409,15 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
   // Fill N1N2MesasgeTransferRequestData
   // get supi and put into URL
-  supi_t supi = n11_triggered_pending->res.get_supi();
+  supi_t supi          = n11_triggered_pending->res.get_supi();
   std::string supi_str = n11_triggered_pending->res.get_supi_prefix() + "-" +
                          smf_supi_to_string(supi);
   std::string url =
-      std::string(inet_ntoa(*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr))) +
+      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
       ":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
-      fmt::format(NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
-                  supi_str.c_str());
+      fmt::format(
+          NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
   n11_triggered_pending->res.set_amf_url(url);
   Logger::smf_n11().debug(
       "N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
@@ -433,7 +435,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
         n11_triggered_pending->res.get_pdu_session_id();
     // N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
     json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-    		"PDU_RES_SETUP_REQ";  // NGAP message type
+        "PDU_RES_SETUP_REQ";  // NGAP message type
     json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
              ["contentId"] = N2_SM_CONTENT_ID;  // NGAP part
     json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
@@ -445,11 +447,11 @@ void session_create_sm_context_procedure::handle_itti_msg(
     // N1N2MsgTxfrFailureNotification
     std::string callback_uri =
         std::string(
-            inet_ntoa(*((struct in_addr *)&smf_cfg.amf_addr.ipv4_addr))) +
+            inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
         ":" + std::to_string(smf_cfg.amf_addr.port) + NSMF_PDU_SESSION_BASE +
         smf_cfg.sbi_api_version +
-        fmt::format(NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE,
-                    supi_str.c_str());
+        fmt::format(
+            NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE, supi_str.c_str());
     json_data["n1n2FailureTxfNotifURI"] = callback_uri.c_str();
   }
   // Others information
@@ -460,8 +462,9 @@ void session_create_sm_context_procedure::handle_itti_msg(
   n11_triggered_pending->res.set_json_data(json_data);
 
   // send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs
-  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_APP",
-                         n11_triggered_pending->get_msg_name());
+  Logger::smf_app().info(
+      "Sending ITTI message %s to task TASK_SMF_APP",
+      n11_triggered_pending->get_msg_name());
 
   int ret = itti_inst->send_msg(n11_triggered_pending);
   if (RETURNok != ret) {
@@ -494,14 +497,14 @@ int session_update_sm_context_procedure::run(
   }
 
   //-------------------
-  n11_trigger = sm_context_req;
+  n11_trigger           = sm_context_req;
   n11_triggered_pending = sm_context_resp;
-  uint64_t seid = smf_app_inst->generate_seid();
+  uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
-  itti_n4_session_modification_request *n4_ser =
+  itti_n4_session_modification_request* n4_ser =
       new itti_n4_session_modification_request(TASK_SMF_APP, TASK_SMF_N4);
-  n4_ser->seid = sps->up_fseid.seid;
-  n4_ser->trxn_id = this->trxn_id;
+  n4_ser->seid       = sps->up_fseid.seid;
+  n4_ser->trxn_id    = this->trxn_id;
   n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
   n4_triggered = std::shared_ptr<itti_n4_session_modification_request>(n4_ser);
 
@@ -538,8 +541,8 @@ int session_update_sm_context_procedure::run(
       for (auto qfi : list_of_qfis_to_be_modified) {
         smf_qos_flow flow = {};
         if (!sps->get_qos_flow(qfi, flow)) {  // no QoS flow found
-          Logger::smf_app().error("could not found any QoS flow with QFI %d",
-                                  qfi.qfi);
+          Logger::smf_app().error(
+              "could not found any QoS flow with QFI %d", qfi.qfi);
           // Set cause to SYSTEM_FAILURE and send response
           qos_flow_context_updated qcu = {};
           qcu.set_cause(SYSTEM_FAILURE);
@@ -568,10 +571,10 @@ int session_update_sm_context_procedure::run(
               "0x%" PRIx32 " ",
               flow.far_id_dl.second.far_id);
           // Update FAR
-          far_id.far_id = flow.far_id_dl.second.far_id;
-          pfcp::update_far update_far = {};
+          far_id.far_id                     = flow.far_id_dl.second.far_id;
+          pfcp::update_far update_far       = {};
           pfcp::apply_action_t apply_action = {};
-          pfcp::outer_header_creation_t outer_header_creation = {};
+          pfcp::outer_header_creation_t outer_header_creation             = {};
           pfcp::update_forwarding_parameters update_forwarding_parameters = {};
 
           update_far.set(flow.far_id_dl.second);
@@ -589,15 +592,15 @@ int session_update_sm_context_procedure::run(
 
           n4_ser->pfcp_ies.set(update_far);
 
-          send_n4 = true;
+          send_n4              = true;
           flow.far_id_dl.first = true;
-          flow.dl_fteid = dl_fteid;
+          flow.dl_fteid        = dl_fteid;
 
         } else {
           Logger::smf_app().debug("Create FAR DL");
           // Create FAR
-          pfcp::create_far create_far = {};
-          pfcp::apply_action_t apply_action = {};
+          pfcp::create_far create_far                       = {};
+          pfcp::apply_action_t apply_action                 = {};
           pfcp::forwarding_parameters forwarding_parameters = {};
           // pfcp::duplicating_parameters      duplicating_parameters = {};
           // pfcp::bar_id_t                    bar_id = {};
@@ -638,9 +641,9 @@ int session_update_sm_context_procedure::run(
 
           send_n4 = true;
 
-          flow.far_id_dl.first = true;
+          flow.far_id_dl.first         = true;
           flow.far_id_dl.second.far_id = far_id.far_id;
-          flow.dl_fteid = dl_fteid;
+          flow.dl_fteid                = dl_fteid;
           Logger::smf_app().debug(
               "FAR DL ID "
               "0x%" PRIx32 " ",
@@ -652,9 +655,9 @@ int session_update_sm_context_procedure::run(
           //-------------------
           // IE create_pdr
           //-------------------
-          pfcp::create_pdr create_pdr = {};
+          pfcp::create_pdr create_pdr   = {};
           pfcp::precedence_t precedence = {};
-          pfcp::pdi pdi = {};
+          pfcp::pdi pdi                 = {};
           //    pfcp::far_id_t                    far_id;
           //    pfcp::urr_id_t                    urr_id;
           //    pfcp::qer_id_t                    qer_id;
@@ -665,7 +668,7 @@ int session_update_sm_context_procedure::run(
           // pfcp::network_instance_t         network_instance = {};
           pfcp::ue_ip_address_t ue_ip_address = {};
           // pfcp::traffic_endpoint_id_t      traffic_endpoint_id = {};
-          pfcp::sdf_filter_t sdf_filter = {};
+          pfcp::sdf_filter_t sdf_filter         = {};
           pfcp::application_id_t application_id = {};
           // pfcp::ethernet_packet_filter     ethernet_packet_filter = {};
           pfcp::qfi_t qfi = {};
@@ -676,11 +679,11 @@ int session_update_sm_context_procedure::run(
 
           // local_fteid.from_core_fteid(qos_flow.qos_flow.dl_fteid);
           if (sps->ipv4) {
-            ue_ip_address.v4 = 1;
+            ue_ip_address.v4                  = 1;
             ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
           }
           if (sps->ipv6) {
-            ue_ip_address.v6 = 1;
+            ue_ip_address.v6           = 1;
             ue_ip_address.ipv6_address = sps->ipv6_address;
           }
 
@@ -688,8 +691,7 @@ int session_update_sm_context_procedure::run(
           // shall uniquely identify the PDR among all the PDRs configured for
           // that PFCP session.
           sps->generate_pdr_id(pdr_id);
-          precedence.precedence =
-              flow.precedence.precedence;
+          precedence.precedence = flow.precedence.precedence;
           pdi.set(source_interface);
           // pdi.set(local_fteid);
           pdi.set(ue_ip_address);
@@ -731,22 +733,21 @@ int session_update_sm_context_procedure::run(
            flow.far_id_dl.first = true;
            */
 
-          pfcp::update_pdr update_pdr = {};
-          pfcp::precedence_t precedence = {};
-          pfcp::pdi pdi = {};
-          pfcp::ue_ip_address_t ue_ip_address = {};
+          pfcp::update_pdr update_pdr               = {};
+          pfcp::precedence_t precedence             = {};
+          pfcp::pdi pdi                             = {};
+          pfcp::ue_ip_address_t ue_ip_address       = {};
           pfcp::source_interface_t source_interface = {};
 
           if (sps->ipv4) {
-            ue_ip_address.v4 = 1;
+            ue_ip_address.v4                  = 1;
             ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
           }
           if (sps->ipv6) {
-            ue_ip_address.v6 = 1;
+            ue_ip_address.v6           = 1;
             ue_ip_address.ipv6_address = sps->ipv6_address;
           }
-          precedence.precedence =
-              flow.precedence.precedence;
+          precedence.precedence = flow.precedence.precedence;
 
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
           pdi.set(source_interface);
@@ -803,7 +804,7 @@ int session_update_sm_context_procedure::run(
 
         // for DL
         if (flow.far_id_dl.first) {
-          pfcp::update_far far = {};
+          pfcp::update_far far  = {};
           pfcp::far_id_t far_id = {};
 
           far_id.far_id = flow.far_id_dl.second.far_id;
@@ -828,11 +829,11 @@ int session_update_sm_context_procedure::run(
 
         // for UL
         if (flow.far_id_ul.first) {
-          pfcp::update_far far = {};
-          pfcp::far_id_t far_id = {};
-          far_id.far_id = flow.far_id_ul.second.far_id;
+          pfcp::update_far far              = {};
+          pfcp::far_id_t far_id             = {};
+          far_id.far_id                     = flow.far_id_ul.second.far_id;
           pfcp::apply_action_t apply_action = {};
-          apply_action.drop = 1;
+          apply_action.drop                 = 1;
 
           far.set(far_id);
           far.set(apply_action);
@@ -855,8 +856,8 @@ int session_update_sm_context_procedure::run(
   }
 
   if (send_n4) {
-    Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N4",
-                           n4_ser->get_msg_name());
+    Logger::smf_app().info(
+        "Sending ITTI message %s to task TASK_SMF_N4", n4_ser->get_msg_name());
     int ret = itti_inst->send_msg(n4_triggered);
     if (RETURNok != ret) {
       Logger::smf_app().error(
@@ -874,7 +875,7 @@ int session_update_sm_context_procedure::run(
 
 //------------------------------------------------------------------------------
 void session_update_sm_context_procedure::handle_itti_msg(
-    itti_n4_session_modification_response &resp,
+    itti_n4_session_modification_response& resp,
     std::shared_ptr<smf::smf_context> sc) {
   std::string n1_sm_msg, n1_sm_msg_hex;
   std::string n2_sm_info, n2_sm_info_hex;
@@ -922,8 +923,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
       n11_triggered_pending->res.remove_all_qos_flow_context_updateds();
 
       for (auto it : qos_flow_context_to_be_updateds)
-        Logger::smf_app().debug("QoS Flow context to be modified QFI %d",
-                                it.first);
+        Logger::smf_app().debug(
+            "QoS Flow context to be modified QFI %d", it.first);
 
       for (auto it_created_pdr : resp.pfcp_ies.created_pdrs) {
         pfcp::pdr_id_t pdr_id = {};
@@ -959,8 +960,9 @@ void session_update_sm_context_procedure::handle_itti_msg(
             }
           }
         } else {
-          Logger::smf_app().error("Could not get pdr_id for created_pdr in %s",
-                                  resp.pfcp_ies.get_msg_name());
+          Logger::smf_app().error(
+              "Could not get pdr_id for created_pdr in %s",
+              resp.pfcp_ies.get_msg_name());
         }
       }
 
@@ -992,8 +994,9 @@ void session_update_sm_context_procedure::handle_itti_msg(
                   resp.pfcp_ies.get_msg_name());
             }
           } else {
-            Logger::smf_app().error("Could not get far_id for update_far in %s",
-                                    resp.pfcp_ies.get_msg_name());
+            Logger::smf_app().error(
+                "Could not get far_id for update_far in %s",
+                resp.pfcp_ies.get_msg_name());
           }
         }
       } else {
@@ -1058,7 +1061,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
       Logger::smf_app().info(
           "PDU Session Establishment Request (UE-Initiated)");
       nlohmann::json json_data = {};
-      json_data["cause"] = n11_triggered_pending->res.get_cause();
+      json_data["cause"]       = n11_triggered_pending->res.get_cause();
       n11_triggered_pending->res.set_json_data(json_data);
 
       // Update PDU session status to ACTIVE
@@ -1084,14 +1087,14 @@ void session_update_sm_context_procedure::handle_itti_msg(
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
       // fill the content of SmContextUpdatedData
-      nlohmann::json json_data = {};
+      nlohmann::json json_data                           = {};
       json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
       json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
           n11_triggered_pending->res.get_pdu_session_id();
       json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
                ["contentId"] = N2_SM_CONTENT_ID;
       json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-    		  "PDU_RES_SETUP_REQ";  // NGAP message
+          "PDU_RES_SETUP_REQ";  // NGAP message
       json_data["upCnxState"] = "ACTIVATING";
       n11_triggered_pending->res.set_json_data(json_data);
       // TODO: verify whether cause is needed (as in 23.502 but not in 3GPP
@@ -1107,8 +1110,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // No need to create N1/N2 Container, just Cause
       Logger::smf_app().info("UE Triggered Service Request (Step 2)");
       nlohmann::json json_data = {};
-      json_data["cause"] = n11_triggered_pending->res.get_cause();
-      json_data["upCnxState"] = "ACTIVATED";
+      json_data["cause"]       = n11_triggered_pending->res.get_cause();
+      json_data["upCnxState"]  = "ACTIVATED";
       n11_triggered_pending->res.set_json_data(json_data);
       n11_triggered_pending->res.set_http_code(
           http_status_code_e::HTTP_STATUS_CODE_200_OK);
@@ -1156,13 +1159,13 @@ void session_update_sm_context_procedure::handle_itti_msg(
         n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
         // fill the content of SmContextUpdatedData
-        sm_context_updated_data["n2SmInfoType"] = 
+        sm_context_updated_data["n2SmInfoType"] =
             //["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-            "PDU_RES_REL_CMD";     // NGAP message
+            "PDU_RES_REL_CMD";  // NGAP message
         n11_triggered_pending->res.set_json_data(sm_context_updated_data);
       } else {
         // fill the content of SmContextUpdatedData
-        nlohmann::json json_data = {};
+        nlohmann::json json_data                          = {};
         json_data["n1MessageContainer"]["n1MessageClass"] = N1N2_MESSAGE_CLASS;
         json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
             N1_SM_CONTENT_ID;
@@ -1205,15 +1208,16 @@ void session_update_sm_context_procedure::handle_itti_msg(
     } break;
 
     default: {
-      Logger::smf_app().info("Unknown session procedure type %d",
-                             session_procedure_type);
+      Logger::smf_app().info(
+          "Unknown session procedure type %d", session_procedure_type);
     }
   }
 
   // send ITTI message to SMF_APP interface to trigger
   // SessionUpdateSMContextResponse towards AMFs
-  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_APP",
-                         n11_triggered_pending->get_msg_name());
+  Logger::smf_app().info(
+      "Sending ITTI message %s to task TASK_SMF_APP",
+      n11_triggered_pending->get_msg_name());
   n11_triggered_pending->session_procedure_type = session_procedure_type;
   int ret = itti_inst->send_msg(n11_triggered_pending);
   if (RETURNok != ret) {
@@ -1258,19 +1262,19 @@ int session_release_sm_context_procedure::run(
   }
 
   //-------------------
-  n11_trigger = sm_context_req;
+  n11_trigger           = sm_context_req;
   n11_triggered_pending = sm_context_res;
-  uint64_t seid = smf_app_inst->generate_seid();
+  uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
-  itti_n4_session_deletion_request *n4_ser =
+  itti_n4_session_deletion_request* n4_ser =
       new itti_n4_session_deletion_request(TASK_SMF_APP, TASK_SMF_N4);
-  n4_ser->seid = sps->up_fseid.seid;
-  n4_ser->trxn_id = this->trxn_id;
+  n4_ser->seid       = sps->up_fseid.seid;
+  n4_ser->trxn_id    = this->trxn_id;
   n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
   n4_triggered = std::shared_ptr<itti_n4_session_deletion_request>(n4_ser);
 
-  Logger::smf_app().info("Sending ITTI message %s to task TASK_SMF_N4",
-                         n4_ser->get_msg_name());
+  Logger::smf_app().info(
+      "Sending ITTI message %s to task TASK_SMF_N4", n4_ser->get_msg_name());
   int ret = itti_inst->send_msg(n4_triggered);
   if (RETURNok != ret) {
     Logger::smf_app().error(
@@ -1283,7 +1287,7 @@ int session_release_sm_context_procedure::run(
 
 //------------------------------------------------------------------------------
 void session_release_sm_context_procedure::handle_itti_msg(
-    itti_n4_session_deletion_response &resp,
+    itti_n4_session_deletion_response& resp,
     std::shared_ptr<smf::smf_context> sc) {
   Logger::smf_app().info(
       "Handle itti_n4_session_deletion_response (Release SM Context Request): "

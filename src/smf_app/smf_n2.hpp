@@ -49,11 +49,11 @@ class smf_n2 {
  private:
  public:
   smf_n2(){};
-  smf_n2(smf_n2 const &) = delete;
-  void operator=(smf_n2 const &) = delete;
+  smf_n2(smf_n2 const&) = delete;
+  void operator=(smf_n2 const&) = delete;
 
  public:
-  static smf_n2 &get_instance() {
+  static smf_n2& get_instance() {
     static smf_n2 instance;
     return instance;
   }
@@ -62,8 +62,9 @@ class smf_n2 {
    * Create N2 SM Information: PDU Session Resource Setup Request Transfer
    * This IE is included in N1N2MessageTransfer Request (Accept, PDU Session
    * Establishment procedure - UE initiated)
-   * @param [pdu_session_create_sm_context_response] sm_context_res: include
+   * @param [pdu_session_create_sm_context_response&] sm_context_res: include
    * necessary information for encoding NGAP msg
+   * @param [n2_sm_info_type_e] ngap_info_type: NGAP info's type
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
    * @return boolean: True if the NGAP message has been created successfully,
@@ -71,15 +72,16 @@ class smf_n2 {
    *
    */
   bool create_n2_pdu_session_resource_setup_request_transfer(
-      pdu_session_create_sm_context_response &sm_context_res,
-      n2_sm_info_type_e ngap_info_type, std::string &ngap_msg_str);
+      pdu_session_create_sm_context_response& sm_context_res,
+      n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
 
   /*
    * Create N2 SM Information: PDU Session Resource Setup Request Transfer
    * This IE is included in PDU Session Update SM Context Response​ (Service
    * Request, step 2)
-   * @param [pdu_session_update_sm_context_response] sm_context_res: include
+   * @param [pdu_session_update_sm_context_response&] sm_context_res: include
    * necessary information for encoding NGAP msg
+   * @param [n2_sm_info_type_e] ngap_info_type: NGAP info's type
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
    * @return boolean: True if the NGAP message has been created successfully,
@@ -87,8 +89,8 @@ class smf_n2 {
    *
    */
   bool create_n2_pdu_session_resource_setup_request_transfer(
-      pdu_session_update_sm_context_response &sm_context_res,
-      n2_sm_info_type_e ngap_info_type, std::string &ngap_msg_str);
+      pdu_session_update_sm_context_response& sm_context_res,
+      n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
 
   /*
    * Create N2 SM Information: PDU Session Resource Setup Request Transfer
@@ -102,8 +104,8 @@ class smf_n2 {
    *
    */
   bool create_n2_pdu_session_resource_setup_request_transfer(
-      pdu_session_report_response &msg, n2_sm_info_type_e ngap_info_type,
-      std::string &ngap_msg_str);
+      pdu_session_report_response& msg, n2_sm_info_type_e ngap_info_type,
+      std::string& ngap_msg_str);
 
   /*
    * Create N2 SM Information: PDU Session Resource Modify Request Transfer IE
@@ -111,6 +113,7 @@ class smf_n2 {
    * Modification procedure, UE-initiated, step 1)
    * @param [pdu_session_update_sm_context_response] sm_context_res: include
    * necessary information for encoding NGAP msg
+   * @param [n2_sm_info_type_e] ngap_info_type: NGAP info's type
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
    * @return boolean: True if the NGAP message has been created successfully,
@@ -118,8 +121,8 @@ class smf_n2 {
    *
    */
   bool create_n2_pdu_session_resource_modify_request_transfer(
-      pdu_session_update_sm_context_response &sm_context_res,
-      n2_sm_info_type_e ngap_info_type, std::string &ngap_msg_str);
+      pdu_session_update_sm_context_response& sm_context_res,
+      n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
 
   /*
    * Create N2 SM Information: PDU Session Resource Modify Request Transfer IE
@@ -127,6 +130,7 @@ class smf_n2 {
    * Modification procedure, SMF-requested, step 1)
    * @param [pdu_session_update_sm_context_response] sm_context_res: include
    * necessary information for encoding NGAP msg
+   * @param [n2_sm_info_type_e] ngap_info_type: NGAP info's type
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
    * @return boolean: True if the NGAP message has been created successfully,
@@ -134,8 +138,8 @@ class smf_n2 {
    *
    */
   bool create_n2_pdu_session_resource_modify_request_transfer(
-      pdu_session_modification_network_requested &msg,
-      n2_sm_info_type_e ngap_info_type, std::string &ngap_msg_str);
+      pdu_session_modification_network_requested& msg,
+      n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
 
   /*
    * Create N2 SM Information: PDU Session Resource Modify Response Transfer IE
@@ -144,18 +148,14 @@ class smf_n2 {
    * necessary information for encoding NGAP msg
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
+   * @param [n2_sm_info_type_e] ngap_info_type: NGAP info's type
    * @return boolean: True if the NGAP message has been created successfully,
    * otherwise return false
    *
    */
   bool create_n2_pdu_session_resource_modify_response_transfer(
-      pdu_session_update_sm_context_response &sm_context_res,
-      n2_sm_info_type_e ngap_info_type, std::string &ngap_msg_str);
-
-  //  bool
-  //  create_n2_pdu_session_resource_modify_response_transfer(pdu_session_modification_network_requested
-  //  &msg, n2_sm_info_type_e ngap_info_type,
-  //                                    std::string &ngap_msg_str);
+      pdu_session_update_sm_context_response& sm_context_res,
+      n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
 
   /*
    * Create N2 SM Information: PDU Session Resource Release Command Transfer IE
@@ -165,6 +165,7 @@ class smf_n2 {
    * Session Release SMF-Requested, step 1)
    * @param [pdu_session_update_sm_context_response] sm_context_res: include
    * necessary information for encoding NGAP msg
+   * @param [n2_sm_info_type_e] ngap_info_type: NGAP info's type
    * @param [std::string&] ngap_msg_str store the created NGAP message in form
    * of string
    * @return boolean: True if the NGAP message has been created successfully,
@@ -172,8 +173,8 @@ class smf_n2 {
    *
    */
   bool create_n2_pdu_session_resource_release_command_transfer(
-      pdu_session_update_sm_context_response &sm_context_res,
-      n2_sm_info_type_e ngap_info_type, std::string &ngap_msg_str);
+      pdu_session_update_sm_context_response& sm_context_res,
+      n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceSetupResponseTransfer
@@ -183,8 +184,8 @@ class smf_n2 {
    * @return status of the decode process
    */
   int decode_n2_sm_information(
-      std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t> &ngap_IE,
-      const std::string &n2_sm_info);
+      std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE,
+      const std::string& n2_sm_info);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceModifyResponseTransfer_t
@@ -194,8 +195,8 @@ class smf_n2 {
    * @return status of the decode process
    */
   int decode_n2_sm_information(
-      std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t> &ngap_IE,
-      const std::string &n2_sm_info);
+      std::shared_ptr<Ngap_PDUSessionResourceModifyResponseTransfer_t>& ngap_IE,
+      const std::string& n2_sm_info);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceReleaseResponseTransfer_t
@@ -205,9 +206,9 @@ class smf_n2 {
    * @return status of the decode process
    */
   int decode_n2_sm_information(
-      std::shared_ptr<Ngap_PDUSessionResourceReleaseResponseTransfer_t>
-          &ngap_IE,
-      const std::string &n2_sm_info);
+      std::shared_ptr<Ngap_PDUSessionResourceReleaseResponseTransfer_t>&
+          ngap_IE,
+      const std::string& n2_sm_info);
 
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceSetupUnsuccessfulTransfer
@@ -218,9 +219,9 @@ class smf_n2 {
    * @return status of the decode process
    */
   int decode_n2_sm_information(
-      std::shared_ptr<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t>
-          &ngap_IE,
-      const std::string &n2_sm_info);
+      std::shared_ptr<Ngap_PDUSessionResourceSetupUnsuccessfulTransfer_t>&
+          ngap_IE,
+      const std::string& n2_sm_info);
 };
 
 }  // namespace smf

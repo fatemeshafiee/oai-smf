@@ -32,7 +32,6 @@
  *      contact@openairinterface.org
  */
 
-
 #include "PDUSessionsCollectionApiImpl.h"
 
 namespace oai {

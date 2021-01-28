@@ -28,8 +28,11 @@
 #ifndef FILE_3GPP_24_008_SEEN
 #define FILE_3GPP_24_008_SEEN
 
+#include <arpa/inet.h>
+#include <iostream>
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 //------------------------------------------------------------------------------
 // 10.5.1.3 Location Area Identification
@@ -40,12 +43,12 @@
 
 #define INVALID_LAC_0000                                                       \
   (uint16_t) 0x0000 /*!< \brief  This LAC can be coded using a full            \
-                       hexadecimal representation except for the following                                                      \
+                       hexadecimal representation except for the following     \
                        reserved hexadecimal values: 0000, and FFFE.   */
 
 #define INVALID_LAC_FFFE                                                       \
   (uint16_t) 0xFFFE /*!< \brief  This LAC can be coded using a full            \
-                       hexadecimal representation except for the following                                                      \
+                       hexadecimal representation except for the following     \
                        reserved hexadecimal values: 0000, and FFFE.   */
 
 //------------------------------------------------------------------------------
@@ -94,12 +97,19 @@
 #define PCO_CONTAINER_IDENTIFIER_ADDITIONAL_APN_RATE_CONTROL_FOR_EXCEPTION_DATA_SUPPORT_INDICATOR \
   (0X0019)
 #define PCO_CONTAINER_IDENTIFIER_PDU_SESSION_ID (0X001A)
+// RESERVED (0x001B..001F)
 #define PCO_CONTAINER_IDENTIFIER_ETHERNET_FRAME_PAYLOAD_MTU_REQUEST (0X0020)
 #define PCO_CONTAINER_IDENTIFIER_UNSTRUCTURED_LINK_MTU_REQUEST (0X0021)
-// RESERVED (0xFF00..FFFF)
+#define PCO_CONTAINER_IDENTIFIER_5GSM_CAUSE_VALUE (0X0022)
+#define PCO_CONTAINER_IDENTIFIER_QOS_RULES_WITH_THE_LENGTH_OF_TWO_OCTETS_SUPPORT_INDICATOR \
+  (0X0023)
+#define PCO_CONTAINER_IDENTIFIER_QOS_FLOW_DESCRIPTIONS_WITH_THE_LENGTH_OF_TWO_OCTETS_SUPPORT_INDICATOR \
+  (0X0024)
+// RESERVED FOR OPERATOR SPECIFIC USE (0x0024..FFFF)
 
 /* CONTAINER IDENTIFIER Network to MS direction:*/
 #define PCO_CONTAINER_IDENTIFIER_P_CSCF_IPV6_ADDRESS (0x0001)
+#define PCO_CONTAINER_IDENTIFIER_IM_CN_SUBSYSTEM_SIGNALING_FLAG (0x0002)
 #define PCO_CONTAINER_IDENTIFIER_DNS_SERVER_IPV6_ADDRESS (0x0003)
 #define PCO_CONTAINER_IDENTIFIER_POLICY_CONTROL_REJECTION_CODE (0x0004)
 #define PCO_CONTAINER_IDENTIFIER_SELECTED_BEARER_CONTROL_MODE (0x0005)
@@ -114,9 +124,9 @@
 #define PCO_CONTAINER_IDENTIFIER_MSISDN (0x000E)
 #define PCO_CONTAINER_IDENTIFIER_IFOM_SUPPORT (0x000F)
 #define PCO_CONTAINER_IDENTIFIER_IPV4_LINK_MTU (0x0010)
-// RESERVED (0xFF00..FFFF)
 #define PCO_CONTAINER_IDENTIFIER_NETWORK_SUPPORT_OF_LOCAL_ADDRESS_IN_TFT_INDICATOR \
   (0x0011)
+// RESERVED                                                             (0x0012)
 #define PCO_CONTAINER_IDENTIFIER_NBIFOM_ACCEPTED_INDICATOR (0x0013)
 //#define PCO_CONTAINER_IDENTIFIER_NBIFOM_MODE (0x0014)
 #define PCO_CONTAINER_IDENTIFIER_NON_IP_LINK_MTU (0x0015)
@@ -126,7 +136,7 @@
   (0x0018)
 #define PCO_CONTAINER_IDENTIFIER_ADDITIONAL_APN_RATE_CONTROL_FOR_EXCEPTION_DATA_PARAMETERS \
   (0x0019)
-#define PCO_CONTAINER_IDENTIFIER_RESERVED (0x001A)
+// RESERVED                                                             (0x001A)
 #define PCO_CONTAINER_IDENTIFIER_S_NSSAI (0x001B)
 #define PCO_CONTAINER_IDENTIFIER_QOS_RULES (0x001C)
 #define PCO_CONTAINER_IDENTIFIER_SESSION_AMBR (0x001D)
@@ -134,6 +144,12 @@
 #define PCO_CONTAINER_IDENTIFIER_QOS_FLOW_DESCRIPTIONS (0x001F)
 #define PCO_CONTAINER_IDENTIFIER_ETHERNET_FRAME_PAYLOAD_MTU (0x0020)
 #define PCO_CONTAINER_IDENTIFIER_UNSTRUCTURED_LINK_MTU (0x0021)
+// RESERVED                                                             (0x0022)
+#define PCO_CONTAINER_IDENTIFIER_QOS_RULES_WITH_THE_LENGTH_OF_TWO_OCTETS       \
+  (0x0023)
+#define PCO_CONTAINER_IDENTIFIER_QOS_FLOW_DESCRIPTIONS_WITH_THE_LENGTH_OF_TWO_OCTETS \
+  (0x0024)  // RESERVED FOR OPERATOR SPECIFIC USE (0xFF00..FFFF)
+
 /*_Both_directions:*/
 #define PCO_CI_IM_CN_SUBSYSTEM_SIGNALING_FLAG (0x0002)
 
@@ -148,10 +164,7 @@ typedef struct protocol_configuration_options_s {
   uint8_t spare : 4;
   uint8_t configuration_protocol : 3;
   uint8_t num_protocol_or_container_id;
-  // arbitrary value, can be greater than defined (250/3)
-#define PCO_UNSPEC_MAXIMUM_PROTOCOL_ID_OR_CONTAINER_ID 8
-  pco_protocol_or_container_id_t
-      protocol_or_container_ids[PCO_UNSPEC_MAXIMUM_PROTOCOL_ID_OR_CONTAINER_ID];
+  std::vector<pco_protocol_or_container_id_t> protocol_or_container_ids;
 } protocol_configuration_options_t;
 
 //------------------------------------------------------------------------------
