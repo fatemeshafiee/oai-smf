@@ -552,11 +552,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     // Subscribe to sm context status change
     sm_context_status_connection =
         event_sub.subscribe_sm_context_status(boost::bind(
-            &smf_context::handle_sm_context_status_change, this, _1, _1, _1));
+            &smf_context::handle_sm_context_status_change, this, _1, _2, _3));
     // Subscribe to pdu session release (event exposure)
     ee_pdu_session_release_connection =
         event_sub.subscribe_ee_pdu_session_release(boost::bind(
-            &smf_context::handle_ee_pdu_session_release, this, _1, _1, _1));
+            &smf_context::handle_ee_pdu_session_release, this, _1, _2, _3));
   }
 
   smf_context(smf_context& b) = delete;
@@ -988,7 +988,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @return void
    */
   void handle_sm_context_status_change(
-      scid_t scid, uint8_t status, uint8_t http_version);
+      scid_t scid, const std::string& status, uint8_t http_version);
 
   /*
    * Handle SM Context Status Change (Send notification AMF)

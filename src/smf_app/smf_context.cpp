@@ -1883,10 +1883,9 @@ bool smf_context::handle_pdu_session_release_complete(
   }
 
   Logger::smf_app().debug("Signal the SM Context Status Change");
+  std::string status = "RELEASED";
   event_sub.sm_context_status(
-      scid,
-      static_cast<uint8_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED),
-      sm_context_request.get()->http_version);
+      scid, status, sm_context_request.get()->http_version);
 
   // Trigger PDU Session Release event notification
   supi64_t supi64 = smf_supi_to_u64(sm_context_request.get()->req.get_supi());
@@ -2895,7 +2894,7 @@ bool smf_context::find_pdu_session(
 
 //------------------------------------------------------------------------------
 void smf_context::handle_sm_context_status_change(
-    scid_t scid, uint8_t status, uint8_t http_version) {
+    scid_t scid, const std::string& status, uint8_t http_version) {
   Logger::smf_app().debug(
       "Send request to N11 to triger SM Context Status Notification to AMF, "
       "SMF Context ID " SCID_FMT " ",
@@ -2916,11 +2915,10 @@ void smf_context::handle_sm_context_status_change(
   std::shared_ptr<itti_n11_notify_sm_context_status> itti_msg =
       std::make_shared<itti_n11_notify_sm_context_status>(
           TASK_SMF_APP, TASK_SMF_N11);
-  itti_msg->scid = scid;
-  itti_msg->sm_context_status =
-      sm_context_status_e2str.at(static_cast<int>(status));
-  itti_msg->amf_status_uri = scf.get()->amf_status_uri;
-  itti_msg->http_version   = http_version;
+  itti_msg->scid              = scid;
+  itti_msg->sm_context_status = status;
+  itti_msg->amf_status_uri    = scf.get()->amf_status_uri;
+  itti_msg->http_version      = http_version;
 
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
