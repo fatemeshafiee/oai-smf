@@ -478,7 +478,7 @@ void smf_app::handle_itti_msg(
             "Got successful response from AMF (response code %d), set session "
             "status to %s",
             m.response_code,
-            pdu_session_status_e2str[static_cast<int>(status)].c_str());
+            pdu_session_status_e2str.at(static_cast<int>(status)).c_str());
       } else {
         // TODO:
         Logger::smf_app().debug(
@@ -537,7 +537,8 @@ void smf_app::handle_itti_msg(
 void smf_app::handle_itti_msg(itti_n11_update_pdu_session_status& m) {
   Logger::smf_app().info(
       "Set PDU Session Status to %s",
-      pdu_session_status_e2str[static_cast<int>(m.pdu_session_status)].c_str());
+      pdu_session_status_e2str.at(static_cast<int>(m.pdu_session_status))
+          .c_str());
   update_pdu_session_status(m.scid, m.pdu_session_status);
 }
 
@@ -1419,7 +1420,7 @@ void smf_app::update_pdu_session_status(
   sp.get()->set_pdu_session_status(status);
   Logger::smf_app().info(
       "Set PDU Session Status to %s",
-      pdu_session_status_e2str[static_cast<int>(status)].c_str());
+      pdu_session_status_e2str.at(static_cast<int>(status)).c_str());
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1474,7 +1475,7 @@ void smf_app::update_pdu_session_upCnx_state(
   sp.get()->set_upCnx_state(state);
   Logger::smf_app().info(
       "Set PDU Session UpCnxState to %s",
-      upCnx_state_e2str[static_cast<int>(state)].c_str());
+      upCnx_state_e2str.at(static_cast<int>(state)).c_str());
 }
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
@@ -1527,7 +1528,7 @@ n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(
     const std::string& n2_info_type) const {
   std::size_t number_of_types = n2_sm_info_type_e2str.size();
   for (auto i = 0; i < number_of_types; ++i) {
-    if (n2_info_type.compare(n2_sm_info_type_e2str[i]) == 0) {
+    if (n2_info_type.compare(n2_sm_info_type_e2str.at(i)) == 0) {
       return static_cast<n2_sm_info_type_e>(i);
     }
   }
@@ -1645,7 +1646,7 @@ void smf_app::trigger_create_context_error_response(
   oai::smf_server::model::ProblemDetails problem_details  = {};
   oai::smf_server::model::RefToBinaryData refToBinaryData = {};
   Logger::smf_app().warn("Create SmContextCreateError");
-  problem_details.setCause(pdu_session_application_error_e2str[cause]);
+  problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   sm_context.setError(problem_details);
   refToBinaryData.setContentId(N1_SM_CONTENT_ID);
   sm_context.setN1SmMsg(refToBinaryData);
@@ -1677,7 +1678,7 @@ void smf_app::trigger_update_context_error_response(
 
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = {};
   oai::smf_server::model::ProblemDetails problem_details            = {};
-  problem_details.setCause(pdu_session_application_error_e2str[cause]);
+  problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   smContextUpdateError.setError(problem_details);
 
   std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
@@ -1707,7 +1708,7 @@ void smf_app::trigger_update_context_error_response(
 
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = {};
   oai::smf_server::model::ProblemDetails problem_details            = {};
-  problem_details.setCause(pdu_session_application_error_e2str[cause]);
+  problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   smContextUpdateError.setError(problem_details);
 
   std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =

@@ -520,8 +520,8 @@ int session_update_sm_context_procedure::run(
 
   Logger::smf_app().debug(
       "Session procedure type: %s",
-      session_management_procedures_type_e2str[static_cast<int>(
-                                                   session_procedure_type)]
+      session_management_procedures_type_e2str
+          .at(static_cast<int>(session_procedure_type))
           .c_str());
 
   switch (session_procedure_type) {
@@ -893,8 +893,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
   Logger::smf_app().debug(
       "Session procedure type: %s",
-      session_management_procedures_type_e2str[static_cast<int>(
-                                                   session_procedure_type)]
+      session_management_procedures_type_e2str
+          .at(static_cast<int>(session_procedure_type))
           .c_str());
 
   switch (session_procedure_type) {
@@ -1310,9 +1310,8 @@ void session_release_sm_context_procedure::handle_itti_msg(
         n11_triggered_pending->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
   } else {
     oai::smf_server::model::ProblemDetails problem_details = {};
-    problem_details.setCause(
-        pdu_session_application_error_e2str
-            [PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE]);
+    problem_details.setCause(pdu_session_application_error_e2str.at(
+        PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE));
     // trigger to send reply to AMF
     /*
     smf_app_inst->trigger_http_response(

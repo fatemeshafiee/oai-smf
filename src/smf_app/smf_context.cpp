@@ -409,7 +409,7 @@ void smf_pdu_session::set_pdu_session_status(
   // TODO: Should consider congestion handling
   Logger::smf_app().info(
       "Set PDU Session Status to %s",
-      pdu_session_status_e2str[static_cast<int>(status)].c_str());
+      pdu_session_status_e2str.at(static_cast<int>(status)).c_str());
   std::unique_lock lock(m_pdu_session_mutex);
   pdu_session_status = status;
 }
@@ -424,7 +424,7 @@ pdu_session_status_e smf_pdu_session::get_pdu_session_status() const {
 void smf_pdu_session::set_upCnx_state(const upCnx_state_e& state) {
   Logger::smf_app().info(
       "Set upCnxState to %s",
-      upCnx_state_e2str[static_cast<int>(state)].c_str());
+      upCnx_state_e2str.at(static_cast<int>(state)).c_str());
   std::unique_lock lock(m_pdu_session_mutex);
   upCnx_state = state;
 }
@@ -1885,7 +1885,7 @@ bool smf_context::handle_pdu_session_release_complete(
   Logger::smf_app().debug("Signal the SM Context Status Change");
   event_sub.sm_context_status(
       scid,
-      static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED),
+      static_cast<uint8_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED),
       sm_context_request.get()->http_version);
 
   // Trigger PDU Session Release event notification
@@ -2512,8 +2512,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       Logger::smf_app().info(
           "PDU Update SM Context Request procedure failed (session procedure "
           "type %s)",
-          session_management_procedures_type_e2str[static_cast<int>(
-                                                       procedure_type)]
+          session_management_procedures_type_e2str
+              .at(static_cast<int>(procedure_type))
               .c_str());
       remove_procedure(proc);
 
@@ -2916,10 +2916,11 @@ void smf_context::handle_sm_context_status_change(
   std::shared_ptr<itti_n11_notify_sm_context_status> itti_msg =
       std::make_shared<itti_n11_notify_sm_context_status>(
           TASK_SMF_APP, TASK_SMF_N11);
-  itti_msg->scid              = scid;
-  itti_msg->sm_context_status = sm_context_status_e2str[status];
-  itti_msg->amf_status_uri    = scf.get()->amf_status_uri;
-  itti_msg->http_version      = http_version;
+  itti_msg->scid = scid;
+  itti_msg->sm_context_status =
+      sm_context_status_e2str.at(static_cast<int>(status));
+  itti_msg->amf_status_uri = scf.get()->amf_status_uri;
+  itti_msg->http_version   = http_version;
 
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
