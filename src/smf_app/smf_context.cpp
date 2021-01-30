@@ -1342,8 +1342,11 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           if (success) {
             set_paa = true;
           } else {
-            // TODO:
-            // cause: ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED; //check for 5G?
+            // ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED;
+            set_paa          = false;
+            request_accepted = false;
+            sm_context_resp->res.set_cause(static_cast<uint8_t>(
+                cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES));
           }
           // Static IP address allocation
         } else if ((paa_res) && (paa.is_ip_assigned())) {
@@ -1389,6 +1392,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
             http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
             smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
       }
+      // sm_context_resp->res.set_cause(static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE));
       request_accepted = false;
     }
   }
@@ -1434,7 +1438,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     std::string smf_context_uri =
         smreq->req.get_api_root() + "/" + smContextRef.c_str();
     sm_context_response.set_smf_context_uri(smf_context_uri);
-    sm_context_response.set_cause(0);  // TODO
+    sm_context_response.set_cause(static_cast<uint8_t>(
+        cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));  // TODO
 
     nlohmann::json json_data = {};
     json_data["cause"]       = 0;
@@ -1479,7 +1484,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // Step 10. if error when establishing the pdu session,
   // send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs (PDU
   // Session Establishment Reject)
-  if (sm_context_resp->res.get_cause() != REQUEST_ACCEPTED) {
+  if (sm_context_resp->res.get_cause() !=
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
     // clear pco, ambr
     // TODO:
     // free paa
@@ -1506,12 +1512,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // Create PDU Session Establishment Reject and embedded in
     // Namf_Communication_N1N2MessageTransfer Request
     Logger::smf_app().debug("Create PDU Session Establishment Reject");
-    // TODO: Should check Cause for other cases
-    cause_value_5gsm_e cause_n1 = {
-        cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE};
-    if (sm_context_resp->res.get_cause() == NO_RESOURCES_AVAILABLE) {
-      cause_n1 = cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES;
-    }
+    cause_value_5gsm_e cause_n1 =
+        static_cast<cause_value_5gsm_e>(sm_context_resp->res.get_cause());
+
     smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
         sm_context_resp_pending->res, n1_sm_message, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
@@ -1995,7 +1998,6 @@ bool smf_context::handle_pdu_session_resource_setup_response_transfer(
              .array[i])
             ->qosFlowIdentifier);
   }
-
   return true;
 }
 //-------------------------------------------------------------------------------------
@@ -2156,7 +2158,8 @@ bool smf_context::handle_service_request(
     sm_context_request.get()->req.add_qfi(i.qfi.qfi);
 
     qos_flow_context_updated qcu = {};
-    qcu.set_cause(REQUEST_ACCEPTED);
+    qcu.set_cause(
+        static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
     qcu.set_qfi(i.qfi);
     qcu.set_ul_fteid(i.ul_fteid);
     qcu.set_qos_profile(i.qos_profile);
@@ -2624,7 +2627,8 @@ void smf_context::handle_pdu_session_release_sm_context_request(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);
   n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
   n11_sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
-  n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
+  n11_sm_context_resp->res.set_cause(
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   n11_sm_context_resp->res.set_pdu_session_id(smreq->req.get_pdu_session_id());
   n11_sm_context_resp->res.set_snssai(smreq->req.get_snssai());
   n11_sm_context_resp->res.set_dnn(smreq->req.get_dnn());

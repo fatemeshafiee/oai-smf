@@ -49,6 +49,7 @@
 #include "smf_n2.hpp"
 #include "smf_pfcp_association.hpp"
 #include "ProblemDetails.h"
+#include "3gpp_24.501.h"
 
 using namespace pfcp;
 using namespace smf;
@@ -303,7 +304,8 @@ void session_create_sm_context_procedure::handle_itti_msg(
   resp.pfcp_ies.get(cause);
   if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
     resp.pfcp_ies.get(sps->up_fseid);
-    n11_triggered_pending->res.set_cause(REQUEST_ACCEPTED);
+    n11_triggered_pending->res.set_cause(
+        static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   }
 
   for (auto it : resp.pfcp_ies.created_pdrs) {
@@ -333,12 +335,15 @@ void session_create_sm_context_procedure::handle_itti_msg(
   qos_flow_context_updated flow_updated = {};
   QOSRulesIE qos_rule                   = {};
 
-  flow_updated.set_cause(REQUEST_ACCEPTED);
+  flow_updated.set_cause(
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   if (not sps->get_default_qos_flow(default_qos_flow)) {
-    flow_updated.set_cause(SYSTEM_FAILURE);
+    flow_updated.set_cause(static_cast<uint8_t>(
+        cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
   } else {
     if (default_qos_flow.ul_fteid.is_zero()) {
-      flow_updated.set_cause(SYSTEM_FAILURE);
+      flow_updated.set_cause(static_cast<uint8_t>(
+          cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
     } else {
       flow_updated.set_ul_fteid(default_qos_flow.ul_fteid);  // tunnel info
     }
@@ -429,7 +434,8 @@ void session_create_sm_context_procedure::handle_itti_msg(
   json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
       N1_SM_CONTENT_ID;  // NAS part
   // N2SM
-  if (n11_triggered_pending->res.get_cause() == REQUEST_ACCEPTED) {
+  if (n11_triggered_pending->res.get_cause() ==
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
     json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
     json_data["n2InfoContainer"]["smInfo"]["pduSessionId"] =
         n11_triggered_pending->res.get_pdu_session_id();
@@ -545,7 +551,8 @@ int session_update_sm_context_procedure::run(
               "could not found any QoS flow with QFI %d", qfi.qfi);
           // Set cause to SYSTEM_FAILURE and send response
           qos_flow_context_updated qcu = {};
-          qcu.set_cause(SYSTEM_FAILURE);
+          qcu.set_cause(static_cast<uint8_t>(
+              cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
           qcu.set_qfi(qfi);
           n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
           continue;
@@ -561,7 +568,8 @@ int session_update_sm_context_procedure::run(
         if ((dl_fteid == flow.dl_fteid) and (not flow.released)) {
           Logger::smf_app().debug("QFI %d dl_fteid unchanged", qfi.qfi);
           qos_flow_context_updated qcu = {};
-          qcu.set_cause(REQUEST_ACCEPTED);
+          qcu.set_cause(static_cast<uint8_t>(
+              cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
           qcu.set_qfi(qfi);
           n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
           continue;
@@ -777,7 +785,8 @@ int session_update_sm_context_procedure::run(
         sps->add_qos_flow(flow);
 
         qos_flow_context_updated qcu = {};
-        qcu.set_cause(REQUEST_ACCEPTED);
+        qcu.set_cause(static_cast<uint8_t>(
+            cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
         qcu.set_qfi(qfi);
         n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
       }
@@ -796,7 +805,8 @@ int session_update_sm_context_procedure::run(
               qfi.qfi);
           // Set cause to SYSTEM_FAILURE and send response
           qos_flow_context_updated qcu = {};
-          qcu.set_cause(SYSTEM_FAILURE);
+          qcu.set_cause(static_cast<uint8_t>(
+              cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
           qcu.set_qfi(qfi);
           n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
           continue;
@@ -948,7 +958,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
               sps->add_qos_flow(flow);
 
               qos_flow_context_updated qcu = {};
-              qcu.set_cause(REQUEST_ACCEPTED);
+              qcu.set_cause(static_cast<uint8_t>(
+                  cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
               qcu.set_qfi(pfcp::qfi_t(it.first));
               qcu.set_ul_fteid(flow.ul_fteid);
               qcu.set_dl_fteid(flow.dl_fteid);
@@ -979,7 +990,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
                   sps->add_qos_flow(flow);
 
                   qos_flow_context_updated qcu = {};
-                  qcu.set_cause(REQUEST_ACCEPTED);
+                  qcu.set_cause(static_cast<uint8_t>(
+                      cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
                   qcu.set_qfi(pfcp::qfi_t(it.first));
                   qcu.set_ul_fteid(flow.ul_fteid);
                   qcu.set_dl_fteid(flow.dl_fteid);

@@ -36,6 +36,7 @@
 #include "SmContextUpdateData.h"
 #include "SmContextReleaseData.h"
 #include "3gpp_29.500.h"
+#include "3gpp_24.501.h"
 
 //------------------------------------------------------------------------------
 void xgpp_conv::paa_to_pfcp_ue_ip_address(
@@ -464,7 +465,8 @@ void xgpp_conv::create_sm_context_response_from_ct_request(
   ctx_response->res.set_http_code(http_status_code_e::HTTP_STATUS_CODE_200_OK);
   ctx_response->res.set_supi(ctx_request->req.get_supi());
   ctx_response->res.set_supi_prefix(ctx_request->req.get_supi_prefix());
-  ctx_response->res.set_cause(REQUEST_ACCEPTED);
+  ctx_response->res.set_cause(
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   ctx_response->res.set_pdu_session_id(ctx_request->req.get_pdu_session_id());
   ctx_response->res.set_snssai(ctx_request->req.get_snssai());
   ctx_response->res.set_dnn(ctx_request->req.get_dnn());
@@ -478,18 +480,13 @@ void xgpp_conv::create_sm_context_response_from_ct_request(
 void xgpp_conv::update_sm_context_response_from_ct_request(
     const std::shared_ptr<itti_n11_update_sm_context_request>& ct_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& ct_response) {
-
-
-	ct_response->res.set_http_code(
-	      http_status_code_e::HTTP_STATUS_CODE_200_OK);  // default status code
-	ct_response->res.set_supi(ct_request->req.get_supi());
-	ct_response->res.set_supi_prefix(
-			ct_request->req.get_supi_prefix());
-	ct_response->res.set_cause(REQUEST_ACCEPTED);
-	ct_response->res.set_pdu_session_id(
-			ct_request->req.get_pdu_session_id());
-	ct_response->res.set_snssai(ct_request->req.get_snssai());
-	ct_response->res.set_dnn(ct_request->req.get_dnn());
-
-
+  ct_response->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);  // default status code
+  ct_response->res.set_supi(ct_request->req.get_supi());
+  ct_response->res.set_supi_prefix(ct_request->req.get_supi_prefix());
+  ct_response->res.set_cause(
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
+  ct_response->res.set_pdu_session_id(ct_request->req.get_pdu_session_id());
+  ct_response->res.set_snssai(ct_request->req.get_snssai());
+  ct_response->res.set_dnn(ct_request->req.get_dnn());
 }
