@@ -344,11 +344,14 @@ smf_app::smf_app(const std::string& config_file)
   }
 
   // Register to NRF
-  register_to_nrf();
-  // Trigger NFStatusNotify
-  unsigned int microsecond = 10000;  // 10ms
-  usleep(microsecond);
-  trigger_upf_status_notification_subscribe();
+  if (smf_cfg.register_nrf) register_to_nrf();
+
+  if (smf_cfg.discover_upf) {
+    // Trigger NFStatusNotify
+    unsigned int microsecond = 10000;  // 10ms
+    usleep(microsecond);
+    trigger_upf_status_notification_subscribe();
+  }
 
   Logger::smf_app().startup("Started");
 }

@@ -160,8 +160,8 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
 
   // PDUAddress
   paa_t paa = sm_context_res.get_paa();
-  sm_msg->pdu_session_establishment_accept.pduaddress
-                              .pdu_address_information = bfromcstralloc(4, "\0");
+  sm_msg->pdu_session_establishment_accept.pduaddress.pdu_address_information =
+      bfromcstralloc(4, "\0");
   util::ipv4_to_bstring(
       paa.ipv4_address, sm_msg->pdu_session_establishment_accept.pduaddress
                             .pdu_address_information);
@@ -228,7 +228,8 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
                    .extendedprotocolconfigurationoptions);
 
   // DNN
-  sm_msg->pdu_session_establishment_accept.dnn = bfromcstralloc(sm_context_res.get_dnn().length(), "\0");
+  sm_msg->pdu_session_establishment_accept.dnn =
+      bfromcstralloc(sm_context_res.get_dnn().length(), "\0");
   util::string_to_bstring(
       sm_context_res.get_dnn(), sm_msg->pdu_session_establishment_accept.dnn);
   Logger::smf_n1().debug("DNN %s", sm_context_res.get_dnn().c_str());
