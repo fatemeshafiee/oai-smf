@@ -219,18 +219,39 @@ install_nghttp2_from_git() {
 
   if [[ $prompt =~ [yY](es)* ]]
   then
-    $SUDO $INSTALLER install $OPTION \
-    gcc-c++ \
-    binutils-devel \
-    autoconf \
-    automake \
-    libtool \
-    pkg-config \
-    zlib-devel \
-    CUnit-devel \
-    openssl-devel \
-    libxml2-devel libev-devel libevent-devel jansson-devel c-ares-devel \
-    jemalloc-devel systemd-devel python3-Cython python3-devel python3-setuptools
+    if [[ $OS_DISTRO == "ubuntu" ]]; then
+      PACKAGE_LIST="\
+      g++ \
+      cmake \
+      binutils \
+      autoconf \
+      automake \
+      autotools-dev \
+      libtool \
+      pkg-config \
+      zlib1g-dev \
+      libcunit1-dev \
+      libssl-dev \
+      libxml2-dev libev-dev libevent-dev libjansson-dev libc-ares-dev \
+      libjemalloc-dev libsystemd-dev cython python3-dev python-setuptools"
+    elif [[ "$OS_BASEDISTRO" == "fedora" ]]; then
+      PACKAGE_LIST="\
+      gcc-c++ \
+      binutils-devel \
+      autoconf \
+      automake \
+      libtool \
+      pkg-config \
+      zlib-devel \
+      CUnit-devel \
+      openssl-devel \
+      libxml2-devel libev-devel libevent-devel jansson-devel c-ares-devel \
+      jemalloc-devel systemd-devel python3-Cython python3-devel python3-setuptools"
+    else
+      echo_fatal "$OS_DISTRO is not a supported distribution."
+    fi
+    echo "Install build tools"
+    $SUDO $INSTALLER install $OPTION $PACKAGE_LIST
     ret=$?;[[ $ret -ne 0 ]] && return $ret
    
     GIT_URL=https://github.com/nghttp2/nghttp2.git
