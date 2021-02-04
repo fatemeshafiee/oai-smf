@@ -248,16 +248,14 @@ typedef struct nf_service_version_s {
 } nf_service_version_t;
 
 typedef struct ip_endpoint_s {
-  std::vector<struct in_addr> ipv4_addresses;
-  // std::vector<struct in6_addr> ipv6_addresses;
+  //struct in6_addr  ipv6_address;
+  struct in_addr ipv4_address;
   std::string transport;  // TCP
   unsigned int port;
   std::string to_string() const {
     std::string s = {};
-    s.append("Ipv4 Addresses: ");
-    for (auto ipv4 : ipv4_addresses) {
-      s.append(inet_ntoa(ipv4));
-    }
+    s.append("Ipv4 Address: ");
+    s.append(inet_ntoa(ipv4_address));
     s.append(", TransportProtocol: ");
     s.append(transport);
     s.append(", Port: ");

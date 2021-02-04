@@ -343,11 +343,12 @@ smf_app::smf_app(const std::string& config_file)
     start_upf_association(*it);
   }
 
-  // Register to NRF
+  // Register to NRF (if this option is enabled)
   if (smf_cfg.register_nrf) register_to_nrf();
 
   if (smf_cfg.discover_upf) {
-    // Trigger NFStatusNotify
+    // Trigger NFStatusNotify subscription to be noticed when a new UPF becomes
+    // available (if this option is enabled)
     unsigned int microsecond = 10000;  // 10ms
     usleep(microsecond);
     trigger_upf_status_notification_subscribe();
@@ -1863,9 +1864,7 @@ void smf_app::generate_smf_profile() {
   ip_endpoint_t endpoint = {};
   std::vector<struct in_addr> addrs;
   nf_instance_profile.get_nf_ipv4_addresses(addrs);
-  for (auto a : addrs) {
-    endpoint.ipv4_addresses.push_back(a);
-  }
+  endpoint.ipv4_address =  addrs[0]; //TODO: use first IP ADDR for now
   endpoint.transport = "TCP";
   endpoint.port      = smf_cfg.sbi.port;
   nf_service.ip_endpoints.push_back(endpoint);
@@ -1912,9 +1911,9 @@ void smf_app::generate_smf_profile() {
 
 //---------------------------------------------------------------------------------------------
 void smf_app::register_to_nrf() {
-  // create a NF profile to this instance
+  // Create a NF profile to this instance
   generate_smf_profile();
-  // send request to N11 to send NF registration to NRF
+  // Send request to N11 to send NF registration to NRF
   trigger_nf_registration_request();
 }
 
