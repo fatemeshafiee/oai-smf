@@ -30,13 +30,13 @@
 #define FILE_SMF_MSG_HPP_SEEN
 
 #include "smf.h"
+#include "3gpp_23.003.h"
 #include "3gpp_24.007.h"
 #include "3gpp_24.501.h"
 #include "3gpp_29.244.h"
 #include "3gpp_29.274.h"
 #include "3gpp_29.508.h"
 #include "3gpp_29.571.h"
-#include "Guami.h"
 #include "NgRanTargetId.h"
 #include "pistache/http.h"
 #include "smf_profile.hpp"
@@ -268,6 +268,12 @@ class pdu_session_create_sm_context_request
   std::string get_sm_context_status_uri() const;
   void set_epco(const protocol_configuration_options_t& p);
   void get_epco(protocol_configuration_options_t& p) const;
+  void set_plmn(const plmn_t p);
+  void get_plmn(plmn_t& p) const;
+  void set_an_type(const std::string& an_type);
+  void get_an_type(std::string& an_type) const;
+  void set_guami(const guami_5g_t& guami);
+  void get_guami(guami_5g_t& guami) const;
 
  private:
   bool m_unauthenticated_supi;
@@ -279,6 +285,8 @@ class pdu_session_create_sm_context_request
   std::string m_dnn_selection_mode;  // SelMode
   std::string m_sm_context_status_uri;
   protocol_configuration_options_t m_epco;
+  plmn_t m_serving_network;
+  guami_5g_t m_guami;
 };
 
 //---------------------------------------------------------------------------------------

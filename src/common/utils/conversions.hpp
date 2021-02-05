@@ -32,6 +32,8 @@
 #include <string>
 #include <netinet/in.h>
 
+#include "3gpp_23.003.h"
+
 /* Used to format an uint32_t containing an ipv4 address */
 #define IN_ADDR_FMT "%u.%u.%u.%u"
 #define PRI_IN_ADDR(aDDRESS)                                                   \
@@ -53,6 +55,7 @@ class conv {
   static void hexa_to_ascii(uint8_t* from, char* to, size_t length);
   static int ascii_to_hex(uint8_t* dst, const char* h);
   static struct in_addr fromString(const std::string addr4);
+  static bool plmnFromString(plmn_t& p, const std::string mcc, const std::string mnc);
   static std::string toString(const struct in_addr& inaddr);
   static std::string toString(const struct in6_addr& in6addr);
   static std::string mccToString(

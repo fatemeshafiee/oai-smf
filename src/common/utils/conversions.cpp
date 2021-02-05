@@ -117,6 +117,40 @@ std::string conv::mncToString(
   return s;
 }
 
+bool conv::plmnFromString(
+    plmn_t& p, const std::string mcc, const std::string mnc) {
+  // MCC
+  if (isdigit(mcc[0]))
+    p.mcc_digit1 = mcc[0] - '0';
+  else
+    return false;
+  if (isdigit(mcc[1]))
+    p.mcc_digit2 = mcc[1] - '0';
+  else
+    return false;
+
+  if (isdigit(mcc[2]))
+    p.mcc_digit3 = mcc[2] - '0';
+  else
+    return false;
+  // MNC
+  if (isdigit(mnc[0]))
+    p.mnc_digit1 = mnc[0] - '0';
+  else
+    return false;
+  if (isdigit(mnc[1]))
+    p.mnc_digit2 = mnc[1] - '0';
+  else
+    return false;
+  if (mnc.length() > 2) {
+    if (isdigit(mnc[2]))
+      p.mnc_digit3 = mnc[2] - '0';
+    else
+      return false;
+  }
+  return true;
+}
+
 //------------------------------------------------------------------------------
 struct in_addr conv::fromString(const std::string addr4) {
   unsigned char buf[sizeof(struct in6_addr)] = {};

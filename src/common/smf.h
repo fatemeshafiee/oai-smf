@@ -262,7 +262,6 @@ typedef struct ip_endpoint_s {
     s.append(std::to_string(port));
     return s;
   }
-
 } ip_endpoint_t;
 
 typedef struct nf_service_s {
@@ -323,5 +322,12 @@ typedef struct patch_item_s {
     return json_data;
   }
 } patch_item_t;
+
+
+//TODO: move to 23.003
+typedef struct guami_5g_s {
+  plmn_t plmn;
+  std::string amf_id;
+} guami_5g_t;
 
 #endif

@@ -1839,6 +1839,7 @@ void smf_app::get_ee_subscriptions(
 
 //---------------------------------------------------------------------------------------------
 void smf_app::generate_smf_profile() {
+  // TODO: remove hardcoded values
   // generate UUID
   generate_uuid();
   nf_instance_profile.set_nf_instance_id(smf_instance_id);
@@ -1864,9 +1865,9 @@ void smf_app::generate_smf_profile() {
   ip_endpoint_t endpoint = {};
   std::vector<struct in_addr> addrs;
   nf_instance_profile.get_nf_ipv4_addresses(addrs);
-  endpoint.ipv4_address =  addrs[0]; //TODO: use first IP ADDR for now
-  endpoint.transport = "TCP";
-  endpoint.port      = smf_cfg.sbi.port;
+  endpoint.ipv4_address = addrs[0];  // TODO: use first IP ADDR for now
+  endpoint.transport    = "TCP";
+  endpoint.port         = smf_cfg.sbi.port;
   nf_service.ip_endpoints.push_back(endpoint);
 
   nf_instance_profile.add_nf_service(nf_service);

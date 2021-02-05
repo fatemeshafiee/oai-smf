@@ -372,8 +372,8 @@ void smf_profile::to_json(nlohmann::json& data) const {
     for (auto endpoint : service.ip_endpoints) {
       nlohmann::json ep_tmp = {};
       ep_tmp["ipv4Address"] = inet_ntoa(endpoint.ipv4_address);
-      ep_tmp["transport"] = endpoint.transport;
-      ep_tmp["port"]      = endpoint.port;
+      ep_tmp["transport"]   = endpoint.transport;
+      ep_tmp["port"]        = endpoint.port;
       srv_tmp["ipEndPoints"].push_back(ep_tmp);
     }
 
