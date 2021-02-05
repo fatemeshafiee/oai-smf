@@ -368,7 +368,8 @@ void session_create_sm_context_procedure::handle_itti_msg(
   std::string n2_sm_info, n2_sm_info_hex;
 
   if (n11_triggered_pending->res.get_cause() !=
-      REQUEST_ACCEPTED) {  // PDU Session Establishment Reject
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
+    // PDU Session Establishment Reject
     Logger::smf_app().debug(
         "Prepare a PDU Session Establishment Reject message and send to UE");
     cause_n1 = cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE;

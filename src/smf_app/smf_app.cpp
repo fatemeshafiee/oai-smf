@@ -636,8 +636,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
                                              PDU_SESSION_TYPE_E_IPV4};
 
   // Step 1. Decode NAS and get the necessary information
-  // std::string n1_sm_msg = smreq->req.get_n1_sm_message();
-
   int decoder_rc = smf_n1::get_instance().decode_n1_sm_container(
       decoded_nas_msg, smreq->req.get_n1_sm_message());
 
