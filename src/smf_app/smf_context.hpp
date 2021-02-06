@@ -403,6 +403,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    * @return void
    */
   void get_amf_addr(std::string& addr) const;
+  std::string get_amf_addr() const;
 
   bool ipv4;  // IP Address(es): IPv4 address and/or IPv6 prefix
   bool ipv6;  // IP Address(es): IPv4 address and/or IPv6 prefix
