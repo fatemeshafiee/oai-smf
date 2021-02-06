@@ -390,6 +390,20 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    */
   pdu_session_type_t get_pdu_session_type() const;
 
+  /*
+   * Set AMF Addr of the serving AMF
+   * @param [const std::string&] addr: AMF Addr in string representation
+   * @return void
+   */
+  void set_amf_addr(const std::string& addr);
+
+  /*
+   * Get AMF Addr of the serving AMF (in string representation)
+   * @param [const std::string&] addr: store AMF IP Addr
+   * @return void
+   */
+  void get_amf_addr(std::string& addr) const;
+
   bool ipv4;  // IP Address(es): IPv4 address and/or IPv6 prefix
   bool ipv6;  // IP Address(es): IPv4 address and/or IPv6 prefix
   struct in_addr
@@ -412,6 +426,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   uint32_t pdu_session_id;
   std::string amf_id;
+  std::string amf_addr;
   pdu_session_status_e pdu_session_status;
   upCnx_state_e
       upCnx_state;  // N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
@@ -1014,6 +1029,20 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       smf::pdu_session_update_sm_context_response& res,
       const nas_message_t& nas_msg);
 
+  /*
+   * Set AMF Addr of the serving AMF
+   * @param [const std::string&] addr: AMF Addr in string representation
+   * @return void
+   */
+  void set_amf_addr(const std::string& addr);
+
+  /*
+   * Get AMF Addr of the serving AMF (in string representation)
+   * @param [const std::string&] addr: store AMF IP Addr
+   * @return void
+   */
+  void get_amf_addr(std::string& addr) const;
+
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
@@ -1023,6 +1052,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   supi_t supi;
   std::string supi_prefix;
   scid_t scid;  // SM Context ID
+
+  //AMF IP addr
+  string amf_addr;
   // Big recursive lock
   mutable std::recursive_mutex m_context;
 

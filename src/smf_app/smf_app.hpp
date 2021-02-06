@@ -88,6 +88,7 @@ class smf_context_ref {
     dnn            = "";
     pdu_session_id = 0;
     amf_status_uri = "";
+    amf_addr = "";
   }
 
   supi_t supi;
@@ -95,6 +96,7 @@ class smf_context_ref {
   pdu_session_id_t pdu_session_id;
   snssai_t nssai;
   std::string amf_status_uri;
+  std::string amf_addr;
 };
 
 class smf_app {

@@ -30,6 +30,7 @@
 #include "smf_context.hpp"
 
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 #include "3gpp_24.501.h"
 #include "3gpp_29.500.h"
@@ -47,6 +48,7 @@
 #include "smf_pfcp_association.hpp"
 #include "smf_procedure.hpp"
 #include "3gpp_conversions.hpp"
+#include "string.hpp"
 
 extern "C" {
 #include "Ngap_AssociatedQosFlowItem.h"
@@ -568,6 +570,16 @@ void smf_pdu_session::add_qos_rule(const QOSRulesIE& qos_rule) {
     Logger::smf_app().error(
         "Failed to add rule (Id %d) failed: invalid rule Id", rule_id);
   }
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::set_amf_addr(const std::string& addr) {
+  amf_addr = addr;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_amf_addr(std::string& addr) const {
+  addr = amf_addr;
 }
 
 //------------------------------------------------------------------------------
@@ -1421,6 +1433,21 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       // TODO: return;
     }
     scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
+
+    // Get and Store AMF Addr
+    std::vector<std::string> split_result;
+    boost::split(
+        split_result, scf.get()->amf_status_uri, boost::is_any_of("/"));
+    if (split_result.size() >= 3) {
+      std::string amf_addr_str = split_result[2];
+      struct in_addr amf_ipv4_addr;
+      if (inet_aton(util::trim(amf_addr_str).c_str(), &amf_ipv4_addr) == 0) {
+        Logger::smf_api_server().warn("Bad IPv4 for AMF");
+      } else {
+        scf.get()->amf_addr = amf_addr_str;
+        sp.get()->set_amf_addr(amf_addr_str);
+      }
+    }
 
     // Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step
     // 5, 4.3.2.2.1 TS 23.502)
@@ -3123,6 +3150,16 @@ void smf_context::update_qos_info(
                                                 // rule identifier
     i++;
   }
+}
+
+//------------------------------------------------------------------------------
+void smf_context::set_amf_addr(const std::string& addr) {
+  amf_addr = addr;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::get_amf_addr(std::string& addr) const {
+  addr = amf_addr;
 }
 
 //------------------------------------------------------------------------------
