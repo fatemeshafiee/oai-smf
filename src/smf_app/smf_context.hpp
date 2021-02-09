@@ -1054,7 +1054,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   std::string supi_prefix;
   scid_t scid;  // SM Context ID
 
-  //AMF IP addr
+  // AMF IP addr
   string amf_addr;
   // Big recursive lock
   mutable std::recursive_mutex m_context;

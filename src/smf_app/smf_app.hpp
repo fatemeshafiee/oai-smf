@@ -88,7 +88,7 @@ class smf_context_ref {
     dnn            = "";
     pdu_session_id = 0;
     amf_status_uri = "";
-    amf_addr = "";
+    amf_addr       = "";
   }
 
   supi_t supi;
