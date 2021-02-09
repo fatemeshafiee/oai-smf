@@ -1705,6 +1705,10 @@ int main(int argc, char* argv[]) {
   std::string supi    = "imsi-200000000000001";
   uint32_t number_ues = 100;
 
+  test_all_procedures_for_one_session(supi, pid, context_id, smf_ip_address,
+                                        http_version, port);
+
+
   /*  for (int i=1; i<=MAX_NUMBER_SESSIONS; i++) {
 
 test_all_procedures_for_one_session(supi, i, i, smf_ip_address,
@@ -1717,8 +1721,8 @@ test_all_procedures_for_one_session(supi, i, i, smf_ip_address,
   // http_version,
   //                                         port);
 
-  test_multiple_ues_multipe_sessions(
-      number_ues, 1, smf_ip_address, http_version, port);
+  //test_multiple_ues_multipe_sessions(
+  //    number_ues, 1, smf_ip_address, http_version, port);
 
   return 0;
 }
