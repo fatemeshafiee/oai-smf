@@ -390,6 +390,21 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    */
   pdu_session_type_t get_pdu_session_type() const;
 
+  /*
+   * Set AMF Addr of the serving AMF
+   * @param [const std::string&] addr: AMF Addr in string representation
+   * @return void
+   */
+  void set_amf_addr(const std::string& addr);
+
+  /*
+   * Get AMF Addr of the serving AMF (in string representation)
+   * @param [const std::string&] addr: store AMF IP Addr
+   * @return void
+   */
+  void get_amf_addr(std::string& addr) const;
+  std::string get_amf_addr() const;
+
   bool ipv4;  // IP Address(es): IPv4 address and/or IPv6 prefix
   bool ipv6;  // IP Address(es): IPv4 address and/or IPv6 prefix
   struct in_addr
@@ -412,6 +427,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   uint32_t pdu_session_id;
   std::string amf_id;
+  std::string amf_addr;
   pdu_session_status_e pdu_session_status;
   upCnx_state_e
       upCnx_state;  // N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
@@ -549,15 +565,26 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
         scid(0),
         event_sub(smf_event::get_instance()) {
     supi_prefix = {};
-    // subscribe to sm context status change
-    event_sub.subscribe_sm_context_status(boost::bind(
-        &smf_context::handle_sm_context_status_change, this, _1, _1, _1));
-    // subscribe to pdu session release (event exposure)
-    event_sub.subscribe_ee_pdu_session_release(boost::bind(
-        &smf_context::handle_ee_pdu_session_release, this, _1, _1, _1));
+    // Subscribe to sm context status change
+    sm_context_status_connection =
+        event_sub.subscribe_sm_context_status(boost::bind(
+            &smf_context::handle_sm_context_status_change, this, _1, _2, _3));
+    // Subscribe to pdu session release (event exposure)
+    ee_pdu_session_release_connection =
+        event_sub.subscribe_ee_pdu_session_release(boost::bind(
+            &smf_context::handle_ee_pdu_session_release, this, _1, _2, _3));
   }
 
   smf_context(smf_context& b) = delete;
+
+  virtual ~smf_context() {
+    Logger::smf_app().debug("Delete SMF Context instance...");
+    // Disconnect the boost connection
+    if (sm_context_status_connection.connected())
+      sm_context_status_connection.disconnect();
+    if (ee_pdu_session_release_connection.connected())
+      ee_pdu_session_release_connection.disconnect();
+  }
 
   /*
    * Insert a procedure to be processed
@@ -977,7 +1004,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @return void
    */
   void handle_sm_context_status_change(
-      scid_t scid, uint8_t status, uint8_t http_version);
+      scid_t scid, const std::string& status, uint8_t http_version);
 
   /*
    * Handle SM Context Status Change (Send notification AMF)
@@ -1003,6 +1030,20 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       smf::pdu_session_update_sm_context_response& res,
       const nas_message_t& nas_msg);
 
+  /*
+   * Set AMF Addr of the serving AMF
+   * @param [const std::string&] addr: AMF Addr in string representation
+   * @return void
+   */
+  void set_amf_addr(const std::string& addr);
+
+  /*
+   * Get AMF Addr of the serving AMF (in string representation)
+   * @param [const std::string&] addr: store AMF IP Addr
+   * @return void
+   */
+  void get_amf_addr(std::string& addr) const;
+
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
@@ -1012,10 +1053,16 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   supi_t supi;
   std::string supi_prefix;
   scid_t scid;  // SM Context ID
+
+  // AMF IP addr
+  string amf_addr;
   // Big recursive lock
   mutable std::recursive_mutex m_context;
+
   // for Event Handling
   smf_event& event_sub;
+  bs2::connection sm_context_status_connection;
+  bs2::connection ee_pdu_session_release_connection;
 };
 }  // namespace smf
 

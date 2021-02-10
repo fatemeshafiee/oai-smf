@@ -542,13 +542,49 @@ int smf_config::load(const string& config_file) {
           astring.c_str());
     }
 
-    smf_cfg.lookupValue(SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO, astring);
-    if (boost::iequals(astring, "yes")) {
-      force_push_pco = true;
-    } else {
-      force_push_pco = false;
-    }
     smf_cfg.lookupValue(SMF_CONFIG_STRING_UE_MTU, ue_mtu);
+
+    // Support features
+    try {
+      const Setting& support_features =
+          smf_cfg[SMF_CONFIG_STRING_SUPPORT_FEATURES];
+      string opt;
+      support_features.lookupValue(
+          SMF_CONFIG_STRING_SUPPORT_FEATURES_REGISTER_NRF, opt);
+      if (boost::iequals(opt, "yes")) {
+        register_nrf = true;
+      } else {
+        register_nrf = false;
+      }
+
+      support_features.lookupValue(
+          SMF_CONFIG_STRING_SUPPORT_FEATURES_DISCOVER_UPF, opt);
+      if (boost::iequals(opt, "yes")) {
+        discover_upf = true;
+      } else {
+        discover_upf = false;
+      }
+
+      support_features.lookupValue(
+          SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_LOCAL_SUBSCRIPTION_INFO, opt);
+      if (boost::iequals(opt, "yes")) {
+        use_local_subscription_info = true;
+      } else {
+        use_local_subscription_info = false;
+      }
+
+      support_features.lookupValue(SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO, opt);
+      if (boost::iequals(opt, "yes")) {
+        force_push_pco = true;
+      } else {
+        force_push_pco = false;
+      }
+
+    } catch (const SettingNotFoundException& nfex) {
+      Logger::smf_app().error(
+          "%s : %s, using defaults", nfex.what(), nfex.getPath());
+      return -1;
+    }
 
     // AMF
     const Setting& amf_cfg = smf_cfg[SMF_CONFIG_STRING_AMF];
@@ -859,25 +895,36 @@ void smf_config::display() {
   Logger::smf_app().info(
       "    API version .........: %s", amf_addr.api_version.c_str());
 
-  Logger::smf_app().info("- UDM:");
-  Logger::smf_app().info(
-      "    IPv4 Addr ...........: %s",
-      inet_ntoa(*((struct in_addr*) &udm_addr.ipv4_addr)));
-  Logger::smf_app().info("    Port ................: %lu  ", udm_addr.port);
-  Logger::smf_app().info(
-      "    API version .........: %s", udm_addr.api_version.c_str());
+  if (!use_local_subscription_info) {
+    Logger::smf_app().info("- UDM:");
+    Logger::smf_app().info(
+        "    IPv4 Addr ...........: %s",
+        inet_ntoa(*((struct in_addr*) &udm_addr.ipv4_addr)));
+    Logger::smf_app().info("    Port ................: %lu  ", udm_addr.port);
+    Logger::smf_app().info(
+        "    API version .........: %s", udm_addr.api_version.c_str());
+  }
 
-  Logger::smf_app().info("- NRF:");
-  Logger::smf_app().info(
-      "    IPv4 Addr ...........: %s",
-      inet_ntoa(*((struct in_addr*) &nrf_addr.ipv4_addr)));
-  Logger::smf_app().info("    Port ................: %lu  ", nrf_addr.port);
-  Logger::smf_app().info(
-      "    API version .........: %s", nrf_addr.api_version.c_str());
+  if (register_nrf) {
+    Logger::smf_app().info("- NRF:");
+    Logger::smf_app().info(
+        "    IPv4 Addr ...........: %s",
+        inet_ntoa(*((struct in_addr*) &nrf_addr.ipv4_addr)));
+    Logger::smf_app().info("    Port ................: %lu  ", nrf_addr.port);
+    Logger::smf_app().info(
+        "    API version .........: %s", nrf_addr.api_version.c_str());
+  }
 
-  Logger::smf_app().info("- Helpers:");
+  Logger::smf_app().info("- Supported Features:");
   Logger::smf_app().info(
-      "    Push PCO (DNS+MTU) ..: %s", force_push_pco == 0 ? "false" : "true");
+      "    Register to NRF............: %s", register_nrf ? "Yes" : "No");
+  Logger::smf_app().info(
+      "    Discover UPF...............: %s", discover_upf ? "Yes" : "No");
+  Logger::smf_app().info(
+      "    Use Local Subscription Info: %s",
+      use_local_subscription_info ? "Yes" : "No");
+  Logger::smf_app().info(
+      "    Push PCO (DNS+MTU).........: %s", force_push_pco ? "Yes" : "No");
 
   if (local_configuration) {
     Logger::smf_app().info(

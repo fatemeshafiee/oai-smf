@@ -252,7 +252,8 @@ enum class cause_value_5gsm_e {
   CAUSE_99_INFORMATION_ELEMENT_NON_EXISTENT_OR_NOT_IMPLEMENTED = 99,
   CAUSE_100_CONDITIONAL_IE_ERROR                               = 100,
   CAUSE_101_MESSAGE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE         = 101,
-  CAUSE_111_PROTOCOL_ERROR_UNSPECIFIED                         = 111
+  CAUSE_111_PROTOCOL_ERROR_UNSPECIFIED                         = 111,
+  CAUSE_255_REQUEST_ACCEPTED                                   = 255
 };
 
 // The 5GSM sublayer states for PDU session handling in the network

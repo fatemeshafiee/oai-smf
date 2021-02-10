@@ -352,6 +352,38 @@ void pdu_session_create_sm_context_request::get_epco(
   p = m_epco;
 }
 
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::set_plmn(const plmn_t p) {
+  m_serving_network = p;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::get_plmn(plmn_t& p) const {
+  p = m_serving_network;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::set_an_type(
+    const std::string& an_type) {
+  m_an_type = an_type;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::get_an_type(
+    std::string& an_type) const {
+  an_type = m_an_type;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::set_guami(const guami_5g_t& guami) {
+  m_guami = guami;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_create_sm_context_request::get_guami(guami_5g_t& guami) const {
+  guami = m_guami;
+}
+
 /*
  * class: PDU Session Create SM Context Response
  */

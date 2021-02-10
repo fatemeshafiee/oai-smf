@@ -252,7 +252,8 @@ void smf_n11::send_n1n2_message_transfer_request(
     itti_msg->set_procedure_type(session_management_procedures_type_e::
                                      PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
     itti_msg->set_cause(response_data["cause"]);
-    if (sm_context_res->res.get_cause() == REQUEST_ACCEPTED) {
+    if (sm_context_res->res.get_cause() ==
+        static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
       itti_msg->set_msg_type(PDU_SESSION_ESTABLISHMENT_ACCEPT);
     } else {
       itti_msg->set_msg_type(PDU_SESSION_ESTABLISHMENT_REJECT);
@@ -794,8 +795,8 @@ void smf_n11::update_nf_instance(
     CURLcode res               = {};
     struct curl_slist* headers = nullptr;
     // headers = curl_slist_append(headers, "charsets: utf-8");
-    headers =
-        curl_slist_append(headers, "content-type: application/json-patch+json");
+    headers = curl_slist_append(
+        headers, "content-type: application/json");  // TODO: json-patch+json
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);

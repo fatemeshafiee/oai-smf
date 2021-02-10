@@ -31,6 +31,7 @@
 #define FILE_SMF_EVENT_SIG_HPP_SEEN
 
 #include <boost/signals2.hpp>
+#include <string>
 #include "3gpp_24.007.h"
 
 namespace bs2 = boost::signals2;
@@ -40,7 +41,7 @@ namespace smf {
 // Signal for PDU session status
 // SCID, PDU Session Status, HTTP version
 typedef bs2::signal_type<
-    void(scid_t, uint8_t, uint8_t),
+    void(scid_t, const std::string&, uint8_t),
     bs2::keywords::mutex_type<bs2::dummy_mutex>>::type sm_context_status_sig_t;
 
 // Signal for Event exposure

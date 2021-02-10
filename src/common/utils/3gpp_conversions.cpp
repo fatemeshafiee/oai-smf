@@ -36,6 +36,8 @@
 #include "SmContextUpdateData.h"
 #include "SmContextReleaseData.h"
 #include "3gpp_29.500.h"
+#include "3gpp_24.501.h"
+#include "conversions.hpp"
 
 //------------------------------------------------------------------------------
 void xgpp_conv::paa_to_pfcp_ue_ip_address(
@@ -159,42 +161,69 @@ void xgpp_conv::sm_context_create_from_openapi(
       "Convert SmContextMessage (OpenAPI) to "
       "PDUSession_CreateSMContext");
 
-  oai::smf_server::model::SmContextCreateData context_data = scd.getJsonData();
+  oai::smf_server::model::SmContextCreateData context_data = {};
+  if (scd.jsonDataIsSet()) {
+    context_data = scd.getJsonData();
+  } else {
+    Logger::smf_app().warn("No Json data available");
+  }
 
-  std::string n1_sm_msg = scd.getBinaryDataN1SmMessage();
-  // N1 SM Message
-  pcr.set_n1_sm_message(n1_sm_msg);
-  Logger::smf_app().debug("N1 SM message: %s", n1_sm_msg.c_str());
+  if (scd.binaryDataN1SmMessageIsSet()) {
+    std::string n1_sm_msg = scd.getBinaryDataN1SmMessage();
+    // N1 SM Message
+    pcr.set_n1_sm_message(n1_sm_msg);
+    Logger::smf_app().debug("N1 SM message: %s", n1_sm_msg.c_str());
+  } else {
+    Logger::smf_app().warn("No N1 SM Message available");
+  }
 
-  // supi
-  supi_t supi             = {.length = 0};
-  std::size_t pos         = context_data.getSupi().find("-");
-  std::string supi_str    = context_data.getSupi().substr(pos + 1);
-  std::string supi_prefix = context_data.getSupi().substr(0, pos);
-  smf_string_to_supi(&supi, supi_str.c_str());
-  pcr.set_supi(supi);
-  pcr.set_supi_prefix(supi_prefix);
-  Logger::smf_app().debug(
-      "SUPI %s, SUPI Prefix %s, IMSI %s", context_data.getSupi().c_str(),
-      supi_prefix.c_str(), supi_str.c_str());
+  if (context_data.supiIsSet()) {
+    // supi
+    supi_t supi             = {.length = 0};
+    std::size_t pos         = context_data.getSupi().find("-");
+    std::string supi_str    = context_data.getSupi().substr(pos + 1);
+    std::string supi_prefix = context_data.getSupi().substr(0, pos);
+    smf_string_to_supi(&supi, supi_str.c_str());
+    pcr.set_supi(supi);
+    pcr.set_supi_prefix(supi_prefix);
+    Logger::smf_app().debug(
+        "SUPI %s, SUPI Prefix %s, IMSI %s", context_data.getSupi().c_str(),
+        supi_prefix.c_str(), supi_str.c_str());
+  } else {
+    Logger::smf_app().warn("No SUPI available");
+  }
 
-  // dnn
-  Logger::smf_app().debug("DNN %s", context_data.getDnn().c_str());
-  pcr.set_dnn(context_data.getDnn().c_str());
+  // TODO: unauthenticatedSupi
+  // DNN
+  if (context_data.dnnIsSet()) {
+    Logger::smf_app().debug("DNN %s", context_data.getDnn().c_str());
+    pcr.set_dnn(context_data.getDnn().c_str());
+  } else {
+    Logger::smf_app().warn("No DNN available");
+  }
 
   // S-Nssai
-  Logger::smf_app().debug(
-      "S-NSSAI SST %d, SD %s", context_data.getSNssai().getSst(),
-      context_data.getSNssai().getSd().c_str());
-  snssai_t snssai(
-      context_data.getSNssai().getSst(), context_data.getSNssai().getSd());
-  pcr.set_snssai(snssai);
+  if (context_data.sNssaiIsSet()) {
+    Logger::smf_app().debug(
+        "S-NSSAI SST %d, SD %s", context_data.getSNssai().getSst(),
+        context_data.getSNssai().getSd().c_str());
+    snssai_t snssai(
+        context_data.getSNssai().getSst(), context_data.getSNssai().getSd());
+    pcr.set_snssai(snssai);
+  } else {
+    Logger::smf_app().warn("No SNSSAI available");
+  }
 
   // PDU session ID
-  Logger::smf_app().debug("PDU Session ID %d", context_data.getPduSessionId());
-  pcr.set_pdu_session_id(context_data.getPduSessionId());
+  if (context_data.pduSessionIdIsSet()) {
+    Logger::smf_app().debug(
+        "PDU Session ID %d", context_data.getPduSessionId());
+    pcr.set_pdu_session_id(context_data.getPduSessionId());
+  } else {
+	  Logger::smf_app().warn("No PDU Session ID available");
+  }
 
-  // AMF ID (ServingNFId)
+  // AMF ID (ServingNFId/NfInstanceId)
   Logger::smf_app().debug(
       "ServingNfId %s", context_data.getServingNfId().c_str());
   pcr.set_serving_nf_id(context_data.getServingNfId()
@@ -202,9 +231,59 @@ void xgpp_conv::sm_context_create_from_openapi(
                                         // is stored in GUAMI or ServingNfId
 
   // Request Type
+  if (context_data.requestTypeIsSet()) {
+    Logger::smf_app().debug(
+        "RequestType %s", context_data.getRequestType().c_str());
+    pcr.set_request_type(context_data.getRequestType());
+  } else {
+    Logger::smf_app().warn("No Request Type available");
+  }
+
+  // SMContextStatusUri
+  pcr.set_sm_context_status_uri(context_data.getSmContextStatusUri());
   Logger::smf_app().debug(
-      "RequestType %s", context_data.getRequestType().c_str());
-  pcr.set_request_type(context_data.getRequestType());
+      "SMContextStatusUri %s", context_data.getSmContextStatusUri().c_str());
+
+  // DNN Selection Mode
+  if (context_data.selModeIsSet()) {
+    Logger::smf_app().debug("SelMode %s", context_data.getSelMode().c_str());
+    pcr.set_dnn_selection_mode(context_data.getSelMode());
+  } else {
+    Logger::smf_app().warn("No SelMode available");
+  }
+
+  // ServingNetwork (PlmnId)
+  Logger::smf_app().debug(
+      "Serving Network (MCC %s, MNC %s)",
+      context_data.getServingNetwork().getMcc().c_str(),
+      context_data.getServingNetwork().getMnc().c_str());
+  plmn_t p = {};
+  if (conv::plmnFromString(
+          p, context_data.getServingNetwork().getMcc(),
+          context_data.getServingNetwork().getMnc())) {
+    pcr.set_plmn(p);
+  } else {
+    Logger::smf_app().warn("Error while converting MCC, MNC to PLMN");
+  }
+
+  // anType (AccessType)
+  Logger::smf_app().debug("AN Type %s", context_data.getAnType().c_str());
+  pcr.set_an_type(context_data.getAnType());
+
+  // Guami
+  if (context_data.guamiIsSet()) {
+    // Logger::smf_app().debug("GUAMI %s", context_data.getGuami().c_str());
+    guami_5g_t guami = {};
+    guami.amf_id     = context_data.getGuami().getAmfId();
+    if (!conv::plmnFromString(
+            guami.plmn, context_data.getGuami().getPlmnId().getMcc(),
+            context_data.getGuami().getPlmnId().getMnc())) {
+      Logger::smf_app().warn("Error while converting MCC, MNC to PLMN");
+    }
+    pcr.set_guami(guami);
+  }
+
+  // TODO:
   // PCF ID
   // Priority Access
   // User Location Information
@@ -212,28 +291,8 @@ void xgpp_conv::sm_context_create_from_openapi(
   // PEI
   // GPSI
   // UE presence in LADN service area
-  // Guami
-  // servingNetwork
-  // anType
   // UETimeZone
-  // SMContextStatusUri
-  pcr.set_sm_context_status_uri(context_data.getSmContextStatusUri());
   // PCFId
-
-  // DNN Selection Mode
-  Logger::smf_app().debug("SelMode %s", context_data.getSelMode().c_str());
-  pcr.set_dnn_selection_mode(context_data.getSelMode().c_str());
-
-  // Subscription for PDU Session Status Notification
-  // Trace requirement
-
-  // SSC mode (Optional)
-  // 5GSM capability (Optional)
-  // Maximum number of supported (Optional)
-  // Maximum number of supported packet filters (Optional)
-  // Always-on PDU session requested (Optional)
-  // SM PDU DN request container (Optional)
-  // Extended protocol configuration options (Optional) e.g, FOR DHCP
 }
 
 //------------------------------------------------------------------------------
@@ -464,7 +523,8 @@ void xgpp_conv::create_sm_context_response_from_ct_request(
   ctx_response->res.set_http_code(http_status_code_e::HTTP_STATUS_CODE_200_OK);
   ctx_response->res.set_supi(ctx_request->req.get_supi());
   ctx_response->res.set_supi_prefix(ctx_request->req.get_supi_prefix());
-  ctx_response->res.set_cause(REQUEST_ACCEPTED);
+  ctx_response->res.set_cause(
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   ctx_response->res.set_pdu_session_id(ctx_request->req.get_pdu_session_id());
   ctx_response->res.set_snssai(ctx_request->req.get_snssai());
   ctx_response->res.set_dnn(ctx_request->req.get_dnn());
@@ -478,18 +538,13 @@ void xgpp_conv::create_sm_context_response_from_ct_request(
 void xgpp_conv::update_sm_context_response_from_ct_request(
     const std::shared_ptr<itti_n11_update_sm_context_request>& ct_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& ct_response) {
-
-
-	ct_response->res.set_http_code(
-	      http_status_code_e::HTTP_STATUS_CODE_200_OK);  // default status code
-	ct_response->res.set_supi(ct_request->req.get_supi());
-	ct_response->res.set_supi_prefix(
-			ct_request->req.get_supi_prefix());
-	ct_response->res.set_cause(REQUEST_ACCEPTED);
-	ct_response->res.set_pdu_session_id(
-			ct_request->req.get_pdu_session_id());
-	ct_response->res.set_snssai(ct_request->req.get_snssai());
-	ct_response->res.set_dnn(ct_request->req.get_dnn());
-
-
+  ct_response->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);  // default status code
+  ct_response->res.set_supi(ct_request->req.get_supi());
+  ct_response->res.set_supi_prefix(ct_request->req.get_supi_prefix());
+  ct_response->res.set_cause(
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
+  ct_response->res.set_pdu_session_id(ct_request->req.get_pdu_session_id());
+  ct_response->res.set_snssai(ct_request->req.get_snssai());
+  ct_response->res.set_dnn(ct_request->req.get_dnn());
 }

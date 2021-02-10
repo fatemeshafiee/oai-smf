@@ -343,12 +343,16 @@ smf_app::smf_app(const std::string& config_file)
     start_upf_association(*it);
   }
 
-  // Register to NRF
-  register_to_nrf();
-  // Trigger NFStatusNotify
-  unsigned int microsecond = 10000;  // 10ms
-  usleep(microsecond);
-  trigger_upf_status_notification_subscribe();
+  // Register to NRF (if this option is enabled)
+  if (smf_cfg.register_nrf) register_to_nrf();
+
+  if (smf_cfg.discover_upf) {
+    // Trigger NFStatusNotify subscription to be noticed when a new UPF becomes
+    // available (if this option is enabled)
+    unsigned int microsecond = 10000;  // 10ms
+    usleep(microsecond);
+    trigger_upf_status_notification_subscribe();
+  }
 
   Logger::smf_app().startup("Started");
 }
@@ -478,7 +482,7 @@ void smf_app::handle_itti_msg(
             "Got successful response from AMF (response code %d), set session "
             "status to %s",
             m.response_code,
-            pdu_session_status_e2str[static_cast<int>(status)].c_str());
+            pdu_session_status_e2str.at(static_cast<int>(status)).c_str());
       } else {
         // TODO:
         Logger::smf_app().debug(
@@ -537,7 +541,8 @@ void smf_app::handle_itti_msg(
 void smf_app::handle_itti_msg(itti_n11_update_pdu_session_status& m) {
   Logger::smf_app().info(
       "Set PDU Session Status to %s",
-      pdu_session_status_e2str[static_cast<int>(m.pdu_session_status)].c_str());
+      pdu_session_status_e2str.at(static_cast<int>(m.pdu_session_status))
+          .c_str());
   update_pdu_session_status(m.scid, m.pdu_session_status);
 }
 
@@ -631,8 +636,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
                                              PDU_SESSION_TYPE_E_IPV4};
 
   // Step 1. Decode NAS and get the necessary information
-  // std::string n1_sm_msg = smreq->req.get_n1_sm_message();
-
   int decoder_rc = smf_n1::get_instance().decode_n1_sm_container(
       decoded_nas_msg, smreq->req.get_n1_sm_message());
 
@@ -1419,7 +1422,7 @@ void smf_app::update_pdu_session_status(
   sp.get()->set_pdu_session_status(status);
   Logger::smf_app().info(
       "Set PDU Session Status to %s",
-      pdu_session_status_e2str[static_cast<int>(status)].c_str());
+      pdu_session_status_e2str.at(static_cast<int>(status)).c_str());
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1474,7 +1477,7 @@ void smf_app::update_pdu_session_upCnx_state(
   sp.get()->set_upCnx_state(state);
   Logger::smf_app().info(
       "Set PDU Session UpCnxState to %s",
-      upCnx_state_e2str[static_cast<int>(state)].c_str());
+      upCnx_state_e2str.at(static_cast<int>(state)).c_str());
 }
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
@@ -1527,7 +1530,7 @@ n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(
     const std::string& n2_info_type) const {
   std::size_t number_of_types = n2_sm_info_type_e2str.size();
   for (auto i = 0; i < number_of_types; ++i) {
-    if (n2_info_type.compare(n2_sm_info_type_e2str[i]) == 0) {
+    if (n2_info_type.compare(n2_sm_info_type_e2str.at(i)) == 0) {
       return static_cast<n2_sm_info_type_e>(i);
     }
   }
@@ -1645,7 +1648,7 @@ void smf_app::trigger_create_context_error_response(
   oai::smf_server::model::ProblemDetails problem_details  = {};
   oai::smf_server::model::RefToBinaryData refToBinaryData = {};
   Logger::smf_app().warn("Create SmContextCreateError");
-  problem_details.setCause(pdu_session_application_error_e2str[cause]);
+  problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   sm_context.setError(problem_details);
   refToBinaryData.setContentId(N1_SM_CONTENT_ID);
   sm_context.setN1SmMsg(refToBinaryData);
@@ -1677,7 +1680,7 @@ void smf_app::trigger_update_context_error_response(
 
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = {};
   oai::smf_server::model::ProblemDetails problem_details            = {};
-  problem_details.setCause(pdu_session_application_error_e2str[cause]);
+  problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   smContextUpdateError.setError(problem_details);
 
   std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
@@ -1707,7 +1710,7 @@ void smf_app::trigger_update_context_error_response(
 
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = {};
   oai::smf_server::model::ProblemDetails problem_details            = {};
-  problem_details.setCause(pdu_session_application_error_e2str[cause]);
+  problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   smContextUpdateError.setError(problem_details);
 
   std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
@@ -1834,6 +1837,7 @@ void smf_app::get_ee_subscriptions(
 
 //---------------------------------------------------------------------------------------------
 void smf_app::generate_smf_profile() {
+  // TODO: remove hardcoded values
   // generate UUID
   generate_uuid();
   nf_instance_profile.set_nf_instance_id(smf_instance_id);
@@ -1859,11 +1863,9 @@ void smf_app::generate_smf_profile() {
   ip_endpoint_t endpoint = {};
   std::vector<struct in_addr> addrs;
   nf_instance_profile.get_nf_ipv4_addresses(addrs);
-  for (auto a : addrs) {
-    endpoint.ipv4_addresses.push_back(a);
-  }
-  endpoint.transport = "TCP";
-  endpoint.port      = smf_cfg.sbi.port;
+  endpoint.ipv4_address = addrs[0];  // TODO: use first IP ADDR for now
+  endpoint.transport    = "TCP";
+  endpoint.port         = smf_cfg.sbi.port;
   nf_service.ip_endpoints.push_back(endpoint);
 
   nf_instance_profile.add_nf_service(nf_service);
@@ -1908,9 +1910,9 @@ void smf_app::generate_smf_profile() {
 
 //---------------------------------------------------------------------------------------------
 void smf_app::register_to_nrf() {
-  // create a NF profile to this instance
+  // Create a NF profile to this instance
   generate_smf_profile();
-  // send request to N11 to send NF registration to NRF
+  // Send request to N11 to send NF registration to NRF
   trigger_nf_registration_request();
 }
 

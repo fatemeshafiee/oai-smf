@@ -30,6 +30,7 @@
 #include "smf_context.hpp"
 
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 #include "3gpp_24.501.h"
 #include "3gpp_29.500.h"
@@ -47,6 +48,7 @@
 #include "smf_pfcp_association.hpp"
 #include "smf_procedure.hpp"
 #include "3gpp_conversions.hpp"
+#include "string.hpp"
 
 extern "C" {
 #include "Ngap_AssociatedQosFlowItem.h"
@@ -409,7 +411,7 @@ void smf_pdu_session::set_pdu_session_status(
   // TODO: Should consider congestion handling
   Logger::smf_app().info(
       "Set PDU Session Status to %s",
-      pdu_session_status_e2str[static_cast<int>(status)].c_str());
+      pdu_session_status_e2str.at(static_cast<int>(status)).c_str());
   std::unique_lock lock(m_pdu_session_mutex);
   pdu_session_status = status;
 }
@@ -424,7 +426,7 @@ pdu_session_status_e smf_pdu_session::get_pdu_session_status() const {
 void smf_pdu_session::set_upCnx_state(const upCnx_state_e& state) {
   Logger::smf_app().info(
       "Set upCnxState to %s",
-      upCnx_state_e2str[static_cast<int>(state)].c_str());
+      upCnx_state_e2str.at(static_cast<int>(state)).c_str());
   std::unique_lock lock(m_pdu_session_mutex);
   upCnx_state = state;
 }
@@ -568,6 +570,21 @@ void smf_pdu_session::add_qos_rule(const QOSRulesIE& qos_rule) {
     Logger::smf_app().error(
         "Failed to add rule (Id %d) failed: invalid rule Id", rule_id);
   }
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::set_amf_addr(const std::string& addr) {
+  amf_addr = addr;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_amf_addr(std::string& addr) const {
+  addr = amf_addr;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_pdu_session::get_amf_addr() const {
+  return amf_addr;
 }
 
 //------------------------------------------------------------------------------
@@ -757,10 +774,11 @@ void smf_context::handle_itti_msg(
             get_supi_prefix(supi_prefix);
             std::string supi_str = supi_prefix + "-" + smf_supi_to_string(supi);
             std::string url =
-                std::string(inet_ntoa(
-                    *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
-                ":" + std::to_string(smf_cfg.amf_addr.port) +
-                NAMF_COMMUNICATION_BASE + smf_cfg.amf_addr.api_version +
+                // std::string(inet_ntoa(
+                //    *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
+                //":" + std::to_string(smf_cfg.amf_addr.port) +
+                sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+                smf_cfg.amf_addr.api_version +
                 fmt::format(
                     NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
                     supi_str.c_str());
@@ -1342,8 +1360,11 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           if (success) {
             set_paa = true;
           } else {
-            // TODO:
-            // cause: ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED; //check for 5G?
+            // ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED;
+            set_paa          = false;
+            request_accepted = false;
+            sm_context_resp->res.set_cause(static_cast<uint8_t>(
+                cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES));
           }
           // Static IP address allocation
         } else if ((paa_res) && (paa.is_ip_assigned())) {
@@ -1389,6 +1410,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
             http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
             smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
       }
+      // sm_context_resp->res.set_cause(static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE));
       request_accepted = false;
     }
   }
@@ -1418,6 +1440,28 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     }
     scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
 
+    // Get and Store AMF Addr if available
+    std::vector<std::string> split_result;
+    std::string amf_addr_str = {};
+    amf_addr_str             = std::string(inet_ntoa(
+                       *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
+                   ":" + std::to_string(smf_cfg.amf_addr.port);
+
+    boost::split(
+        split_result, scf.get()->amf_status_uri, boost::is_any_of("/"));
+    if (split_result.size() >= 3) {
+      std::string addr = split_result[2];
+      struct in_addr amf_ipv4_addr;
+      if (inet_aton(util::trim(addr).c_str(), &amf_ipv4_addr) == 0) {
+        Logger::smf_api_server().warn("Bad IPv4 for AMF");
+      } else {
+        amf_addr_str = addr;
+        Logger::smf_api_server().debug("AMF IP Addr %s", amf_addr_str.c_str());
+      }
+    }
+    scf.get()->amf_addr = amf_addr_str;
+    sp.get()->set_amf_addr(amf_addr_str);
+
     // Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step
     // 5, 4.3.2.2.1 TS 23.502)
     Logger::smf_app().debug(
@@ -1434,7 +1478,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     std::string smf_context_uri =
         smreq->req.get_api_root() + "/" + smContextRef.c_str();
     sm_context_response.set_smf_context_uri(smf_context_uri);
-    sm_context_response.set_cause(0);  // TODO
+    sm_context_response.set_cause(static_cast<uint8_t>(
+        cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));  // TODO
 
     nlohmann::json json_data = {};
     json_data["cause"]       = 0;
@@ -1479,7 +1524,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // Step 10. if error when establishing the pdu session,
   // send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs (PDU
   // Session Establishment Reject)
-  if (sm_context_resp->res.get_cause() != REQUEST_ACCEPTED) {
+  if (sm_context_resp->res.get_cause() !=
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
     // clear pco, ambr
     // TODO:
     // free paa
@@ -1506,12 +1552,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // Create PDU Session Establishment Reject and embedded in
     // Namf_Communication_N1N2MessageTransfer Request
     Logger::smf_app().debug("Create PDU Session Establishment Reject");
-    // TODO: Should check Cause for other cases
-    cause_value_5gsm_e cause_n1 = {
-        cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE};
-    if (sm_context_resp->res.get_cause() == NO_RESOURCES_AVAILABLE) {
-      cause_n1 = cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES;
-    }
+    cause_value_5gsm_e cause_n1 =
+        static_cast<cause_value_5gsm_e>(sm_context_resp->res.get_cause());
+
     smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
         sm_context_resp_pending->res, n1_sm_message, cause_n1);
     smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
@@ -1523,9 +1566,11 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     supi_str    = sm_context_resp_pending->res.get_supi_prefix() + "-" +
                smf_supi_to_string(supi);
     std::string url =
-        std::string(
-            inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
-        ":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
+        //     std::string(
+        //    inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
+        // ":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE
+        // +
+        sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
         smf_cfg.amf_addr.api_version +
         fmt::format(
             NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
@@ -1882,21 +1927,21 @@ bool smf_context::handle_pdu_session_release_complete(
     // TODO: return;
   }
 
+  Logger::smf_app().debug("Signal the SM Context Status Change");
+  std::string status = "RELEASED";
   event_sub.sm_context_status(
-      scid,
-      static_cast<uint32_t>(sm_context_status_e::SM_CONTEXT_STATUS_RELEASED),
-      sm_context_request.get()->http_version);
+      scid, status, sm_context_request.get()->http_version);
 
-  // Get SUPI
-  supi64_t supi64 = smf_supi_to_u64(sm_context_request.get()->req.get_supi());
   // Trigger PDU Session Release event notification
+  supi64_t supi64 = smf_supi_to_u64(sm_context_request.get()->req.get_supi());
+  Logger::smf_app().debug("Signal the PDU Session Release Event notification");
   event_sub.ee_pdu_session_release(
       supi64, sm_context_request.get()->req.get_pdu_session_id(),
       sm_context_request.get()->http_version);
 
   // TODO: if dynamic PCC applied, SMF invokes an SM Policy Association
   // Termination
-  // TODO: SMF unsubscribes from Session Management Subscription data
+  // TODO: SMF un-subscribes from Session Management Subscription data
   // changes notification from UDM by invoking Numd_SDM_Unsubscribe
 
   // TODO: should check if sd context exist
@@ -1995,7 +2040,6 @@ bool smf_context::handle_pdu_session_resource_setup_response_transfer(
              .array[i])
             ->qosFlowIdentifier);
   }
-
   return true;
 }
 //-------------------------------------------------------------------------------------
@@ -2156,7 +2200,8 @@ bool smf_context::handle_service_request(
     sm_context_request.get()->req.add_qfi(i.qfi.qfi);
 
     qos_flow_context_updated qcu = {};
-    qcu.set_cause(REQUEST_ACCEPTED);
+    qcu.set_cause(
+        static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
     qcu.set_qfi(i.qfi);
     qcu.set_ul_fteid(i.ul_fteid);
     qcu.set_qos_profile(i.qos_profile);
@@ -2511,8 +2556,8 @@ void smf_context::handle_pdu_session_update_sm_context_request(
       Logger::smf_app().info(
           "PDU Update SM Context Request procedure failed (session procedure "
           "type %s)",
-          session_management_procedures_type_e2str[static_cast<int>(
-                                                       procedure_type)]
+          session_management_procedures_type_e2str
+              .at(static_cast<int>(procedure_type))
               .c_str());
       remove_procedure(proc);
 
@@ -2624,7 +2669,8 @@ void smf_context::handle_pdu_session_release_sm_context_request(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);
   n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
   n11_sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
-  n11_sm_context_resp->res.set_cause(REQUEST_ACCEPTED);
+  n11_sm_context_resp->res.set_cause(
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   n11_sm_context_resp->res.set_pdu_session_id(smreq->req.get_pdu_session_id());
   n11_sm_context_resp->res.set_snssai(smreq->req.get_snssai());
   n11_sm_context_resp->res.set_dnn(smreq->req.get_dnn());
@@ -2719,8 +2765,10 @@ void smf_context::handle_pdu_session_modification_network_requested(
   std::string supi_str =
       itti_msg->msg.get_supi_prefix() + "-" + smf_supi_to_string(supi);
   std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
+      // std::string(inet_ntoa(*((struct in_addr*)
+      // &smf_cfg.amf_addr.ipv4_addr))) +
+      //":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
+      sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
@@ -2894,7 +2942,7 @@ bool smf_context::find_pdu_session(
 
 //------------------------------------------------------------------------------
 void smf_context::handle_sm_context_status_change(
-    scid_t scid, uint8_t status, uint8_t http_version) {
+    scid_t scid, const std::string& status, uint8_t http_version) {
   Logger::smf_app().debug(
       "Send request to N11 to triger SM Context Status Notification to AMF, "
       "SMF Context ID " SCID_FMT " ",
@@ -2916,7 +2964,7 @@ void smf_context::handle_sm_context_status_change(
       std::make_shared<itti_n11_notify_sm_context_status>(
           TASK_SMF_APP, TASK_SMF_N11);
   itti_msg->scid              = scid;
-  itti_msg->sm_context_status = sm_context_status_e2str[status];
+  itti_msg->sm_context_status = status;
   itti_msg->amf_status_uri    = scf.get()->amf_status_uri;
   itti_msg->http_version      = http_version;
 
@@ -2990,15 +3038,7 @@ void smf_context::update_qos_info(
   QOSFlowDescriptionsContents qos_flow_description_content = {};
 
   // Only one flow description for new requested QoS Flow
-  //  QOSFlowDescriptionsContents* qos_flow_description =
-  //      (QOSFlowDescriptionsContents*) calloc(
-  //          number_of_flow_descriptions, sizeof(QOSFlowDescriptionsContents));
-
   if (number_of_flow_descriptions > 0) {
-    //    qos_flow_description =
-    //    nas_msg.plain.sm.pdu_session_modification_request
-    //                               .qosflowdescriptions.qosflowdescriptionscontents;
-
     for (int i = 0; i < number_of_flow_descriptions; i++) {
       if (nas_msg.plain.sm.pdu_session_modification_request.qosflowdescriptions
               .qosflowdescriptionscontents[i]
@@ -3127,8 +3167,16 @@ void smf_context::update_qos_info(
                                                 // rule identifier
     i++;
   }
+}
 
-  //  free_wrapper((void**) &qos_flow_description);
+//------------------------------------------------------------------------------
+void smf_context::set_amf_addr(const std::string& addr) {
+  amf_addr = addr;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::get_amf_addr(std::string& addr) const {
+  addr = amf_addr;
 }
 
 //------------------------------------------------------------------------------

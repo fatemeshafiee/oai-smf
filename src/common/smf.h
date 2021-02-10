@@ -248,23 +248,20 @@ typedef struct nf_service_version_s {
 } nf_service_version_t;
 
 typedef struct ip_endpoint_s {
-  std::vector<struct in_addr> ipv4_addresses;
-  // std::vector<struct in6_addr> ipv6_addresses;
+  //struct in6_addr  ipv6_address;
+  struct in_addr ipv4_address;
   std::string transport;  // TCP
   unsigned int port;
   std::string to_string() const {
     std::string s = {};
-    s.append("Ipv4 Addresses: ");
-    for (auto ipv4 : ipv4_addresses) {
-      s.append(inet_ntoa(ipv4));
-    }
+    s.append("Ipv4 Address: ");
+    s.append(inet_ntoa(ipv4_address));
     s.append(", TransportProtocol: ");
     s.append(transport);
     s.append(", Port: ");
     s.append(std::to_string(port));
     return s;
   }
-
 } ip_endpoint_t;
 
 typedef struct nf_service_s {
@@ -325,5 +322,12 @@ typedef struct patch_item_s {
     return json_data;
   }
 } patch_item_t;
+
+
+//TODO: move to 23.003
+typedef struct guami_5g_s {
+  plmn_t plmn;
+  std::string amf_id;
+} guami_5g_t;
 
 #endif
