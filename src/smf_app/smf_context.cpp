@@ -1440,21 +1440,27 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     }
     scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
 
-    // Get and Store AMF Addr
+    // Get and Store AMF Addr if available
     std::vector<std::string> split_result;
+    std::string amf_addr_str = {};
+    amf_addr_str             = std::string(inet_ntoa(
+                       *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
+                   ":" + std::to_string(smf_cfg.amf_addr.port);
+
     boost::split(
         split_result, scf.get()->amf_status_uri, boost::is_any_of("/"));
     if (split_result.size() >= 3) {
-      std::string amf_addr_str = split_result[2];
+      std::string addr = split_result[2];
       struct in_addr amf_ipv4_addr;
-      if (inet_aton(util::trim(amf_addr_str).c_str(), &amf_ipv4_addr) == 0) {
+      if (inet_aton(util::trim(addr).c_str(), &amf_ipv4_addr) == 0) {
         Logger::smf_api_server().warn("Bad IPv4 for AMF");
       } else {
-        scf.get()->amf_addr = amf_addr_str;
-        sp.get()->set_amf_addr(amf_addr_str);
+        amf_addr_str = addr;
         Logger::smf_api_server().debug("AMF IP Addr %s", amf_addr_str.c_str());
       }
     }
+    scf.get()->amf_addr = amf_addr_str;
+    sp.get()->set_amf_addr(amf_addr_str);
 
     // Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step
     // 5, 4.3.2.2.1 TS 23.502)
