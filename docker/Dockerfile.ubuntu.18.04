@@ -77,6 +77,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DE
 # Copying executable and generated libraries
 WORKDIR /openair-smf/bin
 COPY --from=oai-smf-builder /openair-smf/build/smf/build/smf oai_smf
+COPY --from=oai-smf-builder /openair-smf/scripts/entrypoint.sh entrypoint.sh
 COPY --from=oai-smf-builder /usr/local/lib/libpistache.so /usr/local/lib/
 COPY --from=oai-smf-builder /usr/local/lib/libnghttp2_asio.so.1 /usr/local/lib/
 COPY --from=oai-smf-builder /usr/lib/x86_64-linux-gnu/libboost_system.so.1.65.1 /usr/lib/x86_64-linux-gnu/
@@ -91,3 +92,9 @@ COPY --from=oai-smf-builder /openair-smf/etc/smf.conf .
 
 WORKDIR /openair-smf
 
+# expose ports
+EXPOSE 80/tcp 9090/tcp 8805/udp
+
+ENTRYPOINT ["/bin/bash","/openair-smf/bin/entrypoint.sh"]
+
+CMD ["/openair-smf/bin/oai_smf", "-c", "/openair-smf/etc/smf.conf", "-o"]
