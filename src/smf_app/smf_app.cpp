@@ -343,15 +343,17 @@ smf_app::smf_app(const std::string& config_file)
     start_upf_association(*it);
   }
 
-  // Register to NRF (if this option is enabled)
-  if (smf_cfg.register_nrf) register_to_nrf();
-
   if (smf_cfg.discover_upf) {
     // Trigger NFStatusNotify subscription to be noticed when a new UPF becomes
     // available (if this option is enabled)
+    trigger_upf_status_notification_subscribe();
+  }
+
+  // Register to NRF (if this option is enabled)
+  if (smf_cfg.register_nrf) {
     unsigned int microsecond = 10000;  // 10ms
     usleep(microsecond);
-    trigger_upf_status_notification_subscribe();
+    register_to_nrf();
   }
 
   Logger::smf_app().startup("Started");
