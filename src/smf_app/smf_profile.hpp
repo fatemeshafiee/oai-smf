@@ -417,6 +417,7 @@ class smf_profile : public nf_profile {
 class upf_profile : public nf_profile {
  public:
   upf_profile() : nf_profile() {  // custom_info = {};
+    nf_type = "UPF";
   }
 
   upf_profile(const std::string& id) : nf_profile(id) {  // custom_info = {};

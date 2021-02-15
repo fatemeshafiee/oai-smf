@@ -398,6 +398,45 @@ void smf_app::start_upf_association(const pfcp::node_id_t& node_id) {
 }
 
 //------------------------------------------------------------------------------
+void smf_app::start_upf_association(
+    const pfcp::node_id_t& node_id, const upf_profile& profile) {
+  std::time_t time_epoch = std::time(nullptr);
+  uint64_t tv_ntp        = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
+
+  pfcp_associations::get_instance().add_peer_candidate_node(node_id);
+  std::shared_ptr<itti_n4_association_setup_request> n4_asc =
+      std::shared_ptr<itti_n4_association_setup_request>(
+          new itti_n4_association_setup_request(TASK_SMF_APP, TASK_SMF_N4));
+
+  // n4_asc->trxn_id = smf_n4_inst->generate_trxn_id();
+  pfcp::cp_function_features_s cp_function_features;
+  cp_function_features      = {};
+  cp_function_features.load = 1;
+  cp_function_features.ovrl = 1;
+
+  pfcp::node_id_t this_node_id = {};
+  if (smf_cfg.get_pfcp_node_id(this_node_id) == RETURNok) {
+    n4_asc->pfcp_ies.set(this_node_id);
+    pfcp::recovery_time_stamp_t r = {.recovery_time_stamp = (uint32_t) tv_ntp};
+    n4_asc->pfcp_ies.set(r);
+
+    n4_asc->pfcp_ies.set(cp_function_features);
+    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+      n4_asc->r_endpoint =
+          endpoint(node_id.u1.ipv4_address, pfcp::default_port);
+      int ret = itti_inst->send_msg(n4_asc);
+      if (RETURNok != ret) {
+        Logger::smf_app().error(
+            "Could not send ITTI message %s to task TASK_SMF_N4",
+            n4_asc.get()->get_msg_name());
+      }
+    } else {
+      Logger::smf_app().warn("Start_association() node_id IPV6, FQDN!");
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(itti_n4_session_establishment_response& seresp) {
   std::shared_ptr<smf_context> pc = {};
   if (seid_2_smf_context(seresp.seid, pc)) {
@@ -1241,7 +1280,11 @@ bool smf_app::handle_nf_status_notification(
           n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
           // memcpy(&n.u1.ipv4_address, &ipv4_addrs[0], sizeof(struct in_addr));
           smf_cfg.upfs.push_back(n);
-          start_upf_association(n);
+          upf_profile* upf_node_profile =
+              dynamic_cast<upf_profile*>(profile.get());
+          start_upf_association(n, std::ref(*upf_node_profile));
+          // start_upf_association(n,
+          // std::static_pointer_cast<upf_profile>(profile));
         } else {
           Logger::smf_app().debug(
               "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));

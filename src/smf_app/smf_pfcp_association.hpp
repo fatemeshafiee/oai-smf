@@ -35,6 +35,7 @@
 
 #include "3gpp_29.244.h"
 #include "itti.hpp"
+#include "smf_profile.hpp"
 
 namespace smf {
 
@@ -61,12 +62,17 @@ class pfcp_association {
   timer_id_t timer_association;
   timer_id_t timer_graceful_release;
 
+  upf_profile upf_node_profile;
+  bool upf_profile_is_set;
+
   explicit pfcp_association(const pfcp::node_id_t& node_id)
       : node_id(node_id),
         recovery_time_stamp(),
         function_features(),
         m_sessions(),
-        sessions() {
+        sessions(),
+        upf_node_profile(),
+        upf_profile_is_set(false) {
     hash_node_id                = std::hash<pfcp::node_id_t>{}(node_id);
     timer_heartbeat             = ITTI_INVALID_TIMER_ID;
     num_retries_timer_heartbeat = 0;
@@ -82,7 +88,9 @@ class pfcp_association {
         recovery_time_stamp(recovery_time_stamp),
         function_features(),
         m_sessions(),
-        sessions() {
+        sessions(),
+        upf_node_profile(),
+        upf_profile_is_set(false) {
     hash_node_id                = std::hash<pfcp::node_id_t>{}(node_id);
     timer_heartbeat             = ITTI_INVALID_TIMER_ID;
     num_retries_timer_heartbeat = 0;
@@ -94,7 +102,12 @@ class pfcp_association {
   pfcp_association(
       const pfcp::node_id_t& ni, pfcp::recovery_time_stamp_t& rts,
       pfcp::up_function_features_s& uff)
-      : node_id(ni), recovery_time_stamp(rts), m_sessions(), sessions() {
+      : node_id(ni),
+        recovery_time_stamp(rts),
+        m_sessions(),
+        sessions(),
+        upf_node_profile(),
+        upf_profile_is_set(false) {
     hash_node_id                = std::hash<pfcp::node_id_t>{}(node_id);
     function_features.first     = true;
     function_features.second    = uff;
@@ -115,7 +128,9 @@ class pfcp_association {
         trxn_id_heartbeat(p.trxn_id_heartbeat),
         is_restore_sessions_pending(p.is_restore_sessions_pending),
         timer_association(0),
-        timer_graceful_release(0) {}
+        timer_graceful_release(0),
+        upf_node_profile(p.upf_node_profile),
+        upf_profile_is_set(p.upf_profile_is_set) {}
 
   void notify_add_session(const pfcp::fseid_t& cp_fseid);
   bool has_session(const pfcp::fseid_t& cp_fseid);
@@ -126,6 +141,14 @@ class pfcp_association {
     function_features.first  = true;
     function_features.second = ff;
   };
+  void set_upf_node_profile(const upf_profile& profile) {
+    upf_node_profile   = profile;
+    upf_profile_is_set = true;
+  };
+  void get_upf_node_profile(upf_profile& profile) const {
+    profile = upf_node_profile;
+  };
+  upf_profile get_upf_node_profile() const { return upf_node_profile; };
 };
 
 enum node_selection_criteria_e {
@@ -189,7 +212,11 @@ class pfcp_associations {
 
   bool select_up_node(
       pfcp::node_id_t& node_id, const int node_selection_criteria);
+  bool select_up_node(
+      pfcp::node_id_t& node_id, const snssai_t& snssai, const std::string& dnn);
   bool add_peer_candidate_node(const pfcp::node_id_t& node_id);
+  bool add_peer_candidate_node(
+      const pfcp::node_id_t& node_id, const upf_profile& profile);
 };
 }  // namespace smf
 

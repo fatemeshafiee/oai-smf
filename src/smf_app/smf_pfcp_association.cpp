@@ -97,6 +97,18 @@ bool pfcp_associations::add_association(
     sa                       = std::shared_ptr<pfcp_association>(association);
     sa->recovery_time_stamp  = recovery_time_stamp;
     std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
+
+    // Associate with UPF profile if exist
+    for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
+             pending_associations.begin();
+         it < pending_associations.end(); ++it) {
+      if ((*it)->node_id == node_id) {
+        Logger::smf_app().info("Associate with UPF profile");
+        sa->set_upf_node_profile((*it)->get_upf_node_profile());
+        break;
+      }
+    }
+
     associations.insert((int32_t) hash_node_id, sa);
     trigger_heartbeat_request_procedure(sa);
   }
@@ -282,6 +294,41 @@ bool pfcp_associations::select_up_node(
   }
   return false;
 }
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::select_up_node(
+    pfcp::node_id_t& node_id, const snssai_t& snssai, const std::string& dnn) {
+  node_id = {};
+  if (associations.empty()) {
+    return false;
+  }
+  folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
+  FOR_EACH(it, associations) {
+    std::shared_ptr<pfcp_association> a = it->second;
+    // get the first node id if there's no upf profile (get UPFs from conf file)
+    if (!a->upf_profile_is_set) {
+      node_id = it->second->node_id;
+      return true;
+    }
+    // else, verify that UPF belongs to the same slice and supports this dnn
+    std::vector<snssai_t> snssais = {};
+    // a->upf_node_profile.get_nf_snssais(snssais);
+    upf_info_t upf_info = {};
+    a->upf_node_profile.get_upf_info(upf_info);
+    for (auto ui : upf_info.snssai_upf_info_list) {
+      if (ui.snssai == snssai) {
+        for (auto d : ui.dnn_upf_info_list) {
+          if (d.dnn.compare(dnn) == 0) {
+            node_id = it->second->node_id;
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
 //------------------------------------------------------------------------------
 void pfcp_associations::notify_add_session(
     const pfcp::node_id_t& node_id, const pfcp::fseid_t& cp_fseid) {
@@ -314,6 +361,27 @@ bool pfcp_associations::add_peer_candidate_node(
   pfcp_association* association = new pfcp_association(node_id);
   std::shared_ptr<pfcp_association> s =
       std::shared_ptr<pfcp_association>(association);
+  pending_associations.push_back(s);
+  return true;
+}
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::add_peer_candidate_node(
+    const pfcp::node_id_t& node_id, const upf_profile& profile) {
+  for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
+           pending_associations.begin();
+       it < pending_associations.end(); ++it) {
+    if ((*it)->node_id == node_id) {
+      // TODO purge sessions of this node
+      Logger::smf_app().info("TODO purge sessions of this node");
+      pending_associations.erase(it);
+      break;
+    }
+  }
+  pfcp_association* association = new pfcp_association(node_id);
+  std::shared_ptr<pfcp_association> s =
+      std::shared_ptr<pfcp_association>(association);
+  s->set_upf_node_profile(profile);
   pending_associations.push_back(s);
   return true;
 }
