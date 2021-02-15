@@ -543,6 +543,7 @@ void smf_app::handle_itti_msg(
         Logger::smf_app().debug("Send failure indication to UPF");
         // TODO: to be completed
         pfcp::node_id_t up_node_id = {};
+        // TODO: Update select_up_node function
         if (not pfcp_associations::get_instance().select_up_node(
                 up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
           Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");

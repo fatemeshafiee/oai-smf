@@ -104,11 +104,28 @@ int session_create_sm_context_procedure::run(
   Logger::smf_app().info("Perform a procedure - Create SM Context Request");
   // TODO check if compatible with ongoing procedures if any
   pfcp::node_id_t up_node_id = {};
+  snssai_t snssai            = sm_context_req->req.get_snssai();
+  std::string dnn            = sm_context_req->req.get_dnn();
+
+  // if (not pfcp_associations::get_instance().select_up_node(
+  //        up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
   if (not pfcp_associations::get_instance().select_up_node(
-          up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
+          up_node_id, snssai, dnn)) {
     sm_context_resp->res.set_cause(
         PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
     return RETURNerror;
+  } else {
+    // Store UPF node
+    std::shared_ptr<smf_context_ref> scf = {};
+    if (smf_app_inst->is_scid_2_smf_context(sm_context_req->scid)) {
+      scf = smf_app_inst->scid_2_smf_context(sm_context_req->scid);
+      scf.get()->upf_node_id = up_node_id;
+    } else {
+      Logger::smf_app().warn(
+          "SM Context associated with this id " SCID_FMT " does not exit!",
+          sm_context_req->scid);
+      // TODO:
+    }
   }
 
   //-------------------
@@ -498,13 +515,33 @@ int session_update_sm_context_procedure::run(
   Logger::smf_app().info("Perform a procedure - Update SM Context Request");
   // TODO check if compatible with ongoing procedures if any
   pfcp::node_id_t up_node_id = {};
-  if (not pfcp_associations::get_instance().select_up_node(
-          up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-    sm_context_resp->res.set_cause(
-        PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
-    Logger::smf_app().info("[SMF Procedure] REMOTE_PEER_NOT_RESPONDING");
-    return RETURNerror;
+  // Get UPF node
+  std::shared_ptr<smf_context_ref> scf = {};
+  scid_t scid                          = {};
+  try {
+    scid = std::stoi(sm_context_req->scid);
+  } catch (const std::exception& err) {
+    Logger::smf_app().warn(
+        "SM Context associated with this id %s does not exit!",
+        sm_context_req->scid);
   }
+  if (smf_app_inst->is_scid_2_smf_context(scid)) {
+    scf        = smf_app_inst->scid_2_smf_context(scid);
+    up_node_id = scf.get()->upf_node_id;
+  } else {
+    Logger::smf_app().warn(
+        "SM Context associated with this id " SCID_FMT " does not exit!", scid);
+    // TODO:
+  }
+
+  /*  if (not pfcp_associations::get_instance().select_up_node(
+            up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
+      sm_context_resp->res.set_cause(
+          PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
+      Logger::smf_app().info("[SMF Procedure] REMOTE_PEER_NOT_RESPONDING");
+      return RETURNerror;
+    }
+  */
 
   //-------------------
   n11_trigger           = sm_context_req;
@@ -1269,14 +1306,33 @@ int session_release_sm_context_procedure::run(
   Logger::smf_app().info("Release SM Context Request");
   // TODO check if compatible with ongoing procedures if any
   pfcp::node_id_t up_node_id = {};
-  if (not pfcp_associations::get_instance().select_up_node(
-          up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-    sm_context_res->res.set_cause(
-        PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
-    Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
-    return RETURNerror;
+  // Get UPF node
+  std::shared_ptr<smf_context_ref> scf = {};
+  scid_t scid                          = {};
+  try {
+    scid = std::stoi(sm_context_req->scid);
+  } catch (const std::exception& err) {
+    Logger::smf_app().warn(
+        "SM Context associated with this id %s does not exit!",
+        sm_context_req->scid);
+  }
+  if (smf_app_inst->is_scid_2_smf_context(scid)) {
+    scf        = smf_app_inst->scid_2_smf_context(scid);
+    up_node_id = scf.get()->upf_node_id;
+  } else {
+    Logger::smf_app().warn(
+        "SM Context associated with this id " SCID_FMT " does not exit!", scid);
+    // TODO:
   }
 
+  /*  if (not pfcp_associations::get_instance().select_up_node(
+            up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
+      sm_context_res->res.set_cause(
+          PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
+      Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
+      return RETURNerror;
+    }
+  */
   //-------------------
   n11_trigger           = sm_context_req;
   n11_triggered_pending = sm_context_res;
