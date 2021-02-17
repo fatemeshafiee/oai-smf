@@ -689,14 +689,6 @@ int smf_config::load(const string& config_file) {
     const Setting& local_cfg = smf_cfg[SMF_CONFIG_STRING_LOCAL_CONFIGURATION];
     string local_configuration_str = {};
 
-    local_cfg.lookupValue(
-        SMF_CONFIG_STRING_USE_LOCAL_CONFIGURATION, local_configuration_str);
-    if (boost::iequals(local_configuration_str, "yes")) {
-      local_configuration = true;
-    } else {
-      local_configuration = false;
-    }
-
     const Setting& session_management_subscription_list_cfg =
         local_cfg[SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST];
     count = session_management_subscription_list_cfg.getLength();

@@ -1371,7 +1371,7 @@ bool smf_app::scid_2_smf_context(
 bool smf_app::use_local_configuration_subscription_data(
     const std::string& dnn_selection_mode) {
   // TODO: should be implemented
-  return smf_cfg.local_configuration;
+  return smf_cfg.use_local_subscription_info;
 }
 
 //------------------------------------------------------------------------------
