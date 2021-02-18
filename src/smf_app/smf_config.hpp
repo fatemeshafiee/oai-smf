@@ -39,7 +39,6 @@
 #include "thread_sched.hpp"
 
 #include "3gpp_29.244.h"
-#include "3gpp_29.274.h"
 #include "pfcp.hpp"
 #include "smf.h"
 

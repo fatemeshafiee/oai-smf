@@ -38,7 +38,6 @@
 
 #include "3gpp_24.008.h"
 #include "3gpp_29.244.h"
-#include "3gpp_29.274.h"
 #include "3gpp_29.502.h"
 #include "3gpp_29.503.h"
 #include "common_root_types.h"

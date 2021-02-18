@@ -31,7 +31,6 @@
 #include <algorithm>  // std::search
 
 #include "3gpp_29.244.h"
-#include "3gpp_29.274.h"
 #include "3gpp_29.500.h"
 #include "3gpp_29.502.h"
 #include "3gpp_conversions.hpp"

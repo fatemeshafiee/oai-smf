@@ -385,3 +385,10 @@ bool pfcp_associations::add_peer_candidate_node(
   pending_associations.push_back(s);
   return true;
 }
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::remove_association(
+    const std::string& node_instance_id) {
+  // TODO
+  return true;
+}

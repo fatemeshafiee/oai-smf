@@ -217,6 +217,7 @@ class pfcp_associations {
   bool add_peer_candidate_node(const pfcp::node_id_t& node_id);
   bool add_peer_candidate_node(
       const pfcp::node_id_t& node_id, const upf_profile& profile);
+  bool remove_association(const std::string& node_instance_id);
 };
 }  // namespace smf
 

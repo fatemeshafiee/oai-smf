@@ -28,7 +28,7 @@
 
 #ifndef FILE_3GPP_CONVERSIONS_HPP_SEEN
 #define FILE_3GPP_CONVERSIONS_HPP_SEEN
-#include "3gpp_29.274.h"
+
 #include "3gpp_29.244.h"
 #include "3gpp_24.501.h"
 #include "endpoint.hpp"

@@ -1294,9 +1294,22 @@ bool smf_app::handle_nf_status_notification(
     } else {
       return false;
     }
-  } else {
+  }
+  if (event_type.compare("NF_DEREGISTERED") == 0) {
     Logger::smf_app().debug(
         "This event (%s) has not been supported yet!", event_type);
+    // TODO: Remove UPF from the list UPFs if received DE-REGISTERED Event
+    /*    std::string nf_instance_uri = {};
+        notification_msg.get_nf_instance_uri(nf_instance_uri);
+        std::vector<std::string> split_result;
+
+        boost::split(
+            split_result, nf_instance_uri, boost::is_any_of("/"));
+        if (split_result.size() > 0) {
+          std::string instance_id = split_result[split_result.size() -1];
+          pfcp_associations::get_instance().remove_association(instance_id);
+        }
+     */
   }
 
   return true;

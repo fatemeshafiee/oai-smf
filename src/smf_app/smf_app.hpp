@@ -39,7 +39,6 @@
 #include <string>
 #include <thread>
 
-#include "3gpp_29.274.h"
 #include "3gpp_29.502.h"
 #include "itti_msg_n11.hpp"
 #include "itti_msg_n4.hpp"
