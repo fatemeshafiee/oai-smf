@@ -562,7 +562,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
         pending_procedures(),
         dnn_subscriptions(),
         scid(0),
-        event_sub(smf_event::get_instance()) {
+        event_sub() {
     supi_prefix = {};
     // Subscribe to sm context status change
     sm_context_status_connection =
@@ -1059,7 +1059,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   mutable std::recursive_mutex m_context;
 
   // for Event Handling
-  smf_event& event_sub;
+  smf_event event_sub;
   bs2::connection sm_context_status_connection;
   bs2::connection ee_pdu_session_release_connection;
 };
