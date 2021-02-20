@@ -157,7 +157,9 @@ class paa_dynamic {
 
   std::map<std::string, dnn_dynamic_pools> dnns;
 
-  paa_dynamic() : ipv4_pools(), ipv6_pools(), dnns(){};
+  mutable std::shared_mutex m_ipv4_pools;
+
+  paa_dynamic() : ipv4_pools(), ipv6_pools(), dnns(), m_ipv4_pools(){};
 
  public:
   static paa_dynamic& get_instance() {
@@ -173,6 +175,7 @@ class paa_dynamic {
       const struct in_addr& first, const int range) {
     if (pool_id >= 0) {
       uint32_t uint32pool_id = uint32_t(pool_id);
+      std::unique_lock lock(m_ipv4_pools);
       if (!ipv4_pools.count(uint32pool_id)) {
         ipv4_pool pool(first, range);
         ipv4_pools[uint32pool_id] = pool;
@@ -206,6 +209,7 @@ class paa_dynamic {
     if (dnns.count(dnn_label)) {
       dnn_dynamic_pools& dnn_pool = dnns[dnn_label];
       if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
+        std::unique_lock lock(m_ipv4_pools);
         for (std::vector<uint32_t>::const_iterator it4 =
                  dnn_pool.ipv4_pool_ids.begin();
              it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
@@ -264,6 +268,7 @@ class paa_dynamic {
     if (dnns.count(dnn_label)) {
       dnn_dynamic_pools& dnn_pool = dnns[dnn_label];
       if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
+        std::unique_lock lock(m_ipv4_pools);
         for (std::vector<uint32_t>::const_iterator it4 =
                  dnn_pool.ipv4_pool_ids.begin();
              it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
@@ -295,6 +300,7 @@ class paa_dynamic {
 
   bool release_paa(
       const std::string& dnn_label, const struct in_addr& ipv4_address) {
+    std::unique_lock lock(m_ipv4_pools);
     if (dnns.count(dnn_label)) {
       dnn_dynamic_pools& dnn_pool = dnns[dnn_label];
       for (std::vector<uint32_t>::const_iterator it4 =

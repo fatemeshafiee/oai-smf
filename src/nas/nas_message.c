@@ -33,6 +33,7 @@
 #include "TLVEncoder.h"
 #include "mmData.h"
 #include "secu_defs.h"
+#include "dynamic_memory_check.h"
 
 /* L O C A L    D E F I N I T I O N S  */
 #define SR_MAC_SIZE_BYTES 2
@@ -940,6 +941,7 @@ static int _nas_message_decrypt(
       // OAILOG_ERROR(LOG_NAS, "Unknown security header type %u",
       // security_header_type); OAILOG_FUNC_RETURN (LOG_NAS, 0);
   };
+  return 0;
 }
 
 static int _nas_message_plain_decode(
