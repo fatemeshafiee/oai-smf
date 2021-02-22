@@ -77,7 +77,7 @@ void smf_qos_flow::mark_as_released() {
 std::string smf_qos_flow::toString() const {
   std::string s = {};
   s.append("QoS Flow:\n");
-  s.append("\tFQI:\t\t\t\t")
+  s.append("\tQFI:\t\t\t\t")
       .append(std::to_string((uint8_t) qfi.qfi))
       .append("\n");
   s.append("\tUL FTEID:\t\t").append(ul_fteid.toString()).append("\n");

@@ -118,7 +118,7 @@ void SMContextsCollectionApi::post_sm_contexts_handler(
 
   } catch (nlohmann::detail::exception& e) {
     Logger::smf_api_server().warn(
-        "Can not parse the json data (error: %s)!", e.what());
+        "Cannot parse the json data (error: %s)!", e.what());
     response.send(Pistache::Http::Code::Bad_Request, e.what());
     return;
   } catch (std::exception& e) {
