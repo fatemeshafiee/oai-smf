@@ -323,6 +323,8 @@ bool pfcp_associations::select_up_node(
     // get the first node id if there's no upf profile (get UPFs from conf file)
     if (!a->upf_profile_is_set) {
       node_id = it->second->node_id;
+      Logger::smf_app().info(
+          "Could not found UPF profile, select the first available UPF");
       return true;
     }
     // else, verify that UPF belongs to the same slice and supports this dnn
@@ -334,6 +336,10 @@ bool pfcp_associations::select_up_node(
         for (auto d : ui.dnn_upf_info_list) {
           if (d.dnn.compare(dnn) == 0) {
             node_id = it->second->node_id;
+            Logger::smf_app().info(
+                "Select the UPF for the corresponding DNN %s, NSSSAI (SD: %s, "
+                "SST: %d) ",
+                d.dnn.c_str(), snssai.sD, snssai.sST);
             return true;
           }
         }
