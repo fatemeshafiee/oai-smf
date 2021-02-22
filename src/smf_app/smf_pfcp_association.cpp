@@ -38,11 +38,13 @@ using namespace std;
 
 extern itti_mw* itti_inst;
 extern smf_n4* smf_n4_inst;
+
 //------------------------------------------------------------------------------
 void pfcp_association::notify_add_session(const pfcp::fseid_t& cp_fseid) {
   std::unique_lock<std::mutex> l(m_sessions);
   sessions.insert(cp_fseid);
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_association::has_session(const pfcp::fseid_t& cp_fseid) {
   std::unique_lock<std::mutex> l(m_sessions);
@@ -75,6 +77,7 @@ void pfcp_association::restore_n4_sessions() {
     restore_proc->run();
   }
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_associations::add_association(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
@@ -114,6 +117,7 @@ bool pfcp_associations::add_association(
   }
   return true;
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_associations::add_association(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
@@ -173,6 +177,7 @@ bool pfcp_associations::get_association(
     return true;
   }
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_associations::get_association(
     const pfcp::fseid_t& cp_fseid,
@@ -196,6 +201,7 @@ void pfcp_associations::restore_n4_sessions(const pfcp::node_id_t& node_id) {
     sa->restore_n4_sessions();
   }
 }
+
 //------------------------------------------------------------------------------
 void pfcp_associations::trigger_heartbeat_request_procedure(
     std::shared_ptr<pfcp_association>& s) {
@@ -203,6 +209,7 @@ void pfcp_associations::trigger_heartbeat_request_procedure(
       PFCP_ASSOCIATION_HEARTBEAT_INTERVAL_SEC, 0, TASK_SMF_N4,
       TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST, s->hash_node_id);
 }
+
 //------------------------------------------------------------------------------
 void pfcp_associations::initiate_heartbeat_request(
     timer_id_t timer_id, uint64_t arg2_user) {
@@ -312,8 +319,7 @@ bool pfcp_associations::select_up_node(
     }
     // else, verify that UPF belongs to the same slice and supports this dnn
     std::vector<snssai_t> snssais = {};
-    // a->upf_node_profile.get_nf_snssais(snssais);
-    upf_info_t upf_info = {};
+    upf_info_t upf_info           = {};
     a->upf_node_profile.get_upf_info(upf_info);
     for (auto ui : upf_info.snssai_upf_info_list) {
       if (ui.snssai == snssai) {
@@ -337,6 +343,7 @@ void pfcp_associations::notify_add_session(
     sa->notify_add_session(cp_fseid);
   }
 }
+
 //------------------------------------------------------------------------------
 void pfcp_associations::notify_del_session(const pfcp::fseid_t& cp_fseid) {
   std::shared_ptr<pfcp_association> sa = {};

@@ -543,10 +543,15 @@ void smf_app::handle_itti_msg(
         Logger::smf_app().debug("Send failure indication to UPF");
         // TODO: to be completed
         pfcp::node_id_t up_node_id = {};
-        // TODO: Update select_up_node function
-        if (not pfcp_associations::get_instance().select_up_node(
-                up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-          Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
+        // Get UPF node
+        std::shared_ptr<smf_context_ref> scf = {};
+        if (smf_app_inst->is_scid_2_smf_context(m.scid)) {
+          scf        = scid_2_smf_context(m.scid);
+          up_node_id = scf.get()->upf_node_id;
+        } else {
+          Logger::smf_app().warn(
+              "SM Context associated with this id " SCID_FMT " does not exit!",
+              m.scid);
           return;
         }
 

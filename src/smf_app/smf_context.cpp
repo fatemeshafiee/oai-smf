@@ -748,13 +748,7 @@ void smf_context::handle_itti_msg(
                   scid);
               return;
             }
-            /*
-             if (not pfcp_associations::get_instance().select_up_node(
-                     up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-               Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
-               return;
-             }
-             */
+
             itti_n4_session_report_response* n4_ser =
                 new itti_n4_session_report_response(TASK_SMF_APP, TASK_SMF_N4);
             n4_ser->seid    = req->seid;
