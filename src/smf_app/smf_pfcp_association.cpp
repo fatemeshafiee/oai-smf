@@ -100,7 +100,6 @@ bool pfcp_associations::add_association(
     sa                       = std::shared_ptr<pfcp_association>(association);
     sa->recovery_time_stamp  = recovery_time_stamp;
     std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
-
     // Associate with UPF profile if exist
     for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
              pending_associations.begin();
@@ -111,7 +110,6 @@ bool pfcp_associations::add_association(
         break;
       }
     }
-
     associations.insert((int32_t) hash_node_id, sa);
     trigger_heartbeat_request_procedure(sa);
   }
@@ -144,6 +142,16 @@ bool pfcp_associations::add_association(
     sa->function_features.first  = true;
     sa->function_features.second = function_features;
     std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
+    // Associate with UPF profile if exist
+    for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
+             pending_associations.begin();
+         it < pending_associations.end(); ++it) {
+      if ((*it)->node_id == node_id) {
+        Logger::smf_app().info("Associate with UPF profile");
+        sa->set_upf_node_profile((*it)->get_upf_node_profile());
+        break;
+      }
+    }
     associations.insert((int32_t) hash_node_id, sa);
     trigger_heartbeat_request_procedure(sa);
   }

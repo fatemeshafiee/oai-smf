@@ -403,7 +403,7 @@ void smf_app::start_upf_association(
   std::time_t time_epoch = std::time(nullptr);
   uint64_t tv_ntp        = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
 
-  pfcp_associations::get_instance().add_peer_candidate_node(node_id);
+  pfcp_associations::get_instance().add_peer_candidate_node(node_id, profile);
   std::shared_ptr<itti_n4_association_setup_request> n4_asc =
       std::shared_ptr<itti_n4_association_setup_request>(
           new itti_n4_association_setup_request(TASK_SMF_APP, TASK_SMF_N4));
