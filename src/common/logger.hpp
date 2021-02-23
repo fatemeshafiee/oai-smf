@@ -86,8 +86,7 @@ class Logger {
   static _Logger& smf_n1() { return *singleton().m_smf_n1; }
   static _Logger& smf_n2() { return *singleton().m_smf_n2; }
   static _Logger& smf_n4() { return *singleton().m_smf_n4; }
-  static _Logger& smf_n10() { return *singleton().m_smf_n10; }
-  static _Logger& smf_n11() { return *singleton().m_smf_n11; }
+  static _Logger& smf_sbi() { return *singleton().m_smf_sbi; }
   static _Logger& smf_api_server() { return *singleton().m_smf_api_server; }
 
  private:
@@ -116,8 +115,7 @@ class Logger {
   _Logger* m_smf_n1;
   _Logger* m_smf_n2;
   _Logger* m_smf_n4;
-  _Logger* m_smf_n10;
-  _Logger* m_smf_n11;
+  _Logger* m_smf_sbi;
   _Logger* m_smf_api_server;
 };
 

@@ -55,7 +55,7 @@ add_library (SMF STATIC
   smf_pco.cpp
   smf_procedure.cpp
   smf_n4.cpp
-  smf_n11.cpp
+  smf_sbi.cpp
   smf_event.cpp
   smf_profile.cpp
   smf_subscription.cpp

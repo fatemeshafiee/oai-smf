@@ -74,7 +74,7 @@ void SubscriptionsCollectionApiImpl::create_individual_subcription(
   // Handle the message in smf_app
   std::shared_ptr<itti_sbi_event_exposure_request> itti_msg =
       std::make_shared<itti_sbi_event_exposure_request>(
-          TASK_SMF_N11, TASK_SMF_APP);
+          TASK_SMF_SBI, TASK_SMF_APP);
   itti_msg->event_exposure = event_exposure;
   itti_msg->http_version   = 1;
 

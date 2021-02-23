@@ -65,7 +65,7 @@ void NFStatusNotifyApiImpl::receive_nf_status_notification(
 
   // Handle the message in smf_app
   std::shared_ptr<itti_sbi_notification_data> itti_msg =
-      std::make_shared<itti_sbi_notification_data>(TASK_SMF_N11, TASK_SMF_APP);
+      std::make_shared<itti_sbi_notification_data>(TASK_SMF_SBI, TASK_SMF_APP);
   itti_msg->notification_msg = notification_msg;
   itti_msg->http_version     = 1;
 

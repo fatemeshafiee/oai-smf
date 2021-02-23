@@ -44,7 +44,7 @@
 #include "smf_config.hpp"
 #include "smf_context.hpp"
 #include "smf_n1.hpp"
-#include "smf_n11.hpp"
+#include "smf_sbi.hpp"
 #include "smf_n2.hpp"
 #include "smf_pfcp_association.hpp"
 #include "ProblemDetails.h"
@@ -443,7 +443,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
   n11_triggered_pending->res.set_amf_url(url);
-  Logger::smf_n11().debug(
+  Logger::smf_app().debug(
       "N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
 
   // Fill the json part
@@ -495,7 +495,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
   int ret = itti_inst->send_msg(n11_triggered_pending);
   if (RETURNok != ret) {
     Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N11",
+        "Could not send ITTI message %s to task TASK_SMF_SBI",
         n11_triggered_pending->get_msg_name());
   }
 }
