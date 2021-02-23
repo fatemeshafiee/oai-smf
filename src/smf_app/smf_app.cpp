@@ -56,7 +56,6 @@
 #include "smf.h"
 #include "smf_event.hpp"
 #include "smf_n1.hpp"
-#include "smf_n10.hpp"
 #include "smf_n11.hpp"
 #include "smf_n4.hpp"
 #include "smf_paa_dynamic.hpp"
@@ -73,7 +72,6 @@ extern util::async_shell_cmd* async_shell_cmd_inst;
 extern smf_app* smf_app_inst;
 extern smf_config smf_cfg;
 smf_n4* smf_n4_inst   = nullptr;
-smf_n10* smf_n10_inst = nullptr;
 smf_n11* smf_n11_inst = nullptr;
 extern itti_mw* itti_inst;
 
@@ -329,7 +327,6 @@ smf_app::smf_app(const std::string& config_file)
 
   try {
     smf_n4_inst  = new smf_n4();
-    smf_n10_inst = new smf_n10();
     smf_n11_inst = new smf_n11();
   } catch (std::exception& e) {
     Logger::smf_app().error("Cannot create SMF_APP: %s", e.what());
@@ -926,7 +923,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     if (not use_local_configuration_subscription_data(dnn_selection_mode)) {
       Logger::smf_app().debug(
           "Retrieve Session Management Subscription data from the UDM");
-      if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
+      if (smf_n11_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
         // update dnn_context with subscription info
         sc.get()->insert_dnn_subscription(snssai, subscription);
       } else {
