@@ -145,6 +145,7 @@ class pfcp_association {
     upf_node_profile   = profile;
     upf_profile_is_set = true;
   };
+  bool is_upf_profile_set() { return upf_profile_is_set; }
   void get_upf_node_profile(upf_profile& profile) const {
     profile = upf_node_profile;
   };

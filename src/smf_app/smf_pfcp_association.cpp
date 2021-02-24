@@ -104,7 +104,7 @@ bool pfcp_associations::add_association(
     for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
              pending_associations.begin();
          it < pending_associations.end(); ++it) {
-      if ((*it)->node_id == node_id) {
+      if (((*it)->node_id == node_id) and ((*it)->is_upf_profile_set())) {
         Logger::smf_app().info("Associate with UPF profile");
         sa->set_upf_node_profile((*it)->get_upf_node_profile());
         break;
@@ -146,7 +146,7 @@ bool pfcp_associations::add_association(
     for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
              pending_associations.begin();
          it < pending_associations.end(); ++it) {
-      if ((*it)->node_id == node_id) {
+      if (((*it)->node_id == node_id) and ((*it)->is_upf_profile_set())) {
         Logger::smf_app().info("Associate with UPF profile");
         sa->set_upf_node_profile((*it)->get_upf_node_profile());
         break;

@@ -238,8 +238,6 @@ class smf_config {
     std::string api_version;
   } nrf_addr;
 
-  // Local configuration
-  bool local_configuration;
 #define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 5
   struct {
     snssai_t single_nssai;
@@ -305,7 +303,6 @@ class smf_config {
     nrf_addr.port             = 80;
     nrf_addr.api_version      = "v1";
 
-    local_configuration                 = false;
     num_session_management_subscription = 0;
 
     for (int i = 0; i < SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX; i++) {
