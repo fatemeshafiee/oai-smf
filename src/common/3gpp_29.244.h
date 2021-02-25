@@ -39,6 +39,13 @@
 #include <vector>
 
 namespace pfcp {
+//-------------------------------------
+// 8.1.1 IE with Enterprise Info
+typedef struct enterprise_specific_s {
+  uint16_t enterprise_id;
+  std::string proprietary_data;
+} enterprise_specific_t;
+//-------------------------------------
 
 struct pfcp_exception : public std::exception {
   pfcp_exception() throw() {
@@ -312,6 +319,7 @@ struct pfcp_ie_value_exception : public pfcp_ie_exception {
 #define PFCP_IE_PAGING_POLICY_INDICATOR (158)
 #define PFCP_IE_APN_DNN (159)
 #define PFCP_IE_3GPP_INTERFACE_TYPE (160)
+#define PFCP_IE_ENTERPRISE_SPECIFIC (32770)
 
 #define PFCP_IE_PFCPSRREQ_FLAGS_3GPP (161)
 #define PFCP_IE_PFCPAUREQ_FLAGS (162)
