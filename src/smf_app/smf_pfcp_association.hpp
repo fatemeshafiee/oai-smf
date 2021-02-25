@@ -190,6 +190,12 @@ class pfcp_associations {
       pfcp::recovery_time_stamp_t& recovery_time_stamp,
       pfcp::up_function_features_s& function_features,
       bool& restore_n4_sessions);
+  bool add_association(
+      pfcp::node_id_t& node_id,
+      pfcp::recovery_time_stamp_t& recovery_time_stamp,
+      pfcp::up_function_features_s& function_features,
+      pfcp::enterprise_specific_s& enterprise_specific,
+      bool& restore_n4_sessions);
   bool update_association(
       pfcp::node_id_t& node_id,
       pfcp::up_function_features_s& function_features);
