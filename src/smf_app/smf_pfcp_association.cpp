@@ -94,6 +94,27 @@ bool pfcp_associations::add_association(
     sa->recovery_time_stamp = recovery_time_stamp;
     sa->function_features   = {};
   } else {
+    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+      Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
+    }
+    struct hostent* record = gethostbyname(node_id.fqdn.c_str());
+    if (record == NULL) {
+      Logger::smf_app().info(
+          "Add association with node (FQDN) %s: cannot resolve the hostname!",
+          node_id.fqdn.c_str());
+      return false;
+    }
+    if (record->h_addrtype == AF_INET) {
+      in_addr* address        = (struct in_addr*) record->h_addr;
+      node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+      node_id.u1.ipv4_address = *address;
+    } else if (record->h_addrtype == AF_INET6) {
+      // TODO
+      return false;
+    } else {
+      return false;
+    }
+
     restore_n4_sessions = false;
     pfcp_association* association =
         new pfcp_association(node_id, recovery_time_stamp);
@@ -135,13 +156,12 @@ bool pfcp_associations::add_association(
     sa->function_features.second = function_features;
   } else {
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
-      Logger::smf_app().info("FQDN, NODE ID %s", node_id.fqdn.c_str());
+      Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
     }
     struct hostent* record = gethostbyname(node_id.fqdn.c_str());
     if (record == NULL) {
       Logger::smf_app().info(
-          "Add association with %s: cannot resolve,"
-          " retrying later",
+          "Add association with node (FQDN) %s: cannot resolve the hostname!",
           node_id.fqdn.c_str());
       return false;
     }
