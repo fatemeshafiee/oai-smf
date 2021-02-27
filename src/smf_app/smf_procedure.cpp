@@ -728,6 +728,9 @@ int session_update_sm_context_procedure::run(
           // local_fteid.from_core_fteid(qos_flow.qos_flow.dl_fteid);
           if (sps->ipv4) {
             ue_ip_address.v4                  = 1;
+            // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit is set to "0", this indicates a Source IP address; 
+            // if this bit is set to "1", this indicates a Destination IP address.
+            ue_ip_address.sd                  = 1;
             ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
           }
           if (sps->ipv6) {
@@ -789,6 +792,9 @@ int session_update_sm_context_procedure::run(
 
           if (sps->ipv4) {
             ue_ip_address.v4                  = 1;
+            // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit is set to "0", this indicates a Source IP address; 
+            // if this bit is set to "1", this indicates a Destination IP address.
+            ue_ip_address.sd                  = 1;
             ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
           }
           if (sps->ipv6) {
