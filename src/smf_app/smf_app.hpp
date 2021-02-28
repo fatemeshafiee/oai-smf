@@ -322,6 +322,13 @@ class smf_app {
   void handle_itti_msg(itti_n4_association_setup_request& sna);
 
   /*
+   * Handle ITTI message (N4 Node Failure)
+   * @param [itti_n4_node_failure&] snf
+   * @return void
+   */
+  void handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf);
+
+  /*
    * Handle ITTI message from N11 to update PDU session status
    * @param [itti_n11_update_pdu_session_status&] snu
    * @return void

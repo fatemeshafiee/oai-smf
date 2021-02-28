@@ -370,6 +370,24 @@ class itti_n4_node_report_response : public itti_n4_msg {
 };
 
 //-----------------------------------------------------------------------------
+class itti_n4_node_failure : public itti_n4_msg {
+ public:
+  itti_n4_node_failure(const task_id_t origin, const task_id_t destination)
+      : itti_n4_msg(N4_NODE_FAILURE, origin, destination), node_id() {}
+  itti_n4_node_failure(const itti_n4_node_failure& i) : itti_n4_msg(i) {
+    node_id = i.node_id;
+  }
+  itti_n4_node_failure(
+      const itti_n4_node_failure& i, const task_id_t orig, const task_id_t dest)
+      : itti_n4_msg(i, orig, dest) {
+    node_id = i.node_id;
+  }
+  const char* get_msg_name() { return typeid(itti_n4_node_failure).name(); };
+
+  pfcp::node_id_t node_id;
+};
+
+//-----------------------------------------------------------------------------
 class itti_n4_session_set_deletion_request : public itti_n4_msg {
  public:
   itti_n4_session_set_deletion_request(

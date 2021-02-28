@@ -211,6 +211,17 @@ void smf_app_task(void*) {
         }
         break;
 
+      case N4_SESSION_REPORT_REQUEST:
+        smf_app_inst->handle_itti_msg(
+            std::static_pointer_cast<itti_n4_session_report_request>(
+                shared_msg));
+        break;
+
+      case N4_NODE_FAILURE:
+        smf_app_inst->handle_itti_msg(
+            std::static_pointer_cast<itti_n4_node_failure>(shared_msg));
+        break;
+
       case N11_SESSION_N1N2_MESSAGE_TRANSFER_RESPONSE_STATUS:
         if (itti_n11_n1n2_message_transfer_response_status* m =
                 dynamic_cast<itti_n11_n1n2_message_transfer_response_status*>(
@@ -224,12 +235,6 @@ void smf_app_task(void*) {
                 dynamic_cast<itti_n11_update_pdu_session_status*>(msg)) {
           smf_app_inst->handle_itti_msg(std::ref(*m));
         }
-        break;
-
-      case N4_SESSION_REPORT_REQUEST:
-        smf_app_inst->handle_itti_msg(
-            std::static_pointer_cast<itti_n4_session_report_request>(
-                shared_msg));
         break;
 
       case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE:
@@ -487,6 +492,22 @@ void smf_app::handle_itti_msg(
         "Received N4 Session Report Request seid" TEID_FMT
         "  pfcp_tx_id %" PRIX64 ", smf_context not found, discarded!",
         snr->seid, snr->trxn_id);
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf) {
+  pfcp::node_id_t node_id = snf->node_id;
+
+  for (auto it : scid2smf_context) {
+    if (it.second->upf_node_id == node_id) {
+      supi64_t supi64 = smf_supi_to_u64(it.second->supi);
+      Logger::smf_app().debug(
+          "Remove the associated PDU session (SUPI " SUPI_64_FMT
+          ", PDU Sessin Id %d)",
+          supi64, it.second->pdu_session_id);
+      //TODO: remove the session
+    }
   }
 }
 
@@ -826,6 +847,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
+  // TODO:
   // If no DNN information from UE, set to default value
   std::string dnn = smreq->req.get_dnn();
   if (dnn.length() == 0) {

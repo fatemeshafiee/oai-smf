@@ -94,6 +94,7 @@ bool pfcp_associations::add_association(
     sa->recovery_time_stamp = recovery_time_stamp;
     sa->function_features   = {};
   } else {
+    // Resolve FQDN to get UPF IP address if necessary
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
       Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
     }
@@ -104,12 +105,20 @@ bool pfcp_associations::add_association(
           node_id.fqdn.c_str());
       return false;
     }
+
     if (record->h_addrtype == AF_INET) {
       in_addr* address        = (struct in_addr*) record->h_addr;
       node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
       node_id.u1.ipv4_address = *address;
+      Logger::smf_app().info(
+          "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
+          inet_ntoa(*address));
     } else if (record->h_addrtype == AF_INET6) {
       // TODO
+      Logger::smf_app().info(
+          "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been supported "
+          "yet!",
+          node_id.fqdn.c_str());
       return false;
     } else {
       return false;
@@ -169,8 +178,15 @@ bool pfcp_associations::add_association(
       in_addr* address        = (struct in_addr*) record->h_addr;
       node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
       node_id.u1.ipv4_address = *address;
+      Logger::smf_app().info(
+          "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
+          inet_ntoa(*address));
     } else if (record->h_addrtype == AF_INET6) {
       // TODO
+      Logger::smf_app().info(
+          "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been supported "
+          "yet!",
+          node_id.fqdn.c_str());
       return false;
     } else {
       return false;
@@ -292,8 +308,24 @@ void pfcp_associations::timeout_heartbeat_request(
       smf_n4_inst->send_heartbeat_request(pit->second);
     } else {
       Logger::smf_n4().warn(
-          "PFCP HEARTBEAT PROCEDURE FAILED after %d retries! TODO",
+          "PFCP HEARTBEAT PROCEDURE FAILED after %d retries, remove the "
+          "association with this UPF",
           PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES);
+      // Related session contexts and PFCP associations become invalid and may
+      // be deleted-> Send request to SMF App to remove all associated sessions
+      // and notify AMF accordingly
+      std::shared_ptr<itti_n4_node_failure> itti_msg =
+          std::make_shared<itti_n4_node_failure>(TASK_SMF_N4, TASK_SMF_APP);
+      itti_msg->node_id = pit->second->node_id;
+      int ret           = itti_inst->send_msg(itti_msg);
+      if (RETURNok != ret) {
+        Logger::smf_n4().error(
+            "Could not send ITTI message %s to task TASK_SMF_APP",
+            itti_msg->get_msg_name());
+      }
+
+      // Remove UPF from the associations
+      remove_association(hash_node_id);
     }
   }
 }
@@ -454,4 +486,13 @@ bool pfcp_associations::remove_association(
     const std::string& node_instance_id) {
   // TODO
   return true;
+}
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::remove_association(const int32_t& hash_node_id) {
+  if (associations.count(hash_node_id) > 0) {
+    associations.erase(hash_node_id);
+    return true;
+  }
+  return false;
 }
