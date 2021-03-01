@@ -97,31 +97,31 @@ bool pfcp_associations::add_association(
     // Resolve FQDN to get UPF IP address if necessary
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
       Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
-    }
-    struct hostent* record = gethostbyname(node_id.fqdn.c_str());
-    if (record == NULL) {
-      Logger::smf_app().info(
-          "Add association with node (FQDN) %s: cannot resolve the hostname!",
-          node_id.fqdn.c_str());
-      return false;
-    }
+      struct hostent* record = gethostbyname(node_id.fqdn.c_str());
+      if (record == NULL) {
+        Logger::smf_app().info(
+            "Add association with node (FQDN) %s: cannot resolve the hostname!",
+            node_id.fqdn.c_str());
+        return false;
+      }
 
-    if (record->h_addrtype == AF_INET) {
-      in_addr* address        = (struct in_addr*) record->h_addr;
-      node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-      node_id.u1.ipv4_address = *address;
-      Logger::smf_app().info(
-          "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
-          inet_ntoa(*address));
-    } else if (record->h_addrtype == AF_INET6) {
-      // TODO
-      Logger::smf_app().info(
-          "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been supported "
-          "yet!",
-          node_id.fqdn.c_str());
-      return false;
-    } else {
-      return false;
+      if (record->h_addrtype == AF_INET) {
+        in_addr* address        = (struct in_addr*) record->h_addr;
+        node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+        node_id.u1.ipv4_address = *address;
+        Logger::smf_app().info(
+            "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
+            inet_ntoa(*address));
+      } else if (record->h_addrtype == AF_INET6) {
+        // TODO
+        Logger::smf_app().info(
+            "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been "
+            "supported yet!",
+            node_id.fqdn.c_str());
+        return false;
+      } else {
+        return false;
+      }
     }
 
     restore_n4_sessions = false;
@@ -166,30 +166,30 @@ bool pfcp_associations::add_association(
   } else {
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
       Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
-    }
-    struct hostent* record = gethostbyname(node_id.fqdn.c_str());
-    if (record == NULL) {
-      Logger::smf_app().info(
-          "Add association with node (FQDN) %s: cannot resolve the hostname!",
-          node_id.fqdn.c_str());
-      return false;
-    }
-    if (record->h_addrtype == AF_INET) {
-      in_addr* address        = (struct in_addr*) record->h_addr;
-      node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-      node_id.u1.ipv4_address = *address;
-      Logger::smf_app().info(
-          "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
-          inet_ntoa(*address));
-    } else if (record->h_addrtype == AF_INET6) {
-      // TODO
-      Logger::smf_app().info(
-          "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been supported "
-          "yet!",
-          node_id.fqdn.c_str());
-      return false;
-    } else {
-      return false;
+      struct hostent* record = gethostbyname(node_id.fqdn.c_str());
+      if (record == NULL) {
+        Logger::smf_app().info(
+            "Add association with node (FQDN) %s: cannot resolve the hostname!",
+            node_id.fqdn.c_str());
+        return false;
+      }
+      if (record->h_addrtype == AF_INET) {
+        in_addr* address        = (struct in_addr*) record->h_addr;
+        node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+        node_id.u1.ipv4_address = *address;
+        Logger::smf_app().info(
+            "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
+            inet_ntoa(*address));
+      } else if (record->h_addrtype == AF_INET6) {
+        // TODO
+        Logger::smf_app().info(
+            "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been "
+            "supported yet!",
+            node_id.fqdn.c_str());
+        return false;
+      } else {
+        return false;
+      }
     }
 
     restore_n4_sessions = false;
