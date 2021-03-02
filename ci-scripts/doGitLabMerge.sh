@@ -103,6 +103,17 @@ esac
 
 done
 
+# If the repo workspace is shallow, unshallow it
+NB_COMMITS=`git log --oneline | wc -l`
+if [ $NB_COMMITS -eq 1 ]
+then
+    git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*" > /dev/null 2>&1
+    echo "git remote update"
+    git remote update > /dev/null 2>&1
+    echo "git fetch --prune --unshallow"
+    git fetch --prune --unshallow > /dev/null 2>&1
+fi
+
 if [[ $TARGET_COMMIT_ID == "latest" ]]
 then
     TARGET_COMMIT_ID=`git log -n1 --pretty=format:%H origin/$TARGET_BRANCH`
