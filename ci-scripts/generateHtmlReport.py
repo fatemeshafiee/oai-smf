@@ -59,17 +59,6 @@ class HtmlReport():
 		self.imageSizeRow()
 		self.buildSummaryFooter()
 
-		self.testBuildSummaryHeader()
-		self.testBuildCompileRows()
-		self.testImageSizeRow()
-		self.testBuildSummaryFooter()
-
-		self.sanityCheckSummaryHeader()
-		self.sanityCheckDeployRow()
-		self.sanityCheckConfigRow()
-		self.sanityCheckTestRow()
-		self.sanityCheckSummaryFooter()
-
 		self.testSummaryHeader()
 		self.testSummaryFooter()
 
