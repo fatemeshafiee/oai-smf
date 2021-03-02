@@ -35,23 +35,6 @@
 #include <vector>
 
 //------------------------------------------------------------------------------
-// 10.5.1.3 Location Area Identification
-//------------------------------------------------------------------------------
-#define LOCATION_AREA_IDENTIFICATION_IE_TYPE 3
-#define LOCATION_AREA_IDENTIFICATION_IE_MIN_LENGTH 6
-#define LOCATION_AREA_IDENTIFICATION_IE_MAX_LENGTH 6
-
-#define INVALID_LAC_0000                                                       \
-  (uint16_t) 0x0000 /*!< \brief  This LAC can be coded using a full            \
-                       hexadecimal representation except for the following     \
-                       reserved hexadecimal values: 0000, and FFFE.   */
-
-#define INVALID_LAC_FFFE                                                       \
-  (uint16_t) 0xFFFE /*!< \brief  This LAC can be coded using a full            \
-                       hexadecimal representation except for the following     \
-                       reserved hexadecimal values: 0000, and FFFE.   */
-
-//------------------------------------------------------------------------------
 // 10.5.6.3 Protocol configuration options
 //------------------------------------------------------------------------------
 #define PROTOCOL_CONFIGURATION_OPTIONS_MAX_LENGTH 250

@@ -102,7 +102,6 @@ int main(int argc, char** argv) {
 
   // Logger
   Logger::init("smf", Options::getlogStdout(), Options::getlogRotFilelog());
-
   Logger::smf_app().startup("Options parsed");
 
   struct sigaction sigIntHandler;
@@ -115,7 +114,7 @@ int main(int argc, char** argv) {
   smf_cfg.load(Options::getlibconfigConfig());
   smf_cfg.display();
 
-  // Inter task Interface
+  // Inter-task Interface
   itti_inst = new itti_mw();
   itti_inst->start(smf_cfg.itti.itti_timer_sched_params);
 

@@ -873,7 +873,7 @@ void pfcp_l4_stack::send_response(
 
 //------------------------------------------------------------------------------
 void pfcp_l4_stack::notify_ul_error(
-    const pfcp_procedure& p, const ::cause_value_e cause) {
+    const pfcp_procedure& p, const cause_value_e cause) {
   Logger::pfcp().trace(
       "notify_ul_error proc %" PRId64 " cause %d", p.trxn_id, cause);
 }
@@ -908,7 +908,8 @@ void pfcp_l4_stack::time_out_event(
       } else {
         // abort procedure
         notify_ul_error(
-            it_proc->second, ::cause_value_e::REMOTE_PEER_NOT_RESPONDING);
+            it_proc->second,
+            cause_value_e::CAUSE_VALUE_PFCP_ENTITY_IN_CONGESTION);
       }
     }
   } else {

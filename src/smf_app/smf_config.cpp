@@ -687,15 +687,6 @@ int smf_config::load(const string& config_file) {
     // Local configuration
     num_session_management_subscription = 0;
     const Setting& local_cfg = smf_cfg[SMF_CONFIG_STRING_LOCAL_CONFIGURATION];
-    string local_configuration_str = {};
-
-    local_cfg.lookupValue(
-        SMF_CONFIG_STRING_USE_LOCAL_CONFIGURATION, local_configuration_str);
-    if (boost::iequals(local_configuration_str, "yes")) {
-      local_configuration = true;
-    } else {
-      local_configuration = false;
-    }
 
     const Setting& session_management_subscription_list_cfg =
         local_cfg[SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST];
@@ -926,7 +917,7 @@ void smf_config::display() {
   Logger::smf_app().info(
       "    Push PCO (DNS+MTU).........: %s", force_push_pco ? "Yes" : "No");
 
-  if (local_configuration) {
+  if (use_local_subscription_info) {
     Logger::smf_app().info(
         "- " SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST ":");
     for (int i = 0; i < num_session_management_subscription; i++) {

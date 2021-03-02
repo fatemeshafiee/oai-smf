@@ -30,9 +30,9 @@
 int encode_extended_protocol_configuration_options(
     protocol_configuration_options_nas_t extendedprotocolconfigurationoptions,
     uint8_t iei, uint8_t* buffer, uint32_t len) {
-  uint8_t* lenPtr   = NULL;
-  uint32_t encoded  = 0;
-  int encode_result = 0;
+  uint8_t* lenPtr  = NULL;
+  uint32_t encoded = 0;
+  //  int encode_result = 0;
   CHECK_PDU_POINTER_AND_LENGTH_ENCODER(
       buffer,
       ((iei > 0) ?
@@ -150,7 +150,7 @@ int decode_extended_protocol_configuration_options(
 //------------------------------------------------------------------------------
 int decode_protocol_configuration_options(
     protocol_configuration_options_nas_t* protocolconfigurationoptions,
-    const uint8_t* const buffer, const const uint32_t len) {
+    const uint8_t* const buffer, const uint32_t len) {
   int decoded       = 0;
   int decode_result = 0;
 

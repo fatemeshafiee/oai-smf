@@ -19,15 +19,15 @@
  *      contact@openairinterface.org
  */
 
-/*! \file smf_n11.hpp
+/*! \file smf_sbi.hpp
  \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
  \company Eurecom
  \date 2019
  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
 
-#ifndef FILE_SMF_N11_HPP_SEEN
-#define FILE_SMF_N11_HPP_SEEN
+#ifndef FILE_SMF_SBI_HPP_SEEN
+#define FILE_SMF_SBI_HPP_SEEN
 
 #include <map>
 #include <thread>
@@ -39,17 +39,17 @@
 
 namespace smf {
 
-#define TASK_SMF_N11_TIMEOUT_NRF_HEARTBEAT_REQUEST 1
+#define TASK_SMF_SBI_TIMEOUT_NRF_HEARTBEAT_REQUEST 1
 
-class smf_n11 {
+class smf_sbi {
  private:
   std::thread::id thread_id;
   std::thread thread;
 
  public:
-  smf_n11();
-  smf_n11(smf_n11 const&) = delete;
-  void operator=(smf_n11 const&) = delete;
+  smf_sbi();
+  smf_sbi(smf_sbi const&) = delete;
+  void operator=(smf_sbi const&) = delete;
 
   /*
    * Send N1N2 Message Transfer Request to AMF
@@ -141,6 +141,27 @@ class smf_n11 {
    * @return pointer to the created curl
    */
   CURL* curl_create_handle(event_notification& ev_notif, std::string* data);
+
+  /*
+   * Get SM subscription data from UDM
+   * @param [const supi64_t &] supi
+   * @param [const std::string &] dnn
+   * @param [const snssai_t &] snssai
+   * @param [std::shared_ptr<session_management_subscription>] subscription
+   * @return bool: True if successful, otherwise false
+   *
+   */
+  bool get_sm_data(
+      const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
+      std::shared_ptr<session_management_subscription> subscription);
+
+  /*
+   * Subscribe to be notify from UDM
+   * @param []
+   * @return void
+   *
+   */
+  void subscribe_sm_data();
 };
 }  // namespace smf
-#endif /* FILE_SMF_N11_HPP_SEEN */
+#endif /* FILE_SMF_SBI_HPP_SEEN */

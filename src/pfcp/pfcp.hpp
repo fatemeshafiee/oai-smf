@@ -28,7 +28,6 @@
 #ifndef FILE_PFCP_HPP_SEEN
 #define FILE_PFCP_HPP_SEEN
 
-#include "3gpp_29.274.h"
 #include "3gpp_29.244.hpp"
 #include "itti.hpp"
 #include "udp.hpp"
@@ -120,7 +119,7 @@ class pfcp_l4_stack : public udp_application {
   void stop_msg_retry_timer(pfcp_procedure& p);
   void stop_msg_retry_timer(timer_id_t& t);
   void stop_proc_cleanup_timer(pfcp_procedure& p);
-  void notify_ul_error(const pfcp_procedure& p, const ::cause_value_e cause);
+  void notify_ul_error(const pfcp_procedure& p, const cause_value_e cause);
 
  public:
   static const uint8_t version = 2;

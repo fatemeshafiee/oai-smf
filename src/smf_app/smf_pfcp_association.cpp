@@ -38,11 +38,13 @@ using namespace std;
 
 extern itti_mw* itti_inst;
 extern smf_n4* smf_n4_inst;
+
 //------------------------------------------------------------------------------
 void pfcp_association::notify_add_session(const pfcp::fseid_t& cp_fseid) {
   std::unique_lock<std::mutex> l(m_sessions);
   sessions.insert(cp_fseid);
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_association::has_session(const pfcp::fseid_t& cp_fseid) {
   std::unique_lock<std::mutex> l(m_sessions);
@@ -75,6 +77,7 @@ void pfcp_association::restore_n4_sessions() {
     restore_proc->run();
   }
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_associations::add_association(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
@@ -91,17 +94,58 @@ bool pfcp_associations::add_association(
     sa->recovery_time_stamp = recovery_time_stamp;
     sa->function_features   = {};
   } else {
+    // Resolve FQDN to get UPF IP address if necessary
+    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+      Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
+      struct hostent* record = gethostbyname(node_id.fqdn.c_str());
+      if (record == NULL) {
+        Logger::smf_app().info(
+            "Add association with node (FQDN) %s: cannot resolve the hostname!",
+            node_id.fqdn.c_str());
+        return false;
+      }
+
+      if (record->h_addrtype == AF_INET) {
+        in_addr* address        = (struct in_addr*) record->h_addr;
+        node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+        node_id.u1.ipv4_address = *address;
+        Logger::smf_app().info(
+            "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
+            inet_ntoa(*address));
+      } else if (record->h_addrtype == AF_INET6) {
+        // TODO
+        Logger::smf_app().info(
+            "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been "
+            "supported yet!",
+            node_id.fqdn.c_str());
+        return false;
+      } else {
+        return false;
+      }
+    }
+
     restore_n4_sessions = false;
     pfcp_association* association =
         new pfcp_association(node_id, recovery_time_stamp);
     sa                       = std::shared_ptr<pfcp_association>(association);
     sa->recovery_time_stamp  = recovery_time_stamp;
     std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
+    // Associate with UPF profile if exist
+    for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
+             pending_associations.begin();
+         it < pending_associations.end(); ++it) {
+      if (((*it)->node_id == node_id) and ((*it)->is_upf_profile_set())) {
+        Logger::smf_app().info("Associate with UPF profile");
+        sa->set_upf_node_profile((*it)->get_upf_node_profile());
+        break;
+      }
+    }
     associations.insert((int32_t) hash_node_id, sa);
     trigger_heartbeat_request_procedure(sa);
   }
   return true;
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_associations::add_association(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
@@ -120,6 +164,34 @@ bool pfcp_associations::add_association(
     sa->function_features.first  = true;
     sa->function_features.second = function_features;
   } else {
+    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+      Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
+      struct hostent* record = gethostbyname(node_id.fqdn.c_str());
+      if (record == NULL) {
+        Logger::smf_app().info(
+            "Add association with node (FQDN) %s: cannot resolve the hostname!",
+            node_id.fqdn.c_str());
+        return false;
+      }
+      if (record->h_addrtype == AF_INET) {
+        in_addr* address        = (struct in_addr*) record->h_addr;
+        node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+        node_id.u1.ipv4_address = *address;
+        Logger::smf_app().info(
+            "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
+            inet_ntoa(*address));
+      } else if (record->h_addrtype == AF_INET6) {
+        // TODO
+        Logger::smf_app().info(
+            "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been "
+            "supported yet!",
+            node_id.fqdn.c_str());
+        return false;
+      } else {
+        return false;
+      }
+    }
+
     restore_n4_sessions = false;
     pfcp_association* association =
         new pfcp_association(node_id, recovery_time_stamp, function_features);
@@ -128,6 +200,16 @@ bool pfcp_associations::add_association(
     sa->function_features.first  = true;
     sa->function_features.second = function_features;
     std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
+    // Associate with UPF profile if exist
+    for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
+             pending_associations.begin();
+         it < pending_associations.end(); ++it) {
+      if (((*it)->node_id == node_id) and ((*it)->is_upf_profile_set())) {
+        Logger::smf_app().info("Associate with UPF profile");
+        sa->set_upf_node_profile((*it)->get_upf_node_profile());
+        break;
+      }
+    }
     associations.insert((int32_t) hash_node_id, sa);
     trigger_heartbeat_request_procedure(sa);
   }
@@ -161,6 +243,7 @@ bool pfcp_associations::get_association(
     return true;
   }
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_associations::get_association(
     const pfcp::fseid_t& cp_fseid,
@@ -184,6 +267,7 @@ void pfcp_associations::restore_n4_sessions(const pfcp::node_id_t& node_id) {
     sa->restore_n4_sessions();
   }
 }
+
 //------------------------------------------------------------------------------
 void pfcp_associations::trigger_heartbeat_request_procedure(
     std::shared_ptr<pfcp_association>& s) {
@@ -191,6 +275,7 @@ void pfcp_associations::trigger_heartbeat_request_procedure(
       PFCP_ASSOCIATION_HEARTBEAT_INTERVAL_SEC, 0, TASK_SMF_N4,
       TASK_SMF_N4_TRIGGER_HEARTBEAT_REQUEST, s->hash_node_id);
 }
+
 //------------------------------------------------------------------------------
 void pfcp_associations::initiate_heartbeat_request(
     timer_id_t timer_id, uint64_t arg2_user) {
@@ -223,8 +308,24 @@ void pfcp_associations::timeout_heartbeat_request(
       smf_n4_inst->send_heartbeat_request(pit->second);
     } else {
       Logger::smf_n4().warn(
-          "PFCP HEARTBEAT PROCEDURE FAILED after %d retries! TODO",
+          "PFCP HEARTBEAT PROCEDURE FAILED after %d retries, remove the "
+          "association with this UPF",
           PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES);
+      // Related session contexts and PFCP associations become invalid and may
+      // be deleted-> Send request to SMF App to remove all associated sessions
+      // and notify AMF accordingly
+      std::shared_ptr<itti_n4_node_failure> itti_msg =
+          std::make_shared<itti_n4_node_failure>(TASK_SMF_N4, TASK_SMF_APP);
+      itti_msg->node_id = pit->second->node_id;
+      int ret           = itti_inst->send_msg(itti_msg);
+      if (RETURNok != ret) {
+        Logger::smf_n4().error(
+            "Could not send ITTI message %s to task TASK_SMF_APP",
+            itti_msg->get_msg_name());
+      }
+
+      // Remove UPF from the associations
+      remove_association(hash_node_id);
     }
   }
 }
@@ -282,6 +383,46 @@ bool pfcp_associations::select_up_node(
   }
   return false;
 }
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::select_up_node(
+    pfcp::node_id_t& node_id, const snssai_t& snssai, const std::string& dnn) {
+  node_id = {};
+  if (associations.empty()) {
+    return false;
+  }
+  folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
+  FOR_EACH(it, associations) {
+    std::shared_ptr<pfcp_association> a = it->second;
+    // get the first node id if there's no upf profile (get UPFs from conf file)
+    if (!a->upf_profile_is_set) {
+      node_id = it->second->node_id;
+      Logger::smf_app().info(
+          "Could not found UPF profile, select the first available UPF");
+      return true;
+    }
+    // else, verify that UPF belongs to the same slice and supports this dnn
+    std::vector<snssai_t> snssais = {};
+    upf_info_t upf_info           = {};
+    a->upf_node_profile.get_upf_info(upf_info);
+    for (auto ui : upf_info.snssai_upf_info_list) {
+      if (ui.snssai == snssai) {
+        for (auto d : ui.dnn_upf_info_list) {
+          if (d.dnn.compare(dnn) == 0) {
+            node_id = it->second->node_id;
+            Logger::smf_app().info(
+                "Select the UPF for the corresponding DNN %s, NSSSAI (SD: %s, "
+                "SST: %d) ",
+                d.dnn.c_str(), snssai.sD, snssai.sST);
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
 //------------------------------------------------------------------------------
 void pfcp_associations::notify_add_session(
     const pfcp::node_id_t& node_id, const pfcp::fseid_t& cp_fseid) {
@@ -290,6 +431,7 @@ void pfcp_associations::notify_add_session(
     sa->notify_add_session(cp_fseid);
   }
 }
+
 //------------------------------------------------------------------------------
 void pfcp_associations::notify_del_session(const pfcp::fseid_t& cp_fseid) {
   std::shared_ptr<pfcp_association> sa = {};
@@ -316,4 +458,41 @@ bool pfcp_associations::add_peer_candidate_node(
       std::shared_ptr<pfcp_association>(association);
   pending_associations.push_back(s);
   return true;
+}
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::add_peer_candidate_node(
+    const pfcp::node_id_t& node_id, const upf_profile& profile) {
+  for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
+           pending_associations.begin();
+       it < pending_associations.end(); ++it) {
+    if ((*it)->node_id == node_id) {
+      // TODO purge sessions of this node
+      Logger::smf_app().info("TODO purge sessions of this node");
+      pending_associations.erase(it);
+      break;
+    }
+  }
+  pfcp_association* association = new pfcp_association(node_id);
+  std::shared_ptr<pfcp_association> s =
+      std::shared_ptr<pfcp_association>(association);
+  s->set_upf_node_profile(profile);
+  pending_associations.push_back(s);
+  return true;
+}
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::remove_association(
+    const std::string& node_instance_id) {
+  // TODO
+  return true;
+}
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::remove_association(const int32_t& hash_node_id) {
+  if (associations.count(hash_node_id) > 0) {
+    associations.erase(hash_node_id);
+    return true;
+  }
+  return false;
 }

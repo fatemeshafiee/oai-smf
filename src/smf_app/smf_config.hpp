@@ -39,7 +39,6 @@
 #include "thread_sched.hpp"
 
 #include "3gpp_29.244.h"
-#include "3gpp_29.274.h"
 #include "pfcp.hpp"
 #include "smf.h"
 
@@ -112,7 +111,6 @@
 #define SMF_CONFIG_STRING_NRF_PORT "PORT"
 
 #define SMF_CONFIG_STRING_LOCAL_CONFIGURATION "LOCAL_CONFIGURATION"
-#define SMF_CONFIG_STRING_USE_LOCAL_CONFIGURATION "USE_LOCAL_CONFIGURATION"
 #define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST                 \
   "SESSION_MANAGEMENT_SUBSCRIPTION_LIST"
 #define SMF_CONFIG_STRING_NSSAI_SST "NSSAI_SST"
@@ -240,8 +238,6 @@ class smf_config {
     std::string api_version;
   } nrf_addr;
 
-  // Local configuration
-  bool local_configuration;
 #define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 5
   struct {
     snssai_t single_nssai;
@@ -307,7 +303,6 @@ class smf_config {
     nrf_addr.port             = 80;
     nrf_addr.api_version      = "v1";
 
-    local_configuration                 = false;
     num_session_management_subscription = 0;
 
     for (int i = 0; i < SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX; i++) {
@@ -315,6 +310,10 @@ class smf_config {
     }
     sbi_http2_port  = 8080;
     sbi_api_version = "v1";
+
+    use_local_subscription_info = false;
+    register_nrf                = false;
+    discover_upf                = false;
   };
   ~smf_config();
   void lock() { m_rw_lock.lock(); };

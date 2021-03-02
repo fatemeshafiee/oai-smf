@@ -42,7 +42,7 @@
 #include "smf_config.hpp"
 #include "smf_event.hpp"
 #include "smf_n1.hpp"
-#include "smf_n11.hpp"
+#include "smf_sbi.hpp"
 #include "smf_n2.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "smf_pfcp_association.hpp"
@@ -77,7 +77,7 @@ void smf_qos_flow::mark_as_released() {
 std::string smf_qos_flow::toString() const {
   std::string s = {};
   s.append("QoS Flow:\n");
-  s.append("\tFQI:\t\t\t\t")
+  s.append("\tQFI:\t\t\t\t")
       .append(std::to_string((uint8_t) qfi.qfi))
       .append("\n");
   s.append("\tUL FTEID:\t\t").append(ul_fteid.toString()).append("\n");
@@ -735,9 +735,17 @@ void smf_context::handle_itti_msg(
           if (find_pdu_session(pdr_id, qfi, sd, sp)) {
             // Step 1. send N4 Data Report Ack to UPF
             pfcp::node_id_t up_node_id = {};
-            if (not pfcp_associations::get_instance().select_up_node(
-                    up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-              Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
+            scid_t scid                = get_scid();
+            // Get UPF node
+            std::shared_ptr<smf_context_ref> scf = {};
+            if (smf_app_inst->is_scid_2_smf_context(scid)) {
+              scf        = smf_app_inst->scid_2_smf_context(scid);
+              up_node_id = scf.get()->upf_node_id;
+            } else {
+              Logger::smf_app().warn(
+                  "SM Context associated with this id " SCID_FMT
+                  " does not exit!",
+                  scid);
               return;
             }
 
@@ -828,7 +836,7 @@ void smf_context::handle_itti_msg(
             session_report_msg.set_json_data(json_data);
 
             itti_n11_session_report_request* itti_n11 =
-                new itti_n11_session_report_request(TASK_SMF_APP, TASK_SMF_N11);
+                new itti_n11_session_report_request(TASK_SMF_APP, TASK_SMF_SBI);
             itti_n11->http_version = 1;  // use HTTPv1 for the moment
             std::shared_ptr<itti_n11_session_report_request> itti_n11_report =
                 std::shared_ptr<itti_n11_session_report_request>(itti_n11);
@@ -836,13 +844,13 @@ void smf_context::handle_itti_msg(
             // send ITTI message to N11 interface to trigger N1N2MessageTransfer
             // towards AMFs
             Logger::smf_app().info(
-                "Sending ITTI message %s to task TASK_SMF_N11",
+                "Sending ITTI message %s to task TASK_SMF_SBI",
                 itti_n11_report->get_msg_name());
 
             ret = itti_inst->send_msg(itti_n11_report);
             if (RETURNok != ret) {
               Logger::smf_app().error(
-                  "Could not send ITTI message %s to task TASK_SMF_N11",
+                  "Could not send ITTI message %s to task TASK_SMF_SBI",
                   itti_n11_report->get_msg_name());
             }
           }
@@ -1252,7 +1260,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // receiving the response from UPF
   itti_n11_create_sm_context_response* sm_context_resp =
       new itti_n11_create_sm_context_response(
-          TASK_SMF_APP, TASK_SMF_N11, smreq->pid);
+          TASK_SMF_APP, TASK_SMF_SBI, smreq->pid);
   std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending =
       std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
 
@@ -1468,7 +1476,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         "Send ITTI msg to SMF APP to trigger the response of Server");
     std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
         std::make_shared<itti_n11_create_sm_context_response>(
-            TASK_SMF_N11, TASK_SMF_APP, smreq->pid);
+            TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
 
     pdu_session_create_sm_context_response sm_context_response = {};
     std::string smContextRef = std::to_string(smreq->scid);
@@ -1587,12 +1595,12 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     // send ITTI message to N11 to trigger N1N2MessageTransfer towards AMFs
     Logger::smf_app().info(
-        "Sending ITTI message %s to task TASK_SMF_N11",
+        "Sending ITTI message %s to task TASK_SMF_SBI",
         sm_context_resp_pending->get_msg_name());
     int ret = itti_inst->send_msg(sm_context_resp_pending);
     if (RETURNok != ret) {
       Logger::smf_app().error(
-          "Could not send ITTI message %s to task TASK_SMF_N11",
+          "Could not send ITTI message %s to task TASK_SMF_SBI",
           sm_context_resp_pending->get_msg_name());
     }
   }
@@ -2289,7 +2297,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
   // when receiving the response from UPF
   itti_n11_update_sm_context_response* n11_sm_context_resp =
       new itti_n11_update_sm_context_response(
-          TASK_SMF_N11, TASK_SMF_APP, smreq->pid);
+          TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
   std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp_pending =
       std::shared_ptr<itti_n11_update_sm_context_response>(n11_sm_context_resp);
 
@@ -2615,7 +2623,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
     int ret = itti_inst->send_msg(sm_context_resp_pending);
     if (RETURNok != ret) {
       Logger::smf_app().error(
-          "Could not send ITTI message %s to task TASK_SMF_N11",
+          "Could not send ITTI message %s to task TASK_SMF_SBI",
           sm_context_resp_pending->get_msg_name());
     }
   }
@@ -2658,7 +2666,7 @@ void smf_context::handle_pdu_session_release_sm_context_request(
 
   itti_n11_release_sm_context_response* n11_sm_context_resp =
       new itti_n11_release_sm_context_response(
-          TASK_SMF_N11, TASK_SMF_APP, smreq->pid);
+          TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
 
   std::shared_ptr<itti_n11_release_sm_context_response>
       sm_context_resp_pending =
@@ -2773,7 +2781,7 @@ void smf_context::handle_pdu_session_modification_network_requested(
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
   itti_msg->msg.set_amf_url(url);
-  Logger::smf_n11().debug(
+  Logger::smf_app().debug(
       "N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
 
   // Fill the json part
@@ -2803,12 +2811,12 @@ void smf_context::handle_pdu_session_modification_network_requested(
   // Step 3. Send ITTI message to N11 interface to trigger N1N2MessageTransfer
   // towards AMFs
   Logger::smf_app().info(
-      "Sending ITTI message %s to task TASK_SMF_N11", itti_msg->get_msg_name());
+      "Sending ITTI message %s to task TASK_SMF_SBI", itti_msg->get_msg_name());
 
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N11",
+        "Could not send ITTI message %s to task TASK_SMF_SBI",
         itti_msg->get_msg_name());
   }
 }
@@ -2962,7 +2970,7 @@ void smf_context::handle_sm_context_status_change(
       "Send ITTI msg to SMF N11 to trigger the status notification");
   std::shared_ptr<itti_n11_notify_sm_context_status> itti_msg =
       std::make_shared<itti_n11_notify_sm_context_status>(
-          TASK_SMF_APP, TASK_SMF_N11);
+          TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->scid              = scid;
   itti_msg->sm_context_status = status;
   itti_msg->amf_status_uri    = scf.get()->amf_status_uri;
@@ -2971,7 +2979,7 @@ void smf_context::handle_sm_context_status_change(
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N11",
+        "Could not send ITTI message %s to task TASK_SMF_SBI",
         itti_msg->get_msg_name());
   }
 }
@@ -2994,7 +3002,7 @@ void smf_context::handle_ee_pdu_session_release(
         "Send ITTI msg to SMF N11 to trigger the event notification");
     std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg =
         std::make_shared<itti_n11_notify_subscribed_event>(
-            TASK_SMF_APP, TASK_SMF_N11);
+            TASK_SMF_APP, TASK_SMF_SBI);
 
     for (auto i : subscriptions) {
       event_notification ev_notif = {};
@@ -3012,7 +3020,7 @@ void smf_context::handle_ee_pdu_session_release(
     int ret = itti_inst->send_msg(itti_msg);
     if (RETURNok != ret) {
       Logger::smf_app().error(
-          "Could not send ITTI message %s to task TASK_SMF_N11",
+          "Could not send ITTI message %s to task TASK_SMF_SBI",
           itti_msg->get_msg_name());
     }
   } else {

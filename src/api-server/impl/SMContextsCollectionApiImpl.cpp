@@ -92,7 +92,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   // Handle the pdu_session_create_sm_context_request message in smf_app
   std::shared_ptr<itti_n11_create_sm_context_request> itti_msg =
       std::make_shared<itti_n11_create_sm_context_request>(
-          TASK_SMF_N11, TASK_SMF_APP, promise_id);
+          TASK_SMF_SBI, TASK_SMF_APP, promise_id);
   itti_msg->req          = sm_context_req_msg;
   itti_msg->http_version = 1;
   m_smf_app->handle_pdu_session_create_sm_context_request(itti_msg);

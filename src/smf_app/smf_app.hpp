@@ -39,7 +39,6 @@
 #include <string>
 #include <thread>
 
-#include "3gpp_29.274.h"
 #include "3gpp_29.502.h"
 #include "itti_msg_n11.hpp"
 #include "itti_msg_n4.hpp"
@@ -89,6 +88,7 @@ class smf_context_ref {
     pdu_session_id = 0;
     amf_status_uri = "";
     amf_addr       = "";
+    upf_node_id    = {};
   }
 
   supi_t supi;
@@ -97,6 +97,7 @@ class smf_context_ref {
   snssai_t nssai;
   std::string amf_status_uri;
   std::string amf_addr;
+  pfcp::node_id_t upf_node_id;
 };
 
 class smf_app {
@@ -319,6 +320,13 @@ class smf_app {
    * @return void
    */
   void handle_itti_msg(itti_n4_association_setup_request& sna);
+
+  /*
+   * Handle ITTI message (N4 Node Failure)
+   * @param [itti_n4_node_failure&] snf
+   * @return void
+   */
+  void handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf);
 
   /*
    * Handle ITTI message from N11 to update PDU session status
@@ -653,6 +661,14 @@ class smf_app {
    * @return void
    */
   void start_upf_association(const pfcp::node_id_t& node_id);
+
+  /*
+   * To start an association with a UPF (SMF-initiated association)
+   * @param [const pfcp::node_id_t] node_id: UPF Node ID
+   * @return void
+   */
+  void start_upf_association(
+      const pfcp::node_id_t& node_id, const upf_profile& profile);
 
   /*
    * To store a promise of a PDU Session Create SM Contex Response to be

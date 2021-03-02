@@ -56,8 +56,7 @@
 #include "smf.h"
 #include "smf_event.hpp"
 #include "smf_n1.hpp"
-#include "smf_n10.hpp"
-#include "smf_n11.hpp"
+#include "smf_sbi.hpp"
 #include "smf_n4.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "string.hpp"
@@ -73,8 +72,7 @@ extern util::async_shell_cmd* async_shell_cmd_inst;
 extern smf_app* smf_app_inst;
 extern smf_config smf_cfg;
 smf_n4* smf_n4_inst   = nullptr;
-smf_n10* smf_n10_inst = nullptr;
-smf_n11* smf_n11_inst = nullptr;
+smf_sbi* smf_sbi_inst = nullptr;
 extern itti_mw* itti_inst;
 
 void smf_app_task(void*);
@@ -213,6 +211,17 @@ void smf_app_task(void*) {
         }
         break;
 
+      case N4_SESSION_REPORT_REQUEST:
+        smf_app_inst->handle_itti_msg(
+            std::static_pointer_cast<itti_n4_session_report_request>(
+                shared_msg));
+        break;
+
+      case N4_NODE_FAILURE:
+        smf_app_inst->handle_itti_msg(
+            std::static_pointer_cast<itti_n4_node_failure>(shared_msg));
+        break;
+
       case N11_SESSION_N1N2_MESSAGE_TRANSFER_RESPONSE_STATUS:
         if (itti_n11_n1n2_message_transfer_response_status* m =
                 dynamic_cast<itti_n11_n1n2_message_transfer_response_status*>(
@@ -226,12 +235,6 @@ void smf_app_task(void*) {
                 dynamic_cast<itti_n11_update_pdu_session_status*>(msg)) {
           smf_app_inst->handle_itti_msg(std::ref(*m));
         }
-        break;
-
-      case N4_SESSION_REPORT_REQUEST:
-        smf_app_inst->handle_itti_msg(
-            std::static_pointer_cast<itti_n4_session_report_request>(
-                shared_msg));
         break;
 
       case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE:
@@ -329,8 +332,7 @@ smf_app::smf_app(const std::string& config_file)
 
   try {
     smf_n4_inst  = new smf_n4();
-    smf_n10_inst = new smf_n10();
-    smf_n11_inst = new smf_n11();
+    smf_sbi_inst = new smf_sbi();
   } catch (std::exception& e) {
     Logger::smf_app().error("Cannot create SMF_APP: %s", e.what());
     throw;
@@ -365,6 +367,45 @@ void smf_app::start_upf_association(const pfcp::node_id_t& node_id) {
   uint64_t tv_ntp        = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
 
   pfcp_associations::get_instance().add_peer_candidate_node(node_id);
+  std::shared_ptr<itti_n4_association_setup_request> n4_asc =
+      std::shared_ptr<itti_n4_association_setup_request>(
+          new itti_n4_association_setup_request(TASK_SMF_APP, TASK_SMF_N4));
+
+  // n4_asc->trxn_id = smf_n4_inst->generate_trxn_id();
+  pfcp::cp_function_features_s cp_function_features;
+  cp_function_features      = {};
+  cp_function_features.load = 1;
+  cp_function_features.ovrl = 1;
+
+  pfcp::node_id_t this_node_id = {};
+  if (smf_cfg.get_pfcp_node_id(this_node_id) == RETURNok) {
+    n4_asc->pfcp_ies.set(this_node_id);
+    pfcp::recovery_time_stamp_t r = {.recovery_time_stamp = (uint32_t) tv_ntp};
+    n4_asc->pfcp_ies.set(r);
+
+    n4_asc->pfcp_ies.set(cp_function_features);
+    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+      n4_asc->r_endpoint =
+          endpoint(node_id.u1.ipv4_address, pfcp::default_port);
+      int ret = itti_inst->send_msg(n4_asc);
+      if (RETURNok != ret) {
+        Logger::smf_app().error(
+            "Could not send ITTI message %s to task TASK_SMF_N4",
+            n4_asc.get()->get_msg_name());
+      }
+    } else {
+      Logger::smf_app().warn("Start_association() node_id IPV6, FQDN!");
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_app::start_upf_association(
+    const pfcp::node_id_t& node_id, const upf_profile& profile) {
+  std::time_t time_epoch = std::time(nullptr);
+  uint64_t tv_ntp        = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
+
+  pfcp_associations::get_instance().add_peer_candidate_node(node_id, profile);
   std::shared_ptr<itti_n4_association_setup_request> n4_asc =
       std::shared_ptr<itti_n4_association_setup_request>(
           new itti_n4_association_setup_request(TASK_SMF_APP, TASK_SMF_N4));
@@ -455,6 +496,22 @@ void smf_app::handle_itti_msg(
 }
 
 //------------------------------------------------------------------------------
+void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf) {
+  pfcp::node_id_t node_id = snf->node_id;
+
+  for (auto it : scid2smf_context) {
+    if (it.second->upf_node_id == node_id) {
+      supi64_t supi64 = smf_supi_to_u64(it.second->supi);
+      Logger::smf_app().debug(
+          "Remove the associated PDU session (SUPI " SUPI_64_FMT
+          ", PDU Sessin Id %d)",
+          supi64, it.second->pdu_session_id);
+      //TODO: remove the session
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(
     itti_n11_n1n2_message_transfer_response_status& m) {
   Logger::smf_app().info("Process N1N2MessageTransfer Response");
@@ -504,9 +561,15 @@ void smf_app::handle_itti_msg(
         Logger::smf_app().debug("Send failure indication to UPF");
         // TODO: to be completed
         pfcp::node_id_t up_node_id = {};
-        if (not pfcp_associations::get_instance().select_up_node(
-                up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-          Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
+        // Get UPF node
+        std::shared_ptr<smf_context_ref> scf = {};
+        if (smf_app_inst->is_scid_2_smf_context(m.scid)) {
+          scf        = scid_2_smf_context(m.scid);
+          up_node_id = scf.get()->upf_node_id;
+        } else {
+          Logger::smf_app().warn(
+              "SM Context associated with this id " SCID_FMT " does not exit!",
+              m.scid);
           return;
         }
 
@@ -784,6 +847,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
+  // TODO:
   // If no DNN information from UE, set to default value
   std::string dnn = smreq->req.get_dnn();
   if (dnn.length() == 0) {
@@ -881,7 +945,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     if (not use_local_configuration_subscription_data(dnn_selection_mode)) {
       Logger::smf_app().debug(
           "Retrieve Session Management Subscription data from the UDM");
-      if (smf_n10_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
+      if (smf_sbi_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
         // update dnn_context with subscription info
         sc.get()->insert_dnn_subscription(snssai, subscription);
       } else {
@@ -1133,7 +1197,7 @@ void smf_app::trigger_pdu_session_modification(
 
   std::shared_ptr<itti_nx_trigger_pdu_session_modification> itti_msg =
       std::make_shared<itti_nx_trigger_pdu_session_modification>(
-          TASK_SMF_APP, TASK_SMF_N11);
+          TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->http_version = http_version;
 
   // step 1. collect the necessary information
@@ -1241,7 +1305,11 @@ bool smf_app::handle_nf_status_notification(
           n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
           // memcpy(&n.u1.ipv4_address, &ipv4_addrs[0], sizeof(struct in_addr));
           smf_cfg.upfs.push_back(n);
-          start_upf_association(n);
+          upf_profile* upf_node_profile =
+              dynamic_cast<upf_profile*>(profile.get());
+          start_upf_association(n, std::ref(*upf_node_profile));
+          // start_upf_association(n,
+          // std::static_pointer_cast<upf_profile>(profile));
         } else {
           Logger::smf_app().debug(
               "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
@@ -1250,9 +1318,22 @@ bool smf_app::handle_nf_status_notification(
     } else {
       return false;
     }
-  } else {
+  }
+  if (event_type.compare("NF_DEREGISTERED") == 0) {
     Logger::smf_app().debug(
         "This event (%s) has not been supported yet!", event_type);
+    // TODO: Remove UPF from the list UPFs if received DE-REGISTERED Event
+    /*    std::string nf_instance_uri = {};
+        notification_msg.get_nf_instance_uri(nf_instance_uri);
+        std::vector<std::string> split_result;
+
+        boost::split(
+            split_result, nf_instance_uri, boost::is_any_of("/"));
+        if (split_result.size() > 0) {
+          std::string instance_id = split_result[split_result.size() -1];
+          pfcp_associations::get_instance().remove_association(instance_id);
+        }
+     */
   }
 
   return true;
@@ -1327,7 +1408,7 @@ bool smf_app::scid_2_smf_context(
 bool smf_app::use_local_configuration_subscription_data(
     const std::string& dnn_selection_mode) {
   // TODO: should be implemented
-  return smf_cfg.local_configuration;
+  return smf_cfg.use_local_subscription_info;
 }
 
 //------------------------------------------------------------------------------
@@ -1493,7 +1574,7 @@ void smf_app::timer_nrf_heartbeat_timeout(
 
   std::shared_ptr<itti_n11_update_nf_instance_request> itti_msg =
       std::make_shared<itti_n11_update_nf_instance_request>(
-          TASK_SMF_APP, TASK_SMF_N11);
+          TASK_SMF_APP, TASK_SMF_SBI);
 
   oai::smf_server::model::PatchItem patch_item = {};
   //{"op":"replace","path":"/nfStatus", "value": "REGISTERED"}
@@ -1506,7 +1587,7 @@ void smf_app::timer_nrf_heartbeat_timeout(
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N11",
+        "Could not send ITTI message %s to task TASK_SMF_SBI",
         itti_msg->get_msg_name());
   } else {
     Logger::smf_app().debug(
@@ -1657,7 +1738,7 @@ void smf_app::trigger_create_context_error_response(
 
   std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
       std::make_shared<itti_n11_create_sm_context_response>(
-          TASK_SMF_N11, TASK_SMF_APP, promise_id);
+          TASK_SMF_SBI, TASK_SMF_APP, promise_id);
   pdu_session_create_sm_context_response sm_context_response = {};
   nlohmann::json json_data                                   = {};
   to_json(json_data, sm_context);
@@ -1687,7 +1768,7 @@ void smf_app::trigger_update_context_error_response(
 
   std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
       std::make_shared<itti_n11_update_sm_context_response>(
-          TASK_SMF_N11, TASK_SMF_APP, promise_id);
+          TASK_SMF_SBI, TASK_SMF_APP, promise_id);
   pdu_session_update_sm_context_response sm_context_response = {};
   nlohmann::json json_data                                   = {};
   to_json(json_data, smContextUpdateError);
@@ -1717,7 +1798,7 @@ void smf_app::trigger_update_context_error_response(
 
   std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
       std::make_shared<itti_n11_update_sm_context_response>(
-          TASK_SMF_N11, TASK_SMF_APP, promise_id);
+          TASK_SMF_SBI, TASK_SMF_APP, promise_id);
   pdu_session_update_sm_context_response sm_context_response = {};
   nlohmann::json json_data                                   = {};
   to_json(json_data, smContextUpdateError);
@@ -1743,7 +1824,7 @@ void smf_app::trigger_http_response(
     case N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE: {
       std::shared_ptr<itti_n11_release_sm_context_response> itti_msg =
           std::make_shared<itti_n11_release_sm_context_response>(
-              TASK_SMF_N11, TASK_SMF_APP, promise_id);
+              TASK_SMF_SBI, TASK_SMF_APP, promise_id);
       pdu_session_release_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
       itti_msg->res = sm_context_response;
@@ -1758,7 +1839,7 @@ void smf_app::trigger_http_response(
     case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE: {
       std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
           std::make_shared<itti_n11_create_sm_context_response>(
-              TASK_SMF_N11, TASK_SMF_APP, promise_id);
+              TASK_SMF_SBI, TASK_SMF_APP, promise_id);
       pdu_session_create_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
       itti_msg->res = sm_context_response;
@@ -1773,7 +1854,7 @@ void smf_app::trigger_http_response(
     case N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE: {
       std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
           std::make_shared<itti_n11_update_sm_context_response>(
-              TASK_SMF_N11, TASK_SMF_APP, promise_id);
+              TASK_SMF_SBI, TASK_SMF_APP, promise_id);
       pdu_session_update_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
       itti_msg->res = sm_context_response;
@@ -1930,12 +2011,12 @@ void smf_app::trigger_nf_registration_request() {
 
   std::shared_ptr<itti_n11_register_nf_instance_request> itti_msg =
       std::make_shared<itti_n11_register_nf_instance_request>(
-          TASK_SMF_APP, TASK_SMF_N11);
+          TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->profile = nf_instance_profile;
   int ret           = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N11",
+        "Could not send ITTI message %s to task TASK_SMF_SBI",
         itti_msg->get_msg_name());
   }
 }
@@ -1947,12 +2028,12 @@ void smf_app::trigger_nf_deregistration() {
 
   std::shared_ptr<itti_n11_deregister_nf_instance> itti_msg =
       std::make_shared<itti_n11_deregister_nf_instance>(
-          TASK_SMF_APP, TASK_SMF_N11);
+          TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->smf_instance_id = smf_instance_id;
   int ret                   = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N11",
+        "Could not send ITTI message %s to task TASK_SMF_SBI",
         itti_msg->get_msg_name());
   }
 }
@@ -1965,7 +2046,7 @@ void smf_app::trigger_upf_status_notification_subscribe() {
 
   std::shared_ptr<itti_n11_subscribe_upf_status_notify> itti_msg =
       std::make_shared<itti_n11_subscribe_upf_status_notify>(
-          TASK_SMF_APP, TASK_SMF_N11);
+          TASK_SMF_APP, TASK_SMF_SBI);
 
   nlohmann::json json_data = {};
   // TODO: remove hardcoded values
@@ -1990,7 +2071,7 @@ void smf_app::trigger_upf_status_notification_subscribe() {
   int ret             = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N11",
+        "Could not send ITTI message %s to task TASK_SMF_SBI",
         itti_msg->get_msg_name());
   }
 }
