@@ -74,6 +74,5 @@ openair-cn5g-smf
     ├── oai_smf:   SMF main directory, contains the "main" CMakeLists.txt file.
     ├── pfcp:      Generic PFCP stack implementation.
     ├── smf_app:   SMF network functions procedures and contexts.
-    ├── test:      Minimal implementation for AMF, UDM network functions for testing purpose.
     └── udp :      UDP server implementation.
 </pre>
