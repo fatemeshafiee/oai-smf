@@ -1344,8 +1344,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       Logger::smf_app().debug(
           "PDU Session Type IPv4v6, select PDU Session Type IPv4");
       bool paa_res = false;
-      /*
-      //TODO: Verified if use default session type or requested session type
+      // TODO: Verified if use default session type or requested session type
       std::shared_ptr<session_management_subscription> ss = {};
       std::shared_ptr<dnn_configuration_t> sdc            = {};
       find_dnn_subscription(snssai, ss);
@@ -1357,8 +1356,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
                   ->pdu_session_types.default_session_type.pdu_session_type;
         }
       }
- */
-      paa.pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4V6;
+      // TODO: use requested PDU Session Type?
+      //     paa.pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4V6;
       if ((not paa_res) || (not paa.is_ip_assigned())) {
         bool success =
             paa_dynamic::get_instance().get_free_paa(sd->dnn_in_use, paa);
