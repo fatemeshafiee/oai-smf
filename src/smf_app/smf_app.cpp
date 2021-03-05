@@ -506,7 +506,7 @@ void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf) {
           "Remove the associated PDU session (SUPI " SUPI_64_FMT
           ", PDU Sessin Id %d)",
           supi64, it.second->pdu_session_id);
-      //TODO: remove the session
+      // TODO: remove the session
     }
   }
 }
@@ -729,6 +729,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   // Get necessary info from NAS
   xgpp_conv::sm_context_request_from_nas(decoded_nas_msg, smreq->req);
 
+  pdu_session_type.pdu_session_type = smreq->req.get_pdu_session_type();
   // TODO: Support IPv4 only for now
   if (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
     cause_n1 = cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
@@ -737,7 +738,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_UNSTRUCTURED)) {
     cause_n1 = cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE;
   }
-  if (pdu_session_type.pdu_session_type != PDU_SESSION_TYPE_E_IPV4) {
+
+  if ((pdu_session_type.pdu_session_type != PDU_SESSION_TYPE_E_IPV4) and
+      (pdu_session_type.pdu_session_type != PDU_SESSION_TYPE_E_IPV4V6)) {
     // PDU Session Establishment Reject
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message, cause_n1)) {

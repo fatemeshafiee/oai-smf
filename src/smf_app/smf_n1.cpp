@@ -166,7 +166,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       paa.ipv4_address, sm_msg->pdu_session_establishment_accept.pduaddress
                             .pdu_address_information);
   sm_msg->pdu_session_establishment_accept.pduaddress.pdu_session_type_value =
-      static_cast<uint8_t>(PDU_SESSION_TYPE_E_IPV4);
+      static_cast<uint8_t>(paa.pdu_session_type.pdu_session_type);
   Logger::smf_n1().debug(
       "UE Address %s", conv::toString(paa.ipv4_address).c_str());
 

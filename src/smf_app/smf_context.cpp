@@ -1338,8 +1338,56 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   bool set_paa = false;
   paa_t paa    = {};
   Logger::smf_app().debug("UE Address Allocation");
+
   switch (sp->pdu_session_type.pdu_session_type) {
+    case PDU_SESSION_TYPE_E_IPV4V6: {
+      Logger::smf_app().debug(
+          "PDU Session Type IPv4v6, select PDU Session Type IPv4");
+      bool paa_res = false;
+      /*
+      //TODO: Verified if use default session type or requested session type
+      std::shared_ptr<session_management_subscription> ss = {};
+      std::shared_ptr<dnn_configuration_t> sdc            = {};
+      find_dnn_subscription(snssai, ss);
+      if (nullptr != ss.get()) {
+        ss.get()->find_dnn_configuration(sd->dnn_in_use, sdc);
+        if (nullptr != sdc.get()) {
+          paa.pdu_session_type.pdu_session_type =
+              sdc.get()
+                  ->pdu_session_types.default_session_type.pdu_session_type;
+        }
+      }
+ */
+      paa.pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4V6;
+      if ((not paa_res) || (not paa.is_ip_assigned())) {
+        bool success =
+            paa_dynamic::get_instance().get_free_paa(sd->dnn_in_use, paa);
+        if (success) {
+          set_paa = true;
+        } else {
+          // ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED;
+          set_paa          = false;
+          request_accepted = false;
+          sm_context_resp->res.set_cause(static_cast<uint8_t>(
+              cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES));
+        }
+        // TODO: Static IP address allocation
+      } else if ((paa_res) && (paa.is_ip_assigned())) {
+        set_paa = true;
+      }
+      Logger::smf_app().info(
+          "PAA, Ipv4 Address: %s",
+          inet_ntoa(*((struct in_addr*) &paa.ipv4_address)));
+
+      char str_addr6[INET6_ADDRSTRLEN];
+      if (inet_ntop(
+              AF_INET6, &paa.ipv6_address, str_addr6, sizeof(str_addr6))) {
+        Logger::smf_app().info("PAA, IPv6 Address: %s", str_addr6);
+      }
+
+    }; break;
     case PDU_SESSION_TYPE_E_IPV4: {
+      Logger::smf_app().debug("PDU Session Type IPv4");
       if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) {
         // use SM NAS signalling
         // static or dynamic address allocation
@@ -1357,7 +1405,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           if (nullptr != sdc.get()) {
             paa.pdu_session_type.pdu_session_type =
                 sdc.get()
-                    ->pdu_session_types.default_session_type.pdu_session_type;
+                    ->pdu_session_types.default_session_type
+                    .pdu_session_type;  // TODO: Verified if use default session
+                                        // type or requested session type
+
             // TODO: static ip address
           }
         }
@@ -1393,11 +1444,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     case PDU_SESSION_TYPE_E_IPV6: {
       // TODO:
       Logger::smf_app().debug("IPv6 has not been supported yet!");
-    } break;
-
-    case PDU_SESSION_TYPE_E_IPV4V6: {
-      // TODO:
-      Logger::smf_app().debug("IPv4/v6 has not been supported yet!");
     } break;
 
     default: {
@@ -1546,7 +1592,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           paa_dynamic::get_instance().release_paa(
               sd->dnn_in_use, free_paa.ipv4_address);
           break;
-
         case PDU_SESSION_TYPE_E_IPV6:
         case PDU_SESSION_TYPE_E_UNSTRUCTURED:
         case PDU_SESSION_TYPE_E_ETHERNET:
