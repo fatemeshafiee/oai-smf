@@ -437,19 +437,19 @@ int smf_config::load(const string& config_file) {
       if (boost::iequals(astring, "IPv4")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_IPV4;
-      } else if (boost::iequals(astring, "IPv6") == 0) {
+      } else if (boost::iequals(astring, "IPv6")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_IPV6;
-      } else if (boost::iequals(astring, "IPv4IPv6") == 0) {
+      } else if (boost::iequals(astring, "IPv4v6")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_IPV4V6;
-      } else if (boost::iequals(astring, "Unstructured") == 0) {
+      } else if (boost::iequals(astring, "Unstructured")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_UNSTRUCTURED;
-      } else if (boost::iequals(astring, "Ethernet") == 0) {
+      } else if (boost::iequals(astring, "Ethernet")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_ETHERNET;
-      } else if (boost::iequals(astring, "Reserved") == 0) {
+      } else if (boost::iequals(astring, "Reserved")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_RESERVED;
       } else {
