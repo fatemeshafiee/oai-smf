@@ -160,15 +160,36 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
 
   // PDUAddress
   paa_t paa = sm_context_res.get_paa();
-  sm_msg->pdu_session_establishment_accept.pduaddress.pdu_address_information =
-      bfromcstralloc(4, "\0");
-  util::ipv4_to_bstring(
-      paa.ipv4_address, sm_msg->pdu_session_establishment_accept.pduaddress
-                            .pdu_address_information);
+  Logger::smf_n1().debug(
+      "PDU Session Type %s", paa.pdu_session_type.toString().c_str());
   sm_msg->pdu_session_establishment_accept.pduaddress.pdu_session_type_value =
       static_cast<uint8_t>(paa.pdu_session_type.pdu_session_type);
-  Logger::smf_n1().debug(
-      "UE Address %s", conv::toString(paa.ipv4_address).c_str());
+  if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
+    sm_msg->pdu_session_establishment_accept.pduaddress
+        .pdu_address_information = bfromcstralloc(4, "\0");
+    util::ipv4_to_bstring(
+        paa.ipv4_address, sm_msg->pdu_session_establishment_accept.pduaddress
+                              .pdu_address_information);
+    Logger::smf_n1().debug(
+        "UE IPv4 Address %s", conv::toString(paa.ipv4_address).c_str());
+  } else if (
+      paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
+    sm_msg->pdu_session_establishment_accept.pduaddress
+        .pdu_address_information = bfromcstralloc(12, "\0");
+    util::ipv4v6_to_bstring(
+        paa.ipv4_address, paa.ipv6_address,
+        sm_msg->pdu_session_establishment_accept.pduaddress
+            .pdu_address_information);
+    Logger::smf_n1().debug(
+        "UE IPv4 Address %s", conv::toString(paa.ipv4_address).c_str());
+    char str_addr6[INET6_ADDRSTRLEN];
+    if (inet_ntop(AF_INET6, &paa.ipv6_address, str_addr6, sizeof(str_addr6))) {
+      Logger::smf_n1().debug("UE IPv6 Address: %s", str_addr6);
+    }
+  } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
+    // TODO:
+    Logger::smf_n1().debug("IPv6 is not fully supported yet!");
+  }
 
   // TODO: GPRSTimer
   // sm_msg->pdu_session_establishment_accept.gprstimer.unit =

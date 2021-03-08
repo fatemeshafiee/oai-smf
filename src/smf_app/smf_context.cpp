@@ -1580,7 +1580,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   if (sm_context_resp->res.get_cause() !=
       static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
     // clear pco, ambr
-    // TODO:
+
     // free paa
     paa_t free_paa = {};
     free_paa       = sm_context_resp->res.get_paa();
@@ -1588,10 +1588,12 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       switch (sp->pdu_session_type.pdu_session_type) {
         case PDU_SESSION_TYPE_E_IPV4:
         case PDU_SESSION_TYPE_E_IPV4V6:
-          paa_dynamic::get_instance().release_paa(
-              sd->dnn_in_use, free_paa.ipv4_address);
-          break;
+          // paa_dynamic::get_instance().release_paa(
+          //    sd->dnn_in_use, free_paa.ipv4_address);
+          // break;
         case PDU_SESSION_TYPE_E_IPV6:
+          paa_dynamic::get_instance().release_paa(sd->dnn_in_use, free_paa);
+          break;
         case PDU_SESSION_TYPE_E_UNSTRUCTURED:
         case PDU_SESSION_TYPE_E_ETHERNET:
         case PDU_SESSION_TYPE_E_RESERVED:

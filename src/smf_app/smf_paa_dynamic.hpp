@@ -290,6 +290,7 @@ class paa_dynamic {
         return false;
       } else if (
           paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
+        Logger::smf_app().debug("IPv6 is not fully supported yet!");
         return true;
       }
     }

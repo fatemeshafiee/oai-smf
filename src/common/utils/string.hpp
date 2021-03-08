@@ -46,6 +46,9 @@ std::string& rtrim(std::string& s);
 std::string& trim(std::string& s);
 
 void ipv4_to_bstring(struct in_addr ipv4_address, bstring str);
+void ipv6_to_bstring(struct in6_addr ipv6_address, bstring str);
+void ipv4v6_to_bstring(
+    struct in_addr ipv4_address, struct in6_addr ipv6_address, bstring str);
 
 void string_to_bstring(const std::string& str, bstring bstr);
 }  // namespace util

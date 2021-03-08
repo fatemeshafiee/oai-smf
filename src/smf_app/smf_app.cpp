@@ -30,6 +30,7 @@
 #include "smf_app.hpp"
 
 #include <boost/uuid/random_generator.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cstdlib>
 #include <iostream>
@@ -1642,21 +1643,20 @@ bool smf_app::get_session_management_subscription_data(
       Logger::smf_app().debug(
           "Default session type %s",
           smf_cfg.session_management_subscription[i].session_type.c_str());
-      if (smf_cfg.session_management_subscription[i].session_type.compare(
-              "IPV4") == 0) {
+
+      std::string session_type =
+          smf_cfg.session_management_subscription[i].session_type;
+      if (boost::iequals(session_type, "IPv4")) {
         pdu_session_type.pdu_session_type =
             pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
-      } else if (
-          smf_cfg.session_management_subscription[i].session_type.compare(
-              "IPV6") == 0) {
+      } else if (boost::iequals(session_type, "IPv6")) {
         pdu_session_type.pdu_session_type =
             pdu_session_type_e::PDU_SESSION_TYPE_E_IPV6;
-      } else if (
-          smf_cfg.session_management_subscription[i].session_type.compare(
-              "IPV4V6") == 0) {
+      } else if (boost::iequals(session_type, "IPv4v6")) {
         pdu_session_type.pdu_session_type =
             pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
       }
+
       dnn_configuration->pdu_session_types.default_session_type =
           pdu_session_type;
 
