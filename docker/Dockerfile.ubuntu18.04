@@ -91,3 +91,8 @@ COPY --from=oai-smf-builder /openair-smf/etc/smf.conf .
 
 WORKDIR /openair-smf
 
+# expose ports
+EXPOSE 80/tcp 9090/tcp 8805/udp
+
+CMD ["/openair-smf/bin/oai_smf", "-c", "/openair-smf/etc/smf.conf", "-o"]
+ENTRYPOINT ["/openair-smf/bin/entrypoint.sh"]
