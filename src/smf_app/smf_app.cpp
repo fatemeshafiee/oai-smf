@@ -82,6 +82,7 @@ void smf_app_task(void*);
 int smf_app::apply_config(const smf_config& cfg) {
   Logger::smf_app().info("Apply config...");
 
+  paa_t paa = {};
   for (int ia = 0; ia < cfg.num_dnn; ia++) {
     if (cfg.dnn[ia].pool_id_iv4 >= 0) {
       int pool_id = cfg.dnn[ia].pool_id_iv4;
@@ -91,13 +92,18 @@ int smf_app::apply_config(const smf_config& cfg) {
           cfg.dnn[ia].dnn, pool_id, cfg.ue_pool_range_low[pool_id], range);
       // TODO: check with dnn_label
       Logger::smf_app().info("Applied config %s", cfg.dnn[ia].dnn.c_str());
+      paa.ipv4_address = cfg.ue_pool_range_low[pool_id];
     }
     if (cfg.dnn[ia].pool_id_iv6 >= 0) {
       int pool_id = cfg.dnn[ia].pool_id_iv6;
       paa_dynamic::get_instance().add_pool(
           cfg.dnn[ia].dnn, pool_id, cfg.paa_pool6_prefix[pool_id],
           cfg.paa_pool6_prefix_len[pool_id]);
+      paa.ipv6_address = cfg.paa_pool6_prefix[pool_id];
+
       // TODO: check with dnn_label
+      Logger::smf_app().info(
+          "Applied config for IPv6 %s", cfg.dnn[ia].dnn.c_str());
     }
   }
 

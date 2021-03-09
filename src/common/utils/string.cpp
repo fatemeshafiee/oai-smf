@@ -19,6 +19,7 @@
  *      contact@openairinterface.org
  */
 #include "string.hpp"
+#include "logger.hpp"
 
 #include <stdarg.h>
 #include <algorithm>
@@ -100,22 +101,33 @@ void util::ipv4_to_bstring(struct in_addr ipv4_address, bstring str) {
 }
 
 void util::ipv6_to_bstring(struct in6_addr ipv6_address, bstring str) {
-  unsigned char bitstream_addr[8];
-  for (int i = 0; i <= 7; i++)
-    bitstream_addr[i] = (uint8_t)(ipv6_address.s6_addr16[i]);
-  str->slen = 8;
-  memcpy(str->data, bitstream_addr, sizeof(bitstream_addr));
+  char str_addr6[INET6_ADDRSTRLEN];
+  if (inet_ntop(AF_INET6, &ipv6_address, str_addr6, sizeof(str_addr6))) {
+    std::string ipv6_addr_str((char*) str_addr6, INET6_ADDRSTRLEN);
+    //Logger::smf_app().info(" Ipv6 address....: %s", ipv6_addr_str.c_str());
+    unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+    if (inet_pton(AF_INET6, util::trim(ipv6_addr_str).c_str(), buf_in6_addr) ==
+        1) {
+      str->slen = 16;
+      memcpy(str->data, buf_in6_addr, sizeof(buf_in6_addr));
+    }
+  }
 }
 
-void util::ipv4v6_to_bstring(
+void util::ipv4v6_to_pdu_address_information(
     struct in_addr ipv4_address, struct in6_addr ipv6_address, bstring str) {
   unsigned char bitstream_addr[12];
-  // TODO: to be updated to remove the hardcoded value
-  std::string ipv6_addr = "2001:4860:4860:0:0:0:0:2";
-  unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-  if (inet_pton(AF_INET6, util::trim(ipv6_addr).c_str(), buf_in6_addr) == 1) {
-    // memcpy(&p, buf_in6_addr, sizeof(struct in6_addr));
-    for (int i = 0; i <= 7; i++) bitstream_addr[i] = (uint8_t)(buf_in6_addr[i]);
+  char str_addr6[INET6_ADDRSTRLEN];
+
+  if (inet_ntop(AF_INET6, &ipv6_address, str_addr6, sizeof(str_addr6))) {
+    std::string ipv6_addr_str((char*) str_addr6, INET6_ADDRSTRLEN);
+    //Logger::smf_app().info(" Ipv6 address....: %s", ipv6_addr_str.c_str());
+    unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+    if (inet_pton(AF_INET6, util::trim(ipv6_addr_str).c_str(), buf_in6_addr) ==
+        1) {
+      for (int i = 0; i <= 7; i++)
+        bitstream_addr[i] = (uint8_t)(buf_in6_addr[i]);
+    }
   }
 
   bitstream_addr[8]  = (uint8_t)((ipv4_address.s_addr) & 0x000000ff);

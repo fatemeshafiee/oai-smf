@@ -176,7 +176,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
     sm_msg->pdu_session_establishment_accept.pduaddress
         .pdu_address_information = bfromcstralloc(12, "\0");
-    util::ipv4v6_to_bstring(
+    util::ipv4v6_to_pdu_address_information(
         paa.ipv4_address, paa.ipv6_address,
         sm_msg->pdu_session_establishment_accept.pduaddress
             .pdu_address_information);

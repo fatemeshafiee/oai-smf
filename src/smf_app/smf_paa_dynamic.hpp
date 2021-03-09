@@ -182,11 +182,13 @@ class paa_dynamic {
         ipv4_pool pool(first, range);
         ipv4_pools[uint32pool_id] = pool;
       }
-      if (!dnns.count(dnn_label)) {
-        dnn_dynamic_pools adp = {};
-        adp.add_ipv4_pool_id(uint32pool_id);
-        dnns[dnn_label] = adp;
+
+      dnn_dynamic_pools adp = {};
+      if (dnns.count(dnn_label)) {
+        adp = dnns[dnn_label];
       }
+      adp.add_ipv4_pool_id(uint32pool_id);
+      dnns[dnn_label] = adp;
     }
   }
 
@@ -199,11 +201,13 @@ class paa_dynamic {
         ipv6_pool pool(prefix, prefix_len);
         ipv6_pools[uint32pool_id] = pool;
       }
-      if (!dnns.count(dnn_label)) {
-        dnn_dynamic_pools adp = {};
-        adp.add_ipv6_pool_id(uint32pool_id);
-        dnns[dnn_label] = adp;
+
+      dnn_dynamic_pools adp = {};
+      if (dnns.count(dnn_label)) {
+        adp = dnns[dnn_label];
       }
+      adp.add_ipv6_pool_id(uint32pool_id);
+      dnns[dnn_label] = adp;
     }
   }
 
@@ -227,10 +231,13 @@ class paa_dynamic {
           paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
         bool success                              = false;
         std::vector<uint32_t>::const_iterator it4 = {};
+        uint32_t ipv4_pool_id                     = 0;
         for (it4 = dnn_pool.ipv4_pool_ids.begin();
              it4 != dnn_pool.ipv4_pool_ids.end(); ++it4) {
           if (ipv4_pools[*it4].alloc_address(paa.ipv4_address)) {
-            success = true;
+            success      = true;
+            ipv4_pool_id = *it4;
+            break;
           }
         }
         if (success) {
@@ -241,16 +248,7 @@ class paa_dynamic {
               return true;
             }
           }
-          // ipv4_pools[*it4].free_address(paa.ipv4_address);
-          // TODO: To be fixed the error for IPv6 addr allocation, so assign a
-          // fixed IPv6 addr here!
-          std::string ipv6_addr = "2001:4860:4860::2";
-          unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-          if (inet_pton(
-                  AF_INET6, util::trim(ipv6_addr).c_str(), buf_in6_addr) == 1) {
-            memcpy(&paa.ipv6_address, buf_in6_addr, sizeof(struct in6_addr));
-            return true;
-          }
+          ipv4_pools[ipv4_pool_id].free_address(paa.ipv4_address);
         }
         Logger::smf_app().warn(
             "Could not get PAA PDU_SESSION_TYPE_E_IPV4V6 for DNN %s",

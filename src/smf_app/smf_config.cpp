@@ -873,8 +873,14 @@ void smf_config::display() {
           dnn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
     }
     if (dnn[i].pool_id_iv6 >= 0) {
-      Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_IPV6_POOL ":  %d", dnn[i].pool_id_iv6);
+      if (inet_ntop(
+              AF_INET6, &paa_pool6_prefix[dnn[i].pool_id_iv6], str_addr6,
+              sizeof(str_addr6))) {
+        Logger::smf_app().info(
+            "        " SMF_CONFIG_STRING_IPV6_POOL ":  %d (%s / %d)",
+            dnn[i].pool_id_iv6, str_addr6,
+            paa_pool6_prefix_len[dnn[i].pool_id_iv6]);
+      }
     }
   }
 
