@@ -144,3 +144,9 @@ void util::string_to_bstring(const std::string& str, bstring bstr) {
   bstr->slen = str.length();
   memcpy((void*) bstr->data, (void*) str.c_str(), str.length());
 }
+
+void util::string_to_dnn(const std::string& str, bstring bstr) {
+  std::string tmp = std::to_string(str.length()) + str;
+  bstr->slen      = tmp.length();
+  memcpy((void*) bstr->data, (void*) tmp.c_str(), tmp.length());
+}

@@ -61,5 +61,6 @@ void ipv4v6_to_pdu_address_information(
     struct in_addr ipv4_address, struct in6_addr ipv6_address, bstring str);
 
 void string_to_bstring(const std::string& str, bstring bstr);
+void string_to_dnn(const std::string& str, bstring bstr);
 }  // namespace util
 #endif

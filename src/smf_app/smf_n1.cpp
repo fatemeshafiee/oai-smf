@@ -250,8 +250,8 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
 
   // DNN
   sm_msg->pdu_session_establishment_accept.dnn =
-      bfromcstralloc(sm_context_res.get_dnn().length(), "\0");
-  util::string_to_bstring(
+      bfromcstralloc(sm_context_res.get_dnn().length() + 1, "\0");
+  util::string_to_dnn(
       sm_context_res.get_dnn(), sm_msg->pdu_session_establishment_accept.dnn);
   Logger::smf_n1().debug("DNN %s", sm_context_res.get_dnn().c_str());
 
