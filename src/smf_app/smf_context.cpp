@@ -1328,7 +1328,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       .ci_dns_server_ipv4_address_request          = 0,
       .ci_ip_address_allocation_via_nas_signalling = 0,
       .ci_ipv4_address_allocation_via_dhcpv4       = 0,
-      .ci_ipv4_link_mtu_request                    = 0};
+      .ci_ipv4_link_mtu_request                    = 0,
+      .ci_dns_server_ipv6_address_request          = 0};
 
   smf_app_inst->process_pco_request(pco_req, pco_resp, pco_ids);
   sm_context_resp_pending->res.set_epco(pco_resp);

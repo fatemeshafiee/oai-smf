@@ -187,6 +187,16 @@ class smf_app {
       const pco_protocol_or_container_id_t* const poc_id);
 
   /*
+   * process_pco_dns_server_v6_request
+   * @param [protocol_configuration_options_t &] pco_resp
+   * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @return
+   */
+  int process_pco_dns_server_v6_request(
+      protocol_configuration_options_t& pco_resp,
+      const pco_protocol_or_container_id_t* const poc_id);
+
+  /*
    * process_pco_link_mtu_request
    * @param [protocol_configuration_options_t &] pco_resp
    * @param [pco_protocol_or_container_id_t *const] proc_id
