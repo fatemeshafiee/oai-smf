@@ -33,6 +33,8 @@
 #include <map>
 
 #include "logger.hpp"
+#include "string.hpp"
+#include <boost/algorithm/string.hpp>
 
 class ipv6_pool {
  public:
@@ -239,7 +241,15 @@ class paa_dynamic {
               return true;
             }
           }
-          ipv4_pools[*it4].free_address(paa.ipv4_address);
+          // ipv4_pools[*it4].free_address(paa.ipv4_address);
+          // TODO: To be fixed the error for IPv6 addr allocation, so assign a
+          // fixed IPv6 addr here!
+          std::string ipv6_addr = "2001:4860:4860::2";
+          unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+          if (inet_pton(
+                  AF_INET6, util::trim(ipv6_addr).c_str(), buf_in6_addr) == 1) {
+            memcpy(&paa.ipv6_address, buf_in6_addr, sizeof(struct in6_addr));
+          }
         }
         Logger::smf_app().warn(
             "Could not get PAA PDU_SESSION_TYPE_E_IPV4V6 for DNN %s",
