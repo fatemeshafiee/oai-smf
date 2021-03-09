@@ -110,31 +110,19 @@ void util::ipv6_to_bstring(struct in6_addr ipv6_address, bstring str) {
 void util::ipv4v6_to_bstring(
     struct in_addr ipv4_address, struct in6_addr ipv6_address, bstring str) {
   unsigned char bitstream_addr[12];
-  bitstream_addr[0] = (uint8_t)((ipv4_address.s_addr) & 0x000000ff);
-  bitstream_addr[1] = (uint8_t)(((ipv4_address.s_addr) & 0x0000ff00) >> 8);
-  bitstream_addr[2] = (uint8_t)(((ipv4_address.s_addr) & 0x00ff0000) >> 16);
-  bitstream_addr[3] = (uint8_t)(((ipv4_address.s_addr) & 0xff000000) >> 24);
-  for (int i = 0; i <= 7; i++)
-    bitstream_addr[i + 4] = (uint8_t)(ipv6_address.s6_addr16[i]);
-  str->slen = 12;
-  memcpy(str->data, bitstream_addr, sizeof(bitstream_addr));
-}
-
-void util::ipv4v6_to_bstring(
-    struct in_addr ipv4_address, std::string ipv6_address, bstring str) {
-  unsigned char bitstream_addr[12];
-  bitstream_addr[0] = (uint8_t)((ipv4_address.s_addr) & 0x000000ff);
-  bitstream_addr[1] = (uint8_t)(((ipv4_address.s_addr) & 0x0000ff00) >> 8);
-  bitstream_addr[2] = (uint8_t)(((ipv4_address.s_addr) & 0x00ff0000) >> 16);
-  bitstream_addr[3] = (uint8_t)(((ipv4_address.s_addr) & 0xff000000) >> 24);
-
-  std::string ipv6_addr = "2001:4860:4860::2";
+  // TODO: to be updated to remove the hardcoded value
+  std::string ipv6_addr = "2001:4860:4860:0:0:0:0:2";
   unsigned char buf_in6_addr[sizeof(struct in6_addr)];
   if (inet_pton(AF_INET6, util::trim(ipv6_addr).c_str(), buf_in6_addr) == 1) {
     // memcpy(&p, buf_in6_addr, sizeof(struct in6_addr));
-    for (int i = 0; i <= 7; i++)
-      bitstream_addr[i + 4] = (uint8_t)(buf_in6_addr[i]);
+    for (int i = 0; i <= 7; i++) bitstream_addr[i] = (uint8_t)(buf_in6_addr[i]);
   }
+
+  bitstream_addr[8]  = (uint8_t)((ipv4_address.s_addr) & 0x000000ff);
+  bitstream_addr[9]  = (uint8_t)(((ipv4_address.s_addr) & 0x0000ff00) >> 8);
+  bitstream_addr[10] = (uint8_t)(((ipv4_address.s_addr) & 0x00ff0000) >> 16);
+  bitstream_addr[11] = (uint8_t)(((ipv4_address.s_addr) & 0xff000000) >> 24);
+
   str->slen = 12;
   memcpy(str->data, bitstream_addr, sizeof(bitstream_addr));
 }

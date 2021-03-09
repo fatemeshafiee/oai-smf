@@ -249,6 +249,7 @@ class paa_dynamic {
           if (inet_pton(
                   AF_INET6, util::trim(ipv6_addr).c_str(), buf_in6_addr) == 1) {
             memcpy(&paa.ipv6_address, buf_in6_addr, sizeof(struct in6_addr));
+            return true;
           }
         }
         Logger::smf_app().warn(
