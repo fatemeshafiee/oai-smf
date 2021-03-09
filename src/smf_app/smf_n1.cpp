@@ -152,11 +152,14 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
     return false;
   }
 
-  sm_msg->pdu_session_establishment_accept.presence = 0x03df;
-  sm_msg->pdu_session_establishment_accept._5gsmcause =
-      static_cast<uint8_t>(sm_cause);
-  Logger::smf_n1().debug(
-      "5GSM Cause: %d", sm_msg->pdu_session_establishment_accept._5gsmcause);
+  sm_msg->pdu_session_establishment_accept.presence = 0x039a;
+  if (static_cast<uint8_t>(sm_cause) > 0) {
+    sm_msg->pdu_session_establishment_accept.presence = 0x039b;
+    sm_msg->pdu_session_establishment_accept._5gsmcause =
+        static_cast<uint8_t>(sm_cause);
+    Logger::smf_n1().debug(
+        "5GSM Cause: %d", sm_msg->pdu_session_establishment_accept._5gsmcause);
+  }
 
   // PDUAddress
   paa_t paa = sm_context_res.get_paa();
