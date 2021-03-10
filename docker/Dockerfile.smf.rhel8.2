@@ -72,10 +72,11 @@ RUN rm /etc/pki/entitlement/*pem
 # TARGET IMAGE
 #---------------------------------------------------------------------
 FROM registry.access.redhat.com/ubi8/ubi:latest as oai-smf
-
+ENV TZ=Europe/Paris
 # We install some debug tools for the moment in addition of mandatory libraries
 RUN yum update -y && \
     yum install -y --enablerepo="ubi-8-codeready-builder" \
+    tzdata \
     psmisc \
     net-tools \
     libevent && \

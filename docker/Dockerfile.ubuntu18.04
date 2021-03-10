@@ -59,10 +59,11 @@ RUN ./build_smf --clean --Verbose --build-type Release --jobs
 #---------------------------------------------------------------------
 FROM ubuntu:bionic as oai-smf
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe
+ENV TZ=Europe/Paris
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # We install some debug tools for the moment in addition of mandatory libraries
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+    tzdata \
     psmisc \
     net-tools \
     bc \
