@@ -317,7 +317,7 @@ pipeline {
         if (fileExists('test_results_oai_smf.html')) {
           archiveArtifacts artifacts: 'test_results_oai_smf.html'
         }
-        if (fileExists('deploy_results_oai_cn5g.html')) {
+        if (fileExists('test_results_oai_cn5g.html')) {
           sh "sed -i -e 's#TEMPLATE_TIME#${JOB_TIMESTAMP}#' *_results_oai_cn5g.html"
           archiveArtifacts artifacts: '*_results_oai_cn5g.html'
         }
