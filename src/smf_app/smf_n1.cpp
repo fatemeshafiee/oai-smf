@@ -102,11 +102,11 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       "PDU Session Type: %d", sm_msg->pdu_session_establishment_accept
                                   ._pdusessiontype.pdu_session_type_value);
 
-  sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value =
-      SSC_MODE_1;  // TODO: get from sm_context_res
-  Logger::smf_n1().debug(
-      "SSC Mode: %d",
-      sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value);
+  //sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value =
+  //    SSC_MODE_1;  // TODO: get from sm_context_res
+  //Logger::smf_n1().debug(
+  //    "SSC Mode: %d",
+  //    sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value);
 
   // authorized QoS rules of the PDU session: QOSRules (Section 6.2.5@3GPP
   // TS 24.501) (Section 6.4.1.3@3GPP TS 24.501 V16.1.0) Make sure that the
@@ -152,7 +152,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
     return false;
   }
 
-  sm_msg->pdu_session_establishment_accept.presence = 0x039a;
+  sm_msg->pdu_session_establishment_accept.presence = 0x038a;
   if (static_cast<uint8_t>(sm_cause) > 0) {
     sm_msg->pdu_session_establishment_accept.presence = 0x039b;
     sm_msg->pdu_session_establishment_accept._5gsmcause =
@@ -253,7 +253,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
 
   // DNN
   sm_msg->pdu_session_establishment_accept.dnn =
-      bfromcstralloc(sm_context_res.get_dnn().length() + 1, "\0");
+      bfromcstralloc(sm_context_res.get_dnn().length() + 1 + 2 + sizeof(".mnc011.mcc110.gprs"), "\0");
   util::string_to_dnn(
       sm_context_res.get_dnn(), sm_msg->pdu_session_establishment_accept.dnn);
   Logger::smf_n1().debug("DNN %s", sm_context_res.get_dnn().c_str());
