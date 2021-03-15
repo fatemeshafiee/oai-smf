@@ -997,6 +997,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     }
   }
 
+  // store PLMN
+  sc.get()->set_plmn(smreq->req.get_plmn());
+
   // Step 8. generate a SMF context Id and store the corresponding information
   // in a map (SM_Context_ID, (supi, dnn, nssai, pdu_session_id))
   scid_t scid = generate_smf_context_ref();
@@ -1010,7 +1013,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   smreq->set_scid(scid);
   // store scid in the context itself
   sc.get()->set_scid(scid);
-
   Logger::smf_app().debug("Generated a SMF Context ID " SCID_FMT " ", scid);
 
   // Step 9. Let the context handle the message

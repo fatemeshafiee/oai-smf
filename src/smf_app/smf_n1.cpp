@@ -36,6 +36,7 @@
 #include "smf.h"
 #include "smf_app.hpp"
 #include "3gpp_conversions.hpp"
+#include "epc.h"
 
 extern "C" {
 #include "dynamic_memory_check.h"
@@ -102,9 +103,9 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       "PDU Session Type: %d", sm_msg->pdu_session_establishment_accept
                                   ._pdusessiontype.pdu_session_type_value);
 
-  //sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value =
+  // sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value =
   //    SSC_MODE_1;  // TODO: get from sm_context_res
-  //Logger::smf_n1().debug(
+  // Logger::smf_n1().debug(
   //    "SSC Mode: %d",
   //    sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value);
 
@@ -252,11 +253,16 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
                    .extendedprotocolconfigurationoptions);
 
   // DNN
+  plmn_t plmn = {};
+  sc.get()->get_plmn(plmn);
+  std::string gprs = EPC::Utility::home_network_gprs(plmn);
+  std::string full_dnn =
+      sm_context_res.get_dnn() +
+      gprs;  //".mnc011.mcc110.gprs";
   sm_msg->pdu_session_establishment_accept.dnn =
-      bfromcstralloc(sm_context_res.get_dnn().length() + 1 + 2 + sizeof(".mnc011.mcc110.gprs"), "\0");
-  util::string_to_dnn(
-      sm_context_res.get_dnn(), sm_msg->pdu_session_establishment_accept.dnn);
-  Logger::smf_n1().debug("DNN %s", sm_context_res.get_dnn().c_str());
+      bfromcstralloc(full_dnn.length() + 1, "\0");
+  util::string_to_dnn(full_dnn, sm_msg->pdu_session_establishment_accept.dnn);
+  Logger::smf_n1().debug("Full DNN %s", full_dnn.c_str());
 
   Logger::smf_n1().info("Encode PDU Session Establishment Accept");
   // Encode NAS message

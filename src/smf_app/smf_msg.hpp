@@ -269,6 +269,7 @@ class pdu_session_create_sm_context_request
   void get_epco(protocol_configuration_options_t& p) const;
   void set_plmn(const plmn_t p);
   void get_plmn(plmn_t& p) const;
+  plmn_t get_plmn() const;
   void set_an_type(const std::string& an_type);
   void get_an_type(std::string& an_type) const;
   void set_guami(const guami_5g_t& guami);

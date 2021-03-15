@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include "epc.h"
+#include "conversions.h"
 
 using namespace EPC;
 
@@ -45,6 +46,25 @@ std::string Utility::home_network_gprs(const char* mnc, const char* mcc) {
 
   // '^mnc(\d{3})\.mcc(\d{3})\.gprs'
   s.APPEND_MNC(mnc).APPEND_MCC(mcc).append("gprs");
+
+  return s;
+}
+
+std::string Utility::home_network_gprs(const plmn_t& plmn) {
+  std::string s;
+
+  uint16_t mcc     = 0;
+  uint16_t mnc     = 0;
+  uint16_t mnc_len = 0;
+
+  PLMN_T_TO_MCC_MNC(plmn, mcc, mnc, mnc_len);
+
+  s.append(".mnc");
+  if (mnc_len == 2) s.append("0");
+  s.append(std::to_string(mnc));
+  s.append(".mcc");
+  s.append(std::to_string(mcc));
+  s.append(".gprs");
 
   return s;
 }

@@ -1128,8 +1128,8 @@ void smf_context::get_session_ambr(
   std::shared_ptr<dnn_configuration_t> sdc            = {};
   find_dnn_subscription(snssai, ss);
 
-  uint32_t bit_rate_dl = {1};
-  uint32_t bit_rate_ul = {1};
+  uint32_t bit_rate_dl = {110000000};  // TODO: to be updated
+  uint32_t bit_rate_ul = {110000000};  // TODO: to be updated
 
   session_ambr.pDUSessionAggregateMaximumBitRateDL.size = 4;
   session_ambr.pDUSessionAggregateMaximumBitRateDL.buf =
@@ -3232,6 +3232,16 @@ void smf_context::set_amf_addr(const std::string& addr) {
 //------------------------------------------------------------------------------
 void smf_context::get_amf_addr(std::string& addr) const {
   addr = amf_addr;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::set_plmn(const plmn_t& plmn) {
+  this->plmn = plmn;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::get_plmn(plmn_t& plmn) const {
+  plmn = this->plmn;
 }
 
 //------------------------------------------------------------------------------

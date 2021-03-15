@@ -146,29 +146,7 @@ void util::string_to_bstring(const std::string& str, bstring bstr) {
 }
 
 void util::string_to_dnn(const std::string& str, bstring bstr) {
-  //std::string tmp = str + ".mnc011.mcc460.gprs";//for test ctnet
-  //std::string tmp = std::to_string(str.length()) + str;
-  //bstr->slen      = str.length()+sizeof(".mnc011.mcc110.gprs");
-/*
-  int n = 0, i=0;
-  bstr->data[i] = str.length(); i++;
-  n = str.length();
-  memcpy((void*) (bstr->data+i+1), (void*) str.c_str(), n); i += n;
-  bstr->data[i] = n;
-  std::string tmp = "mnc011"; n = tmp.length();
-  memcpy((void*) (bstr->data+i+1), (void*) tmp.c_str(), n); i += n;
-  bstr->data[i] = n;
-  tmp = "mcc460"; n = tmp.length();
-  memcpy((void*) (bstr->data+i+1), (void*) tmp.c_str(), n); i += n;
-  tmp = "gprs"; n = tmp.length();
-  memcpy((void*) (bstr->data+i+1), (void*) tmp.c_str(), n); i += n;
-*/
-  //19 05 63 74 6e 65
-  uint8_t strB[6] = {0};
-  strB[0] = str.length(); 
-  memcpy(strB+1, str.c_str(), str.length());
-  bstr->slen      = str.length() + 20;
-  uint8_t dnn[19]={0x06, 0x6d, 0x6e, 0x63, 0x30, 0x31, 0x31, 0x06, 0x6d, 0x63, 0x63, 0x34, 0x36, 0x30, 0x04, 0x67, 0x70, 0x72, 0x73};
-  memcpy((void*)(bstr->data), (void*)strB, str.length()+1);  
-  memcpy((void*)(bstr->data+str.length()+1), (void*)dnn, 19);  
+  std::string tmp = std::to_string(str.length()) + str;
+  bstr->slen      = tmp.length();
+  memcpy((void*) bstr->data, (void*) tmp.c_str(), tmp.length());
 }
