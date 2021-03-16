@@ -33,8 +33,7 @@ FROM ubuntu:bionic as oai-smf-builder
 ARG NEEDED_GIT_PROXY
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
     psmisc \
     git \
@@ -60,12 +59,11 @@ RUN ./build_smf --clean --Verbose --build-type Release --jobs
 FROM ubuntu:bionic as oai-smf
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Paris
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # We install some debug tools for the moment in addition of mandatory libraries
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
-    tzdata \
     psmisc \
     net-tools \
+    tzdata \
     bc \
     tshark \
     libasan4 \
@@ -79,7 +77,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && DE
 WORKDIR /openair-smf/bin
 COPY --from=oai-smf-builder /openair-smf/build/smf/build/smf oai_smf
 COPY --from=oai-smf-builder /openair-smf/scripts/entrypoint.sh entrypoint.sh
-
 COPY --from=oai-smf-builder /usr/local/lib/libpistache.so /usr/local/lib/
 COPY --from=oai-smf-builder /usr/local/lib/libnghttp2_asio.so.1 /usr/local/lib/
 COPY --from=oai-smf-builder /usr/lib/x86_64-linux-gnu/libboost_system.so.1.65.1 /usr/lib/x86_64-linux-gnu/
@@ -94,8 +91,8 @@ COPY --from=oai-smf-builder /openair-smf/etc/smf.conf .
 
 WORKDIR /openair-smf
 
-# expose ports
 EXPOSE 80/tcp 9090/tcp 8805/udp
 
+ENTRYPOINT ["/bin/bash","/openair-smf/bin/entrypoint.sh"]
+
 CMD ["/openair-smf/bin/oai_smf", "-c", "/openair-smf/etc/smf.conf", "-o"]
-ENTRYPOINT ["/openair-smf/bin/entrypoint.sh"]

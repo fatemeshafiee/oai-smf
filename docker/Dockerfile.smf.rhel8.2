@@ -37,14 +37,14 @@ COPY tmp/entitlement/*.pem /etc/pki/entitlement
 
 RUN rm -f /etc/rhsm-host && \
     yum repolist --disablerepo=* && \
-    subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms && \	
+    subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms && \   
     yum update -y && \
     yum install -y \
-    	psmisc \
-    	git \
-	diffutils \
-	file && \
-  	rm -rf /var/lib/apt/lists/* 
+        psmisc \
+        git \
+    diffutils \
+    file && \
+    rm -rf /var/lib/apt/lists/* 
 
 # Some GIT configuration command quite useful
 RUN /bin/bash -c "if [[ -v NEEDED_GIT_PROXY ]]; then git config --global http.proxy $NEEDED_GIT_PROXY; fi"
@@ -76,7 +76,6 @@ ENV TZ=Europe/Paris
 # We install some debug tools for the moment in addition of mandatory libraries
 RUN yum update -y && \
     yum install -y --enablerepo="ubi-8-codeready-builder" \
-    tzdata \
     psmisc \
     net-tools \
     libevent && \
@@ -111,5 +110,6 @@ WORKDIR /openair-smf
 # expose ports
 EXPOSE 80/tcp 9090/tcp 8805/udp
 
-CMD ["/openair-smf/bin/oai_smf", "-c", "/openair-smf/etc/smf.conf", "-o"]
 ENTRYPOINT ["/openair-smf/bin/entrypoint.sh"]
+
+CMD ["/openair-smf/bin/oai_smf", "-c", "/openair-smf/etc/smf.conf", "-o"]
