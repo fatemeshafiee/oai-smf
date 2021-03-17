@@ -51,13 +51,17 @@ std::string Utility::home_network_gprs(const char* mnc, const char* mcc) {
 }
 
 std::string Utility::home_network_gprs(const plmn_t& plmn) {
+  // '.mnc(\d{3})\.mcc(\d{3})\.gprs'
   std::string s;
 
   uint16_t mcc     = 0;
   uint16_t mnc     = 0;
   uint16_t mnc_len = 0;
 
-  PLMN_T_TO_MCC_MNC(plmn, mcc, mnc, mnc_len);
+  mcc     = plmn.mcc_digit1 * 100 + plmn.mcc_digit2 * 10 + plmn.mcc_digit3;
+  mnc_len = (plmn.mnc_digit3 == 0x0 ? 2 : 3);
+  mnc     = plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
+  mnc     = (mnc_len == 2 ? mnc : mnc * 10 + plmn.mnc_digit3);
 
   s.append(".mnc");
   if (mnc_len == 2) s.append("0");

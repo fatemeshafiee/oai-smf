@@ -174,12 +174,18 @@ bool util::string_to_dotted(const std::string& str, std::string& dotted) {
 };
 
 void util::string_to_dnn(const std::string& str, bstring bstr) {
-
-  std::string tmp = std::to_string(str.length()) + str;
-  bstr->slen      = tmp.length();
-  memcpy((void*) bstr->data, (void*) tmp.c_str(), tmp.length());
+  uint8_t tmp[str.length() + 1];
+  tmp[0] = str.length();
+  memcpy((void*) &tmp[1], (void*) str.c_str(), str.length());
+  bstr->slen = str.length() + 1;
+  memcpy((void*) bstr->data, (void*) tmp, str.length() + 1);
 
   /*
+  printf("\n");
+  for (int i = 0; i < str.length() + 1; i++) {
+    printf(" %02x", tmp[i]);
+  }
+
           uint8_t tmp[str.length() + 1];
       tmp[0] = str.length();
       memcpy((void*) &tmp[1], (void*) str.c_str(), tmp.length());

@@ -133,6 +133,7 @@ bool conv::plmnFromString(
     p.mcc_digit3 = mcc[2] - '0';
   else
     return false;
+
   // MNC
   if (isdigit(mnc[0]))
     p.mnc_digit1 = mnc[0] - '0';
@@ -147,6 +148,8 @@ bool conv::plmnFromString(
       p.mnc_digit3 = mnc[2] - '0';
     else
       return false;
+  } else {
+    p.mnc_digit3 = 0x0;
   }
   return true;
 }
