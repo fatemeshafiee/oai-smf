@@ -2220,7 +2220,7 @@ class pfcp_up_function_features_ie : public pfcp_ie {
       uint8_t quoac : 1;
       uint8_t trace : 1;
       uint8_t frrt : 1;
-//      uint8_t spare : 2;
+      //      uint8_t spare : 2;
       uint8_t pfde : 1;
       uint8_t epfar : 1;
     } bf;
@@ -2249,11 +2249,11 @@ class pfcp_up_function_features_ie : public pfcp_ie {
       uint8_t iptv : 1;
       uint8_t ip6pl : 1;
       uint8_t tscu : 1;
-      uint8_t mptcp : 1;   
+      uint8_t mptcp : 1;
     } bf;
     uint8_t b;
   } u4;
-    union {
+  union {
     struct {
       uint8_t atsss_ll : 1;
       uint8_t qfqm : 1;
@@ -2266,7 +2266,7 @@ class pfcp_up_function_features_ie : public pfcp_ie {
     } bf;
     uint8_t b;
   } u5;
-    union {
+  union {
     struct {
       uint8_t rttwp : 1;
       uint8_t spare : 7;
@@ -2277,12 +2277,12 @@ class pfcp_up_function_features_ie : public pfcp_ie {
   //--------
   explicit pfcp_up_function_features_ie(const pfcp::up_function_features_s& b)
       : pfcp_ie(PFCP_IE_UP_FUNCTION_FEATURES) {
-    u1.b       = 0;
-    u2.b       = 0;
-    u3.b       = 0;
-    u4.b       = 0;
-    u5.b       = 0;
-    u6.b       = 0;
+    u1.b = 0;
+    u2.b = 0;
+    u3.b = 0;
+    u4.b = 0;
+    u5.b = 0;
+    u6.b = 0;
 
     u1.bf.bucp = b.bucp;
     u1.bf.ddnd = b.ddnd;
@@ -2311,28 +2311,28 @@ class pfcp_up_function_features_ie : public pfcp_ie {
     u3.bf.bundl = b.bundl;
     u3.bf.gcom  = b.gcom;
 
-    u4.bf.mpas  =  b.mpas;
-    u4.bf.rttl  =  b.rttl;
-    u4.bf.vtime =  b.vtime;
-    u4.bf.norp  =  b.norp;
-    u4.bf.iptv  =  b.iptv;
-    u4.bf.ip6pl =  b.ip6pl;
-    u4.bf.tscu  =  b.tscu;
-    u4.bf.mptcp =  b.mptcp;
+    u4.bf.mpas  = b.mpas;
+    u4.bf.rttl  = b.rttl;
+    u4.bf.vtime = b.vtime;
+    u4.bf.norp  = b.norp;
+    u4.bf.iptv  = b.iptv;
+    u4.bf.ip6pl = b.ip6pl;
+    u4.bf.tscu  = b.tscu;
+    u4.bf.mptcp = b.mptcp;
 
-    u5.bf.atsss_ll  =  b.atsss_ll;
-    u5.bf.qfqm  =  b.qfqm;
-    u5.bf.gpqm  =  b.gpqm;
-    u5.bf.mt_edt=  b.mt_edt;
-    u5.bf.ciot  =  b.ciot;
-    u5.bf.ethar =  b.ethar;
-    u5.bf.ddds  =  b.ddds;
-    u5.bf.rds   =  b.rds;
+    u5.bf.atsss_ll = b.atsss_ll;
+    u5.bf.qfqm     = b.qfqm;
+    u5.bf.gpqm     = b.gpqm;
+    u5.bf.mt_edt   = b.mt_edt;
+    u5.bf.ciot     = b.ciot;
+    u5.bf.ethar    = b.ethar;
+    u5.bf.ddds     = b.ddds;
+    u5.bf.rds      = b.rds;
 
-    u6.bf.rttwp   =  b.rttwp;
+    u6.bf.rttwp = b.rttwp;
 
-//    tlv.set_length(2);
-      tlv.set_length(6); 
+    //    tlv.set_length(2);
+    tlv.set_length(6);
   }
   //--------
   pfcp_up_function_features_ie() : pfcp_ie(PFCP_IE_UP_FUNCTION_FEATURES) {
@@ -2343,8 +2343,8 @@ class pfcp_up_function_features_ie : public pfcp_ie {
     u5.b = 0;
     u6.b = 0;
 
- //   tlv.set_length(2);
-    tlv.set_length(6); 
+    //   tlv.set_length(2);
+    tlv.set_length(6);
   }
   //--------
   explicit pfcp_up_function_features_ie(const pfcp_tlv& t) : pfcp_ie(t) {
@@ -2372,7 +2372,7 @@ class pfcp_up_function_features_ie : public pfcp_ie {
     b.quoac = u2.bf.quoac;
     b.trace = u2.bf.trace;
     b.frrt  = u2.bf.frrt;
-//    b.spare = 0;
+    //    b.spare = 0;
     b.pfde  = u2.bf.pfde;
     b.epfar = u2.bf.epfar;
 
@@ -2385,32 +2385,32 @@ class pfcp_up_function_features_ie : public pfcp_ie {
     b.bundl = u3.bf.bundl;
     b.gcom  = u3.bf.gcom;
 
-    b.mpas  =  u4.bf.mpas;
-    b.rttl  =  u4.bf.rttl;
-    b.vtime =  u4.bf.vtime;
-    b.norp  =  u4.bf.norp;
-    b.iptv  =  u4.bf.iptv;
-    b.ip6pl =  u4.bf.ip6pl;
-    b.tscu  =  u4.bf.tscu;
-    b.mptcp =  u4.bf.mptcp;
+    b.mpas  = u4.bf.mpas;
+    b.rttl  = u4.bf.rttl;
+    b.vtime = u4.bf.vtime;
+    b.norp  = u4.bf.norp;
+    b.iptv  = u4.bf.iptv;
+    b.ip6pl = u4.bf.ip6pl;
+    b.tscu  = u4.bf.tscu;
+    b.mptcp = u4.bf.mptcp;
 
-    b.atsss_ll  =  u5.bf.atsss_ll;
-    b.qfqm  =  u5.bf.qfqm;
-    b.gpqm  =  u5.bf.gpqm;
-    b.mt_edt=  u5.bf.mt_edt;
-    b.ciot  =  u5.bf.ciot;
-    b.ethar =  u5.bf.ethar;
-    b.ddds  =  u5.bf.ddds;
-    b.rds   =  u5.bf.rds;
+    b.atsss_ll = u5.bf.atsss_ll;
+    b.qfqm     = u5.bf.qfqm;
+    b.gpqm     = u5.bf.gpqm;
+    b.mt_edt   = u5.bf.mt_edt;
+    b.ciot     = u5.bf.ciot;
+    b.ethar    = u5.bf.ethar;
+    b.ddds     = u5.bf.ddds;
+    b.rds      = u5.bf.rds;
 
-    b.rttwp =  u6.bf.rttwp;
+    b.rttwp = u6.bf.rttwp;
 
     b.spare = 0;
   }
   //--------
   void dump_to(std::ostream& os) {
-//    tlv.set_length(2);
-      tlv.set_length(6);
+    //    tlv.set_length(2);
+    tlv.set_length(6);
 
     tlv.dump_to(os);
     os.write(reinterpret_cast<const char*>(&u1.b), sizeof(u1.b));
@@ -2423,8 +2423,8 @@ class pfcp_up_function_features_ie : public pfcp_ie {
   //--------
   void load_from(std::istream& is) {
     // tlv.load_from(is);
-//    if (tlv.get_length() != 2) {
-    if (tlv.get_length() != 6) {
+    //    if (tlv.get_length() != 2) {
+    if (tlv.get_length() > 6) {
       throw pfcp_tlv_bad_length_exception(
           tlv.type, tlv.get_length(), __FILE__, __LINE__);
     }

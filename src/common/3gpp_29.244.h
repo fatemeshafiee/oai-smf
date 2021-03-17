@@ -703,39 +703,39 @@ struct up_function_features_s {
   uint16_t quoac : 1;
   uint16_t trace : 1;
   uint16_t frrt : 1;
-//  uint16_t spare : 2;
-  uint16_t pfde  : 1;
+  //  uint16_t spare : 2;
+  uint16_t pfde : 1;
   uint16_t epfar : 1;
 
   uint16_t dpdra : 1;
   uint16_t adpdp : 1;
-  uint16_t ueip  : 1;
-  uint16_t sset  : 1;
-  uint8_t mnop   : 1;
-  uint8_t mte    : 1;
-  uint8_t bundl  : 1;
-  uint8_t gcom   : 1;
+  uint16_t ueip : 1;
+  uint16_t sset : 1;
+  uint8_t mnop : 1;
+  uint8_t mte : 1;
+  uint8_t bundl : 1;
+  uint8_t gcom : 1;
 
-  uint8_t mpas   : 1;
-  uint8_t rttl   : 1;
-  uint8_t vtime  : 1;
-  uint8_t norp   : 1;
-  uint8_t iptv   : 1;
-  uint8_t ip6pl  : 1;
-  uint8_t tscu   : 1;
-  uint8_t mptcp  : 1;  
+  uint8_t mpas : 1;
+  uint8_t rttl : 1;
+  uint8_t vtime : 1;
+  uint8_t norp : 1;
+  uint8_t iptv : 1;
+  uint8_t ip6pl : 1;
+  uint8_t tscu : 1;
+  uint8_t mptcp : 1;
 
   uint8_t atsss_ll : 1;
-  uint8_t qfqm   : 1;
-  uint8_t gpqm   : 1;
+  uint8_t qfqm : 1;
+  uint8_t gpqm : 1;
   uint8_t mt_edt : 1;
-  uint8_t ciot   : 1;
-  uint8_t ethar  : 1;
-  uint8_t ddds   : 1;
-  uint8_t rds    : 1;
+  uint8_t ciot : 1;
+  uint8_t ethar : 1;
+  uint8_t ddds : 1;
+  uint8_t rds : 1;
 
-  uint8_t rttwp  : 1;
-  uint8_t spare  : 7;
+  uint8_t rttwp : 1;
+  uint8_t spare : 7;
 
   // up_function_features_s& operator=(up_function_features_s i)
   //{
@@ -777,7 +777,7 @@ struct up_function_features_s {
         iptv(0),
         ip6pl(0),
         tscu(0),
-        mptcp(0), 
+        mptcp(0),
 
         atsss_ll(0),
         qfqm(0),
@@ -820,25 +820,25 @@ struct up_function_features_s {
     bundl = i.bundl;
     gcom  = i.gcom;
 
-    mpas  =  i.mpas;
-    rttl  =  i.rttl;
-    vtime =  i.vtime;
-    norp  =  i.norp;
-    iptv  =  i.iptv;
-    ip6pl =  i.ip6pl;
-    tscu  =  i.tscu;
-    mptcp =  i.mptcp;
+    mpas  = i.mpas;
+    rttl  = i.rttl;
+    vtime = i.vtime;
+    norp  = i.norp;
+    iptv  = i.iptv;
+    ip6pl = i.ip6pl;
+    tscu  = i.tscu;
+    mptcp = i.mptcp;
 
-    atsss_ll  =  i.atsss_ll;
-    qfqm  =  i.qfqm;
-    gpqm  =  i.gpqm;
-    mt_edt=  i.mt_edt;
-    ciot  =  i.ciot;
-    ethar =  i.ethar;
-    ddds  =  i.ddds;
-    rds   =  i.rds;
+    atsss_ll = i.atsss_ll;
+    qfqm     = i.qfqm;
+    gpqm     = i.gpqm;
+    mt_edt   = i.mt_edt;
+    ciot     = i.ciot;
+    ethar    = i.ethar;
+    ddds     = i.ddds;
+    rds      = i.rds;
 
-    rttwp =  i.rttwp;
+    rttwp = i.rttwp;
   }
 };
 // typedef struct up_function_features_s up_function_features_t;
