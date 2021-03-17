@@ -2873,9 +2873,33 @@ void smf_context::insert_dnn_subscription(
     const snssai_t& snssai,
     std::shared_ptr<session_management_subscription>& ss) {
   std::unique_lock<std::recursive_mutex> lock(m_context);
+
   dnn_subscriptions[(uint8_t) snssai.sST] = ss;
   Logger::smf_app().info(
       "Inserted DNN Subscription, key: %d", (uint8_t) snssai.sST);
+}
+
+//------------------------------------------------------------------------------
+void smf_context::insert_dnn_subscription(
+    const snssai_t& snssai, const std::string& dnn,
+    std::shared_ptr<session_management_subscription>& ss) {
+  std::unique_lock<std::recursive_mutex> lock(m_context);
+  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
+    std::shared_ptr<session_management_subscription> old_ss =
+        dnn_subscriptions.at((uint8_t) snssai.sST);
+
+    std::shared_ptr<dnn_configuration_t> dnn_configuration = {};
+    ss.get()->find_dnn_configuration(dnn, dnn_configuration);
+    if (dnn_configuration != nullptr) {
+      old_ss.get()->insert_dnn_configuration(dnn, dnn_configuration);
+    }
+
+  } else {
+    dnn_subscriptions[(uint8_t) snssai.sST] = ss;
+  }
+  Logger::smf_app().info(
+      "Inserted DNN Subscription, key: %d, dnn %s", (uint8_t) snssai.sST,
+      dnn.c_str());
 }
 
 //------------------------------------------------------------------------------

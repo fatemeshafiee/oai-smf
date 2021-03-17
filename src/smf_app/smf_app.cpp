@@ -957,7 +957,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
           "Retrieve Session Management Subscription data from the UDM");
       if (smf_sbi_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
         // update dnn_context with subscription info
-        sc.get()->insert_dnn_subscription(snssai, subscription);
+        sc.get()->insert_dnn_subscription(snssai, dnn, subscription);
       } else {
         // Cannot retrieve information from UDM, reject PDU session
         // establishment
@@ -992,7 +992,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       if (get_session_management_subscription_data(
               supi64, dnn, snssai, subscription)) {
         // update dnn_context with subscription info
-        sc.get()->insert_dnn_subscription(snssai, subscription);
+        sc.get()->insert_dnn_subscription(snssai, dnn, subscription);
       }
     }
   }

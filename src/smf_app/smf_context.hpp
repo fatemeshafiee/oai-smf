@@ -855,6 +855,18 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<session_management_subscription>& ss);
 
   /*
+   * Insert a session management subscription into the SMF context
+   * @param [const snssai_t&] snssai
+   * @param [const dnn&] dnn
+   * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to
+   * the subscription
+   * @return void
+   */
+  void insert_dnn_subscription(
+      const snssai_t& snssai, const std::string& dnn,
+      std::shared_ptr<session_management_subscription>& ss);
+
+  /*
    * Verify whether a subscription data exist with a given dnn and snssai
    * @param [const std::string &] dnn: DNN
    * @param [const snssai_t&] snssai: single NSSAI
