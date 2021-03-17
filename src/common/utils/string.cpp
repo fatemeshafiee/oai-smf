@@ -145,8 +145,55 @@ void util::string_to_bstring(const std::string& str, bstring bstr) {
   memcpy((void*) bstr->data, (void*) str.c_str(), str.length());
 }
 
+bool util::string_to_dotted(const std::string& str, std::string& dotted) {
+  uint8_t offset = 0;
+  uint8_t* last_size;
+  uint8_t word_length = 0;
+
+  uint8_t value[str.length() + 1];
+  dotted    = {};
+  last_size = &value[0];
+
+  while (str[offset]) {
+    // We replace the . by the length of the word
+    if (str[offset] == '.') {
+      *last_size  = word_length;
+      word_length = 0;
+      last_size   = &value[offset + 1];
+    } else {
+      word_length++;
+      value[offset + 1] = str[offset];
+    }
+
+    offset++;
+  }
+
+  *last_size = word_length;
+  dotted.assign((const char*) value, str.length() + 1);
+  return true;
+};
+
 void util::string_to_dnn(const std::string& str, bstring bstr) {
+
   std::string tmp = std::to_string(str.length()) + str;
   bstr->slen      = tmp.length();
   memcpy((void*) bstr->data, (void*) tmp.c_str(), tmp.length());
+
+  /*
+          uint8_t tmp[str.length() + 1];
+      tmp[0] = str.length();
+      memcpy((void*) &tmp[1], (void*) str.c_str(), tmp.length());
+      bstr->slen      = tmp.length() + 1;
+      memcpy((void*) bstr->data, (void*) tmp, tmp.length()+1);
+  */
+  /*
+  // 19 05 63 74 6e 65
+  uint8_t strB[6] = {0};
+  strB[0]         = str.length();
+  memcpy(strB + 1, str.c_str(), str.length());
+  bstr->slen      = str.length() + 20;
+  uint8_t dnn[19] = {0x06, 0x6d, 0x6e, 0x63, 0x30, 0x31, 0x31, 0x06, 0x6d, 0x63,
+                     0x63, 0x34, 0x36, 0x30, 0x04, 0x67, 0x70, 0x72, 0x73};
+  memcpy((void*) (bstr->data), (void*) strB, str.length() + 1);
+  memcpy((void*) (bstr->data + str.length() + 1), (void*) dnn, 19);*/
 }
