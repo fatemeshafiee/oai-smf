@@ -174,32 +174,6 @@ bool util::string_to_dotted(const std::string& str, std::string& dotted) {
 };
 
 void util::string_to_dnn(const std::string& str, bstring bstr) {
-  uint8_t tmp[str.length() + 1];
-  tmp[0] = str.length();
-  memcpy((void*) &tmp[1], (void*) str.c_str(), str.length());
-  bstr->slen = str.length() + 1;
-  memcpy((void*) bstr->data, (void*) tmp, str.length() + 1);
-
-  /*
-  printf("\n");
-  for (int i = 0; i < str.length() + 1; i++) {
-    printf(" %02x", tmp[i]);
-  }
-
-          uint8_t tmp[str.length() + 1];
-      tmp[0] = str.length();
-      memcpy((void*) &tmp[1], (void*) str.c_str(), tmp.length());
-      bstr->slen      = tmp.length() + 1;
-      memcpy((void*) bstr->data, (void*) tmp, tmp.length()+1);
-  */
-  /*
-  // 19 05 63 74 6e 65
-  uint8_t strB[6] = {0};
-  strB[0]         = str.length();
-  memcpy(strB + 1, str.c_str(), str.length());
-  bstr->slen      = str.length() + 20;
-  uint8_t dnn[19] = {0x06, 0x6d, 0x6e, 0x63, 0x30, 0x31, 0x31, 0x06, 0x6d, 0x63,
-                     0x63, 0x34, 0x36, 0x30, 0x04, 0x67, 0x70, 0x72, 0x73};
-  memcpy((void*) (bstr->data), (void*) strB, str.length() + 1);
-  memcpy((void*) (bstr->data + str.length() + 1), (void*) dnn, 19);*/
+  bstr->slen = str.length();
+  memcpy((void*) bstr->data, (void*) str.c_str(), str.length());
 }

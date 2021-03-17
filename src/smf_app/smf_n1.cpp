@@ -266,15 +266,6 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       bfromcstralloc(dotted.length() + 1, "\0");
   util::string_to_dnn(dotted, sm_msg->pdu_session_establishment_accept.dnn);
 
-  /*
-  sm_msg->pdu_session_establishment_accept.dnn = bfromcstralloc(
-      sm_context_res.get_dnn().length() + 1 + 2 + sizeof(".mnc011.mcc110.gprs"),
-      "\0");
-  util::string_to_dnn(
-      sm_context_res.get_dnn(), sm_msg->pdu_session_establishment_accept.dnn);
-  Logger::smf_n1().debug("DNN %s", sm_context_res.get_dnn().c_str());
-*/
-
   Logger::smf_n1().info("Encode PDU Session Establishment Accept");
   // Encode NAS message
   bytes = nas_message_encode(
