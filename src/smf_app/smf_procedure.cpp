@@ -226,10 +226,11 @@ int session_create_sm_context_procedure::run(
       1;  // SMF requests the UPF to assign a local F-TEID to the PDR
   // TODO required?: local_fteid.v4 = 1;
   // local_fteid.chid = 1;
-  
-  // TS 29.244 R16 8.2.3 -> At least one of the V4 and V6 flags shall be set to "1", and both may be set to "1" for scenarios
-  // when the UP function is requested to allocate the F-TEID, i.e. when CHOOSE bit is set to "1",
-  // and the IPv4 address and IPv6 address fields are not present.
+
+  // TS 29.244 R16 8.2.3 -> At least one of the V4 and V6 flags shall be set to
+  // "1", and both may be set to "1" for scenarios when the UP function is
+  // requested to allocate the F-TEID, i.e. when CHOOSE bit is set to "1", and
+  // the IPv4 address and IPv6 address fields are not present.
   local_fteid.v4 = 1;
   pdi.set(local_fteid);
   // TODO: Network Instance
@@ -732,9 +733,10 @@ int session_update_sm_context_procedure::run(
 
           // local_fteid.from_core_fteid(qos_flow.qos_flow.dl_fteid);
           if (sps->ipv4) {
-            ue_ip_address.v4                  = 1;
-            // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit is set to "0", this indicates a Source IP address; 
-            // if this bit is set to "1", this indicates a Destination IP address.
+            ue_ip_address.v4 = 1;
+            // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit is
+            // set to "0", this indicates a Source IP address; if this bit is
+            // set to "1", this indicates a Destination IP address.
             ue_ip_address.sd                  = 1;
             ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
           }
@@ -796,9 +798,10 @@ int session_update_sm_context_procedure::run(
           pfcp::source_interface_t source_interface = {};
 
           if (sps->ipv4) {
-            ue_ip_address.v4                  = 1;
-            // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit is set to "0", this indicates a Source IP address; 
-            // if this bit is set to "1", this indicates a Destination IP address.
+            ue_ip_address.v4 = 1;
+            // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit is
+            // set to "0", this indicates a Source IP address; if this bit is
+            // set to "1", this indicates a Destination IP address.
             ue_ip_address.sd                  = 1;
             ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
           }

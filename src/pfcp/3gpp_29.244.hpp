@@ -636,10 +636,9 @@ class pfcp_fteid_ie : public pfcp_ie {
         tlv.add_length(16);
       }
     }
-      if (u1.bf.ch & b.v4){
+    if (u1.bf.ch & b.v4) {
       u1.bf.v4 = b.v4;
-    }
-    else {
+    } else {
       ipv4_address.s_addr = INADDR_ANY;
       ipv6_address        = in6addr_any;
       // else should clear v4 v6 bits
