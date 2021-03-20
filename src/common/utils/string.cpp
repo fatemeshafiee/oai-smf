@@ -19,6 +19,7 @@
  *      contact@openairinterface.org
  */
 #include "string.hpp"
+#include "logger.hpp"
 
 #include <stdarg.h>
 #include <algorithm>
@@ -94,13 +95,85 @@ void util::ipv4_to_bstring(struct in_addr ipv4_address, bstring str) {
   bitstream_addr[2] = (uint8_t)(((ipv4_address.s_addr) & 0x00ff0000) >> 16);
   bitstream_addr[3] = (uint8_t)(((ipv4_address.s_addr) & 0xff000000) >> 24);
 
-//  str       = bfromcstralloc(4, "\0");
+  //  str       = bfromcstralloc(4, "\0");
   str->slen = 4;
   memcpy(str->data, bitstream_addr, sizeof(bitstream_addr));
 }
 
+void util::ipv6_to_bstring(struct in6_addr ipv6_address, bstring str) {
+  char str_addr6[INET6_ADDRSTRLEN];
+  if (inet_ntop(AF_INET6, &ipv6_address, str_addr6, sizeof(str_addr6))) {
+    std::string ipv6_addr_str((char*) str_addr6, INET6_ADDRSTRLEN);
+    // Logger::smf_app().info(" Ipv6 address....: %s", ipv6_addr_str.c_str());
+    unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+    if (inet_pton(AF_INET6, util::trim(ipv6_addr_str).c_str(), buf_in6_addr) ==
+        1) {
+      str->slen = 16;
+      memcpy(str->data, buf_in6_addr, sizeof(buf_in6_addr));
+    }
+  }
+}
+
+void util::ipv4v6_to_pdu_address_information(
+    struct in_addr ipv4_address, struct in6_addr ipv6_address, bstring str) {
+  unsigned char bitstream_addr[12];
+  char str_addr6[INET6_ADDRSTRLEN];
+
+  if (inet_ntop(AF_INET6, &ipv6_address, str_addr6, sizeof(str_addr6))) {
+    std::string ipv6_addr_str((char*) str_addr6, INET6_ADDRSTRLEN);
+    // Logger::smf_app().info(" Ipv6 address....: %s", ipv6_addr_str.c_str());
+    unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+    if (inet_pton(AF_INET6, util::trim(ipv6_addr_str).c_str(), buf_in6_addr) ==
+        1) {
+      for (int i = 0; i <= 7; i++)
+        bitstream_addr[i] = (uint8_t)(buf_in6_addr[i]);
+    }
+  }
+
+  bitstream_addr[8]  = (uint8_t)((ipv4_address.s_addr) & 0x000000ff);
+  bitstream_addr[9]  = (uint8_t)(((ipv4_address.s_addr) & 0x0000ff00) >> 8);
+  bitstream_addr[10] = (uint8_t)(((ipv4_address.s_addr) & 0x00ff0000) >> 16);
+  bitstream_addr[11] = (uint8_t)(((ipv4_address.s_addr) & 0xff000000) >> 24);
+
+  str->slen = 12;
+  memcpy(str->data, bitstream_addr, sizeof(bitstream_addr));
+}
+
 void util::string_to_bstring(const std::string& str, bstring bstr) {
-//  bstr       = bfromcstralloc(str.length(), "\0");
+  //  bstr       = bfromcstralloc(str.length(), "\0");
+  bstr->slen = str.length();
+  memcpy((void*) bstr->data, (void*) str.c_str(), str.length());
+}
+
+bool util::string_to_dotted(const std::string& str, std::string& dotted) {
+  uint8_t offset = 0;
+  uint8_t* last_size;
+  uint8_t word_length = 0;
+
+  uint8_t value[str.length() + 1];
+  dotted    = {};
+  last_size = &value[0];
+
+  while (str[offset]) {
+    // We replace the . by the length of the word
+    if (str[offset] == '.') {
+      *last_size  = word_length;
+      word_length = 0;
+      last_size   = &value[offset + 1];
+    } else {
+      word_length++;
+      value[offset + 1] = str[offset];
+    }
+
+    offset++;
+  }
+
+  *last_size = word_length;
+  dotted.assign((const char*) value, str.length() + 1);
+  return true;
+};
+
+void util::string_to_dnn(const std::string& str, bstring bstr) {
   bstr->slen = str.length();
   memcpy((void*) bstr->data, (void*) str.c_str(), str.length());
 }

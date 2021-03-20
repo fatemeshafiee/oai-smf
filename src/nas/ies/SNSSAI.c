@@ -44,6 +44,7 @@ int encode_snssai(SNSSAI snssai, uint8_t iei, uint8_t* buffer, uint32_t len) {
   }
 
   ielen = snssai.len;
+  ielen = 1;
 
   *(buffer + encoded) = ielen;
   encoded++;

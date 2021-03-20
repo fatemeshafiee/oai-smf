@@ -24,6 +24,7 @@
 #include <sstream>
 #include <list>
 #include <vector>
+#include "3gpp_23.003.h"
 
 /*
  MCC digit 1 - low order nibble octet 1
@@ -82,6 +83,7 @@ class Utility {
   static std::string home_network(const char* mnc, const char* mcc);
   static std::string home_network(const unsigned char* plmnid);
   static std::string home_network_gprs(const char* mnc, const char* mcc);
+  static std::string home_network_gprs(const plmn_t& plmn);
   static std::string home_network_gprs(const unsigned char* plmnid);
   static std::string tai_fqdn(
       const char* lb, const char* hb, const char* mnc, const char* mcc);

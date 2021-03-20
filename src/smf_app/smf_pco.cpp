@@ -35,6 +35,7 @@
 #include "rfc_1877.h"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
+#include "string.hpp"
 
 using namespace smf;
 
@@ -283,6 +284,38 @@ int smf_app::process_pco_dns_server_request(
 
   return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
 }
+
+//------------------------------------------------------------------------------
+int smf_app::process_pco_dns_server_v6_request(
+    protocol_configuration_options_t& pco_resp,
+    const pco_protocol_or_container_id_t* const poc_id) {
+  in6_addr ipcp_out_dns_prim_ipv6_addr       = smf_cfg.default_dnsv6;
+  pco_protocol_or_container_id_t poc_id_resp = {0};
+  uint8_t dnsv6_array[16];
+
+  Logger::smf_app().debug(
+      "PCO: Protocol identifier IPCP option DNS Server v6 Request");
+  poc_id_resp.protocol_id = PCO_CONTAINER_IDENTIFIER_DNS_SERVER_IPV6_ADDRESS;
+  poc_id_resp.length_of_protocol_id_contents = 16;
+
+  char str_addr6[INET6_ADDRSTRLEN];
+  if (inet_ntop(
+          AF_INET6, &ipcp_out_dns_prim_ipv6_addr, str_addr6,
+          sizeof(str_addr6))) {
+    std::string ipv6_addr_str((char*) str_addr6, INET6_ADDRSTRLEN);
+    // Logger::smf_app().info(" Ipv6 address....: %s", ipv6_addr_str.c_str());
+    unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+    if (inet_pton(AF_INET6, util::trim(ipv6_addr_str).c_str(), buf_in6_addr) ==
+        1) {
+      for (int i = 0; i <= 15; i++) dnsv6_array[i] = (uint8_t)(buf_in6_addr[i]);
+    }
+  }
+
+  std::string tmp_s((const char*) &dnsv6_array[0], sizeof(dnsv6_array));
+  poc_id_resp.protocol_id_contents = tmp_s;
+
+  return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
+}
 //------------------------------------------------------------------------------
 int smf_app::process_pco_link_mtu_request(
     protocol_configuration_options_t& pco_resp,
@@ -335,7 +368,11 @@ int smf_app::process_pco_request(
             pco_resp, &pco_req.protocol_or_container_ids[id]);
         pco_ids.ci_dns_server_ipv4_address_request = true;
         break;
-
+      case PCO_CONTAINER_IDENTIFIER_DNS_SERVER_IPV6_ADDRESS:
+        process_pco_dns_server_v6_request(
+            pco_resp, &pco_req.protocol_or_container_ids[id]);
+        pco_ids.ci_dns_server_ipv6_address_request = true;
+        break;
       case PCO_CONTAINER_IDENTIFIER_IP_ADDRESS_ALLOCATION_VIA_NAS_SIGNALLING:
         Logger::smf_app().debug("PCO: Allocation via NAS signaling requested");
         pco_ids.ci_ip_address_allocation_via_nas_signalling = true;

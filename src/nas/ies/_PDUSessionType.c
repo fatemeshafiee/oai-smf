@@ -36,10 +36,10 @@ int encode__pdu_session_type(
       buffer, _PDU_SESSION_TYPE_MINIMUM_LENGTH, len);
 
   if (iei > 0) {
-    bitStream |= (iei & 0xf0);
+    bitStream |= (iei & 0xf0) ;
   }
 
-  bitStream |= (_pdusessiontype.pdu_session_type_value & 0x07);
+  bitStream |= ((_pdusessiontype.pdu_session_type_value & 0x07) | 0x10);
   ENCODE_U8(buffer + encoded, bitStream, encoded);
 
   return encoded;

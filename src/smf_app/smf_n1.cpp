@@ -36,6 +36,7 @@
 #include "smf.h"
 #include "smf_app.hpp"
 #include "3gpp_conversions.hpp"
+#include "epc.h"
 
 extern "C" {
 #include "dynamic_memory_check.h"
@@ -102,11 +103,11 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       "PDU Session Type: %d", sm_msg->pdu_session_establishment_accept
                                   ._pdusessiontype.pdu_session_type_value);
 
-  sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value =
-      SSC_MODE_1;  // TODO: get from sm_context_res
-  Logger::smf_n1().debug(
-      "SSC Mode: %d",
-      sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value);
+  // sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value =
+  //    SSC_MODE_1;  // TODO: get from sm_context_res
+  // Logger::smf_n1().debug(
+  //    "SSC Mode: %d",
+  //    sm_msg->pdu_session_establishment_accept.sscmode.ssc_mode_value);
 
   // authorized QoS rules of the PDU session: QOSRules (Section 6.2.5@3GPP
   // TS 24.501) (Section 6.4.1.3@3GPP TS 24.501 V16.1.0) Make sure that the
@@ -152,23 +153,47 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
     return false;
   }
 
-  sm_msg->pdu_session_establishment_accept.presence = 0x03df;
-  sm_msg->pdu_session_establishment_accept._5gsmcause =
-      static_cast<uint8_t>(sm_cause);
-  Logger::smf_n1().debug(
-      "5GSM Cause: %d", sm_msg->pdu_session_establishment_accept._5gsmcause);
+  sm_msg->pdu_session_establishment_accept.presence = 0x038a;
+  if (static_cast<uint8_t>(sm_cause) > 0) {
+    sm_msg->pdu_session_establishment_accept.presence = 0x039b;
+    sm_msg->pdu_session_establishment_accept._5gsmcause =
+        static_cast<uint8_t>(sm_cause);
+    Logger::smf_n1().debug(
+        "5GSM Cause: %d", sm_msg->pdu_session_establishment_accept._5gsmcause);
+  }
 
   // PDUAddress
   paa_t paa = sm_context_res.get_paa();
-  sm_msg->pdu_session_establishment_accept.pduaddress.pdu_address_information =
-      bfromcstralloc(4, "\0");
-  util::ipv4_to_bstring(
-      paa.ipv4_address, sm_msg->pdu_session_establishment_accept.pduaddress
-                            .pdu_address_information);
-  sm_msg->pdu_session_establishment_accept.pduaddress.pdu_session_type_value =
-      static_cast<uint8_t>(PDU_SESSION_TYPE_E_IPV4);
   Logger::smf_n1().debug(
-      "UE Address %s", conv::toString(paa.ipv4_address).c_str());
+      "PDU Session Type %s", paa.pdu_session_type.toString().c_str());
+  sm_msg->pdu_session_establishment_accept.pduaddress.pdu_session_type_value =
+      static_cast<uint8_t>(paa.pdu_session_type.pdu_session_type);
+  if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {
+    sm_msg->pdu_session_establishment_accept.pduaddress
+        .pdu_address_information = bfromcstralloc(4, "\0");
+    util::ipv4_to_bstring(
+        paa.ipv4_address, sm_msg->pdu_session_establishment_accept.pduaddress
+                              .pdu_address_information);
+    Logger::smf_n1().debug(
+        "UE IPv4 Address %s", conv::toString(paa.ipv4_address).c_str());
+  } else if (
+      paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4V6) {
+    sm_msg->pdu_session_establishment_accept.pduaddress
+        .pdu_address_information = bfromcstralloc(12, "\0");
+    util::ipv4v6_to_pdu_address_information(
+        paa.ipv4_address, paa.ipv6_address,
+        sm_msg->pdu_session_establishment_accept.pduaddress
+            .pdu_address_information);
+    Logger::smf_n1().debug(
+        "UE IPv4 Address %s", conv::toString(paa.ipv4_address).c_str());
+    char str_addr6[INET6_ADDRSTRLEN];
+    if (inet_ntop(AF_INET6, &paa.ipv6_address, str_addr6, sizeof(str_addr6))) {
+      Logger::smf_n1().debug("UE IPv6 Address: %s", str_addr6);
+    }
+  } else if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
+    // TODO:
+    Logger::smf_n1().debug("IPv6 is not fully supported yet!");
+  }
 
   // TODO: GPRSTimer
   // sm_msg->pdu_session_establishment_accept.gprstimer.unit =
@@ -228,11 +253,18 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
                    .extendedprotocolconfigurationoptions);
 
   // DNN
+  plmn_t plmn = {};
+  sc.get()->get_plmn(plmn);
+  std::string gprs = EPC::Utility::home_network_gprs(plmn);
+  std::string full_dnn =
+      sm_context_res.get_dnn() + gprs;  //".mnc011.mcc110.gprs";
+  std::string dotted;
+  util::string_to_dotted(full_dnn, dotted);
+  Logger::smf_n1().debug(
+      "Full DNN %s, dotted DNN %s", full_dnn.c_str(), dotted.c_str());
   sm_msg->pdu_session_establishment_accept.dnn =
-      bfromcstralloc(sm_context_res.get_dnn().length(), "\0");
-  util::string_to_bstring(
-      sm_context_res.get_dnn(), sm_msg->pdu_session_establishment_accept.dnn);
-  Logger::smf_n1().debug("DNN %s", sm_context_res.get_dnn().c_str());
+      bfromcstralloc(dotted.length() + 1, "\0");
+  util::string_to_dnn(dotted, sm_msg->pdu_session_establishment_accept.dnn);
 
   Logger::smf_n1().info("Encode PDU Session Establishment Accept");
   // Encode NAS message

@@ -30,6 +30,7 @@
 #include "smf_app.hpp"
 
 #include <boost/uuid/random_generator.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cstdlib>
 #include <iostream>
@@ -81,6 +82,7 @@ void smf_app_task(void*);
 int smf_app::apply_config(const smf_config& cfg) {
   Logger::smf_app().info("Apply config...");
 
+  paa_t paa = {};
   for (int ia = 0; ia < cfg.num_dnn; ia++) {
     if (cfg.dnn[ia].pool_id_iv4 >= 0) {
       int pool_id = cfg.dnn[ia].pool_id_iv4;
@@ -90,13 +92,18 @@ int smf_app::apply_config(const smf_config& cfg) {
           cfg.dnn[ia].dnn, pool_id, cfg.ue_pool_range_low[pool_id], range);
       // TODO: check with dnn_label
       Logger::smf_app().info("Applied config %s", cfg.dnn[ia].dnn.c_str());
+      paa.ipv4_address = cfg.ue_pool_range_low[pool_id];
     }
     if (cfg.dnn[ia].pool_id_iv6 >= 0) {
       int pool_id = cfg.dnn[ia].pool_id_iv6;
       paa_dynamic::get_instance().add_pool(
           cfg.dnn[ia].dnn, pool_id, cfg.paa_pool6_prefix[pool_id],
           cfg.paa_pool6_prefix_len[pool_id]);
+      paa.ipv6_address = cfg.paa_pool6_prefix[pool_id];
+
       // TODO: check with dnn_label
+      Logger::smf_app().info(
+          "Applied config for IPv6 %s", cfg.dnn[ia].dnn.c_str());
     }
   }
 
@@ -506,7 +513,7 @@ void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf) {
           "Remove the associated PDU session (SUPI " SUPI_64_FMT
           ", PDU Sessin Id %d)",
           supi64, it.second->pdu_session_id);
-      //TODO: remove the session
+      // TODO: remove the session
     }
   }
 }
@@ -729,6 +736,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   // Get necessary info from NAS
   xgpp_conv::sm_context_request_from_nas(decoded_nas_msg, smreq->req);
 
+  pdu_session_type.pdu_session_type = smreq->req.get_pdu_session_type();
   // TODO: Support IPv4 only for now
   if (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
     cause_n1 = cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
@@ -737,7 +745,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_UNSTRUCTURED)) {
     cause_n1 = cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE;
   }
-  if (pdu_session_type.pdu_session_type != PDU_SESSION_TYPE_E_IPV4) {
+
+  if ((pdu_session_type.pdu_session_type != PDU_SESSION_TYPE_E_IPV4) and
+      (pdu_session_type.pdu_session_type != PDU_SESSION_TYPE_E_IPV4V6)) {
     // PDU Session Establishment Reject
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message, cause_n1)) {
@@ -947,7 +957,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
           "Retrieve Session Management Subscription data from the UDM");
       if (smf_sbi_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
         // update dnn_context with subscription info
-        sc.get()->insert_dnn_subscription(snssai, subscription);
+        sc.get()->insert_dnn_subscription(snssai, dnn, subscription);
       } else {
         // Cannot retrieve information from UDM, reject PDU session
         // establishment
@@ -982,10 +992,13 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       if (get_session_management_subscription_data(
               supi64, dnn, snssai, subscription)) {
         // update dnn_context with subscription info
-        sc.get()->insert_dnn_subscription(snssai, subscription);
+        sc.get()->insert_dnn_subscription(snssai, dnn, subscription);
       }
     }
   }
+
+  // store PLMN
+  sc.get()->set_plmn(smreq->req.get_plmn());
 
   // Step 8. generate a SMF context Id and store the corresponding information
   // in a map (SM_Context_ID, (supi, dnn, nssai, pdu_session_id))
@@ -1000,7 +1013,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   smreq->set_scid(scid);
   // store scid in the context itself
   sc.get()->set_scid(scid);
-
   Logger::smf_app().debug("Generated a SMF Context ID " SCID_FMT " ", scid);
 
   // Step 9. Let the context handle the message
@@ -1639,21 +1651,20 @@ bool smf_app::get_session_management_subscription_data(
       Logger::smf_app().debug(
           "Default session type %s",
           smf_cfg.session_management_subscription[i].session_type.c_str());
-      if (smf_cfg.session_management_subscription[i].session_type.compare(
-              "IPV4") == 0) {
+
+      std::string session_type =
+          smf_cfg.session_management_subscription[i].session_type;
+      if (boost::iequals(session_type, "IPv4")) {
         pdu_session_type.pdu_session_type =
             pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
-      } else if (
-          smf_cfg.session_management_subscription[i].session_type.compare(
-              "IPV6") == 0) {
+      } else if (boost::iequals(session_type, "IPv6")) {
         pdu_session_type.pdu_session_type =
             pdu_session_type_e::PDU_SESSION_TYPE_E_IPV6;
-      } else if (
-          smf_cfg.session_management_subscription[i].session_type.compare(
-              "IPV4V6") == 0) {
+      } else if (boost::iequals(session_type, "IPv4v6")) {
         pdu_session_type.pdu_session_type =
             pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
       }
+
       dnn_configuration->pdu_session_types.default_session_type =
           pdu_session_type;
 

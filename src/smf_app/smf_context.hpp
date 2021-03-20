@@ -562,7 +562,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
         pending_procedures(),
         dnn_subscriptions(),
         scid(0),
-        event_sub() {
+        event_sub(),
+        plmn() {
     supi_prefix = {};
     // Subscribe to sm context status change
     sm_context_status_connection =
@@ -854,6 +855,18 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<session_management_subscription>& ss);
 
   /*
+   * Insert a session management subscription into the SMF context
+   * @param [const snssai_t&] snssai
+   * @param [const dnn&] dnn
+   * @param [std::shared_ptr<session_management_subscription>&] ss: pointer to
+   * the subscription
+   * @return void
+   */
+  void insert_dnn_subscription(
+      const snssai_t& snssai, const std::string& dnn,
+      std::shared_ptr<session_management_subscription>& ss);
+
+  /*
    * Verify whether a subscription data exist with a given dnn and snssai
    * @param [const std::string &] dnn: DNN
    * @param [const snssai_t&] snssai: single NSSAI
@@ -1043,6 +1056,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   void get_amf_addr(std::string& addr) const;
 
+  void set_plmn(const plmn_t& plmn);
+  void get_plmn(plmn_t& plmn) const;
+
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
@@ -1052,6 +1068,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   supi_t supi;
   std::string supi_prefix;
   scid_t scid;  // SM Context ID
+  plmn_t plmn;
 
   // AMF IP addr
   string amf_addr;

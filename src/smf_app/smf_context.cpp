@@ -1128,8 +1128,8 @@ void smf_context::get_session_ambr(
   std::shared_ptr<dnn_configuration_t> sdc            = {};
   find_dnn_subscription(snssai, ss);
 
-  uint32_t bit_rate_dl = {1};
-  uint32_t bit_rate_ul = {1};
+  uint32_t bit_rate_dl = {110000000};  // TODO: to be updated
+  uint32_t bit_rate_ul = {110000000};  // TODO: to be updated
 
   session_ambr.pDUSessionAggregateMaximumBitRateDL.size = 4;
   session_ambr.pDUSessionAggregateMaximumBitRateDL.buf =
@@ -1328,7 +1328,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       .ci_dns_server_ipv4_address_request          = 0,
       .ci_ip_address_allocation_via_nas_signalling = 0,
       .ci_ipv4_address_allocation_via_dhcpv4       = 0,
-      .ci_ipv4_link_mtu_request                    = 0};
+      .ci_ipv4_link_mtu_request                    = 0,
+      .ci_dns_server_ipv6_address_request          = 0};
 
   smf_app_inst->process_pco_request(pco_req, pco_resp, pco_ids);
   sm_context_resp_pending->res.set_epco(pco_resp);
@@ -1338,8 +1339,55 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   bool set_paa = false;
   paa_t paa    = {};
   Logger::smf_app().debug("UE Address Allocation");
+
   switch (sp->pdu_session_type.pdu_session_type) {
+    case PDU_SESSION_TYPE_E_IPV4V6: {
+      Logger::smf_app().debug(
+          "PDU Session Type IPv4v6, select PDU Session Type IPv4");
+      bool paa_res = false;
+      // TODO: Verified if use default session type or requested session type
+      std::shared_ptr<session_management_subscription> ss = {};
+      std::shared_ptr<dnn_configuration_t> sdc            = {};
+      find_dnn_subscription(snssai, ss);
+      if (nullptr != ss.get()) {
+        ss.get()->find_dnn_configuration(sd->dnn_in_use, sdc);
+        if (nullptr != sdc.get()) {
+          paa.pdu_session_type.pdu_session_type =
+              sdc.get()
+                  ->pdu_session_types.default_session_type.pdu_session_type;
+        }
+      }
+      // TODO: use requested PDU Session Type?
+      //     paa.pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4V6;
+      if ((not paa_res) || (not paa.is_ip_assigned())) {
+        bool success =
+            paa_dynamic::get_instance().get_free_paa(sd->dnn_in_use, paa);
+        if (success) {
+          set_paa = true;
+        } else {
+          // ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED;
+          set_paa          = false;
+          request_accepted = false;
+          sm_context_resp->res.set_cause(static_cast<uint8_t>(
+              cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES));
+        }
+        // TODO: Static IP address allocation
+      } else if ((paa_res) && (paa.is_ip_assigned())) {
+        set_paa = true;
+      }
+      Logger::smf_app().info(
+          "PAA, Ipv4 Address: %s",
+          inet_ntoa(*((struct in_addr*) &paa.ipv4_address)));
+
+      char str_addr6[INET6_ADDRSTRLEN];
+      if (inet_ntop(
+              AF_INET6, &paa.ipv6_address, str_addr6, sizeof(str_addr6))) {
+        Logger::smf_app().info("PAA, IPv6 Address: %s", str_addr6);
+      }
+
+    }; break;
     case PDU_SESSION_TYPE_E_IPV4: {
+      Logger::smf_app().debug("PDU Session Type IPv4");
       if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) {
         // use SM NAS signalling
         // static or dynamic address allocation
@@ -1357,7 +1405,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           if (nullptr != sdc.get()) {
             paa.pdu_session_type.pdu_session_type =
                 sdc.get()
-                    ->pdu_session_types.default_session_type.pdu_session_type;
+                    ->pdu_session_types.default_session_type
+                    .pdu_session_type;  // TODO: Verified if use default session
+                                        // type or requested session type
+
             // TODO: static ip address
           }
         }
@@ -1393,11 +1444,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     case PDU_SESSION_TYPE_E_IPV6: {
       // TODO:
       Logger::smf_app().debug("IPv6 has not been supported yet!");
-    } break;
-
-    case PDU_SESSION_TYPE_E_IPV4V6: {
-      // TODO:
-      Logger::smf_app().debug("IPv4/v6 has not been supported yet!");
     } break;
 
     default: {
@@ -1535,7 +1581,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   if (sm_context_resp->res.get_cause() !=
       static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
     // clear pco, ambr
-    // TODO:
+
     // free paa
     paa_t free_paa = {};
     free_paa       = sm_context_resp->res.get_paa();
@@ -1543,11 +1589,12 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       switch (sp->pdu_session_type.pdu_session_type) {
         case PDU_SESSION_TYPE_E_IPV4:
         case PDU_SESSION_TYPE_E_IPV4V6:
-          paa_dynamic::get_instance().release_paa(
-              sd->dnn_in_use, free_paa.ipv4_address);
-          break;
-
+          // paa_dynamic::get_instance().release_paa(
+          //    sd->dnn_in_use, free_paa.ipv4_address);
+          // break;
         case PDU_SESSION_TYPE_E_IPV6:
+          paa_dynamic::get_instance().release_paa(sd->dnn_in_use, free_paa);
+          break;
         case PDU_SESSION_TYPE_E_UNSTRUCTURED:
         case PDU_SESSION_TYPE_E_ETHERNET:
         case PDU_SESSION_TYPE_E_RESERVED:
@@ -2826,9 +2873,33 @@ void smf_context::insert_dnn_subscription(
     const snssai_t& snssai,
     std::shared_ptr<session_management_subscription>& ss) {
   std::unique_lock<std::recursive_mutex> lock(m_context);
+
   dnn_subscriptions[(uint8_t) snssai.sST] = ss;
   Logger::smf_app().info(
       "Inserted DNN Subscription, key: %d", (uint8_t) snssai.sST);
+}
+
+//------------------------------------------------------------------------------
+void smf_context::insert_dnn_subscription(
+    const snssai_t& snssai, const std::string& dnn,
+    std::shared_ptr<session_management_subscription>& ss) {
+  std::unique_lock<std::recursive_mutex> lock(m_context);
+  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
+    std::shared_ptr<session_management_subscription> old_ss =
+        dnn_subscriptions.at((uint8_t) snssai.sST);
+
+    std::shared_ptr<dnn_configuration_t> dnn_configuration = {};
+    ss.get()->find_dnn_configuration(dnn, dnn_configuration);
+    if (dnn_configuration != nullptr) {
+      old_ss.get()->insert_dnn_configuration(dnn, dnn_configuration);
+    }
+
+  } else {
+    dnn_subscriptions[(uint8_t) snssai.sST] = ss;
+  }
+  Logger::smf_app().info(
+      "Inserted DNN Subscription, key: %d, dnn %s", (uint8_t) snssai.sST,
+      dnn.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -3185,6 +3256,16 @@ void smf_context::set_amf_addr(const std::string& addr) {
 //------------------------------------------------------------------------------
 void smf_context::get_amf_addr(std::string& addr) const {
   addr = amf_addr;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::set_plmn(const plmn_t& plmn) {
+  this->plmn = plmn;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::get_plmn(plmn_t& plmn) const {
+  plmn = this->plmn;
 }
 
 //------------------------------------------------------------------------------

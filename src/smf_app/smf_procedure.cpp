@@ -414,7 +414,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
     // TODO: Support IPv4 only for now
     if (n11_triggered_pending->res.get_pdu_session_type() ==
-        PDU_SESSION_TYPE_E_IPV4V6) {
+        PDU_SESSION_TYPE_E_IPV6) {
       n11_triggered_pending->res.set_pdu_session_type(PDU_SESSION_TYPE_E_IPV4);
       cause_n1 =
           cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;

@@ -437,19 +437,19 @@ int smf_config::load(const string& config_file) {
       if (boost::iequals(astring, "IPv4")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_IPV4;
-      } else if (boost::iequals(astring, "IPv6") == 0) {
+      } else if (boost::iequals(astring, "IPv6")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_IPV6;
-      } else if (boost::iequals(astring, "IPv4IPv6") == 0) {
+      } else if (boost::iequals(astring, "IPv4v6")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_IPV4V6;
-      } else if (boost::iequals(astring, "Unstructured") == 0) {
+      } else if (boost::iequals(astring, "Unstructured")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_UNSTRUCTURED;
-      } else if (boost::iequals(astring, "Ethernet") == 0) {
+      } else if (boost::iequals(astring, "Ethernet")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_ETHERNET;
-      } else if (boost::iequals(astring, "Reserved") == 0) {
+      } else if (boost::iequals(astring, "Reserved")) {
         dnn[dnn_idx].pdu_session_type.pdu_session_type =
             PDU_SESSION_TYPE_E_RESERVED;
       } else {
@@ -873,8 +873,14 @@ void smf_config::display() {
           dnn[i].pool_id_iv4, range_low.c_str(), range_high.c_str());
     }
     if (dnn[i].pool_id_iv6 >= 0) {
-      Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_IPV6_POOL ":  %d", dnn[i].pool_id_iv6);
+      if (inet_ntop(
+              AF_INET6, &paa_pool6_prefix[dnn[i].pool_id_iv6], str_addr6,
+              sizeof(str_addr6))) {
+        Logger::smf_app().info(
+            "        " SMF_CONFIG_STRING_IPV6_POOL ":  %d (%s / %d)",
+            dnn[i].pool_id_iv6, str_addr6,
+            paa_pool6_prefix_len[dnn[i].pool_id_iv6]);
+      }
     }
   }
 

@@ -363,6 +363,11 @@ void pdu_session_create_sm_context_request::get_plmn(plmn_t& p) const {
 }
 
 //-----------------------------------------------------------------------------
+plmn_t pdu_session_create_sm_context_request::get_plmn() const {
+  return m_serving_network;
+}
+
+//-----------------------------------------------------------------------------
 void pdu_session_create_sm_context_request::set_an_type(
     const std::string& an_type) {
   m_an_type = an_type;
