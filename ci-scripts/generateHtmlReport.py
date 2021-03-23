@@ -449,6 +449,7 @@ class HtmlReport():
 					cell_msg = '	  <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>'
 					cell_msg += 'KO::\n'
 					cell_msg += ' -- Some Git Operations went WRONG</b></pre></td>\n'
+			else:
 				cell_msg = '      <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>'
 				cell_msg += 'KO: logfile (' + logFileName + ') not found</b></pre></td>\n'
 
@@ -491,6 +492,9 @@ class HtmlReport():
 				base_image = False
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
 					for line in logfile:
+						result = re.search('FROM oai-smf-base', line)
+						if result is not None:
+							base_image = True
 						result = re.search(section_start_pattern, line)
 						if result is not None:
 							section_status = True
