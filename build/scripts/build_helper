@@ -39,7 +39,7 @@ case "$OS_DISTRO" in
   ubuntu) OS_BASEDISTRO="debian"; INSTALLER="apt-get"; CMAKE="cmake" ;;
 esac
 
-IS_CONTAINER=`egrep -c "docker|kubepods|podman" /proc/self/cgroup`
+IS_CONTAINER=`egrep -c "docker|kubepods|podman|buildah|libpod" /proc/self/cgroup || true`
 
 if [ $IS_CONTAINER -eq 0 ]
 then
