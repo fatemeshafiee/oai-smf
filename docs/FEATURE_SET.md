@@ -22,6 +22,8 @@
 
 ![5GC SBA](./images/5gc_sba.png)
 
+![Scope of the implementation](images/oai_5gc_current_status.jpg)
+
 # 2. OAI SMF Available Interfaces #
 
 | **ID** | **Interface** | **Status**         | **Comment**                                                               |
