@@ -49,6 +49,9 @@ install_fb_folly_from_source(){
   then
     if [[ "$OS_BASEDISTRO" == "fedora" ]]; then 
       $SUDO $INSTALLER install $OPTION \
+        gcc-c++ \
+        $CMAKE \
+        make \
         boost-devel \
         libevent-devel \
         double-conversion-devel \
