@@ -774,7 +774,10 @@ class HtmlReport():
 			logFileName = 'smf_' + variant + '_image_build.log'
 			if os.path.isfile(cwd + '/archives/' + logFileName):
 				section_start_pattern = 'WORKDIR /openair-smf/etc'
-				section_end_pattern = 'Successfully tagged oai-smf'
+				if variant == 'docker':
+					section_end_pattern = 'Successfully tagged oai-smf'
+				else:
+					section_end_pattern = 'COMMIT oai-smf:'
 				section_status = False
 				status = False
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
@@ -845,7 +848,10 @@ class HtmlReport():
 								else:
 									result = re.search('oai-smf *develop', line)
 							if result is not None:
-								result = re.search('ago *([0-9A-Z]+)', line)
+								if variant == 'docker':
+									result = re.search('ago *([0-9A-Z]+)', line)
+								else:
+									result = re.search('ago *([0-9]+ [A-Z]+)', line)
 								if result is not None:
 									size = result.group(1)
 									status = True
@@ -854,7 +860,7 @@ class HtmlReport():
 					cell_msg = '	   <td bgcolor="LimeGreen"><pre style="border:none; background-color:LimeGreen"><b>'
 					cell_msg += 'OK:  ' + size + '\n'
 				else:
-					cell_msg = '	   <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>'
+					cellOMMIT oai-smf:
 					cell_msg += 'KO:\n'
 				cell_msg += '</b></pre></td>\n'
 			else:
