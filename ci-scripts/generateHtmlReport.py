@@ -860,7 +860,7 @@ class HtmlReport():
 					cell_msg = '	   <td bgcolor="LimeGreen"><pre style="border:none; background-color:LimeGreen"><b>'
 					cell_msg += 'OK:  ' + size + '\n'
 				else:
-					cellOMMIT oai-smf:
+					cell_msg = '	   <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>'
 					cell_msg += 'KO:\n'
 				cell_msg += '</b></pre></td>\n'
 			else:
