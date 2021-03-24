@@ -242,6 +242,8 @@ install_nghttp2_from_git() {
       binutils-devel \
       autoconf \
       automake \
+      $CMAKE \
+      make \
       libtool \
       pkg-config \
       zlib-devel \
