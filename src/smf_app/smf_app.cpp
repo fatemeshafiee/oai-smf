@@ -871,6 +871,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   std::string nd_dnn;
   util::dotted_to_string(dnn, nd_dnn);
   dnn = nd_dnn;
+  // update DNN
+  smreq->req.set_dnn(dnn);
   if (not smf_cfg.is_dotted_dnn_handled(dnn, pdu_session_type)) {
     // Not a valid request...
     Logger::smf_app().warn(
