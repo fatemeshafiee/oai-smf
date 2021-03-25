@@ -62,6 +62,7 @@ void ipv4v6_to_pdu_address_information(
 
 void string_to_bstring(const std::string& str, bstring bstr);
 bool string_to_dotted(const std::string& str, std::string& dotted);
+bool dotted_to_string(const std::string& dot, std::string& no_dot);
 void string_to_dnn(const std::string& str, bstring bstr);
 }  // namespace util
 #endif
