@@ -173,6 +173,30 @@ bool util::string_to_dotted(const std::string& str, std::string& dotted) {
   return true;
 };
 
+bool util::dotted_to_string(const std::string& dot, std::string& no_dot) {
+  // uint8_t should be enough, but uint16 if length > 255.
+  uint16_t offset = 0;
+  bool result     = true;
+  no_dot          = {};
+
+  while (offset < dot.length()) {
+    if (dot[offset] < 64) {
+      if ((offset + dot[offset]) <= dot.length()) {
+        if (offset) {
+          no_dot.push_back('.');
+        }
+        no_dot.append(&dot[offset + 1], dot[offset]);
+      }
+      offset = offset + 1 + dot[offset];
+    } else {
+      // should not happen, consume bytes
+      no_dot.push_back(dot[offset++]);
+      result = false;
+    }
+  }
+  return result;
+};
+
 void util::string_to_dnn(const std::string& str, bstring bstr) {
   bstr->slen = str.length();
   memcpy((void*) bstr->data, (void*) str.c_str(), str.length());
