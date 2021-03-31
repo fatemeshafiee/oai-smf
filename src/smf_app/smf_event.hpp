@@ -73,9 +73,15 @@ class smf_event {
   bs2::connection subscribe_ee_pdu_session_release(
       const ee_pdu_session_release_sig_t::slot_type& sig);
 
+  bs2::connection subscribe_ee_pdu_session_status_change(
+      const ee_pdu_session_status_sig_t::slot_type& sig);
+
  private:
   sm_context_status_sig_t
       sm_context_status;  // Signal for SM Context status update
+  ee_pdu_session_status_sig_t
+      ee_pdu_session_status;  // Signal for PDU Session status change
+
   ee_pdu_session_release_sig_t
       ee_pdu_session_release;  // Signal for SM Context status update
 };

@@ -585,8 +585,12 @@ class event_notification {
   std::string get_notif_uri() const;
   void set_notif_id(std::string const& value);
   std::string get_notif_id() const;
+  void set_custom_info(const nlohmann::json& c);
+  void get_custom_info(nlohmann::json& c) const;
+
 
  private:
+  nlohmann::json custom_info;  // store extra json data
   std::string m_notif_uri;  // m_NotifUri;
   std::string m_notif_id;   // m_NotifId;
 

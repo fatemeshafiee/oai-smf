@@ -3083,6 +3083,10 @@ void smf_context::handle_ee_pdu_session_release(
       ev_notif.set_supi(supi);
       ev_notif.set_notif_uri(i.get()->notif_uri);
       ev_notif.set_notif_id(i.get()->notif_id);
+      //custom json e.g., for FlexCN
+      //nlohmann::json cj = {};
+      //cj["ue_ipv4_addr"]  = "12.1.1.2";
+      //cj[""]
       itti_msg->event_notifs.push_back(ev_notif);
     }
 

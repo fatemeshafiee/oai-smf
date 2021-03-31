@@ -148,6 +148,12 @@ class smf_app {
   std::string smf_instance_id;      // SMF instance id
   timer_id_t timer_nrf_heartbeat;
 
+  // for Event Handling
+  smf_event event_sub;
+  bs2::connection pdu_session_status_connection;
+  bs2::connection ee_pdu_session_release_connection;
+
+
   /*
    * Apply the config from the configuration file for DNN pools
    * @param [const smf_config &cfg] cfg
@@ -212,6 +218,9 @@ class smf_app {
 
   virtual ~smf_app() {
     Logger::smf_app().debug("Delete SMF_APP instance...");
+    // Disconnect the boost connection
+    if (pdu_session_status_connection.connected())
+    	pdu_session_status_connection.disconnect();
     // TODO: Unregister NRF
   }
 
@@ -531,6 +540,9 @@ class smf_app {
       std::shared_ptr<itti_sbi_notification_data>& msg,
       oai::smf_server::model::ProblemDetails& problem_details,
       uint8_t& http_code);
+
+  void handle_pdu_session_status_change(
+      scid_t scid, const std::string& status, uint8_t http_version);
 
   /*
    * Trigger pdu session modification

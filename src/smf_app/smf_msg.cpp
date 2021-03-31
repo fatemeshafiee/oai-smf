@@ -966,6 +966,16 @@ std::string event_notification::get_notif_id() const {
   return m_notif_id;
 }
 
+//------------------------------------------------------------------------------
+void event_notification::set_custom_info(const nlohmann::json& c) {
+  custom_info = c;
+}
+
+//------------------------------------------------------------------------------
+void event_notification::get_custom_info(nlohmann::json& c) const {
+  c = custom_info;
+}
+
 //-----------------------------------------------------------------------------
 void data_notification_msg::set_notification_event_type(
     const std::string& type) {

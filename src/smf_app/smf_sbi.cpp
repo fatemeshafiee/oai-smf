@@ -572,12 +572,17 @@ void smf_sbi::notify_subscribed_event(
     event_notif["event"]       = i.get_smf_event();
     event_notif["pduSeId"]     = i.get_pdu_session_id();
     event_notif["supi"]        = std::to_string(i.get_supi());
+    //customized data
+    nlohmann::json customized_data   = {};
+    i.get_custom_info(customized_data);
+    event_notif["customized_data"] = customized_data;
     // timestamp
     std::time_t time_epoch_ntp = std::time(nullptr);
     uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
     event_notif["timeStamp"]   = std::to_string(tv_ntp);
     event_notifs.push_back(event_notif);
     json_data["eventNotifs"] = event_notifs;
+
     std::string body         = json_data.dump();
     bodys.push_back(body);
   }
