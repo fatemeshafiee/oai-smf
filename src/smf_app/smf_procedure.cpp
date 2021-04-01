@@ -1135,6 +1135,9 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
       // set UpCnxState to DEACTIVATED
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
+      //Trigger Event_exposure event
+      scid_t scid = sc.get()->get_scid();
+      sc.get()->trigger_pdu_session_status_change(scid, "ACTIVATED", 1);
     } break;
 
       // UE-Triggered Service Request Procedure (Step 1)

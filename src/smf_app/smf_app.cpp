@@ -2210,9 +2210,5 @@ void smf_app::handle_pdu_session_status_change(
    } else {
      Logger::smf_app().debug("No subscription available for this event");
    }
-
-
-
-
 }
 
