@@ -815,6 +815,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
 
+  // TODO:
+  bool handle_ho_path_switch_req(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+
   /*
    * Find DNN context with name
    * @param [const std::string&] dnn

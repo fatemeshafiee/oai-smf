@@ -359,6 +359,12 @@ class pdu_session_update_sm_context_request
   bool an_type_is_set() const;
   bool release_is_set() const;
   void set_release(bool value);
+  void set_to_be_switched(bool value);
+  bool get_to_be_switched() const;
+  void get_to_be_switched(bool& value) const;
+  void set_failed_to_be_switched(bool value);
+  bool get_failed_to_be_switched() const;
+  void get_failed_to_be_switched(bool& value) const;
 
  private:
   std::vector<pfcp::qfi_t> qfis;
@@ -376,6 +382,11 @@ class pdu_session_update_sm_context_request
   uint8_t m_5gMm_cause_value;
   bool m_release_is_set;
   bool m_release;
+  bool m_to_be_switched;
+  bool m_to_be_switched_is_set;
+  bool m_failed_to_be_switched;
+  bool m_is_failed_to_be_switched;
+  bool m_failed_to_be_switched_is_set;
 };
 
 //---------------------------------------------------------------------------------------

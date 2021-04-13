@@ -123,7 +123,8 @@ enum class session_management_procedures_type_e {
   PDU_SESSION_RELEASE_SMF_INITIATED           = 13,
   PDU_SESSION_RELEASE_AMF_INITIATED           = 14,
   PDU_SESSION_RELEASE_AN_INITIATED            = 15,
-  PDU_SESSION_TEST                            = 16
+  HO_PATH_SWITCH_REQ                          = 16,
+  PDU_SESSION_TEST                            = 17
 };
 
 static const std::vector<std::string> session_management_procedures_type_e2str =
@@ -142,6 +143,7 @@ static const std::vector<std::string> session_management_procedures_type_e2str =
      "PDU_SESSION_RELEASE_SMF_INITIATED",
      "PDU_SESSION_RELEASE_AMF_INITIATED",
      "PDU_SESSION_RELEASE_AN_INITIATED",
+     "HO_PATH_SWITCH_REQ",
      "PDU_SESSION_TEST"
 
 };
