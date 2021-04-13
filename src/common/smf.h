@@ -123,7 +123,8 @@ enum class session_management_procedures_type_e {
   PDU_SESSION_RELEASE_SMF_INITIATED           = 13,
   PDU_SESSION_RELEASE_AMF_INITIATED           = 14,
   PDU_SESSION_RELEASE_AN_INITIATED            = 15,
-  PDU_SESSION_TEST                            = 16
+  HO_PATH_SWITCH_REQ                          = 16,
+  PDU_SESSION_TEST                            = 17
 };
 
 static const std::vector<std::string> session_management_procedures_type_e2str =
@@ -142,6 +143,7 @@ static const std::vector<std::string> session_management_procedures_type_e2str =
      "PDU_SESSION_RELEASE_SMF_INITIATED",
      "PDU_SESSION_RELEASE_AMF_INITIATED",
      "PDU_SESSION_RELEASE_AN_INITIATED",
+     "HO_PATH_SWITCH_REQ",
      "PDU_SESSION_TEST"
 
 };
@@ -248,7 +250,7 @@ typedef struct nf_service_version_s {
 } nf_service_version_t;
 
 typedef struct ip_endpoint_s {
-  //struct in6_addr  ipv6_address;
+  // struct in6_addr  ipv6_address;
   struct in_addr ipv4_address;
   std::string transport;  // TCP
   unsigned int port;
@@ -323,8 +325,7 @@ typedef struct patch_item_s {
   }
 } patch_item_t;
 
-
-//TODO: move to 23.003
+// TODO: move to 23.003
 typedef struct guami_5g_s {
   plmn_t plmn;
   std::string amf_id;

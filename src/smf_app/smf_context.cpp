@@ -59,6 +59,7 @@ extern "C" {
 #include "Ngap_PDUSessionResourceSetupUnsuccessfulTransfer.h"
 #include "Ngap_QosFlowAddOrModifyResponseItem.h"
 #include "Ngap_QosFlowAddOrModifyResponseList.h"
+#include "Ngap_PathSwitchRequestTransfer.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -2561,6 +2562,22 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         // don't need to create a procedure to update UPF
       } break;
 
+      // Handover
+      case n2_sm_info_type_e::PATH_SWITCH_REQ: {
+        // Xn based inter NG-RAN handover (Section 4.9.1.2@3GPP TS 23.502
+        // V16.0.0)
+
+        Logger::smf_app().info(
+            "Xn based inter NG-RAN Handover, processing N2 SM Information");
+        procedure_type =
+            session_management_procedures_type_e::HO_PATH_SWITCH_REQ;
+
+        if (!handle_ho_path_switch_req(n2_sm_information, smreq)) return;
+
+        // need to update UPF accordingly
+        update_upf = true;
+      } break;
+
       default: {
         Logger::smf_app().warn("Unknown N2 SM info type %d", n2_sm_info_type);
       }
@@ -2866,6 +2883,36 @@ void smf_context::handle_pdu_session_modification_network_requested(
         "Could not send ITTI message %s to task TASK_SMF_SBI",
         itti_msg->get_msg_name());
   }
+}
+
+//-------------------------------------------------------------------------------------
+bool smf_context::handle_ho_path_switch_req(
+    std::string& n2_sm_information,
+    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request) {
+  std::string n1_sm_msg, n1_sm_msg_hex;
+
+  // Ngap_PathSwitchRequestTransfer
+  std::shared_ptr<Ngap_PathSwitchRequestTransfer_t> decoded_msg =
+      std::make_shared<Ngap_PathSwitchRequestTransfer_t>();
+  int decode_status = smf_n2::get_instance().decode_n2_sm_information(
+      decoded_msg, n2_sm_information);
+  if (decode_status == RETURNerror) {
+    // error, send error to AMF
+    Logger::smf_app().warn(
+        "Decode N2 SM (Ngap_PathSwitchRequestTransfer) "
+        "failed!");
+    // trigger to send reply to AMF
+    // TODO: to be updated with correct status/cause
+    smf_app_inst->trigger_update_context_error_response(
+        http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+        PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
+        sm_context_request.get()->pid);
+
+    return false;
+  }
+  // TODO:
+
+  return true;
 }
 
 //------------------------------------------------------------------------------

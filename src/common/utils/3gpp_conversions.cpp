@@ -220,7 +220,7 @@ void xgpp_conv::sm_context_create_from_openapi(
         "PDU Session ID %d", context_data.getPduSessionId());
     pcr.set_pdu_session_id(context_data.getPduSessionId());
   } else {
-	  Logger::smf_app().warn("No PDU Session ID available");
+    Logger::smf_app().warn("No PDU Session ID available");
   }
 
   // AMF ID (ServingNFId/NfInstanceId)
@@ -365,6 +365,14 @@ void xgpp_conv::sm_context_update_from_openapi(
   // Flow is released) step 7a, SM Context ID, N2 SM information, UE location
   // information Step 11, SM Context ID, N1 SM (PDU Session Modification Command
   // ACK), User location
+
+  // Handover
+  if (context_data.toBeSwitchedIsSet()) {
+    pur.set_to_be_switched(context_data.isToBeSwitched());
+  }
+  if (context_data.failedToBeSwitchedIsSet()) {
+    pur.set_failed_to_be_switched(context_data.isFailedToBeSwitched());
+  }
 }
 
 //------------------------------------------------------------------------------

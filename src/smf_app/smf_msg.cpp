@@ -530,6 +530,41 @@ void pdu_session_update_sm_context_request::set_release(bool value) {
   m_release_is_set = true;
 }
 
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::set_to_be_switched(bool value) {
+  m_to_be_switched        = value;
+  m_to_be_switched_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::get_to_be_switched(
+    bool& value) const {
+  value = m_to_be_switched;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_update_sm_context_request::get_to_be_switched() const {
+  return m_to_be_switched;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::set_failed_to_be_switched(
+    bool value) {
+  m_failed_to_be_switched        = value;
+  m_failed_to_be_switched_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::get_failed_to_be_switched(
+    bool& value) const {
+  value = m_failed_to_be_switched;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_update_sm_context_request::get_failed_to_be_switched() const {
+  return m_failed_to_be_switched;
+}
+
 /*
  * class: PDU Session Update SM Context Response
  */
