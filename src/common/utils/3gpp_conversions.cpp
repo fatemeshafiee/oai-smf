@@ -366,10 +366,12 @@ void xgpp_conv::sm_context_update_from_openapi(
   // information Step 11, SM Context ID, N1 SM (PDU Session Modification Command
   // ACK), User location
 
-  // Handover
+  // For Xn Handover
   if (context_data.toBeSwitchedIsSet()) {
     pur.set_to_be_switched(context_data.isToBeSwitched());
   }
+  // TODO: additional N2 SM information received from the source 5G-AN
+
   if (context_data.failedToBeSwitchedIsSet()) {
     pur.set_failed_to_be_switched(context_data.isFailedToBeSwitched());
   }

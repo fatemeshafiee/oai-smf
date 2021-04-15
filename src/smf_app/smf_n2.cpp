@@ -1021,6 +1021,18 @@ bool smf_n2::create_n2_pdu_session_resource_modify_response_transfer(
   return result;
 }
 
+//------------------------------------------------------------------------------
+bool smf_n2::create_n2_path_switch_request_ack(
+    pdu_session_update_sm_context_response& sm_context_res,
+    n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str) {
+  // Path Switch Request Acknowledge Transfer IE
+  Logger::smf_n2().debug(
+      "Create N2 SM Information: Path Switch Request Acknowledge Transfer IE");
+  bool result = false;
+
+  return result;
+}
+
 //---------------------------------------------------------------------------------------------
 int smf_n2::decode_n2_sm_information(
     std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE,
@@ -1159,7 +1171,7 @@ int smf_n2::decode_n2_sm_information(
   memset(data, 0, data_len + 1);
   memcpy((void*) data, (void*) n2_sm_info.c_str(), data_len);
 
-  // Ngap_PDUSessionResourceSetupUnsuccessfulTransfer
+  // Ngap_PathSwitchRequestTransfer
   asn_dec_rval_t rc = asn_decode(
       nullptr, ATS_ALIGNED_CANONICAL_PER,
       &asn_DEF_Ngap_PathSwitchRequestTransfer, (void**) &ngap_IE, (void*) data,

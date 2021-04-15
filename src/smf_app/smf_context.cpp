@@ -60,6 +60,8 @@ extern "C" {
 #include "Ngap_QosFlowAddOrModifyResponseItem.h"
 #include "Ngap_QosFlowAddOrModifyResponseList.h"
 #include "Ngap_PathSwitchRequestTransfer.h"
+#include "Ngap_PathSwitchRequestSetupFailedTransfer.h"
+#include "Ngap_QosFlowAcceptedItem.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -2572,8 +2574,9 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         procedure_type =
             session_management_procedures_type_e::HO_PATH_SWITCH_REQ;
 
-        if (!handle_ho_path_switch_req(n2_sm_information, smreq)) return;
-
+        if (!handle_ho_path_switch_req(
+                n2_sm_information, smreq, sm_context_resp_pending, sp))
+          return;
         // need to update UPF accordingly
         update_upf = true;
       } break;
@@ -2888,29 +2891,109 @@ void smf_context::handle_pdu_session_modification_network_requested(
 //-------------------------------------------------------------------------------------
 bool smf_context::handle_ho_path_switch_req(
     std::string& n2_sm_information,
-    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request) {
+    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+    std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+    std::shared_ptr<smf_pdu_session>& sp) {
   std::string n1_sm_msg, n1_sm_msg_hex;
 
-  // Ngap_PathSwitchRequestTransfer
-  std::shared_ptr<Ngap_PathSwitchRequestTransfer_t> decoded_msg =
-      std::make_shared<Ngap_PathSwitchRequestTransfer_t>();
-  int decode_status = smf_n2::get_instance().decode_n2_sm_information(
-      decoded_msg, n2_sm_information);
-  if (decode_status == RETURNerror) {
-    // error, send error to AMF
-    Logger::smf_app().warn(
-        "Decode N2 SM (Ngap_PathSwitchRequestTransfer) "
-        "failed!");
-    // trigger to send reply to AMF
-    // TODO: to be updated with correct status/cause
-    smf_app_inst->trigger_update_context_error_response(
-        http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-        PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
-        sm_context_request.get()->pid);
+  // If the PDU session is requested to be switched to a new N3 endpoint
+  if (sm_context_request->req.get_to_be_switched()) {
+    // Ngap_PathSwitchRequestTransfer
+    std::shared_ptr<Ngap_PathSwitchRequestTransfer_t> decoded_msg =
+        std::make_shared<Ngap_PathSwitchRequestTransfer_t>();
+    int decode_status = smf_n2::get_instance().decode_n2_sm_information(
+        decoded_msg, n2_sm_information);
+    if (decode_status == RETURNerror) {
+      // error, send error to AMF
+      Logger::smf_app().warn(
+          "Decode N2 SM (Ngap_PathSwitchRequestTransfer) "
+          "failed!");
+      // trigger to send reply to AMF
+      // TODO: to be updated with correct status/cause
+      smf_app_inst->trigger_update_context_error_response(
+          http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+          PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
+          sm_context_request.get()->pid);
 
-    return false;
+      return false;
+    }
+
+    // store AN Tunnel Info + list of accepted QFIs
+    pfcp::fteid_t dl_teid = {};
+
+    if (decoded_msg->dL_NGU_UP_TNLInformation.present ==
+        Ngap_UPTransportLayerInformation_PR_gTPTunnel) {
+      memcpy(
+          &dl_teid.teid,
+          decoded_msg->dL_NGU_UP_TNLInformation.choice.gTPTunnel->gTP_TEID.buf,
+          TEID_GRE_KEY_LENGTH);
+      memcpy(
+          &dl_teid.ipv4_address,
+          decoded_msg->dL_NGU_UP_TNLInformation.choice.gTPTunnel
+              ->transportLayerAddress.buf,
+          4);
+
+      dl_teid.teid = ntohl(dl_teid.teid);
+      dl_teid.v4   = 1;  // Only V4 for now
+      sm_context_request.get()->req.set_dl_fteid(dl_teid);
+
+      Logger::smf_app().debug(
+          "DL GTP F-TEID (AN F-TEID) "
+          "0x%" PRIx32 " ",
+          dl_teid.teid);
+      Logger::smf_app().debug(
+          "dL_NGU_UP_TNLInformation (AN IP Addr) %s",
+          conv::toString(dl_teid.ipv4_address).c_str());
+
+      for (int i = 0; i < decoded_msg->qosFlowAcceptedList.list.count; i++) {
+        pfcp::qfi_t qfi((uint8_t)(
+            decoded_msg->qosFlowAcceptedList.list.array[i]->qosFlowIdentifier));
+        sm_context_request.get()->req.add_qfi(qfi);
+        Logger::smf_app().debug(
+            "QoSFlowAcceptedList, QFI % d ",
+            (uint8_t)(decoded_msg->qosFlowAcceptedList.list.array[i]
+                          ->qosFlowIdentifier));
+      }
+    }
+
+    // DL NG-U TNL Information Reused IE
+    if (decoded_msg->dL_NGU_TNLInformationReused != nullptr &&
+        (*decoded_msg->dL_NGU_TNLInformationReused ==
+         Ngap_DL_NGU_TNLInformationReused_true)) {
+      // TODO:
+    }
+
+    // TODO: User Plane Security Information IE
+    return true;
   }
-  // TODO:
+
+  // if the PDU session failed to be setup in the target RAN
+  // Release this session
+  if (sm_context_request->req.get_failed_to_be_switched()) {
+    // TODO:
+    /*	  // Ngap_PathSwitchRequestSetupFailedTransfer
+                std::shared_ptr<Ngap_PathSwitchRequestSetupFailedTransfer_t>
+       decoded_msg =
+                    std::make_shared<Ngap_PathSwitchRequestSetupFailedTransfer_t>();
+                int decode_status =
+       smf_n2::get_instance().decode_n2_sm_information( decoded_msg,
+       n2_sm_information); if (decode_status == RETURNerror) {
+                  // error, send error to AMF
+                  Logger::smf_app().warn(
+                      "Decode N2 SM (Ngap_PathSwitchRequestSetupFailedTransfer)
+       " "failed!");
+                  // trigger to send reply to AMF
+                  // TODO: to be updated with correct status/cause
+                  smf_app_inst->trigger_update_context_error_response(
+                      http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                      PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
+                      sm_context_request.get()->pid);
+
+                  return false;
+                }
+      */
+    // TODO:
+  }
 
   return true;
 }
