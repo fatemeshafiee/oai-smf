@@ -177,6 +177,10 @@ class smf_n2 {
       pdu_session_update_sm_context_response& sm_context_res,
       n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
 
+  bool create_n2_path_switch_request_ack(
+      pdu_session_update_sm_context_response& sm_context_res,
+      n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
+
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceSetupResponseTransfer
    * @param [std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>&]
