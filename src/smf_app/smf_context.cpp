@@ -2971,28 +2971,6 @@ bool smf_context::handle_ho_path_switch_req(
   // Release this session
   if (sm_context_request->req.get_failed_to_be_switched()) {
     // TODO:
-    /*	  // Ngap_PathSwitchRequestSetupFailedTransfer
-                std::shared_ptr<Ngap_PathSwitchRequestSetupFailedTransfer_t>
-       decoded_msg =
-                    std::make_shared<Ngap_PathSwitchRequestSetupFailedTransfer_t>();
-                int decode_status =
-       smf_n2::get_instance().decode_n2_sm_information( decoded_msg,
-       n2_sm_information); if (decode_status == RETURNerror) {
-                  // error, send error to AMF
-                  Logger::smf_app().warn(
-                      "Decode N2 SM (Ngap_PathSwitchRequestSetupFailedTransfer)
-       " "failed!");
-                  // trigger to send reply to AMF
-                  // TODO: to be updated with correct status/cause
-                  smf_app_inst->trigger_update_context_error_response(
-                      http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-                      PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
-                      sm_context_request.get()->pid);
-
-                  return false;
-                }
-      */
-    // TODO:
   }
 
   return true;
