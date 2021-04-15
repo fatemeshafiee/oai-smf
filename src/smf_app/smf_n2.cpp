@@ -54,6 +54,7 @@ extern "C" {
 #include "Ngap_QosFlowAddOrModifyResponseList.h"
 #include "Ngap_QosFlowSetupRequestItem.h"
 #include "Ngap_UL-NGU-UP-TNLModifyItem.h"
+#include "Ngap_PathSwitchRequestAcknowledgeTransfer.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -1029,6 +1030,97 @@ bool smf_n2::create_n2_path_switch_request_ack(
   Logger::smf_n2().debug(
       "Create N2 SM Information: Path Switch Request Acknowledge Transfer IE");
   bool result = false;
+
+  Ngap_PathSwitchRequestAcknowledgeTransfer_t* path_switch_req_ack = nullptr;
+  path_switch_req_ack = (Ngap_PathSwitchRequestAcknowledgeTransfer_t*) calloc(
+      1, sizeof(Ngap_PathSwitchRequestAcknowledgeTransfer_t));
+
+  // TODO:
+  pfcp::fteid_t ul_fteid            = {};
+  qos_flow_context_updated qos_flow = {};
+
+  // get default QoS value
+  std::map<uint8_t, qos_flow_context_updated> qos_flows = {};
+  sm_context_res.get_all_qos_flow_context_updateds(qos_flows);
+  for (std::map<uint8_t, qos_flow_context_updated>::iterator it =
+           qos_flows.begin();
+       it != qos_flows.end(); ++it)
+    Logger::smf_n2().debug("QoS Flow context to be updated QFI %d", it->first);
+
+  if (qos_flows.empty()) {
+    free_wrapper((void**) &path_switch_req_ack);
+    return false;
+  }
+  // TODO: support only 1 qos flow
+  qos_flow = qos_flows.begin()->second;
+  ul_fteid = qos_flow.ul_fteid;
+
+  path_switch_req_ack->uL_NGU_UP_TNLInformation =
+      (Ngap_UPTransportLayerInformation*) calloc(
+          1, sizeof(Ngap_UPTransportLayerInformation));
+
+  path_switch_req_ack->uL_NGU_UP_TNLInformation->present =
+      Ngap_UPTransportLayerInformation_PR_gTPTunnel;
+
+  path_switch_req_ack->uL_NGU_UP_TNLInformation->choice.gTPTunnel =
+      (Ngap_GTPTunnel_t*) calloc(1, sizeof(Ngap_GTPTunnel_t));
+
+  path_switch_req_ack->uL_NGU_UP_TNLInformation->choice.gTPTunnel
+      ->transportLayerAddress.size = sizeof(struct in_addr);
+  path_switch_req_ack->uL_NGU_UP_TNLInformation->choice.gTPTunnel
+      ->transportLayerAddress.buf =
+      (uint8_t*) calloc(sizeof(struct in_addr), sizeof(uint8_t));
+  memcpy(
+      path_switch_req_ack->uL_NGU_UP_TNLInformation->choice.gTPTunnel
+          ->transportLayerAddress.buf,
+      &ul_fteid.ipv4_address, sizeof(struct in_addr));
+  path_switch_req_ack->uL_NGU_UP_TNLInformation->choice.gTPTunnel
+      ->transportLayerAddress.bits_unused = 0;
+
+  path_switch_req_ack->uL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID
+      .size = TEID_GRE_KEY_LENGTH;
+  path_switch_req_ack->uL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID
+      .buf = (uint8_t*) calloc(TEID_GRE_KEY_LENGTH, sizeof(uint8_t));
+  memcpy(
+      path_switch_req_ack->uL_NGU_UP_TNLInformation->choice.gTPTunnel->gTP_TEID
+          .buf,
+      &ul_fteid.teid, TEID_GRE_KEY_LENGTH);
+
+  // TODO: Ngap_SecurityIndication (Optional)
+
+  // encode
+  size_t buffer_size = BUF_LEN;
+  char* buffer       = (char*) calloc(1, buffer_size);
+
+  ssize_t encoded_size = aper_encode_to_new_buffer(
+      &asn_DEF_Ngap_PathSwitchRequestAcknowledgeTransfer, nullptr,
+      path_switch_req_ack, (void**) &buffer);
+  if (encoded_size < 0) {
+    Logger::smf_n2().warn(
+        " Ngap_PathSwitchRequestAcknowledgeTransfer encode failed "
+        "(encoded size %d)",
+        encoded_size);
+    result = false;
+  } else {
+#if DEBUG_IS_ON
+    Logger::smf_n2().debug("N2 SM buffer data: ");
+    for (int i = 0; i < encoded_size; i++) printf("%02x ", (char) buffer[i]);
+    Logger::smf_n2().debug(" (%d bytes) \n", encoded_size);
+#endif
+
+    std::string ngap_message((char*) buffer, encoded_size);
+    ngap_msg_str = ngap_message;
+    result       = true;
+  }
+
+  // free memory
+  free_wrapper((void**) &path_switch_req_ack->uL_NGU_UP_TNLInformation->choice
+                   .gTPTunnel->transportLayerAddress.buf);
+  free_wrapper((void**) &path_switch_req_ack->uL_NGU_UP_TNLInformation->choice
+                   .gTPTunnel->gTP_TEID.buf);
+  free_wrapper((void**) &path_switch_req_ack->uL_NGU_UP_TNLInformation->choice
+                   .gTPTunnel);
+  free_wrapper((void**) &buffer);
 
   return result;
 }
