@@ -393,6 +393,7 @@ check_install_smf_deps() {
       lksctp-tools \
       lksctp-tools-devel \
       openssl-devel \
+      libnghttp2 \
       libtool \
       libxml2 \
       libxml2-devel \
