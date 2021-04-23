@@ -125,13 +125,13 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
 
     response.headers().add<Pistache::Http::Header::ContentType>(
         Pistache::Http::Mime::MediaType(json_format));
-    response.send(
-        Pistache::Http::Code(sm_context_response.get_http_code()),
-        json_data.dump().c_str());
-
+    body = json_data.dump().c_str();
   } else {  // otherwise, send reply without content
     response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
+    return;
   }
+  response.send(
+      Pistache::Http::Code(sm_context_response.get_http_code()), body);
 }
 }  // namespace api
 }  // namespace smf_server
