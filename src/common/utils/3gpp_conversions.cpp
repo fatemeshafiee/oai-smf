@@ -38,6 +38,7 @@
 #include "3gpp_29.500.h"
 #include "3gpp_24.501.h"
 #include "conversions.hpp"
+#include "NgRanTargetId.h"
 
 //------------------------------------------------------------------------------
 void xgpp_conv::paa_to_pfcp_ue_ip_address(
@@ -374,6 +375,34 @@ void xgpp_conv::sm_context_update_from_openapi(
 
   if (context_data.failedToBeSwitchedIsSet()) {
     pur.set_failed_to_be_switched(context_data.isFailedToBeSwitched());
+  }
+  // HO state
+  if (context_data.hoStateIsSet()) {
+    std::string state = context_data.getHoState().state;
+    pur.set_ho_state(state);
+  }
+  if (context_data.targetIdIsSet()) {
+    oai::smf_server::model::NgRanTargetId api_target_id =
+        context_data.getTargetId();
+    ng_ran_target_id_t ran_target_id = {};
+    if (!conv::plmnFromString(
+            ran_target_id.global_ran_node_id.plmn_id,
+            api_target_id.getTai().getPlmnId().getMcc(),
+            api_target_id.getTai().getPlmnId().getMnc())) {
+      Logger::smf_app().warn("Error while converting MCC, MNC to PLMN");
+    }
+    ran_target_id.global_ran_node_id.gNbId.bit_length =
+        api_target_id.getRanNodeId().getGNbId().getBitLength();
+    ran_target_id.global_ran_node_id.gNbId.gNB_value =
+        api_target_id.getRanNodeId().getGNbId().getGNBValue();
+
+    if (!conv::plmnFromString(
+            ran_target_id.tai.plmn, api_target_id.getTai().getPlmnId().getMcc(),
+            api_target_id.getTai().getPlmnId().getMnc())) {
+      Logger::smf_app().warn("Error while converting MCC, MNC to PLMN");
+    }
+    // ran_target_id.tai.tac =api_target_id.getTai().getTac();
+    // string to uint16_t
   }
 }
 

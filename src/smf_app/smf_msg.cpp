@@ -565,6 +565,39 @@ bool pdu_session_update_sm_context_request::get_failed_to_be_switched() const {
   return m_failed_to_be_switched;
 }
 
+//-----------------------------------------------------------------------------
+std::string pdu_session_update_sm_context_request::get_ho_state() const {
+  return m_ho_state;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::get_ho_state(
+    std::string& state) const {
+  state = m_ho_state;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::set_ho_state(
+    const std::string& state) {
+  m_ho_state = state;
+}
+
+//-----------------------------------------------------------------------------
+ng_ran_target_id_t pdu_session_update_sm_context_request::get_target_id()
+    const {
+  return m_ng_ran_target_id;
+}
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::get_target_id(
+    ng_ran_target_id_t& value) const {
+  value = m_ng_ran_target_id;
+}
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::set_target_id(
+    const ng_ran_target_id_t& value) {
+  m_ng_ran_target_id = value;
+}
+
 /*
  * class: PDU Session Update SM Context Response
  */
