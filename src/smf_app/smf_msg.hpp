@@ -39,6 +39,7 @@
 #include "NgRanTargetId.h"
 #include "pistache/http.h"
 #include "smf_profile.hpp"
+#include "3gpp_29.518.h"
 
 extern "C" {
 #include "QOSRules.h"
@@ -366,6 +367,14 @@ class pdu_session_update_sm_context_request
   bool get_failed_to_be_switched() const;
   void get_failed_to_be_switched(bool& value) const;
 
+  std::string get_ho_state() const;
+  void get_ho_state(std::string& state) const;
+  void set_ho_state(const std::string& state);
+
+  ng_ran_target_id_t get_target_id() const;
+  void get_target_id(ng_ran_target_id_t& value) const;
+  void set_target_id(const ng_ran_target_id_t& value);
+
  private:
   std::vector<pfcp::qfi_t> qfis;
   pfcp::fteid_t dl_fteid;  // AN Tunnel Info
@@ -387,6 +396,10 @@ class pdu_session_update_sm_context_request
   bool m_failed_to_be_switched;
   bool m_is_failed_to_be_switched;
   bool m_failed_to_be_switched_is_set;
+  std::string m_ho_state;
+  bool m_ho_state_is_set;
+  ng_ran_target_id_t m_ng_ran_target_id;
+  bool m_target_id_is_set;
 };
 
 //---------------------------------------------------------------------------------------
