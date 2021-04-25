@@ -1646,7 +1646,10 @@ bool smf_app::get_session_management_subscription_data(
   for (int i = 0; i < smf_cfg.num_session_management_subscription; i++) {
     if ((0 == dnn.compare(smf_cfg.session_management_subscription[i].dnn)) and
         (snssai.sST ==
-         smf_cfg.session_management_subscription[i].single_nssai.sST)) {
+         smf_cfg.session_management_subscription[i].single_nssai.sST) and
+        (0 ==
+         snssai.sD.compare(
+             smf_cfg.session_management_subscription[i].single_nssai.sD))) {
       std::shared_ptr<dnn_configuration_t> dnn_configuration =
           std::make_shared<dnn_configuration_t>();
 

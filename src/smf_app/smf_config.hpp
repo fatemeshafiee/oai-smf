@@ -238,7 +238,7 @@ class smf_config {
     std::string api_version;
   } nrf_addr;
 
-#define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 5
+#define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 10
   struct {
     snssai_t single_nssai;
     std::string session_type;
