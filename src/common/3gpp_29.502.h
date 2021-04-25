@@ -98,6 +98,7 @@ static const std::vector<std::string> pdu_session_application_error_e2str = {
 
 // 6.1.6.3.12 Enumeration: N2SmInfoType @3GPP TS 29.502 V16.0.0
 enum class n2_sm_info_type_e {
+  UNKNOWN_TYPE       = 0,
   PDU_RES_SETUP_REQ  = 1,   // PDU Session Resource Setup Request Transfer
   PDU_RES_SETUP_RSP  = 2,   // PDU Session Resource Setup Response Transfer
   PDU_RES_SETUP_FAIL = 3,   // PDU Session Resource Setup Unsuccessful Transfer

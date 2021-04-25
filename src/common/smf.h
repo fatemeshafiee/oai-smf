@@ -233,6 +233,7 @@ typedef struct nf_service_version_s {
   nf_service_version_s& operator=(const nf_service_version_s& s) {
     api_version_in_uri = s.api_version_in_uri;
     api_full_version   = s.api_full_version;
+    return *this;
   }
 
   std::string to_string() const {
@@ -248,7 +249,7 @@ typedef struct nf_service_version_s {
 } nf_service_version_t;
 
 typedef struct ip_endpoint_s {
-  //struct in6_addr  ipv6_address;
+  // struct in6_addr  ipv6_address;
   struct in_addr ipv4_address;
   std::string transport;  // TCP
   unsigned int port;
@@ -323,8 +324,7 @@ typedef struct patch_item_s {
   }
 } patch_item_t;
 
-
-//TODO: move to 23.003
+// TODO: move to 23.003
 typedef struct guami_5g_s {
   plmn_t plmn;
   std::string amf_id;

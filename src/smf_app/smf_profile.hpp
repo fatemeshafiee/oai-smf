@@ -80,6 +80,7 @@ class nf_profile : public std::enable_shared_from_this<nf_profile> {
     nf_type          = s.nf_type;
     nf_instance_name = s.nf_instance_name;
     nf_status        = s.nf_status;
+    return *this;
   }
   // nf_profile(nf_profile &b) = delete;
 
@@ -317,6 +318,7 @@ class smf_profile : public nf_profile {
     custom_info      = s.custom_info;
     smf_info         = s.smf_info;
     nf_services      = s.nf_services;
+    return *this;
   }
   // smf_profile(smf_profile &b) = delete;
 
@@ -435,6 +437,7 @@ class upf_profile : public nf_profile {
     nf_status        = s.nf_status;
     // custom_info = s.custom_info;
     upf_info = s.upf_info;
+    return *this;
   }
   // upf_profile(upf_profile &b) = delete;
 

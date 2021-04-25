@@ -1271,6 +1271,7 @@ evsub_id_t smf_app::handle_event_exposure_subscription(
     ss.get()->ev_type = i.smf_event;
     add_event_subscription(evsub_id, i.smf_event, ss);
   }
+  return evsub_id;
 }
 
 //------------------------------------------------------------------------------
@@ -1634,6 +1635,7 @@ n2_sm_info_type_e smf_app::n2_sm_info_type_str2e(
       return static_cast<n2_sm_info_type_e>(i);
     }
   }
+  return n2_sm_info_type_e::UNKNOWN_TYPE;
 }
 
 //---------------------------------------------------------------------------------------------

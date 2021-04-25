@@ -445,7 +445,7 @@ struct fteid_s {
            (v4 == f.v4) and (v6 == f.v6);
   }
 
-  bool operator=(const struct fteid_s& f) {
+  fteid_s& operator=(const struct fteid_s& f) {
     v4                  = f.v4;
     v6                  = f.v6;
     chid                = f.chid;
@@ -458,6 +458,7 @@ struct fteid_s {
     // ipv6_address.s6_addr32[1] = f.ipv6_address.s6_addr32[1];
     // ipv6_address.s6_addr32[2] = f.ipv6_address.s6_addr32[2];
     // ipv6_address.s6_addr32[3] = f.ipv6_address.s6_addr32[3];
+    return *this;
   }
 
   std::string toString() const {
