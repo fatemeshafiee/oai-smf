@@ -401,8 +401,18 @@ void xgpp_conv::sm_context_update_from_openapi(
             api_target_id.getTai().getPlmnId().getMnc())) {
       Logger::smf_app().warn("Error while converting MCC, MNC to PLMN");
     }
-    // ran_target_id.tai.tac =api_target_id.getTai().getTac();
-    // string to uint16_t
+
+    try {
+      // string to uint16_t
+      ran_target_id.tai.tac =
+          std::stoul(api_target_id.getTai().getTac(), nullptr, 10);
+    } catch (const std::exception& e) {
+      Logger::smf_n1().warn(
+          "Error when converting from string to int for RAN target ID TAC, "
+          "error: %s",
+          e.what());
+      ran_target_id.tai.tac = 1;  // TODO: default TAC
+    }
   }
 }
 
