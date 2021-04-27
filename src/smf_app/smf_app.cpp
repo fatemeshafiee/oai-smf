@@ -709,7 +709,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
           PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR, n1_sm_message_hex,
           smreq->pid);
     } else {
-      // trigger to send reply to AMF
+      // Trigger to send reply to AMF
       trigger_http_response(
           http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
           smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
