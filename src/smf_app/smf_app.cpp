@@ -237,13 +237,6 @@ void smf_app_task(void*) {
         }
         break;
 
-      case N11_SESSION_UPDATE_PDU_SESSION_STATUS:
-        if (itti_n11_update_pdu_session_status* m =
-                dynamic_cast<itti_n11_update_pdu_session_status*>(msg)) {
-          smf_app_inst->handle_itti_msg(std::ref(*m));
-        }
-        break;
-
       case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE:
         if (itti_n11_create_sm_context_response* m =
                 dynamic_cast<itti_n11_create_sm_context_response*>(msg)) {
@@ -607,15 +600,6 @@ void smf_app::handle_itti_msg(
       Logger::smf_app().warn("Unknown procedure type %d", m.procedure_type);
     }
   }
-}
-
-//------------------------------------------------------------------------------
-void smf_app::handle_itti_msg(itti_n11_update_pdu_session_status& m) {
-  Logger::smf_app().info(
-      "Set PDU Session Status to %s",
-      pdu_session_status_e2str.at(static_cast<int>(m.pdu_session_status))
-          .c_str());
-  update_pdu_session_status(m.scid, m.pdu_session_status);
 }
 
 //------------------------------------------------------------------------------
