@@ -339,13 +339,6 @@ class smf_app {
   void handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf);
 
   /*
-   * Handle ITTI message from N11 to update PDU session status
-   * @param [itti_n11_update_pdu_session_status&] snu
-   * @return void
-   */
-  void handle_itti_msg(itti_n11_update_pdu_session_status& snu);
-
-  /*
    * Handle ITTI message N11 Create SM Context Response to trigger the response
    * to AMF
    * @param [itti_n11_create_sm_context_response&] snc
