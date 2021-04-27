@@ -124,11 +124,15 @@ enum class session_management_procedures_type_e {
   PDU_SESSION_RELEASE_AMF_INITIATED           = 14,
   PDU_SESSION_RELEASE_AN_INITIATED            = 15,
   HO_PATH_SWITCH_REQ                          = 16,
-  PDU_SESSION_TEST                            = 17
+  N2_HO_PREPARATION_PHASE_STEP1               = 17,
+  N2_HO_PREPARATION_PHASE_STEP2               = 18,
+  N2_HO_EXECUTION_PHASE                       = 19,
+  PDU_SESSION_TEST                            = 20
 };
 
 static const std::vector<std::string> session_management_procedures_type_e2str =
-    {"PDU_SESSION_ESTABLISHMENT_UE_REQUESTED",
+    {"PROCEDURE_TYPE_UNKNOWN",
+     "PDU_SESSION_ESTABLISHMENT_UE_REQUESTED",
      "SERVICE_REQUEST_UE_TRIGGERED_STEP1",
      "SERVICE_REQUEST_UE_TRIGGERED_STEP2",
      "SERVICE_REQUEST_NETWORK_TRIGGERED",
@@ -144,6 +148,9 @@ static const std::vector<std::string> session_management_procedures_type_e2str =
      "PDU_SESSION_RELEASE_AMF_INITIATED",
      "PDU_SESSION_RELEASE_AN_INITIATED",
      "HO_PATH_SWITCH_REQ",
+     "N2_HO_PREPARATION_PHASE_STEP1",
+     "N2_HO_PREPARATION_PHASE_STEP2",
+     "N2_HO_EXECUTION_PHASE",
      "PDU_SESSION_TEST"
 
 };
