@@ -2564,7 +2564,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
         // don't need to create a procedure to update UPF
       } break;
 
-      // Handover
+      // Xn Handover
       case n2_sm_info_type_e::PATH_SWITCH_REQ: {
         // Xn based inter NG-RAN handover (Section 4.9.1.2@3GPP TS 23.502
         // V16.0.0)
@@ -2575,6 +2575,24 @@ void smf_context::handle_pdu_session_update_sm_context_request(
             session_management_procedures_type_e::HO_PATH_SWITCH_REQ;
 
         if (!handle_ho_path_switch_req(
+                n2_sm_information, smreq, sm_context_resp_pending, sp))
+          return;
+        // need to update UPF accordingly
+        update_upf = true;
+      } break;
+
+      // N2 Handover
+      case n2_sm_info_type_e::HANDOVER_REQUIRED: {
+        // Inter NG-RAN node N2 based handover (Section 4.9.1.3@3GPP TS 23.502
+        // V16.0.0)
+
+        Logger::smf_app().info(
+            "Inter NG-RAN node N2 based handover, processing N2 SM "
+            "Information");
+        procedure_type =
+            session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP1;
+
+        if (!handle_ho_preparation(
                 n2_sm_information, smreq, sm_context_resp_pending, sp))
           return;
         // need to update UPF accordingly
@@ -2973,6 +2991,18 @@ bool smf_context::handle_ho_path_switch_req(
     // TODO:
   }
 
+  return true;
+}
+
+//-------------------------------------------------------------------------------------
+bool smf_context::handle_ho_preparation(
+    std::string& n2_sm_information,
+    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+    std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+    std::shared_ptr<smf_pdu_session>& sp) {
+  std::string n1_sm_msg, n1_sm_msg_hex;
+
+  // TODO: TO BE UPDATED!!!
   return true;
 }
 

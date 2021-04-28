@@ -128,6 +128,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     released           = false;
     default_qfi.qfi    = NO_QOS_FLOW_IDENTIFIER_ASSIGNED;
     pdu_session_status = pdu_session_status_e::PDU_SESSION_INACTIVE;
+    upCnx_state        = upCnx_state_e::UPCNX_STATE_DEACTIVATED;
+    ho_state           = ho_state_e::HO_STATE_NONE;
     timer_T3590        = ITTI_INVALID_TIMER_ID;
     timer_T3591        = ITTI_INVALID_TIMER_ID;
     timer_T3592        = ITTI_INVALID_TIMER_ID;
@@ -430,6 +432,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   pdu_session_status_e pdu_session_status;
   upCnx_state_e
       upCnx_state;  // N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
+  ho_state_e ho_state;
   timer_id_t timer_T3590;
   timer_id_t timer_T3591;
   timer_id_t timer_T3592;
@@ -817,6 +820,13 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   // TODO:
   bool handle_ho_path_switch_req(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  // TODO:
+  bool handle_ho_preparation(
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
       std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
