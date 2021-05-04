@@ -42,6 +42,7 @@ extern "C" {
 #include "Ngap_PDUSessionResourceSetupResponseTransfer.h"
 #include "Ngap_PDUSessionResourceSetupUnsuccessfulTransfer.h"
 #include "Ngap_PathSwitchRequestTransfer.h"
+#include "Ngap_HandoverRequiredTransfer.h"
 }
 
 namespace smf {
@@ -230,6 +231,10 @@ class smf_n2 {
 
   int decode_n2_sm_information(
       std::shared_ptr<Ngap_PathSwitchRequestTransfer_t>& ngap_IE,
+      const std::string& n2_sm_info);
+
+  int decode_n2_sm_information(
+      std::shared_ptr<Ngap_HandoverRequiredTransfer_t>& ngap_IE,
       const std::string& n2_sm_info);
 };
 

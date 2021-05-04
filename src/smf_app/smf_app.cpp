@@ -721,7 +721,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   xgpp_conv::sm_context_request_from_nas(decoded_nas_msg, smreq->req);
 
   pdu_session_type.pdu_session_type = smreq->req.get_pdu_session_type();
-  // TODO: Support IPv4 only for now
+  // Support IPv4/IPv4v6 for now
   if (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
     cause_n1 = cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
   } else if (
@@ -769,7 +769,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
        PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED) ||
       (pti.procedure_transaction_id > PROCEDURE_TRANSACTION_IDENTITY_LAST)) {
     Logger::smf_app().warn(
-        "Invalid PTI value (pti = %d)", pti.procedure_transaction_id);
+        "Invalid PTI value (PTI = %d)", pti.procedure_transaction_id);
     // PDU Session Establishment Reject including cause "#81 Invalid PTI value"
     // (section 7.3.1 @3GPP TS 24.501)
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
@@ -789,7 +789,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  // Check pdu session id
+  // Check PDU Session ID
   pdu_session_id_t pdu_session_id =
       decoded_nas_msg.plain.sm.header.pdu_session_identity;
   if ((pdu_session_id == PDU_SESSION_IDENTITY_UNASSIGNED) ||
@@ -803,11 +803,11 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  // Check message type
+  // Check Message Type
   uint8_t message_type = decoded_nas_msg.plain.sm.header.message_type;
   if (message_type != PDU_SESSION_ESTABLISHMENT_REQUEST) {
     Logger::smf_app().warn(
-        "Invalid message type (message type = %d)", message_type);
+        "Invalid Message Type (Message Type = %d)", message_type);
     // PDU Session Establishment Reject
     //(24.501 (section 7.4)) implementation dependent->do similar to UE:
     // response with a 5GSM STATUS message including cause "#98 message type not
@@ -817,7 +817,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
             cause_value_5gsm_e::
                 CAUSE_98_MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-      // trigger to send reply to AMF
+      // Trigger to send reply to AMF
       trigger_create_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
           PDU_SESSION_APPLICATION_ERROR_N1_SM_ERROR, n1_sm_message_hex,
@@ -830,11 +830,11 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     return;
   }
 
-  // Check request type
+  // Check Request Type
   std::string request_type = smreq->req.get_request_type();
   if (request_type.compare("INITIAL_REQUEST") != 0) {
     Logger::smf_app().warn(
-        "Invalid request type (request type = %s)", request_type.c_str());
+        "Invalid Request Type (Request Type = %s)", request_type.c_str());
     //"Existing PDU Session", AMF should use PDUSession_UpdateSMContext instead
     //(see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0) ignore the
     // message
@@ -868,7 +868,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN)) {
       smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
-      // trigger to send reply to AMF
+      // Trigger to send reply to AMF
       trigger_create_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
           PDU_SESSION_APPLICATION_ERROR_DNN_DENIED, n1_sm_message_hex,
@@ -913,10 +913,10 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     }
   }
 
-  // Step 6. if colliding with an existing SM context (session is already
-  // existed and request type is INITIAL_REQUEST)  Delete the local context
-  // (including and any associated resources in the UPF and PCF) and create a
-  // new one
+  // Step 6. If colliding with an existing SM context (session is already
+  // existed and request type is INITIAL_REQUEST)
+  // Delete the local context (including and any associated resources in
+  // the UPF and PCF) and create a new one
   if (is_scid_2_smf_context(supi64, dnn, snssai, pdu_session_id) &&
       (request_type.compare("INITIAL_REQUEST") == 0)) {
     // remove smf_pdu_session (including all flows associated to this session)
@@ -927,15 +927,14 @@ void smf_app::handle_pdu_session_create_sm_context_request(
         supi64, dnn.c_str(), snssai.sST, snssai.sD.c_str(), pdu_session_id);
   }
 
-  // Step 7. retrieve Session Management Subscription data from UDM if not
+  // Step 7. Retrieve Session Management Subscription data from UDM if not
   // available (step 4, section 4.3.2 3GPP TS 23.502)
   std::string dnn_selection_mode = smreq->req.get_dnn_selection_mode();
-  // if the Session Management Subscription data is not available, get from
+  // If the Session Management Subscription data is not available, get from
   // configuration file or UDM
   if (not sc.get()->is_dnn_snssai_subscription_data(dnn, snssai)) {
     Logger::smf_app().debug(
         "The Session Management Subscription data is not available");
-
     session_management_subscription* s =
         new session_management_subscription(snssai);
     std::shared_ptr<session_management_subscription> subscription =
@@ -945,7 +944,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       Logger::smf_app().debug(
           "Retrieve Session Management Subscription data from the UDM");
       if (smf_sbi_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
-        // update dnn_context with subscription info
+        // Update dnn_context with subscription info
         sc.get()->insert_dnn_subscription(snssai, dnn, subscription);
       } else {
         // Cannot retrieve information from UDM, reject PDU session
@@ -1018,7 +1017,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
       "version %d)",
       smreq->http_version);
 
-  // Step 1. get supi, dnn, nssai, pdu_session id from sm_context
+  // Step 1. Get supi, dnn, nssai, pdu_session id from sm_context
   // SM Context ID - uint32_t in our case
   scid_t scid = {};
   try {

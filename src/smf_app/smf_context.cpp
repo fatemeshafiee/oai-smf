@@ -62,6 +62,8 @@ extern "C" {
 #include "Ngap_PathSwitchRequestTransfer.h"
 #include "Ngap_PathSwitchRequestSetupFailedTransfer.h"
 #include "Ngap_QosFlowAcceptedItem.h"
+#include "Ngap_HandoverRequiredTransfer.h"
+//#include "Ngap_ProtocolIE-Field.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -3002,7 +3004,40 @@ bool smf_context::handle_ho_preparation(
     std::shared_ptr<smf_pdu_session>& sp) {
   std::string n1_sm_msg, n1_sm_msg_hex;
 
-  // TODO: TO BE UPDATED!!!
+  sm_context_resp.get()->session_procedure_type =
+      session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP1;
+
+  // Ngap_HandoverRequiredTransfer
+  std::shared_ptr<Ngap_HandoverRequiredTransfer_t> decoded_msg =
+      std::make_shared<Ngap_HandoverRequiredTransfer_t>();
+  int decode_status = smf_n2::get_instance().decode_n2_sm_information(
+      decoded_msg, n2_sm_information);
+  if (decode_status == RETURNerror) {
+    // error, send error to AMF
+    Logger::smf_app().warn(
+        "Decode N2 SM (Ngap_HandoverRequiredTransfer) "
+        "failed!");
+    // trigger to send reply to AMF
+    // TODO: to be updated with correct status/cause
+    smf_app_inst->trigger_update_context_error_response(
+        http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+        PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
+        sm_context_request.get()->pid);
+
+    return false;
+  }
+  if (decoded_msg->directForwardingPathAvailability != nullptr) {
+    // TODO:
+  } else {
+    // TODO:
+  }
+
+  ng_ran_target_id_t ran_target_id = {};
+  sm_context_request->req.get_target_id(ran_target_id);
+
+  pdu_session_id_t pdu_session_id =
+      sm_context_request->req.get_pdu_session_id();
+
   return true;
 }
 
