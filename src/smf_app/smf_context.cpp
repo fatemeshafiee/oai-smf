@@ -63,7 +63,6 @@ extern "C" {
 #include "Ngap_PathSwitchRequestSetupFailedTransfer.h"
 #include "Ngap_QosFlowAcceptedItem.h"
 #include "Ngap_HandoverRequiredTransfer.h"
-//#include "Ngap_ProtocolIE-Field.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -3030,6 +3029,7 @@ bool smf_context::handle_ho_preparation(
     // TODO:
   } else {
     // TODO:
+    return false;
   }
 
   ng_ran_target_id_t ran_target_id = {};
@@ -3037,6 +3037,9 @@ bool smf_context::handle_ho_preparation(
 
   pdu_session_id_t pdu_session_id =
       sm_context_request->req.get_pdu_session_id();
+
+  // TODO: Check Target ID whether N2 Handover for the indicated PDU Session can
+  // be accepted Select UPF (should be done in Procedure)
 
   return true;
 }
