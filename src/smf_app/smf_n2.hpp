@@ -44,6 +44,7 @@ extern "C" {
 #include "Ngap_PathSwitchRequestTransfer.h"
 #include "Ngap_HandoverRequiredTransfer.h"
 #include "Ngap_HandoverRequestAcknowledgeTransfer.h"
+#include "Ngap_HandoverResourceAllocationUnsuccessfulTransfer.h"
 }
 
 namespace smf {
@@ -188,6 +189,11 @@ class smf_n2 {
       pdu_session_update_sm_context_response& sm_context_res,
       n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
 
+  //------------------------------------------------------------------------------
+  bool create_n2_handover_preparation_unsuccessful_transfer(
+      pdu_session_update_sm_context_response& sm_context_res,
+      n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str);
+
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceSetupResponseTransfer
    * @param [std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>&]
@@ -222,6 +228,10 @@ class smf_n2 {
           ngap_IE,
       const std::string& n2_sm_info);
 
+  int decode_n2_sm_information(
+      std::shared_ptr<Ngap_HandoverResourceAllocationUnsuccessfulTransfer_t>&
+          ngap_IE,
+      const std::string& n2_sm_info);
   /*
    * Decode N2 SM Information Ngap_PDUSessionResourceSetupUnsuccessfulTransfer
    * @param

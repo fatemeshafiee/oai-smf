@@ -65,6 +65,7 @@ extern "C" {
 #include "Ngap_HandoverRequiredTransfer.h"
 #include "Ngap_HandoverRequestAcknowledgeTransfer.h"
 #include "Ngap_QosFlowItemWithDataForwarding.h"
+#include "Ngap_HandoverResourceAllocationUnsuccessfulTransfer.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -2660,6 +2661,28 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
         update_upf = true;
       } break;
 
+      case n2_sm_info_type_e::HANDOVER_RES_ALLOC_FAIL: {
+        // Inter NG-RAN node N2 based handover (Section 4.9.1.3@3GPP TS 23.502
+        // V16.0.0)
+
+        Logger::smf_app().info(
+            "Inter NG-RAN node N2 based handover (Handover Preparation, Step "
+            "2), processing N2 SM "
+            "Information");
+        procedure_type =
+            session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2;
+
+        if (!handle_ho_preparation_request_fail(
+                n2_sm_information, smreq, sm_context_resp_pending, sp)) {
+          // TODO:
+          return false;
+        }
+
+        // TODO:
+        // Update UPF with new DL Tunnel
+        update_upf = false;
+      } break;
+
       default: {
         Logger::smf_app().warn("Unknown N2 SM info type %d", n2_sm_info_type);
       }
@@ -3218,6 +3241,63 @@ bool smf_context::handle_ho_preparation_request_ack(
   }
 }
 
+//-------------------------------------------------------------------------------------
+bool smf_context::handle_ho_preparation_request_fail(
+    std::string& n2_sm_information,
+    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+    std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+    std::shared_ptr<smf_pdu_session>& sp) {
+  std::string n2_sm_info, n2_sm_info_hex;
+
+  sm_context_resp.get()->session_procedure_type =
+      session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2;
+
+  // Ngap_HandoverResourceAllocationUnsuccessfulTransfer
+  std::shared_ptr<Ngap_HandoverResourceAllocationUnsuccessfulTransfer_t>
+      decoded_msg = std::make_shared<
+          Ngap_HandoverResourceAllocationUnsuccessfulTransfer_t>();
+  int decode_status = smf_n2::get_instance().decode_n2_sm_information(
+      decoded_msg, n2_sm_information);
+  if (decode_status == RETURNerror) {
+    // error, send error to AMF
+    Logger::smf_app().warn(
+        "Decode N2 SM (Ngap_HandoverResourceAllocationUnsuccessfulTransfer) "
+        "failed!");
+    // trigger to send reply to AMF
+    // TODO: to be updated with correct status/cause
+    smf_app_inst->trigger_update_context_error_response(
+        http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+        PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
+        sm_context_request.get()->pid);
+
+    return false;
+  }
+
+  // decoded_msg->cause
+  // set HoState to NONE
+  sp.get()->set_ho_state(ho_state_e::HO_STATE_NONE);
+  // Release resource ??
+  // Create Handover Preparation Unsuccessful Transfer IE
+
+  smf_n2::get_instance().create_n2_handover_preparation_unsuccessful_transfer(
+      sm_context_resp->res, n2_sm_info_type_e::HANDOVER_RES_ALLOC_FAIL,
+      n2_sm_info);
+
+  smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+  sm_context_resp.get()->res.set_n2_sm_information(n2_sm_info_hex);
+
+  // Fill the content of SmContextUpdatedData
+  nlohmann::json json_data                           = {};
+  json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
+  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
+           ["contentId"] = N2_SM_CONTENT_ID;
+  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+      "HANDOVER_RES_ALLOC_FAIL";  // NGAP message
+  json_data["hoState"] = "PREPARING";
+  sm_context_resp.get()->res.set_json_data(json_data);
+
+  return true;
+}
 //------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(
     const snssai_t& snssai,

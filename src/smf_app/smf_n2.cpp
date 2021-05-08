@@ -56,6 +56,7 @@ extern "C" {
 #include "Ngap_UL-NGU-UP-TNLModifyItem.h"
 #include "Ngap_PathSwitchRequestAcknowledgeTransfer.h"
 #include "Ngap_HandoverCommandTransfer.h"
+#include "Ngap_HandoverPreparationUnsuccessfulTransfer.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -1229,6 +1230,58 @@ bool smf_n2::create_n2_handover_command_transfer(
   return result;
 }
 
+//------------------------------------------------------------------------------
+bool smf_n2::create_n2_handover_preparation_unsuccessful_transfer(
+    pdu_session_update_sm_context_response& sm_context_res,
+    n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str) {
+  // Handover Preparation Unsuccessful Transfer IE
+  Logger::smf_n2().debug(
+      "Create N2 SM Information: Handover Preparation Unsuccessful Transfer "
+      "IE");
+  bool result = false;
+
+  Ngap_HandoverPreparationUnsuccessfulTransfer_t*
+      ho_preparation_unsuccessrul_transfer = nullptr;
+  ho_preparation_unsuccessrul_transfer =
+      (Ngap_HandoverPreparationUnsuccessfulTransfer_t*) calloc(
+          1, sizeof(Ngap_HandoverPreparationUnsuccessfulTransfer_t));
+
+  ho_preparation_unsuccessrul_transfer->cause.present =
+      Ngap_Cause_PR_radioNetwork;  // TODO
+
+  ho_preparation_unsuccessrul_transfer->cause.choice.radioNetwork =
+      Ngap_CauseRadioNetwork_ho_target_not_allowed;
+  // encode
+  size_t buffer_size = BUF_LEN;
+  char* buffer       = (char*) calloc(1, buffer_size);
+
+  ssize_t encoded_size = aper_encode_to_new_buffer(
+      &asn_DEF_Ngap_HandoverPreparationUnsuccessfulTransfer, nullptr,
+      ho_preparation_unsuccessrul_transfer, (void**) &buffer);
+  if (encoded_size < 0) {
+    Logger::smf_n2().warn(
+        " Ngap_HandoverPreparationUnsuccessfulTransfer encode failed "
+        "(encoded size %d)",
+        encoded_size);
+    result = false;
+  } else {
+#if DEBUG_IS_ON
+    Logger::smf_n2().debug("N2 SM buffer data: ");
+    for (int i = 0; i < encoded_size; i++) printf("%02x ", (char) buffer[i]);
+    Logger::smf_n2().debug(" (%d bytes) \n", encoded_size);
+#endif
+
+    std::string ngap_message((char*) buffer, encoded_size);
+    ngap_msg_str = ngap_message;
+    result       = true;
+  }
+
+  // free memory
+  free_wrapper((void**) &buffer);
+
+  return result;
+}
+
 //---------------------------------------------------------------------------------------------
 int smf_n2::decode_n2_sm_information(
     std::shared_ptr<Ngap_PDUSessionResourceSetupResponseTransfer_t>& ngap_IE,
@@ -1432,6 +1485,38 @@ int smf_n2::decode_n2_sm_information(
       nullptr, ATS_ALIGNED_CANONICAL_PER,
       &asn_DEF_Ngap_HandoverRequestAcknowledgeTransfer, (void**) &ngap_IE,
       (void*) data, data_len);
+
+  // free memory
+  free_wrapper((void**) &data);
+
+  if (rc.code != RC_OK) {
+    Logger::smf_n2().warn("asn_decode failed with code %d", rc.code);
+
+    return RETURNerror;
+  }
+  return RETURNok;
+}
+
+//---------------------------------------------------------------------------------------------
+int smf_n2::decode_n2_sm_information(
+    std::shared_ptr<Ngap_HandoverResourceAllocationUnsuccessfulTransfer_t>&
+        ngap_IE,
+    const std::string& n2_sm_info) {
+  Logger::smf_n2().info(
+      "Decode NGAP message "
+      "(Ngap_HandoverResourceAllocationUnsuccessfulTransfer) "
+      "from N2 SM Information");
+
+  unsigned int data_len = n2_sm_info.length();
+  unsigned char* data   = (unsigned char*) malloc(data_len + 1);
+  memset(data, 0, data_len + 1);
+  memcpy((void*) data, (void*) n2_sm_info.c_str(), data_len);
+
+  // Ngap_HandoverRequired
+  asn_dec_rval_t rc = asn_decode(
+      nullptr, ATS_ALIGNED_CANONICAL_PER,
+      &asn_DEF_Ngap_HandoverResourceAllocationUnsuccessfulTransfer,
+      (void**) &ngap_IE, (void*) data, data_len);
 
   // free memory
   free_wrapper((void**) &data);
