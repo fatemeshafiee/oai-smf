@@ -260,6 +260,20 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    */
   upCnx_state_e get_upCnx_state() const;
 
+  /*
+   * Set HOState of a PDU Session
+   * @param [ho_state_e&] state: new HO State for the PDU Session
+   * @return void
+   */
+  void set_ho_state(const ho_state_e& state);
+
+  /*
+   * Get HOState of a PDU Session
+   * @param void
+   * @return ho_state_e: current state of this PDU Session
+   */
+  ho_state_e get_ho_state() const;
+
   // deallocate_ressources is for releasing related-resources prior to the
   // deletion of objects since shared_ptr is actually heavy used for handling
   // objects, deletion of object instances cannot be always guaranteed when
@@ -657,7 +671,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * message
    * @return void
    */
-  void handle_pdu_session_update_sm_context_request(
+  bool handle_pdu_session_update_sm_context_request(
       std::shared_ptr<itti_n11_update_sm_context_request> smreq);
 
   /*
@@ -826,12 +840,18 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<smf_pdu_session>& sp);
 
   // TODO:
-  bool handle_ho_preparation(
+  bool handle_ho_preparation_request(
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
       std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
       std::shared_ptr<smf_pdu_session>& sp);
 
+  // TODO:
+  bool handle_ho_preparation_request_ack(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
   /*
    * Find DNN context with name
    * @param [const std::string&] dnn

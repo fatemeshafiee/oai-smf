@@ -589,7 +589,8 @@ int session_update_sm_context_procedure::run(
         PDU_SESSION_MODIFICATION_AN_REQUESTED:
     case session_management_procedures_type_e::
         PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2:
-    case session_management_procedures_type_e::HO_PATH_SWITCH_REQ: {
+    case session_management_procedures_type_e::HO_PATH_SWITCH_REQ:
+    case session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2: {
       pfcp::fteid_t dl_fteid = {};
       sm_context_req_msg.get_dl_fteid(dl_fteid);  // eNB's fteid
 
@@ -975,7 +976,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
         SERVICE_REQUEST_UE_TRIGGERED_STEP2:
     case session_management_procedures_type_e::
         PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2:
-    case session_management_procedures_type_e::HO_PATH_SWITCH_REQ: {
+    case session_management_procedures_type_e::HO_PATH_SWITCH_REQ:
+    case session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2: {
       pfcp::fteid_t dl_fteid = {};
       n11_trigger->req.get_dl_fteid(dl_fteid);
 
@@ -1297,6 +1299,33 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // NGAP message json_data["upCnxState"] ="ACTIVATING";
       n11_triggered_pending->res.set_json_data(json_data);
 
+    } break;
+
+    case session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2: {
+      // Create N2 SM Information: Handover Command Transfer IE
+
+      // N2 SM Information
+      smf_n2::get_instance().create_n2_handover_command_transfer(
+          n11_triggered_pending->res, n2_sm_info_type_e::HANDOVER_CMD,
+          n2_sm_info);
+
+      smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+      n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
+
+      // fill the content of SmContextUpdatedData
+      nlohmann::json json_data                           = {};
+      json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
+      json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+          n11_triggered_pending->res.get_pdu_session_id();
+      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
+               ["contentId"] = N2_SM_CONTENT_ID;
+      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+          "HANDOVER_CMD";
+      json_data["hoState"] = "PREPARED";
+      n11_triggered_pending->res.set_json_data(json_data);
+
+      // Set HO State to prepared
+      sps->set_ho_state(ho_state_e::HO_STATE_PREPARED);
     } break;
 
     default: {
