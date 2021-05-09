@@ -2732,12 +2732,13 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
     update_upf = true;
   }
 
-  // Step 5. N2 Handover Execution
+  // Step 5. N2 Handover Execution/Cancellation
   if (sm_context_req_msg.ho_state_is_set() or
       sm_context_req_msg.n2_sm_info_is_set()) {
     std::string ho_state;
     sm_context_req_msg.get_ho_state(ho_state);
 
+    // Handover Execution
     if (ho_state.compare("COMPLETED") == 0 or
         n2_sm_info_type == n2_sm_info_type_e::SECONDARY_RAT_USAGE) {
       Logger::smf_app().info(
@@ -2754,6 +2755,16 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
 
       // TODO:
       // Update UPF with new DL Tunnel
+      update_upf = false;
+    }
+
+    // Handover Cancellation
+    if (ho_state.compare("CANCELLED") == 0) {
+      if (!handle_ho_cancellation(
+              n2_sm_information, smreq, sm_context_resp_pending, sp)) {
+        // TODO:
+        return false;
+      }
       update_upf = false;
     }
   }
@@ -3149,11 +3160,15 @@ bool smf_context::handle_ho_preparation_request(
 
     return false;
   }
+
   if (decoded_msg->directForwardingPathAvailability != nullptr) {
+    Logger::smf_app().debug(
+        "Ngap_HandoverRequiredTransfer, directForwardingPathAvailability");
     // TODO:
   } else {
+    Logger::smf_app().debug(
+        "Ngap_HandoverRequiredTransfer, In directForwardingPathAvailability");
     // TODO:
-    // return false;
   }
 
   ng_ran_target_id_t ran_target_id = {};
@@ -3164,15 +3179,6 @@ bool smf_context::handle_ho_preparation_request(
 
   // TODO: Check Target ID whether N2 Handover for the indicated PDU Session can
   // be accepted Select UPF (should be done in Procedure)
-
-  // Get info from current PDU session and set to sm_context_resp->res
-  /*  sm_context_resp->res.set_pdu_session_id(pdu_session_id);
-    sm_context_resp->res.set_supi(sm_context_request->req.get_supi());
-    sm_context_resp->res.set_dnn(sm_context_request->req.get_dnn());
-    sm_context_resp->res.set_snssai(sm_context_request->req.get_snssai());
-    sm_context_resp->res.set_pdu_session_type(
-        sm_context_request->req.get_pdu_session_type());
-  */
 
   std::vector<smf_qos_flow> flows = {};
   sp.get()->get_qos_flows(
@@ -3201,7 +3207,10 @@ bool smf_context::handle_ho_preparation_request(
       "PDU_RES_SETUP_REQ";  // NGAP message
   json_data["hoState"] = "PREPARING";
   sm_context_resp.get()->res.set_json_data(json_data);
+  sm_context_resp.get()->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);
 
+  // Set HOStatus to PREPARING
   sp.get()->set_ho_state(ho_state_e::HO_STATE_PREPARING);
 
   return true;
@@ -3378,6 +3387,25 @@ bool smf_context::handle_ho_execution(
   return true;
 }
 
+//-------------------------------------------------------------------------------------
+bool smf_context::handle_ho_cancellation(
+    std::string& n2_sm_information,
+    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+    std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+    std::shared_ptr<smf_pdu_session>& sp) {
+  std::string n2_sm_info, n2_sm_info_hex;
+
+  sm_context_resp.get()->session_procedure_type =
+      session_management_procedures_type_e::N2_HO_CANCELLATION_PHASE;
+
+  // set HoState to CANCELLED
+  sp.get()->set_ho_state(ho_state_e::HO_STATE_CANCELLED);
+  // TODO: release resources ...
+  sp.get()->set_ho_state(ho_state_e::HO_STATE_NONE);
+  // Delete targetServingNfId
+
+  return true;
+}
 //------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(
     const snssai_t& snssai,

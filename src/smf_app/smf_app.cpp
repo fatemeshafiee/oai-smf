@@ -1056,7 +1056,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   smreq->req.set_snssai(scf.get()->nssai);
   smreq->req.set_pdu_session_id(scf.get()->pdu_session_id);
 
-  // Step 2. find the smf context
+  // Step 3. find the smf context
   std::shared_ptr<smf_context> sc = {};
   if (is_supi_2_smf_context(supi64)) {
     sc = supi_2_smf_context(supi64);
@@ -1076,7 +1076,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     return;
   }
 
-  // get dnn context
+  // Step 4. get dnn context
   std::shared_ptr<dnn_context> sd = {};
 
   if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
@@ -1092,9 +1092,15 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     }
   }
 
-  // Step 3. Verify AMF??
+  // Step 5. Verify AMF??
 
-  // Step 4. handle the message in smf_context
+  // Step 6. Update targetServingNfId if available (for N2 Handover with AMF
+  // change)
+  if (smreq.get()->req.target_serving_nf_id_is_set()) {
+    scf.get()->target_amf = smreq.get()->req.get_target_serving_nf_id();
+  }
+
+  // Step 7. handle the message in smf_context
   if (!sc.get()->handle_pdu_session_update_sm_context_request(smreq)) {
     Logger::smf_app().warn(
         "Received PDU Session Update SM Context Request, couldn't process!");
@@ -1103,6 +1109,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
         http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
         PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE, smreq->pid);
   }
+  return;
 }
 //------------------------------------------------------------------------------
 void smf_app::handle_pdu_session_release_sm_context_request(

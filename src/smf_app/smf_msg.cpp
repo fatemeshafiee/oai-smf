@@ -589,6 +589,31 @@ bool pdu_session_update_sm_context_request::ho_state_is_set() const {
 }
 
 //-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::get_target_serving_nf_id(
+    std::string& nf_id) const {
+  nf_id = m_target_serving_nf_id;
+}
+
+//-----------------------------------------------------------------------------
+std::string pdu_session_update_sm_context_request::get_target_serving_nf_id()
+    const {
+  return m_target_serving_nf_id;
+}
+
+//-----------------------------------------------------------------------------
+void pdu_session_update_sm_context_request::set_target_serving_nf_id(
+    const std::string& nf_id) {
+  m_target_serving_nf_id        = nf_id;
+  m_target_serving_nf_id_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_update_sm_context_request::target_serving_nf_id_is_set()
+    const {
+  return m_target_serving_nf_id_is_set;
+}
+
+//-----------------------------------------------------------------------------
 ng_ran_target_id_t pdu_session_update_sm_context_request::get_target_id()
     const {
   return m_ng_ran_target_id;

@@ -376,11 +376,14 @@ void xgpp_conv::sm_context_update_from_openapi(
   if (context_data.failedToBeSwitchedIsSet()) {
     pur.set_failed_to_be_switched(context_data.isFailedToBeSwitched());
   }
+
+  // For N2 Handover,
   // HO state
   if (context_data.hoStateIsSet()) {
     std::string state = context_data.getHoState().state;
     pur.set_ho_state(state);
   }
+  // Target ID
   if (context_data.targetIdIsSet()) {
     oai::smf_server::model::NgRanTargetId api_target_id =
         context_data.getTargetId();
@@ -413,6 +416,11 @@ void xgpp_conv::sm_context_update_from_openapi(
           e.what());
       ran_target_id.tai.tac = 1;  // TODO: default TAC
     }
+  }
+  // TargetServingNfId
+  if (context_data.targetServingNfIdIsSet()) {
+    std::string target_serving_nf_id = context_data.getTargetServingNfId();
+    pur.set_target_serving_nf_id(target_serving_nf_id);
   }
 }
 

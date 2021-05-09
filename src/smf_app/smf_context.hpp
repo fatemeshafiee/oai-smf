@@ -832,36 +832,91 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
 
-  // TODO:
+  /*
+   * Handle Xn Handover Patch Switch Request
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
   bool handle_ho_path_switch_req(
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
       std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
       std::shared_ptr<smf_pdu_session>& sp);
 
-  // TODO:
+  /*
+   * Handle N2 Handover Preparation (Phrase 1- Preparing)
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
   bool handle_ho_preparation_request(
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
       std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
       std::shared_ptr<smf_pdu_session>& sp);
 
-  // TODO:
+  /*
+   * Handle N2 Handover Preparation (Phrase 2- Prepared)
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
   bool handle_ho_preparation_request_ack(
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
       std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
       std::shared_ptr<smf_pdu_session>& sp);
 
-  // TODO:
+  /*
+   * Handle N2 Handover Preparation failure
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
   bool handle_ho_preparation_request_fail(
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
       std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
       std::shared_ptr<smf_pdu_session>& sp);
 
-  // TODO:
+  /*
+   * Handle N2 Handover Execution
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
   bool handle_ho_execution(
+      std::string& n2_sm_information,
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
+   * Handle N2 Handover Cancellation
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if handle successful, otherwise return false
+   */
+  bool handle_ho_cancellation(
       std::string& n2_sm_information,
       std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
       std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
@@ -1108,7 +1163,18 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   void get_amf_addr(std::string& addr) const;
 
+  /*
+   * Set PLMN
+   * @param [const plmn_t&] plmn: PLMN
+   * @return void
+   */
   void set_plmn(const plmn_t& plmn);
+
+  /*
+   * get PLMN
+   * @param [plmn_t&] plmn: store PLMN
+   * @return void
+   */
   void get_plmn(plmn_t& plmn) const;
 
  private:

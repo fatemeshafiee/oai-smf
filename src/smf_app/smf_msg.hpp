@@ -377,6 +377,11 @@ class pdu_session_update_sm_context_request
   void get_target_id(ng_ran_target_id_t& value) const;
   void set_target_id(const ng_ran_target_id_t& value);
 
+  void set_target_serving_nf_id(const std::string& nf_id);
+  void get_target_serving_nf_id(std::string& nf_id) const;
+  std::string get_target_serving_nf_id() const;
+  bool target_serving_nf_id_is_set() const;
+
  private:
   std::vector<pfcp::qfi_t> qfis;
   pfcp::fteid_t dl_fteid;  // AN Tunnel Info
@@ -387,7 +392,6 @@ class pdu_session_update_sm_context_request
   bool m_rat_type_is_set;
   std::string m_upCnx_state;
   bool m_upCnx_state_is_set;
-  std::string m_target_serving_nfId;
   std::string m_sm_context_status_uri;
   bool m_data_forwarding;
   uint8_t m_5gMm_cause_value;
@@ -402,6 +406,8 @@ class pdu_session_update_sm_context_request
   bool m_ho_state_is_set;
   ng_ran_target_id_t m_ng_ran_target_id;
   bool m_target_id_is_set;
+  std::string m_target_serving_nf_id;
+  bool m_target_serving_nf_id_is_set;
 };
 
 //---------------------------------------------------------------------------------------

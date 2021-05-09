@@ -89,6 +89,7 @@ class smf_context_ref {
     amf_status_uri = "";
     amf_addr       = "";
     upf_node_id    = {};
+    target_amf     = "";
   }
 
   supi_t supi;
@@ -97,6 +98,7 @@ class smf_context_ref {
   snssai_t nssai;
   std::string amf_status_uri;
   std::string amf_addr;
+  std::string target_amf;  // targetServingNfId
   pfcp::node_id_t upf_node_id;
 };
 
