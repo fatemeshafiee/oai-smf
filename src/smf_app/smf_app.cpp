@@ -345,9 +345,9 @@ smf_app::smf_app(const std::string& config_file)
     start_upf_association(*it);
   }
 
+  // Trigger NFStatusNotify subscription to be noticed when a new UPF becomes
+  // available (if this option is enabled)
   if (smf_cfg.discover_upf) {
-    // Trigger NFStatusNotify subscription to be noticed when a new UPF becomes
-    // available (if this option is enabled)
     trigger_upf_status_notification_subscribe();
   }
 
