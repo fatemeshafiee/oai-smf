@@ -345,6 +345,7 @@ class pdu_session_update_sm_context_request
     m_release_is_set     = false;
     m_an_type_is_set     = false;
     m_rat_type_is_set    = false;
+    m_ho_state_is_set    = false;
   };
 
   void add_qfi(const pfcp::qfi_t& qfi);
@@ -370,6 +371,7 @@ class pdu_session_update_sm_context_request
   std::string get_ho_state() const;
   void get_ho_state(std::string& state) const;
   void set_ho_state(const std::string& state);
+  bool ho_state_is_set() const;
 
   ng_ran_target_id_t get_target_id() const;
   void get_target_id(ng_ran_target_id_t& value) const;

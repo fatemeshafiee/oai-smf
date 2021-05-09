@@ -1095,7 +1095,14 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   // Step 3. Verify AMF??
 
   // Step 4. handle the message in smf_context
-  sc.get()->handle_pdu_session_update_sm_context_request(smreq);
+  if (!sc.get()->handle_pdu_session_update_sm_context_request(smreq)) {
+    Logger::smf_app().warn(
+        "Received PDU Session Update SM Context Request, couldn't process!");
+    // trigger to send reply to AMF
+    trigger_update_context_error_response(
+        http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+        PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE, smreq->pid);
+  }
 }
 //------------------------------------------------------------------------------
 void smf_app::handle_pdu_session_release_sm_context_request(

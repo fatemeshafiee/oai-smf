@@ -579,7 +579,13 @@ void pdu_session_update_sm_context_request::get_ho_state(
 //-----------------------------------------------------------------------------
 void pdu_session_update_sm_context_request::set_ho_state(
     const std::string& state) {
-  m_ho_state = state;
+  m_ho_state        = state;
+  m_ho_state_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+bool pdu_session_update_sm_context_request::ho_state_is_set() const {
+  return m_ho_state_is_set;
 }
 
 //-----------------------------------------------------------------------------

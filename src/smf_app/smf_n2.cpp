@@ -1528,3 +1528,34 @@ int smf_n2::decode_n2_sm_information(
   }
   return RETURNok;
 }
+
+//---------------------------------------------------------------------------------------------
+int smf_n2::decode_n2_sm_information(
+    std::shared_ptr<Ngap_SecondaryRATDataUsageReportTransfer_t>& ngap_IE,
+    const std::string& n2_sm_info) {
+  Logger::smf_n2().info(
+      "Decode NGAP message "
+      "(Ngap_SecondaryRATDataUsageReportTransfer) "
+      "from N2 SM Information");
+
+  unsigned int data_len = n2_sm_info.length();
+  unsigned char* data   = (unsigned char*) malloc(data_len + 1);
+  memset(data, 0, data_len + 1);
+  memcpy((void*) data, (void*) n2_sm_info.c_str(), data_len);
+
+  // Ngap_HandoverRequired
+  asn_dec_rval_t rc = asn_decode(
+      nullptr, ATS_ALIGNED_CANONICAL_PER,
+      &asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer, (void**) &ngap_IE,
+      (void*) data, data_len);
+
+  // free memory
+  free_wrapper((void**) &data);
+
+  if (rc.code != RC_OK) {
+    Logger::smf_n2().warn("asn_decode failed with code %d", rc.code);
+
+    return RETURNerror;
+  }
+  return RETURNok;
+}

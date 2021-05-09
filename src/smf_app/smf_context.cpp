@@ -36,6 +36,8 @@
 #include "3gpp_29.500.h"
 #include "3gpp_29.502.h"
 #include "SmContextCreatedData.h"
+#include "RefToBinaryData.h"
+#include "SmContextUpdateError.h"
 #include "itti.hpp"
 #include "logger.hpp"
 #include "smf_app.hpp"
@@ -66,6 +68,7 @@ extern "C" {
 #include "Ngap_HandoverRequestAcknowledgeTransfer.h"
 #include "Ngap_QosFlowItemWithDataForwarding.h"
 #include "Ngap_HandoverResourceAllocationUnsuccessfulTransfer.h"
+#include "Ngap_SecondaryRATDataUsageReportTransfer.h"
 #include "dynamic_memory_check.h"
 }
 
@@ -2498,12 +2501,13 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
   }
 
   // Step 2.2. Decode N2 (if content is available)
+  std::string n2_sm_info_type_str, n2_sm_information;
+  n2_sm_info_type_e n2_sm_info_type = {};
   if (sm_context_req_msg.n2_sm_info_is_set()) {
     // get necessary information (N2 SM information)
-    std::string n2_sm_info_type_str = smreq->req.get_n2_sm_info_type();
-    std::string n2_sm_information   = smreq->req.get_n2_sm_information();
-    n2_sm_info_type_e n2_sm_info_type =
-        smf_app_inst->n2_sm_info_type_str2e(n2_sm_info_type_str);
+    n2_sm_info_type_str = smreq->req.get_n2_sm_info_type();
+    n2_sm_information   = smreq->req.get_n2_sm_information();
+    n2_sm_info_type = smf_app_inst->n2_sm_info_type_str2e(n2_sm_info_type_str);
 
     // decode N2 SM Info
     switch (n2_sm_info_type) {
@@ -2683,6 +2687,12 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
         update_upf = false;
       } break;
 
+      case n2_sm_info_type_e::SECONDARY_RAT_USAGE: {
+        // Inter NG-RAN node N2 based handover (Section 4.9.1.3@3GPP TS 23.502
+        // V16.0.0)
+        // process later
+      } break;
+
       default: {
         Logger::smf_app().warn("Unknown N2 SM info type %d", n2_sm_info_type);
       }
@@ -2720,6 +2730,32 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
     }
     // need update UPF
     update_upf = true;
+  }
+
+  // Step 5. N2 Handover Execution
+  if (sm_context_req_msg.ho_state_is_set() or
+      sm_context_req_msg.n2_sm_info_is_set()) {
+    std::string ho_state;
+    sm_context_req_msg.get_ho_state(ho_state);
+
+    if (ho_state.compare("COMPLETED") == 0 or
+        n2_sm_info_type == n2_sm_info_type_e::SECONDARY_RAT_USAGE) {
+      Logger::smf_app().info(
+          "Inter NG-RAN node N2 based handover (Handover execution, "
+          "processing N2 SM Information");
+      procedure_type =
+          session_management_procedures_type_e::N2_HO_EXECUTION_PHASE;
+
+      if (!handle_ho_execution(
+              n2_sm_information, smreq, sm_context_resp_pending, sp)) {
+        // TODO:
+        return false;
+      }
+
+      // TODO:
+      // Update UPF with new DL Tunnel
+      update_upf = false;
+    }
   }
 
   // Step 5. Create a procedure for update SM context and let the procedure
@@ -3284,20 +3320,64 @@ bool smf_context::handle_ho_preparation_request_fail(
       n2_sm_info);
 
   smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-  sm_context_resp.get()->res.set_n2_sm_information(n2_sm_info_hex);
 
-  // Fill the content of SmContextUpdatedData
-  nlohmann::json json_data                           = {};
-  json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-           ["contentId"] = N2_SM_CONTENT_ID;
-  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-      "HANDOVER_RES_ALLOC_FAIL";  // NGAP message
-  json_data["hoState"] = "PREPARING";
+  // Prepare SmContextUpdateError
+  oai::smf_server::model::SmContextUpdateError sm_context = {};
+  oai::smf_server::model::ProblemDetails problem_details  = {};
+  oai::smf_server::model::RefToBinaryData refToBinaryData = {};
+  Logger::smf_app().warn("Create SmContextCreateError");
+  problem_details.setCause(pdu_session_application_error_e2str.at(
+      PDU_SESSION_APPLICATION_ERROR_HANDOVER_RESOURCE_ALLOCATION_FAILURE));
+  sm_context.setError(problem_details);
+  refToBinaryData.setContentId(N2_SM_CONTENT_ID);
+  sm_context.setN2SmInfo(refToBinaryData);
+  nlohmann::json json_data = {};
+  to_json(json_data, sm_context);
   sm_context_resp.get()->res.set_json_data(json_data);
+  sm_context_resp.get()->res.set_json_format("application/problem+json");
+  sm_context_resp.get()->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE);  // To be
+                                                                 // verified
+  sm_context_resp.get()->res.set_n2_sm_information(n2_sm_info_hex);
 
   return true;
 }
+
+//-------------------------------------------------------------------------------------
+bool smf_context::handle_ho_execution(
+    std::string& n2_sm_information,
+    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+    std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+    std::shared_ptr<smf_pdu_session>& sp) {
+  std::string n2_sm_info, n2_sm_info_hex;
+
+  sm_context_resp.get()->session_procedure_type =
+      session_management_procedures_type_e::N2_HO_EXECUTION_PHASE;
+
+  // Ngap_SecondaryRATDataUsageReportTransfer
+  std::shared_ptr<Ngap_SecondaryRATDataUsageReportTransfer_t> decoded_msg =
+      std::make_shared<Ngap_SecondaryRATDataUsageReportTransfer_t>();
+  int decode_status = smf_n2::get_instance().decode_n2_sm_information(
+      decoded_msg, n2_sm_information);
+  if (decode_status == RETURNerror) {
+    // error, send error to AMF
+    Logger::smf_app().warn(
+        "Decode N2 SM (Ngap_SecondaryRATDataUsageReportTransfer) "
+        "failed!");
+    // trigger to send reply to AMF
+    smf_app_inst->trigger_update_context_error_response(
+        http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+        PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
+        sm_context_request.get()->pid);
+    return false;
+  }
+  // TODO: process Ngap_SecondaryRATDataUsageReportTransfer
+
+  // set HoState to NONE
+  sp.get()->set_ho_state(ho_state_e::HO_STATE_COMPLETED);
+  return true;
+}
+
 //------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(
     const snssai_t& snssai,
