@@ -220,7 +220,7 @@ void xgpp_conv::sm_context_create_from_openapi(
         "PDU Session ID %d", context_data.getPduSessionId());
     pcr.set_pdu_session_id(context_data.getPduSessionId());
   } else {
-	  Logger::smf_app().warn("No PDU Session ID available");
+    Logger::smf_app().warn("No PDU Session ID available");
   }
 
   // AMF ID (ServingNFId/NfInstanceId)
