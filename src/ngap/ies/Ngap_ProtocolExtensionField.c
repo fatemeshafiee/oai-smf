@@ -19350,32 +19350,27 @@ asn_SEQUENCE_specifics_t
         0,  /* Optional elements (not needed) */
         -1, /* First extension addition */
 };
-asn_TYPE_descriptor_t
-    asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs = {
-        "AdditionalDLUPTNLInformationForHOItem-ExtIEs",
-        "AdditionalDLUPTNLInformationForHOItem-ExtIEs",
-        &asn_OP_SEQUENCE,
-        asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1,
-        sizeof(
-            asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1) /
-            sizeof(
-                asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1
-                    [0]), /* 1 */
-        asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1, /* Same
-                                                                             as
-                                                                             above
-                                                                           */
-        sizeof(
-            asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1) /
-            sizeof(
-                asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1
-                    [0]), /* 1 */
-        {0, 0, SEQUENCE_constraint},
-        asn_MBR_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_1,
-        3, /* Elements count */
-        &asn_SPC_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_specs_1 /* Additional
-                                                                              specs
-                                                                            */
+asn_TYPE_descriptor_t asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs = {
+    "AdditionalDLUPTNLInformationForHOItem-ExtIEs",
+    "AdditionalDLUPTNLInformationForHOItem-ExtIEs",
+    &asn_OP_SEQUENCE,
+    asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1,
+    sizeof(asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1) /
+        sizeof(asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1
+                   [0]),                                              /* 1 */
+    asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1, /* Same
+                                                                         as
+                                                                         above
+                                                                       */
+    sizeof(asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1) /
+        sizeof(asn_DEF_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_tags_1
+                   [0]), /* 1 */
+    {0, 0, SEQUENCE_constraint},
+    asn_MBR_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_1,
+    3, /* Elements count */
+    &asn_SPC_Ngap_AdditionalDLUPTNLInformationForHOItem_ExtIEs_specs_1 /* Additional
+                                                                          specs
+                                                                        */
 };
 
 static asn_CHOICE_specifics_t asn_SPC_Ngap_extensionValue_specs_8 = {
@@ -22142,32 +22137,27 @@ asn_SEQUENCE_specifics_t
         0,  /* Optional elements (not needed) */
         -1, /* First extension addition */
 };
-asn_TYPE_descriptor_t asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs =
-    {
-        "CNTypeRestrictionsForEquivalentItem-ExtIEs",
-        "CNTypeRestrictionsForEquivalentItem-ExtIEs",
-        &asn_OP_SEQUENCE,
-        asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105,
-        sizeof(
-            asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105) /
-            sizeof(
-                asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105
-                    [0]), /* 1 */
-        asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105, /* Same
-                                                                             as
-                                                                             above
-                                                                           */
-        sizeof(
-            asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105) /
-            sizeof(
-                asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105
-                    [0]), /* 1 */
-        {0, 0, SEQUENCE_constraint},
-        asn_MBR_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_105,
-        3, /* Elements count */
-        &asn_SPC_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_specs_105 /* Additional
-                                                                              specs
-                                                                            */
+asn_TYPE_descriptor_t asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs = {
+    "CNTypeRestrictionsForEquivalentItem-ExtIEs",
+    "CNTypeRestrictionsForEquivalentItem-ExtIEs",
+    &asn_OP_SEQUENCE,
+    asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105,
+    sizeof(asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105) /
+        sizeof(asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105
+                   [0]),                                              /* 1 */
+    asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105, /* Same
+                                                                         as
+                                                                         above
+                                                                       */
+    sizeof(asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105) /
+        sizeof(asn_DEF_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_tags_105
+                   [0]), /* 1 */
+    {0, 0, SEQUENCE_constraint},
+    asn_MBR_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_105,
+    3, /* Elements count */
+    &asn_SPC_Ngap_CNTypeRestrictionsForEquivalentItem_ExtIEs_specs_105 /* Additional
+                                                                          specs
+                                                                        */
 };
 
 static asn_CHOICE_specifics_t asn_SPC_Ngap_extensionValue_specs_112 = {
@@ -32378,32 +32368,27 @@ asn_SEQUENCE_specifics_t
         0,  /* Optional elements (not needed) */
         -1, /* First extension addition */
 };
-asn_TYPE_descriptor_t asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs =
-    {
-        "PDUSessionResourceReleasedItemPSAck-ExtIEs",
-        "PDUSessionResourceReleasedItemPSAck-ExtIEs",
-        &asn_OP_SEQUENCE,
-        asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453,
-        sizeof(
-            asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453) /
-            sizeof(
-                asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453
-                    [0]), /* 1 */
-        asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453, /* Same
-                                                                             as
-                                                                             above
-                                                                           */
-        sizeof(
-            asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453) /
-            sizeof(
-                asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453
-                    [0]), /* 1 */
-        {0, 0, SEQUENCE_constraint},
-        asn_MBR_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_453,
-        3, /* Elements count */
-        &asn_SPC_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_specs_453 /* Additional
-                                                                              specs
-                                                                            */
+asn_TYPE_descriptor_t asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs = {
+    "PDUSessionResourceReleasedItemPSAck-ExtIEs",
+    "PDUSessionResourceReleasedItemPSAck-ExtIEs",
+    &asn_OP_SEQUENCE,
+    asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453,
+    sizeof(asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453) /
+        sizeof(asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453
+                   [0]),                                              /* 1 */
+    asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453, /* Same
+                                                                         as
+                                                                         above
+                                                                       */
+    sizeof(asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453) /
+        sizeof(asn_DEF_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_tags_453
+                   [0]), /* 1 */
+    {0, 0, SEQUENCE_constraint},
+    asn_MBR_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_453,
+    3, /* Elements count */
+    &asn_SPC_Ngap_PDUSessionResourceReleasedItemPSAck_ExtIEs_specs_453 /* Additional
+                                                                          specs
+                                                                        */
 };
 
 static asn_CHOICE_specifics_t asn_SPC_Ngap_extensionValue_specs_460 = {
@@ -37029,32 +37014,27 @@ asn_SEQUENCE_specifics_t
         0,  /* Optional elements (not needed) */
         -1, /* First extension addition */
 };
-asn_TYPE_descriptor_t asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs =
-    {
-        "SecondaryRATDataUsageReportTransfer-ExtIEs",
-        "SecondaryRATDataUsageReportTransfer-ExtIEs",
-        &asn_OP_SEQUENCE,
-        asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617,
-        sizeof(
-            asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617) /
-            sizeof(
-                asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617
-                    [0]), /* 1 */
-        asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617, /* Same
-                                                                             as
-                                                                             above
-                                                                           */
-        sizeof(
-            asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617) /
-            sizeof(
-                asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617
-                    [0]), /* 1 */
-        {0, 0, SEQUENCE_constraint},
-        asn_MBR_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_617,
-        3, /* Elements count */
-        &asn_SPC_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_specs_617 /* Additional
-                                                                              specs
-                                                                            */
+asn_TYPE_descriptor_t asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs = {
+    "SecondaryRATDataUsageReportTransfer-ExtIEs",
+    "SecondaryRATDataUsageReportTransfer-ExtIEs",
+    &asn_OP_SEQUENCE,
+    asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617,
+    sizeof(asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617) /
+        sizeof(asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617
+                   [0]),                                              /* 1 */
+    asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617, /* Same
+                                                                         as
+                                                                         above
+                                                                       */
+    sizeof(asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617) /
+        sizeof(asn_DEF_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_tags_617
+                   [0]), /* 1 */
+    {0, 0, SEQUENCE_constraint},
+    asn_MBR_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_617,
+    3, /* Elements count */
+    &asn_SPC_Ngap_SecondaryRATDataUsageReportTransfer_ExtIEs_specs_617 /* Additional
+                                                                          specs
+                                                                        */
 };
 
 static asn_CHOICE_specifics_t asn_SPC_Ngap_extensionValue_specs_624 = {
@@ -40873,32 +40853,27 @@ asn_SEQUENCE_specifics_t
         0,  /* Optional elements (not needed) */
         -1, /* First extension addition */
 };
-asn_TYPE_descriptor_t asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs =
-    {
-        "UPTransportLayerInformationPairItem-ExtIEs",
-        "UPTransportLayerInformationPairItem-ExtIEs",
-        &asn_OP_SEQUENCE,
-        asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761,
-        sizeof(
-            asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761) /
-            sizeof(
-                asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761
-                    [0]), /* 1 */
-        asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761, /* Same
-                                                                             as
-                                                                             above
-                                                                           */
-        sizeof(
-            asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761) /
-            sizeof(
-                asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761
-                    [0]), /* 1 */
-        {0, 0, SEQUENCE_constraint},
-        asn_MBR_Ngap_UPTransportLayerInformationPairItem_ExtIEs_761,
-        3, /* Elements count */
-        &asn_SPC_Ngap_UPTransportLayerInformationPairItem_ExtIEs_specs_761 /* Additional
-                                                                              specs
-                                                                            */
+asn_TYPE_descriptor_t asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs = {
+    "UPTransportLayerInformationPairItem-ExtIEs",
+    "UPTransportLayerInformationPairItem-ExtIEs",
+    &asn_OP_SEQUENCE,
+    asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761,
+    sizeof(asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761) /
+        sizeof(asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761
+                   [0]),                                              /* 1 */
+    asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761, /* Same
+                                                                         as
+                                                                         above
+                                                                       */
+    sizeof(asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761) /
+        sizeof(asn_DEF_Ngap_UPTransportLayerInformationPairItem_ExtIEs_tags_761
+                   [0]), /* 1 */
+    {0, 0, SEQUENCE_constraint},
+    asn_MBR_Ngap_UPTransportLayerInformationPairItem_ExtIEs_761,
+    3, /* Elements count */
+    &asn_SPC_Ngap_UPTransportLayerInformationPairItem_ExtIEs_specs_761 /* Additional
+                                                                          specs
+                                                                        */
 };
 
 static asn_TYPE_member_t asn_MBR_Ngap_extensionValue_768[] = {
