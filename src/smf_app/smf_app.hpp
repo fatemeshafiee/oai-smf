@@ -149,10 +149,9 @@ class smf_app {
   timer_id_t timer_nrf_heartbeat;
 
   // for Event Handling
-  smf_event event_sub;
-  bs2::connection pdu_session_status_connection;
-  bs2::connection ee_pdu_session_release_connection;
-
+  //  smf_event event_sub;
+  //  bs2::connection pdu_session_status_connection;
+  //  bs2::connection ee_pdu_session_release_connection;
 
   /*
    * Apply the config from the configuration file for DNN pools
@@ -219,8 +218,9 @@ class smf_app {
   virtual ~smf_app() {
     Logger::smf_app().debug("Delete SMF_APP instance...");
     // Disconnect the boost connection
-    if (pdu_session_status_connection.connected())
-    	pdu_session_status_connection.disconnect();
+    /*    if (pdu_session_status_connection.connected())
+            pdu_session_status_connection.disconnect();
+     */
     // TODO: Unregister NRF
   }
 

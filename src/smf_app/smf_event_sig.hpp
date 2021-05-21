@@ -48,7 +48,8 @@ typedef bs2::signal_type<
 // SCID, PDU Session Status, HTTP version
 typedef bs2::signal_type<
     void(scid_t, const std::string&, uint8_t),
-    bs2::keywords::mutex_type<bs2::dummy_mutex>>::type ee_pdu_session_status_sig_t;
+    bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    ee_pdu_session_status_sig_t;
 
 // Signal for Event exposure
 // PDU session Release, SUPI, PDU SessionID, HTTP version
@@ -62,6 +63,7 @@ typedef bs2::signal_type<
 // TODO: UP Path Change
 // TODO: PLMN Change
 // TODO: Downlink data delivery status
+// TODO: Customized APIs for FlexCN
 
 }  // namespace smf
 #endif /* FILE_SMF_EVENT_SIG_HPP_SEEN */
