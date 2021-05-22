@@ -39,6 +39,9 @@ class SmfEvent {
 
   void validate();
 
+  void set_value(uint8_t value);
+  void get_value(uint8_t& value) const;
+  uint8_t get_value() const;
   /////////////////////////////////////////////
   /// SmfEvent members
 
@@ -46,6 +49,8 @@ class SmfEvent {
   friend void from_json(const nlohmann::json& j, SmfEvent& o);
 
  protected:
+ private:
+  uint8_t value;
 };
 
 }  // namespace model

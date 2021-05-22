@@ -35,6 +35,7 @@
 #include "SmContextCreateData.h"
 #include "SmContextUpdateData.h"
 #include "SmContextReleaseData.h"
+#include "EventSubscription.h"
 #include "3gpp_29.500.h"
 #include "3gpp_24.501.h"
 #include "conversions.hpp"
@@ -220,7 +221,7 @@ void xgpp_conv::sm_context_create_from_openapi(
         "PDU Session ID %d", context_data.getPduSessionId());
     pcr.set_pdu_session_id(context_data.getPduSessionId());
   } else {
-	  Logger::smf_app().warn("No PDU Session ID available");
+    Logger::smf_app().warn("No PDU Session ID available");
   }
 
   // AMF ID (ServingNFId/NfInstanceId)
@@ -453,11 +454,19 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
   eem.set_notif_id(nee.getNotifId());    // NotifId
   eem.set_notif_uri(nee.getNotifUri());  // NotifUri
 
-  // EventSubscription: TODO
-  event_subscription_t event_subscription = {};
-  event_subscription.smf_event            = smf_event_t::SMF_EVENT_PDU_SES_REL;
+  std::vector<oai::smf_server::model::EventSubscription> event_subcription_api =
+      {};
+  nee.getEventSubs(event_subcription_api);
+
   std::vector<event_subscription_t> event_subscriptions = {};
-  event_subscriptions.push_back(event_subscription);
+  for (auto e : event_subcription_api) {
+    // EventSubscription: TODO
+    event_subscription_t event_subscription = {};
+    event_subscription.smf_event =
+        static_cast<smf_event_t>(e.getEvent().get_value());
+    event_subscriptions.push_back(event_subscription);
+  }
+  // event_subscription.smf_event            = smf_event_t::SMF_EVENT_FLEXCN;
   eem.set_event_subs(event_subscriptions);
 
   // std::vector<EventSubscription> eventSubscriptions;
