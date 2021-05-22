@@ -2475,6 +2475,7 @@ bstring bjoinblk(const struct bstrList* bl, const void* blk, int len) {
  *  NULL is returned, otherwise a bstring with the correct result is returned.
  */
 bstring bjoin(const struct bstrList* bl, const_bstring sep) {
+  if (sep == NULL) return NULL;
   if (sep != NULL && (sep->slen < 0 || sep->data == NULL)) return NULL;
   return bjoinblk(bl, sep->data, sep->slen);
 }
