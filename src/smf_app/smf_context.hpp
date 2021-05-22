@@ -579,6 +579,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
         event_sub.subscribe_ee_pdu_session_status_change(boost::bind(
             &smf_context::handle_pdu_session_status_change, this, _1, _2, _3));
 
+    // Subscribe to FlexCN event
+    ee_flexcn = event_sub.subscribe_ee_flexcn_event(
+        boost::bind(&smf_context::handle_flexcn_event, this, _1, _2));
   }
 
   smf_context(smf_context& b) = delete;
@@ -591,7 +594,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     if (ee_pdu_session_release_connection.connected())
       ee_pdu_session_release_connection.disconnect();
     if (pdu_session_status_connection.connected())
-    	pdu_session_status_connection.disconnect();
+      pdu_session_status_connection.disconnect();
   }
 
   /*
@@ -1038,8 +1041,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   void handle_pdu_session_status_change(
       scid_t scid, const std::string& status, uint8_t http_version);
-  void trigger_pdu_session_status_change(scid_t scid, const std::string& status, uint8_t http_version);
+  void trigger_pdu_session_status_change(
+      scid_t scid, const std::string& status, uint8_t http_version);
 
+  void trigger_flexcn_event(scid_t scid, uint8_t http_version);
+  void handle_flexcn_event(scid_t scid, uint8_t http_version);
   /*
    * Update QoS information in the Response message according to the content of
    * decoded NAS msg
@@ -1092,6 +1098,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bs2::connection sm_context_status_connection;
   bs2::connection pdu_session_status_connection;
   bs2::connection ee_pdu_session_release_connection;
+  bs2::connection ee_flexcn;
 };
 }  // namespace smf
 

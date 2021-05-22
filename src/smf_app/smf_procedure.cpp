@@ -1133,11 +1133,12 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // Update PDU session status to ACTIVE
       sps->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_ACTIVE);
 
-      // set UpCnxState to DEACTIVATED
+      // set UpCnxState to ACTIVATED
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
-      //Trigger Event_exposure event
+      // Trigger Event_exposure event
       scid_t scid = sc.get()->get_scid();
       sc.get()->trigger_pdu_session_status_change(scid, "ACTIVATED", 1);
+      sc.get()->trigger_flexcn_event(scid, 1);
     } break;
 
       // UE-Triggered Service Request Procedure (Step 1)

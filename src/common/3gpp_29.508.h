@@ -30,7 +30,8 @@ typedef enum smf_event_e {
   SMF_EVENT_PDU_SES_REL = 3,
   SMF_EVENT_PLMN_CH     = 4,
   SMF_EVENT_UE_IP_CH    = 5,
-  SMF_EVENT_DDDS        = 6
+  SMF_EVENT_DDDS        = 6,
+  SMF_EVENT_FLEXCN      = 99
 } smf_event_t;
 
 static const std::vector<std::string> smf_event_e2str = {

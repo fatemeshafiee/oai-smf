@@ -42,12 +42,20 @@ bs2::connection smf_event::subscribe_sm_context_status(
   return sm_context_status.connect(sig);
 }
 
+//------------------------------------------------------------------------------
 bs2::connection smf_event::subscribe_ee_pdu_session_status_change(
     const ee_pdu_session_status_sig_t::slot_type& sig) {
-	return ee_pdu_session_status.connect(sig);
+  return ee_pdu_session_status.connect(sig);
 }
+
 //------------------------------------------------------------------------------
 bs2::connection smf_event::subscribe_ee_pdu_session_release(
     const ee_pdu_session_release_sig_t::slot_type& sig) {
   return ee_pdu_session_release.connect(sig);
+}
+
+//------------------------------------------------------------------------------
+bs2::connection smf_event::subscribe_ee_flexcn_event(
+    const ee_flexcn_sig_t::slot_type& sig) {
+  return ee_flexcn.connect(sig);
 }

@@ -63,7 +63,12 @@ typedef bs2::signal_type<
 // TODO: UP Path Change
 // TODO: PLMN Change
 // TODO: Downlink data delivery status
-// TODO: Customized APIs for FlexCN
+
+// Signal for FlexCN event (for Event Exposure)
+// SCID, HTTP version
+typedef bs2::signal_type<
+    void(scid_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    ee_flexcn_sig_t;
 
 }  // namespace smf
 #endif /* FILE_SMF_EVENT_SIG_HPP_SEEN */
