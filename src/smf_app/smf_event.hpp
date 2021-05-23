@@ -84,11 +84,9 @@ class smf_event {
       sm_context_status;  // Signal for SM Context status update
   ee_pdu_session_status_sig_t
       ee_pdu_session_status;  // Signal for PDU Session status change
-
   ee_pdu_session_release_sig_t
       ee_pdu_session_release;  // Signal for SM Context status update
-
-  ee_flexcn_sig_t ee_flexcn;  // Signal for FlexCN Event
+  ee_flexcn_sig_t ee_flexcn;   // Signal for FlexCN Event
 };
 }  // namespace smf
 #endif /* FILE_SMF_EVENT_HPP_SEEN */

@@ -3103,6 +3103,7 @@ void smf_context::handle_ee_pdu_session_release(
   }
 }
 
+//------------------------------------------------------------------------------
 void smf_context::handle_pdu_session_status_change(
     scid_t scid, const std::string& status, uint8_t http_version) {
   Logger::smf_app().debug(
@@ -3206,6 +3207,7 @@ void smf_context::handle_pdu_session_status_change(
   }
 }
 
+//------------------------------------------------------------------------------
 void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN, "
@@ -3345,10 +3347,12 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
   }
 }
 
+//------------------------------------------------------------------------------
 void smf_context::trigger_flexcn_event(scid_t scid, uint8_t http_version) {
   event_sub.ee_flexcn(scid, http_version);
 }
 
+//------------------------------------------------------------------------------
 void smf_context::trigger_pdu_session_status_change(
     scid_t scid, const std::string& status, uint8_t http_version) {
   event_sub.ee_pdu_session_status(scid, status, http_version);

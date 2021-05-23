@@ -466,7 +466,6 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
         static_cast<smf_event_t>(e.getEvent().get_value());
     event_subscriptions.push_back(event_subscription);
   }
-  // event_subscription.smf_event            = smf_event_t::SMF_EVENT_FLEXCN;
   eem.set_event_subs(event_subscriptions);
 
   // std::vector<EventSubscription> eventSubscriptions;

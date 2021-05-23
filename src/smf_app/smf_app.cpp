@@ -330,11 +330,6 @@ smf_app::smf_app(const std::string& config_file)
   set_seid_n4       = {};
   seid_n4_generator = 0;
 
-  // Subscribe to sm context status change
-  //  pdu_session_status_connection =
-  //      event_sub.subscribe_ee_pdu_session_status_change(boost::bind(
-  //          &smf_app::handle_pdu_session_status_change, this, _1, _2, _3));
-
   apply_config(smf_cfg);
 
   if (itti_inst->create_task(TASK_SMF_APP, smf_app_task, nullptr)) {
@@ -621,19 +616,6 @@ void smf_app::handle_itti_msg(itti_n11_update_pdu_session_status& m) {
       pdu_session_status_e2str.at(static_cast<int>(m.pdu_session_status))
           .c_str());
   update_pdu_session_status(m.scid, m.pdu_session_status);
-  if ((m.pdu_session_status == pdu_session_status_e::PDU_SESSION_ACTIVE) or
-      (m.pdu_session_status == pdu_session_status_e::PDU_SESSION_INACTIVE)) {
-    Logger::smf_app().info("Notify PDU Session Status change");
-    std::string status;
-    /*	  if (m.pdu_session_status  == pdu_session_status_e::PDU_SESSION_ACTIVE)
-                 status = "ESTABLISHED";
-              else
-                      status = "RELEASED";
-
-              event_sub.ee_pdu_session_status(
-                      m.scid, status, 1);
-    */
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -2108,109 +2090,4 @@ void smf_app::trigger_upf_status_notification_subscribe() {
         "Could not send ITTI message %s to task TASK_SMF_SBI",
         itti_msg->get_msg_name());
   }
-}
-
-void smf_app::handle_pdu_session_status_change(
-    scid_t scid, const std::string& status, uint8_t http_version) {
-  /*
-Logger::smf_app().debug(
-"Send request to N11 to triger PDU Session Status Change Notification, "
-"SMF Context ID " SCID_FMT " ",
-scid);
-
-// get the smf context
-std::shared_ptr<smf_context_ref> scf = {};
-
-if (is_scid_2_smf_context(scid)) {
-scf = scid_2_smf_context(scid);
-} else {
-Logger::smf_app().warn(
-  "Context associated with this id " SCID_FMT " does not exit!", scid);
-}
-
-supi_t supi                     = scf.get()->supi;
-supi64_t supi64                 = smf_supi_to_u64(supi);
-pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
-
-std::shared_ptr<smf_context> sc = {};
-
-if (is_supi_2_smf_context(supi64)) {
-sc = supi_2_smf_context(supi64);
-Logger::smf_app().debug(
-  "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
-} else {
-Logger::smf_app().warn(
-  "Could not retrieve the corresponding SMF context with "
-  "Supi " SUPI_64_FMT "!",
-  supi64);
-}
-
-// get dnn context
-std::shared_ptr<dnn_context> sd = {};
-
-if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
-if (nullptr == sd.get()) {
-Logger::smf_app().warn(
-    "Could not retrieve the corresponding DNN context!");
-}
-}
-// get smd_pdu_session
-std::shared_ptr<smf_pdu_session> sp = {};
-bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
-
-if (nullptr == sp.get()) {
-Logger::smf_app().warn(
-  "Could not retrieve the corresponding SMF PDU Session context!");
-}
-
-Logger::smf_app().debug(
-"Send request to N11 to triger PDU Session Status Change Notification "
-"(Event "
-"Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
-supi, pdu_session_id, http_version);
-
-std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
-smf_app_inst->get_ee_subscriptions(
-smf_event_t::SMF_EVENT_PDU_SES_REL, subscriptions);
-
-if (subscriptions.size() > 0) {
-// Send request to N11 to trigger the notification to the subscribed event
-Logger::smf_app().debug(
-  "Send ITTI msg to SMF N11 to trigger the event notification");
-std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg =
-  std::make_shared<itti_n11_notify_subscribed_event>(
-      TASK_SMF_APP, TASK_SMF_SBI);
-
-for (auto i : subscriptions) {
-event_notification ev_notif = {};
-ev_notif.set_supi(supi64);
-ev_notif.set_pdu_session_id(pdu_session_id);
-ev_notif.set_smf_event(smf_event_t::SMF_EVENT_PDU_SES_REL);
-ev_notif.set_notif_uri(i.get()->notif_uri);
-ev_notif.set_notif_id(i.get()->notif_id);
-// custom json e.g., for FlexCN
-nlohmann::json cj = {};
-if (sp.get() != nullptr) {
-  if (sp->ipv4) {
-    cj["ue_ipv4_addr"] = conv::toString(sp->ipv4_address);
-  }
-  cj["pdu_session_type"] = sp->pdu_session_type.toString();
-}
-
-ev_notif.set_custom_info(cj);
-itti_msg->event_notifs.push_back(ev_notif);
-}
-
-itti_msg->http_version = http_version;
-
-int ret = itti_inst->send_msg(itti_msg);
-if (RETURNok != ret) {
-Logger::smf_app().error(
-    "Could not send ITTI message %s to task TASK_SMF_SBI",
-    itti_msg->get_msg_name());
-}
-} else {
-Logger::smf_app().debug("No subscription available for this event");
-}
-*/
 }
