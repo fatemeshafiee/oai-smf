@@ -772,6 +772,16 @@ class smf_app {
   void trigger_http_response(
       const uint32_t& http_code, uint32_t& promise_id, uint8_t msg_type);
 
+  void trigger_session_create_sm_context_response(
+      pdu_session_create_sm_context_response& sm_context_response,
+      uint32_t& pid);
+  void trigger_session_update_sm_context_response(
+      pdu_session_update_sm_context_response& sm_context_response,
+      uint32_t& pid);
+  void trigger_session_release_sm_context_response(
+      pdu_session_release_sm_context_response& sm_context_response,
+      uint32_t& pid);
+
   /*
    * Add an Event Subscription to the list
    * @param [const evsub_id_t&] sub_id: Subscription ID

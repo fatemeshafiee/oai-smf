@@ -1843,53 +1843,119 @@ void smf_app::trigger_http_response(
       "Send ITTI msg to SMF APP to trigger the response of HTTP Server");
   switch (msg_type) {
     case N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE: {
-      std::shared_ptr<itti_n11_release_sm_context_response> itti_msg =
+      /*std::shared_ptr<itti_n11_release_sm_context_response> itti_msg =
           std::make_shared<itti_n11_release_sm_context_response>(
               TASK_SMF_SBI, TASK_SMF_APP, promise_id);
+      */
       pdu_session_release_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
+
+      trigger_session_release_sm_context_response(
+          sm_context_response, promise_id);
+
+      /*
       itti_msg->res = sm_context_response;
       int ret       = itti_inst->send_msg(itti_msg);
       if (RETURNok != ret) {
         Logger::smf_app().error(
             "Could not send ITTI message %s to task TASK_SMF_APP",
             itti_msg->get_msg_name());
-      }
+      }*/
+
     } break;
 
     case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE: {
-      std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
-          std::make_shared<itti_n11_create_sm_context_response>(
-              TASK_SMF_SBI, TASK_SMF_APP, promise_id);
+      /* std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
+           std::make_shared<itti_n11_create_sm_context_response>(
+               TASK_SMF_SBI, TASK_SMF_APP, promise_id);
+       */
       pdu_session_create_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
+      trigger_session_create_sm_context_response(
+          sm_context_response, promise_id);
+
+      /*
       itti_msg->res = sm_context_response;
       int ret       = itti_inst->send_msg(itti_msg);
       if (RETURNok != ret) {
         Logger::smf_app().error(
             "Could not send ITTI message %s to task TASK_SMF_APP",
             itti_msg->get_msg_name());
-      }
+      }*/
+
     } break;
 
     case N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE: {
-      std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
-          std::make_shared<itti_n11_update_sm_context_response>(
-              TASK_SMF_SBI, TASK_SMF_APP, promise_id);
+      /* std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
+           std::make_shared<itti_n11_update_sm_context_response>(
+               TASK_SMF_SBI, TASK_SMF_APP, promise_id);
+       */
       pdu_session_update_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
-      itti_msg->res = sm_context_response;
+      trigger_session_update_sm_context_response(
+          sm_context_response, promise_id);
+
+      /* itti_msg->res = sm_context_response;
       int ret       = itti_inst->send_msg(itti_msg);
       if (RETURNok != ret) {
         Logger::smf_app().error(
             "Could not send ITTI message %s to task TASK_SMF_APP",
             itti_msg->get_msg_name());
-      }
+      }*/
+
     } break;
 
     default: {
       Logger::smf_app().debug("Unknown message type %d", msg_type);
     }
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_app::trigger_session_create_sm_context_response(
+    pdu_session_create_sm_context_response& sm_context_response,
+    uint32_t& pid) {
+  Logger::smf_app().debug(
+      "Trigger PDU Session Create SM Context Response: Set promise with ID %d "
+      "to ready",
+      pid);
+  std::unique_lock lock(m_sm_context_create_promises);
+  if (sm_context_create_promises.count(pid) > 0) {
+    sm_context_create_promises[pid]->set_value(sm_context_response);
+    // Remove this promise from list
+    sm_context_create_promises.erase(pid);
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_app::trigger_session_update_sm_context_response(
+    pdu_session_update_sm_context_response& sm_context_response,
+    uint32_t& pid) {
+  Logger::smf_app().debug(
+      "Trigger PDU Session Update SM Context Response: Set promise with ID %d "
+      "to ready",
+      pid);
+  std::unique_lock lock(m_sm_context_update_promises);
+  if (sm_context_update_promises.count(pid) > 0) {
+    sm_context_update_promises[pid]->set_value(sm_context_response);
+    // Remove this promise from list
+    sm_context_update_promises.erase(pid);
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_app::trigger_session_release_sm_context_response(
+    pdu_session_release_sm_context_response& sm_context_response,
+    uint32_t& pid) {
+  Logger::smf_app().debug(
+      "Trigger PDU Session Release SM Context Response: Set promise with ID %d "
+      "to ready",
+      pid);
+  std::unique_lock lock(m_sm_context_release_promises);
+  if (sm_context_release_promises.count(pid) > 0) {
+    sm_context_release_promises[pid]->set_value(sm_context_response);
+    // Remove this promise from list
+    sm_context_release_promises.erase(pid);
   }
 }
 
