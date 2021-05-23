@@ -1520,10 +1520,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // 5, 4.3.2.2.1 TS 23.502)
     Logger::smf_app().debug(
         "Send ITTI msg to SMF APP to trigger the response of Server");
-    std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
-        std::make_shared<itti_n11_create_sm_context_response>(
-            TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
-
+    /*  std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
+          std::make_shared<itti_n11_create_sm_context_response>(
+              TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
+  */
     pdu_session_create_sm_context_response sm_context_response = {};
     std::string smContextRef = std::to_string(smreq->scid);
     // headers: Location: contains the URI of the newly created resource,
@@ -1540,6 +1540,11 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     sm_context_response.set_json_data(json_data);
     sm_context_response.set_http_code(
         http_status_code_e::HTTP_STATUS_CODE_201_CREATED);
+
+    smf_app_inst->trigger_session_create_sm_context_response(
+        sm_context_response, smreq->pid);
+
+    /*
     itti_msg->res = sm_context_response;
 
     int ret = itti_inst->send_msg(itti_msg);
@@ -1548,6 +1553,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           "Could not send ITTI message %s to task TASK_SMF_APP",
           itti_msg->get_msg_name());
     }
+*/
 
     // TODO: PDU Session authentication/authorization (Optional)
     // see section 4.3.2.3@3GPP TS 23.502 and section 6.3.1@3GPP TS 24.501
