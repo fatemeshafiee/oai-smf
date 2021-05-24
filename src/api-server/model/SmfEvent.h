@@ -39,9 +39,9 @@ class SmfEvent {
 
   void validate();
 
-  void set_value(uint8_t value);
-  void get_value(uint8_t& value) const;
-  uint8_t get_value() const;
+  void set_value(std::string value);
+  void get_value(std::string& value) const;
+  std::string get_value() const;
   /////////////////////////////////////////////
   /// SmfEvent members
 
@@ -50,7 +50,7 @@ class SmfEvent {
 
  protected:
  private:
-  uint8_t value;
+  std::string value;
 };
 
 }  // namespace model
