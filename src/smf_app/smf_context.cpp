@@ -113,6 +113,15 @@ void smf_qos_flow::deallocate_ressources() {
 }
 
 //------------------------------------------------------------------------------
+void smf_pdu_session::get_pdu_session_id(uint32_t& psi) const {
+  psi = pdu_session_id;
+}
+//------------------------------------------------------------------------------
+uint32_t smf_pdu_session::get_pdu_session_id() const {
+  return pdu_session_id;
+}
+
+//------------------------------------------------------------------------------
 void smf_pdu_session::set(const paa_t& paa) {
   switch (paa.pdu_session_type.pdu_session_type) {
     case PDU_SESSION_TYPE_E_IPV4:
@@ -3209,6 +3218,128 @@ void smf_context::handle_pdu_session_status_change(
 }
 
 //------------------------------------------------------------------------------
+void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
+  Logger::smf_app().debug(
+      "Send request to N11 to triger FlexCN, "
+      "SMF Context ID " SCID_FMT " ",
+      scid);
+
+  // get the smf context
+  std::shared_ptr<smf_context_ref> scf = {};
+
+  if (smf_app_inst->is_scid_2_smf_context(scid)) {
+    scf = smf_app_inst->scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+    return;
+  }
+
+  supi_t supi                     = scf.get()->supi;
+  supi64_t supi64                 = smf_supi_to_u64(supi);
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
+
+  std::shared_ptr<smf_context> sc = {};
+
+  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+    sc = smf_app_inst->supi_2_smf_context(supi64);
+    Logger::smf_app().debug(
+        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
+  } else {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF context with "
+        "Supi " SUPI_64_FMT "!",
+        supi64);
+  }
+
+  // get dnn context
+  std::shared_ptr<dnn_context> sd = {};
+
+  if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
+    if (nullptr == sd.get()) {
+      Logger::smf_app().warn(
+          "Could not retrieve the corresponding DNN context!");
+      return;
+    }
+  }
+
+  // get smf_pdu_session
+  std::shared_ptr<smf_pdu_session> sp = {};
+  bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
+
+  if (nullptr == sp.get()) {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF PDU Session context!");
+    return;
+  }
+
+  Logger::smf_app().debug(
+      "Send request to N11 to triger FlexCN (Event "
+      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
+      supi, pdu_session_id, http_version);
+
+  std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
+  smf_app_inst->get_ee_subscriptions(
+      smf_event_t::SMF_EVENT_UE_IP_CH, subscriptions);
+
+  if (subscriptions.size() > 0) {
+    // Send request to N11 to trigger the notification to the subscribed event
+    Logger::smf_app().debug(
+        "Send ITTI msg to SMF N11 to trigger the event notification");
+    std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg =
+        std::make_shared<itti_n11_notify_subscribed_event>(
+            TASK_SMF_APP, TASK_SMF_SBI);
+
+    for (auto i : subscriptions) {
+      event_notification ev_notif = {};
+      ev_notif.set_supi(supi64);                    // SUPI
+      ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
+      ev_notif.set_smf_event(smf_event_t::SMF_EVENT_UE_IP_CH);
+      ev_notif.set_notif_uri(i.get()->notif_uri);
+      ev_notif.set_notif_id(i.get()->notif_id);
+      // timestamp
+      std::time_t time_epoch_ntp = std::time(nullptr);
+      uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
+      ev_notif.set_timestamp(std::to_string(tv_ntp));
+
+      // New UE IPv4
+      if (sp->ipv4) {
+        ev_notif.set_ad_ipv4_addr(conv::toString(sp->ipv4_address));
+      }
+      // New UE IPv6 Prefix
+      if (sp->ipv6) {
+        char str_addr6[INET6_ADDRSTRLEN];
+        if (inet_ntop(
+                AF_INET6, &sp->ipv6_address, str_addr6, sizeof(str_addr6))) {
+          // TODO
+          // ev_notif.set_ad_ipv6_prefix(conv::toString(sp->ipv4_address));
+        }
+      }
+
+      // TODO: Release UE IP address/prefix as "reIpv4Addr", "reIpv6Prefix"
+
+      itti_msg->event_notifs.push_back(ev_notif);
+    }
+
+    itti_msg->http_version = http_version;
+
+    int ret = itti_inst->send_msg(itti_msg);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_SBI",
+          itti_msg->get_msg_name());
+    }
+  } else {
+    Logger::smf_app().debug("No subscription available for this event");
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_context::trigger_ue_ip_change(scid_t scid, uint8_t http_version) {
+  event_sub.ee_ue_ip_change(scid, http_version);
+}
+
+//------------------------------------------------------------------------------
 void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN, "
@@ -3253,7 +3384,7 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       return;
     }
   }
-  // get smd_pdu_session
+  // get smf_pdu_session
   std::shared_ptr<smf_pdu_session> sp = {};
   bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
 
@@ -3287,6 +3418,11 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_FLEXCN);
       ev_notif.set_notif_uri(i.get()->notif_uri);
       ev_notif.set_notif_id(i.get()->notif_id);
+      // timestamp
+      std::time_t time_epoch_ntp = std::time(nullptr);
+      uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
+      ev_notif.set_timestamp(std::to_string(tv_ntp));
+
       // custom json e.g., for FlexCN
       nlohmann::json cj = {};
       // PLMN
@@ -3305,7 +3441,7 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
         char str_addr6[INET6_ADDRSTRLEN];
         if (inet_ntop(
                 AF_INET6, &sp->ipv6_address, str_addr6, sizeof(str_addr6))) {
-          cj["ue_ipv6_addr"] = str_addr6;
+          cj["ue_ipv6_prefix"] = str_addr6;
         }
       }
       // PDU Session Type
@@ -3352,11 +3488,6 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
           cj["qos_flow"].push_back(tmp);
         }
       }
-
-      // timestamp
-      std::time_t time_epoch_ntp = std::time(nullptr);
-      uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
-      cj["timeStamp"]            = std::to_string(tv_ntp);
 
       ev_notif.set_custom_info(cj);
       itti_msg->event_notifs.push_back(ev_notif);

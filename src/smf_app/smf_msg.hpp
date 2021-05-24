@@ -565,6 +565,10 @@ class event_notification {
   void set_smf_event(const smf_event_t& ev);
   smf_event_t get_smf_event() const;
 
+  void set_timestamp(const std::string& ss);
+  void get_timestamp(std::string& ss) const;
+  std::string get_timestamp() const;
+
   void set_supi(const supi64_t& supi);
   supi64_t get_supi() const;
   bool is_supi_is_set() const;
@@ -588,14 +592,13 @@ class event_notification {
   void set_custom_info(const nlohmann::json& c);
   void get_custom_info(nlohmann::json& c) const;
 
-
  private:
   nlohmann::json custom_info;  // store extra json data
-  std::string m_notif_uri;  // m_NotifUri;
-  std::string m_notif_id;   // m_NotifId;
+  std::string m_notif_uri;     // m_NotifUri;
+  std::string m_notif_id;      // m_NotifId;
 
   smf_event_t m_event;  // SmfEvent
-  // std::string m_TimeStamp;
+  std::string m_timestamp;
 
   supi64_t m_supi;
   bool m_supi_is_set;

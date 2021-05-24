@@ -76,6 +76,9 @@ class smf_event {
   bs2::connection subscribe_ee_pdu_session_status_change(
       const ee_pdu_session_status_sig_t::slot_type& sig);
 
+  bs2::connection subscribe_ee_ue_ip_change(
+      const ee_ue_ip_change_sig_t::slot_type& sig);
+
   bs2::connection subscribe_ee_flexcn_event(
       const ee_flexcn_sig_t::slot_type& sig);
 
@@ -85,8 +88,9 @@ class smf_event {
   ee_pdu_session_status_sig_t
       ee_pdu_session_status;  // Signal for PDU Session status change
   ee_pdu_session_release_sig_t
-      ee_pdu_session_release;  // Signal for SM Context status update
-  ee_flexcn_sig_t ee_flexcn;   // Signal for FlexCN Event
+      ee_pdu_session_release;             // Signal for SM Context status update
+  ee_ue_ip_change_sig_t ee_ue_ip_change;  // Signal for UE IP Addr change
+  ee_flexcn_sig_t ee_flexcn;              // Signal for FlexCN Event
 };
 }  // namespace smf
 #endif /* FILE_SMF_EVENT_HPP_SEEN */

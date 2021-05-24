@@ -877,9 +877,25 @@ void event_exposure_msg::set_event_subs(
 void event_notification::set_smf_event(const smf_event_t& ev) {
   m_event = ev;
 }
+
 //-----------------------------------------------------------------------------
 smf_event_t event_notification::get_smf_event() const {
   return m_event;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_timestamp(const std::string& ss) {
+  m_timestamp = ss;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::get_timestamp(std::string& ss) const {
+  ss = m_timestamp;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_timestamp() const {
+  return m_timestamp;
 }
 
 //-----------------------------------------------------------------------------

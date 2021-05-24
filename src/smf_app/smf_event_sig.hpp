@@ -59,6 +59,12 @@ typedef bs2::signal_type<
     ee_pdu_session_release_sig_t;
 
 // TODO: ee_ue_ip_address_change_sig_t; //UI IP Address, UE ID
+// Signal for Event exposure
+// UE Addr Change, SUPI, PDU SessionID, HTTP version
+typedef bs2::signal_type<
+    void(supi64_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    ee_ue_ip_change_sig_t;
+
 // TODO: Access Type Change
 // TODO: UP Path Change
 // TODO: PLMN Change

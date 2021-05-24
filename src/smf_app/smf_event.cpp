@@ -55,6 +55,12 @@ bs2::connection smf_event::subscribe_ee_pdu_session_release(
 }
 
 //------------------------------------------------------------------------------
+bs2::connection smf_event::subscribe_ee_ue_ip_change(
+    const ee_ue_ip_change_sig_t::slot_type& sig) {
+  return ee_ue_ip_change.connect(sig);
+}
+
+//------------------------------------------------------------------------------
 bs2::connection smf_event::subscribe_ee_flexcn_event(
     const ee_flexcn_sig_t::slot_type& sig) {
   return ee_flexcn.connect(sig);

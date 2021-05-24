@@ -135,6 +135,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   smf_pdu_session(smf_pdu_session& b) = delete;
 
+  void get_pdu_session_id(uint32_t& psi) const;
+  uint32_t get_pdu_session_id() const;
+
   /*
    * Set UE Address for this session
    * @param [paa_t &] paa: PAA
@@ -578,6 +581,10 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     pdu_session_status_connection =
         event_sub.subscribe_ee_pdu_session_status_change(boost::bind(
             &smf_context::handle_pdu_session_status_change, this, _1, _2, _3));
+
+    // Subscribe to UE IP Change Event
+    ee_ue_ip_change_connection = event_sub.subscribe_ee_ue_ip_change(
+        boost::bind(&smf_context::handle_ue_ip_change, this, _1, _2));
 
     // Subscribe to FlexCN event
     ee_flexcn = event_sub.subscribe_ee_flexcn_event(
@@ -1044,6 +1051,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void trigger_pdu_session_status_change(
       scid_t scid, const std::string& status, uint8_t http_version);
 
+  void trigger_ue_ip_change(scid_t scid, uint8_t http_version);
+  void handle_ue_ip_change(scid_t scid, uint8_t http_version);
+
   void trigger_flexcn_event(scid_t scid, uint8_t http_version);
   void handle_flexcn_event(scid_t scid, uint8_t http_version);
   /*
@@ -1098,6 +1108,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bs2::connection sm_context_status_connection;
   bs2::connection pdu_session_status_connection;
   bs2::connection ee_pdu_session_release_connection;
+  bs2::connection ee_ue_ip_change_connection;
   bs2::connection ee_flexcn;
 };
 }  // namespace smf
