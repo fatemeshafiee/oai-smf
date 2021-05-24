@@ -450,6 +450,9 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
     Logger::smf_api_server().debug("PDU Session ID %d", nee.getPduSeId());
     eem.set_pdu_session_id(nee.getPduSeId());
   }
+  // TODO: groupId
+  // TODO: DNN
+  // TODO: GUAMI
 
   eem.set_notif_id(nee.getNotifId());    // NotifId
   eem.set_notif_uri(nee.getNotifUri());  // NotifUri
@@ -464,16 +467,13 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
     event_subscription_t event_subscription = {};
     event_subscription.smf_event =
         static_cast<smf_event_t>(e.getEvent().get_value());
+    // TODO: dnaiChType (for event UP path change)
+    // TODO: dddTraDes/ddsStati (for event downlink data delivery status)
+    // TODO: altNotifIpv4Addrs, altNotifIpv6Addrs, serviceName, ImmeRep,
+    // notifMethod, maxReportNbr, expiry
     event_subscriptions.push_back(event_subscription);
   }
   eem.set_event_subs(event_subscriptions);
-
-  // std::vector<EventSubscription> eventSubscriptions;
-  // for (auto it: nee.getEventSubs()){
-  // event_subscription.smf_event = it.getEvent();
-  // getDnaiChgType
-  // event_subscriptions.push_back(event_subscription);
-  //}
 }
 
 //------------------------------------------------------------------------------

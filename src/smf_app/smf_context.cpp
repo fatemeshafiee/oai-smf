@@ -3353,6 +3353,11 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
         }
       }
 
+      // timestamp
+      std::time_t time_epoch_ntp = std::time(nullptr);
+      uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
+      cj["timeStamp"]            = std::to_string(tv_ntp);
+
       ev_notif.set_custom_info(cj);
       itti_msg->event_notifs.push_back(ev_notif);
     }
