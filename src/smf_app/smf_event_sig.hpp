@@ -44,13 +44,6 @@ typedef bs2::signal_type<
     void(scid_t, const std::string&, uint8_t),
     bs2::keywords::mutex_type<bs2::dummy_mutex>>::type sm_context_status_sig_t;
 
-// Signal for PDU session status change (for Event Exposure)
-// SCID, PDU Session Status, HTTP version
-typedef bs2::signal_type<
-    void(scid_t, const std::string&, uint8_t),
-    bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
-    ee_pdu_session_status_sig_t;
-
 // Signal for Event exposure
 // PDU session Release, SUPI, PDU SessionID, HTTP version
 typedef bs2::signal_type<

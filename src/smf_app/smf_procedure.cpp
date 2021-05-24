@@ -1137,7 +1137,6 @@ void session_update_sm_context_procedure::handle_itti_msg(
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
       // Trigger Event_exposure event
       scid_t scid = sc.get()->get_scid();
-      sc.get()->trigger_pdu_session_status_change(scid, "ACTIVATED", 1);
       sc.get()->trigger_ue_ip_change(scid, 1);
       sc.get()->trigger_flexcn_event(scid, 1);
 

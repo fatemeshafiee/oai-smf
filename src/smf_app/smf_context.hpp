@@ -568,19 +568,15 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
         event_sub(),
         plmn() {
     supi_prefix = {};
-    // Subscribe to sm context status change
+
+    // Subscribe to SM Context Status change (to notify to AMF)
     sm_context_status_connection =
         event_sub.subscribe_sm_context_status(boost::bind(
             &smf_context::handle_sm_context_status_change, this, _1, _2, _3));
-    // Subscribe to pdu session release (event exposure)
+    // Subscribe to PDU Session Release (event exposure)
     ee_pdu_session_release_connection =
         event_sub.subscribe_ee_pdu_session_release(boost::bind(
             &smf_context::handle_ee_pdu_session_release, this, _1, _2, _3));
-
-    // Subscribe to sm context status change
-    pdu_session_status_connection =
-        event_sub.subscribe_ee_pdu_session_status_change(boost::bind(
-            &smf_context::handle_pdu_session_status_change, this, _1, _2, _3));
 
     // Subscribe to UE IP Change Event
     ee_ue_ip_change_connection = event_sub.subscribe_ee_ue_ip_change(
@@ -600,8 +596,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       sm_context_status_connection.disconnect();
     if (ee_pdu_session_release_connection.connected())
       ee_pdu_session_release_connection.disconnect();
-    if (pdu_session_status_connection.connected())
-      pdu_session_status_connection.disconnect();
+    if (ee_ue_ip_change_connection.connected())
+      ee_ue_ip_change_connection.disconnect();
+    if (ee_flexcn.connected()) ee_flexcn.disconnect();
   }
 
   /*
@@ -1046,11 +1043,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void handle_ee_pdu_session_release(
       supi64_t supi, pdu_session_id_t pdu_session_id, uint8_t http_version);
 
-  void handle_pdu_session_status_change(
-      scid_t scid, const std::string& status, uint8_t http_version);
-  void trigger_pdu_session_status_change(
-      scid_t scid, const std::string& status, uint8_t http_version);
-
   void trigger_ue_ip_change(scid_t scid, uint8_t http_version);
   void handle_ue_ip_change(scid_t scid, uint8_t http_version);
 
@@ -1106,7 +1098,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   // for Event Handling
   smf_event event_sub;
   bs2::connection sm_context_status_connection;
-  bs2::connection pdu_session_status_connection;
   bs2::connection ee_pdu_session_release_connection;
   bs2::connection ee_ue_ip_change_connection;
   bs2::connection ee_flexcn;
