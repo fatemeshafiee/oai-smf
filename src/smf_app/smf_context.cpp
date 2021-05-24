@@ -3181,16 +3181,17 @@ void smf_context::handle_pdu_session_status_change(
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_PDU_SES_REL);
       ev_notif.set_notif_uri(i.get()->notif_uri);
       ev_notif.set_notif_id(i.get()->notif_id);
-      // custom json e.g., for FlexCN
-      nlohmann::json cj = {};
-      if (sp.get() != nullptr) {
-        if (sp->ipv4) {
-          cj["ue_ipv4_addr"] = conv::toString(sp->ipv4_address);
-        }
-        cj["pdu_session_type"] = sp->pdu_session_type.toString();
-      }
+      /*      // custom json e.g., for FlexCN
+            nlohmann::json cj = {};
+            if (sp.get() != nullptr) {
+              if (sp->ipv4) {
+                cj["ue_ipv4_addr"] = conv::toString(sp->ipv4_address);
+              }
+              cj["pdu_session_type"] = sp->pdu_session_type.toString();
+            }
 
-      ev_notif.set_custom_info(cj);
+            ev_notif.set_custom_info(cj);
+      */
       itti_msg->event_notifs.push_back(ev_notif);
     }
 
@@ -3288,16 +3289,29 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       ev_notif.set_notif_id(i.get()->notif_id);
       // custom json e.g., for FlexCN
       nlohmann::json cj = {};
+      // UE IPv4
       if (sp->ipv4) {
         cj["ue_ipv4_addr"] = conv::toString(sp->ipv4_address);
       }
+      // UE IPv6
+      if (sp->ipv6) {
+        char str_addr6[INET6_ADDRSTRLEN];
+        if (inet_ntop(
+                AF_INET6, &sp->ipv6_address, str_addr6, sizeof(str_addr6))) {
+          cj["ue_ipv6_addr"] = str_addr6;
+        }
+      }
+      // PDU Session Type
       cj["pdu_session_type"] = sp->pdu_session_type.toString();
-      cj["snssai"]["sst"]    = scf->nssai.sST;
-      cj["snssai"]["sd"]     = scf->nssai.sD;
-      cj["dnn"]              = scf->dnn;
-      cj["amf_addr"]         = scf->amf_addr;
-      // if (scf->upf_node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS)
-      //  cj["upf_addr"] = inet_ntoa(scf->upf_node_id.u1.ipv4_address);
+      // NSSAI
+      cj["snssai"]["sst"] = scf->nssai.sST;
+      cj["snssai"]["sd"]  = scf->nssai.sD;
+      // DNN
+      cj["dnn"] = scf->dnn;
+      // Serving AMF addr
+      cj["amf_addr"] = scf->amf_addr;
+
+      // QoS flows associated with this session
       std::vector<smf_qos_flow> flows = {};
       sp->get_qos_flows(flows);
 
@@ -3306,6 +3320,7 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
         for (auto f : flows) {
           nlohmann::json tmp = {};
           tmp["qfi"]         = (uint8_t) f.qfi.qfi;
+          // UL FTeid IPv4/IPv6 (UPF)
           if (f.ul_fteid.v4)
             tmp["upf_addr"]["ipv4"] = inet_ntoa(f.ul_fteid.ipv4_address);
           if (f.ul_fteid.v6) {
@@ -3316,7 +3331,7 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
               tmp["upf_addr"]["ipv6"] = str_addr6;
             }
           }
-
+          // DL FTeid Ipv4/v6 (AN)
           if (f.dl_fteid.v4)
             tmp["an_addr"]["ipv4"] = inet_ntoa(f.dl_fteid.ipv4_address);
           if (f.dl_fteid.v6) {
@@ -3330,6 +3345,7 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
           cj["qos_flow"].push_back(tmp);
         }
       }
+
       ev_notif.set_custom_info(cj);
       itti_msg->event_notifs.push_back(ev_notif);
     }
