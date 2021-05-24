@@ -572,10 +572,18 @@ void smf_sbi::notify_subscribed_event(
     event_notif["event"]       = i.get_smf_event();
     event_notif["pduSeId"]     = i.get_pdu_session_id();
     event_notif["supi"]        = std::to_string(i.get_supi());
-    //customized data
-    nlohmann::json customized_data   = {};
+
+    if (i.is_ad_ipv4_addr_is_set()) {
+      event_notif["adIpv4Addr"] = i.get_ad_ipv4_addr();
+    }
+    if (i.is_re_ipv4_addr_is_set()) {
+      event_notif["reIpv4Addr"] = i.get_re_ipv4_addr();
+    }
+    // customized data
+    nlohmann::json customized_data = {};
     i.get_custom_info(customized_data);
-    event_notif["customized_data"] = customized_data;
+    if (!customized_data.is_null())
+      event_notif["customized_data"] = customized_data;
     // timestamp
     std::time_t time_epoch_ntp = std::time(nullptr);
     uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
@@ -583,7 +591,7 @@ void smf_sbi::notify_subscribed_event(
     event_notifs.push_back(event_notif);
     json_data["eventNotifs"] = event_notifs;
 
-    std::string body         = json_data.dump();
+    std::string body = json_data.dump();
     bodys.push_back(body);
   }
 
