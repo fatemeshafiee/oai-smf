@@ -3289,6 +3289,13 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       ev_notif.set_notif_id(i.get()->notif_id);
       // custom json e.g., for FlexCN
       nlohmann::json cj = {};
+      // PLMN
+      plmn_t plmn = {};
+      std::string mcc, mnc;
+      sc->get_plmn(plmn);
+      conv::plmnToMccMnc(plmn, mcc, mnc);
+      cj["plmn"]["mcc"] = mcc;
+      cj["plmn"]["mnc"] = mnc;
       // UE IPv4
       if (sp->ipv4) {
         cj["ue_ipv4_addr"] = conv::toString(sp->ipv4_address);

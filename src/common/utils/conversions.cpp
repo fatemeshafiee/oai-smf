@@ -102,6 +102,7 @@ std::string conv::mccToString(
   s.append(std::to_string(mcc16));
   return s;
 }
+
 //------------------------------------------------------------------------------
 std::string conv::mncToString(
     const uint8_t digit1, const uint8_t digit2, const uint8_t digit3) {
@@ -117,6 +118,7 @@ std::string conv::mncToString(
   return s;
 }
 
+//------------------------------------------------------------------------------
 bool conv::plmnFromString(
     plmn_t& p, const std::string mcc, const std::string mnc) {
   // MCC
@@ -152,6 +154,23 @@ bool conv::plmnFromString(
     p.mnc_digit3 = 0x0;
   }
   return true;
+}
+
+//------------------------------------------------------------------------------
+void conv::plmnToMccMnc(
+    const plmn_t& plmn, std::string& mcc, std::string& mnc) {
+  uint16_t mcc_dec = 0;
+  uint16_t mnc_dec = 0;
+  uint16_t mnc_len = 0;
+
+  mcc_dec = plmn.mcc_digit1 * 100 + plmn.mcc_digit2 * 10 + plmn.mcc_digit3;
+  mnc_len = (plmn.mnc_digit3 == 0x0 ? 2 : 3);
+  mnc_dec = plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
+  mnc_dec = (mnc_len == 2 ? mnc_dec : mnc_dec * 10 + plmn.mnc_digit3);
+
+  mcc = std::to_string(mcc_dec);
+  mnc = std::to_string(mnc_dec);
+  return;
 }
 
 //------------------------------------------------------------------------------

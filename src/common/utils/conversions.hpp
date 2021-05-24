@@ -55,7 +55,10 @@ class conv {
   static void hexa_to_ascii(uint8_t* from, char* to, size_t length);
   static int ascii_to_hex(uint8_t* dst, const char* h);
   static struct in_addr fromString(const std::string addr4);
-  static bool plmnFromString(plmn_t& p, const std::string mcc, const std::string mnc);
+  static bool plmnFromString(
+      plmn_t& p, const std::string mcc, const std::string mnc);
+  static void plmnToMccMnc(
+      const plmn_t& plmn, std::string& mcc, std::string& mnc);
   static std::string toString(const struct in_addr& inaddr);
   static std::string toString(const struct in6_addr& in6addr);
   static std::string mccToString(
