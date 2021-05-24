@@ -569,7 +569,7 @@ void smf_sbi::notify_subscribed_event(
     json_data["notifId"]       = i.get_notif_id();
     auto event_notifs          = nlohmann::json::array();
     nlohmann::json event_notif = {};
-    event_notif["event"]       = i.get_smf_event();
+    event_notif["event"]       = smf_event_from_enum(i.get_smf_event());
     event_notif["pduSeId"]     = i.get_pdu_session_id();
     event_notif["supi"]        = std::to_string(i.get_supi());
 
