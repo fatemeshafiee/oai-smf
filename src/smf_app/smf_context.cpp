@@ -814,7 +814,7 @@ void smf_context::handle_itti_msg(
                     session_report_msg, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
                     n2_sm_info);
 
-            smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+            conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
             session_report_msg.set_n2_sm_information(n2_sm_info_hex);
 
             // Fill the json part
@@ -1239,7 +1239,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::
                 CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
+      conv::convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
       // trigger to send reply to AMF
       smf_app_inst->trigger_create_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_401_UNAUTHORIZED,
@@ -1453,7 +1453,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
               smreq->req, n1_sm_message,
               cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE)) {
-        smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
+        conv::convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
         // trigger to send reply to AMF
         smf_app_inst->trigger_create_context_error_response(
             http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -1604,7 +1604,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
         sm_context_resp_pending->res, n1_sm_message, cause_n1);
-    smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
+    conv::convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
     sm_context_resp_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
     // get supi and put into URL
@@ -1737,9 +1737,9 @@ bool smf_context::handle_pdu_session_modification_request(
     return false;
   }
 
-  smf_app_inst->convert_string_2_hex(
+  conv::convert_string_2_hex(
       n1_sm_msg_to_be_created, n1_sm_msg_hex_to_be_created);
-  smf_app_inst->convert_string_2_hex(
+  conv::convert_string_2_hex(
       n2_sm_info_to_be_created, n2_sm_info_hex_to_be_created);
 
   sm_context_resp.get()->res.set_n1_sm_message(n1_sm_msg_hex_to_be_created);
@@ -1880,7 +1880,7 @@ bool smf_context::handle_pdu_session_release_request(
     if (smf_n1::get_instance().create_n1_pdu_session_release_reject(
             sm_context_request.get()->req, n1_sm_msg,
             cause_value_5gsm_e::CAUSE_43_INVALID_PDU_SESSION_IDENTITY)) {
-      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+      conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       // trigger to send reply to AMF
       smf_app_inst->trigger_update_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -2032,7 +2032,7 @@ bool smf_context::handle_pdu_session_resource_setup_response_transfer(
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             sm_context_request.get()->req, n1_sm_msg,
             cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
-      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+      conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       // trigger to send reply to AMF
       smf_app_inst->trigger_update_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -2118,7 +2118,7 @@ bool smf_context::handle_pdu_session_resource_setup_unsuccessful_transfer(
   if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
           sm_context_request.get()->req, n1_sm_msg,
           cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES)) {
-    smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+    conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     // trigger to send reply to AMF
     smf_app_inst->trigger_update_context_error_response(
         http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -2264,7 +2264,7 @@ bool smf_context::handle_service_request(
       sm_context_resp.get()->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
       n2_sm_info);
 
-  smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+  conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
   sm_context_resp.get()->res.set_n2_sm_information(n2_sm_info_hex);
 
   // fill the content of SmContextUpdatedData
@@ -2616,7 +2616,7 @@ void smf_context::handle_pdu_session_update_sm_context_request(
           if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
                   sm_context_req_msg, n1_sm_msg,
                   cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE)) {
-            smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+            conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
             // trigger to send reply to AMF
             smf_app_inst->trigger_update_context_error_response(
                 http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -2796,14 +2796,14 @@ void smf_context::handle_pdu_session_modification_network_requested(
   // N1: PDU_SESSION_MODIFICATION_COMMAND
   smf_n1::get_instance().create_n1_pdu_session_modification_command(
       itti_msg->msg, n1_sm_msg, cause_value_5gsm_e::CAUSE_0_UNKNOWN);
-  smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+  conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
   itti_msg->msg.set_n1_sm_message(n1_sm_msg_hex);
 
   // N2: PDU Session Resource Modify Response Transfer
   smf_n2::get_instance().create_n2_pdu_session_resource_modify_request_transfer(
       itti_msg->msg, n2_sm_info_type_e::PDU_RES_MOD_REQ, n2_sm_info);
 
-  smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+  conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
   itti_msg->msg.set_n2_sm_information(n2_sm_info_hex);
 
   // Fill N1N2MesasgeTransferRequestData

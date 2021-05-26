@@ -134,11 +134,6 @@ scid_t smf_app::generate_smf_context_ref() {
 }
 
 //------------------------------------------------------------------------------
-void smf_app::generate_ev_subscription_id(std::string& sub_id) {
-  sub_id = std::to_string(evsub_id_generator.get_uid());
-}
-
-//------------------------------------------------------------------------------
 evsub_id_t smf_app::generate_ev_subscription_id() {
   return evsub_id_generator.get_uid();
 }
@@ -718,7 +713,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::CAUSE_95_SEMANTICALLY_INCORRECT_MESSAGE)) {
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      conv::convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       // trigger to send reply to AMF
       trigger_create_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -751,7 +746,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     // PDU Session Establishment Reject
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message, cause_n1)) {
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      conv::convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       // trigger to send reply to AMF
       trigger_create_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -791,7 +786,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::CAUSE_81_INVALID_PTI_VALUE)) {
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      conv::convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       // trigger to send reply to AMF
       trigger_create_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -832,7 +827,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::
                 CAUSE_98_MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE)) {
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      conv::convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       // trigger to send reply to AMF
       trigger_create_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -883,7 +878,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
             smreq->req, n1_sm_message,
             cause_value_5gsm_e::CAUSE_27_MISSING_OR_UNKNOWN_DNN)) {
-      smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+      conv::convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
       // trigger to send reply to AMF
       trigger_create_context_error_response(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -975,7 +970,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
                 smreq->req, n1_sm_message,
                 cause_value_5gsm_e::
                     CAUSE_29_USER_AUTHENTICATION_OR_AUTHORIZATION_FAILED)) {
-          smf_app_inst->convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
+          conv::convert_string_2_hex(n1_sm_message, n1_sm_message_hex);
           // trigger to send reply to AMF
           trigger_create_context_error_response(
               http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -1440,35 +1435,6 @@ bool smf_app::is_supi_dnn_snssai_subscription_data(
 bool smf_app::is_create_sm_context_request_valid() const {
   // TODO: should be implemented
   return true;
-}
-
-//---------------------------------------------------------------------------------------------
-void smf_app::convert_string_2_hex(
-    const std::string& input_str, std::string& output_str) {
-  Logger::smf_app().debug("Convert string to Hex");
-  unsigned char* data = (unsigned char*) malloc(input_str.length() + 1);
-  memset(data, 0, input_str.length() + 1);
-  memcpy((void*) data, (void*) input_str.c_str(), input_str.length());
-
-#if DEBUG_IS_ON
-  Logger::smf_app().debug("Input: ");
-  for (int i = 0; i < input_str.length(); i++) {
-    printf("%02x ", data[i]);
-  }
-  printf("\n");
-#endif
-  char* datahex = (char*) malloc(input_str.length() * 2 + 1);
-  memset(datahex, 0, input_str.length() * 2 + 1);
-
-  for (int i = 0; i < input_str.length(); i++)
-    sprintf(datahex + i * 2, "%02x", data[i]);
-
-  output_str = reinterpret_cast<char*>(datahex);
-  Logger::smf_app().debug("Output: \n %s ", output_str.c_str());
-
-  // free memory
-  free_wrapper((void**) &data);
-  free_wrapper((void**) &datahex);
 }
 
 //---------------------------------------------------------------------------------------------
