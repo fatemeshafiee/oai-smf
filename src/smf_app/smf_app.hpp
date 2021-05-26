@@ -43,9 +43,6 @@
 #include "itti_msg_n11.hpp"
 #include "itti_msg_n4.hpp"
 #include "itti_msg_sbi.hpp"
-#include "pistache/endpoint.h"
-#include "pistache/http.h"
-#include "pistache/router.h"
 #include "smf.h"
 #include "smf_context.hpp"
 #include "smf_msg.hpp"
@@ -732,7 +729,6 @@ class smf_app {
    * @param [const uint32_t &] http_code: Status code of HTTP response
    * @param [const uint8_t &] cause: Error cause
    * @param [uint32_t &] promise_id: Promise Id
-   * @param [uint8_t] msg_type: Type of HTTP message (Update/Release)
    * @return void
    */
   void trigger_update_context_error_response(
@@ -745,7 +741,6 @@ class smf_app {
    * @param [const uint8_t &] cause: cause
    * @param [const std::string &] n1_sm_msg: N1 SM message
    * @param [uint32_t &] promise_id: Promise Id
-   * @param [uint8_t] msg_type: Type of HTTP message (Update/Release)
    * @return void
    */
   void trigger_update_context_error_response(
@@ -763,12 +758,38 @@ class smf_app {
   void trigger_http_response(
       const uint32_t& http_code, uint32_t& promise_id, uint8_t msg_type);
 
+  /*
+   * To trigger the session create sm context response by set the value of the
+   * corresponding promise to ready
+   * @param [pdu_session_create_sm_context_response&] sm_context_response:
+   * response message
+   * @param [uint32_t &] promise_id: Promise Id
+   * @return void
+   */
   void trigger_session_create_sm_context_response(
       pdu_session_create_sm_context_response& sm_context_response,
       uint32_t& pid);
+
+  /*
+   * To trigger the session update sm context response by set the value of the
+   * corresponding promise to ready
+   * @param [pdu_session_update_sm_context_response&] sm_context_response:
+   * response message
+   * @param [uint32_t &] promise_id: Promise Id
+   * @return void
+   */
   void trigger_session_update_sm_context_response(
       pdu_session_update_sm_context_response& sm_context_response,
       uint32_t& pid);
+
+  /*
+   * To trigger the session release sm context response by set the value of the
+   * corresponding promise to ready
+   * @param [pdu_session_release_sm_context_response&] sm_context_response:
+   * response message
+   * @param [uint32_t &] promise_id: Promise Id
+   * @return void
+   */
   void trigger_session_release_sm_context_response(
       pdu_session_release_sm_context_response& sm_context_response,
       uint32_t& pid);

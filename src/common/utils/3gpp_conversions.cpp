@@ -516,7 +516,7 @@ void xgpp_conv::sm_context_request_from_nas(
 }
 
 //------------------------------------------------------------------------------
-void xgpp_conv::create_sm_context_response_from_ct_request(
+void xgpp_conv::create_sm_context_response_from_ctx_request(
     const std::shared_ptr<itti_n11_create_sm_context_request>& ctx_request,
     std::shared_ptr<itti_n11_create_sm_context_response>& ctx_response) {
   ctx_response->http_version = ctx_request->http_version;
@@ -535,7 +535,7 @@ void xgpp_conv::create_sm_context_response_from_ct_request(
 }
 
 //------------------------------------------------------------------------------
-void xgpp_conv::update_sm_context_response_from_ct_request(
+void xgpp_conv::update_sm_context_response_from_ctx_request(
     const std::shared_ptr<itti_n11_update_sm_context_request>& ct_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& ct_response) {
   ct_response->res.set_http_code(
