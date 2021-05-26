@@ -1009,8 +1009,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   scf.get()->pdu_session_id = pdu_session_id;
   set_scid_2_smf_context(scid, scf);
   smreq->set_scid(scid);
-  // Store scid in the context itself
-  sc.get()->set_scid(scid);
+
   Logger::smf_app().debug("Generated a SMF Context ID " SCID_FMT " ", scid);
 
   // Step 9. Let the context handle the message

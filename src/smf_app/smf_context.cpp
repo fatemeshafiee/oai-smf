@@ -734,27 +734,11 @@ void smf_context::handle_itti_msg(
           pfcp::qfi_t qfi                     = {};
           if (find_pdu_session(pdr_id, qfi, sd, sp)) {
             // Step 1. send N4 Data Report Ack to UPF
-            pfcp::node_id_t up_node_id = {};
-            scid_t scid                = get_scid();
-            // Get UPF node
-            std::shared_ptr<smf_context_ref> scf = {};
-            if (smf_app_inst->is_scid_2_smf_context(scid)) {
-              scf        = smf_app_inst->scid_2_smf_context(scid);
-              up_node_id = scf.get()->upf_node_id;
-            } else {
-              Logger::smf_app().warn(
-                  "SM Context associated with this id " SCID_FMT
-                  " does not exit!",
-                  scid);
-              return;
-            }
-
             itti_n4_session_report_response* n4_ser =
                 new itti_n4_session_report_response(TASK_SMF_APP, TASK_SMF_N4);
-            n4_ser->seid    = req->seid;
-            n4_ser->trxn_id = req->trxn_id;
-            n4_ser->r_endpoint =
-                endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
+            n4_ser->seid       = req->seid;
+            n4_ser->trxn_id    = req->trxn_id;
+            n4_ser->r_endpoint = req->r_endpoint;
             std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
                 std::shared_ptr<itti_n4_session_report_response>(n4_ser);
 
@@ -2966,16 +2950,6 @@ void smf_context::set_supi(const supi_t& s) {
 //-----------------------------------------------------------------------------
 std::size_t smf_context::get_number_dnn_contexts() const {
   return dnns.size();
-}
-
-//-----------------------------------------------------------------------------
-void smf_context::set_scid(const scid_t& id) {
-  scid = id;
-}
-
-//-----------------------------------------------------------------------------
-scid_t smf_context::get_scid() const {
-  return scid;
 }
 
 //-----------------------------------------------------------------------------

@@ -558,7 +558,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       : m_context(),
         pending_procedures(),
         dnn_subscriptions(),
-        scid(0),
         event_sub(),
         plmn() {
     supi_prefix = {};
@@ -923,20 +922,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   std::size_t get_number_dnn_contexts() const;
 
   /*
-   * Set SM Context ID
-   * @param [const scid_t &] id: SM Context Id
-   * @return void
-   */
-  void set_scid(const scid_t& id);
-
-  /*
-   * Get SM Context ID
-   * @param [void
-   * @return scid_t: SM Context Id
-   */
-  scid_t get_scid() const;
-
-  /*
    * Get Supi prefix
    * @param [const std::string &]  prefix: Supi prefix (e.g., imsi)
    * @return void
@@ -1064,7 +1049,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       dnn_subscriptions;
   supi_t supi;
   std::string supi_prefix;
-  scid_t scid;  // SM Context ID
   plmn_t plmn;
 
   // AMF IP addr
