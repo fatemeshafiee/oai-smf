@@ -1757,10 +1757,6 @@ void smf_app::trigger_create_context_error_response(
   refToBinaryData.setContentId(N1_SM_CONTENT_ID);
   sm_context.setN1SmMsg(refToBinaryData);
 
-  /*  std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
-        std::make_shared<itti_n11_create_sm_context_response>(
-            TASK_SMF_SBI, TASK_SMF_APP, promise_id);
-   */
   pdu_session_create_sm_context_response sm_context_response = {};
   nlohmann::json json_data                                   = {};
   to_json(json_data, sm_context);
@@ -1769,14 +1765,6 @@ void smf_app::trigger_create_context_error_response(
   sm_context_response.set_n1_sm_message(n1_sm_msg);
   sm_context_response.set_http_code(http_code);
   trigger_session_create_sm_context_response(sm_context_response, promise_id);
-
-  /*itti_msg->res = sm_context_response;
-  int ret       = itti_inst->send_msg(itti_msg);
-  if (RETURNok != ret) {
-    Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_APP",
-        itti_msg->get_msg_name());
-  }*/
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1790,10 +1778,6 @@ void smf_app::trigger_update_context_error_response(
   problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   smContextUpdateError.setError(problem_details);
 
-  /*std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
-      std::make_shared<itti_n11_update_sm_context_response>(
-          TASK_SMF_SBI, TASK_SMF_APP, promise_id);
-  */
   pdu_session_update_sm_context_response sm_context_response = {};
   nlohmann::json json_data                                   = {};
   to_json(json_data, smContextUpdateError);
@@ -1801,14 +1785,6 @@ void smf_app::trigger_update_context_error_response(
   sm_context_response.set_json_format("application/problem+json");
   sm_context_response.set_http_code(http_code);
   trigger_session_update_sm_context_response(sm_context_response, promise_id);
-
-  /*itti_msg->res = sm_context_response;
-  int ret       = itti_inst->send_msg(itti_msg);
-  if (RETURNok != ret) {
-    Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_APP",
-        itti_msg->get_msg_name());
-  }*/
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1823,10 +1799,6 @@ void smf_app::trigger_update_context_error_response(
   problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   smContextUpdateError.setError(problem_details);
 
-  /* std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
-       std::make_shared<itti_n11_update_sm_context_response>(
-           TASK_SMF_SBI, TASK_SMF_APP, promise_id);
-   */
   pdu_session_update_sm_context_response sm_context_response = {};
   nlohmann::json json_data                                   = {};
   to_json(json_data, smContextUpdateError);
@@ -1835,14 +1807,6 @@ void smf_app::trigger_update_context_error_response(
   sm_context_response.set_n1_sm_message(n1_sm_msg);
   sm_context_response.set_http_code(http_code);
   trigger_session_update_sm_context_response(sm_context_response, promise_id);
-
-  /*itti_msg->res = sm_context_response;
-  int ret       = itti_inst->send_msg(itti_msg);
-  if (RETURNok != ret) {
-    Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_APP",
-        itti_msg->get_msg_name());
-  }*/
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1852,65 +1816,27 @@ void smf_app::trigger_http_response(
       "Send ITTI msg to SMF APP to trigger the response of HTTP Server");
   switch (msg_type) {
     case N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE: {
-      /*std::shared_ptr<itti_n11_release_sm_context_response> itti_msg =
-          std::make_shared<itti_n11_release_sm_context_response>(
-              TASK_SMF_SBI, TASK_SMF_APP, promise_id);
-      */
       pdu_session_release_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
 
       trigger_session_release_sm_context_response(
           sm_context_response, promise_id);
 
-      /*
-      itti_msg->res = sm_context_response;
-      int ret       = itti_inst->send_msg(itti_msg);
-      if (RETURNok != ret) {
-        Logger::smf_app().error(
-            "Could not send ITTI message %s to task TASK_SMF_APP",
-            itti_msg->get_msg_name());
-      }*/
-
     } break;
 
     case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE: {
-      /* std::shared_ptr<itti_n11_create_sm_context_response> itti_msg =
-           std::make_shared<itti_n11_create_sm_context_response>(
-               TASK_SMF_SBI, TASK_SMF_APP, promise_id);
-       */
       pdu_session_create_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
       trigger_session_create_sm_context_response(
           sm_context_response, promise_id);
 
-      /*
-      itti_msg->res = sm_context_response;
-      int ret       = itti_inst->send_msg(itti_msg);
-      if (RETURNok != ret) {
-        Logger::smf_app().error(
-            "Could not send ITTI message %s to task TASK_SMF_APP",
-            itti_msg->get_msg_name());
-      }*/
-
     } break;
 
     case N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE: {
-      /* std::shared_ptr<itti_n11_update_sm_context_response> itti_msg =
-           std::make_shared<itti_n11_update_sm_context_response>(
-               TASK_SMF_SBI, TASK_SMF_APP, promise_id);
-       */
       pdu_session_update_sm_context_response sm_context_response = {};
       sm_context_response.set_http_code(http_code);
       trigger_session_update_sm_context_response(
           sm_context_response, promise_id);
-
-      /* itti_msg->res = sm_context_response;
-      int ret       = itti_inst->send_msg(itti_msg);
-      if (RETURNok != ret) {
-        Logger::smf_app().error(
-            "Could not send ITTI message %s to task TASK_SMF_APP",
-            itti_msg->get_msg_name());
-      }*/
 
     } break;
 
