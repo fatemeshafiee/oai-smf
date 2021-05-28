@@ -3264,6 +3264,7 @@ bool dnn_context::remove_pdu_session(const uint32_t pdu_session_id) {
   }
   return false;
 }
+
 //------------------------------------------------------------------------------
 size_t dnn_context::get_number_pdu_sessions() const {
   std::shared_lock lock(m_context);

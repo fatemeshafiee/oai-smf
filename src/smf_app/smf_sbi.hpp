@@ -32,6 +32,8 @@
 #include <map>
 #include <thread>
 
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
 #include <curl/curl.h>
 #include "3gpp_29.503.h"
 #include "smf.h"
@@ -43,11 +45,21 @@ namespace smf {
 
 class smf_sbi {
  private:
+  CURLM* curl_multi;
+  std::vector<CURL*> handles;
+  struct curl_slist* headers;
+
+  mutable std::shared_mutex m_curl_handle_promises;
+
+  std::map<std::string, boost::shared_ptr<boost::promise<std::string>>>
+      curl_handle_promises;
+
   std::thread::id thread_id;
   std::thread thread;
 
  public:
   smf_sbi();
+  virtual ~smf_sbi();
   smf_sbi(smf_sbi const&) = delete;
   void operator=(smf_sbi const&) = delete;
 
@@ -162,6 +174,54 @@ class smf_sbi {
    *
    */
   void subscribe_sm_data();
+
+  /*
+   * Create Curl handle for multi curl
+   * @param [const std::string &] uri: URI of the subscribed NF
+   * @param [std::string &] data: data to be sent
+   * @param [std::string &] response_data: response data
+   * @return pointer to the created curl
+   */
+  CURL* curl_create_handle(
+      const std::string& uri, const std::string& data,
+      std::string& response_data);
+
+  /*
+   * Prepare to send a request using curl multi
+   * @param [const std::string &] uri: URI of the subscribed NF
+   * @param [std::string &] data: data to be sent
+   * @param [std::string &] response_data: response data
+   * @return void
+   */
+  void send_curl_multi(
+      const std::string& uri, const std::string& data,
+      std::string& response_data);
+
+  /*
+   * Perform curl multi to actually process the available data
+   * @param [uint64_t ms] ms: current time
+   * @return void
+   */
+  void perform_curl_multi(uint64_t ms);
+
+  /*
+   * Finish all the curl transfers
+   * @param void
+   * @return void
+   */
+  void wait_curl_end();
+
+  /*
+   * Release all the handles
+   * @param void
+   * @return void
+   */
+  void curl_release_handles();
+  void send_n1n2_message_transfer_request_curl_multi(
+      std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
+
+  void add_promise(
+      std::string id, boost::shared_ptr<boost::promise<std::string>>& p);
 };
 }  // namespace smf
 #endif /* FILE_SMF_SBI_HPP_SEEN */
