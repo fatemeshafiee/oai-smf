@@ -1259,10 +1259,11 @@ void smf_sbi::curl_release_handles() {
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
       Logger::smf_app().debug("Got response with HTTP code  %d!", http_code);
 
-      std::string curl_url;
+      char* curl_url = nullptr;
       int res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &curl_url);
-      if (res == CURLE_OK) {
-        trigger_process_response(curl_url, http_code);
+      if (res == CURLE_OK and curl_url) {
+        std::string curl_url_str(curl_url);
+        trigger_process_response(curl_url_str, http_code);
       }
 
       // TODO: remove handle from the multi session and end this handle now, or
