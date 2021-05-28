@@ -43,6 +43,7 @@
 #include "smf.h"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
+#include "PlmnId.h"
 
 extern "C" {
 #include "dynamic_memory_check.h"
@@ -579,6 +580,16 @@ void smf_sbi::notify_subscribed_event(
     if (i.is_re_ipv4_addr_is_set()) {
       event_notif["reIpv4Addr"] = i.get_re_ipv4_addr();
     }
+
+    // add support for plmn change.
+    if (i.is_plmnid_is_set()) {
+      oai::smf_server::model::PlmnId plmnid = i.get_plmnid();
+      nlohmann::json plmnid_data = {};
+      //oai::smf_server::model::
+      to_json(plmnid_data, plmnid);
+      event_notif["plmnId"] = plmnid_data;
+    }
+    
     // customized data
     nlohmann::json customized_data = {};
     i.get_custom_info(customized_data);

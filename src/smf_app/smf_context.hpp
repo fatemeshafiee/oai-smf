@@ -582,6 +582,14 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     ee_ue_ip_change_connection = event_sub.subscribe_ee_ue_ip_change(
         boost::bind(&smf_context::handle_ue_ip_change, this, _1, _2));
 
+    // Subscribe to PLMN Change Event
+    ee_plmn_change_connection = event_sub.subscribe_ee_plmn_change(
+        boost::bind(&smf_context::handle_plmn_change, this, _1, _2));
+
+    // Subscribe to DDDS event
+    ee_ddds_connection = event_sub.subscribe_ee_ddds(
+        boost::bind(&smf_context::handle_ddds, this, _1, _2));
+
     // Subscribe to FlexCN event
     ee_flexcn = event_sub.subscribe_ee_flexcn_event(
         boost::bind(&smf_context::handle_flexcn_event, this, _1, _2));
@@ -598,6 +606,10 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       ee_pdu_session_release_connection.disconnect();
     if (ee_ue_ip_change_connection.connected())
       ee_ue_ip_change_connection.disconnect();
+    if (ee_plmn_change_connection.connected())
+      ee_plmn_change_connection.disconnect();
+    if (ee_ddds_connection.connected())
+      ee_ddds_connection.disconnect();
     if (ee_flexcn.connected()) ee_flexcn.disconnect();
   }
 
@@ -1046,6 +1058,12 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void trigger_ue_ip_change(scid_t scid, uint8_t http_version);
   void handle_ue_ip_change(scid_t scid, uint8_t http_version);
 
+  void trigger_plmn_change(scid_t scid, uint8_t http_version);
+  void handle_plmn_change(scid_t scid, uint8_t http_version);
+
+  void trigger_ddds(scid_t scid, uint8_t http_version);
+  void handle_ddds(scid_t scid, uint8_t http_version);
+
   void trigger_flexcn_event(scid_t scid, uint8_t http_version);
   void handle_flexcn_event(scid_t scid, uint8_t http_version);
   /*
@@ -1100,6 +1118,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bs2::connection sm_context_status_connection;
   bs2::connection ee_pdu_session_release_connection;
   bs2::connection ee_ue_ip_change_connection;
+  bs2::connection ee_plmn_change_connection;
+  bs2::connection ee_ddds_connection;
   bs2::connection ee_flexcn;
 };
 }  // namespace smf

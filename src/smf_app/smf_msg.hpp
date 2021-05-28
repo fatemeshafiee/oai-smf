@@ -39,10 +39,13 @@
 #include "NgRanTargetId.h"
 #include "pistache/http.h"
 #include "smf_profile.hpp"
+#include "PlmnId.h"
 
 extern "C" {
 #include "QOSRules.h"
 }
+
+// using namespace oai::smf_server::model;
 
 typedef enum {
   PDU_SESSION_MSG_TYPE_NONE             = -1,
@@ -581,6 +584,11 @@ class event_notification {
   std::string get_re_ipv4_addr() const;
   bool is_re_ipv4_addr_is_set() const;
 
+  // m_PlmnId
+  void set_PlmnId(oai::smf_server::model::PlmnId const& value);
+  oai::smf_server::model::PlmnId get_plmnid() const;
+  bool is_plmnid_is_set() const;
+
   void set_pdu_session_id(const pdu_session_id_t value);
   pdu_session_id_t get_pdu_session_id() const;
   bool is_psi_is_set() const;
@@ -610,8 +618,8 @@ class event_notification {
   bool m_re_ipv4_addr_is_set;  // m_ReIpv4AddrIsSet;
 
   // for a PLMN Change
-  // PlmnId m_PlmnId;
-  // bool m_PlmnIdIsSet;
+  oai::smf_server::model::PlmnId m_PlmnId;
+  bool m_PlmnIdIsSet;
 
   // for an access type change
   // AccessType m_AccType;

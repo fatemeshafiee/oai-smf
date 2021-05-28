@@ -61,7 +61,14 @@ typedef bs2::signal_type<
 // TODO: Access Type Change
 // TODO: UP Path Change
 // TODO: PLMN Change
+typedef bs2::signal_type<
+    void(supi64_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    ee_plmn_change_sig_t;
+
 // TODO: Downlink data delivery status
+typedef bs2::signal_type<
+    void(supi64_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    ee_ddds_sig_t;
 
 // Signal for FlexCN event (for Event Exposure)
 // SCID, HTTP version

@@ -946,6 +946,20 @@ bool event_notification::is_re_ipv4_addr_is_set() const {
   return m_re_ipv4_addr_is_set;
 }
 
+// m_PlmnId
+void event_notification::set_PlmnId(oai::smf_server::model::PlmnId const& value){
+   m_PlmnId = value;
+   m_PlmnIdIsSet = true;
+}
+
+oai::smf_server::model::PlmnId event_notification::get_plmnid() const{
+  return m_PlmnId;
+}
+
+bool event_notification::is_plmnid_is_set() const{
+  return m_PlmnIdIsSet;
+}
+
 //-----------------------------------------------------------------------------
 void event_notification::set_pdu_session_id(const pdu_session_id_t value) {
   m_pdu_session_id = value;
