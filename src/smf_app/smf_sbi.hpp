@@ -51,7 +51,7 @@ class smf_sbi {
 
   mutable std::shared_mutex m_curl_handle_promises;
 
-  std::map<std::string, boost::shared_ptr<boost::promise<std::string>>>
+  std::map<std::string, boost::shared_ptr<boost::promise<uint32_t>>>
       curl_handle_promises;
 
   std::thread::id thread_id;
@@ -221,7 +221,7 @@ class smf_sbi {
       std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
 
   void add_promise(
-      std::string id, boost::shared_ptr<boost::promise<std::string>>& p);
+      std::string id, boost::shared_ptr<boost::promise<uint32_t>>& p);
   void trigger_process_response(std::string& pid, uint32_t http_code);
 };
 }  // namespace smf

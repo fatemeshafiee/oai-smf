@@ -1341,10 +1341,10 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
   curl_multi_add_handle(curl_multi, tmp);
   handles.push_back(tmp);
 
-  boost::shared_ptr<boost::promise<std::string>> p =
-      boost::make_shared<boost::promise<std::string>>();
+  boost::shared_ptr<boost::promise<uint32_t>> p =
+      boost::make_shared<boost::promise<uint32_t>>();
 
-  boost::shared_future<std::string> f;
+  boost::shared_future<uint32_t> f;
   f = p->get_future();
 
   // Generate ID for this promise (to be used in SMF-APP)
@@ -1356,25 +1356,61 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
 
   f.wait();  // wait for it to finish
-
   assert(f.is_ready());
   assert(f.has_value());
   assert(!f.has_exception());
 
   // Wait for the response back
-  std::string response_msg = f.get();
+  uint32_t response_code = f.get();
   Logger::smf_sbi().debug(
       "Got result for promise ID %s",
       sm_context_res->res.get_amf_url().c_str());
 
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
 
+  // get cause from the response
+  json response_data_json = {};
+  try {
+    response_data_json = json::parse(response_data);
+  } catch (json::exception& e) {
+    Logger::smf_sbi().warn("Could not get the cause from the response");
+    // Set the default Cause
+    response_data_json["cause"] = "504 Gateway Timeout";
+  }
+  Logger::smf_sbi().debug(
+      "Response from AMF, Http Code: %d, cause %s", response_code,
+      response_data_json["cause"].dump().c_str());
+
+  // send response to APP to process
+  itti_n11_n1n2_message_transfer_response_status* itti_msg =
+      new itti_n11_n1n2_message_transfer_response_status(
+          TASK_SMF_SBI, TASK_SMF_APP);
+  itti_msg->set_response_code(response_code);
+  itti_msg->set_scid(sm_context_res->scid);
+  itti_msg->set_procedure_type(session_management_procedures_type_e::
+                                   PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
+  itti_msg->set_cause(response_data_json["cause"]);
+  if (sm_context_res->res.get_cause() ==
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
+    itti_msg->set_msg_type(PDU_SESSION_ESTABLISHMENT_ACCEPT);
+  } else {
+    itti_msg->set_msg_type(PDU_SESSION_ESTABLISHMENT_REJECT);
+  }
+  std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> i =
+      std::shared_ptr<itti_n11_n1n2_message_transfer_response_status>(itti_msg);
+  int ret = itti_inst->send_msg(i);
+  if (RETURNok != ret) {
+    Logger::smf_sbi().error(
+        "Could not send ITTI message %s to task TASK_SMF_APP",
+        i->get_msg_name());
+  }
+
   free_wrapper((void**) &data);
 }
 
 //---------------------------------------------------------------------------------------------
 void smf_sbi::add_promise(
-    std::string id, boost::shared_ptr<boost::promise<std::string>>& p) {
+    std::string id, boost::shared_ptr<boost::promise<uint32_t>>& p) {
   std::unique_lock lock(m_curl_handle_promises);
   curl_handle_promises.emplace(id, p);
 }
@@ -1387,7 +1423,7 @@ void smf_sbi::trigger_process_response(std::string& pid, uint32_t http_code) {
       pid.c_str());
   std::unique_lock lock(m_curl_handle_promises);
   if (curl_handle_promises.count(pid) > 0) {
-    curl_handle_promises[pid]->set_value(std::to_string(http_code));
+    curl_handle_promises[pid]->set_value(http_code);
     // Remove this promise from list
     curl_handle_promises.erase(pid);
   }
