@@ -444,7 +444,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
       // std::string(inet_ntoa(*((struct in_addr*)
       // &smf_cfg.amf_addr.ipv4_addr))) +
       //":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
-      sps.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+      "http://" + sps.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());

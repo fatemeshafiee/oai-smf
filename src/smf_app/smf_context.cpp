@@ -769,7 +769,7 @@ void smf_context::handle_itti_msg(
                 // std::string(inet_ntoa(
                 //    *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
                 //":" + std::to_string(smf_cfg.amf_addr.port) +
-                sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+                "http://" + sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
                 smf_cfg.amf_addr.api_version +
                 fmt::format(
                     NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
@@ -1599,7 +1599,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     supi_str    = sm_context_resp_pending->res.get_supi_prefix() + "-" +
                smf_supi_to_string(supi);
     std::string url =
-        sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+        "http://" + sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
         smf_cfg.amf_addr.api_version +
         fmt::format(
             NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
@@ -2795,7 +2795,7 @@ void smf_context::handle_pdu_session_modification_network_requested(
       // std::string(inet_ntoa(*((struct in_addr*)
       // &smf_cfg.amf_addr.ipv4_addr))) +
       //":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
-      sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+      "http://" + sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
