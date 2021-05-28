@@ -1262,12 +1262,7 @@ void smf_sbi::curl_release_handles() {
       std::string curl_url;
       int res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &curl_url);
       if (res == CURLE_OK) {
-        std::unique_lock lock(m_curl_handle_promises);
-        if (curl_handle_promises.count(curl_url) > 0) {
-          curl_handle_promises[curl_url]->set_value(std::to_string(http_code));
-          // Remove this promise from list
-          curl_handle_promises.erase(curl_url);
-        }
+        trigger_process_response(curl_url, http_code);
       }
 
       // TODO: remove handle from the multi session and end this handle now, or
@@ -1381,4 +1376,18 @@ void smf_sbi::add_promise(
     std::string id, boost::shared_ptr<boost::promise<std::string>>& p) {
   std::unique_lock lock(m_curl_handle_promises);
   curl_handle_promises.emplace(id, p);
+}
+
+//------------------------------------------------------------------------------
+void smf_sbi::trigger_process_response(std::string& pid, uint32_t http_code) {
+  Logger::smf_app().debug(
+      "Trigger process response: Set promise with ID %s "
+      "to ready",
+      pid.c_str());
+  std::unique_lock lock(m_curl_handle_promises);
+  if (curl_handle_promises.count(pid) > 0) {
+    curl_handle_promises[pid]->set_value(std::to_string(http_code));
+    // Remove this promise from list
+    curl_handle_promises.erase(pid);
+  }
 }

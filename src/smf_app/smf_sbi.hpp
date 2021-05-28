@@ -222,6 +222,7 @@ class smf_sbi {
 
   void add_promise(
       std::string id, boost::shared_ptr<boost::promise<std::string>>& p);
+  void trigger_process_response(std::string& pid, uint32_t http_code);
 };
 }  // namespace smf
 #endif /* FILE_SMF_SBI_HPP_SEEN */
