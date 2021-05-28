@@ -77,7 +77,7 @@ void smf_sbi_task(void* args_p) {
     auto* msg                            = shared_msg.get();
     switch (msg->msg_type) {
       case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE:
-        smf_sbi_inst->send_n1n2_message_transfer_request(
+        smf_sbi_inst->send_n1n2_message_transfer_request_curl_multi(
             std::static_pointer_cast<itti_n11_create_sm_context_response>(
                 shared_msg));
         break;
@@ -1358,6 +1358,12 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
 
   perform_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
+
+  f.wait();  // wait for it to finish
+
+  assert(f.is_ready());
+  assert(f.has_value());
+  assert(!f.has_exception());
 
   // Wait for the response back
   std::string response_msg = f.get();
