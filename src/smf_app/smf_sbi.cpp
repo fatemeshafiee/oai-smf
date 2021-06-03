@@ -1169,16 +1169,15 @@ void smf_sbi::subscribe_sm_data() {
 //------------------------------------------------------------------------------
 CURL* smf_sbi::curl_create_handle(
     const std::string& uri, const char* data, uint32_t data_len,
-    std::string& response_data, uint32_t* promise_id) {
+    std::string& response_data, uint32_t* promise_id, bool is_multipart) {
   // create handle for a curl request
   CURL* curl = curl_easy_init();
 
-  /*
-  uint32_t str_len = data.length();
-  char* data_str   = (char*) malloc(str_len + 1);
-  memset(data_str, 0, str_len + 1);
-  memcpy((void*) data_str, (void*) data.c_str(), str_len);
-*/
+  if (is_multipart) {
+    std::string content_type = "content-type: multipart/related; boundary=" +
+                               std::string(CURL_MIME_BOUNDARY);
+    headers = curl_slist_append(headers, content_type.c_str());
+  }
 
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -1195,7 +1194,6 @@ CURL* smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
   }
 
-  // free_wrapper((void**) &data_str);
   return curl;
 }
 
@@ -1383,7 +1381,7 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
   // the curl will actually be sent in perform_curl_multi
   CURL* tmp = curl_create_handle(
       sm_context_res->res.get_amf_url(), data_str, str_len, response_data,
-      pid_ptr);
+      pid_ptr, true);
   curl_multi_add_handle(curl_multi, tmp);
   handles.push_back(tmp);
 

@@ -188,7 +188,7 @@ class smf_sbi {
 
   CURL* curl_create_handle(
       const std::string& uri, const char* data, uint32_t data_len,
-      std::string& response_data, uint32_t* promise_id);
+      std::string& response_data, uint32_t* promise_id, bool is_multipart);
 
   /*
    * Prepare to send a request using curl multi
