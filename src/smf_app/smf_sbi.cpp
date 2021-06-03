@@ -777,16 +777,7 @@ void smf_sbi::subscribe_upf_status_notify(
 bool smf_sbi::get_sm_data(
     const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
     std::shared_ptr<session_management_subscription> subscription) {
-  // retrieve a UE's Session Management Subscription Data
-
   nlohmann::json jsonData = {};
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-  struct curl_slist* headers = nullptr;
-  headers = curl_slist_append(headers, "Accept: application/json");
-  headers = curl_slist_append(headers, "Content-Type: application/json");
-  headers = curl_slist_append(headers, "charsets: utf-8");
-
-  CURL* curl = curl_easy_init();
   std::string url =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) +
       ":" + std::to_string(smf_cfg.udm_addr.port) + NUDM_SDM_BASE +
