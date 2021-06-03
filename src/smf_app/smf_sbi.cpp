@@ -508,6 +508,7 @@ void smf_sbi::send_sm_context_status_notification(
         curl, CURLOPT_URL, sm_context_status->amf_status_uri.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, AMF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
     if (sm_context_status->http_version == 2) {
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -594,6 +595,7 @@ void smf_sbi::notify_subscribed_event(
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1);
       curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
+      curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
       // Hook up data handling function.
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
@@ -662,6 +664,7 @@ CURL* smf_sbi::curl_create_handle(
     // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
     // Hook up data handling function.
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData);
@@ -705,6 +708,7 @@ void smf_sbi::register_nf_instance(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NRF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
     if (msg->http_version == 2) {
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -805,6 +809,7 @@ void smf_sbi::update_nf_instance(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NRF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
     if (msg->http_version == 2) {
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -887,6 +892,7 @@ void smf_sbi::deregister_nf_instance(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NRF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
     if (msg->http_version == 2) {
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -952,6 +958,7 @@ void smf_sbi::subscribe_upf_status_notify(
     curl_easy_setopt(curl, CURLOPT_URL, msg->url.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NRF_CURL_TIMEOUT_MS);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
     if (msg->http_version == 2) {
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
