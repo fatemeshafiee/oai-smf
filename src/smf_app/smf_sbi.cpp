@@ -1173,6 +1173,11 @@ CURL* smf_sbi::curl_create_handle(
   // create handle for a curl request
   CURL* curl = curl_easy_init();
 
+  uint32_t str_len           = data.length();
+  char data_str[str_len + 1] = {};
+  data.copy(data_str, str_len);
+  data_str[str_len] = '\0';
+
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
@@ -1185,7 +1190,7 @@ CURL* smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.length());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data_str);
   }
   return curl;
 }
