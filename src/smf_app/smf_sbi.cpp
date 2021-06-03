@@ -1168,15 +1168,17 @@ void smf_sbi::subscribe_sm_data() {
 
 //------------------------------------------------------------------------------
 CURL* smf_sbi::curl_create_handle(
-    const std::string& uri, const std::string& data, std::string& response_data,
-    uint32_t* promise_id) {
+    const std::string& uri, const char* data, uint32_t data_len,
+    std::string& response_data, uint32_t* promise_id) {
   // create handle for a curl request
   CURL* curl = curl_easy_init();
 
+  /*
   uint32_t str_len = data.length();
   char* data_str   = (char*) malloc(str_len + 1);
   memset(data_str, 0, str_len + 1);
   memcpy((void*) data_str, (void*) data.c_str(), str_len);
+*/
 
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -1189,11 +1191,11 @@ CURL* smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.length());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data_str);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data_len);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
   }
 
-  free_wrapper((void**) &data_str);
+  // free_wrapper((void**) &data_str);
   return curl;
 }
 
@@ -1361,16 +1363,15 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
 
   Logger::smf_sbi().debug(
       "Send Communication_N1N2MessageTransfer to AMF, body %s", body.c_str());
-  /*
-    uint32_t str_len           = body.length();
-    char data_str[str_len + 1] = {};
-    char* data                 = (char*) malloc(str_len + 1);
-    memset(data, 0, str_len + 1);
-    memcpy((void*) data, (void*) body.c_str(), str_len);
 
-    body.copy(data_str, str_len);
-    data_str[str_len] = '\0';
-  */
+  uint32_t str_len           = body.length();
+  char data_str[str_len + 1] = {};
+  char* data                 = (char*) malloc(str_len + 1);
+  memset(data, 0, str_len + 1);
+  memcpy((void*) data, (void*) body.c_str(), str_len);
+
+  body.copy(data_str, str_len);
+  data_str[str_len] = '\0';
 
   std::string response_data;
   // Generate a promise and associate this promise to the curl handle
@@ -1381,7 +1382,8 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
   // create a new handle and add to the multi handle
   // the curl will actually be sent in perform_curl_multi
   CURL* tmp = curl_create_handle(
-      sm_context_res->res.get_amf_url(), body, response_data, pid_ptr);
+      sm_context_res->res.get_amf_url(), data_str, str_len, response_data,
+      pid_ptr);
   curl_multi_add_handle(curl_multi, tmp);
   handles.push_back(tmp);
 
