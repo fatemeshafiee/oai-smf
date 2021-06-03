@@ -174,21 +174,18 @@ class smf_sbi {
    * @param [std::string &] response_data: response data
    * @return pointer to the created curl
    */
-  CURL* curl_create_handle(
-      const std::string& uri, const std::string& data,
-      std::string& response_data, const std::string& method);
 
-  CURL* curl_create_handle(
+  void curl_create_handle(
       const std::string& uri, const char* data, uint32_t data_len,
       std::string& response_data, uint32_t* promise_id,
       const std::string& method, bool is_multipart);
 
-  CURL* curl_create_handle(
+  void curl_create_handle(
       const std::string& uri, const std::string& data,
       std::string& response_data, uint32_t* promise_id,
       const std::string& method);
 
-  CURL* curl_create_handle(
+  void curl_create_handle(
       const std::string& uri, std::string& response_data, uint32_t* promise_id,
       const std::string& method);
 
@@ -206,6 +203,7 @@ class smf_sbi {
    */
   void curl_release_handles();
 
+  uint32_t get_available_response(boost::shared_future<uint32_t>& f);
   void add_promise(
       uint32_t pid, boost::shared_ptr<boost::promise<uint32_t>>& p);
   void trigger_process_response(uint32_t pid, uint32_t http_code);

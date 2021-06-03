@@ -229,25 +229,14 @@ void smf_sbi::send_n1n2_message_transfer_request(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp = curl_create_handle(
+  curl_create_handle(
       sm_context_res->res.get_amf_url(), data_str, str_len, response_data,
       pid_ptr, "POST", true);
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
 
   // Wait for the response back
-  uint32_t response_code = f.get();
-  Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
+  uint32_t response_code = get_available_response(f);
 
+  Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
 
   // get cause from the response
@@ -334,25 +323,13 @@ void smf_sbi::send_n1n2_message_transfer_request(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp = curl_create_handle(
+  curl_create_handle(
       sm_session_modification->msg.get_amf_url(), data_str, str_len,
       response_data, pid_ptr, "POST", true);
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
 
   // Wait for the response back
-  uint32_t response_code = f.get();
+  uint32_t response_code = get_available_response(f);
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
 
   json response_data_json = {};
@@ -409,25 +386,13 @@ void smf_sbi::send_n1n2_message_transfer_request(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp = curl_create_handle(
+  curl_create_handle(
       report_msg->res.get_amf_url(), data_str, str_len, response_data, pid_ptr,
       "POST", true);
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
 
   // Wait for the response back
-  uint32_t httpCode = f.get();
+  uint32_t httpCode = get_available_response(f);
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
 
   json response_data_json = {};
@@ -490,24 +455,12 @@ void smf_sbi::send_sm_context_status_notification(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp = curl_create_handle(
+  curl_create_handle(
       sm_context_status->amf_status_uri, body, response_data, pid_ptr, "POST");
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
 
   // Wait for the response back
-  uint32_t response_code = f.get();
+  uint32_t response_code = get_available_response(f);
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-
   Logger::smf_sbi().debug("Response code %u", response_code);
   // TODO: in case of "307 temporary redirect"
 }
@@ -560,23 +513,12 @@ void smf_sbi::notify_subscribed_event(
     std::string url = i.get_notif_uri();
 
     // Create a new curl easy handle and add to the multi handle
-    // the curl cmd will actually be performed in perform_curl_multi
-    CURL* tmp = curl_create_handle(url, body, response_data, pid_ptr, "POST");
-    curl_multi_add_handle(curl_multi, tmp);
-    handles.push_back(tmp);
-
-    perform_curl_multi(
-        0);  // TODO: current time as parameter if curl is performed per event
-
-    f.wait();  // wait for it to finish
-    assert(f.is_ready());
-    assert(f.has_value());
-    assert(!f.has_exception());
+    curl_create_handle(url, body, response_data, pid_ptr, "POST");
 
     // Wait for the response back
-    uint32_t response_code = f.get();
-    Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
+    uint32_t response_code = get_available_response(f);
 
+    Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
     Logger::smf_sbi().debug("Response code %u", response_code);
     Logger::smf_sbi().debug("Response data %s", response_data.c_str());
   }
@@ -617,25 +559,13 @@ void smf_sbi::register_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp = curl_create_handle(url, body, response_data, pid_ptr, "POST");
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
+  curl_create_handle(url, body, response_data, pid_ptr, "POST");
 
   // Wait for the response back
-  uint32_t httpCode = f.get();
+  uint32_t httpCode = get_available_response(f);
+
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
-
   Logger::smf_sbi().debug(
       "NF Instance Registration, response from NRF, HTTP Code: %u", httpCode);
 
@@ -709,25 +639,13 @@ void smf_sbi::update_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp = curl_create_handle(url, body, response_data, pid_ptr, "PATCH");
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
+  curl_create_handle(url, body, response_data, pid_ptr, "PATCH");
 
   // Wait for the response back
-  uint32_t httpCode = f.get();
+  uint32_t httpCode = get_available_response(f);
+
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
-
   Logger::smf_sbi().debug(
       "NF Instance Registration, response from NRF, HTTP Code: %u", httpCode);
 
@@ -784,25 +702,13 @@ void smf_sbi::deregister_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp = curl_create_handle(url, response_data, pid_ptr, "DELETE");
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
+  curl_create_handle(url, response_data, pid_ptr, "DELETE");
 
   // Wait for the response back
-  uint32_t httpCode = f.get();
+  uint32_t httpCode = get_available_response(f);
+
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
-
   Logger::smf_sbi().debug(
       "NF Instance Registration, response from NRF, HTTP Code: %u", httpCode);
 
@@ -844,26 +750,13 @@ void smf_sbi::subscribe_upf_status_notify(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp =
-      curl_create_handle(msg->url, body, response_data, pid_ptr, "POST");
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
+  curl_create_handle(msg->url, body, response_data, pid_ptr, "POST");
 
   // Wait for the response back
-  uint32_t httpCode = f.get();
+  uint32_t httpCode = get_available_response(f);
+
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
-
   Logger::smf_sbi().debug(
       "NF Instance Registration, response from NRF, HTTP Code: %u", httpCode);
 
@@ -913,25 +806,13 @@ bool smf_sbi::get_sm_data(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  // the curl cmd will actually be performed in perform_curl_multi
-  CURL* tmp = curl_create_handle(url, response_data, pid_ptr, "GET");
-  curl_multi_add_handle(curl_multi, tmp);
-  handles.push_back(tmp);
-
-  perform_curl_multi(
-      0);  // TODO: current time as parameter if curl is performed per event
-
-  f.wait();  // wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
+  curl_create_handle(url, response_data, pid_ptr, "GET");
 
   // Wait for the response back
-  uint32_t httpCode = f.get();
+  uint32_t httpCode = get_available_response(f);
+
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
-
   Logger::smf_sbi().debug(
       "NF Instance Registration, response from NRF, HTTP Code: %u", httpCode);
 
@@ -1038,7 +919,7 @@ void smf_sbi::subscribe_sm_data() {
 }
 
 //------------------------------------------------------------------------------
-CURL* smf_sbi::curl_create_handle(
+void smf_sbi::curl_create_handle(
     const std::string& uri, const char* data, uint32_t data_len,
     std::string& response_data, uint32_t* promise_id, const std::string& method,
     bool is_multipart) {
@@ -1075,13 +956,21 @@ CURL* smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data_len);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    // Add to the multi handle
+    curl_multi_add_handle(curl_multi, curl);
+    handles.push_back(curl);
   }
 
-  return curl;
+  // the curl cmd will actually be performed in perform_curl_multi
+  perform_curl_multi(
+      0);  // TODO: current time as parameter if curl is performed per event
+
+  return;
 }
 
 //------------------------------------------------------------------------------
-CURL* smf_sbi::curl_create_handle(
+void smf_sbi::curl_create_handle(
     const std::string& uri, const std::string& data, std::string& response_data,
     uint32_t* promise_id, const std::string& method) {
   // create handle for a curl request
@@ -1112,13 +1001,19 @@ CURL* smf_sbi::curl_create_handle(
       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.length());
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
     }
+    // Add to the multi handle
+    curl_multi_add_handle(curl_multi, curl);
+    handles.push_back(curl);
   }
 
-  return curl;
+  // the curl cmd will actually be performed in perform_curl_multi
+  perform_curl_multi(
+      0);  // TODO: current time as parameter if curl is performed per event
+  return;
 }
 
 //------------------------------------------------------------------------------
-CURL* smf_sbi::curl_create_handle(
+void smf_sbi::curl_create_handle(
     const std::string& uri, std::string& response_data, uint32_t* promise_id,
     const std::string& method) {
   // create handle for a curl request
@@ -1141,9 +1036,15 @@ CURL* smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    // Add to the multi handle
+    curl_multi_add_handle(curl_multi, curl);
+    handles.push_back(curl);
   }
+  // the curl cmd will actually be performed in perform_curl_multi
+  perform_curl_multi(
+      0);  // TODO: current time as parameter if curl is performed per event
 
-  return curl;
+  return;
 }
 
 //------------------------------------------------------------------------------
@@ -1227,6 +1128,18 @@ void smf_sbi::curl_release_handles() {
       Logger::smf_app().debug("curl_msg null");
     }
   }
+}
+
+//---------------------------------------------------------------------------------------------
+uint32_t smf_sbi::get_available_response(boost::shared_future<uint32_t>& f) {
+  f.wait();  // wait for it to finish
+  assert(f.is_ready());
+  assert(f.has_value());
+  assert(!f.has_exception());
+
+  // Wait for the response back
+  uint32_t response_code = f.get();
+  return response_code;
 }
 
 //---------------------------------------------------------------------------------------------
