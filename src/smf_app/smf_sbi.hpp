@@ -147,14 +147,6 @@ class smf_sbi {
       std::shared_ptr<itti_n11_subscribe_upf_status_notify> msg);
 
   /*
-   * Create Curl handle for multi curl
-   * @param [event_notification&] ev_notif: content of the event notification
-   * @param [std::string *] data: data
-   * @return pointer to the created curl
-   */
-  CURL* curl_create_handle(event_notification& ev_notif, std::string* data);
-
-  /*
    * Get SM subscription data from UDM
    * @param [const supi64_t &] supi
    * @param [const std::string &] dnn
@@ -184,22 +176,21 @@ class smf_sbi {
    */
   CURL* curl_create_handle(
       const std::string& uri, const std::string& data,
-      std::string& response_data);
+      std::string& response_data, const std::string& method);
 
   CURL* curl_create_handle(
       const std::string& uri, const char* data, uint32_t data_len,
-      std::string& response_data, uint32_t* promise_id, bool is_multipart);
+      std::string& response_data, uint32_t* promise_id,
+      const std::string& method, bool is_multipart);
 
-  /*
-   * Prepare to send a request using curl multi
-   * @param [const std::string &] uri: URI of the subscribed NF
-   * @param [std::string &] data: data to be sent
-   * @param [std::string &] response_data: response data
-   * @return void
-   */
-  void send_curl_multi(
+  CURL* curl_create_handle(
       const std::string& uri, const std::string& data,
-      std::string& response_data);
+      std::string& response_data, uint32_t* promise_id,
+      const std::string& method);
+
+  CURL* curl_create_handle(
+      const std::string& uri, std::string& response_data, uint32_t* promise_id,
+      const std::string& method);
 
   /*
    * Perform curl multi to actually process the available data
@@ -209,20 +200,11 @@ class smf_sbi {
   void perform_curl_multi(uint64_t ms);
 
   /*
-   * Finish all the curl transfers
-   * @param void
-   * @return void
-   */
-  void wait_curl_end();
-
-  /*
    * Release all the handles
    * @param void
    * @return void
    */
   void curl_release_handles();
-  void send_n1n2_message_transfer_request_curl_multi(
-      std::shared_ptr<itti_n11_create_sm_context_response> sm_context_res);
 
   void add_promise(
       uint32_t pid, boost::shared_ptr<boost::promise<uint32_t>>& p);
