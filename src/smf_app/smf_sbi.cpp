@@ -1280,19 +1280,21 @@ void smf_sbi::curl_release_handles() {
       // Get HTTP code
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
       Logger::smf_app().debug("Got response with HTTP code  %d!", http_code);
+      /*
+            char* curl_url = nullptr;
+            int res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL,
+         &curl_url); if (res == CURLE_OK and curl_url) { std::string
+         curl_url_str(curl_url); trigger_process_response(curl_url_str,
+         http_code);
+            }
+            */
 
-      char* curl_url = nullptr;
-      int res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &curl_url);
-      if (res == CURLE_OK and curl_url) {
-        // std::string curl_url_str(curl_url);
-        // trigger_process_response(curl_url_str, http_code);
-      }
       uint32_t* promise_id = nullptr;
       curl_easy_getinfo(curl, CURLINFO_PRIVATE, &promise_id);
       if (promise_id) {
         Logger::smf_app().debug(
-            "Prepare to make Promise id %d ready!", *promise_id);
-        trigger_process_response(std::to_string(*promise_id), http_code);
+            "Prepare to make promise id %d ready!", *promise_id);
+        trigger_process_response(*promise_id, http_code);
       }
 
       // TODO: remove handle from the multi session and end this handle now, or
@@ -1342,11 +1344,9 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
   auto n2_sm_found = json_data.count("n2InfoContainer");
   if (n2_sm_found > 0) {
     std::string n2_message = sm_context_res->res.get_n2_sm_information();
-    // prepare the body content for Curl
     parser.create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n1_message, n2_message);
   } else {
-    // prepare the body content for Curl
     parser.create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n1_message,
         multipart_related_content_part_e::NAS);
@@ -1366,10 +1366,7 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
   */
 
   std::string response_data;
-  // send_curl_multi(sm_context_res->res.get_amf_url(), body, response_data);
-
-  // Create and store the promise
-  // Generate ID for this promise (to be used in SMF-APP)
+  // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
   Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
   uint32_t* pid_ptr = &promise_id;
@@ -1388,7 +1385,7 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
   f = p->get_future();
 
   // add_promise(sm_context_res->res.get_amf_url(), p);
-  add_promise(std::to_string(promise_id), p);
+  add_promise(promise_id, p);
 
   perform_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
@@ -1448,17 +1445,17 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
 
 //---------------------------------------------------------------------------------------------
 void smf_sbi::add_promise(
-    std::string id, boost::shared_ptr<boost::promise<uint32_t>>& p) {
+    uint32_t id, boost::shared_ptr<boost::promise<uint32_t>>& p) {
   std::unique_lock lock(m_curl_handle_promises);
   curl_handle_promises.emplace(id, p);
 }
 
 //------------------------------------------------------------------------------
-void smf_sbi::trigger_process_response(std::string pid, uint32_t http_code) {
+void smf_sbi::trigger_process_response(uint32_t pid, uint32_t http_code) {
   Logger::smf_app().debug(
-      "Trigger process response: Set promise with ID %s "
+      "Trigger process response: Set promise with ID %u "
       "to ready",
-      pid.c_str());
+      pid);
   std::unique_lock lock(m_curl_handle_promises);
   if (curl_handle_promises.count(pid) > 0) {
     curl_handle_promises[pid]->set_value(http_code);
