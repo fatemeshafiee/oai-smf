@@ -681,7 +681,6 @@ CURL* smf_sbi::curl_create_handle(
     Logger::smf_sbi().debug("Send notification to NF with URI: %s", url);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    // curl_easy_setopt(curl, CURLOPT_PRIVATE, str);
     // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
@@ -1177,7 +1176,6 @@ CURL* smf_sbi::curl_create_handle(
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-    // curl_easy_setopt(curl, CURLOPT_PRIVATE, str);
     // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
@@ -1326,10 +1324,14 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
   Logger::smf_sbi().debug(
       "Send Communication_N1N2MessageTransfer to AMF, body %s", body.c_str());
 
-  uint32_t str_len = body.length();
-  char* data       = (char*) malloc(str_len + 1);
+  uint32_t str_len           = body.length();
+  char data_str[str_len + 1] = {};
+  char* data                 = (char*) malloc(str_len + 1);
   memset(data, 0, str_len + 1);
   memcpy((void*) data, (void*) body.c_str(), str_len);
+
+  body.copy(data_str, str_len);
+  data_str[str_len] = '\0';
 
   std::string response_data;
   // send_curl_multi(sm_context_res->res.get_amf_url(), body, response_data);
@@ -1341,15 +1343,13 @@ void smf_sbi::send_n1n2_message_transfer_request_curl_multi(
   curl_multi_add_handle(curl_multi, tmp);
   handles.push_back(tmp);
 
+  // Create and store the promise
   boost::shared_ptr<boost::promise<uint32_t>> p =
       boost::make_shared<boost::promise<uint32_t>>();
 
   boost::shared_future<uint32_t> f;
   f = p->get_future();
 
-  // Generate ID for this promise (to be used in SMF-APP)
-  // uint32_t promise_id = 1;  // generate_promise_id();
-  // Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
   add_promise(sm_context_res->res.get_amf_url(), p);
 
   perform_curl_multi(
