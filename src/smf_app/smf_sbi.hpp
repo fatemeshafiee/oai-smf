@@ -186,6 +186,10 @@ class smf_sbi {
       const std::string& uri, const std::string& data,
       std::string& response_data);
 
+  CURL* curl_create_handle(
+      const std::string& uri, const std::string& data,
+      std::string& response_data, uint32_t* promise_id);
+
   /*
    * Prepare to send a request using curl multi
    * @param [const std::string &] uri: URI of the subscribed NF
@@ -222,7 +226,11 @@ class smf_sbi {
 
   void add_promise(
       std::string id, boost::shared_ptr<boost::promise<uint32_t>>& p);
-  void trigger_process_response(std::string& pid, uint32_t http_code);
+  void trigger_process_response(std::string pid, uint32_t http_code);
+
+  static uint64_t generate_promise_id() {
+    return util::uint_uid_generator<uint64_t>::get_instance().get_uid();
+  }
 };
 }  // namespace smf
 #endif /* FILE_SMF_SBI_HPP_SEEN */
