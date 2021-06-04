@@ -1059,6 +1059,7 @@ bool smf_sbi::curl_create_handle(
 bool smf_sbi::curl_create_handle(
     const std::string& uri, std::string& response_data, uint32_t* promise_id,
     const std::string& method) {
+  headers = curl_slist_append(headers, "Content-Type: application/json");
   // create handle for a curl request
   CURL* curl = curl_easy_init();
 
