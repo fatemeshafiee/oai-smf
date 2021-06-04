@@ -155,14 +155,18 @@ smf_sbi::smf_sbi() {
     Logger::smf_sbi().error("Cannot create task TASK_SMF_SBI");
     throw std::runtime_error("Cannot create task TASK_SMF_SBI");
   }
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl_multi = curl_multi_init();
-  handles    = {};
-  headers    = NULL;
-  headers    = curl_slist_append(headers, "Accept: application/json");
-  headers    = curl_slist_append(headers, "Content-Type: application/json");
-  headers    = curl_slist_append(headers, "charsets: utf-8");
+  CURLcode code = curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_multi    = curl_multi_init();
+  handles       = {};
+  headers       = nullptr;
+  headers       = curl_slist_append(headers, "Accept: application/json");
+  headers       = curl_slist_append(headers, "Content-Type: application/json");
+  headers       = curl_slist_append(headers, "charsets: utf-8");
 
+  if ((code < 0) or (curl_multi == nullptr) or (headers == nullptr)) {
+    Logger::smf_sbi().error("Cannot initialize Curl Multi Interface");
+    throw std::runtime_error("Cannot create task TASK_SMF_SBI");
+  }
   Logger::smf_sbi().startup("Started");
 }
 
@@ -229,9 +233,13 @@ void smf_sbi::send_n1n2_message_transfer_request(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(
-      sm_context_res->res.get_amf_url(), data_str, str_len, response_data,
-      pid_ptr, "POST", true);
+  if (!curl_create_handle(
+          sm_context_res->res.get_amf_url(), data_str, str_len, response_data,
+          pid_ptr, "POST", true)) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return;
+  }
 
   // Wait for the response back
   uint32_t response_code = get_available_response(f);
@@ -323,9 +331,13 @@ void smf_sbi::send_n1n2_message_transfer_request(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(
-      sm_session_modification->msg.get_amf_url(), data_str, str_len,
-      response_data, pid_ptr, "POST", true);
+  if (!curl_create_handle(
+          sm_session_modification->msg.get_amf_url(), data_str, str_len,
+          response_data, pid_ptr, "POST", true)) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return;
+  }
 
   // Wait for the response back
   uint32_t response_code = get_available_response(f);
@@ -386,9 +398,13 @@ void smf_sbi::send_n1n2_message_transfer_request(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(
-      report_msg->res.get_amf_url(), data_str, str_len, response_data, pid_ptr,
-      "POST", true);
+  if (!curl_create_handle(
+          report_msg->res.get_amf_url(), data_str, str_len, response_data,
+          pid_ptr, "POST", true)) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return;
+  }
 
   // Wait for the response back
   uint32_t httpCode = get_available_response(f);
@@ -455,8 +471,13 @@ void smf_sbi::send_sm_context_status_notification(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(
-      sm_context_status->amf_status_uri, body, response_data, pid_ptr, "POST");
+  if (!curl_create_handle(
+          sm_context_status->amf_status_uri, body, response_data, pid_ptr,
+          "POST")) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return;
+  }
 
   // Wait for the response back
   uint32_t response_code = get_available_response(f);
@@ -513,7 +534,11 @@ void smf_sbi::notify_subscribed_event(
     std::string url = i.get_notif_uri();
 
     // Create a new curl easy handle and add to the multi handle
-    curl_create_handle(url, body, response_data, pid_ptr, "POST");
+    if (!curl_create_handle(url, body, response_data, pid_ptr, "POST")) {
+      Logger::smf_sbi().warn("Could not create a new handle to send message");
+      // TODO: remove promise
+      return;
+    }
 
     // Wait for the response back
     uint32_t response_code = get_available_response(f);
@@ -559,7 +584,11 @@ void smf_sbi::register_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(url, body, response_data, pid_ptr, "POST");
+  if (!curl_create_handle(url, body, response_data, pid_ptr, "POST")) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return;
+  }
 
   // Wait for the response back
   uint32_t httpCode = get_available_response(f);
@@ -639,7 +668,11 @@ void smf_sbi::update_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(url, body, response_data, pid_ptr, "PATCH");
+  if (!curl_create_handle(url, body, response_data, pid_ptr, "PATCH")) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return;
+  }
 
   // Wait for the response back
   uint32_t httpCode = get_available_response(f);
@@ -702,7 +735,11 @@ void smf_sbi::deregister_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(url, response_data, pid_ptr, "DELETE");
+  if (!curl_create_handle(url, response_data, pid_ptr, "DELETE")) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return;
+  }
 
   // Wait for the response back
   uint32_t httpCode = get_available_response(f);
@@ -750,7 +787,11 @@ void smf_sbi::subscribe_upf_status_notify(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(msg->url, body, response_data, pid_ptr, "POST");
+  if (!curl_create_handle(msg->url, body, response_data, pid_ptr, "POST")) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return;
+  }
 
   // Wait for the response back
   uint32_t httpCode = get_available_response(f);
@@ -797,7 +838,11 @@ bool smf_sbi::get_sm_data(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  curl_create_handle(url, response_data, pid_ptr, "GET");
+  if (!curl_create_handle(url, response_data, pid_ptr, "GET")) {
+    Logger::smf_sbi().warn("Could not create a new handle to send message");
+    // TODO: remove promise
+    return false;
+  }
 
   // Wait for the response back
   uint32_t httpCode = get_available_response(f);
@@ -910,7 +955,7 @@ void smf_sbi::subscribe_sm_data() {
 }
 
 //------------------------------------------------------------------------------
-void smf_sbi::curl_create_handle(
+bool smf_sbi::curl_create_handle(
     const std::string& uri, const char* data, uint32_t data_len,
     std::string& response_data, uint32_t* promise_id, const std::string& method,
     bool is_multipart) {
@@ -923,119 +968,130 @@ void smf_sbi::curl_create_handle(
     headers = curl_slist_append(headers, content_type.c_str());
   }
 
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-    curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
-    // curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-    if (method.compare("POST") == 0)
-      curl_easy_setopt(curl, CURLOPT_POST, 1);
-    else if (method.compare("PATCH") == 0)
-      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
-    else if (method.compare("PUT") == 0)
-      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-    else
-      curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
-
-    // Hook up data handling function.
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data_len);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
-
-    // Add to the multi handle
-    curl_multi_add_handle(curl_multi, curl);
-    handles.push_back(curl);
+  if ((curl == nullptr) or (headers == nullptr)) {
+    Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
+    return false;
   }
+
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
+  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+  curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
+  // curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+  if (method.compare("POST") == 0)
+    curl_easy_setopt(curl, CURLOPT_POST, 1);
+  else if (method.compare("PATCH") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+  else if (method.compare("PUT") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+  else
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+
+  // Hook up data handling function.
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data_len);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+  // Add to the multi handle
+  curl_multi_add_handle(curl_multi, curl);
+  handles.push_back(curl);
 
   // the curl cmd will actually be performed in perform_curl_multi
   perform_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
 
-  return;
+  return true;
 }
 
 //------------------------------------------------------------------------------
-void smf_sbi::curl_create_handle(
+bool smf_sbi::curl_create_handle(
     const std::string& uri, const std::string& data, std::string& response_data,
     uint32_t* promise_id, const std::string& method) {
+  headers = curl_slist_append(headers, "Content-Type: application/json");
   // create handle for a curl request
   CURL* curl = curl_easy_init();
 
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-    curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
-
-    if (method.compare("POST") == 0)
-      curl_easy_setopt(curl, CURLOPT_POST, 1);
-    else if (method.compare("PATCH") == 0)
-      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
-    else if (method.compare("PUT") == 0)
-      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-    else
-      curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
-    // Hook up data handling function.
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    if (method.compare("DELETE") != 0) {
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.length());
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-    }
-    // Add to the multi handle
-    curl_multi_add_handle(curl_multi, curl);
-    handles.push_back(curl);
+  if ((curl == nullptr) or (headers == nullptr)) {
+    Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
+    return false;
   }
+
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
+  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+  curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
+
+  if (method.compare("POST") == 0)
+    curl_easy_setopt(curl, CURLOPT_POST, 1);
+  else if (method.compare("PATCH") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+  else if (method.compare("PUT") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+  else
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  // Hook up data handling function.
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  if (method.compare("DELETE") != 0) {
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.length());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+  }
+  // Add to the multi handle
+  curl_multi_add_handle(curl_multi, curl);
+  handles.push_back(curl);
 
   // the curl cmd will actually be performed in perform_curl_multi
   perform_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
-  return;
+  return true;
 }
 
 //------------------------------------------------------------------------------
-void smf_sbi::curl_create_handle(
+bool smf_sbi::curl_create_handle(
     const std::string& uri, std::string& response_data, uint32_t* promise_id,
     const std::string& method) {
   // create handle for a curl request
   CURL* curl = curl_easy_init();
 
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-    curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
-
-    if (method.compare("DELETE") == 0)
-      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-    else
-      curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
-
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
-    // Hook up data handling function.
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    // Add to the multi handle
-    curl_multi_add_handle(curl_multi, curl);
-    handles.push_back(curl);
+  if ((curl == nullptr) or (headers == nullptr)) {
+    Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
+    return false;
   }
+
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
+  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+  curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
+
+  if (method.compare("DELETE") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+  else
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  // Hook up data handling function.
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  // Add to the multi handle
+  curl_multi_add_handle(curl_multi, curl);
+  handles.push_back(curl);
+
   // the curl cmd will actually be performed in perform_curl_multi
   perform_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
 
-  return;
+  return true;
 }
 
 //------------------------------------------------------------------------------

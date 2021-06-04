@@ -176,9 +176,9 @@ class smf_sbi {
    * @param [uint32_t* ] promise_id: pointer to the promise id
    * @param [const std::string&] method: HTTP method
    * @param [bool] is_multipart: use multipart or json format
-   * @return void
+   * @return true if a handle was created successfully, otherwise return false
    */
-  void curl_create_handle(
+  bool curl_create_handle(
       const std::string& uri, const char* data, uint32_t data_len,
       std::string& response_data, uint32_t* promise_id,
       const std::string& method, bool is_multipart);
@@ -191,9 +191,9 @@ class smf_sbi {
    * @param [uint32_t* ] promise_id: pointer to the promise id
    * @param [const std::string&] method: HTTP method
    * @param [bool] is_multipart: use multipart or json format
-   * @return void
+   * @return true if a handle was created successfully, otherwise return false
    */
-  void curl_create_handle(
+  bool curl_create_handle(
       const std::string& uri, const std::string& data,
       std::string& response_data, uint32_t* promise_id,
       const std::string& method);
@@ -204,9 +204,9 @@ class smf_sbi {
    * @param [std::string &] response_data: response data
    * @param [uint32_t* ] promise_id: pointer to the promise id
    * @param [const std::string&] method: HTTP method
-   * @return void
+   * @return true if a handle was created successfully, otherwise return false
    */
-  void curl_create_handle(
+  bool curl_create_handle(
       const std::string& uri, std::string& response_data, uint32_t* promise_id,
       const std::string& method);
 
