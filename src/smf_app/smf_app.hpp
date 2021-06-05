@@ -81,10 +81,10 @@ class smf_context_ref {
   void clear() {
     supi           = {};
     nssai          = {};
-    dnn            = "";
+    dnn            = {};
     pdu_session_id = 0;
-    amf_status_uri = "";
-    amf_addr       = "";
+    amf_status_uri = {};
+    amf_addr       = {};
     upf_node_id    = {};
   }
 
@@ -214,6 +214,7 @@ class smf_app {
 
   void operator=(smf_app const&) = delete;
 
+  void test_dns();
   /*
    * Set the association between Seid and SM Context
    * @param [const seid_t &] seid: SessionID

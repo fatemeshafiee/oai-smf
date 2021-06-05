@@ -137,6 +137,9 @@
   "USE_LOCAL_SUBSCRIPTION_INFO"
 #define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO                                   \
   "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
+#define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS "USE_FQDN_DNS"
+
+#define SMF_CONFIG_STRING_FQDN_DNS "FQDN"
 
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -217,6 +220,7 @@ class smf_config {
   bool register_nrf;
   bool discover_upf;
   bool use_local_subscription_info;
+  bool use_fqdn_dns;
 
   struct {
     struct in_addr ipv4_addr;
@@ -314,6 +318,7 @@ class smf_config {
     use_local_subscription_info = false;
     register_nrf                = false;
     discover_upf                = false;
+    use_fqdn_dns                = false;
   };
   ~smf_config();
   void lock() { m_rw_lock.lock(); };
