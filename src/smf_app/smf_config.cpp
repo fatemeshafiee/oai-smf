@@ -192,7 +192,7 @@ int smf_config::load_interface(const Setting& if_cfg, interface_cfg_t& cfg) {
         return RETURNerror;
       }
     } else {
-      std::vector<std::string> words;
+      std::vector<std::string> words = {};
       boost::split(
           words, address, boost::is_any_of("/"), boost::token_compress_on);
       if (words.size() != 2) {
@@ -311,7 +311,7 @@ int smf_config::load(const string& config_file) {
   }
 
   try {
-    string astring;
+    string astring = {};
 
     const Setting& pool_cfg = smf_cfg[SMF_CONFIG_STRING_IP_ADDRESS_POOL];
 
@@ -387,9 +387,9 @@ int smf_config::load(const string& config_file) {
     int count6 = ipv6_pool_cfg.getLength();
     for (int i = 0; i < count6; i++) {
       const Setting& ipv6_cfg = ipv6_pool_cfg[i];
-      string ipv6_prefix;
+      string ipv6_prefix      = {};
       ipv6_cfg.lookupValue(SMF_CONFIG_STRING_PREFIX, ipv6_prefix);
-      std::vector<std::string> ips6;
+      std::vector<std::string> ips6 = {};
       boost::split(
           ips6, ipv6_prefix,
           boost::is_any_of(SMF_CONFIG_STRING_IPV6_ADDRESS_PREFIX_DELIMITER),
@@ -427,7 +427,7 @@ int smf_config::load(const string& config_file) {
 
     const Setting& dnn_list_cfg = smf_cfg[SMF_CONFIG_STRING_DNN_LIST];
     count                       = dnn_list_cfg.getLength();
-    int dnn_idx                 = 0;
+    int dnn_idx                 = {0};
     num_dnn                     = 0;
     for (int i = 0; i < count; i++) {
       const Setting& dnn_cfg = dnn_list_cfg[i];
@@ -596,10 +596,10 @@ int smf_config::load(const string& config_file) {
     }
 
     // AMF
-    const Setting& amf_cfg = smf_cfg[SMF_CONFIG_STRING_AMF];
-    struct in_addr amf_ipv4_addr;
-    unsigned int amf_port       = 0;
-    std::string amf_api_version = {};
+    const Setting& amf_cfg       = smf_cfg[SMF_CONFIG_STRING_AMF];
+    struct in_addr amf_ipv4_addr = {};
+    unsigned int amf_port        = {0};
+    std::string amf_api_version  = {};
 
     if (!use_fqdn_dns) {
       amf_cfg.lookupValue(SMF_CONFIG_STRING_AMF_IPV4_ADDRESS, astring);
@@ -621,34 +621,28 @@ int smf_config::load(const string& config_file) {
       amf_addr.api_version = amf_api_version;
     } else {
       amf_cfg.lookupValue(SMF_CONFIG_STRING_FQDN_DNS, astring);
-      // astring = "maserati";
-      uint8_t addr_type = 0;
-
+      uint8_t addr_type   = {0};
       std::string address = {};
+
       fqdn::resolve(astring, address, amf_port, addr_type);
-      if (addr_type != 0) {
-        // IPv6
+      if (addr_type != 0) {  // IPv6
         // TODO:
-        throw(
-            "DO NOT SUPPORT IPV6 ADDR FOR AMF"
-            "failed");
-      } else {
-        // IPv4
+        throw("DO NOT SUPPORT IPV6 ADDR FOR AMF!");
+      } else {  // IPv4
         IPV4_STR_ADDR_TO_INADDR(
             util::trim(address).c_str(), amf_ipv4_addr,
             "BAD IPv4 ADDRESS FORMAT FOR AMF !");
-        amf_addr.ipv4_addr = amf_ipv4_addr;
-        amf_addr.port      = amf_port;
+        amf_addr.ipv4_addr   = amf_ipv4_addr;
+        amf_addr.port        = amf_port;
+        amf_addr.api_version = "v1";  // TODO: to get API version from DNS
       }
-
-      // TODO: How to get API version from DNS
     }
 
     // UDM
-    const Setting& udm_cfg = smf_cfg[SMF_CONFIG_STRING_UDM];
-    struct in_addr udm_ipv4_addr;
-    unsigned int udm_port = 0;
-    std::string udm_api_version;
+    const Setting& udm_cfg       = smf_cfg[SMF_CONFIG_STRING_UDM];
+    struct in_addr udm_ipv4_addr = {};
+    unsigned int udm_port        = {0};
+    std::string udm_api_version  = {};
 
     if (!use_fqdn_dns) {
       udm_cfg.lookupValue(SMF_CONFIG_STRING_UDM_IPV4_ADDRESS, astring);
@@ -670,26 +664,21 @@ int smf_config::load(const string& config_file) {
       udm_addr.api_version = udm_api_version;
     } else {
       udm_cfg.lookupValue(SMF_CONFIG_STRING_FQDN_DNS, astring);
-      uint8_t addr_type = 0;
-
+      uint8_t addr_type   = {0};
       std::string address = {};
+
       fqdn::resolve(astring, address, udm_port, addr_type);
-      if (addr_type != 0) {
-        // IPv6
+      if (addr_type != 0) {  // IPv6
         // TODO:
-        throw(
-            "DO NOT SUPPORT IPV6 ADDR FOR UDM"
-            "failed");
-      } else {
-        // IPv4
+        throw("DO NOT SUPPORT IPV6 ADDR FOR UDM!");
+      } else {  // IPv4
         IPV4_STR_ADDR_TO_INADDR(
             util::trim(address).c_str(), udm_ipv4_addr,
             "BAD IPv4 ADDRESS FORMAT FOR UDM !");
-        udm_addr.ipv4_addr = udm_ipv4_addr;
-        udm_addr.port      = udm_port;
+        udm_addr.ipv4_addr   = udm_ipv4_addr;
+        udm_addr.port        = udm_port;
+        udm_addr.api_version = "v1";  // TODO: to get API version from DNS
       }
-
-      // TODO: How to get API version from DNS
     }
 
     // UPF list
@@ -715,25 +704,23 @@ int smf_config::load(const string& config_file) {
             throw("CONFIG: BAD ADDRESS in " SMF_CONFIG_STRING_UPF_LIST);
           }
           upfs.push_back(n);
+        } else {  // TODO IPV6_ADDRESS, FQDN
+          throw(
+              "Bad value in section %s : item no %d in config file %s",
+              SMF_CONFIG_STRING_UPF_LIST, i, config_file.c_str());
         }
 
       } else {
-        unsigned int upf_port = 0;
+        unsigned int upf_port = {0};
 
         upf_cfg.lookupValue(SMF_CONFIG_STRING_FQDN_DNS, astring);
-        uint8_t addr_type = 0;
-
+        uint8_t addr_type   = {0};
         std::string address = {};
         fqdn::resolve(astring, address, upf_port, addr_type, "");
-        if (addr_type != 0) {
-          // IPv6
+        if (addr_type != 0) {  // IPv6
           // TODO:
-          throw(
-              "DO NOT SUPPORT IPV6 ADDR FOR NRF"
-              "failed");
-        } else {
-          // IPv4
-
+          throw("DO NOT SUPPORT IPV6 ADDR FOR NRF!");
+        } else {  // IPv4
           pfcp::node_id_t n = {};
           n.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;  // actually
           if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) ==
@@ -748,36 +735,15 @@ int smf_config::load(const string& config_file) {
           }
           upfs.push_back(n);
         }
-
-        // TODO: How to get API version from DNS
-      }
-
-      if (upf_cfg.lookupValue(SMF_CONFIG_STRING_UPF_IPV4_ADDRESS, address)) {
-        pfcp::node_id_t n = {};
-        n.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;  // actually
-        if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) == 1) {
-          memcpy(&n.u1.ipv4_address, buf_in_addr, sizeof(struct in_addr));
-        } else {
-          Logger::smf_app().error(
-              "CONFIG: BAD IPV4 ADDRESS in " SMF_CONFIG_STRING_UPF_LIST
-              " item %d",
-              i);
-          throw("CONFIG: BAD ADDRESS in " SMF_CONFIG_STRING_UPF_LIST);
-        }
-        upfs.push_back(n);
-      } else {
-        // TODO IPV6_ADDRESS, FQDN
-        throw(
-            "Bad value in section %s : item no %d in config file %s",
-            SMF_CONFIG_STRING_UPF_LIST, i, config_file.c_str());
       }
     }
 
     // NRF
-    const Setting& nrf_cfg = smf_cfg[SMF_CONFIG_STRING_NRF];
-    struct in_addr nrf_ipv4_addr;
-    unsigned int nrf_port = 0;
-    std::string nrf_api_version;
+    const Setting& nrf_cfg       = smf_cfg[SMF_CONFIG_STRING_NRF];
+    struct in_addr nrf_ipv4_addr = {};
+    unsigned int nrf_port        = {0};
+    std::string nrf_api_version  = {};
+
     if (!use_fqdn_dns) {
       nrf_cfg.lookupValue(SMF_CONFIG_STRING_NRF_IPV4_ADDRESS, astring);
       IPV4_STR_ADDR_TO_INADDR(
@@ -798,26 +764,20 @@ int smf_config::load(const string& config_file) {
       nrf_addr.api_version = nrf_api_version;
     } else {
       nrf_cfg.lookupValue(SMF_CONFIG_STRING_FQDN_DNS, astring);
-      uint8_t addr_type = 0;
-
+      uint8_t addr_type   = {0};
       std::string address = {};
       fqdn::resolve(astring, address, nrf_port, addr_type);
-      if (addr_type != 0) {
-        // IPv6
+      if (addr_type != 0) {  // IPv6
         // TODO:
-        throw(
-            "DO NOT SUPPORT IPV6 ADDR FOR NRF"
-            "failed");
-      } else {
-        // IPv4
+        throw("DO NOT SUPPORT IPV6 ADDR FOR NRF!");
+      } else {  // IPv4
         IPV4_STR_ADDR_TO_INADDR(
             util::trim(address).c_str(), nrf_ipv4_addr,
             "BAD IPv4 ADDRESS FORMAT FOR NRF !");
-        nrf_addr.ipv4_addr = nrf_ipv4_addr;
-        nrf_addr.port      = nrf_port;
+        nrf_addr.ipv4_addr   = nrf_ipv4_addr;
+        nrf_addr.port        = nrf_port;
+        nrf_addr.api_version = "v1";  // TODO: to get API version from DNS
       }
-
-      // TODO: How to get API version from DNS
     }
 
     // Local configuration

@@ -50,7 +50,8 @@ bool fqdn::resolve(
       return true;
     }
   } catch (std::exception& e) {
-    std::cerr << e.what() << '\n';
+    throw std::runtime_error(
+        "Cannot resolve a DNS name " + std::string(e.what()));
     return false;
   }
 
