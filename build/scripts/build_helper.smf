@@ -334,6 +334,8 @@ install_nghttp2_from_git() {
 #arg2 is debug (0 or 1) (install debug libraries)
 check_install_smf_deps() {
 
+ var_ubuntu_18_04=0
+
   if [ $1 -gt 0 ]; then
     OPTION="-y"
   else
@@ -398,8 +400,12 @@ check_install_smf_deps() {
   if [[ $OS_DISTRO == "ubuntu" ]]; then
     case "$(get_distribution_release)" in
       "ubuntu18.04")
-        specific_packages="libconfig++-dev libasio-dev libboost-all-dev"
+        var_ubuntu_18_04=1 
+        specific_packages="libconfig++-dev"
       ;;
+      *)
+        specific_packages="libconfig++-dev libasio-dev libboost-all-dev"
+        ;;
     esac
     # removed libspdlog-dev
     PACKAGE_LIST="\
@@ -472,8 +478,10 @@ check_install_smf_deps() {
   install_nghttp2_from_git $1 $2
   ret=$?;[[ $ret -ne 0 ]] && return $ret
 
-  install_boost_1_66 $1 $2
-  ret=$?;[[ $ret -ne 0 ]] && return $ret
+  if [ $var_ubuntu_18_04 -ne 0 ]; then 
+    install_boost_1_66 $1 $2
+    ret=$?;[[ $ret -ne 0 ]] && return $ret
+  fi
     
   return 0
 }
