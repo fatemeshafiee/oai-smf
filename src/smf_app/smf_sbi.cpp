@@ -198,7 +198,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
 
   sm_context_res->res.get_json_data(json_data);
   std::string json_part = json_data.dump();
-  // add N2 content if available
+  // Add N2 content if available
   auto n2_sm_found = json_data.count("n2InfoContainer");
   if (n2_sm_found > 0) {
     parser.create_multipart_related_content(
@@ -247,7 +247,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
 
-  // get cause from the response
+  // Get cause from the response
   json response_data_json = {};
   try {
     response_data_json = json::parse(response_data);
@@ -260,7 +260,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
       "Response from AMF, Http Code: %d, cause %s", response_code,
       response_data_json["cause"].dump().c_str());
 
-  // send response to APP to process
+  // Send response to APP to process
   itti_n11_n1n2_message_transfer_response_status* itti_msg =
       new itti_n11_n1n2_message_transfer_response_status(
           TASK_SMF_SBI, TASK_SMF_APP);
@@ -330,12 +330,12 @@ void smf_sbi::send_n1n2_message_transfer_request(
   f = p->get_future();
   add_promise(promise_id, p);
 
-  // Create a new curl easy handle and add to the multi handle
+  // Create a new Curl Easy Handle and add to the Multi Handle
   if (!curl_create_handle(
           sm_session_modification->msg.get_amf_url(), data_str, str_len,
           response_data, pid_ptr, "POST", true)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    // TODO: Remove promise
     return;
   }
 
@@ -367,11 +367,11 @@ void smf_sbi::send_n1n2_message_transfer_request(
   report_msg->res.get_json_data(json_data);
   std::string json_part = json_data.dump();
 
-  // add N1 content if available
+  // Add N1 content if available
   auto n1_sm_found = json_data.count("n1MessageContainer");
   if (n1_sm_found > 0) {
     std::string n1_message = report_msg->res.get_n1_sm_message();
-    // prepare the body content for Curl
+    // Prepare the body content for Curl
     parser.create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n1_message, n2_message);
   } else {
@@ -423,7 +423,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
       "Response from AMF, Http Code: %d, cause %s", httpCode,
       response_data_json["cause"].dump().c_str());
 
-  // send response to APP to process
+  // Send response to APP to process
   itti_n11_n1n2_message_transfer_response_status* itti_msg =
       new itti_n11_n1n2_message_transfer_response_status(
           TASK_SMF_SBI, TASK_SMF_APP);
@@ -492,17 +492,7 @@ void smf_sbi::notify_subscribed_event(
   Logger::smf_sbi().debug(
       "Send notification for the subscribed event to the subscription");
 
-  int still_running = 0, numfds = 0, res = 0;
-  CURLMsg* curl_msg    = nullptr;
-  CURL* curl           = nullptr;
-  CURLcode return_code = {};
-  int http_status_code = 0, msgs_left = 0;
-  CURLM* m_curl_multi = nullptr;
-  char* url           = nullptr;
-
-  std::unique_ptr<std::string> httpData(new std::string());
-
-  // create and add an easy handle to a  multi curl request
+  // Create and add an easy handle to a  multi curl request
   for (auto i : msg->event_notifs) {
     // Fill the json part
     nlohmann::json json_data   = {};
@@ -612,7 +602,7 @@ void smf_sbi::register_nf_instance(
         "NF Instance Registration, response from NRF, json data: \n %s",
         response_json.dump().c_str());
 
-    // send response to APP to process
+    // Send response to APP to process
     std::shared_ptr<itti_n11_register_nf_instance_response> itti_msg =
         std::make_shared<itti_n11_register_nf_instance_response>(
             TASK_SMF_SBI, TASK_SMF_APP);
@@ -688,8 +678,8 @@ void smf_sbi::update_nf_instance(
        http_response_codes_e::HTTP_RESPONSE_CODE_NO_CONTENT)) {
     Logger::smf_sbi().debug("NF Update, got successful response from NRF");
 
-    // TODO: in case of response containing NF profile
-    // send response to APP to process
+    // TODO: In case of response containing NF profile
+    // Send response to APP to process
     std::shared_ptr<itti_n11_update_nf_instance_response> itti_msg =
         std::make_shared<itti_n11_update_nf_instance_response>(
             TASK_SMF_SBI, TASK_SMF_APP);
@@ -868,11 +858,11 @@ bool smf_sbi::get_sm_data(
     // TODO
   }
 
-  // process the response
+  // Process the response
   if (!jsonData.empty()) {
     Logger::smf_sbi().debug("Response from UDM %s", jsonData.dump().c_str());
 
-    // retrieve SessionManagementSubscription and store in the context
+    // Retrieve SessionManagementSubscription and store in the context
     for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin();
          it != jsonData["dnnConfigurations"].end(); ++it) {
       Logger::smf_sbi().debug("DNN %s", it.key().c_str());
@@ -898,7 +888,7 @@ bool smf_sbi::get_sm_data(
         dnn_configuration->pdu_session_types.default_session_type =
             pdu_session_type;
 
-        // Ssc_Mode
+        // SSC_Mode
         ssc_mode_t ssc_mode(ssc_mode_e::SSC_MODE_1);
         std::string default_ssc_mode = it.value()["sscModes"]["defaultSscMode"];
         Logger::smf_sbi().debug(
@@ -958,8 +948,8 @@ void smf_sbi::subscribe_sm_data() {
 bool smf_sbi::curl_create_handle(
     const std::string& uri, const char* data, uint32_t data_len,
     std::string& response_data, uint32_t* promise_id, const std::string& method,
-    bool is_multipart) {
-  // create handle for a curl request
+    bool is_multipart, uint8_t http_version) {
+  // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
   if (is_multipart) {
@@ -977,7 +967,6 @@ bool smf_sbi::curl_create_handle(
   curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
   // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
-  // curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
   if (method.compare("POST") == 0)
     curl_easy_setopt(curl, CURLOPT_POST, 1);
   else if (method.compare("PATCH") == 0)
@@ -990,6 +979,15 @@ bool smf_sbi::curl_create_handle(
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
   curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
+  if (http_version == 2) {
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    // We use a self-signed test server, skip verification during debugging
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(
+        curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+  }
+
   // Hook up data handling function.
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
@@ -1001,7 +999,7 @@ bool smf_sbi::curl_create_handle(
   curl_multi_add_handle(curl_multi, curl);
   handles.push_back(curl);
 
-  // the curl cmd will actually be performed in perform_curl_multi
+  // The curl cmd will actually be performed in perform_curl_multi
   perform_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
 
@@ -1011,9 +1009,9 @@ bool smf_sbi::curl_create_handle(
 //------------------------------------------------------------------------------
 bool smf_sbi::curl_create_handle(
     const std::string& uri, const std::string& data, std::string& response_data,
-    uint32_t* promise_id, const std::string& method) {
+    uint32_t* promise_id, const std::string& method, uint8_t http_version) {
   headers = curl_slist_append(headers, "Content-Type: application/json");
-  // create handle for a curl request
+  // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
   if ((curl == nullptr) or (headers == nullptr)) {
@@ -1037,6 +1035,16 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
   curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+
+  if (http_version == 2) {
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    // We use a self-signed test server, skip verification during debugging
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(
+        curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+  }
+
   // Hook up data handling function.
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
@@ -1049,7 +1057,7 @@ bool smf_sbi::curl_create_handle(
   curl_multi_add_handle(curl_multi, curl);
   handles.push_back(curl);
 
-  // the curl cmd will actually be performed in perform_curl_multi
+  // Curl cmd will actually be performed in perform_curl_multi
   perform_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
   return true;
@@ -1058,9 +1066,9 @@ bool smf_sbi::curl_create_handle(
 //------------------------------------------------------------------------------
 bool smf_sbi::curl_create_handle(
     const std::string& uri, std::string& response_data, uint32_t* promise_id,
-    const std::string& method) {
+    const std::string& method, uint8_t http_version) {
   headers = curl_slist_append(headers, "Content-Type: application/json");
-  // create handle for a curl request
+  // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
   if ((curl == nullptr) or (headers == nullptr)) {
@@ -1080,6 +1088,16 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
   curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+
+  if (http_version == 2) {
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    // We use a self-signed test server, skip verification during debugging
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(
+        curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+  }
+
   // Hook up data handling function.
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
@@ -1088,7 +1106,7 @@ bool smf_sbi::curl_create_handle(
   curl_multi_add_handle(curl_multi, curl);
   handles.push_back(curl);
 
-  // the curl cmd will actually be performed in perform_curl_multi
+  // Curl cmd will actually be performed in perform_curl_multi
   perform_curl_multi(
       0);  // TODO: current time as parameter if curl is performed per event
 
@@ -1150,8 +1168,7 @@ void smf_sbi::curl_release_handles() {
         trigger_process_response(*promise_id, http_code);
       }
 
-      // TODO: remove handle from the multi session and end this handle now, or
-      // later
+      // TODO: Remove handle from the multi session
       curl_multi_remove_handle(curl_multi, curl);
       curl_easy_cleanup(curl);
 
@@ -1180,7 +1197,7 @@ void smf_sbi::curl_release_handles() {
 
 //---------------------------------------------------------------------------------------------
 uint32_t smf_sbi::get_available_response(boost::shared_future<uint32_t>& f) {
-  f.wait();  // wait for it to finish
+  f.wait();  // Wait for it to finish
   assert(f.is_ready());
   assert(f.has_value());
   assert(!f.has_exception());

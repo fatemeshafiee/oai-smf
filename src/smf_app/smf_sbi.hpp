@@ -181,7 +181,7 @@ class smf_sbi {
   bool curl_create_handle(
       const std::string& uri, const char* data, uint32_t data_len,
       std::string& response_data, uint32_t* promise_id,
-      const std::string& method, bool is_multipart);
+      const std::string& method, bool is_multipart, uint8_t http_version = 1);
 
   /*
    * Create Curl handle for multi curl
@@ -196,7 +196,7 @@ class smf_sbi {
   bool curl_create_handle(
       const std::string& uri, const std::string& data,
       std::string& response_data, uint32_t* promise_id,
-      const std::string& method);
+      const std::string& method, uint8_t http_version = 1);
 
   /*
    * Create Curl handle for multi curl
@@ -208,7 +208,7 @@ class smf_sbi {
    */
   bool curl_create_handle(
       const std::string& uri, std::string& response_data, uint32_t* promise_id,
-      const std::string& method);
+      const std::string& method, uint8_t http_version = 1);
 
   /*
    * Perform curl multi to actually process the available data
