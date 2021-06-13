@@ -103,7 +103,6 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
   nlohmann::json json_data = {};
-  mime_parser parser       = {};
   std::string json_format  = {};
   std::string body         = {};
 
@@ -112,7 +111,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
 
   if (sm_context_response.n1_sm_msg_is_set()) {  // add N1 container if
                                                  // available
-    parser.create_multipart_related_content(
+    mime_parser::create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n1_sm_message(),
         multipart_related_content_part_e::NAS, json_format);

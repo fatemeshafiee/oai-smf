@@ -165,7 +165,6 @@ void smf_sbi::send_n1n2_message_transfer_request(
       "Send Communication_N1N2MessageTransfer to AMF (HTTP version %d)",
       sm_context_res->http_version);
 
-  mime_parser parser       = {};
   std::string n1_message   = sm_context_res->res.get_n1_sm_message();
   nlohmann::json json_data = {};
   std::string body;
@@ -177,11 +176,11 @@ void smf_sbi::send_n1n2_message_transfer_request(
   if (n2_sm_found > 0) {
     std::string n2_message = sm_context_res->res.get_n2_sm_information();
     // prepare the body content for Curl
-    parser.create_multipart_related_content(
+    mime_parser::create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n1_message, n2_message);
   } else {
     // prepare the body content for Curl
-    parser.create_multipart_related_content(
+    mime_parser::create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n1_message,
         multipart_related_content_part_e::NAS);
   }
@@ -284,7 +283,6 @@ void smf_sbi::send_n1n2_message_transfer_request(
         sm_session_modification) {
   Logger::smf_sbi().debug("Send Communication_N1N2MessageTransfer to AMF");
 
-  mime_parser parser = {};
   std::string body;
   nlohmann::json json_data = {};
   std::string json_part;
@@ -297,10 +295,10 @@ void smf_sbi::send_n1n2_message_transfer_request(
   if (n2_sm_found > 0) {
     std::string n2_message =
         sm_session_modification->msg.get_n2_sm_information();
-    parser.create_multipart_related_content(
+    mime_parser::create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n1_message, n2_message);
   } else {
-    parser.create_multipart_related_content(
+    mime_parser::create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n1_message,
         multipart_related_content_part_e::NAS);
   }
@@ -374,7 +372,6 @@ void smf_sbi::send_n1n2_message_transfer_request(
       "Send Communication_N1N2MessageTransfer to AMF (Network-initiated "
       "Service Request)");
 
-  mime_parser parser       = {};
   std::string n2_message   = report_msg->res.get_n2_sm_information();
   nlohmann::json json_data = {};
   std::string body;
@@ -386,10 +383,10 @@ void smf_sbi::send_n1n2_message_transfer_request(
   if (n1_sm_found > 0) {
     std::string n1_message = report_msg->res.get_n1_sm_message();
     // prepare the body content for Curl
-    parser.create_multipart_related_content(
+    mime_parser::create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n1_message, n2_message);
   } else {
-    parser.create_multipart_related_content(
+    mime_parser::create_multipart_related_content(
         body, json_part, CURL_MIME_BOUNDARY, n2_message,
         multipart_related_content_part_e::NGAP);
   }
