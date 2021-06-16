@@ -340,17 +340,17 @@ smf_app::smf_app(const std::string& config_file)
     throw;
   }
 
-  // TODO: should be done when SMF select UPF for a particular UE (should be
-  // verified)
-  for (std::vector<pfcp::node_id_t>::const_iterator it = smf_cfg.upfs.begin();
-       it != smf_cfg.upfs.end(); ++it) {
-    start_upf_association(*it);
-  }
-
   if (smf_cfg.discover_upf) {
     // Trigger NFStatusNotify subscription to be noticed when a new UPF becomes
     // available (if this option is enabled)
     trigger_upf_status_notification_subscribe();
+  } else {
+    // TODO: should be done when SMF select UPF for a particular UE (should be
+    // verified)
+    for (std::vector<pfcp::node_id_t>::const_iterator it = smf_cfg.upfs.begin();
+         it != smf_cfg.upfs.end(); ++it) {
+      start_upf_association(*it);
+    }
   }
 
   // Register to NRF (if this option is enabled)

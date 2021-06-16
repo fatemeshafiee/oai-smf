@@ -226,12 +226,14 @@ class smf_config {
     struct in_addr ipv4_addr;
     unsigned int port;
     std::string api_version;
+    std::string fqdn;
   } amf_addr;
 
   struct {
     struct in_addr ipv4_addr;
     unsigned int port;
     std::string api_version;
+    std::string fqdn;
   } udm_addr;
 
   std::vector<pfcp::node_id_t> upfs;
@@ -240,6 +242,7 @@ class smf_config {
     struct in_addr ipv4_addr;
     unsigned int port;
     std::string api_version;
+    std::string fqdn;
   } nrf_addr;
 
 #define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 10
@@ -299,13 +302,17 @@ class smf_config {
     amf_addr.ipv4_addr.s_addr = INADDR_ANY;
     amf_addr.port             = 80;
     amf_addr.api_version      = "v1";
+    amf_addr.fqdn             = {};
+
     udm_addr.ipv4_addr.s_addr = INADDR_ANY;
     udm_addr.port             = 80;
     udm_addr.api_version      = "v1";
+    udm_addr.fqdn             = {};
 
     nrf_addr.ipv4_addr.s_addr = INADDR_ANY;
     nrf_addr.port             = 80;
     nrf_addr.api_version      = "v1";
+    nrf_addr.fqdn             = {};
 
     num_session_management_subscription = 0;
 
