@@ -1149,6 +1149,8 @@ asn_enc_rval_t CHOICE_encode_aper(
       ASN__ENCODE_FAILED;
     rval.encoded = 0;
     ASN__ENCODED_OK(rval);
+  } else {
+    ASN__ENCODE_FAILED;
   }
 }
 
