@@ -33,6 +33,7 @@
 #include "logger.hpp"
 #include "msg_pfcp.hpp"
 #include "serializable.hpp"
+#include "string.hpp"
 
 #include <arpa/inet.h>
 #include <cstring>
@@ -868,11 +869,14 @@ class pfcp_fteid_ie : public pfcp_ie {
 class pfcp_network_instance_ie : public pfcp_ie {
  public:
   std::string network_instance;
+  std::string network_instance_dotted;
 
   //--------
   explicit pfcp_network_instance_ie(const pfcp::network_instance_t& b)
       : pfcp_ie(PFCP_IE_NETWORK_INSTANCE) {
     network_instance = b.network_instance;
+    util::string_to_dotted(network_instance, network_instance_dotted);
+    network_instance = network_instance_dotted;
     tlv.set_length(network_instance.size());
   }
   //--------
