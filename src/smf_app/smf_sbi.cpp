@@ -1190,7 +1190,6 @@ uint32_t smf_sbi::get_available_response(boost::shared_future<uint32_t>& f) {
   assert(f.has_value());
   assert(!f.has_exception());
 
-  // Wait for the response back
   uint32_t response_code = f.get();
   return response_code;
 }
