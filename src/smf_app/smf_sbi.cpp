@@ -1149,15 +1149,6 @@ void smf_sbi::curl_release_handles() {
       // Get HTTP code
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
       Logger::smf_app().debug("Got response with HTTP code  %d!", http_code);
-      /*
-            char* curl_url = nullptr;
-            int res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL,
-         &curl_url); if (res == CURLE_OK and curl_url) { std::string
-         curl_url_str(curl_url); trigger_process_response(curl_url_str,
-         http_code);
-            }
-            */
-
       uint32_t* promise_id = nullptr;
       curl_easy_getinfo(curl, CURLINFO_PRIVATE, &promise_id);
       if (promise_id) {
