@@ -193,7 +193,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
       sm_context_res->http_version);
 
   nlohmann::json json_data = {};
-  std::string body;
+  std::string body         = {};
 
   sm_context_res->res.get_json_data(json_data);
   std::string json_part = json_data.dump();
@@ -219,7 +219,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
   body.copy(data_str, str_len);
   data_str[str_len] = '\0';
 
-  std::string response_data;
+  std::string response_data = {};
 
   // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
@@ -236,7 +236,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
           sm_context_res->res.get_amf_url(), data_str, str_len, response_data,
           pid_ptr, "POST", true)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    remove_promise(promise_id);
     return;
   }
 
@@ -291,9 +291,9 @@ void smf_sbi::send_n1n2_message_transfer_request(
         sm_session_modification) {
   Logger::smf_sbi().debug("Send Communication_N1N2MessageTransfer to AMF");
 
-  std::string body;
+  std::string body         = {};
   nlohmann::json json_data = {};
-  std::string json_part;
+  std::string json_part    = {};
   sm_session_modification->msg.get_json_data(json_data);
   json_part = json_data.dump();
 
@@ -316,7 +316,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
   body.copy(data_str, str_len);
   data_str[str_len] = '\0';
 
-  std::string response_data;
+  std::string response_data = {};
 
   // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
@@ -333,7 +333,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
           sm_session_modification->msg.get_amf_url(), data_str, str_len,
           response_data, pid_ptr, "POST", true)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: Remove promise
+    remove_promise(promise_id);
     return;
   }
 
@@ -360,7 +360,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
 
   std::string n2_message   = report_msg->res.get_n2_sm_information();
   nlohmann::json json_data = {};
-  std::string body;
+  std::string body         = {};
   report_msg->res.get_json_data(json_data);
   std::string json_part = json_data.dump();
 
@@ -382,7 +382,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
   body.copy(data_str, str_len);
   data_str[str_len] = '\0';
 
-  std::string response_data;
+  std::string response_data = {};
 
   // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
@@ -399,7 +399,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
           report_msg->res.get_amf_url(), data_str, str_len, response_data,
           pid_ptr, "POST", true)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    remove_promise(promise_id);
     return;
   }
 
@@ -472,7 +472,7 @@ void smf_sbi::send_sm_context_status_notification(
           sm_context_status->amf_status_uri, body, response_data, pid_ptr,
           "POST")) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    remove_promise(promise_id);
     return;
   }
 
@@ -523,7 +523,7 @@ void smf_sbi::notify_subscribed_event(
     // Create a new curl easy handle and add to the multi handle
     if (!curl_create_handle(url, body, response_data, pid_ptr, "POST")) {
       Logger::smf_sbi().warn("Could not create a new handle to send message");
-      // TODO: remove promise
+      remove_promise(promise_id);
       return;
     }
 
@@ -559,7 +559,7 @@ void smf_sbi::register_nf_instance(
   Logger::smf_sbi().debug(
       "Send NF Instance Registration to NRF, msg body: \n %s", body.c_str());
 
-  std::string response_data;
+  std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
   Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
@@ -573,7 +573,7 @@ void smf_sbi::register_nf_instance(
   // Create a new curl easy handle and add to the multi handle
   if (!curl_create_handle(url, body, response_data, pid_ptr, "POST")) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    remove_promise(promise_id);
     return;
   }
 
@@ -643,7 +643,7 @@ void smf_sbi::update_nf_instance(
 
   Logger::smf_sbi().debug("Send NF Update to NRF, NRF URL %s", url.c_str());
 
-  std::string response_data;
+  std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
   Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
@@ -657,7 +657,7 @@ void smf_sbi::update_nf_instance(
   // Create a new curl easy handle and add to the multi handle
   if (!curl_create_handle(url, body, response_data, pid_ptr, "PATCH")) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    remove_promise(promise_id);
     return;
   }
 
@@ -710,7 +710,7 @@ void smf_sbi::deregister_nf_instance(
   Logger::smf_sbi().debug(
       "Send NF De-register to NRF (NRF URL %s)", url.c_str());
 
-  std::string response_data;
+  std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
   Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
@@ -724,7 +724,7 @@ void smf_sbi::deregister_nf_instance(
   // Create a new curl easy handle and add to the multi handle
   if (!curl_create_handle(url, response_data, pid_ptr, "DELETE")) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    remove_promise(promise_id);
     return;
   }
 
@@ -762,7 +762,7 @@ void smf_sbi::subscribe_upf_status_notify(
   Logger::smf_sbi().debug(
       "Send NFStatusNotify to NRF, msg body: %s", body.c_str());
 
-  std::string response_data;
+  std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
   Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
@@ -776,7 +776,7 @@ void smf_sbi::subscribe_upf_status_notify(
   // Create a new curl easy handle and add to the multi handle
   if (!curl_create_handle(msg->url, body, response_data, pid_ptr, "POST")) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    remove_promise(promise_id);
     return;
   }
 
@@ -813,7 +813,7 @@ bool smf_sbi::get_sm_data(
       fmt::format(NUDM_SDM_GET_SM_DATA_URL, std::to_string(supi));
   Logger::smf_sbi().debug("UDM's URL: %s ", url.c_str());
 
-  std::string response_data;
+  std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle
   uint32_t promise_id = generate_promise_id();
   Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
@@ -827,7 +827,7 @@ bool smf_sbi::get_sm_data(
   // Create a new curl easy handle and add to the multi handle
   if (!curl_create_handle(url, response_data, pid_ptr, "GET")) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
-    // TODO: remove promise
+    remove_promise(promise_id);
     return false;
   }
 
@@ -1113,7 +1113,8 @@ bool smf_sbi::curl_create_handle(
 //------------------------------------------------------------------------------
 void smf_sbi::perform_curl_multi(uint64_t ms) {
   //_unused(ms);
-  int still_running = 0, numfds = 0;
+  int still_running = 0;
+  int numfds        = 0;
 
   CURLMcode code = curl_multi_perform(curl_multi, &still_running);
 
@@ -1165,7 +1166,6 @@ void smf_sbi::curl_release_handles() {
         trigger_process_response(*promise_id, http_code);
       }
 
-      // TODO: Remove handle from the multi session
       curl_multi_remove_handle(curl_multi, curl);
       curl_easy_cleanup(curl);
 
@@ -1209,6 +1209,12 @@ void smf_sbi::add_promise(
     uint32_t id, boost::shared_ptr<boost::promise<uint32_t>>& p) {
   std::unique_lock lock(m_curl_handle_promises);
   curl_handle_promises.emplace(id, p);
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_sbi::remove_promise(uint32_t id) {
+  std::unique_lock lock(m_curl_handle_promises);
+  curl_handle_promises.erase(id);
 }
 
 //------------------------------------------------------------------------------

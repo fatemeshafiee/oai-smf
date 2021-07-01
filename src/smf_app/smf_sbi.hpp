@@ -241,6 +241,13 @@ class smf_sbi {
       uint32_t pid, boost::shared_ptr<boost::promise<uint32_t>>& p);
 
   /*
+   * Remove the promise
+   * @param [uint32_t] pid: promise id
+   * @return void
+   */
+  void remove_promise(uint32_t id);
+
+  /*
    * Set the value of the promise to make it ready
    * @param [uint32_t] pid: promise id
    * @param [uint32_t ] http_code: http response code
