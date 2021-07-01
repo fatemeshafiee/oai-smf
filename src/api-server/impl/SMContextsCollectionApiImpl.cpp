@@ -106,7 +106,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
 
   boost::future_status status;
   // wait for timeout or ready
-  status = f.wait_for(boost::chrono::milliseconds(100));
+  status = f.wait_for(boost::chrono::milliseconds(FUTURE_STATUS_TIMEOUT_MS));
   if (status == boost::future_status::ready) {
     assert(f.is_ready());
     assert(f.has_value());

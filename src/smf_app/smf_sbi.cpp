@@ -571,7 +571,7 @@ void smf_sbi::register_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  if (!curl_create_handle(url, body, response_data, pid_ptr, "POST")) {
+  if (!curl_create_handle(url, body, response_data, pid_ptr, "PUT")) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return;
