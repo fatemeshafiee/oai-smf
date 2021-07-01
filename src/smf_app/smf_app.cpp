@@ -364,6 +364,13 @@ smf_app::smf_app(const std::string& config_file)
 }
 
 //------------------------------------------------------------------------------
+smf_app::~smf_app() {
+  Logger::smf_app().debug("Delete SMF_APP instance...");
+  // TODO: Unregister NRF
+  if (smf_n4_inst) delete smf_n4_inst;
+  if (smf_sbi_inst) delete smf_sbi_inst;
+}
+//------------------------------------------------------------------------------
 void smf_app::start_upf_association(const pfcp::node_id_t& node_id) {
   std::time_t time_epoch = std::time(nullptr);
   uint64_t tv_ntp        = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
