@@ -206,11 +206,7 @@ class smf_app {
  public:
   explicit smf_app(const std::string& config_file);
   smf_app(smf_app const&) = delete;
-
-  virtual ~smf_app() {
-    Logger::smf_app().debug("Delete SMF_APP instance...");
-    // TODO: Unregister NRF
-  }
+  virtual ~smf_app();
 
   void operator=(smf_app const&) = delete;
 

@@ -68,6 +68,7 @@ COPY --from=oai-smf-builder /usr/local/lib/libpistache.so /usr/local/lib/
 COPY --from=oai-smf-builder /usr/local/lib/libnghttp2_asio.so.1 /usr/local/lib/
 COPY --from=oai-smf-builder /usr/lib/x86_64-linux-gnu/libboost_system.so.1.65.1 /usr/lib/x86_64-linux-gnu/
 COPY --from=oai-smf-builder /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.65.1 /usr/lib/x86_64-linux-gnu/
+COPY --from=oai-smf-builder /usr/lib/x86_64-linux-gnu/libboost_chrono.so.1.65.1 /usr/lib/x86_64-linux-gnu/
 COPY --from=oai-smf-builder /openair-smf/build/smf/build/nas/libNAS.so /usr/local/lib/
 RUN ldconfig
 

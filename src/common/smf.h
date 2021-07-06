@@ -194,17 +194,19 @@ typedef struct qos_profile_s {
 #define NNRF_NFM_BASE "/nnrf-nfm/"
 #define NNRF_NF_REGISTER_URL "/nf-instances/"
 #define NNRF_NF_STATUS_SUBSCRIBE_URL "/subscriptions"
-#define NRF_CURL_TIMEOUT_MS 100L
 
 // for CURL
-#define AMF_CURL_TIMEOUT_MS 100L
+#define NF_CURL_TIMEOUT_MS 100L
+#define MAX_WAIT_MSECS 10000  // 1 second
 #define AMF_NUMBER_RETRIES 3
-#define UDM_CURL_TIMEOUT_MS 100L
 #define UDM_NUMBER_RETRIES 3
 constexpr auto CURL_MIME_BOUNDARY = "----Boundary";
 
 // for N1N2
 #define BUF_LEN 512
+
+// FOR FUTURE PROMISE
+#define FUTURE_STATUS_TIMEOUT_MS 100
 
 // for PFCP
 constexpr uint64_t SECONDS_SINCE_FIRST_EPOCH = 2208988800;
