@@ -45,6 +45,7 @@
 #define SMF_CONFIG_STRING_SMF_CONFIG "SMF"
 #define SMF_CONFIG_STRING_PID_DIRECTORY "PID_DIRECTORY"
 #define SMF_CONFIG_STRING_INSTANCE "INSTANCE"
+#define SMF_CONFIG_STRING_FQDN_DNS "FQDN"
 #define SMF_CONFIG_STRING_INTERFACES "INTERFACES"
 #define SMF_CONFIG_STRING_INTERFACE_NAME "INTERFACE_NAME"
 #define SMF_CONFIG_STRING_IPV4_ADDRESS "IPV4_ADDRESS"
@@ -139,8 +140,6 @@
   "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS "USE_FQDN_DNS"
 
-#define SMF_CONFIG_STRING_FQDN_DNS "FQDN"
-
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
 namespace smf {
@@ -175,6 +174,7 @@ class smf_config {
   std::mutex m_rw_lock;
   std::string pid_dir;
   unsigned int instance = 0;
+  std::string fqdn      = {};
 
   interface_cfg_t n4;
   interface_cfg_t sbi;

@@ -260,6 +260,7 @@ int smf_config::load(const string& config_file) {
 
   const Setting& smf_cfg = root[SMF_CONFIG_STRING_SMF_CONFIG];
 
+  // Instance
   try {
     smf_cfg.lookupValue(SMF_CONFIG_STRING_INSTANCE, instance);
   } catch (const SettingNotFoundException& nfex) {
@@ -267,8 +268,17 @@ int smf_config::load(const string& config_file) {
         "%s : %s, using defaults", nfex.what(), nfex.getPath());
   }
 
+  // PID_DIR
   try {
     smf_cfg.lookupValue(SMF_CONFIG_STRING_PID_DIRECTORY, pid_dir);
+  } catch (const SettingNotFoundException& nfex) {
+    Logger::smf_app().info(
+        "%s : %s, using defaults", nfex.what(), nfex.getPath());
+  }
+
+  // FQDN
+  try {
+    smf_cfg.lookupValue(SMF_CONFIG_STRING_FQDN_DNS, fqdn);
   } catch (const SettingNotFoundException& nfex) {
     Logger::smf_app().info(
         "%s : %s, using defaults", nfex.what(), nfex.getPath());
@@ -1103,6 +1113,13 @@ void smf_config::display() {
 //------------------------------------------------------------------------------
 int smf_config::get_pfcp_node_id(pfcp::node_id_t& node_id) {
   node_id = {};
+  // TODO: support QFDN
+  if (!fqdn.empty() and use_fqdn_dns) {
+    node_id.node_id_type = pfcp::NODE_ID_TYPE_FQDN;
+    node_id.fqdn         = fqdn;
+    return RETURNok;
+  }
+
   if (n4.addr4.s_addr) {
     node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
     node_id.u1.ipv4_address = n4.addr4;

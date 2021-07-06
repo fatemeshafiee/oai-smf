@@ -61,6 +61,7 @@
 #include "smf_n4.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "string.hpp"
+#include "fqdn.hpp"
 
 extern "C" {
 #include "dynamic_memory_check.h"
@@ -441,8 +442,17 @@ void smf_app::start_upf_association(
             "Could not send ITTI message %s to task TASK_SMF_N4",
             n4_asc.get()->get_msg_name());
       }
+    } else if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+      n4_asc->r_endpoint =
+          endpoint(node_id.u1.ipv4_address, pfcp::default_port);
+      int ret = itti_inst->send_msg(n4_asc);
+      if (RETURNok != ret) {
+        Logger::smf_app().error(
+            "Could not send ITTI message %s to task TASK_SMF_N4",
+            n4_asc.get()->get_msg_name());
+      }
     } else {
-      Logger::smf_app().warn("Start_association() node_id IPV6, FQDN!");
+      Logger::smf_app().warn("Start_association() node_id IPV6!");
     }
   }
 }
@@ -1296,39 +1306,92 @@ bool smf_app::handle_nf_status_notification(
             upf_info);
         // Verify if the UPF is already exist
         // if not, add to the DB and send Association request
-        // UPF N4 ipv4 address
-        std::vector<struct in_addr> ipv4_addrs = {};
-        profile.get()->get_nf_ipv4_addresses(ipv4_addrs);
+        // UPF N4 ipv4 address/FQDN
+        std::string upf_fqdn = profile.get()->get_fqdn();
 
-        if (ipv4_addrs.size() < 1) {
-          Logger::smf_app().debug("No IP Addr found");
-          return false;
-        }
+        if (upf_fqdn.empty()) {  // Use IPv4 Addr
+          std::vector<struct in_addr> ipv4_addrs = {};
+          profile.get()->get_nf_ipv4_addresses(ipv4_addrs);
 
-        bool found = false;
-        for (auto node : smf_cfg.upfs) {
-          if (node.u1.ipv4_address.s_addr == ipv4_addrs[0].s_addr) {
-            found = false;
-            break;
+          if (ipv4_addrs.size() < 1) {
+            Logger::smf_app().debug("No IP Addr found");
+            return false;
           }
-        }
-        if (!found) {
-          // Add a new UPF node
-          Logger::smf_app().debug(
-              "Add a new UPF node, Ipv4 Addr %s", inet_ntoa(ipv4_addrs[0]));
-          pfcp::node_id_t n        = {};
-          n.node_id_type           = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-          n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
-          // memcpy(&n.u1.ipv4_address, &ipv4_addrs[0], sizeof(struct in_addr));
-          smf_cfg.upfs.push_back(n);
-          upf_profile* upf_node_profile =
-              dynamic_cast<upf_profile*>(profile.get());
-          start_upf_association(n, std::ref(*upf_node_profile));
-          // start_upf_association(n,
-          // std::static_pointer_cast<upf_profile>(profile));
-        } else {
-          Logger::smf_app().debug(
-              "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
+
+          bool found = false;
+          for (auto node : smf_cfg.upfs) {
+            if (node.u1.ipv4_address.s_addr == ipv4_addrs[0].s_addr) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            // Add a new UPF node
+            Logger::smf_app().debug(
+                "Add a new UPF node, Ipv4 Addr %s", inet_ntoa(ipv4_addrs[0]));
+            pfcp::node_id_t n        = {};
+            n.node_id_type           = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+            n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
+            // memcpy(&n.u1.ipv4_address, &ipv4_addrs[0], sizeof(struct
+            // in_addr));
+            smf_cfg.upfs.push_back(n);
+            upf_profile* upf_node_profile =
+                dynamic_cast<upf_profile*>(profile.get());
+            start_upf_association(n, std::ref(*upf_node_profile));
+            // start_upf_association(n,
+            // std::static_pointer_cast<upf_profile>(profile));
+          } else {
+            Logger::smf_app().debug(
+                "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
+          }
+
+        } else {  // use FQDN
+
+          uint8_t addr_type            = {0};
+          std::string address          = {};
+          uint32_t upf_port            = {0};
+          struct in_addr upf_ipv4_addr = {};
+
+          fqdn::resolve(upf_fqdn, address, upf_port, addr_type);
+          if (addr_type != 0) {  // IPv6
+            // TODO:
+            Logger::smf_app().debug("Do not support IPv6 addr for UPF");
+            return false;
+          } else {  // IPv4
+
+            if (inet_aton(util::trim(address).c_str(), &upf_ipv4_addr) == 0) {
+              Logger::smf_app().debug("Bad IPv4 Addr format for UPF");
+              return false;
+            }
+          }
+          bool found = false;
+          for (auto node : smf_cfg.upfs) {
+            if ((node.u1.ipv4_address.s_addr == upf_ipv4_addr.s_addr) or
+                (upf_fqdn.compare(node.fqdn) == 0)) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            // Add a new UPF node
+            Logger::smf_app().debug(
+                "Add a new UPF node, FQDN %s", upf_fqdn.c_str());
+            pfcp::node_id_t n = {};
+            n.node_id_type    = pfcp::NODE_ID_TYPE_FQDN;
+            n.fqdn            = upf_fqdn;
+            n.u1.ipv4_address.s_addr =
+                upf_ipv4_addr
+                    .s_addr;  // Normally we should not do that, but ok since we
+                              // keep both fqdn and IPv4 at the same time
+
+            smf_cfg.upfs.push_back(n);
+            upf_profile* upf_node_profile =
+                dynamic_cast<upf_profile*>(profile.get());
+            start_upf_association(n, std::ref(*upf_node_profile));
+          } else {
+            Logger::smf_app().debug(
+                "UPF node already exist (%s)", address.c_str());
+          }
         }
       }
     } else {
