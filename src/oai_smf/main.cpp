@@ -147,11 +147,11 @@ int main(int argc, char** argv) {
   // smf_api_server_2->start();
   std::thread smf_http2_manager(&smf_http2_server::start, smf_api_server_2);
 
-  smf_http1_manager.join();
-  smf_http2_manager.join();
-
   // Register to NRF and discover appropriate UPFs
   smf_app_inst->start_nf_registration_discovery();
+
+  smf_http1_manager.join();
+  smf_http2_manager.join();
 
   FILE* fp             = NULL;
   std::string filename = fmt::format("/tmp/smf_{}.status", getpid());
