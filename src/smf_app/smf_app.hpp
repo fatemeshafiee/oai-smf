@@ -666,6 +666,13 @@ class smf_app {
       const pfcp::node_id_t& node_id, const upf_profile& profile);
 
   /*
+   * To start NF registration with NRF and subscribe to UPF event notification
+   * @param void
+   * @return void
+   */
+  void start_nf_registration_discovery();
+
+  /*
    * To store a promise of a PDU Session Create SM Contex Response to be
    * triggered when the result is ready
    * @param [uint32_t] id: promise id

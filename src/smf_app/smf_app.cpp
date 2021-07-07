@@ -341,6 +341,19 @@ smf_app::smf_app(const std::string& config_file)
     throw;
   }
 
+  Logger::smf_app().startup("Started");
+}
+
+//------------------------------------------------------------------------------
+smf_app::~smf_app() {
+  Logger::smf_app().debug("Delete SMF_APP instance...");
+  // TODO: Unregister NRF
+  if (smf_n4_inst) delete smf_n4_inst;
+  if (smf_sbi_inst) delete smf_sbi_inst;
+}
+
+//------------------------------------------------------------------------------
+void smf_app::start_nf_registration_discovery() {
   if (smf_cfg.discover_upf) {
     // Trigger NFStatusNotify subscription to be noticed when a new UPF becomes
     // available (if this option is enabled)
@@ -360,17 +373,8 @@ smf_app::smf_app(const std::string& config_file)
     usleep(microsecond);
     register_to_nrf();
   }
-
-  Logger::smf_app().startup("Started");
 }
 
-//------------------------------------------------------------------------------
-smf_app::~smf_app() {
-  Logger::smf_app().debug("Delete SMF_APP instance...");
-  // TODO: Unregister NRF
-  if (smf_n4_inst) delete smf_n4_inst;
-  if (smf_sbi_inst) delete smf_sbi_inst;
-}
 //------------------------------------------------------------------------------
 void smf_app::start_upf_association(const pfcp::node_id_t& node_id) {
   std::time_t time_epoch = std::time(nullptr);
