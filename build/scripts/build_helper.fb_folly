@@ -69,6 +69,7 @@ install_fb_folly_from_source(){
       $SUDO $INSTALLER install $OPTION \
         g++ \
         libevent-dev \
+        libboost1.67-dev \
         libdouble-conversion-dev \
         libgoogle-glog-dev \
         libgflags-dev \
