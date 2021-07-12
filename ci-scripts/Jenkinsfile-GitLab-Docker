@@ -121,7 +121,8 @@ pipeline {
         script {
           sh "git clean -x -d -f > /dev/null 2>&1"
           if ("MERGE".equals(env.gitlabActionType)) {
-            gitlabMergeRequestLink = sh "curl --silent \"https://gitlab.eurecom.fr/api/v4/projects/oai%2Fcn5g%2Foai-cn5g-smf/merge_requests/${env.gitlabMergeRequestIid}\" | jq .web_url | sed 's#\"##g'"
+            gitlabMergeRequestLink = sh returnStdout: true, script: "curl --silent 'https://gitlab.eurecom.fr/api/v4/projects/oai%2Fcn5g%2Foai-cn5g-smf/merge_requests/${env.gitlabMergeRequestIid}' | jq .web_url | sed 's#\"##g'"
+            gitlabMergeRequestLink = gitlabMergeRequestLink.trim()
             echo "========= THIS IS A MERGE REQUEST =========="
             echo "MR ID       is ${env.gitlabMergeRequestIid}"
             echo "MR LINK     is ${gitlabMergeRequestLink}"

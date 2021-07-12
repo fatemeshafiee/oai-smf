@@ -852,12 +852,11 @@ class HtmlReport():
 								else:
 									result = re.search('oai-smf *develop', line)
 							if result is not None:
-								if variant == 'docker':
-									result = re.search('ago *([0-9A-Z]+)', line)
-								else:
-									result = re.search('ago *([0-9]+ [A-Z]+)', line)
+								result = re.search('ago  *([0-9A-Z ]+)', line)
 								if result is not None:
 									size = result.group(1)
+									if variant == 'docker':
+										size = re.sub('MB', ' MB', size)
 									status = True
 					logfile.close()
 				if status:
