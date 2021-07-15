@@ -1313,15 +1313,11 @@ bool smf_app::handle_nf_status_notification(
         // UPF N4 ipv4 address/FQDN
         std::string upf_fqdn = profile.get()->get_fqdn();
 
-        if (upf_fqdn.empty()) {  // Use IPv4 Addr
-          std::vector<struct in_addr> ipv4_addrs = {};
-          profile.get()->get_nf_ipv4_addresses(ipv4_addrs);
+        std::vector<struct in_addr> ipv4_addrs = {};
+        profile.get()->get_nf_ipv4_addresses(ipv4_addrs);
 
-          if (ipv4_addrs.size() < 1) {
-            Logger::smf_app().debug("No IP Addr found");
-            return false;
-          }
-
+        // Use IPv4 addr first if available
+        if (ipv4_addrs.size() >= 1) {
           bool found = false;
           for (auto node : smf_cfg.upfs) {
             if (node.u1.ipv4_address.s_addr == ipv4_addrs[0].s_addr) {
@@ -1336,21 +1332,16 @@ bool smf_app::handle_nf_status_notification(
             pfcp::node_id_t n        = {};
             n.node_id_type           = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
             n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
-            // memcpy(&n.u1.ipv4_address, &ipv4_addrs[0], sizeof(struct
-            // in_addr));
             smf_cfg.upfs.push_back(n);
             upf_profile* upf_node_profile =
                 dynamic_cast<upf_profile*>(profile.get());
             start_upf_association(n, std::ref(*upf_node_profile));
-            // start_upf_association(n,
-            // std::static_pointer_cast<upf_profile>(profile));
           } else {
             Logger::smf_app().debug(
                 "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
           }
 
-        } else {  // use FQDN
-
+        } else if (!upf_fqdn.empty()) {  // use FQDN
           uint8_t addr_type            = {0};
           std::string address          = {};
           uint32_t upf_port            = {0};
@@ -1396,6 +1387,9 @@ bool smf_app::handle_nf_status_notification(
             Logger::smf_app().debug(
                 "UPF node already exist (%s)", address.c_str());
           }
+        } else {
+          Logger::smf_app().debug("No IP Addr/FQDN found");
+          return false;
         }
       }
     } else {
