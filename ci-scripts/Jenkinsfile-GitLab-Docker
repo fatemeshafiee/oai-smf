@@ -67,7 +67,8 @@ pipeline {
       "Build RHEL8 SMF Image",
       "Static Code Analysis",
       "Code Formatting Checker",
-      "Test with DsTester"
+      "Test with DsTester on Docker environment",
+      "Test with DsTester on OC environment"
     ])
 
   }
