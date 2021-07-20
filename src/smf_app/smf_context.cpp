@@ -2674,7 +2674,12 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
       case n2_sm_info_type_e::SECONDARY_RAT_USAGE: {
         // Inter NG-RAN node N2 based handover (Section 4.9.1.3@3GPP TS 23.502
         // V16.0.0)
-        // process later
+        if (sm_context_req_msg.ho_state_is_set()) {
+          std::string ho_state = sm_context_req_msg.get_ho_state();
+          if (ho_state.compare("COMPLETED") == 0) {
+            // TODO:
+          }
+        }
       } break;
 
       default: {
@@ -2719,8 +2724,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
   // Step 5. N2 Handover Execution/Cancellation
   if (sm_context_req_msg.ho_state_is_set() or
       sm_context_req_msg.n2_sm_info_is_set()) {
-    std::string ho_state;
-    sm_context_req_msg.get_ho_state(ho_state);
+    std::string ho_state = sm_context_req_msg.get_ho_state();
 
     // Handover Execution
     if (ho_state.compare("COMPLETED") == 0 or
@@ -3163,6 +3167,10 @@ bool smf_context::handle_ho_preparation_request(
 
   // TODO: Check Target ID whether N2 Handover for the indicated PDU Session can
   // be accepted Select UPF (should be done in Procedure)
+  if (!check_handover_possibility(ran_target_id, pdu_session_id)) {
+    // TODO:
+    return false;
+  }
 
   std::vector<smf_qos_flow> flows = {};
   sp.get()->get_qos_flows(
@@ -3217,11 +3225,11 @@ bool smf_context::handle_ho_preparation_request_ack(
   int decode_status = smf_n2::get_instance().decode_n2_sm_information(
       decoded_msg, n2_sm_information);
   if (decode_status == RETURNerror) {
-    // error, send error to AMF
+    // Error, send error to AMF
     Logger::smf_app().warn(
         "Decode N2 SM (Ngap_HandoverRequestAcknowledgeTransfer) "
         "failed!");
-    // trigger to send reply to AMF
+    // Trigger to send reply to AMF
     // TODO: to be updated with correct status/cause
     smf_app_inst->trigger_update_context_error_response(
         http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
@@ -3232,7 +3240,7 @@ bool smf_context::handle_ho_preparation_request_ack(
   }
 
   if (decoded_msg->dL_NGU_UP_TNLInformation.present) {
-    // store AN Tunnel Info + list of accepted QFIs
+    // Store AN Tunnel Info + list of accepted QFIs
     pfcp::fteid_t dl_teid = {};
 
     memcpy(
@@ -3247,6 +3255,7 @@ bool smf_context::handle_ho_preparation_request_ack(
 
     dl_teid.teid = ntohl(dl_teid.teid);
     dl_teid.v4   = 1;  // Only V4 for now
+    dl_teid.v6   = 0;
     sm_context_request.get()->req.set_dl_fteid(dl_teid);
 
     Logger::smf_app().debug(
@@ -3365,6 +3374,13 @@ bool smf_context::handle_ho_execution(
     return false;
   }
   // TODO: process Ngap_SecondaryRATDataUsageReportTransfer
+
+  // Fill the content of SmContextUpdatedData
+  nlohmann::json json_data = {};
+  json_data["hoState"]     = "COMPLETED";
+  sm_context_resp.get()->res.set_json_data(json_data);
+  sm_context_resp.get()->res.set_http_code(
+      http_status_code_e::HTTP_STATUS_CODE_200_OK);
 
   // set HoState to NONE
   sp.get()->set_ho_state(ho_state_e::HO_STATE_COMPLETED);
@@ -3778,6 +3794,14 @@ void smf_context::set_plmn(const plmn_t& plmn) {
 //------------------------------------------------------------------------------
 void smf_context::get_plmn(plmn_t& plmn) const {
   plmn = this->plmn;
+}
+
+//------------------------------------------------------------------------------
+bool smf_context::check_handover_possibility(
+    const ng_ran_target_id_t& ran_target_id,
+    const pdu_session_id_t& pdu_session_id) const {
+  // TODO:
+  return true;
 }
 
 //------------------------------------------------------------------------------

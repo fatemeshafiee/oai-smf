@@ -1172,6 +1172,17 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   void get_plmn(plmn_t& plmn) const;
 
+  /*
+   * Check if N2 HO for this PDU session can be accepted
+   * @param [const ng_ran_target_id_t&] ran_target_id: Target ID
+   * @param [const pdu_session_id_t&] pdu_session_id: PDU Session ID
+   * @return true if the N2 HO can be accepted, otherwise return false
+   *
+   */
+  bool check_handover_possibility(
+      const ng_ran_target_id_t& ran_target_id,
+      const pdu_session_id_t& pdu_session_id) const;
+
  private:
   std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
