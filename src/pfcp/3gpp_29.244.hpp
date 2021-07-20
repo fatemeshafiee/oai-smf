@@ -33,6 +33,7 @@
 #include "logger.hpp"
 #include "msg_pfcp.hpp"
 #include "serializable.hpp"
+#include "string.hpp"
 
 #include <arpa/inet.h>
 #include <cstring>
@@ -123,6 +124,59 @@ class pfcp_ie : public stream_serializable {
   };
 
   static pfcp_ie* new_pfcp_ie_from_stream(std::istream& is);
+
+  // from SPGWC
+  static bool string_to_dotted(const std::string& str, std::string& dotted) {
+    uint8_t offset = 0;
+    uint8_t* last_size;
+    uint8_t word_length = 0;
+
+    uint8_t value[str.length() + 1];
+    dotted    = {};
+    last_size = &value[0];
+
+    while (str[offset]) {
+      // We replace the . by the length of the word
+      if (str[offset] == '.') {
+        *last_size  = word_length;
+        word_length = 0;
+        last_size   = &value[offset + 1];
+      } else {
+        word_length++;
+        value[offset + 1] = str[offset];
+      }
+
+      offset++;
+    }
+
+    *last_size = word_length;
+    dotted.assign((const char*) value, str.length() + 1);
+    return true;
+  };
+
+  static bool dotted_to_string(const std::string& dot, std::string& no_dot) {
+    // uint8_t should be enough, but uint16 if length > 255.
+    uint16_t offset = 0;
+    bool result     = true;
+    no_dot          = {};
+
+    while (offset < dot.length()) {
+      if (dot[offset] < 64) {
+        if ((offset + dot[offset]) <= dot.length()) {
+          if (offset) {
+            no_dot.push_back('.');
+          }
+          no_dot.append(&dot[offset + 1], dot[offset]);
+        }
+        offset = offset + 1 + dot[offset];
+      } else {
+        // should not happen, consume bytes
+        no_dot.push_back(dot[offset++]);
+        result = false;
+      }
+    }
+    return result;
+  };
 };
 //------------------------------------------------------------------------------
 class pfcp_grouped_ie : public pfcp_ie {
@@ -556,35 +610,33 @@ class pfcp_enterprise_specific_ie : public pfcp_ie {
   uint16_t enterprise_id;
   std::string proprietary_data;
 
-    //--------
+  //--------
   explicit pfcp_enterprise_specific_ie(const pfcp::enterprise_specific_t& b)
       : pfcp_ie(PFCP_IE_ENTERPRISE_SPECIFIC) {
-    enterprise_id = b.enterprise_id;
+    enterprise_id    = b.enterprise_id;
     proprietary_data = b.proprietary_data;
     tlv.set_length(2 + proprietary_data.size());
   }
   //--------
   pfcp_enterprise_specific_ie() : pfcp_ie(PFCP_IE_ENTERPRISE_SPECIFIC) {
-    enterprise_id = 0;
+    enterprise_id    = 0;
     proprietary_data = {};
     tlv.set_length(2);
   }
   //  --------
-  explicit pfcp_enterprise_specific_ie(const pfcp_tlv& t) 
-  : pfcp_ie(t),
-   enterprise_id(0),
-   proprietary_data(){};
+  explicit pfcp_enterprise_specific_ie(const pfcp_tlv& t)
+      : pfcp_ie(t), enterprise_id(0), proprietary_data(){};
 
   //--------
   void to_core_type(pfcp::enterprise_specific_t& b) {
-    b.enterprise_id = enterprise_id;
+    b.enterprise_id    = enterprise_id;
     b.proprietary_data = proprietary_data;
   }
   //--------
   void dump_to(std::ostream& os) {
     tlv.dump_to(os);
-    os.write(reinterpret_cast<const char*>(&enterprise_id),
-        sizeof(enterprise_id));
+    os.write(
+        reinterpret_cast<const char*>(&enterprise_id), sizeof(enterprise_id));
     os << enterprise_id;
   }
   //--------
@@ -594,9 +646,8 @@ class pfcp_enterprise_specific_ie : public pfcp_ie {
       throw pfcp_tlv_bad_length_exception(
           tlv.type, tlv.get_length(), __FILE__, __LINE__);
     }
-    is.read(reinterpret_cast<char*>(&enterprise_id),
-        sizeof(enterprise_id));
-        
+    is.read(reinterpret_cast<char*>(&enterprise_id), sizeof(enterprise_id));
+
     char e[tlv.get_length() - 2];
     is.read(e, tlv.get_length() - 2);
     proprietary_data.assign(e, tlv.get_length() - 2);
@@ -818,11 +869,14 @@ class pfcp_fteid_ie : public pfcp_ie {
 class pfcp_network_instance_ie : public pfcp_ie {
  public:
   std::string network_instance;
+  std::string network_instance_dotted;
 
   //--------
   explicit pfcp_network_instance_ie(const pfcp::network_instance_t& b)
       : pfcp_ie(PFCP_IE_NETWORK_INSTANCE) {
     network_instance = b.network_instance;
+    util::string_to_dotted(network_instance, network_instance_dotted);
+    network_instance = network_instance_dotted;
     tlv.set_length(network_instance.size());
   }
   //--------
@@ -3357,7 +3411,7 @@ class pfcp_node_id_ie : public pfcp_ie {
         ipv6_address = b.u1.ipv6_address;
         break;
       case pfcp::NODE_ID_TYPE_FQDN:
-        tlv.add_length(sizeof(b.fqdn));
+        tlv.add_length(b.fqdn.length() + 1);
         fqdn = b.fqdn;
         break;
       default:;
@@ -3400,9 +3454,11 @@ class pfcp_node_id_ie : public pfcp_ie {
       case pfcp::NODE_ID_TYPE_IPV6_ADDRESS:
         ipv6_address_dump_to(os, ipv6_address);
         break;
-      case pfcp::NODE_ID_TYPE_FQDN:
-        os << fqdn;
-        break;
+      case pfcp::NODE_ID_TYPE_FQDN: {
+        std::string dotted = {};
+        pfcp_ie::string_to_dotted(fqdn, dotted);
+        os << dotted;
+      } break;
       default:;
     }
   }
@@ -3433,7 +3489,9 @@ class pfcp_node_id_ie : public pfcp_ie {
         }
         char e[check_length];
         is.read(e, check_length);
-        fqdn.assign(e, check_length);
+        std::string dot = {};
+        dot.assign(e, check_length);
+        pfcp_ie::dotted_to_string(dot, fqdn);
       } break;
       default:;
     }
@@ -3492,51 +3550,61 @@ class pfcp_node_id_ie : public pfcp_ie {
 //  }
 //};
 ////-------------------------------------
-//// IE MEASUREMENT_METHOD
-// class pfcp_measurement_method_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_measurement_method_ie(const pfcp::measurement_method_t& b) :
-//  pfcp_ie(PFCP_IE_MEASUREMENT_METHOD){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_measurement_method_ie() : pfcp_ie(PFCP_IE_MEASUREMENT_METHOD){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_measurement_method_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::measurement_method_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::measurement_method_t measurement_method = {};
-//      to_core_type(measurement_method);
-//      s.set(measurement_method);
-//  }
-//};
+// IE MEASUREMENT_METHOD
+class pfcp_measurement_method_ie : public pfcp_ie {
+ public:
+  union {
+    struct {
+      uint8_t durat : 1;
+      uint8_t volum : 1;
+      uint8_t event : 1;
+      uint8_t spare : 5;
+    } bf;
+    uint8_t b;
+  } u1;
+  //--------
+  pfcp_measurement_method_ie(const pfcp::measurement_method_t& b)
+      : pfcp_ie(PFCP_IE_MEASUREMENT_METHOD) {
+    u1.b        = 0;
+    u1.bf.durat = b.durat;
+    u1.bf.volum = b.volum;
+    u1.bf.event = b.event;
+    tlv.set_length(1);
+  }
+  //--------
+  pfcp_measurement_method_ie() : pfcp_ie(PFCP_IE_MEASUREMENT_METHOD) {
+    u1.b = 0;
+    tlv.set_length(1);
+  }
+  //--------
+  pfcp_measurement_method_ie(const pfcp_tlv& t) : pfcp_ie(t) { u1.b = 0; };
+  //--------
+  void to_core_type(pfcp::measurement_method_t& b) {
+    b.durat = u1.bf.durat;
+    b.volum = u1.bf.volum;
+    b.event = u1.bf.event;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    os.write(reinterpret_cast<const char*>(&u1.b), sizeof(u1.b));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != 1) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&u1.b), sizeof(u1.b));
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::measurement_method_t measurement_method = {};
+    to_core_type(measurement_method);
+    s.set(measurement_method);
+  }
+};
 ////-------------------------------------
 //// IE USAGE_REPORT_TRIGGER
 // class pfcp_usage_report_trigger_ie : public pfcp_ie {
@@ -4407,7 +4475,7 @@ class pfcp_urr_id_ie : public pfcp_ie {
   void dump_to(std::ostream& os) {
     tlv.dump_to(os);
     auto be_urr_id = htobe32(urr_id);
-    os.write(reinterpret_cast<const char*>(&urr_id), sizeof(urr_id));
+    os.write(reinterpret_cast<const char*>(&be_urr_id), sizeof(be_urr_id));
   }
   //--------
   void load_from(std::istream& is) {
@@ -8723,10 +8791,23 @@ class pfcp_create_urr_ie : public pfcp_grouped_ie {
   explicit pfcp_create_urr_ie(const pfcp::create_urr& b)
       : pfcp_grouped_ie(PFCP_IE_CREATE_URR) {
     tlv.set_length(0);
+    if (b.urr_id.first) {
+      std::shared_ptr<pfcp_urr_id_ie> sie(new pfcp_urr_id_ie(b.urr_id.second));
+      add_ie(sie);
+    }
+    if (b.urr_id.first) {
+      std::shared_ptr<pfcp_measurement_method_ie> sie(
+          new pfcp_measurement_method_ie(b.measurement_method.second));
+      add_ie(sie);
+    }
+    if (b.urr_id.first) {
+      std::shared_ptr<pfcp_reporting_triggers_ie> sie(
+          new pfcp_reporting_triggers_ie(b.reporting_triggers.second));
+      add_ie(sie);
+    }
+    // ToDo: Optional IEs
   }
-  //--------
   pfcp_create_urr_ie() : pfcp_grouped_ie(PFCP_IE_CREATE_URR) {}
-  //--------
   explicit pfcp_create_urr_ie(const pfcp_tlv& t) : pfcp_grouped_ie(t) {}
   //--------
   void to_core_type(pfcp::duplicating_parameters& c) {

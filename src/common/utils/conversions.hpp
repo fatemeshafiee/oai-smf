@@ -55,12 +55,22 @@ class conv {
   static void hexa_to_ascii(uint8_t* from, char* to, size_t length);
   static int ascii_to_hex(uint8_t* dst, const char* h);
   static struct in_addr fromString(const std::string addr4);
-  static bool plmnFromString(plmn_t& p, const std::string mcc, const std::string mnc);
+  static bool plmnFromString(
+      plmn_t& p, const std::string mcc, const std::string mnc);
   static std::string toString(const struct in_addr& inaddr);
   static std::string toString(const struct in6_addr& in6addr);
   static std::string mccToString(
       const uint8_t digit1, const uint8_t digit2, const uint8_t digit3);
   static std::string mncToString(
       const uint8_t digit1, const uint8_t digit2, const uint8_t digit3);
+
+  /*
+   * Convert a string to hex representing this string
+   * @param [const std::string&] input_str Input string
+   * @param [std::string&] output_str String represents string in hex format
+   * @return void
+   */
+  static void convert_string_2_hex(
+      const std::string& input_str, std::string& output_str);
 };
 #endif /* FILE_CONVERSIONS_HPP_SEEN */

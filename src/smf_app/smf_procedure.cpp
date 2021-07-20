@@ -405,7 +405,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
     smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
         n11_triggered_pending->res, n1_sm_msg, cause_n1);
-    smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+    conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
   } else {  // PDU Session Establishment Accept
@@ -422,7 +422,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
     smf_n1::get_instance().create_n1_pdu_session_establishment_accept(
         n11_triggered_pending->res, n1_sm_msg, cause_n1);
-    smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+    conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
     n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
     // N2 SM Information (Step 11, section 4.3.2.2.1 @ 3GPP TS 23.502):
     // PDUSessionRessourceSetupRequestTransfer IE
@@ -431,7 +431,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
             n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
             n2_sm_info);
 
-    smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+    conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
     n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
   }
 
@@ -444,7 +444,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
       // std::string(inet_ntoa(*((struct in_addr*)
       // &smf_cfg.amf_addr.ipv4_addr))) +
       //":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
-      sps.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+      "http://" + sps.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
@@ -1141,7 +1141,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
               n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
               n2_sm_info);
 
-      smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
       // fill the content of SmContextUpdatedData
@@ -1202,7 +1202,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
           n11_triggered_pending->res, n1_sm_msg,
           cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);  // TODO: check
                                                                  // Cause
-      smf_app_inst->convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+      conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
       n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
       // include N2 SM Resource Release Request only when User Plane connection
@@ -1213,7 +1213,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
             .create_n2_pdu_session_resource_release_command_transfer(
                 n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_REL_CMD,
                 n2_sm_info);
-        smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+        conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
         n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
         // Prepare response to send to AMF (N1N2MessageTransfer or
@@ -1284,7 +1284,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
           n11_triggered_pending->res, n2_sm_info_type_e::PATH_SWITCH_REQ_ACK,
           n2_sm_info);
 
-      smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
       // fill the content of SmContextUpdatedData
@@ -1309,7 +1309,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
           n11_triggered_pending->res, n2_sm_info_type_e::HANDOVER_CMD,
           n2_sm_info);
 
-      smf_app_inst->convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
       n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
 
       // fill the content of SmContextUpdatedData

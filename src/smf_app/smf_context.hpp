@@ -43,9 +43,6 @@
 #include "common_root_types.h"
 #include "itti.hpp"
 #include "msg_pfcp.hpp"
-#include "pistache/endpoint.h"
-#include "pistache/http.h"
-#include "pistache/router.h"
 #include "smf_event.hpp"
 #include "smf_procedure.hpp"
 #include "uint_generator.hpp"
@@ -315,7 +312,19 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    * @return void
    */
   void release_pdr_id(const pfcp::pdr_id_t& pdr_id);
+  /*
+   * Generate a URR ID
+   * @param [pfcp::urr_id_t &]: far_id: URR ID generated
+   * @return void
+   */
+  void generate_urr_id(pfcp::urr_id_t& urr_id);
 
+  /*
+   * Release a URR ID
+   * @param [const pfcp::urr_id_t &]: far_id: URR ID to be released
+   * @return void
+   */
+  void release_urr_id(const pfcp::urr_id_t& urr_id);
   /*
    * Generate a FAR ID
    * @param [pfcp::far_id_t &]: far_id: FAR ID generated
@@ -439,6 +448,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   //
   util::uint_generator<uint16_t> pdr_id_generator;
   util::uint_generator<uint32_t> far_id_generator;
+  util::uint_generator<uint32_t> urr_id_generator;
 
   uint32_t pdu_session_id;
   std::string amf_id;
@@ -578,7 +588,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       : m_context(),
         pending_procedures(),
         dnn_subscriptions(),
-        scid(0),
         event_sub(),
         plmn() {
     supi_prefix = {};
@@ -1033,20 +1042,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   std::size_t get_number_dnn_contexts() const;
 
   /*
-   * Set SM Context ID
-   * @param [const scid_t &] id: SM Context Id
-   * @return void
-   */
-  void set_scid(const scid_t& id);
-
-  /*
-   * Get SM Context ID
-   * @param [void
-   * @return scid_t: SM Context Id
-   */
-  scid_t get_scid() const;
-
-  /*
    * Get Supi prefix
    * @param [const std::string &]  prefix: Supi prefix (e.g., imsi)
    * @return void
@@ -1185,7 +1180,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       dnn_subscriptions;
   supi_t supi;
   std::string supi_prefix;
-  scid_t scid;  // SM Context ID
   plmn_t plmn;
 
   // AMF IP addr
