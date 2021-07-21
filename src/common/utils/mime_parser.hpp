@@ -43,6 +43,7 @@ typedef struct mime_part {
 
 class mime_parser {
  public:
+  mime_parser() { mime_parts = {}; }
   /*
    * Parse the input string into different Mime parts
    * @param [const std::string &] str: input string

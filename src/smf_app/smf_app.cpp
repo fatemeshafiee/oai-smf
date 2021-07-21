@@ -233,13 +233,6 @@ void smf_app_task(void*) {
         }
         break;
 
-      case N11_SESSION_UPDATE_PDU_SESSION_STATUS:
-        if (itti_n11_update_pdu_session_status* m =
-                dynamic_cast<itti_n11_update_pdu_session_status*>(msg)) {
-          smf_app_inst->handle_itti_msg(std::ref(*m));
-        }
-        break;
-
       case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE:
         if (itti_n11_create_sm_context_response* m =
                 dynamic_cast<itti_n11_create_sm_context_response*>(msg)) {
@@ -355,8 +348,6 @@ smf_app::~smf_app() {
 //------------------------------------------------------------------------------
 void smf_app::start_nf_registration_discovery() {
   if (smf_cfg.discover_upf) {
-    // Trigger NFStatusNotify subscription to be noticed when a new UPF becomes
-    // available (if this option is enabled)
     trigger_upf_status_notification_subscribe();
   } else {
     // TODO: should be done when SMF select UPF for a particular UE (should be
@@ -626,15 +617,6 @@ void smf_app::handle_itti_msg(
 }
 
 //------------------------------------------------------------------------------
-void smf_app::handle_itti_msg(itti_n11_update_pdu_session_status& m) {
-  Logger::smf_app().info(
-      "Set PDU Session Status to %s",
-      pdu_session_status_e2str.at(static_cast<int>(m.pdu_session_status))
-          .c_str());
-  update_pdu_session_status(m.scid, m.pdu_session_status);
-}
-
-//------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(itti_n11_create_sm_context_response& m) {
   Logger::smf_app().debug(
       "PDU Session Create SM Context: Set promise with ID %d to ready", m.pid);
@@ -752,7 +734,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   xgpp_conv::sm_context_request_from_nas(decoded_nas_msg, smreq->req);
 
   pdu_session_type.pdu_session_type = smreq->req.get_pdu_session_type();
-  // TODO: Support IPv4 only for now
+  // Support IPv4/IPv4v6 for now
   if (pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV6) {
     cause_n1 = cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
   } else if (
@@ -800,7 +782,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
        PROCEDURE_TRANSACTION_IDENTITY_UNASSIGNED) ||
       (pti.procedure_transaction_id > PROCEDURE_TRANSACTION_IDENTITY_LAST)) {
     Logger::smf_app().warn(
-        "Invalid PTI value (pti = %d)", pti.procedure_transaction_id);
+        "Invalid PTI value (PTI = %d)", pti.procedure_transaction_id);
     // PDU Session Establishment Reject including cause "#81 Invalid PTI value"
     // (section 7.3.1 @3GPP TS 24.501)
     if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
@@ -838,7 +820,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   uint8_t message_type = decoded_nas_msg.plain.sm.header.message_type;
   if (message_type != PDU_SESSION_ESTABLISHMENT_REQUEST) {
     Logger::smf_app().warn(
-        "Invalid message type (message type = %d)", message_type);
+        "Invalid Message Type (Message Type = %d)", message_type);
     // PDU Session Establishment Reject
     //(24.501 (section 7.4)) implementation dependent->do similar to UE:
     // response with a 5GSM STATUS message including cause "#98 message type not
@@ -865,7 +847,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   std::string request_type = smreq->req.get_request_type();
   if (request_type.compare("INITIAL_REQUEST") != 0) {
     Logger::smf_app().warn(
-        "Invalid request type (request type = %s)", request_type.c_str());
+        "Invalid Request Type (Request Type = %s)", request_type.c_str());
     //"Existing PDU Session", AMF should use PDUSession_UpdateSMContext instead
     //(see step 3, section 4.3.2.2.1 @ 3GPP TS 23.502 v16.0.0) ignore the
     // message
@@ -965,7 +947,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   if (not sc.get()->is_dnn_snssai_subscription_data(dnn, snssai)) {
     Logger::smf_app().debug(
         "The Session Management Subscription data is not available");
-
     session_management_subscription* s =
         new session_management_subscription(snssai);
     std::shared_ptr<session_management_subscription> subscription =
@@ -1105,7 +1086,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     return;
   }
 
-  // Get dnn context
+  // Step 4. get dnn context
   std::shared_ptr<dnn_context> sd = {};
 
   if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
@@ -1121,10 +1102,24 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     }
   }
 
-  // Step 4. Verify AMF??
+  // Step 5. Verify AMF??
 
-  // Step 5. handle the message in smf_context
-  sc.get()->handle_pdu_session_update_sm_context_request(smreq);
+  // Step 6. Update targetServingNfId if available (for N2 Handover with AMF
+  // change)
+  if (smreq.get()->req.target_serving_nf_id_is_set()) {
+    scf.get()->target_amf = smreq.get()->req.get_target_serving_nf_id();
+  }
+
+  // Step 7. handle the message in smf_context
+  if (!sc.get()->handle_pdu_session_update_sm_context_request(smreq)) {
+    Logger::smf_app().warn(
+        "Received PDU Session Update SM Context Request, couldn't process!");
+    // trigger to send reply to AMF
+    trigger_update_context_error_response(
+        http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+        PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE, smreq->pid);
+  }
+  return;
 }
 //------------------------------------------------------------------------------
 void smf_app::handle_pdu_session_release_sm_context_request(

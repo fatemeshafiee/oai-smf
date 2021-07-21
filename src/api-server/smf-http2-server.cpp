@@ -85,7 +85,13 @@ void smf_http2_server::start() {
 
             // simple parser
             mime_parser sp = {};
-            sp.parse(msg);
+            if (!sp.parse(msg)) {
+              // send reply!!!
+              response.write_head(
+                  http_status_code_e::HTTP_STATUS_CODE_400_BAD_REQUEST);
+              response.end();
+              return;
+            }
 
             std::vector<mime_part> parts = {};
             sp.get_mime_parts(parts);
@@ -176,7 +182,13 @@ void smf_http2_server::start() {
 
               // simple parser
               mime_parser sp = {};
-              sp.parse(msg);
+              if (!sp.parse(msg)) {
+                // send reply!!!
+                response.write_head(
+                    http_status_code_e::HTTP_STATUS_CODE_400_BAD_REQUEST);
+                response.end();
+                return;
+              }
 
               std::vector<mime_part> parts = {};
               sp.get_mime_parts(parts);
@@ -235,7 +247,13 @@ void smf_http2_server::start() {
 
               // simple parser
               mime_parser sp = {};
-              sp.parse(msg);
+              if (!sp.parse(msg)) {
+                // send reply!!!
+                response.write_head(
+                    http_status_code_e::HTTP_STATUS_CODE_400_BAD_REQUEST);
+                response.end();
+                return;
+              }
 
               std::vector<mime_part> parts = {};
               sp.get_mime_parts(parts);

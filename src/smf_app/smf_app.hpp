@@ -86,6 +86,7 @@ class smf_context_ref {
     amf_status_uri = {};
     amf_addr       = {};
     upf_node_id    = {};
+    target_amf     = "";
   }
 
   supi_t supi;
@@ -94,6 +95,7 @@ class smf_context_ref {
   snssai_t nssai;
   std::string amf_status_uri;
   std::string amf_addr;
+  std::string target_amf;  // targetServingNfId
   pfcp::node_id_t upf_node_id;
 };
 
@@ -331,13 +333,6 @@ class smf_app {
    * @return void
    */
   void handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf);
-
-  /*
-   * Handle ITTI message from N11 to update PDU session status
-   * @param [itti_n11_update_pdu_session_status&] snu
-   * @return void
-   */
-  void handle_itti_msg(itti_n11_update_pdu_session_status& snu);
 
   /*
    * Handle ITTI message N11 Create SM Context Response to trigger the response
@@ -649,7 +644,14 @@ class smf_app {
    */
   void timer_nrf_heartbeat_timeout(timer_id_t timer_id, uint64_t arg2_user);
 
+  /*
+   * will be executed when NRF Deregistration timer expires
+   * @param [timer_id_t] timer_id
+   * @param [uint64_t] arg2_user
+   * @return void
+   */
   void timer_nrf_deregistration(timer_id_t timer_id, uint64_t arg2_user);
+
   /*
    * To start an association with a UPF (SMF-initiated association)
    * @param [const pfcp::node_id_t] node_id: UPF Node ID
