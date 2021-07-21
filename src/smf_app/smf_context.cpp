@@ -3036,7 +3036,8 @@ bool smf_context::handle_ho_path_switch_req(
     std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
     std::shared_ptr<smf_pdu_session>& sp) {
-  std::string n1_sm_msg, n1_sm_msg_hex;
+  std::string n1_sm_msg     = {};
+  std::string n1_sm_msg_hex = {};
 
   // If the PDU session is requested to be switched to a new N3 endpoint
   if (sm_context_request->req.get_to_be_switched()) {
@@ -3056,7 +3057,6 @@ bool smf_context::handle_ho_path_switch_req(
           http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
           PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
           sm_context_request.get()->pid);
-
       return false;
     }
 
@@ -3124,7 +3124,8 @@ bool smf_context::handle_ho_preparation_request(
     std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
     std::shared_ptr<smf_pdu_session>& sp) {
-  std::string n2_sm_info, n2_sm_info_hex;
+  std::string n2_sm_info     = {};
+  std::string n2_sm_info_hex = {};
 
   sm_context_resp.get()->session_procedure_type =
       session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP1;
@@ -3145,7 +3146,6 @@ bool smf_context::handle_ho_preparation_request(
         http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
         PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
         sm_context_request.get()->pid);
-
     return false;
   }
 
@@ -3214,7 +3214,8 @@ bool smf_context::handle_ho_preparation_request_ack(
     std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
     std::shared_ptr<smf_pdu_session>& sp) {
-  std::string n2_sm_info, n2_sm_info_hex;
+  std::string n2_sm_info     = {};
+  std::string n2_sm_info_hex = {};
 
   sm_context_resp.get()->session_procedure_type =
       session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2;
@@ -3235,7 +3236,6 @@ bool smf_context::handle_ho_preparation_request_ack(
         http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
         PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
         sm_context_request.get()->pid);
-
     return false;
   }
 
@@ -3277,6 +3277,7 @@ bool smf_context::handle_ho_preparation_request_ack(
         (decoded_msg->qosFlowSetupResponseList.list.array[i])
             ->qosFlowIdentifier);
   }
+  return true;
 }
 
 //-------------------------------------------------------------------------------------
@@ -3285,7 +3286,8 @@ bool smf_context::handle_ho_preparation_request_fail(
     std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
     std::shared_ptr<smf_pdu_session>& sp) {
-  std::string n2_sm_info, n2_sm_info_hex;
+  std::string n2_sm_info     = {};
+  std::string n2_sm_info_hex = {};
 
   sm_context_resp.get()->session_procedure_type =
       session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2;
@@ -3307,7 +3309,6 @@ bool smf_context::handle_ho_preparation_request_fail(
         http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
         PDU_SESSION_APPLICATION_ERROR_N2_SM_ERROR,
         sm_context_request.get()->pid);
-
     return false;
   }
 
@@ -3316,7 +3317,6 @@ bool smf_context::handle_ho_preparation_request_fail(
   sp.get()->set_ho_state(ho_state_e::HO_STATE_NONE);
   // Release resource ??
   // Create Handover Preparation Unsuccessful Transfer IE
-
   smf_n2::get_instance().create_n2_handover_preparation_unsuccessful_transfer(
       sm_context_resp->res, n2_sm_info_type_e::HANDOVER_RES_ALLOC_FAIL,
       n2_sm_info);
@@ -3351,7 +3351,8 @@ bool smf_context::handle_ho_execution(
     std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
     std::shared_ptr<smf_pdu_session>& sp) {
-  std::string n2_sm_info, n2_sm_info_hex;
+  std::string n2_sm_info     = {};
+  std::string n2_sm_info_hex = {};
 
   sm_context_resp.get()->session_procedure_type =
       session_management_procedures_type_e::N2_HO_EXECUTION_PHASE;
@@ -3393,8 +3394,6 @@ bool smf_context::handle_ho_cancellation(
     std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
     std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
     std::shared_ptr<smf_pdu_session>& sp) {
-  std::string n2_sm_info, n2_sm_info_hex;
-
   sm_context_resp.get()->session_procedure_type =
       session_management_procedures_type_e::N2_HO_CANCELLATION_PHASE;
 

@@ -336,16 +336,23 @@ class pdu_session_update_sm_context_request
  public:
   pdu_session_update_sm_context_request()
       : pdu_session_sm_context_request(PDU_SESSION_UPDATE_SM_CONTEXT_REQUEST) {
-    m_5gMm_cause_value   = 0;
-    m_data_forwarding    = false;
-    m_upCnx_state_is_set = false;
-    qfis                 = {};
-    dl_fteid             = {};
-    m_release            = false;
-    m_release_is_set     = false;
-    m_an_type_is_set     = false;
-    m_rat_type_is_set    = false;
-    m_ho_state_is_set    = false;
+    m_5gMm_cause_value             = 0;
+    m_data_forwarding              = false;
+    m_upCnx_state_is_set           = false;
+    qfis                           = {};
+    dl_fteid                       = {};
+    m_release                      = false;
+    m_release_is_set               = false;
+    m_to_be_switched               = false;
+    m_to_be_switched_is_set        = false;
+    m_failed_to_be_switched        = false;
+    m_is_failed_to_be_switched     = false;
+    m_failed_to_be_switched_is_set = false;
+    m_an_type_is_set               = false;
+    m_rat_type_is_set              = false;
+    m_ho_state_is_set              = false;
+    m_target_id_is_set             = false;
+    m_target_serving_nf_id_is_set  = false;
   };
 
   void add_qfi(const pfcp::qfi_t& qfi);
