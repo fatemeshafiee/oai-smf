@@ -583,13 +583,16 @@ void smf_sbi::notify_subscribed_event(
 
     // add support for plmn change.
     if (i.is_plmnid_is_set()) {
-      oai::smf_server::model::PlmnId plmnid = i.get_plmnid();
-      nlohmann::json plmnid_data = {};
-      //oai::smf_server::model::
-      to_json(plmnid_data, plmnid);
-      event_notif["plmnId"] = plmnid_data;
+      event_notif["plmnId"] = i.get_plmnid();
     }
     
+    // add support for ddds
+    if (i.is_ddds_is_set()) {
+      //TODO: change this one to the real value when finished the event for ddds
+      // event_notif["dddStatus"] = i.get_ddds();
+      event_notif["dddStatus"] = "TRANSMITTED";
+    }
+
     // customized data
     nlohmann::json customized_data = {};
     i.get_custom_info(customized_data);

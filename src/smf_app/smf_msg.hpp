@@ -40,6 +40,7 @@
 #include "pistache/http.h"
 #include "smf_profile.hpp"
 #include "PlmnId.h"
+#include "DddStatus.h"
 
 extern "C" {
 #include "QOSRules.h"
@@ -589,6 +590,12 @@ class event_notification {
   oai::smf_server::model::PlmnId get_plmnid() const;
   bool is_plmnid_is_set() const;
 
+  // ddds change
+  void set_Ddds(oai::smf_server::model::DddStatus const& value);
+  oai::smf_server::model::DddStatus get_ddds() const;
+  bool is_ddds_is_set() const;
+
+
   void set_pdu_session_id(const pdu_session_id_t value);
   pdu_session_id_t get_pdu_session_id() const;
   bool is_psi_is_set() const;
@@ -620,6 +627,10 @@ class event_notification {
   // for a PLMN Change
   oai::smf_server::model::PlmnId m_PlmnId;
   bool m_PlmnIdIsSet;
+
+  // for ddds change
+  oai::smf_server::model::DddStatus m_DddStatus;
+  bool m_DddStatusIsSet;
 
   // for an access type change
   // AccessType m_AccType;
@@ -655,8 +666,6 @@ class event_notification {
   // bool m_AdIpv6PrefixIsSet;
   // Ipv6Prefix m_ReIpv6Prefix;
   // bool m_ReIpv6PrefixIsSet;
-  // DddStatus m_DddStatus;
-  // bool m_DddStatusIsSet;
   // std::string m_MaxWaitTime;
   // bool m_MaxWaitTimeIsSet;
 };

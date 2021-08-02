@@ -884,6 +884,21 @@ smf_event_t event_notification::get_smf_event() const {
 }
 
 //-----------------------------------------------------------------------------
+// ddds change
+void event_notification::set_Ddds(oai::smf_server::model::DddStatus const& value){
+  m_DddStatus = value;
+  m_DddStatusIsSet = true;
+}
+oai::smf_server::model::DddStatus event_notification::get_ddds() const{
+  return m_DddStatus;
+}
+
+bool event_notification::is_ddds_is_set() const{
+  return m_DddStatusIsSet;
+}
+
+
+//-----------------------------------------------------------------------------
 void event_notification::set_timestamp(const std::string& ss) {
   m_timestamp = ss;
 }

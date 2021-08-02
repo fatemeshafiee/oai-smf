@@ -1138,6 +1138,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // Trigger Event_exposure event
       scid_t scid = sc.get()->get_scid();
       sc.get()->trigger_ue_ip_change(scid, 1);
+      sc.get()->trigger_plmn_change(scid, 1);
+      sc.get()->trigger_ddds(scid, 1);
       sc.get()->trigger_flexcn_event(scid, 1);
 
     } break;
