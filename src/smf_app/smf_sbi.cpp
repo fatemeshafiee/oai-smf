@@ -1007,7 +1007,6 @@ bool smf_sbi::curl_create_handle(
 bool smf_sbi::curl_create_handle(
     const std::string& uri, const std::string& data, std::string& response_data,
     uint32_t* promise_id, const std::string& method, uint8_t http_version) {
-  headers = curl_slist_append(headers, "Content-Type: application/json");
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
@@ -1064,7 +1063,6 @@ bool smf_sbi::curl_create_handle(
 bool smf_sbi::curl_create_handle(
     const std::string& uri, std::string& response_data, uint32_t* promise_id,
     const std::string& method, uint8_t http_version) {
-  headers = curl_slist_append(headers, "Content-Type: application/json");
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
