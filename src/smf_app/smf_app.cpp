@@ -1670,6 +1670,9 @@ bool smf_app::get_session_management_subscription_data(
   Logger::smf_app().debug(
       "Get Session Management Subscription from configuration file");
 
+  std::shared_ptr<dnn_configuration_t> dnn_configuration =
+      std::make_shared<dnn_configuration_t>();
+
   for (int i = 0; i < smf_cfg.num_session_management_subscription; i++) {
     if ((0 == dnn.compare(smf_cfg.session_management_subscription[i].dnn)) and
         (snssai.sST ==
@@ -1677,9 +1680,6 @@ bool smf_app::get_session_management_subscription_data(
         (0 ==
          snssai.sD.compare(
              smf_cfg.session_management_subscription[i].single_nssai.sD))) {
-      std::shared_ptr<dnn_configuration_t> dnn_configuration =
-          std::make_shared<dnn_configuration_t>();
-
       // PDU Session Type
       pdu_session_type_t pdu_session_type(
           pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
@@ -1736,7 +1736,23 @@ bool smf_app::get_session_management_subscription_data(
       return true;
     }
   }
-  return false;
+
+  // Default QoS parameters
+  dnn_configuration->pdu_session_types.default_session_type.pdu_session_type =
+      pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
+  // SSC_Mode
+  dnn_configuration->ssc_modes.default_ssc_mode.ssc_mode = 1;
+  // 5gQosProfile
+  dnn_configuration->_5g_qos_profile._5qi               = DEFAULT_QFI;
+  dnn_configuration->_5g_qos_profile.arp.priority_level = 1;
+  dnn_configuration->_5g_qos_profile.arp.preempt_cap    = "NOT_PREEMPT";
+  dnn_configuration->_5g_qos_profile.arp.preempt_vuln   = "NOT_PREEMPTABLE";
+  dnn_configuration->_5g_qos_profile.priority_level     = 1;
+  // Session_ambr
+  dnn_configuration->session_ambr.uplink   = "100Mbps";
+  dnn_configuration->session_ambr.downlink = "100Mbps";
+  subscription->insert_dnn_configuration(dnn, dnn_configuration);
+  return true;
 }
 
 //---------------------------------------------------------------------------------------------
