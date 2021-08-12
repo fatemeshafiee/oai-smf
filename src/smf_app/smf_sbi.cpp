@@ -260,9 +260,14 @@ void smf_sbi::send_n1n2_message_transfer_request(
       response_data_json["cause"].dump().c_str());
 
   // Send response to APP to process
-  itti_n11_n1n2_message_transfer_response_status* itti_msg =
-      new itti_n11_n1n2_message_transfer_response_status(
+  /*  itti_n11_n1n2_message_transfer_response_status* itti_msg =
+        new itti_n11_n1n2_message_transfer_response_status(
+            TASK_SMF_SBI, TASK_SMF_APP);
+    */
+  std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> itti_msg =
+      std::make_shared<itti_n11_n1n2_message_transfer_response_status>(
           TASK_SMF_SBI, TASK_SMF_APP);
+
   itti_msg->set_response_code(response_code);
   itti_msg->set_scid(sm_context_res->scid);
   itti_msg->set_procedure_type(session_management_procedures_type_e::
@@ -274,13 +279,12 @@ void smf_sbi::send_n1n2_message_transfer_request(
   } else {
     itti_msg->set_msg_type(PDU_SESSION_ESTABLISHMENT_REJECT);
   }
-  std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> i =
-      std::shared_ptr<itti_n11_n1n2_message_transfer_response_status>(itti_msg);
-  int ret = itti_inst->send_msg(i);
+
+  int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_sbi().error(
         "Could not send ITTI message %s to task TASK_SMF_APP",
-        i->get_msg_name());
+        itti_msg->get_msg_name());
   }
   return;
 }
@@ -421,9 +425,14 @@ void smf_sbi::send_n1n2_message_transfer_request(
       response_data_json["cause"].dump().c_str());
 
   // Send response to APP to process
-  itti_n11_n1n2_message_transfer_response_status* itti_msg =
+  /* itti_n11_n1n2_message_transfer_response_status* itti_msg =
       new itti_n11_n1n2_message_transfer_response_status(
           TASK_SMF_SBI, TASK_SMF_APP);
+  */
+  std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> itti_msg =
+      std::make_shared<itti_n11_n1n2_message_transfer_response_status>(
+          TASK_SMF_SBI, TASK_SMF_APP);
+
   itti_msg->set_response_code(httpCode);
   itti_msg->set_procedure_type(
       session_management_procedures_type_e::SERVICE_REQUEST_NETWORK_TRIGGERED);
@@ -431,13 +440,11 @@ void smf_sbi::send_n1n2_message_transfer_request(
   itti_msg->set_seid(report_msg->res.get_seid());
   itti_msg->set_trxn_id(report_msg->res.get_trxn_id());
 
-  std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> i =
-      std::shared_ptr<itti_n11_n1n2_message_transfer_response_status>(itti_msg);
-  int ret = itti_inst->send_msg(i);
+  int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_sbi().error(
         "Could not send ITTI message %s to task TASK_SMF_APP",
-        i->get_msg_name());
+        itti_msg->get_msg_name());
   }
 }
 

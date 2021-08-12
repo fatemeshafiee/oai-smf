@@ -770,22 +770,26 @@ void smf_context::handle_itti_msg(
           pfcp::qfi_t qfi                     = {};
           if (find_pdu_session(pdr_id, qfi, sd, sp)) {
             // Step 1. send N4 Data Report Ack to UPF
-            itti_n4_session_report_response* n4_ser =
-                new itti_n4_session_report_response(TASK_SMF_APP, TASK_SMF_N4);
-            n4_ser->seid       = req->seid;
-            n4_ser->trxn_id    = req->trxn_id;
-            n4_ser->r_endpoint = req->r_endpoint;
+            /*            itti_n4_session_report_response* n4_ser =
+                            new itti_n4_session_report_response(TASK_SMF_APP,
+               TASK_SMF_N4); n4_ser->seid       = req->seid; n4_ser->trxn_id =
+               req->trxn_id; n4_ser->r_endpoint = req->r_endpoint;
+            */
             std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
-                std::shared_ptr<itti_n4_session_report_response>(n4_ser);
+                std::make_shared<itti_n4_session_report_response>(
+                    TASK_SMF_APP, TASK_SMF_N4);
+            n4_report_ack->seid       = req->seid;
+            n4_report_ack->trxn_id    = req->trxn_id;
+            n4_report_ack->r_endpoint = req->r_endpoint;
 
             Logger::smf_app().info(
                 "Sending ITTI message %s to task TASK_SMF_N4",
-                n4_ser->get_msg_name());
+                n4_report_ack->get_msg_name());
             int ret = itti_inst->send_msg(n4_report_ack);
             if (RETURNok != ret) {
               Logger::smf_app().error(
                   "Could not send ITTI message %s to task TASK_SMF_N4",
-                  n4_ser->get_msg_name());
+                  n4_report_ack->get_msg_name());
               return;
             }
 
@@ -855,12 +859,16 @@ void smf_context::handle_itti_msg(
 
             session_report_msg.set_json_data(json_data);
 
-            itti_n11_session_report_request* itti_n11 =
-                new itti_n11_session_report_request(TASK_SMF_APP, TASK_SMF_SBI);
-            itti_n11->http_version = 1;  // use HTTPv1 for the moment
+            //            itti_n11_session_report_request* itti_n11 =
+            //                new itti_n11_session_report_request(TASK_SMF_APP,
+            //                TASK_SMF_SBI);
+            //            itti_n11->http_version = 1;  // use HTTPv1 for the
+            //            moment
             std::shared_ptr<itti_n11_session_report_request> itti_n11_report =
-                std::shared_ptr<itti_n11_session_report_request>(itti_n11);
-            itti_n11_report->res = session_report_msg;
+                std::make_shared<itti_n11_session_report_request>(
+                    TASK_SMF_APP, TASK_SMF_SBI);
+            itti_n11_report->http_version = 1;  // use HTTPv1 for the moment
+            itti_n11_report->res          = session_report_msg;
             // send ITTI message to N11 interface to trigger N1N2MessageTransfer
             // towards AMFs
             Logger::smf_app().info(
@@ -1240,8 +1248,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       "version %d)",
       smreq->http_version);
 
-  std::string n1_sm_message, n1_sm_msg_hex;
-  bool request_accepted = true;
+  std::string n1_sm_message = {};
+  std::string n1_sm_msg_hex = {};
+  bool request_accepted     = true;
 
   // Step 1. Get necessary information
   std::string dnn         = smreq->req.get_dnn();
@@ -1278,11 +1287,13 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
   // Store HttpResponse and session-related information to be used when
   // receiving the response from UPF
-  itti_n11_create_sm_context_response* sm_context_resp =
-      new itti_n11_create_sm_context_response(
-          TASK_SMF_APP, TASK_SMF_SBI, smreq->pid);
+  /* itti_n11_create_sm_context_response* sm_context_resp =
+       new itti_n11_create_sm_context_response(
+           TASK_SMF_APP, TASK_SMF_SBI, smreq->pid);
+  */
   std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending =
-      std::shared_ptr<itti_n11_create_sm_context_response>(sm_context_resp);
+      std::make_shared<itti_n11_create_sm_context_response>(
+          TASK_SMF_APP, TASK_SMF_SBI, smreq->pid);
 
   // Assign necessary information for the response
   xgpp_conv::create_sm_context_response_from_ctx_request(
@@ -1292,7 +1303,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   std::shared_ptr<dnn_context> sd = {};
   bool find_dnn                   = find_dnn_context(snssai, dnn, sd);
 
-  // Step 3.1. Create dnn context if not exist
+  // Step 3.1. Create DNN context if not exist
   // At this step, this context should be existed
   if (nullptr == sd.get()) {
     Logger::smf_app().debug(
@@ -1308,7 +1319,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         "DNN context (dnn_in_use %s) is already existed", dnn.c_str());
   }
 
-  // Step 3.2. Create pdu session if not exist
+  // Step 3.2. Create PDU session if not exist
   std::shared_ptr<smf_pdu_session> sp = {};
   bool find_pdu = sd.get()->find_pdu_session(pdu_session_id, sp);
 
@@ -1388,7 +1399,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
           // ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED;
           set_paa          = false;
           request_accepted = false;
-          sm_context_resp->res.set_cause(static_cast<uint8_t>(
+          sm_context_resp_pending->res.set_cause(static_cast<uint8_t>(
               cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES));
         }
         // TODO: Static IP address allocation
@@ -1442,7 +1453,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
             // ALL_DYNAMIC_ADDRESSES_ARE_OCCUPIED;
             set_paa          = false;
             request_accepted = false;
-            sm_context_resp->res.set_cause(static_cast<uint8_t>(
+            sm_context_resp_pending->res.set_cause(static_cast<uint8_t>(
                 cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES));
           }
           // Static IP address allocation
@@ -1486,7 +1497,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
             http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
             smreq->pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
       }
-      // sm_context_resp->res.set_cause(static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE));
+      // sm_context_resp_pending->res.set_cause(static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_28_UNKNOWN_PDU_SESSION_TYPE));
       request_accepted = false;
     }
   }
@@ -1580,7 +1591,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       remove_procedure(proc);
       // Set cause to error to trigger PDU session establishment reject (step
       // 10)
-      sm_context_resp->res.set_cause(
+      sm_context_resp_pending->res.set_cause(
           PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
     }
   } else {  // if request is rejected
@@ -1592,13 +1603,13 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // Step 10. if error when establishing the pdu session,
   // send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs (PDU
   // Session Establishment Reject)
-  if (sm_context_resp->res.get_cause() !=
+  if (sm_context_resp_pending->res.get_cause() !=
       static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
     // clear pco, ambr
 
     // free paa
     paa_t free_paa = {};
-    free_paa       = sm_context_resp->res.get_paa();
+    free_paa       = sm_context_resp_pending->res.get_paa();
     if (free_paa.is_ip_assigned()) {
       switch (sp->pdu_session_type.pdu_session_type) {
         case PDU_SESSION_TYPE_E_IPV4:
@@ -1621,18 +1632,18 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // Create PDU Session Establishment Reject and embedded in
     // Namf_Communication_N1N2MessageTransfer Request
     Logger::smf_app().debug("Create PDU Session Establishment Reject");
-    cause_value_5gsm_e cause_n1 =
-        static_cast<cause_value_5gsm_e>(sm_context_resp->res.get_cause());
+    cause_value_5gsm_e cause_n1 = static_cast<cause_value_5gsm_e>(
+        sm_context_resp_pending->res.get_cause());
 
     smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
         sm_context_resp_pending->res, n1_sm_message, cause_n1);
     conv::convert_string_2_hex(n1_sm_message, n1_sm_msg_hex);
     sm_context_resp_pending->res.set_n1_sm_message(n1_sm_msg_hex);
 
-    // Get supi and put into URL
-    std::string supi_str;
-    supi_t supi = sm_context_resp_pending->res.get_supi();
-    supi_str    = sm_context_resp_pending->res.get_supi_prefix() + "-" +
+    // Get SUPI and put into URL
+    std::string supi_str = {};
+    supi_t supi          = sm_context_resp_pending->res.get_supi();
+    supi_str = sm_context_resp_pending->res.get_supi_prefix() + "-" +
                smf_supi_to_string(supi);
     std::string url =
         "http://" + sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
@@ -2322,9 +2333,11 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
       "(HTTP version %d)",
       smreq->http_version);
   pdu_session_update_sm_context_request sm_context_req_msg = smreq->req;
-  std::string n1_sm_msg, n1_sm_msg_hex;
-  std::string n2_sm_info, n2_sm_info_hex;
-  bool update_upf = false;
+  std::string n1_sm_msg                                    = {};
+  std::string n1_sm_msg_hex                                = {};
+  std::string n2_sm_info                                   = {};
+  std::string n2_sm_info_hex                               = {};
+  bool update_upf                                          = false;
   session_management_procedures_type_e procedure_type(
       session_management_procedures_type_e::
           PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
@@ -2352,13 +2365,14 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
 
   // we need to store HttpResponse and session-related information to be used
   // when receiving the response from UPF
-  itti_n11_update_sm_context_response* n11_sm_context_resp =
-      new itti_n11_update_sm_context_response(
-          TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
+  // itti_n11_update_sm_context_response* n11_sm_context_resp =
+  //    new itti_n11_update_sm_context_response(
+  //        TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
   std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp_pending =
-      std::shared_ptr<itti_n11_update_sm_context_response>(n11_sm_context_resp);
+      std::make_shared<itti_n11_update_sm_context_response>(
+          TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
 
-  n11_sm_context_resp->res.set_pdu_session_type(
+  sm_context_resp_pending->res.set_pdu_session_type(
       sp.get()->get_pdu_session_type().pdu_session_type);
 
   // Assign necessary information for the response
@@ -2485,8 +2499,10 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
   }
 
   // Step 2.2. Decode N2 (if content is available)
-  std::string n2_sm_info_type_str, n2_sm_information;
+  std::string n2_sm_info_type_str   = {};
+  std::string n2_sm_information     = {};
   n2_sm_info_type_e n2_sm_info_type = {};
+
   if (sm_context_req_msg.n2_sm_info_is_set()) {
     // get necessary information (N2 SM information)
     n2_sm_info_type_str = smreq->req.get_n2_sm_info_type();
@@ -2873,24 +2889,26 @@ void smf_context::handle_pdu_session_release_sm_context_request(
     return;
   }
 
-  itti_n11_release_sm_context_response* n11_sm_context_resp =
-      new itti_n11_release_sm_context_response(
-          TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
+  /*  itti_n11_release_sm_context_response* n11_sm_context_resp =
+        new itti_n11_release_sm_context_response(
+            TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
+  */
 
   std::shared_ptr<itti_n11_release_sm_context_response>
       sm_context_resp_pending =
-          std::shared_ptr<itti_n11_release_sm_context_response>(
-              n11_sm_context_resp);
+          std::make_shared<itti_n11_release_sm_context_response>(
+              TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
 
-  n11_sm_context_resp->res.set_http_code(
+  sm_context_resp_pending->res.set_http_code(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);
-  n11_sm_context_resp->res.set_supi(smreq->req.get_supi());
-  n11_sm_context_resp->res.set_supi_prefix(smreq->req.get_supi_prefix());
-  n11_sm_context_resp->res.set_cause(
+  sm_context_resp_pending->res.set_supi(smreq->req.get_supi());
+  sm_context_resp_pending->res.set_supi_prefix(smreq->req.get_supi_prefix());
+  sm_context_resp_pending->res.set_cause(
       static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
-  n11_sm_context_resp->res.set_pdu_session_id(smreq->req.get_pdu_session_id());
-  n11_sm_context_resp->res.set_snssai(smreq->req.get_snssai());
-  n11_sm_context_resp->res.set_dnn(smreq->req.get_dnn());
+  sm_context_resp_pending->res.set_pdu_session_id(
+      smreq->req.get_pdu_session_id());
+  sm_context_resp_pending->res.set_snssai(smreq->req.get_snssai());
+  sm_context_resp_pending->res.set_dnn(smreq->req.get_dnn());
 
   session_release_sm_context_procedure* proc =
       new session_release_sm_context_procedure(sp);
@@ -2899,7 +2917,7 @@ void smf_context::handle_pdu_session_release_sm_context_request(
   insert_procedure(sproc);
   if (proc->run(smreq, sm_context_resp_pending, shared_from_this())) {
     Logger::smf_app().info("PDU Release SM Context Request procedure failed");
-    // trigger to send reply to AMF
+    // Trigger to send reply to AMF
     smf_app_inst->trigger_http_response(
         http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
         smreq->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
