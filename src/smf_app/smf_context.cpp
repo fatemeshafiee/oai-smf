@@ -770,11 +770,6 @@ void smf_context::handle_itti_msg(
           pfcp::qfi_t qfi                     = {};
           if (find_pdu_session(pdr_id, qfi, sd, sp)) {
             // Step 1. send N4 Data Report Ack to UPF
-            /*            itti_n4_session_report_response* n4_ser =
-                            new itti_n4_session_report_response(TASK_SMF_APP,
-               TASK_SMF_N4); n4_ser->seid       = req->seid; n4_ser->trxn_id =
-               req->trxn_id; n4_ser->r_endpoint = req->r_endpoint;
-            */
             std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
                 std::make_shared<itti_n4_session_report_response>(
                     TASK_SMF_APP, TASK_SMF_N4);
@@ -859,11 +854,6 @@ void smf_context::handle_itti_msg(
 
             session_report_msg.set_json_data(json_data);
 
-            //            itti_n11_session_report_request* itti_n11 =
-            //                new itti_n11_session_report_request(TASK_SMF_APP,
-            //                TASK_SMF_SBI);
-            //            itti_n11->http_version = 1;  // use HTTPv1 for the
-            //            moment
             std::shared_ptr<itti_n11_session_report_request> itti_n11_report =
                 std::make_shared<itti_n11_session_report_request>(
                     TASK_SMF_APP, TASK_SMF_SBI);
@@ -1287,10 +1277,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
   // Store HttpResponse and session-related information to be used when
   // receiving the response from UPF
-  /* itti_n11_create_sm_context_response* sm_context_resp =
-       new itti_n11_create_sm_context_response(
-           TASK_SMF_APP, TASK_SMF_SBI, smreq->pid);
-  */
   std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp_pending =
       std::make_shared<itti_n11_create_sm_context_response>(
           TASK_SMF_APP, TASK_SMF_SBI, smreq->pid);
@@ -2365,9 +2351,6 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
 
   // we need to store HttpResponse and session-related information to be used
   // when receiving the response from UPF
-  // itti_n11_update_sm_context_response* n11_sm_context_resp =
-  //    new itti_n11_update_sm_context_response(
-  //        TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
   std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp_pending =
       std::make_shared<itti_n11_update_sm_context_response>(
           TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
@@ -2888,11 +2871,6 @@ void smf_context::handle_pdu_session_release_sm_context_request(
         N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
     return;
   }
-
-  /*  itti_n11_release_sm_context_response* n11_sm_context_resp =
-        new itti_n11_release_sm_context_response(
-            TASK_SMF_SBI, TASK_SMF_APP, smreq->pid);
-  */
 
   std::shared_ptr<itti_n11_release_sm_context_response>
       sm_context_resp_pending =

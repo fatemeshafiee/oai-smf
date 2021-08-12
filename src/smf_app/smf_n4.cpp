@@ -610,26 +610,19 @@ void smf_n4::handle_receive_session_establishment_response(
 
   handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
   if (!error) {
-    /*    itti_n4_session_establishment_response* itti_msg =
-            new itti_n4_session_establishment_response(TASK_SMF_N4,
-       TASK_SMF_APP); itti_msg->pfcp_ies   = msg_ies_container;
-        itti_msg->r_endpoint = remote_endpoint;
-        itti_msg->trxn_id    = trxn_id;
-        itti_msg->seid       = msg.get_seid();
-    */
-    std::shared_ptr<itti_n4_session_establishment_response> i =
+    std::shared_ptr<itti_n4_session_establishment_response> itti_msg =
         std::make_shared<itti_n4_session_establishment_response>(
             TASK_SMF_N4, TASK_SMF_APP);
-    i->pfcp_ies   = msg_ies_container;
-    i->r_endpoint = remote_endpoint;
-    i->trxn_id    = trxn_id;
-    i->seid       = msg.get_seid();
+    itti_msg->pfcp_ies   = msg_ies_container;
+    itti_msg->r_endpoint = remote_endpoint;
+    itti_msg->trxn_id    = trxn_id;
+    itti_msg->seid       = msg.get_seid();
 
-    int ret = itti_inst->send_msg(i);
+    int ret = itti_inst->send_msg(itti_msg);
     if (RETURNok != ret) {
       Logger::smf_n4().error(
           "Could not send ITTI message %s to task TASK_SMF_APP",
-          i->get_msg_name());
+          itti_msg->get_msg_name());
     }
   }
   // else ignore
@@ -645,14 +638,6 @@ void smf_n4::handle_receive_session_modification_response(
 
   handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
   if (!error) {
-    /*    itti_n4_session_modification_response* itti_msg =
-            new itti_n4_session_modification_response(TASK_SMF_N4,
-       TASK_SMF_APP); itti_msg->pfcp_ies   = msg_ies_container;
-        itti_msg->r_endpoint = remote_endpoint;
-        itti_msg->trxn_id    = trxn_id;
-        itti_msg->seid       = msg.get_seid();
-    */
-
     std::shared_ptr<itti_n4_session_modification_response> itti_msg =
         std::make_shared<itti_n4_session_modification_response>(
             TASK_SMF_N4, TASK_SMF_APP);
@@ -682,14 +667,6 @@ void smf_n4::handle_receive_session_deletion_response(
 
   handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
   if (!error) {
-    /*    itti_n4_session_deletion_response* itti_msg =
-            new itti_n4_session_deletion_response(TASK_SMF_N4, TASK_SMF_APP);
-        itti_msg->pfcp_ies   = msg_ies_container;
-        itti_msg->r_endpoint = remote_endpoint;
-        itti_msg->trxn_id    = trxn_id;
-        itti_msg->seid       = msg.get_seid();
-      */
-
     std::shared_ptr<itti_n4_session_deletion_response> itti_msg =
         std::make_shared<itti_n4_session_deletion_response>(
             TASK_SMF_N4, TASK_SMF_APP);
@@ -719,14 +696,6 @@ void smf_n4::handle_receive_session_report_request(
 
   handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
   if (!error) {
-    /*    itti_n4_session_report_request* itti_msg =
-            new itti_n4_session_report_request(TASK_SMF_N4, TASK_SMF_APP);
-        itti_msg->pfcp_ies   = msg_ies_container;
-        itti_msg->r_endpoint = remote_endpoint;
-        itti_msg->trxn_id    = trxn_id;
-        itti_msg->seid       = msg.get_seid();
-       */
-
     std::shared_ptr<itti_n4_session_report_request> itti_msg =
         std::make_shared<itti_n4_session_report_request>(
             TASK_SMF_N4, TASK_SMF_APP);

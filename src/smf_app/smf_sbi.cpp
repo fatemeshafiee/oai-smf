@@ -260,10 +260,6 @@ void smf_sbi::send_n1n2_message_transfer_request(
       response_data_json["cause"].dump().c_str());
 
   // Send response to APP to process
-  /*  itti_n11_n1n2_message_transfer_response_status* itti_msg =
-        new itti_n11_n1n2_message_transfer_response_status(
-            TASK_SMF_SBI, TASK_SMF_APP);
-    */
   std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> itti_msg =
       std::make_shared<itti_n11_n1n2_message_transfer_response_status>(
           TASK_SMF_SBI, TASK_SMF_APP);
@@ -425,10 +421,6 @@ void smf_sbi::send_n1n2_message_transfer_request(
       response_data_json["cause"].dump().c_str());
 
   // Send response to APP to process
-  /* itti_n11_n1n2_message_transfer_response_status* itti_msg =
-      new itti_n11_n1n2_message_transfer_response_status(
-          TASK_SMF_SBI, TASK_SMF_APP);
-  */
   std::shared_ptr<itti_n11_n1n2_message_transfer_response_status> itti_msg =
       std::make_shared<itti_n11_n1n2_message_transfer_response_status>(
           TASK_SMF_SBI, TASK_SMF_APP);

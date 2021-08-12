@@ -587,12 +587,6 @@ void smf_app::handle_itti_msg(
           return;
         }
 
-        /*       itti_n4_session_failure_indication* itti_n4 =
-                   new itti_n4_session_failure_indication(TASK_SMF_APP,
-           TASK_SMF_N4); itti_n4->seid    = m.seid; itti_n4->trxn_id =
-           m.trxn_id; itti_n4->r_endpoint = endpoint(up_node_id.u1.ipv4_address,
-           pfcp::default_port);
-       */
         std::shared_ptr<itti_n4_session_failure_indication>
             itti_n4_failure_indication =
                 std::make_shared<itti_n4_session_failure_indication>(
