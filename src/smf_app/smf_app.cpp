@@ -947,10 +947,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   if (not sc.get()->is_dnn_snssai_subscription_data(dnn, snssai)) {
     Logger::smf_app().debug(
         "The Session Management Subscription data is not available");
-    session_management_subscription* s =
-        new session_management_subscription(snssai);
     std::shared_ptr<session_management_subscription> subscription =
-        std::shared_ptr<session_management_subscription>(s);
+        std::shared_ptr<session_management_subscription>(
+            new session_management_subscription(snssai));
 
     if (not use_local_configuration_subscription_data(dnn_selection_mode)) {
       Logger::smf_app().debug(

@@ -220,7 +220,6 @@ smf_n4::smf_n4()
   std::time_t ellapsed = now_c - time_epoch;
   // recovery_time_stamp = ellapsed;
 
-  // test new way to calculate recovery_time_stamp
   std::time_t time_epoch_ntp = std::time(nullptr);
   uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
   recovery_time_stamp        = tv_ntp;
