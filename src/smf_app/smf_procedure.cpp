@@ -130,13 +130,6 @@ int session_create_sm_context_procedure::run(
   n11_triggered_pending = sm_context_resp;
   uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
-  /*
-  itti_n4_session_establishment_request* n4_ser =
-      new itti_n4_session_establishment_request(TASK_SMF_APP, TASK_SMF_N4);
-  n4_ser->seid       = 0;
-  n4_ser->trxn_id    = this->trxn_id;
-  n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
-  */
 
   n4_triggered = std::make_shared<itti_n4_session_establishment_request>(
       TASK_SMF_APP, TASK_SMF_N4);
@@ -558,13 +551,6 @@ int session_update_sm_context_procedure::run(
   n11_triggered_pending = sm_context_resp;
   uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
-  /*  itti_n4_session_modification_request* n4_ser =
-        new itti_n4_session_modification_request(TASK_SMF_APP, TASK_SMF_N4);
-    n4_ser->seid       = sps->up_fseid.seid;
-    n4_ser->trxn_id    = this->trxn_id;
-    n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address,
-    pfcp::default_port);
-    */
 
   n4_triggered = std::make_shared<itti_n4_session_modification_request>(
       TASK_SMF_APP, TASK_SMF_N4);
@@ -1418,13 +1404,6 @@ int session_release_sm_context_procedure::run(
   n11_triggered_pending = sm_context_res;
   uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
-  /*  itti_n4_session_deletion_request* n4_ser =
-        new itti_n4_session_deletion_request(TASK_SMF_APP, TASK_SMF_N4);
-    n4_ser->seid       = sps->up_fseid.seid;
-    n4_ser->trxn_id    = this->trxn_id;
-    n4_ser->r_endpoint = endpoint(up_node_id.u1.ipv4_address,
-    pfcp::default_port);
-    */
 
   n4_triggered = std::make_shared<itti_n4_session_deletion_request>(
       TASK_SMF_APP, TASK_SMF_N4);
