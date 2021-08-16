@@ -72,8 +72,9 @@ void pfcp_association::restore_n4_sessions() {
   std::unique_lock<std::mutex> l(m_sessions);
   if (sessions.size()) {
     is_restore_sessions_pending = true;
-    n4_session_restore_procedure* restore_proc =
-        new n4_session_restore_procedure(sessions);
+    std::unique_ptr<n4_session_restore_procedure> restore_proc =
+        std::make_unique<n4_session_restore_procedure>(sessions);
+
     restore_proc->run();
   }
 }
@@ -125,9 +126,7 @@ bool pfcp_associations::add_association(
     }
 
     restore_n4_sessions = false;
-    pfcp_association* association =
-        new pfcp_association(node_id, recovery_time_stamp);
-    sa                       = std::shared_ptr<pfcp_association>(association);
+    sa = std::make_shared<pfcp_association>(node_id, recovery_time_stamp);
     sa->recovery_time_stamp  = recovery_time_stamp;
     std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
     // Associate with UPF profile if exist
@@ -193,10 +192,9 @@ bool pfcp_associations::add_association(
     }
 
     restore_n4_sessions = false;
-    pfcp_association* association =
-        new pfcp_association(node_id, recovery_time_stamp, function_features);
-    sa                      = std::shared_ptr<pfcp_association>(association);
-    sa->recovery_time_stamp = recovery_time_stamp;
+    sa                  = std::make_shared<pfcp_association>(
+        node_id, recovery_time_stamp, function_features);
+    sa->recovery_time_stamp      = recovery_time_stamp;
     sa->function_features.first  = true;
     sa->function_features.second = function_features;
     std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
@@ -235,10 +233,9 @@ bool pfcp_associations::add_association(
     sa->function_features.second = function_features;
   } else {
     restore_n4_sessions = false;
-    pfcp_association* association =
-        new pfcp_association(node_id, recovery_time_stamp, function_features);
-    sa                      = std::shared_ptr<pfcp_association>(association);
-    sa->recovery_time_stamp = recovery_time_stamp;
+    sa                  = std::make_shared<pfcp_association>(
+        node_id, recovery_time_stamp, function_features);
+    sa->recovery_time_stamp      = recovery_time_stamp;
     sa->function_features.first  = true;
     sa->function_features.second = function_features;
     std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
@@ -485,9 +482,9 @@ bool pfcp_associations::add_peer_candidate_node(
       break;
     }
   }
-  pfcp_association* association = new pfcp_association(node_id);
+
   std::shared_ptr<pfcp_association> s =
-      std::shared_ptr<pfcp_association>(association);
+      std::make_shared<pfcp_association>(node_id);
   pending_associations.push_back(s);
   return true;
 }
@@ -505,9 +502,9 @@ bool pfcp_associations::add_peer_candidate_node(
       break;
     }
   }
-  pfcp_association* association = new pfcp_association(node_id);
+
   std::shared_ptr<pfcp_association> s =
-      std::shared_ptr<pfcp_association>(association);
+      std::make_shared<pfcp_association>(node_id);
   s->set_upf_node_profile(profile);
   pending_associations.push_back(s);
   return true;

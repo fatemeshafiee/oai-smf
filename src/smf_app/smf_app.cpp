@@ -587,24 +587,24 @@ void smf_app::handle_itti_msg(
           return;
         }
 
-        itti_n4_session_failure_indication* itti_n4 =
-            new itti_n4_session_failure_indication(TASK_SMF_APP, TASK_SMF_N4);
-        itti_n4->seid    = m.seid;
-        itti_n4->trxn_id = m.trxn_id;
-        itti_n4->r_endpoint =
-            endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
         std::shared_ptr<itti_n4_session_failure_indication>
             itti_n4_failure_indication =
-                std::shared_ptr<itti_n4_session_failure_indication>(itti_n4);
+                std::make_shared<itti_n4_session_failure_indication>(
+                    TASK_SMF_APP, TASK_SMF_N4);
+
+        itti_n4_failure_indication->seid    = m.seid;
+        itti_n4_failure_indication->trxn_id = m.trxn_id;
+        itti_n4_failure_indication->r_endpoint =
+            endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
 
         Logger::smf_app().info(
             "Sending ITTI message %s to task TASK_SMF_N4",
-            itti_n4->get_msg_name());
+            itti_n4_failure_indication->get_msg_name());
         int ret = itti_inst->send_msg(itti_n4_failure_indication);
         if (RETURNok != ret) {
           Logger::smf_app().error(
               "Could not send ITTI message %s to task TASK_SMF_N4",
-              itti_n4->get_msg_name());
+              itti_n4_failure_indication->get_msg_name());
           return;
         }
       }
@@ -864,7 +864,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   // authorization by the external DN
 
   // Step 3. check if the DNN requested is valid
-  std::string nd_dnn;
+  std::string nd_dnn = {};
   util::dotted_to_string(dnn, nd_dnn);
   dnn = nd_dnn;
   // Update DNN
@@ -947,10 +947,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   if (not sc.get()->is_dnn_snssai_subscription_data(dnn, snssai)) {
     Logger::smf_app().debug(
         "The Session Management Subscription data is not available");
-    session_management_subscription* s =
-        new session_management_subscription(snssai);
     std::shared_ptr<session_management_subscription> subscription =
-        std::shared_ptr<session_management_subscription>(s);
+        std::shared_ptr<session_management_subscription>(
+            new session_management_subscription(snssai));
 
     if (not use_local_configuration_subscription_data(dnn_selection_mode)) {
       Logger::smf_app().debug(
@@ -1027,7 +1026,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
       "version %d)",
       smreq->http_version);
 
-  // Step 1. Get supi, dnn, nssai, pdu_session id from sm_context
+  // Step 1. Get SUPI, DNN, NSSAI, PDU Session ID from sm_context
   // SM Context ID - uint32_t in our case
   scid_t scid = {};
   try {
@@ -1058,7 +1057,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     return;
   }
 
-  // Step 2. Store supi, dnn, nssai  in itti_n11_update_sm_context_request to be
+  // Step 2. Store SUPI, DNN, NSSAI  in itti_n11_update_sm_context_request to be
   // processed later on
   supi64_t supi64 = smf_supi_to_u64(scf.get()->supi);
   smreq->req.set_supi(scf.get()->supi);
@@ -1110,7 +1109,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
     scf.get()->target_amf = smreq.get()->req.get_target_serving_nf_id();
   }
 
-  // Step 7. handle the message in smf_context
+  // Step 7. Handle the message in smf_context
   if (!sc.get()->handle_pdu_session_update_sm_context_request(smreq)) {
     Logger::smf_app().warn(
         "Received PDU Session Update SM Context Request, couldn't process!");
@@ -1668,7 +1667,7 @@ bool smf_app::get_session_management_subscription_data(
     const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
     std::shared_ptr<session_management_subscription> subscription) {
   Logger::smf_app().debug(
-      "Get Session Management Subscription from configuration file");
+      "Get Session Management Subscription from the configuration file");
 
   std::shared_ptr<dnn_configuration_t> dnn_configuration =
       std::make_shared<dnn_configuration_t>();
@@ -1703,7 +1702,7 @@ bool smf_app::get_session_management_subscription_data(
       dnn_configuration->pdu_session_types.default_session_type =
           pdu_session_type;
 
-      // Ssc_Mode
+      // SSC_Mode
       dnn_configuration->ssc_modes.default_ssc_mode.ssc_mode =
           smf_cfg.session_management_subscription[i].ssc_mode;
 
@@ -1722,7 +1721,7 @@ bool smf_app::get_session_management_subscription_data(
       dnn_configuration->_5g_qos_profile.priority_level =
           smf_cfg.session_management_subscription[i].default_qos.priority_level;
 
-      // session_ambr
+      // Session_ambr
       dnn_configuration->session_ambr.uplink =
           smf_cfg.session_management_subscription[i].session_ambr.uplink;
       dnn_configuration->session_ambr.downlink =
