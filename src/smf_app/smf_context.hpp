@@ -552,65 +552,6 @@ class session_management_subscription {
   mutable std::shared_mutex m_mutex;
 };
 
-/*
- * Manage the DNN context
- */
-class dnn_context {
- public:
-  dnn_context() : m_context(), in_use(false), pdu_sessions(), nssai() {}
-
-  dnn_context(std::string dnn)
-      : m_context(), in_use(false), pdu_sessions(), nssai(), dnn_in_use(dnn) {}
-  dnn_context(dnn_context& b) = delete;
-
-  /*
-   * Find a PDU Session by its ID
-   * @param [const uint32_t] pdu_session_id
-   * @param [std::shared_ptr<smf_pdu_session> &] pdu_session
-   * @return bool: return true if pdu session is found, otherwise, return false
-   */
-  bool find_pdu_session(
-      const uint32_t pdu_session_id,
-      std::shared_ptr<smf_pdu_session>& pdu_session);
-
-  /*
-   * Insert a PDU Session into the DNN context
-   * @param [std::shared_ptr<smf_pdu_session> &] sp: shared pointer to a PDU
-   * Session
-   * @return void
-   */
-  void insert_pdu_session(std::shared_ptr<smf_pdu_session>& sp);
-
-  /*
-   * Delete a PDU Session identified by its ID
-   * @param [const uint32_t] pdu_session_id
-   * @return bool: return true if the pdu session is deleted, otherwise, return
-   * false
-   */
-  bool remove_pdu_session(const uint32_t pdu_session_id);
-
-  /*
-   * Get number of pdu sessions associated with this context (dnn and Nssai)
-   * @param void
-   * @return size_t: number of PDU sessions
-   */
-  size_t get_number_pdu_sessions() const;
-
-  /*
-   * Represent DNN Context as a string object
-   * @param void
-   * @return void
-   */
-  std::string toString() const;
-
-  bool in_use;
-  std::string dnn_in_use;  // The DNN currently used, as received from the AMF
-  snssai_t nssai;
-  std::vector<std::shared_ptr<smf_pdu_session>>
-      pdu_sessions;  // Store all PDU Sessions associated with this DNN context
-  mutable std::shared_mutex m_context;
-};
-
 class smf_context;
 
 class smf_context : public std::enable_shared_from_this<smf_context> {

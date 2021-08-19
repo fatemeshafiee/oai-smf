@@ -1505,20 +1505,6 @@ bool smf_app::is_scid_2_smf_context(const scid_t& scid) const {
 
 //------------------------------------------------------------------------------
 bool smf_app::is_scid_2_smf_context(
-    const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
-    const pdu_session_id_t& pid) const {
-  std::shared_lock lock(m_scid2smf_context);
-  for (auto it : scid2smf_context) {
-    supi64_t supi64 = smf_supi_to_u64(it.second->supi);
-    if ((supi64 == supi) and (it.second->dnn.compare(dnn) == 0) and
-        (it.second->nssai == snssai) and (it.second->pdu_session_id == pid))
-      return true;
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
-bool smf_app::is_scid_2_smf_context(
     const supi64_t& supi, const pdu_session_id_t& pid) const {
   std::shared_lock lock(m_scid2smf_context);
   for (auto it : scid2smf_context) {

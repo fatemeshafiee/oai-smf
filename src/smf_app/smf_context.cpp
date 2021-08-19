@@ -395,6 +395,8 @@ std::string smf_pdu_session::toString() const {
   smf_qos_flow flow = {};
 
   s.append("PDN CONNECTION:\n");
+  s.append("\tDNN:\t\t\t").append(dnn).append("\n");
+  s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
   s.append("\tPDN type:\t\t\t")
       .append(pdu_session_type.toString())
       .append("\n");
@@ -3918,57 +3920,4 @@ bool smf_context::check_handover_possibility(
     const pdu_session_id_t& pdu_session_id) const {
   // TODO:
   return true;
-}
-
-//------------------------------------------------------------------------------
-bool dnn_context::find_pdu_session(
-    const uint32_t pdu_session_id,
-    std::shared_ptr<smf_pdu_session>& pdu_session) {
-  pdu_session = {};
-  std::shared_lock lock(m_context);
-  for (auto it : pdu_sessions) {
-    if (pdu_session_id == it->pdu_session_id) {
-      pdu_session = it;
-      return true;
-    }
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
-void dnn_context::insert_pdu_session(std::shared_ptr<smf_pdu_session>& sp) {
-  std::unique_lock lock(m_context);
-  pdu_sessions.push_back(sp);
-}
-
-//------------------------------------------------------------------------------
-bool dnn_context::remove_pdu_session(const uint32_t pdu_session_id) {
-  std::unique_lock lock(m_context);
-  for (auto it = pdu_sessions.begin(); it != pdu_sessions.end(); ++it) {
-    if (pdu_session_id == (*it).get()->pdu_session_id) {
-      (*it).get()->remove_qos_flows();
-      (*it).get()->clear();
-      pdu_sessions.erase(it);
-      return true;
-    }
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
-size_t dnn_context::get_number_pdu_sessions() const {
-  std::shared_lock lock(m_context);
-  return pdu_sessions.size();
-}
-
-//------------------------------------------------------------------------------
-std::string dnn_context::toString() const {
-  std::string s = {};
-  s.append("DNN CONTEXT:\n");
-  s.append("\tIn use:\t\t\t\t").append(std::to_string(in_use)).append("\n");
-  s.append("\tDNN:\t\t\t\t").append(dnn_in_use).append("\n");
-  for (auto it : pdu_sessions) {
-    s.append(it->toString());
-  }
-  return s;
 }

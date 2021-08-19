@@ -79,9 +79,9 @@ class smf_context_ref {
   smf_context_ref() { clear(); }
 
   void clear() {
-    supi           = {};
-    nssai          = {};
-    dnn            = {};
+    supi = {};
+    // nssai          = {};
+    // dnn            = {};
     pdu_session_id = 0;
     amf_status_uri = {};
     amf_addr       = {};
@@ -90,9 +90,9 @@ class smf_context_ref {
   }
 
   supi_t supi;
-  std::string dnn;
+  // std::string dnn;
   pdu_session_id_t pdu_session_id;
-  snssai_t nssai;
+  // snssai_t nssai;
   std::string amf_status_uri;
   std::string amf_addr;
   std::string target_amf;  // targetServingNfId
@@ -451,19 +451,6 @@ class smf_app {
    * @return bool: True if a SMF Context Reference exist, otherwise return false
    */
   bool is_scid_2_smf_context(const scid_t& scid) const;
-
-  /*
-   * Verify whether a SMF Context Reference with a given ID exist
-   * @param [const supi64_t &] supi64: Supi64
-   * @param [const std::string &] dnn: DNN
-   * @param [const snssai_t &] snssai: S-NSSAI
-   * @param [const pdu_session_id_t &] pid: PDU Session ID
-   *
-   * @return bool: True if a SMF Context Reference exist, otherwise return false
-   */
-  bool is_scid_2_smf_context(
-      const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
-      const pdu_session_id_t& pid) const;
 
   /*
    * Verify whether a SMF Context Reference exist
