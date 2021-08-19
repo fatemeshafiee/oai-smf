@@ -1067,6 +1067,19 @@ struct node_id_s {
       return false;
     }
   };
+
+  node_id_s& operator=(const struct node_id_s& i) {
+    node_id_type                 = i.node_id_type;
+    fqdn                         = i.fqdn;
+    u1.ipv4_address.s_addr       = i.u1.ipv4_address.s_addr;
+    u1.ipv6_address.s6_addr32[0] = i.u1.ipv6_address.s6_addr32[0];
+    u1.ipv6_address.s6_addr32[1] = i.u1.ipv6_address.s6_addr32[1];
+    u1.ipv6_address.s6_addr32[2] = i.u1.ipv6_address.s6_addr32[2];
+    u1.ipv6_address.s6_addr32[3] = i.u1.ipv6_address.s6_addr32[3];
+
+    return *this;
+  }
+
   std::string toString() const {
     if (NODE_ID_TYPE_FQDN == this->node_id_type) {
       return fqdn;

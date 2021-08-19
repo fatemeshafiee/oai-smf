@@ -626,7 +626,7 @@ std::string smf_pdu_session::get_amf_addr() const {
 }
 
 //------------------------------------------------------------------------------
-void smf_pdu_session::set_amf_status_uri(std::string& status_uri) {
+void smf_pdu_session::set_amf_status_uri(const std::string& status_uri) {
   amf_status_uri = status_uri;
 }
 
@@ -638,6 +638,26 @@ void smf_pdu_session::get_amf_status_uri(std::string& status_uri) const {
 //------------------------------------------------------------------------------
 std::string smf_pdu_session::get_amf_status_uri() const {
   return amf_status_uri;
+}
+
+void smf_pdu_session::set_target_amf(const std::string& amf) {
+  target_amf = amf;
+}
+void smf_pdu_session::get_target_amf(std::string& amf) const {
+  amf = target_amf;
+}
+std::string smf_pdu_session::get_target_amf() const {
+  return target_amf;
+}
+
+void smf_pdu_session::set_upf_node_id(const pfcp::node_id_t& node_id) {
+  upf_node_id = node_id;
+}
+void smf_pdu_session::get_upf_node_id(pfcp::node_id_t& node_id) const {
+  node_id = upf_node_id;
+}
+pfcp::node_id_t smf_pdu_session::get_upf_node_id() const {
+  return upf_node_id;
 }
 
 //-----------------------------------------------------------------------------
@@ -3682,6 +3702,17 @@ bool smf_context::remove_pdu_session(const pdu_session_id_t& psi) {
 size_t smf_context::get_number_pdu_sessions() const {
   std::shared_lock lock(m_pdu_sessions_mutex);
   return pdu_sessions.size();
+}
+
+//------------------------------------------------------------------------------
+void smf_context::get_pdu_sessions(
+    std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>& sessions) {
+  std::shared_lock lock(m_pdu_sessions_mutex);
+  for (auto it : pdu_sessions) {
+    sessions.insert(
+        std::pair<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>(
+            it.first, it.second));
+  }
 }
 
 //------------------------------------------------------------------------------

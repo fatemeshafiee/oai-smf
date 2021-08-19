@@ -514,14 +514,38 @@ void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf) {
   pfcp::node_id_t node_id = snf->node_id;
 
   for (auto it : scid2smf_context) {
-    if (it.second->upf_node_id == node_id) {
-      supi64_t supi64 = smf_supi_to_u64(it.second->supi);
-      Logger::smf_app().debug(
-          "Remove the associated PDU session (SUPI " SUPI_64_FMT
-          ", PDU Sessin Id %d)",
-          supi64, it.second->pdu_session_id);
-      // TODO: remove the session
+    std::shared_ptr<smf_context> sc = {};
+    supi64_t supi64                 = smf_supi_to_u64(it.second->supi);
+    if (is_supi_2_smf_context(supi64)) {
+      sc = supi_2_smf_context(supi64);
     }
+    if (sc.get() == nullptr) {
+      Logger::smf_app().debug("No SMF Context found");
+      return;
+    }
+
+    std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>> sessions;
+    sc.get()->get_pdu_sessions(sessions);
+    for (auto s : sessions) {
+      pfcp::node_id_t n = s.second->get_upf_node_id();
+      if (n == node_id) {
+        Logger::smf_app().debug(
+            "Remove the associated PDU session (SUPI " SUPI_64_FMT
+            ", PDU Sessin Id %d)",
+            supi64, it.first);
+        // TODO: remove the session
+      }
+    }
+    /*
+        if (it.second->upf_node_id == node_id) {
+          supi64_t supi64 = smf_supi_to_u64(it.second->supi);
+          Logger::smf_app().debug(
+              "Remove the associated PDU session (SUPI " SUPI_64_FMT
+              ", PDU Sessin Id %d)",
+              supi64, it.second->pdu_session_id);
+          // TODO: remove the session
+        }
+        */
   }
 }
 
@@ -578,12 +602,39 @@ void smf_app::handle_itti_msg(
         // Get UPF node
         std::shared_ptr<smf_context_ref> scf = {};
         if (smf_app_inst->is_scid_2_smf_context(m.scid)) {
-          scf        = scid_2_smf_context(m.scid);
-          up_node_id = scf.get()->upf_node_id;
+          scf = scid_2_smf_context(m.scid);
+          // up_node_id = scf.get()->upf_node_id;
         } else {
           Logger::smf_app().warn(
               "SM Context associated with this id " SCID_FMT " does not exit!",
               m.scid);
+          return;
+        }
+
+        std::shared_ptr<smf_context> sc = {};
+        supi64_t supi64                 = smf_supi_to_u64(scf.get()->supi);
+        if (is_supi_2_smf_context(supi64)) {
+          Logger::smf_app().debug(
+              "Update SMF context with SUPI " SUPI_64_FMT "", supi64);
+          sc = supi_2_smf_context(supi64);
+        }
+
+        if (sc.get() == nullptr) {
+          Logger::smf_app().warn(
+              "SM Context associated with this id " SCID_FMT " does not exit!",
+              m.scid);
+          return;
+        }
+
+        std::shared_ptr<smf_pdu_session> sp = {};
+        if (!sc.get()->find_pdu_session(scf.get()->pdu_session_id, sp)) {
+          Logger::smf_app().warn("PDU session context does not exist!");
+        }
+
+        if (sp.get() != nullptr) {
+          sp.get()->get_upf_node_id(up_node_id);
+        } else {
+          Logger::smf_app().warn("PDU session context does not exist!");
           return;
         }
 
@@ -1143,7 +1194,9 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   // Step 6. Update targetServingNfId if available (for N2 Handover with AMF
   // change)
   if (smreq.get()->req.target_serving_nf_id_is_set()) {
-    scf.get()->target_amf = smreq.get()->req.get_target_serving_nf_id();
+    // scf.get()->target_amf = smreq.get()->req.get_target_serving_nf_id();
+    std::string target_amf = smreq.get()->req.get_target_serving_nf_id();
+    sp.get()->set_target_amf(target_amf);
   }
 
   // Step 7. Handle the message in smf_context

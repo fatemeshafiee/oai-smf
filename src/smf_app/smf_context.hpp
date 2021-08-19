@@ -454,9 +454,17 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   void get_amf_addr(std::string& addr) const;
   std::string get_amf_addr() const;
 
-  void set_amf_status_uri(std::string& status_uri);
+  void set_amf_status_uri(const std::string& status_uri);
   void get_amf_status_uri(std::string& status_uri) const;
   std::string get_amf_status_uri() const;
+
+  void set_target_amf(const std::string& amf);
+  void get_target_amf(std::string& amf) const;
+  std::string get_target_amf() const;
+
+  void set_upf_node_id(const pfcp::node_id_t& node_id);
+  void get_upf_node_id(pfcp::node_id_t& node_id) const;
+  pfcp::node_id_t get_upf_node_id() const;
 
   std::string get_dnn() const;
   snssai_t get_snssai() const;
@@ -479,6 +487,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   std::string amf_id;
   std::string amf_addr;
   std::string amf_status_uri;
+  std::string target_amf;  // targetServingNfId
+  pfcp::node_id_t upf_node_id;
 
   pdu_session_status_e pdu_session_status;
   upCnx_state_e
@@ -1096,6 +1106,9 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @return size_t: number of PDU sessions
    */
   size_t get_number_pdu_sessions() const;
+
+  void get_pdu_sessions(
+      std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>& sessions);
 
   /*
    * Handle SM Context Status Change (Send notification AMF)
