@@ -625,6 +625,21 @@ std::string smf_pdu_session::get_amf_addr() const {
   return amf_addr;
 }
 
+//------------------------------------------------------------------------------
+void smf_pdu_session::set_amf_status_uri(std::string& status_uri) {
+  amf_status_uri = status_uri;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_amf_status_uri(std::string& status_uri) const {
+  status_uri = amf_status_uri;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_pdu_session::get_amf_status_uri() const {
+  return amf_status_uri;
+}
+
 //-----------------------------------------------------------------------------
 std::string smf_pdu_session::get_dnn() const {
   return dnn;
@@ -1524,16 +1539,19 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     // Store AMF callback URI and subscribe to the status notification: AMF will
     // be notified when SM context changes
-    std::shared_ptr<smf_context_ref> scf = {};
-    if (smf_app_inst->is_scid_2_smf_context(smreq->scid)) {
-      scf = smf_app_inst->scid_2_smf_context(smreq->scid);
-    } else {
-      Logger::smf_app().warn(
-          "SM Context associated with this id " SCID_FMT " does not exit!",
-          smreq->scid);
-      // TODO: return;
-    }
-    scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
+    /*  std::shared_ptr<smf_context_ref> scf = {};
+      if (smf_app_inst->is_scid_2_smf_context(smreq->scid)) {
+        scf = smf_app_inst->scid_2_smf_context(smreq->scid);
+      } else {
+        Logger::smf_app().warn(
+            "SM Context associated with this id " SCID_FMT " does not exit!",
+            smreq->scid);
+        // TODO: return;
+      }
+      scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
+      */
+    std::string amf_status_uri = smreq->req.get_sm_context_status_uri();
+    sp.get()->set_amf_status_uri(amf_status_uri);
 
     // Get and Store AMF Addr if available
     std::vector<std::string> split_result;
@@ -1543,7 +1561,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
                    ":" + std::to_string(smf_cfg.amf_addr.port);
 
     boost::split(
-        split_result, scf.get()->amf_status_uri, boost::is_any_of("/"));
+        split_result, smreq->req.get_sm_context_status_uri(),
+        boost::is_any_of("/"));
     if (split_result.size() >= 3) {
       std::string addr = split_result[2];
       struct in_addr amf_ipv4_addr;
@@ -1554,7 +1573,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         Logger::smf_api_server().debug("AMF IP Addr %s", amf_addr_str.c_str());
       }
     }
-    scf.get()->amf_addr = amf_addr_str;
+    // scf.get()->amf_addr = amf_addr_str;
     sp.get()->set_amf_addr(amf_addr_str);
 
     // Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step
@@ -3682,6 +3701,14 @@ void smf_context::handle_sm_context_status_change(
     return;
   }
 
+  std::shared_ptr<smf_pdu_session> sp = {};
+  if (!find_pdu_session(scf.get()->pdu_session_id, sp)) {
+    if (sp.get() == nullptr) {
+      Logger::smf_n1().warn("PDU session context does not exist!");
+      return;
+    }
+  }
+
   // Send request to N11 to trigger the notification
   Logger::smf_app().debug(
       "Send ITTI msg to SMF N11 to trigger the status notification");
@@ -3690,7 +3717,7 @@ void smf_context::handle_sm_context_status_change(
           TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->scid              = scid;
   itti_msg->sm_context_status = status;
-  itti_msg->amf_status_uri    = scf.get()->amf_status_uri;
+  itti_msg->amf_status_uri    = sp.get()->get_amf_status_uri();
   itti_msg->http_version      = http_version;
 
   int ret = itti_inst->send_msg(itti_msg);

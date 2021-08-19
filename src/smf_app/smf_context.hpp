@@ -453,6 +453,11 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    */
   void get_amf_addr(std::string& addr) const;
   std::string get_amf_addr() const;
+
+  void set_amf_status_uri(std::string& status_uri);
+  void get_amf_status_uri(std::string& status_uri) const;
+  std::string get_amf_status_uri() const;
+
   std::string get_dnn() const;
   snssai_t get_snssai() const;
   void set_dnn(const std::string& d);
@@ -473,6 +478,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   std::string amf_id;
   std::string amf_addr;
+  std::string amf_status_uri;
+
   pdu_session_status_e pdu_session_status;
   upCnx_state_e
       upCnx_state;  // N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
