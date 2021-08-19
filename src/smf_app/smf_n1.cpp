@@ -415,8 +415,8 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   Logger::smf_n1().info("PDU_SESSION_MODIFICATION_COMMAND, encode starting...");
 
   // Get the SMF_PDU_Session
-  std::shared_ptr<smf_context> sc     = {};
-  std::shared_ptr<dnn_context> sd     = {};
+  std::shared_ptr<smf_context> sc = {};
+  // std::shared_ptr<dnn_context> sd     = {};
   std::shared_ptr<smf_pdu_session> sp = {};
   supi_t supi                         = sm_context_res.get_supi();
   supi64_t supi64                     = smf_supi_to_u64(supi);
@@ -429,17 +429,37 @@ bool smf_n1::create_n1_pdu_session_modification_command(
         "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
     return false;
   }
+  /*
+    bool find_dnn = sc.get()->find_dnn_context(
+        sm_context_res.get_snssai(), sm_context_res.get_dnn(), sd);
+    bool find_pdu = false;
+    if (find_dnn) {
+      find_pdu =
+          sd.get()->find_pdu_session(sm_context_res.get_pdu_session_id(), sp);
+    }
+    if (!find_dnn or !find_pdu) {
+      // error
+      Logger::smf_n1().warn("DNN or PDU session context does not exist!");
+      return false;
+    }
+  */
 
-  bool find_dnn = sc.get()->find_dnn_context(
-      sm_context_res.get_snssai(), sm_context_res.get_dnn(), sd);
-  bool find_pdu = false;
-  if (find_dnn) {
-    find_pdu =
-        sd.get()->find_pdu_session(sm_context_res.get_pdu_session_id(), sp);
-  }
-  if (!find_dnn or !find_pdu) {
+  if (!sc.get()->find_pdu_session(sm_context_res.get_pdu_session_id(), sp)) {
     // error
-    Logger::smf_n1().warn("DNN or PDU session context does not exist!");
+    Logger::smf_n1().warn("PDU session context does not exist!");
+    return false;
+  }
+
+  std::string dnn = sp.get()->get_dnn();
+  if (dnn.compare(sm_context_res.get_dnn()) != 0) {
+    // error
+    Logger::smf_n1().warn("DNN doesn't matched with this session!");
+    return false;
+  }
+
+  if (!(sp.get()->get_snssai() == sm_context_res.get_snssai())) {
+    // error
+    Logger::smf_n1().warn("SNSSAI doesn't matched with this session!");
     return false;
   }
 
@@ -553,8 +573,8 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   Logger::smf_n1().info("PDU_SESSION_MODIFICATION_COMMAND, encode starting...");
 
   // Get the SMF_PDU_Session
-  std::shared_ptr<smf_context> sc     = {};
-  std::shared_ptr<dnn_context> sd     = {};
+  std::shared_ptr<smf_context> sc = {};
+  // std::shared_ptr<dnn_context> sd     = {};
   std::shared_ptr<smf_pdu_session> sp = {};
   supi_t supi                         = msg.get_supi();
   supi64_t supi64                     = smf_supi_to_u64(supi);
@@ -567,18 +587,39 @@ bool smf_n1::create_n1_pdu_session_modification_command(
         "SMF context with SUPI " SUPI_64_FMT " does not exist!", supi64);
     return false;
   }
+  /*
+    bool find_dnn =
+        sc.get()->find_dnn_context(msg.get_snssai(), msg.get_dnn(), sd);
+    bool find_pdu = false;
+    if (find_dnn) {
+      find_pdu = sd.get()->find_pdu_session(msg.get_pdu_session_id(), sp);
+    }
+    if (!find_dnn or !find_pdu) {
+      // error
+      Logger::smf_n1().warn("DNN or PDU session context does not exist!");
+      return false;
+    }
+  */
 
-  bool find_dnn =
-      sc.get()->find_dnn_context(msg.get_snssai(), msg.get_dnn(), sd);
-  bool find_pdu = false;
-  if (find_dnn) {
-    find_pdu = sd.get()->find_pdu_session(msg.get_pdu_session_id(), sp);
-  }
-  if (!find_dnn or !find_pdu) {
+  if (!sc.get()->find_pdu_session(msg.get_pdu_session_id(), sp)) {
     // error
-    Logger::smf_n1().warn("DNN or PDU session context does not exist!");
+    Logger::smf_n1().warn("PDU session context does not exist!");
     return false;
   }
+
+  std::string dnn = sp.get()->get_dnn();
+  if (dnn.compare(msg.get_dnn()) != 0) {
+    // error
+    Logger::smf_n1().warn("DNN doesn't matched with this session!");
+    return false;
+  }
+  /*
+    if (!(sp.get()->get_snssai() ==  msg.get_snssai())){
+              // error
+              Logger::smf_n1().warn("SNSSAI doesn't matched with this
+    session!"); return false;
+    }
+    */
 
   sm_msg->header.procedure_transaction_identity =
       msg.get_pti().procedure_transaction_id;

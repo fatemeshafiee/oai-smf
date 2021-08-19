@@ -73,6 +73,12 @@ typedef struct s_nssai  // section 28.4, TS23.003
     }
   }
 
+  s_nssai& operator=(const struct s_nssai& s) {
+    sST = s.sST;
+    sD  = s.sD;
+    return *this;
+  }
+
 } snssai_t;
 
 typedef uint8_t pdu_session_id;

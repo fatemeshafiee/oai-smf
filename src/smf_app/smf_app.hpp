@@ -466,6 +466,16 @@ class smf_app {
       const pdu_session_id_t& pid) const;
 
   /*
+   * Verify whether a SMF Context Reference exist
+   * @param [const supi64_t &] supi64: Supi64
+   * @param [const pdu_session_id_t &] pid: PDU Session ID
+   * @return bool: True if SMF Context Reference found, otherwise return false
+   */
+
+  bool is_scid_2_smf_context(
+      const supi64_t& supi, const pdu_session_id_t& pid) const;
+
+  /*
    * Find SMF Context Reference by its ID
    * @param [const scid_t &] scid: SM Context Reference ID
    * @param [std::shared_ptr<smf_context_ref> &] scf : Shared_ptr to a SMF
