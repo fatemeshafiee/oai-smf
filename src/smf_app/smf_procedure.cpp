@@ -453,7 +453,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
   std::string supi_str = n11_triggered_pending->res.get_supi_prefix() + "-" +
                          smf_supi_to_string(supi);
   std::string url =
-      "http://" + sps.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+      "http://" + sc.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
@@ -486,7 +486,7 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
     // N1N2MsgTxfrFailureNotification
     std::string callback_uri =
-        sps.get()->get_amf_addr() + NSMF_PDU_SESSION_BASE +
+        sc.get()->get_amf_addr() + NSMF_PDU_SESSION_BASE +
         smf_cfg.sbi_api_version +
         fmt::format(
             NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE, supi_str.c_str());

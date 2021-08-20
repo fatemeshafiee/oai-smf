@@ -440,35 +440,52 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   pdu_session_type_t get_pdu_session_type() const;
 
   /*
-   * Set AMF Addr of the serving AMF
-   * @param [const std::string&] addr: AMF Addr in string representation
+   * Set UPF Node ID of this PDU Session
+   * @param [const pfcp::node_id_t&] node_id: UPF Node Id
    * @return void
    */
-  void set_amf_addr(const std::string& addr);
+  void set_upf_node_id(const pfcp::node_id_t& node_id);
 
   /*
-   * Get AMF Addr of the serving AMF (in string representation)
-   * @param [const std::string&] addr: store AMF IP Addr
+   * Get UPF Node ID of this PDU Session
+   * @param [pfcp::node_id_t&] node_id: UPF Node Id
    * @return void
    */
-  void get_amf_addr(std::string& addr) const;
-  std::string get_amf_addr() const;
-
-  void set_amf_status_uri(const std::string& status_uri);
-  void get_amf_status_uri(std::string& status_uri) const;
-  std::string get_amf_status_uri() const;
-
-  void set_target_amf(const std::string& amf);
-  void get_target_amf(std::string& amf) const;
-  std::string get_target_amf() const;
-
-  void set_upf_node_id(const pfcp::node_id_t& node_id);
   void get_upf_node_id(pfcp::node_id_t& node_id) const;
+
+  /*
+   * Get UPF Node ID of this PDU Session
+   * @param void
+   * @return UPF Node Id
+   */
   pfcp::node_id_t get_upf_node_id() const;
 
+  /*
+   * Get DNN associated with this PDU Session
+   * @param void
+   * @return std::string: DNN
+   */
   std::string get_dnn() const;
-  snssai_t get_snssai() const;
+
+  /*
+   * Set DNN associated with this PDU Session
+   * @param [const std::string&] d: DNN
+   * @return void
+   */
   void set_dnn(const std::string& d);
+
+  /*
+   * Get SNSSAI associated with this PDU Session
+   * @param void
+   * @return snssai_t: SNSSAI
+   */
+  snssai_t get_snssai() const;
+
+  /*
+   * Set SNSSAI associated with this PDU Session
+   * @param [const snssai_t&] s: SNSSAI
+   * @return void
+   */
   void set_snssai(const snssai_t s);
 
  public:
@@ -484,10 +501,6 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   std::string dnn;  // associated DNN
   snssai_t snssai;  // associated SNSSAI
 
-  std::string amf_id;
-  std::string amf_addr;
-  std::string amf_status_uri;
-  std::string target_amf;  // targetServingNfId
   pfcp::node_id_t upf_node_id;
 
   pdu_session_status_e pdu_session_status;
@@ -512,9 +525,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
       number_of_supported_packet_filters;  // number_of_supported_packet_filters
   util::uint_generator<uint32_t> qos_rule_id_generator;
 
-  //----------------------------------------------------------------------------
   // PFCP related members
-  //----------------------------------------------------------------------------
   // PFCP Session
   uint64_t seid;
   pfcp::fseid_t up_fseid;
@@ -581,7 +592,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
         dnn_subscriptions(),
         event_sub(),
         plmn() {
-    supi_prefix = {};
+    amf_id         = {};
+    amf_addr       = {};
+    amf_status_uri = {};
+    target_amf     = {};
+    supi_prefix    = {};
     // Subscribe to sm context status change
     sm_context_status_connection =
         event_sub.subscribe_sm_context_status(boost::bind(
@@ -1098,12 +1113,18 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bool remove_pdu_session(const pdu_session_id_t& psi);
 
   /*
-   * Get number of pdu sessions associated with this context (dnn and Nssai)
+   * Get number of pdu sessions associated with this context
    * @param void
    * @return size_t: number of PDU sessions
    */
   size_t get_number_pdu_sessions() const;
 
+  /*
+   * Get all the PDU Sessions
+   * @param [std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>&]
+   * sessions: all PDU sessions
+   * @return void
+   */
   void get_pdu_sessions(
       std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>& sessions);
 
@@ -1150,10 +1171,59 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   /*
    * Get AMF Addr of the serving AMF (in string representation)
-   * @param [const std::string&] addr: store AMF IP Addr
+   * @param [std::string&] addr: store AMF IP Addr
    * @return void
    */
   void get_amf_addr(std::string& addr) const;
+
+  /*
+   * Get AMF Addr of the serving AMF (in string representation)
+   * @param void
+   * @return string: AMF IP Addr
+   */
+  std::string get_amf_addr() const;
+
+  /*
+   * Set the URI of AMF for receiving context status update
+   * @param [const std::string&] status_uri: AMF's URI
+   * @return void
+   */
+  void set_amf_status_uri(const std::string& status_uri);
+
+  /*
+   * Get the URI of AMF for receiving context status update
+   * @param [std::string&] status_uri: AMF's URI
+   * @return void
+   */
+  void get_amf_status_uri(std::string& status_uri) const;
+
+  /*
+   * Get the URI of AMF for receiving context status update
+   * @param void
+   * @return string
+   */
+  std::string get_amf_status_uri() const;
+
+  /*
+   * Set target AMF in case of HO
+   * @param [const std::string&] amf: Target AMF
+   * @return void
+   */
+  void set_target_amf(const std::string& amf);
+
+  /*
+   * Get target AMF in case of HO
+   * @param [std::string&] amf: Target AMF
+   * @return void
+   */
+  void get_target_amf(std::string& amf) const;
+
+  /*
+   * Get target AMF in case of HO
+   * @param void
+   * @return std::string
+   */
+  std::string get_target_amf() const;
 
   /*
    * Set PLMN
@@ -1196,7 +1266,13 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   plmn_t plmn;
 
   // AMF IP addr
-  string amf_addr;
+  // string amf_addr;
+
+  std::string amf_id;
+  std::string amf_addr;
+  std::string amf_status_uri;
+  std::string target_amf;  // targetServingNfId
+
   // Big recursive lock
   mutable std::recursive_mutex m_context;
 

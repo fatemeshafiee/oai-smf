@@ -615,46 +615,6 @@ void smf_pdu_session::add_qos_rule(const QOSRulesIE& qos_rule) {
   }
 }
 
-//------------------------------------------------------------------------------
-void smf_pdu_session::set_amf_addr(const std::string& addr) {
-  amf_addr = addr;
-}
-
-//------------------------------------------------------------------------------
-void smf_pdu_session::get_amf_addr(std::string& addr) const {
-  addr = amf_addr;
-}
-
-//------------------------------------------------------------------------------
-std::string smf_pdu_session::get_amf_addr() const {
-  return amf_addr;
-}
-
-//------------------------------------------------------------------------------
-void smf_pdu_session::set_amf_status_uri(const std::string& status_uri) {
-  amf_status_uri = status_uri;
-}
-
-//------------------------------------------------------------------------------
-void smf_pdu_session::get_amf_status_uri(std::string& status_uri) const {
-  status_uri = amf_status_uri;
-}
-
-//------------------------------------------------------------------------------
-std::string smf_pdu_session::get_amf_status_uri() const {
-  return amf_status_uri;
-}
-
-void smf_pdu_session::set_target_amf(const std::string& amf) {
-  target_amf = amf;
-}
-void smf_pdu_session::get_target_amf(std::string& amf) const {
-  amf = target_amf;
-}
-std::string smf_pdu_session::get_target_amf() const {
-  return target_amf;
-}
-
 void smf_pdu_session::set_upf_node_id(const pfcp::node_id_t& node_id) {
   upf_node_id = node_id;
 }
@@ -862,7 +822,7 @@ void smf_context::handle_itti_msg(
                 // std::string(inet_ntoa(
                 //    *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
                 //":" + std::to_string(smf_cfg.amf_addr.port) +
-                "http://" + sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+                "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
                 smf_cfg.amf_addr.api_version +
                 fmt::format(
                     NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
@@ -1368,6 +1328,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   }
 */
 
+  // Update AMF ID
+  set_amf_addr(smreq->req.get_serving_nf_id());  // amf id
+
   // Step 3.2. Create PDU session if not exist
   std::shared_ptr<smf_pdu_session> sp = {};
   bool find_pdu                       = find_pdu_session(pdu_session_id, sp);
@@ -1379,7 +1342,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         smreq->req.get_pdu_session_type();
     sp.get()->set_dnn(dnn);
     sp.get()->set_snssai(snssai);
-    sp.get()->set_amf_addr(smreq->req.get_serving_nf_id());  // amf id
     // sd->insert_pdu_session(sp); //TO BE REMOVED
     add_pdu_session(pdu_session_id, sp);
   } else {
@@ -1577,7 +1539,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
       */
     std::string amf_status_uri = smreq->req.get_sm_context_status_uri();
-    sp.get()->set_amf_status_uri(amf_status_uri);
+
+    set_amf_status_uri(amf_status_uri);
 
     // Get and Store AMF Addr if available
     std::vector<std::string> split_result;
@@ -1598,7 +1561,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       }
     }
     // scf.get()->amf_addr = amf_addr_str;
-    sp.get()->set_amf_addr(amf_addr_str);
+    set_amf_addr(amf_addr_str);
 
     // Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step
     // 5, 4.3.2.2.1 TS 23.502)
@@ -1697,7 +1660,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     supi_str = sm_context_resp_pending->res.get_supi_prefix() + "-" +
                smf_supi_to_string(supi);
     std::string url =
-        "http://" + sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+        "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
         smf_cfg.amf_addr.api_version +
         fmt::format(
             NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
@@ -3132,7 +3095,7 @@ void smf_context::handle_pdu_session_modification_network_requested(
       // std::string(inet_ntoa(*((struct in_addr*)
       // &smf_cfg.amf_addr.ipv4_addr))) +
       //":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
-      "http://" + sp.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
+      "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
@@ -3765,7 +3728,7 @@ void smf_context::handle_sm_context_status_change(
           TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->scid              = scid;
   itti_msg->sm_context_status = status;
-  itti_msg->amf_status_uri    = sp.get()->get_amf_status_uri();
+  itti_msg->amf_status_uri    = get_amf_status_uri();
   itti_msg->http_version      = http_version;
 
   int ret = itti_inst->send_msg(itti_msg);
@@ -3977,6 +3940,36 @@ void smf_context::set_amf_addr(const std::string& addr) {
 //------------------------------------------------------------------------------
 void smf_context::get_amf_addr(std::string& addr) const {
   addr = amf_addr;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_context::get_amf_addr() const {
+  return amf_addr;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::set_amf_status_uri(const std::string& status_uri) {
+  amf_status_uri = status_uri;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::get_amf_status_uri(std::string& status_uri) const {
+  status_uri = amf_status_uri;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_context::get_amf_status_uri() const {
+  return amf_status_uri;
+}
+
+void smf_context::set_target_amf(const std::string& amf) {
+  target_amf = amf;
+}
+void smf_context::get_target_amf(std::string& amf) const {
+  amf = target_amf;
+}
+std::string smf_context::get_target_amf() const {
+  return target_amf;
 }
 
 //------------------------------------------------------------------------------

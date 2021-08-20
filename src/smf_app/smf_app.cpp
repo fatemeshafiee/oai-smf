@@ -1196,7 +1196,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   if (smreq.get()->req.target_serving_nf_id_is_set()) {
     // scf.get()->target_amf = smreq.get()->req.get_target_serving_nf_id();
     std::string target_amf = smreq.get()->req.get_target_serving_nf_id();
-    sp.get()->set_target_amf(target_amf);
+    sc.get()->set_target_amf(target_amf);
   }
 
   // Step 7. Handle the message in smf_context
