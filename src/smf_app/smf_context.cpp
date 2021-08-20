@@ -961,6 +961,11 @@ std::string smf_context::toString() const {
   s.append("\tSUPI:\t\t\t\t")
       .append(smf_supi_to_string(supi).c_str())
       .append("\n");
+  s.append("\tPDU Session:\t\t\t\t").append("\n");
+  for (auto it : pdu_sessions) {
+    s.append(it.second->toString());
+    s.append("\n");
+  }
   return s;
 }
 
@@ -2959,7 +2964,7 @@ void smf_context::handle_pdu_session_release_sm_context_request(
       return;
     }
   */
-  if (find_pdu_session(smreq->req.get_pdu_session_id(), sp)) {
+  if (!find_pdu_session(smreq->req.get_pdu_session_id(), sp)) {
     // error
     Logger::smf_app().warn("PDU session context does not exist!");
     // trigger to send reply to AMF
@@ -3041,7 +3046,7 @@ void smf_context::handle_pdu_session_modification_network_requested(
   }
 */
 
-  if (find_pdu_session(itti_msg->msg.get_pdu_session_id(), sp)) {
+  if (!find_pdu_session(itti_msg->msg.get_pdu_session_id(), sp)) {
     // error
     Logger::smf_app().warn("PDU session context does not exist!");
     return;
