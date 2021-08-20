@@ -79,24 +79,12 @@ class smf_context_ref {
   smf_context_ref() { clear(); }
 
   void clear() {
-    supi = {};
-    // nssai          = {};
-    // dnn            = {};
+    supi           = {};
     pdu_session_id = 0;
-    // amf_status_uri = {};
-    // amf_addr    = {};
-    //  upf_node_id = {};
-    // target_amf  = "";
   }
 
   supi_t supi;
-  // std::string dnn;
   pdu_session_id_t pdu_session_id;
-  // snssai_t nssai;
-  // std::string amf_status_uri;
-  // std::string amf_addr;
-  // std::string target_amf;  // targetServingNfId
-  // pfcp::node_id_t upf_node_id;
 };
 
 class smf_app {

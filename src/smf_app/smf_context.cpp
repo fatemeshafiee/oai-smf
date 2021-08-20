@@ -399,32 +399,32 @@ std::string smf_pdu_session::toString() const {
     is_released = true;
   // s.append("PDN CONNECTION:\n");
   if (!is_released) {
-    s.append("\t\tDNN:\t\t\t").append(dnn).append("\n");
-    s.append("\t\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
-    s.append("\t\tPDN type:\t\t")
+    s.append("\tDNN:\t\t\t").append(dnn).append("\n");
+    s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
+    s.append("\tPDN type:\t\t")
         .append(pdu_session_type.toString())
         .append("\n");
   }
   if (ipv4)
-    s.append("\t\tPAA IPv4:\t\t")
+    s.append("\tPAA IPv4:\t\t")
         .append(conv::toString(ipv4_address))
         .append("\n");
   if (ipv6)
-    s.append("\t\tPAA IPv6:\t\t")
+    s.append("\tPAA IPv6:\t\t")
         .append(conv::toString(ipv6_address))
         .append("\n");
   if (default_qfi.qfi) {
-    s.append("\t\tDefault QFI:\t\t")
+    s.append("\tDefault QFI:\t\t")
         .append(std::to_string(default_qfi.qfi))
         .append("\n");
   } else {
-    s.append("\t\tDefault QFI:\t\t").append("No QFI available").append("\n");
+    s.append("\tDefault QFI:\t\t").append("No QFI available").append("\n");
   }
   if (!is_released) {
-    s.append("\t\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
+    s.append("\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
   }
   if (default_qfi.qfi) {
-    s.append("Default ");
+    s.append("\tDefault ");
     for (auto it : qos_flows) {
       if (it.second.qfi == default_qfi.qfi) {
         s.append(it.second.toString());
@@ -959,10 +959,10 @@ std::string smf_context::toString() const {
   std::string s = {};
   s.append("\n");
   s.append("SMF CONTEXT:\n");
-  s.append("\tSUPI:\t\t\t\t")
+  s.append("SUPI:\t\t\t\t")
       .append(smf_supi_to_string(supi).c_str())
       .append("\n");
-  s.append("\tPDU SESSION:\t\t\t\t").append("\n");
+  s.append("PDU SESSION:\t\t\t\t").append("\n");
   for (auto it : pdu_sessions) {
     s.append(it.second->toString());
     s.append("\n");
