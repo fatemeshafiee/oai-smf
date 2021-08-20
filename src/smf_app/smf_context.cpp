@@ -2412,7 +2412,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
     }
   */
 
-  if (find_pdu_session(sm_context_req_msg.get_pdu_session_id(), sp)) {
+  if (!find_pdu_session(sm_context_req_msg.get_pdu_session_id(), sp)) {
     // error
     Logger::smf_app().warn("PDU session context does not exist!");
     // trigger to send reply to AMF
