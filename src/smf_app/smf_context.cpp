@@ -399,7 +399,9 @@ std::string smf_pdu_session::toString() const {
     is_released = true;
   // s.append("PDN CONNECTION:\n");
   if (!is_released) {
-    s.append("\tPDU Session ID:\t\t\t").append(dnn).append("\n");
+    s.append("\tPDU Session ID:\t\t\t")
+        .append(std::to_string((uint8_t) pdu_session_id))
+        .append("\n");
     s.append("\tDNN:\t\t\t").append(dnn).append("\n");
     s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
     s.append("\tPDN type:\t\t")
