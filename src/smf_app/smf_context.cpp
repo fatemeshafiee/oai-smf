@@ -1580,9 +1580,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
                        *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
                    ":" + std::to_string(smf_cfg.amf_addr.port);
 
-    boost::split(
-        split_result, smreq->req.get_sm_context_status_uri(),
-        boost::is_any_of("/"));
+    boost::split(split_result, amf_status_uri, boost::is_any_of("/"));
     if (split_result.size() >= 3) {
       std::string addr = split_result[2];
       struct in_addr amf_ipv4_addr;

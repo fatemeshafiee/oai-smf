@@ -626,9 +626,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   void remove_procedure(smf_procedure* proc);
 
-#define IS_FIND_PDN_WITH_LOCAL_TEID true
-#define IS_FIND_PDN_WITH_PEER_TEID false
-
   /*
    * Handle N4 message (session establishment response) from UPF
    * @param [itti_n4_session_establishment_responset&]
