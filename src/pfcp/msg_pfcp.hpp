@@ -99,7 +99,7 @@ class pfcp_ies_container {
     throw pfcp_msg_illegal_ie_exception(
         0, PFCP_IE_ENTERPRISE_SPECIFIC, __FILE__, __LINE__);
   }
-  
+
   //  PFCP_IE_CREATE_PDR
   virtual bool get(pfcp::create_pdr& v) const {
     throw pfcp_msg_illegal_ie_exception(
@@ -2660,6 +2660,7 @@ class event_information : public pfcp::pfcp_ies_container {
 
 //------------------------------------------------------------------------------
 // Table 7.5.2.4-1: Create URR IE within PFCP Session Establishment Request
+// Section 7.5.4.17: Create URR IE within PFCP Session Modification Request
 class create_urr : public pfcp::pfcp_ies_container {
  public:
   std::pair<bool, pfcp::urr_id_t> urr_id;
@@ -5574,7 +5575,7 @@ class pfcp_association_setup_request : public pfcp_ies_container {
         up_function_features(),
         cp_function_features(),
         user_plane_ip_resource_information(),
-        enterprise_specific () {}
+        enterprise_specific() {}
 
   pfcp_association_setup_request(const pfcp_association_setup_request& i) {
     node_id                            = i.node_id;
@@ -5676,7 +5677,7 @@ class pfcp_association_setup_response : public pfcp_ies_container {
         up_function_features(),
         cp_function_features(),
         user_plane_ip_resource_information(),
-        enterprise_specific () {}
+        enterprise_specific() {}
 
   pfcp_association_setup_response(const pfcp_association_setup_response& i) {
     node_id                            = i.node_id;
@@ -6740,6 +6741,9 @@ class pfcp_session_modification_request : public pfcp_ies_container {
   std::vector<pfcp::create_pdr> create_pdrs;
   std::vector<pfcp::create_far> create_fars;
   std::vector<pfcp::create_urr> create_urrs;
+
+  std::vector<pfcp::query_urr> query_urrs;
+
   std::vector<pfcp::create_qer> create_qers;
   std::pair<bool, pfcp::create_bar> create_bar;
   std::pair<bool, pfcp::create_traffic_endpoint> create_traffic_endpoint;
@@ -6773,6 +6777,7 @@ class pfcp_session_modification_request : public pfcp_ies_container {
         create_fars(),
         create_urrs(),
         create_qers(),
+        query_urrs(),
         create_bar(),
         create_traffic_endpoint(),
         update_pdrs(),
@@ -6803,6 +6808,7 @@ class pfcp_session_modification_request : public pfcp_ies_container {
         create_fars(i.create_fars),
         create_urrs(i.create_urrs),
         create_qers(i.create_qers),
+        query_urrs(i.query_urrs),
         create_bar(i.create_bar),
         create_traffic_endpoint(i.create_traffic_endpoint),
         update_pdrs(i.update_pdrs),
@@ -6955,6 +6961,7 @@ class pfcp_session_modification_request : public pfcp_ies_container {
   void set(const pfcp::remove_far& v) { remove_fars.push_back(v); }
   void set(const pfcp::remove_urr& v) { remove_urrs.push_back(v); }
   void set(const pfcp::remove_qer& v) { remove_qers.push_back(v); }
+  void set(const pfcp::query_urr& v) { query_urrs.push_back(v); }
   void set(const pfcp::remove_bar& v) {
     remove_bar.first  = true;
     remove_bar.second = v;
