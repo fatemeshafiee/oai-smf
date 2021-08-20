@@ -394,31 +394,34 @@ std::string smf_pdu_session::toString() const {
   std::string s     = {};
   smf_qos_flow flow = {};
 
-  s.append("PDN CONNECTION:\n");
-  if (!released) {
-    s.append("\tDNN:\t\t\t").append(dnn).append("\n");
-    s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
-    s.append("\tPDN type:\t\t\t")
+  bool is_released = false;
+  if (pdu_session_status == pdu_session_status_e::PDU_SESSION_INACTIVE)
+    is_released = true;
+  // s.append("PDN CONNECTION:\n");
+  if (!is_released) {
+    s.append("\t\tDNN:\t\t\t").append(dnn).append("\n");
+    s.append("\t\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
+    s.append("\t\tPDN type:\t\t")
         .append(pdu_session_type.toString())
         .append("\n");
   }
   if (ipv4)
-    s.append("\tPAA IPv4:\t\t\t")
+    s.append("\t\tPAA IPv4:\t\t")
         .append(conv::toString(ipv4_address))
         .append("\n");
   if (ipv6)
-    s.append("\tPAA IPv6:\t\t\t")
+    s.append("\t\tPAA IPv6:\t\t")
         .append(conv::toString(ipv6_address))
         .append("\n");
   if (default_qfi.qfi) {
-    s.append("\tDefault QFI:\t\t\t")
+    s.append("\t\tDefault QFI:\t\t")
         .append(std::to_string(default_qfi.qfi))
         .append("\n");
   } else {
-    s.append("\tDefault QFI:\t\t\t").append("No QFI available").append("\n");
+    s.append("\t\tDefault QFI:\t\t").append("No QFI available").append("\n");
   }
-  if (!released) {
-    s.append("\tSEID:\t\t\t\t").append(std::to_string(seid)).append("\n");
+  if (!is_released) {
+    s.append("\t\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
   }
   if (default_qfi.qfi) {
     s.append("Default ");
@@ -785,9 +788,7 @@ void smf_context::handle_itti_msg(
         "  pfcp_tx_id %" PRIX64 ", smf_procedure not found, discarded!",
         smresp.seid, smresp.trxn_id);
   }
-  Logger::smf_app().info(
-      "Handle N4 Session Modification Response with SMF context %s",
-      toString().c_str());
+  Logger::smf_app().info("Handle N4 Session Modification Response");
 }
 
 //------------------------------------------------------------------------------
@@ -807,9 +808,7 @@ void smf_context::handle_itti_msg(itti_n4_session_deletion_response& sdresp) {
         sdresp.seid, sdresp.trxn_id);
   }
 
-  Logger::smf_app().info(
-      "Handle N4 Session Deletion Response with SMF context %s",
-      toString().c_str());
+  Logger::smf_app().info("Handle N4 Session Deletion Response");
 }
 
 //------------------------------------------------------------------------------
@@ -963,7 +962,7 @@ std::string smf_context::toString() const {
   s.append("\tSUPI:\t\t\t\t")
       .append(smf_supi_to_string(supi).c_str())
       .append("\n");
-  s.append("\tPDU Session:\t\t\t\t").append("\n");
+  s.append("\tPDU SESSION:\t\t\t\t").append("\n");
   for (auto it : pdu_sessions) {
     s.append(it.second->toString());
     s.append("\n");
@@ -2556,6 +2555,13 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
           // TODO:
           return false;
         }
+
+        // Update PDU session status to PDU_SESSION_INACTIVE
+        sp.get()->set_pdu_session_status(
+            pdu_session_status_e::PDU_SESSION_INACTIVE);
+
+        // display info
+        toString();
         // don't need to create a procedure to update UPF
       } break;
 
@@ -2676,6 +2682,11 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
         sm_context_resp_pending->session_procedure_type =
             session_management_procedures_type_e::
                 PDU_SESSION_RELEASE_UE_REQUESTED_STEP2;
+
+        // Update PDU session status to PDU_SESSION_INACTIVE
+        sp.get()->set_pdu_session_status(
+            pdu_session_status_e::PDU_SESSION_INACTIVE);
+
         // don't need to create a procedure to update UPF
       } break;
 

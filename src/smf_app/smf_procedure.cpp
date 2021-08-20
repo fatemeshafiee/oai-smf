@@ -1147,6 +1147,8 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
       // set UpCnxState to DEACTIVATED
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
+
+      sc.get()->toString();
     } break;
 
       // UE-Triggered Service Request Procedure (Step 1)
