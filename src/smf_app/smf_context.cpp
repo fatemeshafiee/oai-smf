@@ -2561,7 +2561,8 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
             pdu_session_status_e::PDU_SESSION_INACTIVE);
 
         // display info
-        toString();
+        Logger::smf_app().info("SMF context: \n %s", toString().c_str());
+
         // don't need to create a procedure to update UPF
       } break;
 

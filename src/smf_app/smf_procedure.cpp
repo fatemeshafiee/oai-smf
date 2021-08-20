@@ -1145,10 +1145,12 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // Update PDU session status to ACTIVE
       sps->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_ACTIVE);
 
-      // set UpCnxState to DEACTIVATED
+      // set UpCnxState to ACTIVATED
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
 
-      sc.get()->toString();
+      Logger::smf_app().info(
+          "SMF context: \n %s", sc.get()->toString().c_str());
+
     } break;
 
       // UE-Triggered Service Request Procedure (Step 1)
