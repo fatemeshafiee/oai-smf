@@ -597,11 +597,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     amf_status_uri = {};
     target_amf     = {};
     supi_prefix    = {};
-    // Subscribe to sm context status change
+    // Subscribe to SM Context Status Change
     sm_context_status_connection =
         event_sub.subscribe_sm_context_status(boost::bind(
             &smf_context::handle_sm_context_status_change, this, _1, _2, _3));
-    // Subscribe to pdu session release (event exposure)
+    // Subscribe to PDU Session Release (event exposure)
     ee_pdu_session_release_connection =
         event_sub.subscribe_ee_pdu_session_release(boost::bind(
             &smf_context::handle_ee_pdu_session_release, this, _1, _2, _3));
@@ -1020,13 +1020,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   supi_t get_supi() const;
 
   /*
-   * Get the number of dnn contexts
-   * @param
-   * @return std::size_t: the number of contexts
-   */
-  std::size_t get_number_dnn_contexts() const;
-
-  /*
    * Get Supi prefix
    * @param [const std::string &]  prefix: Supi prefix (e.g., imsi)
    * @return void
@@ -1251,12 +1244,10 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       const pdu_session_id_t& pdu_session_id) const;
 
  private:
-  // std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
   // snssai-sst <-> session management subscription
   std::map<uint8_t, std::shared_ptr<session_management_subscription>>
       dnn_subscriptions;
-
   std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>
       pdu_sessions;  // Store all PDU Sessions associated with this UE
   mutable std::shared_mutex m_pdu_sessions_mutex;
@@ -1264,9 +1255,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   supi_t supi;
   std::string supi_prefix;
   plmn_t plmn;
-
-  // AMF IP addr
-  // string amf_addr;
 
   std::string amf_id;
   std::string amf_addr;

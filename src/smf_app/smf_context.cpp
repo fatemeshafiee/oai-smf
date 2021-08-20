@@ -87,28 +87,26 @@ void smf_qos_flow::mark_as_released() {
 std::string smf_qos_flow::toString() const {
   std::string s = {};
   s.append("QoS Flow:\n");
-  s.append("\tQFI:\t\t\t\t")
-      .append(std::to_string((uint8_t) qfi.qfi))
-      .append("\n");
-  s.append("\tUL FTEID:\t\t").append(ul_fteid.toString()).append("\n");
-  s.append("\tDL FTEID:\t\t").append(dl_fteid.toString()).append("\n");
-  s.append("\tPDR ID UL:\t\t\t")
+  s.append("\tQFI:\t\t").append(std::to_string((uint8_t) qfi.qfi)).append("\n");
+  s.append("\tUL FTEID:\t").append(ul_fteid.toString()).append("\n");
+  s.append("\tDL FTEID:\t").append(dl_fteid.toString()).append("\n");
+  s.append("\tPDR ID UL:\t")
       .append(std::to_string(pdr_id_ul.rule_id))
       .append("\n");
-  s.append("\tPDR ID DL:\t\t\t")
+  s.append("\tPDR ID DL:\t")
       .append(std::to_string(pdr_id_dl.rule_id))
       .append("\n");
 
-  s.append("\tPrecedence:\t\t\t")
+  s.append("\tPrecedence:\t")
       .append(std::to_string(precedence.precedence))
       .append("\n");
   if (far_id_ul.first) {
-    s.append("\tFAR ID UL:\t\t\t")
+    s.append("\tFAR ID UL:\t")
         .append(std::to_string(far_id_ul.second.far_id))
         .append("\n");
   }
   if (far_id_dl.first) {
-    s.append("\tFAR ID DL:\t\t\t")
+    s.append("\tFAR ID DL:\t")
         .append(std::to_string(far_id_dl.second.far_id))
         .append("\n");
   }
@@ -427,7 +425,7 @@ std::string smf_pdu_session::toString() const {
     s.append("\tDefault ");
     for (auto it : qos_flows) {
       if (it.second.qfi == default_qfi.qfi) {
-        s.append(it.second.toString());
+        s.append("\t").append(it.second.toString());
       }
     }
   }
@@ -783,7 +781,6 @@ void smf_context::handle_itti_msg(
       if (req->pfcp_ies.get(data_report)) {
         pfcp::pdr_id_t pdr_id;
         if (data_report.get(pdr_id)) {
-          // std::shared_ptr<dnn_context> sd     = {};
           std::shared_ptr<smf_pdu_session> sp = {};
           pfcp::qfi_t qfi                     = {};
           if (find_pdu_session(pdr_id, qfi, sp)) {
@@ -1305,29 +1302,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   xgpp_conv::create_sm_context_response_from_ctx_request(
       smreq, sm_context_resp_pending);
 
-  /*
-  // TO BE REMOVED
-  // Step 3. Find pdu_session
-  std::shared_ptr<dnn_context> sd = {};
-  bool find_dnn                   = find_dnn_context(snssai, dnn, sd);
-
-  // Step 3.1. Create DNN context if not exist
-  // At this step, this context should be existed
-  if (nullptr == sd.get()) {
-    Logger::smf_app().debug(
-        "DNN context (dnn_in_use %s) is not existed yet!", dnn.c_str());
-    sd                   = std::shared_ptr<dnn_context>(new dnn_context());
-    sd.get()->in_use     = true;
-    sd.get()->dnn_in_use = dnn;
-    sd.get()->nssai      = snssai;
-    insert_dnn(sd);
-  } else {
-    sd.get()->dnn_in_use = dnn;
-    Logger::smf_app().debug(
-        "DNN context (dnn_in_use %s) is already existed", dnn.c_str());
-  }
-*/
-
   // Update AMF ID
   set_amf_addr(smreq->req.get_serving_nf_id());  // amf id
 
@@ -1342,7 +1316,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         smreq->req.get_pdu_session_type();
     sp.get()->set_dnn(dnn);
     sp.get()->set_snssai(snssai);
-    // sd->insert_pdu_session(sp); //TO BE REMOVED
     add_pdu_session(pdu_session_id, sp);
   } else {
     Logger::smf_app().warn("PDU session is already existed!");
@@ -1527,19 +1500,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     // Store AMF callback URI and subscribe to the status notification: AMF will
     // be notified when SM context changes
-    /*  std::shared_ptr<smf_context_ref> scf = {};
-      if (smf_app_inst->is_scid_2_smf_context(smreq->scid)) {
-        scf = smf_app_inst->scid_2_smf_context(smreq->scid);
-      } else {
-        Logger::smf_app().warn(
-            "SM Context associated with this id " SCID_FMT " does not exit!",
-            smreq->scid);
-        // TODO: return;
-      }
-      scf.get()->amf_status_uri = smreq->req.get_sm_context_status_uri();
-      */
     std::string amf_status_uri = smreq->req.get_sm_context_status_uri();
-
     set_amf_status_uri(amf_status_uri);
 
     // Get and Store AMF Addr if available
@@ -1560,7 +1521,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         Logger::smf_api_server().debug("AMF IP Addr %s", amf_addr_str.c_str());
       }
     }
-    // scf.get()->amf_addr = amf_addr_str;
+
     set_amf_addr(amf_addr_str);
 
     // Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step
@@ -1629,7 +1590,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         case PDU_SESSION_TYPE_E_IPV4:
         case PDU_SESSION_TYPE_E_IPV4V6:
           // paa_dynamic::get_instance().release_paa(
-          //    sd->dnn_in_use, free_paa.ipv4_address);
+          //    dnn, free_paa.ipv4_address);
           // break;
         case PDU_SESSION_TYPE_E_IPV6:
           paa_dynamic::get_instance().release_paa(dnn, free_paa);
@@ -2035,13 +1996,7 @@ bool smf_context::handle_pdu_session_release_complete(
   // changes notification from UDM by invoking Numd_SDM_Unsubscribe
 
   // TODO: should check if sd context exist
-  /*  std::shared_ptr<dnn_context> sd = {};
-    find_dnn_context(
-        sm_context_request.get()->req.get_snssai(),
-        sm_context_request.get()->req.get_dnn(), sd);
-  */
 
-  // if (sd.get() != nullptr) {
   if (get_number_pdu_sessions() == 0) {
     Logger::smf_app().debug(
         "Unsubscribe from Session Management Subscription data changes "
@@ -2049,7 +2004,7 @@ bool smf_context::handle_pdu_session_release_complete(
     // TODO: unsubscribes from Session Management Subscription data
     // changes notification from UDM
   }
-  //}
+
   // TODO: Invoke Nudm_UECM_Deregistration
   return true;
 }
@@ -2357,30 +2312,9 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
       session_management_procedures_type_e::
           PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
 
-  // Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and
-  // pdu_session must be existed
-  // std::shared_ptr<dnn_context> sd     = {};
+  // Step 1. get SMF PDU session context. At this stage, pdu_session must be
+  // existed
   std::shared_ptr<smf_pdu_session> sp = {};
-  /*
-    bool find_dnn                       = find_dnn_context(
-        sm_context_req_msg.get_snssai(), sm_context_req_msg.get_dnn(), sd);
-    bool find_pdu = false;
-    if (find_dnn) {
-      find_pdu =
-          sd.get()->find_pdu_session(sm_context_req_msg.get_pdu_session_id(),
-    sp);
-    }
-    if (!find_dnn or !find_pdu) {
-      // error, send reply to AMF with error code "Context Not Found"
-      Logger::smf_app().warn("DNN or PDU session context does not exist!");
-      // trigger to send reply to AMF
-      smf_app_inst->trigger_update_context_error_response(
-          http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND,
-          PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND, smreq->pid);
-      return false;
-    }
-  */
-
   if (!find_pdu_session(sm_context_req_msg.get_pdu_session_id(), sp)) {
     // error
     Logger::smf_app().warn("PDU session context does not exist!");
@@ -2919,28 +2853,9 @@ void smf_context::handle_pdu_session_release_sm_context_request(
       "Handle a PDU Session Release SM Context Request message from AMF");
   bool update_upf = false;
 
-  // Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and
-  // pdu_session must be existed
-  // std::shared_ptr<dnn_context> sd     = {};
+  // Step 1. get SMF PDU session context. At this stage, pdu_session must be
+  // existed
   std::shared_ptr<smf_pdu_session> sp = {};
-  /*
-    bool find_dnn =
-        find_dnn_context(smreq->req.get_snssai(), smreq->req.get_dnn(), sd);
-    bool find_pdu = false;
-    if (find_dnn) {
-      find_pdu = sd.get()->find_pdu_session(smreq->req.get_pdu_session_id(),
-    sp);
-    }
-    if (!find_dnn or !find_pdu) {
-      // error, send reply to AMF with error code "Context Not Found"
-      Logger::smf_app().warn("DNN or PDU session context does not exist!");
-      // trigger to send reply to AMF
-      smf_app_inst->trigger_http_response(
-          http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND, smreq->pid,
-          N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
-      return;
-    }
-  */
   if (!find_pdu_session(smreq->req.get_pdu_session_id(), sp)) {
     // error
     Logger::smf_app().warn("PDU session context does not exist!");
@@ -3005,42 +2920,15 @@ void smf_context::handle_pdu_session_modification_network_requested(
   std::string n2_sm_info     = {};
   std::string n2_sm_info_hex = {};
 
-  // Step 1. get DNN, SMF PDU session context. At this stage, dnn_context and
-  // pdu_session must be existed
-  // std::shared_ptr<dnn_context> sd     = {};
+  // Step 1. get SMF PDU session context. At this stage, pdu_session must be
+  // existed
   std::shared_ptr<smf_pdu_session> sp = {};
-  /*
-  bool find_dnn =
-      find_dnn_context(itti_msg->msg.get_snssai(), itti_msg->msg.get_dnn(), sd);
-  bool find_pdu = false;
-  if (find_dnn) {
-    find_pdu =
-        sd.get()->find_pdu_session(itti_msg->msg.get_pdu_session_id(), sp);
-  }
-  if (!find_dnn or !find_pdu) {
-    Logger::smf_app().warn("DNN or PDU session context does not exist!");
-    return;
-  }
-*/
 
   if (!find_pdu_session(itti_msg->msg.get_pdu_session_id(), sp)) {
     // error
     Logger::smf_app().warn("PDU session context does not exist!");
     return;
   }
-  /*
-    std::string dnn = sp.get()->get_dnn();
-    if ((dnn.compare(smreq->req.get_dnn()) != 0) or (!(sp.get()->get_snssai() ==
-    smreq->req.get_snssai()))){
-              // error
-              Logger::smf_n1().warn("DNN/SNSSAI doesn't matched with this
-    session!");
-              // trigger to send reply to AMF
-              smf_app_inst->trigger_http_response(
-                  http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND,
-    smreq->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE); return;
-    }
-  */
 
   std::vector<pfcp::qfi_t> list_qfis_to_be_updated;
   itti_msg->msg.get_qfis(list_qfis_to_be_updated);
@@ -3092,9 +2980,6 @@ void smf_context::handle_pdu_session_modification_network_requested(
   std::string supi_str =
       itti_msg->msg.get_supi_prefix() + "-" + smf_supi_to_string(supi);
   std::string url =
-      // std::string(inet_ntoa(*((struct in_addr*)
-      // &smf_cfg.amf_addr.ipv4_addr))) +
-      //":" + std::to_string(smf_cfg.amf_addr.port) + NAMF_COMMUNICATION_BASE +
       "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
       fmt::format(
@@ -3618,7 +3503,7 @@ bool smf_context::find_pdu_session(
   std::shared_lock lock(m_pdu_sessions_mutex);
   if (pdu_sessions.count(psi) > 0) {
     sp = pdu_sessions.at(psi);
-    return true;
+    if (sp) return true;
   }
   return false;
 }
@@ -3633,7 +3518,8 @@ bool smf_context::find_pdu_session(
     if (it.second->find_qos_flow(pdr_id, flow)) {
       qfi.qfi = flow.qfi.qfi;
       sp      = it.second;
-      return true;
+      if (sp) return true;
+      break;
     }
   }
   return false;

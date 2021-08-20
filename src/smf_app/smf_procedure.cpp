@@ -125,7 +125,7 @@ int session_create_sm_context_procedure::run(
             PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND);
         return RETURNerror;
       }
-      if (sp.get() != nullptr) sp.get()->set_upf_node_id(up_node_id);
+      sp.get()->set_upf_node_id(up_node_id);
 
     } else {
       Logger::smf_app().warn(
@@ -549,13 +549,9 @@ int session_update_sm_context_procedure::run(
   std::shared_ptr<smf_pdu_session> sp = {};
   if (!sc.get()->find_pdu_session(scf.get()->pdu_session_id, sp)) {
     Logger::smf_app().warn("PDU session context does not exist!");
-  }
-  if (sp.get() != nullptr) {
-    sp.get()->get_upf_node_id(up_node_id);
-  } else {
-    Logger::smf_app().warn("PDU session context does not exist!");
     return RETURNerror;
   }
+  sp.get()->get_upf_node_id(up_node_id);
 
   // TODO: UPF insertion in case of Handover
 
@@ -1421,13 +1417,10 @@ int session_release_sm_context_procedure::run(
   std::shared_ptr<smf_pdu_session> sp = {};
   if (!sc.get()->find_pdu_session(scf.get()->pdu_session_id, sp)) {
     Logger::smf_app().warn("PDU session context does not exist!");
-  }
-  if (sp.get() != nullptr) {
-    sp.get()->get_upf_node_id(up_node_id);
-  } else {
-    Logger::smf_app().warn("PDU session context does not exist!");
     return RETURNerror;
   }
+
+  sp.get()->get_upf_node_id(up_node_id);
 
   /*  if (not pfcp_associations::get_instance().select_up_node(
             up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {

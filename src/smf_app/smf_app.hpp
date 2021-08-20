@@ -200,7 +200,6 @@ class smf_app {
 
   void operator=(smf_app const&) = delete;
 
-  void test_dns();
   /*
    * Set the association between Seid and SM Context
    * @param [const seid_t &] seid: SessionID
