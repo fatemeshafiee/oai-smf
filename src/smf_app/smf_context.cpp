@@ -2925,7 +2925,6 @@ void smf_context::handle_pdu_session_modification_network_requested(
   std::shared_ptr<smf_pdu_session> sp = {};
 
   if (!find_pdu_session(itti_msg->msg.get_pdu_session_id(), sp)) {
-    // error
     Logger::smf_app().warn("PDU session context does not exist!");
     return;
   }

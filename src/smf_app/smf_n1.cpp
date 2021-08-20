@@ -430,7 +430,6 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   }
 
   if (!sc.get()->find_pdu_session(sm_context_res.get_pdu_session_id(), sp)) {
-    // error
     Logger::smf_n1().warn("PDU session context does not exist!");
     return false;
   }
@@ -573,7 +572,6 @@ bool smf_n1::create_n1_pdu_session_modification_command(
   }
 
   if (!sc.get()->find_pdu_session(msg.get_pdu_session_id(), sp)) {
-    // error
     Logger::smf_n1().warn("PDU session context does not exist!");
     return false;
   }
