@@ -395,11 +395,13 @@ std::string smf_pdu_session::toString() const {
   smf_qos_flow flow = {};
 
   s.append("PDN CONNECTION:\n");
-  s.append("\tDNN:\t\t\t").append(dnn).append("\n");
-  s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
-  s.append("\tPDN type:\t\t\t")
-      .append(pdu_session_type.toString())
-      .append("\n");
+  if (!released) {
+    s.append("\tDNN:\t\t\t").append(dnn).append("\n");
+    s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
+    s.append("\tPDN type:\t\t\t")
+        .append(pdu_session_type.toString())
+        .append("\n");
+  }
   if (ipv4)
     s.append("\tPAA IPv4:\t\t\t")
         .append(conv::toString(ipv4_address))
@@ -415,9 +417,9 @@ std::string smf_pdu_session::toString() const {
   } else {
     s.append("\tDefault QFI:\t\t\t").append("No QFI available").append("\n");
   }
-
-  s.append("\tSEID:\t\t\t\t").append(std::to_string(seid)).append("\n");
-
+  if (!released) {
+    s.append("\tSEID:\t\t\t\t").append(std::to_string(seid)).append("\n");
+  }
   if (default_qfi.qfi) {
     s.append("Default ");
     for (auto it : qos_flows) {
