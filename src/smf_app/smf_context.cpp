@@ -87,26 +87,28 @@ void smf_qos_flow::mark_as_released() {
 std::string smf_qos_flow::toString() const {
   std::string s = {};
   s.append("QoS Flow:\n");
-  s.append("\tQFI:\t\t").append(std::to_string((uint8_t) qfi.qfi)).append("\n");
-  s.append("\tUL FTEID:\t").append(ul_fteid.toString()).append("\n");
-  s.append("\tDL FTEID:\t").append(dl_fteid.toString()).append("\n");
-  s.append("\tPDR ID UL:\t")
+  s.append("\t\tQFI:\t\t")
+      .append(std::to_string((uint8_t) qfi.qfi))
+      .append("\n");
+  s.append("\t\tUL FTEID:\t").append(ul_fteid.toString()).append("\n");
+  s.append("\t\tDL FTEID:\t").append(dl_fteid.toString()).append("\n");
+  s.append("\t\tPDR ID UL:\t")
       .append(std::to_string(pdr_id_ul.rule_id))
       .append("\n");
-  s.append("\tPDR ID DL:\t")
+  s.append("\t\tPDR ID DL:\t")
       .append(std::to_string(pdr_id_dl.rule_id))
       .append("\n");
 
-  s.append("\tPrecedence:\t")
+  s.append("\t\tPrecedence:\t")
       .append(std::to_string(precedence.precedence))
       .append("\n");
   if (far_id_ul.first) {
-    s.append("\tFAR ID UL:\t")
+    s.append("\t\tFAR ID UL:\t")
         .append(std::to_string(far_id_ul.second.far_id))
         .append("\n");
   }
   if (far_id_dl.first) {
-    s.append("\tFAR ID DL:\t")
+    s.append("\t\tFAR ID DL:\t")
         .append(std::to_string(far_id_dl.second.far_id))
         .append("\n");
   }
@@ -397,6 +399,7 @@ std::string smf_pdu_session::toString() const {
     is_released = true;
   // s.append("PDN CONNECTION:\n");
   if (!is_released) {
+    s.append("\tPDU Session ID:\t\t\t").append(dnn).append("\n");
     s.append("\tDNN:\t\t\t").append(dnn).append("\n");
     s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
     s.append("\tPDN type:\t\t")
@@ -425,7 +428,7 @@ std::string smf_pdu_session::toString() const {
     s.append("\tDefault ");
     for (auto it : qos_flows) {
       if (it.second.qfi == default_qfi.qfi) {
-        s.append("\t").append(it.second.toString());
+        s.append(it.second.toString());
       }
     }
   }
