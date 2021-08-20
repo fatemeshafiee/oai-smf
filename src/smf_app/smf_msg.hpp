@@ -35,6 +35,7 @@
 #include "3gpp_24.501.h"
 #include "3gpp_29.244.h"
 #include "3gpp_29.508.h"
+#include "3gpp_29.518.h"
 #include "3gpp_29.571.h"
 #include "NgRanTargetId.h"
 #include "pistache/http.h"
