@@ -984,18 +984,18 @@ smf_event_t event_notification::get_smf_event() const {
 
 //-----------------------------------------------------------------------------
 // ddds change
-void event_notification::set_Ddds(oai::smf_server::model::DddStatus const& value){
-  m_DddStatus = value;
+void event_notification::set_Ddds(
+    oai::smf_server::model::DddStatus const& value) {
+  m_DddStatus      = value;
   m_DddStatusIsSet = true;
 }
-oai::smf_server::model::DddStatus event_notification::get_ddds() const{
+oai::smf_server::model::DddStatus event_notification::get_ddds() const {
   return m_DddStatus;
 }
 
-bool event_notification::is_ddds_is_set() const{
+bool event_notification::is_ddds_is_set() const {
   return m_DddStatusIsSet;
 }
-
 
 //-----------------------------------------------------------------------------
 void event_notification::set_timestamp(const std::string& ss) {
@@ -1061,16 +1061,17 @@ bool event_notification::is_re_ipv4_addr_is_set() const {
 }
 
 // m_PlmnId
-void event_notification::set_PlmnId(oai::smf_server::model::PlmnId const& value){
-   m_PlmnId = value;
-   m_PlmnIdIsSet = true;
+void event_notification::set_PlmnId(
+    oai::smf_server::model::PlmnId const& value) {
+  m_PlmnId      = value;
+  m_PlmnIdIsSet = true;
 }
 
-oai::smf_server::model::PlmnId event_notification::get_plmnid() const{
+oai::smf_server::model::PlmnId event_notification::get_plmnid() const {
   return m_PlmnId;
 }
 
-bool event_notification::is_plmnid_is_set() const{
+bool event_notification::is_plmnid_is_set() const {
   return m_PlmnIdIsSet;
 }
 

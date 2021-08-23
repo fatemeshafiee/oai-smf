@@ -47,8 +47,6 @@ extern "C" {
 #include "QOSRules.h"
 }
 
-// using namespace oai::smf_server::model;
-
 typedef enum {
   PDU_SESSION_MSG_TYPE_NONE             = -1,
   PDU_SESSION_MSG_TYPE_FIRST            = 0,
@@ -633,7 +631,6 @@ class event_notification {
   void set_Ddds(oai::smf_server::model::DddStatus const& value);
   oai::smf_server::model::DddStatus get_ddds() const;
   bool is_ddds_is_set() const;
-
 
   void set_pdu_session_id(const pdu_session_id_t value);
   pdu_session_id_t get_pdu_session_id() const;

@@ -43,7 +43,6 @@
 #include "smf.h"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
-#include "PlmnId.h"
 
 extern "C" {
 #include "dynamic_memory_check.h"
@@ -511,10 +510,11 @@ void smf_sbi::notify_subscribed_event(
     if (i.is_plmnid_is_set()) {
       event_notif["plmnId"] = i.get_plmnid();
     }
-    
+
     // add support for ddds
     if (i.is_ddds_is_set()) {
-      //TODO: change this one to the real value when finished the event for ddds
+      // TODO: change this one to the real value when finished the event for
+      // ddds
       // event_notif["dddStatus"] = i.get_ddds();
       event_notif["dddStatus"] = "TRANSMITTED";
     }

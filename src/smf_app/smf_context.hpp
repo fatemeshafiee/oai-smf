@@ -634,8 +634,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       ee_ue_ip_change_connection.disconnect();
     if (ee_plmn_change_connection.connected())
       ee_plmn_change_connection.disconnect();
-    if (ee_ddds_connection.connected())
-      ee_ddds_connection.disconnect();
+    if (ee_ddds_connection.connected()) ee_ddds_connection.disconnect();
     if (ee_flexcn.connected()) ee_flexcn.disconnect();
   }
 

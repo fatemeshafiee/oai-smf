@@ -126,6 +126,7 @@ void smf_qos_flow::deallocate_ressources() {
 void smf_pdu_session::get_pdu_session_id(uint32_t& psi) const {
   psi = pdu_session_id;
 }
+
 //------------------------------------------------------------------------------
 uint32_t smf_pdu_session::get_pdu_session_id() const {
   return pdu_session_id;
@@ -3641,7 +3642,7 @@ void smf_context::trigger_ddds(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_ddds( scid_t scid, uint8_t http_version) {
+void smf_context::handle_ddds(scid_t scid, uint8_t http_version) {
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN, "
       "SMF Context ID " SCID_FMT " ",
@@ -3658,8 +3659,8 @@ void smf_context::handle_ddds( scid_t scid, uint8_t http_version) {
     return;
   }
 
-  supi_t supi                     = scf.get()->supi;
-  supi64_t supi64                 = smf_supi_to_u64(supi);
+  supi_t supi     = scf.get()->supi;
+  supi64_t supi64 = smf_supi_to_u64(supi);
   // pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
 
   std::shared_ptr<smf_context> sc = {};
@@ -3689,7 +3690,7 @@ void smf_context::handle_ddds( scid_t scid, uint8_t http_version) {
 
     for (auto i : subscriptions) {
       event_notification ev_notif = {};
-      ev_notif.set_supi(supi64);                    // SUPI
+      ev_notif.set_supi(supi64);  // SUPI
       // ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_DDDS);
       ev_notif.set_notif_uri(i.get()->notif_uri);
@@ -3701,7 +3702,8 @@ void smf_context::handle_ddds( scid_t scid, uint8_t http_version) {
 
       // DDDS Status
       // TODO: where to get this information in SMF???
-      oai::smf_server::model::DddStatus ddds = oai::smf_server::model::DddStatus();
+      oai::smf_server::model::DddStatus ddds =
+          oai::smf_server::model::DddStatus();
       ev_notif.set_Ddds(ddds);
       itti_msg->event_notifs.push_back(ev_notif);
     }
@@ -3718,7 +3720,6 @@ void smf_context::handle_ddds( scid_t scid, uint8_t http_version) {
     Logger::smf_app().debug("No subscription available for this event");
   }
 }
-
 
 //------------------------------------------------------------------------------
 void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
@@ -4037,8 +4038,8 @@ void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {
     return;
   }
 
-  supi_t supi                     = scf.get()->supi;
-  supi64_t supi64                 = smf_supi_to_u64(supi);
+  supi_t supi     = scf.get()->supi;
+  supi64_t supi64 = smf_supi_to_u64(supi);
   // pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
 
   std::shared_ptr<smf_context> sc = {};
@@ -4068,7 +4069,7 @@ void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {
 
     for (auto i : subscriptions) {
       event_notification ev_notif = {};
-      ev_notif.set_supi(supi64);                    // SUPI
+      ev_notif.set_supi(supi64);  // SUPI
       // ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_PLMN_CH);
       ev_notif.set_notif_uri(i.get()->notif_uri);
@@ -4102,7 +4103,6 @@ void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {
     Logger::smf_app().debug("No subscription available for this event");
   }
 }
-
 
 //------------------------------------------------------------------------------
 void smf_context::update_qos_info(
