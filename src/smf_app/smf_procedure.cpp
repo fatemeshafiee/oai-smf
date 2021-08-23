@@ -1123,8 +1123,19 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // Update PDU session status to ACTIVE
       sps->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_ACTIVE);
 
-      // set UpCnxState to DEACTIVATED
+      // set UpCnxState to ACTIVATED
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
+      // Trigger Event_exposure event
+      std::string str_scid = n11_trigger.get()->scid;
+      // TODO: validate the str_scid
+      //
+
+      scid_t scid = (scid_t) std::stoul(str_scid, nullptr, 0);
+      sc.get()->trigger_ue_ip_change(scid, 1);
+      sc.get()->trigger_plmn_change(scid, 1);
+      sc.get()->trigger_ddds(scid, 1);
+      sc.get()->trigger_flexcn_event(scid, 1);
+
     } break;
 
       // UE-Triggered Service Request Procedure (Step 1)

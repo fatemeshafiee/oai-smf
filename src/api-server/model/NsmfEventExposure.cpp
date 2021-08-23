@@ -270,8 +270,12 @@ bool NsmfEventExposure::altNotifIpv6AddrsIsSet() const {
 void NsmfEventExposure::unsetAltNotifIpv6Addrs() {
   m_AltNotifIpv6AddrsIsSet = false;
 }
-std::vector<EventSubscription>& NsmfEventExposure::getEventSubs() {
+std::vector<EventSubscription> NsmfEventExposure::getEventSubs() const {
   return m_EventSubs;
+}
+
+void NsmfEventExposure::getEventSubs(std::vector<EventSubscription>& es) const {
+  es = m_EventSubs;
 }
 void NsmfEventExposure::setEventSubs(
     std::vector<EventSubscription> const& value) {

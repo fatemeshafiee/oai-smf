@@ -134,6 +134,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   smf_pdu_session(smf_pdu_session& b) = delete;
 
+  void get_pdu_session_id(uint32_t& psi) const;
+  uint32_t get_pdu_session_id() const;
+
   /*
    * Set UE Address for this session
    * @param [paa_t &] paa: PAA
@@ -591,14 +594,31 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
         event_sub(),
         plmn() {
     supi_prefix = {};
-    // Subscribe to sm context status change
+
+    // Subscribe to SM Context Status change (to notify to AMF)
     sm_context_status_connection =
         event_sub.subscribe_sm_context_status(boost::bind(
             &smf_context::handle_sm_context_status_change, this, _1, _2, _3));
-    // Subscribe to pdu session release (event exposure)
+    // Subscribe to PDU Session Release (event exposure)
     ee_pdu_session_release_connection =
         event_sub.subscribe_ee_pdu_session_release(boost::bind(
             &smf_context::handle_ee_pdu_session_release, this, _1, _2, _3));
+
+    // Subscribe to UE IP Change Event
+    ee_ue_ip_change_connection = event_sub.subscribe_ee_ue_ip_change(
+        boost::bind(&smf_context::handle_ue_ip_change, this, _1, _2));
+
+    // Subscribe to PLMN Change Event
+    ee_plmn_change_connection = event_sub.subscribe_ee_plmn_change(
+        boost::bind(&smf_context::handle_plmn_change, this, _1, _2));
+
+    // Subscribe to DDDS event
+    ee_ddds_connection = event_sub.subscribe_ee_ddds(
+        boost::bind(&smf_context::handle_ddds, this, _1, _2));
+
+    // Subscribe to FlexCN event
+    ee_flexcn = event_sub.subscribe_ee_flexcn_event(
+        boost::bind(&smf_context::handle_flexcn_event, this, _1, _2));
   }
 
   smf_context(smf_context& b) = delete;
@@ -610,6 +630,12 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       sm_context_status_connection.disconnect();
     if (ee_pdu_session_release_connection.connected())
       ee_pdu_session_release_connection.disconnect();
+    if (ee_ue_ip_change_connection.connected())
+      ee_ue_ip_change_connection.disconnect();
+    if (ee_plmn_change_connection.connected())
+      ee_plmn_change_connection.disconnect();
+    if (ee_ddds_connection.connected()) ee_ddds_connection.disconnect();
+    if (ee_flexcn.connected()) ee_flexcn.disconnect();
   }
 
   /*
@@ -1130,6 +1156,17 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void handle_ee_pdu_session_release(
       supi64_t supi, pdu_session_id_t pdu_session_id, uint8_t http_version);
 
+  void trigger_ue_ip_change(scid_t scid, uint8_t http_version);
+  void handle_ue_ip_change(scid_t scid, uint8_t http_version);
+
+  void trigger_plmn_change(scid_t scid, uint8_t http_version);
+  void handle_plmn_change(scid_t scid, uint8_t http_version);
+
+  void trigger_ddds(scid_t scid, uint8_t http_version);
+  void handle_ddds(scid_t scid, uint8_t http_version);
+
+  void trigger_flexcn_event(scid_t scid, uint8_t http_version);
+  void handle_flexcn_event(scid_t scid, uint8_t http_version);
   /*
    * Update QoS information in the Response message according to the content of
    * decoded NAS msg
@@ -1202,6 +1239,10 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   smf_event event_sub;
   bs2::connection sm_context_status_connection;
   bs2::connection ee_pdu_session_release_connection;
+  bs2::connection ee_ue_ip_change_connection;
+  bs2::connection ee_plmn_change_connection;
+  bs2::connection ee_ddds_connection;
+  bs2::connection ee_flexcn;
 };
 }  // namespace smf
 

@@ -495,9 +495,35 @@ void smf_sbi::notify_subscribed_event(
     json_data["notifId"]       = i.get_notif_id();
     auto event_notifs          = nlohmann::json::array();
     nlohmann::json event_notif = {};
-    event_notif["event"]       = i.get_smf_event();
+    event_notif["event"]       = smf_event_from_enum(i.get_smf_event());
     event_notif["pduSeId"]     = i.get_pdu_session_id();
     event_notif["supi"]        = std::to_string(i.get_supi());
+
+    if (i.is_ad_ipv4_addr_is_set()) {
+      event_notif["adIpv4Addr"] = i.get_ad_ipv4_addr();
+    }
+    if (i.is_re_ipv4_addr_is_set()) {
+      event_notif["reIpv4Addr"] = i.get_re_ipv4_addr();
+    }
+
+    // add support for plmn change.
+    if (i.is_plmnid_is_set()) {
+      event_notif["plmnId"] = i.get_plmnid();
+    }
+
+    // add support for ddds
+    if (i.is_ddds_is_set()) {
+      // TODO: change this one to the real value when finished the event for
+      // ddds
+      // event_notif["dddStatus"] = i.get_ddds();
+      event_notif["dddStatus"] = "TRANSMITTED";
+    }
+
+    // customized data
+    nlohmann::json customized_data = {};
+    i.get_custom_info(customized_data);
+    if (!customized_data.is_null())
+      event_notif["customized_data"] = customized_data;
     // timestamp
     std::time_t time_epoch_ntp = std::time(nullptr);
     uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;

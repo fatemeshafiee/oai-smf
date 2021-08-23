@@ -976,9 +976,40 @@ void event_exposure_msg::set_event_subs(
 void event_notification::set_smf_event(const smf_event_t& ev) {
   m_event = ev;
 }
+
 //-----------------------------------------------------------------------------
 smf_event_t event_notification::get_smf_event() const {
   return m_event;
+}
+
+//-----------------------------------------------------------------------------
+// ddds change
+void event_notification::set_Ddds(
+    oai::smf_server::model::DddStatus const& value) {
+  m_DddStatus      = value;
+  m_DddStatusIsSet = true;
+}
+oai::smf_server::model::DddStatus event_notification::get_ddds() const {
+  return m_DddStatus;
+}
+
+bool event_notification::is_ddds_is_set() const {
+  return m_DddStatusIsSet;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_timestamp(const std::string& ss) {
+  m_timestamp = ss;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::get_timestamp(std::string& ss) const {
+  ss = m_timestamp;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_timestamp() const {
+  return m_timestamp;
 }
 
 //-----------------------------------------------------------------------------
@@ -1029,6 +1060,21 @@ bool event_notification::is_re_ipv4_addr_is_set() const {
   return m_re_ipv4_addr_is_set;
 }
 
+// m_PlmnId
+void event_notification::set_PlmnId(
+    oai::smf_server::model::PlmnId const& value) {
+  m_PlmnId      = value;
+  m_PlmnIdIsSet = true;
+}
+
+oai::smf_server::model::PlmnId event_notification::get_plmnid() const {
+  return m_PlmnId;
+}
+
+bool event_notification::is_plmnid_is_set() const {
+  return m_PlmnIdIsSet;
+}
+
 //-----------------------------------------------------------------------------
 void event_notification::set_pdu_session_id(const pdu_session_id_t value) {
   m_pdu_session_id = value;
@@ -1063,6 +1109,16 @@ void event_notification::set_notif_id(std::string const& value) {
 //-----------------------------------------------------------------------------
 std::string event_notification::get_notif_id() const {
   return m_notif_id;
+}
+
+//------------------------------------------------------------------------------
+void event_notification::set_custom_info(const nlohmann::json& c) {
+  custom_info = c;
+}
+
+//------------------------------------------------------------------------------
+void event_notification::get_custom_info(nlohmann::json& c) const {
+  c = custom_info;
 }
 
 //-----------------------------------------------------------------------------

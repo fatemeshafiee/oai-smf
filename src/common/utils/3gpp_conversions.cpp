@@ -35,6 +35,7 @@
 #include "SmContextCreateData.h"
 #include "SmContextUpdateData.h"
 #include "SmContextReleaseData.h"
+#include "EventSubscription.h"
 #include "3gpp_29.500.h"
 #include "3gpp_24.501.h"
 #include "conversions.hpp"
@@ -506,23 +507,51 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
     Logger::smf_api_server().debug("PDU Session ID %d", nee.getPduSeId());
     eem.set_pdu_session_id(nee.getPduSeId());
   }
+  // TODO: groupId
+  // TODO: DNN
+  // TODO: GUAMI
 
   eem.set_notif_id(nee.getNotifId());    // NotifId
   eem.set_notif_uri(nee.getNotifUri());  // NotifUri
 
-  // EventSubscription: TODO
-  event_subscription_t event_subscription = {};
-  event_subscription.smf_event            = smf_event_t::SMF_EVENT_PDU_SES_REL;
-  std::vector<event_subscription_t> event_subscriptions = {};
-  event_subscriptions.push_back(event_subscription);
-  eem.set_event_subs(event_subscriptions);
+  std::vector<oai::smf_server::model::EventSubscription> event_subcription_api =
+      {};
+  nee.getEventSubs(event_subcription_api);
 
-  // std::vector<EventSubscription> eventSubscriptions;
-  // for (auto it: nee.getEventSubs()){
-  // event_subscription.smf_event = it.getEvent();
-  // getDnaiChgType
-  // event_subscriptions.push_back(event_subscription);
-  //}
+  std::vector<event_subscription_t> event_subscriptions = {};
+  for (auto e : event_subcription_api) {
+    // EventSubscription: TODO
+    event_subscription_t event_subscription = {};
+    uint8_t event_id_enum                   = 0;
+    std::string event_id                    = e.getEvent().get_value();
+    if (event_id.compare("AC_TY_CH") == 0) {
+      event_subscription.smf_event = smf_event_e::SMF_EVENT_AC_TY_CH;
+    } else if (event_id.compare("UP_PATH_CH") == 0) {
+      event_subscription.smf_event = smf_event_e::SMF_EVENT_UP_PATH_CH;
+    } else if (event_id.compare("PDU_SES_REL") == 0) {
+      event_subscription.smf_event = smf_event_e::SMF_EVENT_PDU_SES_REL;
+    } else if (event_id.compare("PLMN_CH") == 0) {
+      event_subscription.smf_event = smf_event_e::SMF_EVENT_PLMN_CH;
+    } else if (event_id.compare("UE_IP_CH") == 0) {
+      event_subscription.smf_event = smf_event_e::SMF_EVENT_UE_IP_CH;
+    } else if (event_id.compare("DDDS") == 0) {
+      event_subscription.smf_event = smf_event_e::SMF_EVENT_DDDS;
+    } else if (event_id.compare("FLEXCN") == 0) {
+      event_subscription.smf_event = smf_event_e::SMF_EVENT_FLEXCN;
+    } else {
+      Logger::smf_api_server().debug("Unknown SMF Event %s", event_id.c_str());
+      break;
+    }
+
+    // event_subscription.smf_event =
+    //     static_cast<smf_event_t>(e.getEvent().get_value());
+    // TODO: dnaiChType (for event UP path change)
+    // TODO: dddTraDes/ddsStati (for event downlink data delivery status)
+    // TODO: altNotifIpv4Addrs, altNotifIpv6Addrs, serviceName, ImmeRep,
+    // notifMethod, maxReportNbr, expiry
+    event_subscriptions.push_back(event_subscription);
+  }
+  eem.set_event_subs(event_subscriptions);
 }
 
 //------------------------------------------------------------------------------
