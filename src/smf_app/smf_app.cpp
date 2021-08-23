@@ -534,16 +534,6 @@ void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf) {
         // TODO: remove the session
       }
     }
-    /*
-        if (it.second->upf_node_id == node_id) {
-          supi64_t supi64 = smf_supi_to_u64(it.second->supi);
-          Logger::smf_app().debug(
-              "Remove the associated PDU session (SUPI " SUPI_64_FMT
-              ", PDU Sessin Id %d)",
-              supi64, it.second->pdu_session_id);
-          // TODO: remove the session
-        }
-        */
   }
 }
 
