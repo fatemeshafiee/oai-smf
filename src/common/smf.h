@@ -317,7 +317,16 @@ typedef struct snssai_upf_info_item_s {
   std::vector<dnn_upf_info_item_t> dnn_upf_info_list;
 } snssai_upf_info_item_t;
 
+typedef struct interface_upf_info_item_s {
+  std::string interface_type;
+  std::vector<struct in_addr> ipv4_addresses;
+  std::vector<struct in6_addr> ipv6_addresses;
+  std::string endpoint_fqdn;
+  std::string network_instance;
+} interface_upf_info_item_t;
+
 typedef struct upf_info_s {
+  std::vector<interface_upf_info_item_t> interface_upf_info_list;
   std::vector<snssai_upf_info_item_t> snssai_upf_info_list;
 } upf_info_t;
 

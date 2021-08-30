@@ -45,8 +45,10 @@ class InterfaceUpfInfoItem {
   /// <summary>
   ///
   /// </summary>
-  UPInterfaceType getInterfaceType() const;
-  void setInterfaceType(UPInterfaceType const& value);
+  // UPInterfaceType getInterfaceType() const;
+  // void setInterfaceType(UPInterfaceType const& value);
+  std::string getInterfaceType() const;
+  void setInterfaceType(std::string const& value);
   /// <summary>
   ///
   /// </summary>
@@ -80,7 +82,8 @@ class InterfaceUpfInfoItem {
   friend void from_json(const nlohmann::json& j, InterfaceUpfInfoItem& o);
 
  protected:
-  UPInterfaceType m_InterfaceType;
+  // UPInterfaceType m_InterfaceType;
+  std::string m_InterfaceType;
 
   std::vector<std::string> m_Ipv4EndpointAddresses;
   bool m_Ipv4EndpointAddressesIsSet;
