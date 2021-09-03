@@ -1,5 +1,12 @@
 # RELEASE NOTES: #
 
+## v1.2.0 -- September 2021 ##
+
+* Event Exposure implemented
+* UPF profile update
+* Support for URR query
+* Bug fixes
+
 ## v1.1.0 -- July 2021 ##
 
 * PFCP Release 16 support
