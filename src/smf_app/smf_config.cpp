@@ -884,7 +884,7 @@ int smf_config::load(const string& config_file) {
 //------------------------------------------------------------------------------
 void smf_config::display() {
   Logger::smf_app().info(
-      "==== EURECOM %s v%s ====", PACKAGE_NAME, PACKAGE_VERSION);
+      "==== OAI-CN5G %s v%s ====", PACKAGE_NAME, PACKAGE_VERSION);
   Logger::smf_app().info("Configuration SMF:");
   Logger::smf_app().info("- Instance ..............: %d\n", instance);
   Logger::smf_app().info("- PID dir ...............: %s\n", pid_dir.c_str());
