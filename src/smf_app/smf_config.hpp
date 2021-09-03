@@ -110,6 +110,7 @@
 #define SMF_CONFIG_STRING_NRF "NRF"
 #define SMF_CONFIG_STRING_NRF_IPV4_ADDRESS "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_NRF_PORT "PORT"
+#define SMF_CONFIG_STRING_NRF_HTTP_VERSION "HTTP_VERSION"
 
 #define SMF_CONFIG_STRING_LOCAL_CONFIGURATION "LOCAL_CONFIGURATION"
 #define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST                 \
@@ -241,6 +242,7 @@ class smf_config {
   struct {
     struct in_addr ipv4_addr;
     unsigned int port;
+    unsigned int http_version;
     std::string api_version;
     std::string fqdn;
   } nrf_addr;

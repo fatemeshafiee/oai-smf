@@ -760,7 +760,15 @@ int smf_config::load(const string& config_file) {
       const Setting& nrf_cfg       = smf_cfg[SMF_CONFIG_STRING_NRF];
       struct in_addr nrf_ipv4_addr = {};
       unsigned int nrf_port        = {0};
+      unsigned int httpVersion     = {0};
       std::string nrf_api_version  = {};
+
+      if (!(nrf_cfg.lookupValue(
+              SMF_CONFIG_STRING_NRF_HTTP_VERSION, httpVersion))) {
+        Logger::smf_app().error(SMF_CONFIG_STRING_NRF_HTTP_VERSION "failed");
+        throw(SMF_CONFIG_STRING_NRF_HTTP_VERSION "failed");
+      }
+      nrf_addr.http_version = httpVersion;
 
       if (!use_fqdn_dns) {
         nrf_cfg.lookupValue(SMF_CONFIG_STRING_NRF_IPV4_ADDRESS, astring);
