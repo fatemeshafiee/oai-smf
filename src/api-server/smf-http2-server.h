@@ -35,6 +35,7 @@
 #include "SmContextUpdateMessage.h"
 #include "SmContextMessage.h"
 #include "SmContextReleaseMessage.h"
+#include "NFStatusNotifyApiImpl.h"
 #include "uint_generator.hpp"
 #include "smf.h"
 
@@ -59,6 +60,10 @@ class smf_http2_server {
       const std::string& smf_ref,
       const SmContextReleaseMessage& smContextReleaseMessage,
       const response& response);
+
+  void nf_status_notify_handler(
+      const NotificationData& notificationData, const response& response);
+
   void stop();
 
  private:
