@@ -156,10 +156,11 @@ int session_create_sm_context_procedure::run(
   //-------------------
   // IE network instance
   //-------------------
-  bool nwi_enabled       = false;
+  bool nwi_list_present  = false;
   uint8_t nwi_list_index = 0;
-  if (smf_cfg.get_nwi_list_index(nwi_enabled, nwi_list_index, node_id))
-    nwi_enabled = true;
+  if (smf_cfg.get_nwi_list_index(nwi_list_present, nwi_list_index, node_id) &
+      smf_cfg.use_nwi)
+    nwi_list_present = true;
 
   //*******************
   // UPLINK
@@ -182,7 +183,7 @@ int session_create_sm_context_procedure::run(
       pfcp::INTERFACE_VALUE_CORE;  // ACCESS is for downlink, CORE for uplink
   forwarding_parameters.set(destination_interface);
 
-  if (nwi_enabled) {
+  if (nwi_list_present) {
     pfcp::network_instance_t network_instance = {};
     network_instance.network_instance =
         smf_cfg.upf_nwi_list[nwi_list_index].domain_core;
@@ -236,7 +237,7 @@ int session_create_sm_context_procedure::run(
   source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
   pdi.set(source_interface);
 
-  if (nwi_enabled) {
+  if (nwi_list_present) {
     pfcp::network_instance_t network_instance = {};
     network_instance.network_instance = smf_cfg.upf_nwi_list[0].domain_access;
     pdi.set(network_instance);
@@ -571,10 +572,11 @@ int session_update_sm_context_procedure::run(
   //-------------------
   // IE network instance
   //-------------------
-  bool nwi_enabled       = false;
+  bool nwi_list_present  = false;
   uint8_t nwi_list_index = 0;
-  if (smf_cfg.get_nwi_list_index(nwi_enabled, nwi_list_index, up_node_id))
-    nwi_enabled = true;
+  if (smf_cfg.get_nwi_list_index(nwi_list_present, nwi_list_index, up_node_id) &
+      smf_cfg.use_nwi)
+    nwi_list_present = true;
 
   //-------------------
   n11_trigger           = sm_context_req;
@@ -709,7 +711,7 @@ int session_update_sm_context_procedure::run(
           destination_interface.interface_value =
               pfcp::INTERFACE_VALUE_ACCESS;  // ACCESS is for downlink, CORE for
                                              // uplink
-          if (nwi_enabled) {
+          if (nwi_list_present) {
             pfcp::network_instance_t network_instance = {};
             network_instance.network_instance =
                 smf_cfg.upf_nwi_list[0].domain_access;
@@ -767,7 +769,7 @@ int session_update_sm_context_procedure::run(
           // pfcp::framed_routing_t           framed_routing = {};
           // pfcp::framed_ipv6_route_t        framed_ipv6_route = {};
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
-          if (nwi_enabled) {
+          if (nwi_list_present) {
             pfcp::network_instance_t network_instance =
                 {};  // mandatory for travelping
             network_instance.network_instance =
@@ -855,7 +857,7 @@ int session_update_sm_context_procedure::run(
           precedence.precedence = flow.precedence.precedence;
 
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
-          if (nwi_enabled) {
+          if (nwi_list_present) {
             pfcp::network_instance_t network_instance =
                 {};  // mandatory for travelping
             network_instance.network_instance =

@@ -144,6 +144,8 @@
 #define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO                                   \
   "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS "USE_FQDN_DNS"
+#define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_NETWORK_INSTANCE                \
+  "USE_NETWORK_INSTANCE"
 
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -226,6 +228,7 @@ class smf_config {
   bool discover_upf;
   bool use_local_subscription_info;
   bool use_fqdn_dns;
+  bool use_nwi;
 
   struct {
     struct in_addr ipv4_addr;
@@ -251,15 +254,16 @@ class smf_config {
   } nrf_addr;
 
   // Network instance
-  bool network_instance_configuration;
-#define SMF_NUM_NETWORK_INSTANCE_LIST_MAX 10
-  struct {
+  // bool network_instance_configuration;
+  struct upf_nwi_list_s {
     pfcp::node_id_t upf_id;
     std::string domain_access;
     std::string domain_core;
     //      std::string domain_sgi_lan;
-  } upf_nwi_list[SMF_NUM_NETWORK_INSTANCE_LIST_MAX];
-  uint8_t num_upf_network_instance_list;
+  };
+  typedef struct upf_nwi_list_s upf_nwi_list_t;
+
+  std::vector<upf_nwi_list_t> upf_nwi_list;
 
 #define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 10
   struct {
