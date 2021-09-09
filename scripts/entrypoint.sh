@@ -5,6 +5,11 @@ set -euo pipefail
 CONFIG_DIR="/openair-smf/etc"
 
 # Default values
+# (Default NWI Domain for all UPFs in OAI-Integration)
+USE_NETWORK_INSTANCE=${USE_NETWORK_INSTANCE:-no}
+DOMAIN_ACCESS=${DOMAIN_ACCESS:-access.oai.org}
+DOMAIN_CORE=${DOMAIN_CORE:-core.oai.org}
+
 if [[ ${USE_FQDN_DNS} == "yes" ]];then
     AMF_IPV4_ADDRESS=${AMF_IPV4_ADDRESS:-0.0.0.0}
     NRF_IPV4_ADDRESS=${NRF_IPV4_ADDRESS:-0.0.0.0}

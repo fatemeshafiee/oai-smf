@@ -153,6 +153,15 @@ int session_create_sm_context_procedure::run(
   cp_fseid.seid = sps->seid;
   n4_triggered->pfcp_ies.set(cp_fseid);
 
+  //-------------------
+  // IE network instance
+  //-------------------
+  bool nwi_list_present  = false;
+  uint8_t nwi_list_index = 0;
+  if (smf_cfg.get_nwi_list_index(nwi_list_present, nwi_list_index, node_id) &
+      smf_cfg.use_nwi)
+    nwi_list_present = true;
+
   //*******************
   // UPLINK
   //*******************
@@ -173,7 +182,14 @@ int session_create_sm_context_procedure::run(
   destination_interface.interface_value =
       pfcp::INTERFACE_VALUE_CORE;  // ACCESS is for downlink, CORE for uplink
   forwarding_parameters.set(destination_interface);
-  // TODO: Network Instance
+
+  if (nwi_list_present) {
+    pfcp::network_instance_t network_instance = {};
+    network_instance.network_instance =
+        smf_cfg.upf_nwi_list[nwi_list_index].domain_core;
+    forwarding_parameters.set(network_instance);
+  }
+
   // TODO: Redirect Information
   // TODO: Outer Header Creation (e.g., in case of N9)
 
@@ -220,6 +236,13 @@ int session_create_sm_context_procedure::run(
   // Session Establishment Request, 3GPP TS 29.244 V16.0.0)  source interface
   source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
   pdi.set(source_interface);
+
+  if (nwi_list_present) {
+    pfcp::network_instance_t network_instance = {};
+    network_instance.network_instance = smf_cfg.upf_nwi_list[0].domain_access;
+    pdi.set(network_instance);
+  }
+
   // CN tunnel info
   local_fteid.ch =
       1;  // SMF requests the UPF to assign a local F-TEID to the PDR
@@ -547,6 +570,15 @@ int session_update_sm_context_procedure::run(
   */
 
   //-------------------
+  // IE network instance
+  //-------------------
+  bool nwi_list_present  = false;
+  uint8_t nwi_list_index = 0;
+  if (smf_cfg.get_nwi_list_index(nwi_list_present, nwi_list_index, up_node_id) &
+      smf_cfg.use_nwi)
+    nwi_list_present = true;
+
+  //-------------------
   n11_trigger           = sm_context_req;
   n11_triggered_pending = sm_context_resp;
   uint64_t seid         = smf_app_inst->generate_seid();
@@ -679,6 +711,12 @@ int session_update_sm_context_procedure::run(
           destination_interface.interface_value =
               pfcp::INTERFACE_VALUE_ACCESS;  // ACCESS is for downlink, CORE for
                                              // uplink
+          if (nwi_list_present) {
+            pfcp::network_instance_t network_instance = {};
+            network_instance.network_instance =
+                smf_cfg.upf_nwi_list[0].domain_access;
+            forwarding_parameters.set(network_instance);
+          }
           forwarding_parameters.set(destination_interface);
           outer_header_creation.outer_header_creation_description =
               OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
@@ -731,7 +769,13 @@ int session_update_sm_context_procedure::run(
           // pfcp::framed_routing_t           framed_routing = {};
           // pfcp::framed_ipv6_route_t        framed_ipv6_route = {};
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
-
+          if (nwi_list_present) {
+            pfcp::network_instance_t network_instance =
+                {};  // mandatory for travelping
+            network_instance.network_instance =
+                smf_cfg.upf_nwi_list[0].domain_core;
+            pdi.set(network_instance);
+          }
           // local_fteid.from_core_fteid(qos_flow.qos_flow.dl_fteid);
           if (sps->ipv4) {
             ue_ip_address.v4 = 1;
@@ -813,6 +857,13 @@ int session_update_sm_context_procedure::run(
           precedence.precedence = flow.precedence.precedence;
 
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
+          if (nwi_list_present) {
+            pfcp::network_instance_t network_instance =
+                {};  // mandatory for travelping
+            network_instance.network_instance =
+                smf_cfg.upf_nwi_list[0].domain_core;
+            pdi.set(network_instance);
+          }
           pdi.set(source_interface);
           pdi.set(ue_ip_address);
 
