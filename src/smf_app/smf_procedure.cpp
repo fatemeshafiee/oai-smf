@@ -158,7 +158,7 @@ int session_create_sm_context_procedure::run(
   //-------------------
   bool nwi_list_present  = false;
   uint8_t nwi_list_index = 0;
-  if (smf_cfg.get_nwi_list_index(nwi_list_present, nwi_list_index, node_id) &
+  if (smf_cfg.get_nwi_list_index(nwi_list_present, nwi_list_index, up_node_id) &
       smf_cfg.use_nwi)
     nwi_list_present = true;
 
