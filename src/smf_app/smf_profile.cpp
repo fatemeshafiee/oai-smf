@@ -519,6 +519,26 @@ void upf_profile::display() const {
       Logger::smf_app().debug("\t\t\tDNN %s", d.dnn.c_str());
     }
   }
+  if (!upf_info.interface_upf_info_list.empty()) {
+    for (auto s : upf_info.interface_upf_info_list) {
+      std::string network_instance               = {};
+      std::string endpoint_fqdn                  = {};
+      std::vector<struct in_addr> ipv4_addresses = {};
+      // std::vector<struct in6_addr> ipv6_addresses = {};
+      if (!s.network_instance.empty()) network_instance = s.network_instance;
+      if (!s.endpoint_fqdn.empty()) endpoint_fqdn = s.endpoint_fqdn;
+      Logger::smf_app().debug(
+          "\t\tINTERFACE UPF Info List, Interface Type : %s, Network Instance "
+          "%s, EndpointFqdn: %s",
+          s.interface_type.c_str(), s.network_instance.c_str(),
+          s.endpoint_fqdn.c_str());
+      if (s.ipv4_addresses.size() > 0)
+        Logger::smf_app().debug("\t\t\tINTERFACE UPF Info List, IPv4 Addr:");
+      for (auto address : s.ipv4_addresses) {
+        Logger::smf_app().debug("\t\t\t\t\t\t %s", inet_ntoa(address));
+      }
+    }
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -540,7 +560,24 @@ void upf_profile::to_json(nlohmann::json& data) const {
     }
     data["upfInfo"]["sNssaiUpfInfoList"].push_back(tmp);
   }
-
+  if (!upf_info.interface_upf_info_list.empty()) {
+    data["upfInfo"]["interfaceUpfInfoList"] = nlohmann::json::array();
+    for (auto s : upf_info.interface_upf_info_list) {
+      nlohmann::json tmp   = {};
+      tmp["interfaceType"] = s.interface_type;
+      if (!s.endpoint_fqdn.empty()) tmp["endpointFqdn"] = s.endpoint_fqdn;
+      if (!s.network_instance.empty())
+        tmp["networkInstance"] = s.network_instance;
+      if (s.ipv4_addresses.size() > 0) {
+        tmp["ipv4EndpointAddresses"] = nlohmann::json::array();
+        for (auto address : s.ipv4_addresses) {
+          tmp["ipv4EndpointAddresses"].push_back(inet_ntoa(address));
+        }
+      }
+      // ToDo for ipv6
+      data["upfInfo"]["interfaceUpfInfoList"].push_back(tmp);
+    }
+  }
   Logger::smf_app().debug("UPF profile to json:\n %s", data.dump().c_str());
 }
 
@@ -574,6 +611,42 @@ void upf_profile::from_json(const nlohmann::json& data) {
           }
         }
         upf_info.snssai_upf_info_list.push_back(upf_info_item);
+      }
+    }
+    if (info.find("interfaceUpfInfoList") != info.end()) {
+      nlohmann::json interface_upf_info_list =
+          data["upfInfo"]["interfaceUpfInfoList"];
+      for (auto it : interface_upf_info_list) {
+        interface_upf_info_item_t up_interface_info_item = {};
+        if (it.find("interfaceType") != it.end())
+          up_interface_info_item.interface_type =
+              it["interfaceType"].get<std::string>();
+        if (it.find("networkInstance") != it.end())
+          up_interface_info_item.network_instance =
+              it["networkInstance"].get<std::string>();
+        if (it.find("endpointFqdn") != it.end())
+          up_interface_info_item.endpoint_fqdn =
+              it["endpointFqdn"].get<std::string>();
+        if (it.find("ipv4EndpointAddresses") != it.end()) {
+          nlohmann::json addresses = it["ipv4EndpointAddresses"];
+
+          for (auto d : addresses) {
+            struct in_addr addr4 = {};
+            std::string address  = d.get<std::string>();
+            unsigned char buf_in_addr[sizeof(struct in_addr)];
+            if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) ==
+                1) {
+              memcpy(&addr4, buf_in_addr, sizeof(struct in_addr));
+            } else {
+              Logger::smf_app().warn(
+                  "Address conversion: Bad value %s",
+                  util::trim(address).c_str());
+            }
+            up_interface_info_item.ipv4_addresses.push_back(addr4);
+          }
+        }
+        // ToDo for ipv6
+        upf_info.interface_upf_info_list.push_back(up_interface_info_item);
       }
     }
   }

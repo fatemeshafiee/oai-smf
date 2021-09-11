@@ -604,6 +604,14 @@ int smf_config::load(const string& config_file) {
           SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION, httpVersion);
       http_version = httpVersion;
 
+      support_features.lookupValue(
+          SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_NETWORK_INSTANCE, opt);
+      if (boost::iequals(opt, "yes")) {
+        use_nwi = true;
+      } else {
+        use_nwi = false;
+      }
+
     } catch (const SettingNotFoundException& nfex) {
       Logger::smf_app().error(
           "%s : %s, using defaults", nfex.what(), nfex.getPath());
@@ -707,12 +715,13 @@ int smf_config::load(const string& config_file) {
       for (int i = 0; i < count; i++) {
         const Setting& upf_cfg = upf_list_cfg[i];
         // TODO FQDN
-        string address = {};
+        string address    = {};
+        pfcp::node_id_t n = {};
         if (!use_fqdn_dns) {
           if (upf_cfg.lookupValue(
                   SMF_CONFIG_STRING_UPF_IPV4_ADDRESS, address)) {
-            pfcp::node_id_t n = {};
-            n.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;  // actually
+            // pfcp::node_id_t n = {};
+            n.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;  // actually
             if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) ==
                 1) {
               memcpy(&n.u1.ipv4_address, buf_in_addr, sizeof(struct in_addr));
@@ -741,9 +750,9 @@ int smf_config::load(const string& config_file) {
             // TODO:
             throw("DO NOT SUPPORT IPV6 ADDR FOR NRF!");
           } else {  // IPv4
-            pfcp::node_id_t n = {};
-            n.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;  // actually
-            n.fqdn            = astring;
+            // pfcp::node_id_t n = {};
+            n.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;  // actually
+            n.fqdn         = astring;
             if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) ==
                 1) {
               memcpy(&n.u1.ipv4_address, buf_in_addr, sizeof(struct in_addr));
@@ -755,6 +764,25 @@ int smf_config::load(const string& config_file) {
               throw("CONFIG: BAD ADDRESS in " SMF_CONFIG_STRING_UPF_LIST);
             }
             upfs.push_back(n);
+          }
+        }
+        // Network Instance
+        if (upf_cfg.exists(SMF_CONFIG_STRING_NWI_LIST) & use_nwi) {
+          const Setting& nwi_cfg = upf_cfg[SMF_CONFIG_STRING_NWI_LIST];
+          count                  = nwi_cfg.getLength();
+          // Check if NWI list for given UPF is present
+          if (count > 0) {
+            upf_nwi_list_t upf_nwi;
+            nwi_cfg[0].lookupValue(
+                SMF_CONFIG_STRING_DOMAIN_ACCESS, upf_nwi.domain_access);
+            nwi_cfg[0].lookupValue(
+                SMF_CONFIG_STRING_DOMAIN_CORE, upf_nwi.domain_core);
+            upf_nwi.upf_id = n;
+            Logger::smf_app().debug(
+                "NWI config found for UP node:-\t Nwi access: %s , \t Nwi "
+                "core: %s",
+                upf_nwi.domain_access.c_str(), upf_nwi.domain_core.c_str());
+            upf_nwi_list.push_back(upf_nwi);
           }
         }
       }
@@ -889,7 +917,7 @@ int smf_config::load(const string& config_file) {
 //------------------------------------------------------------------------------
 void smf_config::display() {
   Logger::smf_app().info(
-      "==== EURECOM %s v%s ====", PACKAGE_NAME, PACKAGE_VERSION);
+      "==== OAI-CN5G %s v%s ====", PACKAGE_NAME, PACKAGE_VERSION);
   Logger::smf_app().info("Configuration SMF:");
   Logger::smf_app().info("- Instance ..............: %d\n", instance);
   Logger::smf_app().info("- PID dir ...............: %s\n", pid_dir.c_str());
@@ -1019,6 +1047,8 @@ void smf_config::display() {
       "    Push PCO (DNS+MTU).........: %s", force_push_pco ? "Yes" : "No");
   Logger::smf_app().info(
       "    Use FQDN ..................: %s", use_fqdn_dns ? "Yes" : "No");
+  Logger::smf_app().info(
+      "    Use NWI  ..................: %s", use_nwi ? "Yes" : "No");
 
   Logger::smf_app().info("- AMF:");
   Logger::smf_app().info(
@@ -1186,4 +1216,34 @@ bool smf_config::is_dotted_dnn_handled(
 std::string smf_config::get_default_dnn() {
   Logger::smf_app().debug("Default DNN: %s", smf_cfg.dnn[0].dnn.c_str());
   return smf_cfg.dnn[0].dnn;
+}
+
+//------------------------------------------------------------------------------
+bool smf_config::get_nwi_list_index(
+    bool nwi_enabled, uint8_t nwi_list_index, pfcp::node_id_t node_id) {
+  Logger::smf_app().debug("Default DNN: %s", smf_cfg.dnn[0].dnn.c_str());
+  // return smf_cfg.dnn[0].dnn;
+  if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+    for (int i = 0; i < upf_nwi_list.size(); i++) {
+      if (node_id.u1.ipv4_address.s_addr ==
+          upf_nwi_list[i].upf_id.u1.ipv4_address.s_addr) {
+        nwi_list_index = i;
+        nwi_enabled    = true;
+        return true;
+      }
+    }
+    nwi_enabled = false;
+    return false;
+  }
+  if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+    for (int i = 0; i < upf_nwi_list.size(); i++) {
+      if (node_id.fqdn == upf_nwi_list[i].upf_id.fqdn) {
+        nwi_list_index = i;
+        nwi_enabled    = true;
+        return true;
+      }
+    }
+    nwi_enabled = false;
+    return false;
+  }
 }

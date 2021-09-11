@@ -111,6 +111,11 @@
 #define SMF_CONFIG_STRING_NRF_IPV4_ADDRESS "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_NRF_PORT "PORT"
 
+#define SMF_CONFIG_STRING_NWI_LIST "NWI_LIST"
+#define SMF_CONFIG_STRING_DOMAIN_ACCESS "DOMAIN_ACCESS"
+#define SMF_CONFIG_STRING_DOMAIN_CORE "DOMAIN_CORE"
+#define SMF_CONFIG_STRING_DOMAIN_SGI_LAN "DOMAIN_SGI_LAN"
+
 #define SMF_CONFIG_STRING_LOCAL_CONFIGURATION "LOCAL_CONFIGURATION"
 #define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST                 \
   "SESSION_MANAGEMENT_SUBSCRIPTION_LIST"
@@ -140,6 +145,8 @@
   "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS "USE_FQDN_DNS"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION "HTTP_VERSION"
+#define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_NETWORK_INSTANCE                \
+  "USE_NETWORK_INSTANCE"
 
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -223,6 +230,7 @@ class smf_config {
   bool use_local_subscription_info;
   bool use_fqdn_dns;
   unsigned int http_version;
+  bool use_nwi;
 
   struct {
     struct in_addr ipv4_addr;
@@ -247,6 +255,18 @@ class smf_config {
     std::string api_version;
     std::string fqdn;
   } nrf_addr;
+
+  // Network instance
+  // bool network_instance_configuration;
+  struct upf_nwi_list_s {
+    pfcp::node_id_t upf_id;
+    std::string domain_access;
+    std::string domain_core;
+    //      std::string domain_sgi_lan;
+  };
+  typedef struct upf_nwi_list_s upf_nwi_list_t;
+
+  std::vector<upf_nwi_list_t> upf_nwi_list;
 
 #define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 10
   struct {
@@ -341,6 +361,8 @@ class smf_config {
   bool is_dotted_dnn_handled(
       const std::string& dnn, const pdu_session_type_t& pdn_session_type);
   std::string get_default_dnn();
+  bool get_nwi_list_index(
+      bool nwi_enabled, uint8_t nwi_list_index, pfcp::node_id_t node_id);
 };
 
 }  // namespace smf
