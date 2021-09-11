@@ -110,7 +110,6 @@
 #define SMF_CONFIG_STRING_NRF "NRF"
 #define SMF_CONFIG_STRING_NRF_IPV4_ADDRESS "IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_NRF_PORT "PORT"
-#define SMF_CONFIG_STRING_NRF_HTTP_VERSION "HTTP_VERSION"
 
 #define SMF_CONFIG_STRING_LOCAL_CONFIGURATION "LOCAL_CONFIGURATION"
 #define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST                 \
@@ -140,6 +139,7 @@
 #define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO                                   \
   "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS "USE_FQDN_DNS"
+#define SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION "HTTP_VERSION"
 
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -222,6 +222,7 @@ class smf_config {
   bool discover_upf;
   bool use_local_subscription_info;
   bool use_fqdn_dns;
+  unsigned int http_version;
 
   struct {
     struct in_addr ipv4_addr;

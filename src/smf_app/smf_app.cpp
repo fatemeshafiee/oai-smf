@@ -1625,7 +1625,7 @@ void smf_app::timer_nrf_heartbeat_timeout(
   patch_item.setValue("REGISTERED");
   itti_msg->patch_items.push_back(patch_item);
   itti_msg->smf_instance_id = smf_instance_id;
-  itti_msg->http_version    = smf_cfg.nrf_addr.http_version;
+  itti_msg->http_version    = smf_cfg.http_version;
 
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
@@ -2072,7 +2072,7 @@ void smf_app::trigger_nf_registration_request() {
       std::make_shared<itti_n11_register_nf_instance_request>(
           TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->profile      = nf_instance_profile;
-  itti_msg->http_version = smf_cfg.nrf_addr.http_version;
+  itti_msg->http_version = smf_cfg.http_version;
   int ret                = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
@@ -2090,7 +2090,7 @@ void smf_app::trigger_nf_deregistration() {
       std::make_shared<itti_n11_deregister_nf_instance>(
           TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->smf_instance_id = smf_instance_id;
-  itti_msg->http_version    = smf_cfg.nrf_addr.http_version;
+  itti_msg->http_version    = smf_cfg.http_version;
   int ret                   = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
@@ -2111,7 +2111,7 @@ void smf_app::trigger_upf_status_notification_subscribe() {
 
   nlohmann::json json_data = {};
   unsigned int port        = smf_cfg.sbi.port;
-  if (smf_cfg.nrf_addr.http_version == 2) port = smf_cfg.sbi_http2_port;
+  if (smf_cfg.http_version == 2) port = smf_cfg.sbi_http2_port;
   // TODO: remove hardcoded values
   json_data["nfStatusNotificationUri"] =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))) + ":" +
@@ -2131,7 +2131,7 @@ void smf_app::trigger_upf_status_notification_subscribe() {
 
   itti_msg->url          = url;
   itti_msg->json_data    = json_data;
-  itti_msg->http_version = smf_cfg.nrf_addr.http_version;
+  itti_msg->http_version = smf_cfg.http_version;
   int ret                = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(

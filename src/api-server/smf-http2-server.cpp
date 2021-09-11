@@ -561,7 +561,7 @@ void smf_http2_server::nf_status_notify_handler(
 
   smf::data_notification_msg notification_msg = {};
   nlohmann::json json_data                    = {};
-  std::string content_type                    = "application/json";
+  std::string content_type                    = "application/problem+json";
 
   // convert from NotificationData to data_notification_msg
   xgpp_conv::data_notification_from_openapi(notificationData, notification_msg);
@@ -570,23 +570,22 @@ void smf_http2_server::nf_status_notify_handler(
   std::shared_ptr<itti_sbi_notification_data> itti_msg =
       std::make_shared<itti_sbi_notification_data>(TASK_SMF_SBI, TASK_SMF_APP);
   itti_msg->notification_msg = notification_msg;
-  itti_msg->http_version     = 1;
+  itti_msg->http_version     = 2;
 
   ProblemDetails problem_details = {};
   uint8_t http_code              = 0;
   header_map h;
-  h.emplace(
-      "location",
-      header_value{m_address + "/nsmf-nfstatus-notify/v1/subscriptions"});
-  h.emplace("content-type", header_value{content_type});
-  response.write_head(http_code, h);
-  response.end(json_data.dump().c_str());
 
   if (m_smf_app->handle_nf_status_notification(
-          itti_msg, problem_details, http_code))
+          itti_msg, problem_details, http_code)) {
+    http_code = 204;
+    response.write_head(http_code, h);
     response.end();
-  else
+  } else {
+    to_json(json_data, problem_details);
+    h.emplace("content-type", header_value{content_type});
     response.end(json_data.dump().c_str());
+  }
 }
 //------------------------------------------------------------------------------
 void smf_http2_server::stop() {
