@@ -825,8 +825,17 @@ int smf_config::load(const string& config_file) {
           IPV4_STR_ADDR_TO_INADDR(
               util::trim(address).c_str(), nrf_ipv4_addr,
               "BAD IPv4 ADDRESS FORMAT FOR NRF !");
-          nrf_addr.ipv4_addr   = nrf_ipv4_addr;
-          nrf_addr.port        = nrf_port;
+          nrf_addr.ipv4_addr = nrf_ipv4_addr;
+          // nrf_addr.port        = nrf_port;
+
+          // We hardcode nrf port from config for the moment
+          if (!(nrf_cfg.lookupValue(SMF_CONFIG_STRING_NRF_PORT, nrf_port))) {
+            Logger::smf_app().error(SMF_CONFIG_STRING_NRF_PORT "failed");
+            throw(SMF_CONFIG_STRING_NRF_PORT "failed");
+          }
+          nrf_addr.port = nrf_port;
+          //
+
           nrf_addr.api_version = "v1";  // TODO: to get API version from DNS
           nrf_addr.fqdn        = astring;
         }
