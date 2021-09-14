@@ -701,8 +701,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   std::string n1_sm_message, n1_sm_message_hex;
   nas_message_t decoded_nas_msg       = {};
   cause_value_5gsm_e cause_n1         = {cause_value_5gsm_e::CAUSE_0_UNKNOWN};
-  pdu_session_type_t pdu_session_type = {.pdu_session_type =
-                                             PDU_SESSION_TYPE_E_IPV4};
+  pdu_session_type_t pdu_session_type = {
+      .pdu_session_type = PDU_SESSION_TYPE_E_IPV4};
 
   // Step 1. Decode NAS and get the necessary information
   int decoder_rc = smf_n1::get_instance().decode_n1_sm_container(
@@ -1625,6 +1625,7 @@ void smf_app::timer_nrf_heartbeat_timeout(
   patch_item.setValue("REGISTERED");
   itti_msg->patch_items.push_back(patch_item);
   itti_msg->smf_instance_id = smf_instance_id;
+  itti_msg->http_version    = smf_cfg.http_version;
 
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
@@ -2070,8 +2071,9 @@ void smf_app::trigger_nf_registration_request() {
   std::shared_ptr<itti_n11_register_nf_instance_request> itti_msg =
       std::make_shared<itti_n11_register_nf_instance_request>(
           TASK_SMF_APP, TASK_SMF_SBI);
-  itti_msg->profile = nf_instance_profile;
-  int ret           = itti_inst->send_msg(itti_msg);
+  itti_msg->profile      = nf_instance_profile;
+  itti_msg->http_version = smf_cfg.http_version;
+  int ret                = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_SBI",
@@ -2088,6 +2090,7 @@ void smf_app::trigger_nf_deregistration() {
       std::make_shared<itti_n11_deregister_nf_instance>(
           TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->smf_instance_id = smf_instance_id;
+  itti_msg->http_version    = smf_cfg.http_version;
   int ret                   = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
@@ -2107,10 +2110,12 @@ void smf_app::trigger_upf_status_notification_subscribe() {
           TASK_SMF_APP, TASK_SMF_SBI);
 
   nlohmann::json json_data = {};
+  unsigned int port        = smf_cfg.sbi.port;
+  if (smf_cfg.http_version == 2) port = smf_cfg.sbi_http2_port;
   // TODO: remove hardcoded values
   json_data["nfStatusNotificationUri"] =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))) + ":" +
-      std::to_string(smf_cfg.sbi.port) + "/nsmf-nfstatus-notify/" +
+      std::to_string(port) + "/nsmf-nfstatus-notify/" +
       smf_cfg.sbi_api_version + "/subscriptions";
 
   json_data["subscrCond"]["NfTypeCond"]["nfType"] = "UPF";
@@ -2124,9 +2129,10 @@ void smf_app::trigger_upf_status_notification_subscribe() {
       ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
       smf_cfg.nrf_addr.api_version + NNRF_NF_STATUS_SUBSCRIBE_URL;
 
-  itti_msg->url       = url;
-  itti_msg->json_data = json_data;
-  int ret             = itti_inst->send_msg(itti_msg);
+  itti_msg->url          = url;
+  itti_msg->json_data    = json_data;
+  itti_msg->http_version = smf_cfg.http_version;
+  int ret                = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_SBI",

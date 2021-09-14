@@ -144,6 +144,7 @@
 #define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO                                   \
   "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS "USE_FQDN_DNS"
+#define SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION "HTTP_VERSION"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_NETWORK_INSTANCE                \
   "USE_NETWORK_INSTANCE"
 
@@ -228,6 +229,7 @@ class smf_config {
   bool discover_upf;
   bool use_local_subscription_info;
   bool use_fqdn_dns;
+  unsigned int http_version;
   bool use_nwi;
 
   struct {
@@ -249,6 +251,7 @@ class smf_config {
   struct {
     struct in_addr ipv4_addr;
     unsigned int port;
+    unsigned int http_version;
     std::string api_version;
     std::string fqdn;
   } nrf_addr;

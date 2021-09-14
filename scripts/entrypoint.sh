@@ -16,6 +16,7 @@ if [[ ${USE_FQDN_DNS} == "yes" ]];then
     UPF_IPV4_ADDRESS=${UPF_IPV4_ADDRESS:-0.0.0.0}
     UDM_IPV4_ADDRESS=${UDM_IPV4_ADDRESS:-0.0.0.0}
 fi
+HTTP_VERSION=${HTTP_VERSION:-1}
 
 for c in ${CONFIG_DIR}/*.conf; do
     # grep variable names (format: ${VAR}) from template to be rendered

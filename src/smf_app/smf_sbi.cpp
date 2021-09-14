@@ -596,7 +596,8 @@ void smf_sbi::register_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  if (!curl_create_handle(url, body, response_data, pid_ptr, "PUT")) {
+  if (!curl_create_handle(
+          url, body, response_data, pid_ptr, "PUT", msg->http_version)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return;
@@ -680,7 +681,8 @@ void smf_sbi::update_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  if (!curl_create_handle(url, body, response_data, pid_ptr, "PATCH")) {
+  if (!curl_create_handle(
+          url, body, response_data, pid_ptr, "PATCH", msg->http_version)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return;
@@ -747,7 +749,8 @@ void smf_sbi::deregister_nf_instance(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  if (!curl_create_handle(url, response_data, pid_ptr, "DELETE")) {
+  if (!curl_create_handle(
+          url, response_data, pid_ptr, "DELETE", msg->http_version)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return;
@@ -799,7 +802,8 @@ void smf_sbi::subscribe_upf_status_notify(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  if (!curl_create_handle(msg->url, body, response_data, pid_ptr, "POST")) {
+  if (!curl_create_handle(
+          msg->url, body, response_data, pid_ptr, "POST", msg->http_version)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return;
