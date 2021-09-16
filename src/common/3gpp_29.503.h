@@ -50,6 +50,14 @@ typedef struct ssc_mode_s {
       ssc_mode = ssc_mode_e::SSC_MODE_1;  // default mode
     }
   }
+
+  ssc_mode_s& operator=(const ssc_mode_s& s) {
+    ssc_mode = s.ssc_mode;
+    return *this;
+  }
+
+  virtual ~ssc_mode_s(){};
+
 } ssc_mode_t;
 
 typedef struct pdu_session_types_s {
@@ -143,6 +151,33 @@ typedef struct ip_address_s {
       return false;
     }
   };
+
+  ip_address_s& operator=(const struct in_addr& a) {
+    ip_address_type        = IP_ADDRESS_TYPE_IPV4_ADDRESS;
+    u1.ipv4_address.s_addr = a.s_addr;
+    return *this;
+  }
+
+  ip_address_s& operator=(const struct in6_addr& a) {
+    ip_address_type              = IP_ADDRESS_TYPE_IPV6_ADDRESS;
+    u1.ipv6_address.s6_addr32[0] = a.s6_addr32[0];
+    u1.ipv6_address.s6_addr32[1] = a.s6_addr32[1];
+    u1.ipv6_address.s6_addr32[2] = a.s6_addr32[2];
+    u1.ipv6_address.s6_addr32[3] = a.s6_addr32[3];
+    return *this;
+  }
+
+  ip_address_s& operator=(const ipv6_prefix_t& a) {
+    ip_address_type                    = IP_ADDRESS_TYPE_IPV6_PREFIX;
+    u1.ipv6_prefix.prefix_len          = a.prefix_len;
+    u1.ipv6_prefix.prefix.s6_addr32[0] = a.prefix.s6_addr32[0];
+    u1.ipv6_prefix.prefix.s6_addr32[1] = a.prefix.s6_addr32[1];
+    u1.ipv6_prefix.prefix.s6_addr32[2] = a.prefix.s6_addr32[2];
+    u1.ipv6_prefix.prefix.s6_addr32[3] = a.prefix.s6_addr32[3];
+    return *this;
+  }
+
+  virtual ~ip_address_s(){};
 
   std::string to_string() const {
     if (IP_ADDRESS_TYPE_IPV4_ADDRESS == this->ip_address_type) {
