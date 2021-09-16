@@ -835,6 +835,9 @@ bool smf_sbi::get_sm_data(
     const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
     std::shared_ptr<session_management_subscription> subscription) {
   nlohmann::json jsonData = {};
+  std::string query_str   = {};
+  query_str = "?single-nssai={\"sst\":" + std::to_string(snssai.sST) +
+              ",\"sd\":" + snssai.sD + "}&dnn=oai";
   std::string url =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) +
       ":" + std::to_string(smf_cfg.udm_addr.port) + NUDM_SDM_BASE +
@@ -866,7 +869,9 @@ bool smf_sbi::get_sm_data(
   Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
   Logger::smf_sbi().debug(
-      "NF Instance Registration, response from NRF, HTTP Code: %u", httpCode);
+      "Session Management Subscription Data Retrieval, response from UDM, HTTP "
+      "Code: %u",
+      httpCode);
 
   if (static_cast<http_response_codes_e>(httpCode) ==
       http_response_codes_e::HTTP_RESPONSE_CODE_OK) {
@@ -887,72 +892,83 @@ bool smf_sbi::get_sm_data(
   // Process the response
   if (!jsonData.empty()) {
     Logger::smf_sbi().debug("Response from UDM %s", jsonData.dump().c_str());
+    // Verify SNSSAI
+    if (jsonData.find("singleNssai") == jsonData.end()) return false;
+    if (jsonData["singleNssai"].find("sst") != jsonData["singleNssai"].end()) {
+      std::string sst = jsonData["singleNssai"]["sst"];
+      if (sst.compare(std::to_string(snssai.sST)) != 0) {
+        return false;
+      }
+    }
+    if (jsonData["singleNssai"].find("sd") != jsonData["singleNssai"].end()) {
+      std::string sd = jsonData["singleNssai"]["sd"];
+      if (sd.compare(snssai.sD) != 0) {
+        return false;
+      }
+    }
 
     // Retrieve SessionManagementSubscription and store in the context
     for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin();
          it != jsonData["dnnConfigurations"].end(); ++it) {
       Logger::smf_sbi().debug("DNN %s", it.key().c_str());
+      if (it.key().compare(dnn) != 0) break;
+
       try {
         std::shared_ptr<dnn_configuration_t> dnn_configuration =
             std::make_shared<dnn_configuration_t>();
-        pdu_session_type_t pdu_session_type(
-            pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
+        // PDU Session Type (Mandatory)
         std::string default_session_type =
             it.value()["pduSessionTypes"]["defaultSessionType"];
         Logger::smf_sbi().debug(
             "Default session type %s", default_session_type.c_str());
-        if (default_session_type.compare("IPV4") == 0) {
-          pdu_session_type.pdu_session_type =
-              pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
-        } else if (default_session_type.compare("IPV6") == 0) {
-          pdu_session_type.pdu_session_type =
-              pdu_session_type_e::PDU_SESSION_TYPE_E_IPV6;
-        } else if (default_session_type.compare("IPV4V6") == 0) {
-          pdu_session_type.pdu_session_type =
-              pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
-        }
+        pdu_session_type_t pdu_session_type(default_session_type);
         dnn_configuration->pdu_session_types.default_session_type =
             pdu_session_type;
 
-        // SSC_Mode
-        ssc_mode_t ssc_mode(ssc_mode_e::SSC_MODE_1);
+        // SSC_Mode (Mandatory)
         std::string default_ssc_mode = it.value()["sscModes"]["defaultSscMode"];
         Logger::smf_sbi().debug(
             "Default SSC Mode %s", default_ssc_mode.c_str());
-        if (default_ssc_mode.compare("SSC_MODE_1") == 0) {
-          dnn_configuration->ssc_modes.default_ssc_mode =
-              ssc_mode_t(ssc_mode_e::SSC_MODE_1);
-        } else if (default_ssc_mode.compare("SSC_MODE_2") == 0) {
-          dnn_configuration->ssc_modes.default_ssc_mode =
-              ssc_mode_t(ssc_mode_e::SSC_MODE_2);
-        } else if (default_ssc_mode.compare("SSC_MODE_3") == 0) {
-          dnn_configuration->ssc_modes.default_ssc_mode =
-              ssc_mode_t(ssc_mode_e::SSC_MODE_3);
+        ssc_mode_t ssc_mode(default_ssc_mode);
+        dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode;
+
+        // 5gQosProfile (Optional)
+        if (it.value().find("5gQosProfile") != it.value().end()) {
+          dnn_configuration->_5g_qos_profile._5qi =
+              it.value()["5gQosProfile"]["5qi"];
+          dnn_configuration->_5g_qos_profile.arp.priority_level =
+              it.value()["5gQosProfile"]["arp"]["priorityLevel"];
+          dnn_configuration->_5g_qos_profile.arp.preempt_cap =
+              it.value()["5gQosProfile"]["arp"]["preemptCap"];
+          dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
+              it.value()["5gQosProfile"]["arp"]["preemptVuln"];
+          // Optinal
+          if (it.value()["5gQosProfile"].find("") !=
+              it.value()["5gQosProfile"].end()) {
+            dnn_configuration->_5g_qos_profile.priority_level =
+                it.value()["5gQosProfile"]["5QiPriorityLevel"];
+          }
         }
 
-        // 5gQosProfile
-        dnn_configuration->_5g_qos_profile._5qi =
-            it.value()["5gQosProfile"]["5qi"];
-        dnn_configuration->_5g_qos_profile.arp.priority_level =
-            it.value()["5gQosProfile"]["arp"]["priorityLevel"];
-        dnn_configuration->_5g_qos_profile.arp.preempt_cap =
-            it.value()["5gQosProfile"]["arp"]["preemptCap"];
-        dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
-            it.value()["5gQosProfile"]["arp"]["preemptVuln"];
-        dnn_configuration->_5g_qos_profile.priority_level =
-            1;  // TODO: hardcoded
-
-        // session_ambr
-        dnn_configuration->session_ambr.uplink =
-            it.value()["sessionAmbr"]["uplink"];
-        dnn_configuration->session_ambr.downlink =
-            it.value()["sessionAmbr"]["downlink"];
-        Logger::smf_sbi().debug(
-            "Session AMBR Uplink %s, Downlink %s",
-            dnn_configuration->session_ambr.uplink.c_str(),
-            dnn_configuration->session_ambr.downlink.c_str());
+        // session_ambr: Optional
+        if (it.value().find("sessionAmbr") != it.value().end()) {
+          dnn_configuration->session_ambr.uplink =
+              it.value()["sessionAmbr"]["uplink"];
+          dnn_configuration->session_ambr.downlink =
+              it.value()["sessionAmbr"]["downlink"];
+          Logger::smf_sbi().debug(
+              "Session AMBR Uplink %s, Downlink %s",
+              dnn_configuration->session_ambr.uplink.c_str(),
+              dnn_configuration->session_ambr.downlink.c_str());
+        }
+        // Optional: Static IP Address
+        if (it.value().find("staticIpAddress") != it.value().end()) {
+          for (const auto& ip_addr : it.value()["staticIpAddress"]) {
+          }
+        }
 
         subscription->insert_dnn_configuration(it.key(), dnn_configuration);
+        return true;
       } catch (nlohmann::json::exception& e) {
         Logger::smf_sbi().warn(
             "Exception message %s, exception id %d ", e.what(), e.id);

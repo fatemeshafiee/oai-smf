@@ -38,6 +38,18 @@ typedef struct ssc_mode_s {
   ssc_mode_s() : ssc_mode(SSC_MODE_1) {}
   ssc_mode_s(ssc_mode_e mode) : ssc_mode(mode) {}
   ssc_mode_s(const struct ssc_mode_s& p) : ssc_mode(p.ssc_mode) {}
+
+  ssc_mode_s(const std::string& s) {
+    if (s.compare("SSC_MODE_1") == 0) {
+      ssc_mode = ssc_mode_e::SSC_MODE_1;
+    } else if (s.compare("SSC_MODE_2") == 0) {
+      ssc_mode = ssc_mode_e::SSC_MODE_2;
+    } else if (s.compare("SSC_MODE_3") == 0) {
+      ssc_mode = ssc_mode_e::SSC_MODE_3;
+    } else {
+      ssc_mode = ssc_mode_e::SSC_MODE_1;  // default mode
+    }
+  }
 } ssc_mode_t;
 
 typedef struct pdu_session_types_s {
@@ -50,12 +62,106 @@ typedef struct ssc_modes_s {
   std::vector<ssc_mode_t> allowed_ssc_modes;
 } ssc_modes_t;
 
+enum ip_address_type_value_e {
+  IP_ADDRESS_TYPE_IPV4_ADDRESS = 0,
+  IP_ADDRESS_TYPE_IPV6_ADDRESS = 1,
+  IP_ADDRESS_TYPE_IPV6_PREFIX  = 2
+};
+
+typedef struct ipv6_prefix_s {
+  struct in6_addr prefix;
+  uint8_t prefix_len;
+  std::string to_string() const {
+    return conv::toString(prefix) + "/" + std::to_string(prefix_len);
+  }
+
+} ipv6_prefix_t;
+
+typedef struct ip_address_s {
+  uint8_t ip_address_type;
+  union {
+    struct in_addr ipv4_address;
+    struct in6_addr ipv6_address;
+    ipv6_prefix_t ipv6_prefix;
+  } u1;
+
+  bool operator==(const struct ip_address_s& i) const {
+    if ((i.ip_address_type == this->ip_address_type) &&
+        (i.u1.ipv4_address.s_addr == this->u1.ipv4_address.s_addr) &&
+        (i.u1.ipv6_address.s6_addr32[0] ==
+         this->u1.ipv6_address.s6_addr32[0]) &&
+        (i.u1.ipv6_address.s6_addr32[1] ==
+         this->u1.ipv6_address.s6_addr32[1]) &&
+        (i.u1.ipv6_address.s6_addr32[2] ==
+         this->u1.ipv6_address.s6_addr32[2]) &&
+        (i.u1.ipv6_address.s6_addr32[3] ==
+         this->u1.ipv6_address.s6_addr32[3]) &&
+        (i.u1.ipv6_prefix.prefix_len == this->u1.ipv6_prefix.prefix_len) &&
+        (i.u1.ipv6_prefix.prefix.s6_addr32[0] ==
+         this->u1.ipv6_prefix.prefix.s6_addr32[0]) &&
+        (i.u1.ipv6_prefix.prefix.s6_addr32[1] ==
+         this->u1.ipv6_prefix.prefix.s6_addr32[1]) &&
+        (i.u1.ipv6_prefix.prefix.s6_addr32[2] ==
+         this->u1.ipv6_prefix.prefix.s6_addr32[2]) &&
+        (i.u1.ipv6_prefix.prefix.s6_addr32[3] ==
+         this->u1.ipv6_prefix.prefix.s6_addr32[3])) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  bool operator==(const struct in_addr& a) const {
+    if ((IP_ADDRESS_TYPE_IPV4_ADDRESS == this->ip_address_type) &&
+        (a.s_addr == u1.ipv4_address.s_addr)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  bool operator==(const struct in6_addr& i) const {
+    if ((IP_ADDRESS_TYPE_IPV6_ADDRESS == this->ip_address_type) &&
+        (i.s6_addr32[0] == this->u1.ipv6_address.s6_addr32[0]) &&
+        (i.s6_addr32[1] == this->u1.ipv6_address.s6_addr32[1]) &&
+        (i.s6_addr32[2] == this->u1.ipv6_address.s6_addr32[2]) &&
+        (i.s6_addr32[3] == this->u1.ipv6_address.s6_addr32[3])) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  bool operator==(const ipv6_prefix_t& i) const {
+    if ((IP_ADDRESS_TYPE_IPV6_PREFIX == this->ip_address_type) &&
+        (i.prefix_len == this->u1.ipv6_prefix.prefix_len) &&
+        (i.prefix.s6_addr32[0] == this->u1.ipv6_prefix.prefix.s6_addr32[0]) &&
+        (i.prefix.s6_addr32[1] == this->u1.ipv6_prefix.prefix.s6_addr32[1]) &&
+        (i.prefix.s6_addr32[2] == this->u1.ipv6_prefix.prefix.s6_addr32[2]) &&
+        (i.prefix.s6_addr32[3] == this->u1.ipv6_prefix.prefix.s6_addr32[3])) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  std::string to_string() const {
+    if (IP_ADDRESS_TYPE_IPV4_ADDRESS == this->ip_address_type) {
+      return conv::toString(u1.ipv4_address);
+    } else if (IP_ADDRESS_TYPE_IPV6_ADDRESS == this->ip_address_type) {
+      return conv::toString(u1.ipv6_address);
+    } else if (IP_ADDRESS_TYPE_IPV6_PREFIX == this->ip_address_type) {
+      return u1.ipv6_prefix.to_string();
+    }
+    return std::string("Unknown IP Address Type");
+  }
+} ip_address_t;
+
 typedef struct dnn_configuration_s {
   pdu_session_types_t pdu_session_types;
   ssc_modes_t ssc_modes;
   session_ambr_t session_ambr;
   subscribed_default_qos_t _5g_qos_profile;
-  // staticIpAddresses
+  std::vector<ip_address_t> static_ip_addresses;
 } dnn_configuration_t;
 
 #endif
