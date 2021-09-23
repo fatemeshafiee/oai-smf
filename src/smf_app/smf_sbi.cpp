@@ -845,8 +845,8 @@ bool smf_sbi::get_sm_data(
   conv::plmnToMccMnc(plmn, mcc, mnc);
 
   query_str = "?single-nssai={\"sst\":" + std::to_string(snssai.sST) +
-              ",\"sd\":" + snssai.sD + "}&dnn=oai" +
-              "&plmn-id={\"mcc\":" + mcc + ",\"mnc\":" + mnc + "}";
+              ",\"sd\":\"" + snssai.sD + "\"}&dnn=oai" +
+              "&plmn-id={\"mcc\":\"" + mcc + "\",\"mnc\":\"" + mnc + "\"}";
   std::string url =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) +
       ":" + std::to_string(smf_cfg.udm_addr.port) + NUDM_SDM_BASE +
