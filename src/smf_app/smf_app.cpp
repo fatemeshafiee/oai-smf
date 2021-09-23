@@ -907,6 +907,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     sc.get()->set_supi(supi);
     sc.get()->set_supi_prefix(supi_prefix);
     set_supi_2_smf_context(supi64, sc);
+    sc.get()->set_plmn(smreq->req.get_plmn());  // PLMN
   }
 
   // Step 5. Create/update context with dnn information
@@ -997,9 +998,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       }
     }
   }
-
-  // Store PLMN
-  sc.get()->set_plmn(smreq->req.get_plmn());
 
   // Step 8. Generate a SMF context Id and store the corresponding information
   // in a map (SM_Context_ID, (supi, dnn, nssai, pdu_session_id))
