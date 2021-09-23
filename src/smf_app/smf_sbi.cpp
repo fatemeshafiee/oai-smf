@@ -905,8 +905,8 @@ bool smf_sbi::get_sm_data(
     // Verify SNSSAI
     if (jsonData.find("singleNssai") == jsonData.end()) return false;
     if (jsonData["singleNssai"].find("sst") != jsonData["singleNssai"].end()) {
-      std::string sst = jsonData["singleNssai"]["sst"];
-      if (sst.compare(std::to_string(snssai.sST)) != 0) {
+      uint8_t sst = jsonData["singleNssai"]["sst"].get<uint8_t>();
+      if (sst != snssai.sST) {
         return false;
       }
     }
