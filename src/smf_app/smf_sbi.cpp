@@ -836,11 +836,17 @@ void smf_sbi::subscribe_upf_status_notify(
 //------------------------------------------------------------------------------
 bool smf_sbi::get_sm_data(
     const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
-    std::shared_ptr<session_management_subscription>& subscription) {
+    std::shared_ptr<session_management_subscription>& subscription,
+    plmn_t plmn) {
   nlohmann::json jsonData = {};
   std::string query_str   = {};
+  std::string mcc         = {};
+  std::string mnc         = {};
+  conv::plmnToMccMnc(plmn, mcc, mnc);
+
   query_str = "?single-nssai={\"sst\":" + std::to_string(snssai.sST) +
-              ",\"sd\":" + snssai.sD + "}&dnn=oai";
+              ",\"sd\":" + snssai.sD + "}&dnn=oai" +
+              "&plmn-id={\"mcc\":" + mcc + ",\"mnc\":" + mnc + "}";
   std::string url =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) +
       ":" + std::to_string(smf_cfg.udm_addr.port) + NUDM_SDM_BASE +
