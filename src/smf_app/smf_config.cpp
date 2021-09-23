@@ -553,6 +553,7 @@ int smf_config::load(const string& config_file) {
           astring.c_str());
     }
 
+    // UE MTU
     smf_cfg.lookupValue(SMF_CONFIG_STRING_UE_MTU, ue_mtu);
 
     // Support features
@@ -986,6 +987,7 @@ void smf_config::display() {
   Logger::smf_app().info(
       "    Scheduling prio .....: %d",
       itti.async_cmd_sched_params.sched_priority);
+
   Logger::smf_app().info("- " SMF_CONFIG_STRING_IP_ADDRESS_POOL ":");
   for (int i = 0; i < num_ue_pool; i++) {
     std::string range_low(inet_ntoa(ue_pool_range_low[dnn[i].pool_id_iv4]));
@@ -1044,6 +1046,7 @@ void smf_config::display() {
     }
   }
 
+  Logger::smf_app().info("- Default UE MTU: %d", ue_mtu);
   Logger::smf_app().info("- Supported Features:");
   Logger::smf_app().info(
       "    Register to NRF............: %s", register_nrf ? "Yes" : "No");
@@ -1255,4 +1258,5 @@ bool smf_config::get_nwi_list_index(
     nwi_enabled = false;
     return false;
   }
+  return true;
 }
