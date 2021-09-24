@@ -143,15 +143,6 @@ struct imsi_s {
 typedef struct imsi_s imsi_t;
 
 //-------------------------------------
-// 8.9 IP Address
-typedef struct ip_address_s {
-  bool is_ipv4;  // if not ipv4, then it is ipv6
-  union {
-    struct in_addr ipv4_address;
-    struct in6_addr ipv6_address;
-  } address;
-} ip_address_t;
-//-------------------------------------
 // 8.10 Mobile Equipment Identity (MEI)
 // The ME Identity field contains either the IMEI or the IMEISV as defined in
 // subclause 6.2 of 3GPP TS 23.003

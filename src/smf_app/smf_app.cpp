@@ -942,6 +942,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     sc.get()->set_supi(supi);
     sc.get()->set_supi_prefix(supi_prefix);
     set_supi_2_smf_context(supi64, sc);
+    sc.get()->set_plmn(smreq->req.get_plmn());  // PLMN
   }
 
   // Step 5. If colliding with an existing SM context (session is already
@@ -972,7 +973,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     if (not use_local_configuration_subscription_data(dnn_selection_mode)) {
       Logger::smf_app().debug(
           "Retrieve Session Management Subscription data from the UDM");
-      if (smf_sbi_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
+      plmn_t plmn = {};
+      sc.get()->get_plmn(plmn);
+      if (smf_sbi_inst->get_sm_data(supi64, dnn, snssai, subscription, plmn)) {
         // Update dnn_context with subscription info
         sc.get()->insert_dnn_subscription(snssai, dnn, subscription);
       } else {
@@ -1013,9 +1016,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       }
     }
   }
-
-  // Step 7. Store PLMN
-  sc.get()->set_plmn(smreq->req.get_plmn());
 
   // Step 8. Generate a SMF context Id and store the corresponding information
   // in a map (SM_Context_ID, (supi, pdu_session_id))
@@ -1617,6 +1617,7 @@ void smf_app::timer_nrf_heartbeat_timeout(
   patch_item.setValue("REGISTERED");
   itti_msg->patch_items.push_back(patch_item);
   itti_msg->smf_instance_id = smf_instance_id;
+  itti_msg->http_version    = smf_cfg.http_version;
 
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
@@ -2062,8 +2063,9 @@ void smf_app::trigger_nf_registration_request() {
   std::shared_ptr<itti_n11_register_nf_instance_request> itti_msg =
       std::make_shared<itti_n11_register_nf_instance_request>(
           TASK_SMF_APP, TASK_SMF_SBI);
-  itti_msg->profile = nf_instance_profile;
-  int ret           = itti_inst->send_msg(itti_msg);
+  itti_msg->profile      = nf_instance_profile;
+  itti_msg->http_version = smf_cfg.http_version;
+  int ret                = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_SBI",
@@ -2080,6 +2082,7 @@ void smf_app::trigger_nf_deregistration() {
       std::make_shared<itti_n11_deregister_nf_instance>(
           TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->smf_instance_id = smf_instance_id;
+  itti_msg->http_version    = smf_cfg.http_version;
   int ret                   = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
@@ -2099,10 +2102,12 @@ void smf_app::trigger_upf_status_notification_subscribe() {
           TASK_SMF_APP, TASK_SMF_SBI);
 
   nlohmann::json json_data = {};
+  unsigned int port        = smf_cfg.sbi.port;
+  if (smf_cfg.http_version == 2) port = smf_cfg.sbi_http2_port;
   // TODO: remove hardcoded values
   json_data["nfStatusNotificationUri"] =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))) + ":" +
-      std::to_string(smf_cfg.sbi.port) + "/nsmf-nfstatus-notify/" +
+      std::to_string(port) + "/nsmf-nfstatus-notify/" +
       smf_cfg.sbi_api_version + "/subscriptions";
 
   json_data["subscrCond"]["NfTypeCond"]["nfType"] = "UPF";
@@ -2116,9 +2121,10 @@ void smf_app::trigger_upf_status_notification_subscribe() {
       ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
       smf_cfg.nrf_addr.api_version + NNRF_NF_STATUS_SUBSCRIBE_URL;
 
-  itti_msg->url       = url;
-  itti_msg->json_data = json_data;
-  int ret             = itti_inst->send_msg(itti_msg);
+  itti_msg->url          = url;
+  itti_msg->json_data    = json_data;
+  itti_msg->http_version = smf_cfg.http_version;
+  int ret                = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_SBI",

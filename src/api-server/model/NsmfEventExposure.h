@@ -119,7 +119,8 @@ class NsmfEventExposure {
   /// <summary>
   /// Subscribed events
   /// </summary>
-  std::vector<EventSubscription>& getEventSubs();
+  std::vector<EventSubscription> getEventSubs() const;
+  void getEventSubs(std::vector<EventSubscription>&) const;
   void setEventSubs(std::vector<EventSubscription> const& value);
   /// <summary>
   ///

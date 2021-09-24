@@ -35,11 +35,13 @@
 #include "3gpp_24.501.h"
 #include "3gpp_29.244.h"
 #include "3gpp_29.508.h"
+#include "3gpp_29.518.h"
 #include "3gpp_29.571.h"
 #include "NgRanTargetId.h"
 #include "pistache/http.h"
 #include "smf_profile.hpp"
-#include "3gpp_29.518.h"
+#include "PlmnId.h"
+#include "DddStatus.h"
 
 extern "C" {
 #include "QOSRules.h"
@@ -604,6 +606,10 @@ class event_notification {
   void set_smf_event(const smf_event_t& ev);
   smf_event_t get_smf_event() const;
 
+  void set_timestamp(const std::string& ss);
+  void get_timestamp(std::string& ss) const;
+  std::string get_timestamp() const;
+
   void set_supi(const supi64_t& supi);
   supi64_t get_supi() const;
   bool is_supi_is_set() const;
@@ -616,6 +622,16 @@ class event_notification {
   std::string get_re_ipv4_addr() const;
   bool is_re_ipv4_addr_is_set() const;
 
+  // m_PlmnId
+  void set_PlmnId(oai::smf_server::model::PlmnId const& value);
+  oai::smf_server::model::PlmnId get_plmnid() const;
+  bool is_plmnid_is_set() const;
+
+  // ddds change
+  void set_Ddds(oai::smf_server::model::DddStatus const& value);
+  oai::smf_server::model::DddStatus get_ddds() const;
+  bool is_ddds_is_set() const;
+
   void set_pdu_session_id(const pdu_session_id_t value);
   pdu_session_id_t get_pdu_session_id() const;
   bool is_psi_is_set() const;
@@ -624,13 +640,16 @@ class event_notification {
   std::string get_notif_uri() const;
   void set_notif_id(std::string const& value);
   std::string get_notif_id() const;
+  void set_custom_info(const nlohmann::json& c);
+  void get_custom_info(nlohmann::json& c) const;
 
  private:
-  std::string m_notif_uri;  // m_NotifUri;
-  std::string m_notif_id;   // m_NotifId;
+  nlohmann::json custom_info;  // store extra json data
+  std::string m_notif_uri;     // m_NotifUri;
+  std::string m_notif_id;      // m_NotifId;
 
   smf_event_t m_event;  // SmfEvent
-  // std::string m_TimeStamp;
+  std::string m_timestamp;
 
   supi64_t m_supi;
   bool m_supi_is_set;
@@ -642,8 +661,12 @@ class event_notification {
   bool m_re_ipv4_addr_is_set;  // m_ReIpv4AddrIsSet;
 
   // for a PLMN Change
-  // PlmnId m_PlmnId;
-  // bool m_PlmnIdIsSet;
+  oai::smf_server::model::PlmnId m_PlmnId;
+  bool m_PlmnIdIsSet;
+
+  // for ddds change
+  oai::smf_server::model::DddStatus m_DddStatus;
+  bool m_DddStatusIsSet;
 
   // for an access type change
   // AccessType m_AccType;
@@ -679,8 +702,6 @@ class event_notification {
   // bool m_AdIpv6PrefixIsSet;
   // Ipv6Prefix m_ReIpv6Prefix;
   // bool m_ReIpv6PrefixIsSet;
-  // DddStatus m_DddStatus;
-  // bool m_DddStatusIsSet;
   // std::string m_MaxWaitTime;
   // bool m_MaxWaitTimeIsSet;
 };

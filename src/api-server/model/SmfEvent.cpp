@@ -25,11 +25,23 @@ void SmfEvent::validate() {
   // TODO: implement validation
 }
 
-void to_json(nlohmann::json& j, const SmfEvent& o) {
-  j = nlohmann::json();
+void SmfEvent::set_value(std::string value) {
+  this->value = value;
+}
+void SmfEvent::get_value(std::string& value) const {
+  value = this->value;
+}
+std::string SmfEvent::get_value() const {
+  return value;
 }
 
-void from_json(const nlohmann::json& j, SmfEvent& o) {}
+void to_json(nlohmann::json& j, const SmfEvent& o) {
+  j = o.get_value();
+}
+
+void from_json(const nlohmann::json& j, SmfEvent& o) {
+  o.set_value(j.get<std::string>());
+}
 
 }  // namespace model
 }  // namespace smf_server

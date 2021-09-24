@@ -63,10 +63,16 @@ void from_json(const nlohmann::json& j, InterfaceUpfInfoItem& o) {
   }
 }
 
-UPInterfaceType InterfaceUpfInfoItem::getInterfaceType() const {
+// UPInterfaceType InterfaceUpfInfoItem::getInterfaceType() const {
+//   return m_InterfaceType;
+// }
+// void InterfaceUpfInfoItem::setInterfaceType(UPInterfaceType const& value) {
+//   m_InterfaceType = value;
+// }
+std::string InterfaceUpfInfoItem::getInterfaceType() const {
   return m_InterfaceType;
 }
-void InterfaceUpfInfoItem::setInterfaceType(UPInterfaceType const& value) {
+void InterfaceUpfInfoItem::setInterfaceType(std::string const& value) {
   m_InterfaceType = value;
 }
 std::vector<std::string>& InterfaceUpfInfoItem::getIpv4EndpointAddresses() {

@@ -157,7 +157,8 @@ class smf_sbi {
    */
   bool get_sm_data(
       const supi64_t& supi, const std::string& dnn, const snssai_t& snssai,
-      std::shared_ptr<session_management_subscription> subscription);
+      std::shared_ptr<session_management_subscription>& subscription,
+      plmn_t plmn = {});
 
   /*
    * Subscribe to be notify from UDM
