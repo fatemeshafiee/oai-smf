@@ -1376,7 +1376,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   std::shared_ptr<dnn_configuration_t> sdc            = {};
   find_dnn_subscription(snssai, ss);
   if (nullptr != ss.get()) {
-    ss.get()->find_dnn_configuration(sd->dnn_in_use, sdc);
+    ss.get()->find_dnn_configuration(dnn, sdc);
     if (nullptr != sdc.get()) {
       paa.pdu_session_type.pdu_session_type =
           sdc.get()
@@ -1427,8 +1427,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       // TODO: use requested PDU Session Type?
       //     paa.pdu_session_type.pdu_session_type = PDU_SESSION_TYPE_E_IPV4V6;
       if ((not paa_static_ip) || (not paa.is_ip_assigned())) {
-        bool success =
-            paa_dynamic::get_instance().get_free_paa(sd->dnn_in_use, paa);
+        bool success = paa_dynamic::get_instance().get_free_paa(dnn, paa);
         if (success) {
           set_paa = true;
         } else {
@@ -1457,8 +1456,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       if (!pco_ids.ci_ipv4_address_allocation_via_dhcpv4) {
         // use SM NAS signalling
         if ((not paa_static_ip) || (not paa.is_ip_assigned())) {
-          bool success =
-              paa_dynamic::get_instance().get_free_paa(sd->dnn_in_use, paa);
+          bool success = paa_dynamic::get_instance().get_free_paa(dnn, paa);
           if (success) {
             set_paa = true;
           } else {
@@ -3820,22 +3818,9 @@ void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
         supi64);
   }
 
-  // get dnn context
-  std::shared_ptr<dnn_context> sd = {};
-
-  if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
-    if (nullptr == sd.get()) {
-      Logger::smf_app().warn(
-          "Could not retrieve the corresponding DNN context!");
-      return;
-    }
-  }
-
   // get smf_pdu_session
   std::shared_ptr<smf_pdu_session> sp = {};
-  bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
-
-  if (nullptr == sp.get()) {
+  if (!find_pdu_session(pdu_session_id, sp)) {
     Logger::smf_app().warn(
         "Could not retrieve the corresponding SMF PDU Session context!");
     return;
@@ -3941,22 +3926,10 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
         "Supi " SUPI_64_FMT "!",
         supi64);
   }
-
-  // get dnn context
-  std::shared_ptr<dnn_context> sd = {};
-
-  if (!sc.get()->find_dnn_context(scf.get()->nssai, scf.get()->dnn, sd)) {
-    if (nullptr == sd.get()) {
-      Logger::smf_app().warn(
-          "Could not retrieve the corresponding DNN context!");
-      return;
-    }
-  }
   // get smf_pdu_session
   std::shared_ptr<smf_pdu_session> sp = {};
-  bool find_pdn = sd.get()->find_pdu_session(pdu_session_id, sp);
 
-  if (nullptr == sp.get()) {
+  if (!find_pdu_session(pdu_session_id, sp)) {
     Logger::smf_app().warn(
         "Could not retrieve the corresponding SMF PDU Session context!");
     return;
@@ -3994,8 +3967,9 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       // custom json e.g., for FlexCN
       nlohmann::json cj = {};
       // PLMN
-      plmn_t plmn = {};
-      std::string mcc, mnc;
+      plmn_t plmn     = {};
+      std::string mcc = {};
+      std::string mnc = {};
       sc->get_plmn(plmn);
       conv::plmnToMccMnc(plmn, mcc, mnc);
       cj["plmn"]["mcc"] = mcc;
@@ -4012,15 +3986,13 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
           cj["ue_ipv6_prefix"] = str_addr6;
         }
       }
-      // PDU Session Type
-      cj["pdu_session_type"] = sp->pdu_session_type.toString();
+      cj["pdu_session_type"] =
+          sp->pdu_session_type.toString();  // PDU Session Type
       // NSSAI
-      cj["snssai"]["sst"] = scf->nssai.sST;
-      cj["snssai"]["sd"]  = scf->nssai.sD;
-      // DNN
-      cj["dnn"] = scf->dnn;
-      // Serving AMF addr
-      cj["amf_addr"] = scf->amf_addr;
+      cj["snssai"]["sst"] = sp->get_snssai().sST;
+      cj["snssai"]["sd"]  = sp->get_snssai().sD;
+      cj["dnn"]           = sp->get_dnn();       // DNN
+      cj["amf_addr"]      = sc->get_amf_addr();  // Serving AMF addr
 
       // QoS flows associated with this session
       std::vector<smf_qos_flow> flows = {};
@@ -4031,7 +4003,7 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
         for (auto f : flows) {
           nlohmann::json tmp = {};
           tmp["qfi"]         = (uint8_t) f.qfi.qfi;
-          // UL FTeid IPv4/IPv6 (UPF)
+          // UL FTEID IPv4/IPv6 (UPF)
           if (f.ul_fteid.v4)
             tmp["upf_addr"]["ipv4"] = inet_ntoa(f.ul_fteid.ipv4_address);
           if (f.ul_fteid.v6) {
@@ -4042,7 +4014,7 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
               tmp["upf_addr"]["ipv6"] = str_addr6;
             }
           }
-          // DL FTeid Ipv4/v6 (AN)
+          // DL FTEID Ipv4/v6 (AN)
           if (f.dl_fteid.v4)
             tmp["an_addr"]["ipv4"] = inet_ntoa(f.dl_fteid.ipv4_address);
           if (f.dl_fteid.v6) {
