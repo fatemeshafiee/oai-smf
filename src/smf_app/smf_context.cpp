@@ -352,7 +352,7 @@ void smf_pdu_session::set_seid(const uint64_t& s) {
 }
 
 //------------------------------------------------------------------------------
-// TODO check if urr_id should be uniq in the UPF or in the context of a pdn
+// TODO check if urr_id should be unique in the UPF or in the context of a pdn
 // connection
 void smf_pdu_session::generate_urr_id(pfcp::urr_id_t& urr_id) {
   urr_id.urr_id = urr_id_generator.get_uid();
@@ -376,14 +376,14 @@ void smf_pdu_session::release_far_id(const pfcp::far_id_t& far_id) {
 }
 
 //------------------------------------------------------------------------------
-// TODO check if prd_id should be uniq in the UPF or in the context of a pdn
+// TODO check if prd_id should be unique in the UPF or in the context of a pdn
 // connection
 void smf_pdu_session::generate_pdr_id(pfcp::pdr_id_t& pdr_id) {
   pdr_id.rule_id = pdr_id_generator.get_uid();
 }
 
 //------------------------------------------------------------------------------
-// TODO check if prd_id should be uniq in the UPF or in the context of a pdn
+// TODO check if prd_id should be unique in the UPF or in the context of a pdn
 // connection
 void smf_pdu_session::release_pdr_id(const pfcp::pdr_id_t& pdr_id) {
   pdr_id_generator.free_uid(pdr_id.rule_id);
@@ -829,15 +829,12 @@ void smf_context::handle_itti_msg(
             std::string supi_prefix = {};
             get_supi_prefix(supi_prefix);
             std::string supi_str = supi_prefix + "-" + smf_supi_to_string(supi);
-            std::string url =
-                // std::string(inet_ntoa(
-                //    *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
-                //":" + std::to_string(smf_cfg.amf_addr.port) +
-                "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
-                smf_cfg.amf_addr.api_version +
-                fmt::format(
-                    NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
-                    supi_str.c_str());
+            std::string url      = "http://" + get_amf_addr() +
+                              NAMF_COMMUNICATION_BASE +
+                              smf_cfg.amf_addr.api_version +
+                              fmt::format(
+                                  NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
+                                  supi_str.c_str());
             session_report_msg.set_amf_url(url);
             // seid and trxn_id to be used in Failure indication
             session_report_msg.set_seid(req->seid);
