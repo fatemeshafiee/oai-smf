@@ -344,11 +344,13 @@ class smf_config {
     }
     sbi_http2_port  = 8080;
     sbi_api_version = "v1";
+    http_version    = 1;
 
     use_local_subscription_info = false;
     register_nrf                = false;
     discover_upf                = false;
     use_fqdn_dns                = false;
+    use_nwi                     = false;
   };
   ~smf_config();
   void lock() { m_rw_lock.lock(); };

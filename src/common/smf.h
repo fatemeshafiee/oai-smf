@@ -73,6 +73,19 @@ typedef struct s_nssai  // section 28.4, TS23.003
     }
   }
 
+  s_nssai& operator=(const struct s_nssai& s) {
+    sST = s.sST;
+    sD  = s.sD;
+    return *this;
+  }
+
+  std::string toString() const {
+    std::string s = {};
+    s.append("SST=").append(std::to_string(sST));
+    s.append(", SD=").append(sD);
+    return s;
+  }
+
 } snssai_t;
 
 typedef uint8_t pdu_session_id;

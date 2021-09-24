@@ -113,16 +113,43 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
  public:
   smf_pdu_session() : m_pdu_session_mutex() { clear(); }
 
+  smf_pdu_session(pdu_session_id_t psi)
+      : pdu_session_id(psi), m_pdu_session_mutex() {
+    ipv4                = false;
+    ipv6                = false;
+    ipv4_address.s_addr = INADDR_ANY;
+    ipv6_address        = in6addr_any;
+    released            = false;
+    dnn                 = {};
+    snssai              = {};
+    pdu_session_type    = {};
+    seid                = 0;
+    up_fseid            = {};
+    qos_flows.clear();
+    default_qfi.qfi    = NO_QOS_FLOW_IDENTIFIER_ASSIGNED;
+    pdu_session_status = pdu_session_status_e::PDU_SESSION_INACTIVE;
+    upCnx_state        = upCnx_state_e::UPCNX_STATE_DEACTIVATED;
+    ho_state           = ho_state_e::HO_STATE_NONE;
+    timer_T3590        = ITTI_INVALID_TIMER_ID;
+    timer_T3591        = ITTI_INVALID_TIMER_ID;
+    timer_T3592        = ITTI_INVALID_TIMER_ID;
+    number_of_supported_packet_filters         = 0;
+    maximum_number_of_supported_packet_filters = 0;
+  }
+
   void clear() {
     ipv4                = false;
     ipv6                = false;
     ipv4_address.s_addr = INADDR_ANY;
     ipv6_address        = in6addr_any;
+    released            = false;
+    pdu_session_id      = 0;
+    dnn                 = {};
+    snssai              = {};
     pdu_session_type    = {};
     seid                = 0;
     up_fseid            = {};
     qos_flows.clear();
-    released           = false;
     default_qfi.qfi    = NO_QOS_FLOW_IDENTIFIER_ASSIGNED;
     pdu_session_status = pdu_session_status_e::PDU_SESSION_INACTIVE;
     upCnx_state        = upCnx_state_e::UPCNX_STATE_DEACTIVATED;
@@ -418,44 +445,69 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   pdu_session_type_t get_pdu_session_type() const;
 
   /*
-   * Set AMF Addr of the serving AMF
-   * @param [const std::string&] addr: AMF Addr in string representation
+   * Set UPF Node ID of this PDU Session
+   * @param [const pfcp::node_id_t&] node_id: UPF Node Id
    * @return void
    */
-  void set_amf_addr(const std::string& addr);
+  void set_upf_node_id(const pfcp::node_id_t& node_id);
 
   /*
-   * Get AMF Addr of the serving AMF (in string representation)
-   * @param [const std::string&] addr: store AMF IP Addr
+   * Get UPF Node ID of this PDU Session
+   * @param [pfcp::node_id_t&] node_id: UPF Node Id
    * @return void
    */
-  void get_amf_addr(std::string& addr) const;
-  std::string get_amf_addr() const;
+  void get_upf_node_id(pfcp::node_id_t& node_id) const;
 
-  bool ipv4;  // IP Address(es): IPv4 address and/or IPv6 prefix
-  bool ipv6;  // IP Address(es): IPv4 address and/or IPv6 prefix
-  struct in_addr
-      ipv4_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
-  struct in6_addr
-      ipv6_address;  // IP Address(es): IPv4 address and/or IPv6 prefix
+  /*
+   * Get UPF Node ID of this PDU Session
+   * @param void
+   * @return UPF Node Id
+   */
+  pfcp::node_id_t get_upf_node_id() const;
+
+  /*
+   * Get DNN associated with this PDU Session
+   * @param void
+   * @return std::string: DNN
+   */
+  std::string get_dnn() const;
+
+  /*
+   * Set DNN associated with this PDU Session
+   * @param [const std::string&] d: DNN
+   * @return void
+   */
+  void set_dnn(const std::string& d);
+
+  /*
+   * Get SNSSAI associated with this PDU Session
+   * @param void
+   * @return snssai_t: SNSSAI
+   */
+  snssai_t get_snssai() const;
+
+  /*
+   * Set SNSSAI associated with this PDU Session
+   * @param [const snssai_t&] s: SNSSAI
+   * @return void
+   */
+  void set_snssai(const snssai_t s);
+
+ public:
+  bool ipv4;                            // IPv4 Addr
+  struct in_addr ipv4_address;          // IPv4 Addr
+  bool ipv6;                            // IPv6 prefix
+  struct in6_addr ipv6_address;         // IPv6 prefix
   pdu_session_type_t pdu_session_type;  // IPv4, IPv6, IPv4v6 or Non-IP
 
-  bool released;  //(release access bearers request)
-
-  //----------------------------------------------------------------------------
-  // PFCP related members
-  //----------------------------------------------------------------------------
-  // PFCP Session
-  uint64_t seid;
-  pfcp::fseid_t up_fseid;
-  //
-  util::uint_generator<uint16_t> pdr_id_generator;
-  util::uint_generator<uint32_t> far_id_generator;
-  util::uint_generator<uint32_t> urr_id_generator;
+  bool released;  // release session request
 
   uint32_t pdu_session_id;
-  std::string amf_id;
-  std::string amf_addr;
+  std::string dnn;  // associated DNN
+  snssai_t snssai;  // associated SNSSAI
+
+  pfcp::node_id_t upf_node_id;
+
   pdu_session_status_e pdu_session_status;
   upCnx_state_e
       upCnx_state;  // N3 tunnel status (ACTIVATED, DEACTIVATED, ACTIVATING)
@@ -477,6 +529,15 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint8_t
       number_of_supported_packet_filters;  // number_of_supported_packet_filters
   util::uint_generator<uint32_t> qos_rule_id_generator;
+
+  // PFCP related members
+  // PFCP Session
+  uint64_t seid;
+  pfcp::fseid_t up_fseid;
+  //
+  util::uint_generator<uint16_t> pdr_id_generator;
+  util::uint_generator<uint32_t> far_id_generator;
+  util::uint_generator<uint32_t> urr_id_generator;
 
   // Shared lock
   mutable std::shared_mutex m_pdu_session_mutex;
@@ -524,78 +585,24 @@ class session_management_subscription {
   mutable std::shared_mutex m_mutex;
 };
 
-/*
- * Manage the DNN context
- */
-class dnn_context {
- public:
-  dnn_context() : m_context(), in_use(false), pdu_sessions(), nssai() {}
-
-  dnn_context(std::string dnn)
-      : m_context(), in_use(false), pdu_sessions(), nssai(), dnn_in_use(dnn) {}
-  dnn_context(dnn_context& b) = delete;
-
-  /*
-   * Find a PDU Session by its ID
-   * @param [const uint32_t] pdu_session_id
-   * @param [std::shared_ptr<smf_pdu_session> &] pdu_session
-   * @return bool: return true if pdu session is found, otherwise, return false
-   */
-  bool find_pdu_session(
-      const uint32_t pdu_session_id,
-      std::shared_ptr<smf_pdu_session>& pdu_session);
-
-  /*
-   * Insert a PDU Session into the DNN context
-   * @param [std::shared_ptr<smf_pdu_session> &] sp: shared pointer to a PDU
-   * Session
-   * @return void
-   */
-  void insert_pdu_session(std::shared_ptr<smf_pdu_session>& sp);
-
-  /*
-   * Delete a PDU Session identified by its ID
-   * @param [const uint32_t] pdu_session_id
-   * @return bool: return true if the pdu session is deleted, otherwise, return
-   * false
-   */
-  bool remove_pdu_session(const uint32_t pdu_session_id);
-
-  /*
-   * Get number of pdu sessions associated with this context (dnn and Nssai)
-   * @param void
-   * @return size_t: number of PDU sessions
-   */
-  size_t get_number_pdu_sessions() const;
-
-  /*
-   * Represent DNN Context as a string object
-   * @param void
-   * @return void
-   */
-  std::string toString() const;
-
-  bool in_use;
-  std::string dnn_in_use;  // The DNN currently used, as received from the AMF
-  snssai_t nssai;
-  std::vector<std::shared_ptr<smf_pdu_session>>
-      pdu_sessions;  // Store all PDU Sessions associated with this DNN context
-  mutable std::shared_mutex m_context;
-};
-
 class smf_context;
 
 class smf_context : public std::enable_shared_from_this<smf_context> {
  public:
   smf_context()
       : m_context(),
+        m_pdu_sessions_mutex(),
+        pdu_sessions(),
         pending_procedures(),
         dnn_subscriptions(),
         event_sub(),
         plmn() {
-    supi_prefix = {};
-
-    // Subscribe to SM Context Status change (to notify to AMF)
+    amf_id         = {};
+    amf_addr       = {};
+    amf_status_uri = {};
+    target_amf     = {};
+    supi_prefix    = {};
+    // Subscribe to SM Context Status Change
     sm_context_status_connection =
         event_sub.subscribe_sm_context_status(boost::bind(
             &smf_context::handle_sm_context_status_change, this, _1, _2, _3));
@@ -660,9 +667,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @return void
    */
   void remove_procedure(smf_procedure* proc);
-
-#define IS_FIND_PDN_WITH_LOCAL_TEID true
-#define IS_FIND_PDN_WITH_PEER_TEID false
 
   /*
    * Handle N4 message (session establishment response) from UPF
@@ -958,24 +962,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<smf_pdu_session>& sp);
 
   /*
-   * Find DNN context with name
-   * @param [const std::string&] dnn
-   * @param [std::shared_ptr<dnn_context>&] dnn_context dnn context to be found
-   * @return void
-   */
-  bool find_dnn_context(
-      const snssai_t& nssai, const std::string& dnn,
-      std::shared_ptr<dnn_context>& dnn_context);
-
-  /*
-   * Insert a DNN context into SMF context
-   * @param [std::shared_ptr<dnn_context>&] sd Shared_ptr pointer to a DNN
-   * context
-   * @return void
-   */
-  void insert_dnn(std::shared_ptr<dnn_context>& sd);
-
-  /*
    * Check the validity of the request according to user subscription and local
    * policies
    * @param [std::shared_ptr<itti_n11_create_sm_context_request>] smreq
@@ -1061,13 +1047,6 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   supi_t get_supi() const;
 
   /*
-   * Get the number of dnn contexts
-   * @param
-   * @return std::size_t: the number of contexts
-   */
-  std::size_t get_number_dnn_contexts() const;
-
-  /*
    * Get Supi prefix
    * @param [const std::string &]  prefix: Supi prefix (e.g., imsi)
    * @return void
@@ -1125,16 +1104,49 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       const snssai_t& snssai, const std::string& dnn);
 
   /*
-   * Find the PDU Session, QFI associated with a given PDR_ID
-   * @param [const pfcp::pdr_id_t &] pdr_id: PDR ID
-   * @param [pfcp::qfi_t &] qfi: QFI
-   * @param [std::shared_ptr<dnn_context> &] sd: pointer to the DNN context
+   * Find the PDU Session with its ID
+   * @param [const pdu_session_id_t &] psi: PDU Session ID
    * @param [std::shared_ptr<smf_pdu_session> &] sp: pointer to the PDU session
    * @return bool: return true if found, otherwise return false
    */
   bool find_pdu_session(
+      const pdu_session_id_t& psi, std::shared_ptr<smf_pdu_session>& sp) const;
+
+  bool find_pdu_session(
       const pfcp::pdr_id_t& pdr_id, pfcp::qfi_t& qfi,
-      std::shared_ptr<dnn_context>& sd, std::shared_ptr<smf_pdu_session>& sp);
+      std::shared_ptr<smf_pdu_session>& sp);
+  /*
+   * Add a PDU Session to the PDU Session List
+   * @param [const pdu_session_id_t &] psi: PDU Session ID
+   * @param [const std::shared_ptr<smf_pdu_session> &] sp: pointer to the PDU
+   * session
+   * @return bool: return true if found, otherwise return false
+   */
+  bool add_pdu_session(
+      const pdu_session_id_t& psi, const std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
+   * Remove a PDU Session from the PDU Session List
+   * @param [const pdu_session_id_t &] psi: PDU Session ID
+   * @return bool: return true if success, otherwise return false
+   */
+  bool remove_pdu_session(const pdu_session_id_t& psi);
+
+  /*
+   * Get number of pdu sessions associated with this context
+   * @param void
+   * @return size_t: number of PDU sessions
+   */
+  size_t get_number_pdu_sessions() const;
+
+  /*
+   * Get all the PDU Sessions
+   * @param [std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>&]
+   * sessions: all PDU sessions
+   * @return void
+   */
+  void get_pdu_sessions(
+      std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>& sessions);
 
   /*
    * Handle SM Context Status Change (Send notification AMF)
@@ -1190,10 +1202,59 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
   /*
    * Get AMF Addr of the serving AMF (in string representation)
-   * @param [const std::string&] addr: store AMF IP Addr
+   * @param [std::string&] addr: store AMF IP Addr
    * @return void
    */
   void get_amf_addr(std::string& addr) const;
+
+  /*
+   * Get AMF Addr of the serving AMF (in string representation)
+   * @param void
+   * @return string: AMF IP Addr
+   */
+  std::string get_amf_addr() const;
+
+  /*
+   * Set the URI of AMF for receiving context status update
+   * @param [const std::string&] status_uri: AMF's URI
+   * @return void
+   */
+  void set_amf_status_uri(const std::string& status_uri);
+
+  /*
+   * Get the URI of AMF for receiving context status update
+   * @param [std::string&] status_uri: AMF's URI
+   * @return void
+   */
+  void get_amf_status_uri(std::string& status_uri) const;
+
+  /*
+   * Get the URI of AMF for receiving context status update
+   * @param void
+   * @return string
+   */
+  std::string get_amf_status_uri() const;
+
+  /*
+   * Set target AMF in case of HO
+   * @param [const std::string&] amf: Target AMF
+   * @return void
+   */
+  void set_target_amf(const std::string& amf);
+
+  /*
+   * Get target AMF in case of HO
+   * @param [std::string&] amf: Target AMF
+   * @return void
+   */
+  void get_target_amf(std::string& amf) const;
+
+  /*
+   * Get target AMF in case of HO
+   * @param void
+   * @return std::string
+   */
+  std::string get_target_amf() const;
 
   /*
    * Set PLMN
@@ -1221,17 +1282,23 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       const pdu_session_id_t& pdu_session_id) const;
 
  private:
-  std::vector<std::shared_ptr<dnn_context>> dnns;
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
   // snssai-sst <-> session management subscription
   std::map<uint8_t, std::shared_ptr<session_management_subscription>>
       dnn_subscriptions;
+  std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>
+      pdu_sessions;  // Store all PDU Sessions associated with this UE
+  mutable std::shared_mutex m_pdu_sessions_mutex;
+
   supi_t supi;
   std::string supi_prefix;
   plmn_t plmn;
 
-  // AMF IP addr
-  string amf_addr;
+  std::string amf_id;
+  std::string amf_addr;
+  std::string amf_status_uri;
+  std::string target_amf;  // targetServingNfId
+
   // Big recursive lock
   mutable std::recursive_mutex m_context;
 
