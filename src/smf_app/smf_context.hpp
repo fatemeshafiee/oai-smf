@@ -133,6 +133,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     timer_T3590        = ITTI_INVALID_TIMER_ID;
     timer_T3591        = ITTI_INVALID_TIMER_ID;
     timer_T3592        = ITTI_INVALID_TIMER_ID;
+    number_of_supported_packet_filters         = 0;
+    maximum_number_of_supported_packet_filters = 0;
   }
 
   void clear() {
