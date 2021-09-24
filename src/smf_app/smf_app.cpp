@@ -701,8 +701,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   std::string n1_sm_message, n1_sm_message_hex;
   nas_message_t decoded_nas_msg       = {};
   cause_value_5gsm_e cause_n1         = {cause_value_5gsm_e::CAUSE_0_UNKNOWN};
-  pdu_session_type_t pdu_session_type = {
-      .pdu_session_type = PDU_SESSION_TYPE_E_IPV4};
+  pdu_session_type_t pdu_session_type = {.pdu_session_type =
+                                             PDU_SESSION_TYPE_E_IPV4};
 
   // Step 1. Decode NAS and get the necessary information
   int decoder_rc = smf_n1::get_instance().decode_n1_sm_container(
@@ -907,6 +907,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     sc.get()->set_supi(supi);
     sc.get()->set_supi_prefix(supi_prefix);
     set_supi_2_smf_context(supi64, sc);
+    sc.get()->set_plmn(smreq->req.get_plmn());  // PLMN
   }
 
   // Step 5. Create/update context with dnn information
@@ -954,7 +955,9 @@ void smf_app::handle_pdu_session_create_sm_context_request(
     if (not use_local_configuration_subscription_data(dnn_selection_mode)) {
       Logger::smf_app().debug(
           "Retrieve Session Management Subscription data from the UDM");
-      if (smf_sbi_inst->get_sm_data(supi64, dnn, snssai, subscription)) {
+      plmn_t plmn = {};
+      sc.get()->get_plmn(plmn);
+      if (smf_sbi_inst->get_sm_data(supi64, dnn, snssai, subscription, plmn)) {
         // Update dnn_context with subscription info
         sc.get()->insert_dnn_subscription(snssai, dnn, subscription);
       } else {
@@ -995,9 +998,6 @@ void smf_app::handle_pdu_session_create_sm_context_request(
       }
     }
   }
-
-  // Store PLMN
-  sc.get()->set_plmn(smreq->req.get_plmn());
 
   // Step 8. Generate a SMF context Id and store the corresponding information
   // in a map (SM_Context_ID, (supi, dnn, nssai, pdu_session_id))
