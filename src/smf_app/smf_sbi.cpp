@@ -237,7 +237,7 @@ void smf_sbi::send_n1n2_message_transfer_request(
   // Create a new curl easy handle and add to the multi handle
   if (!curl_create_handle(
           sm_context_res->res.get_amf_url(), data_str, str_len, response_data,
-          pid_ptr, "POST", true)) {
+          pid_ptr, "POST", true, sm_context_res->http_version)) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return;

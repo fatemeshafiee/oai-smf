@@ -1233,8 +1233,6 @@ std::string smf_config::get_default_dnn() {
 //------------------------------------------------------------------------------
 bool smf_config::get_nwi_list_index(
     bool nwi_enabled, uint8_t nwi_list_index, pfcp::node_id_t node_id) {
-  Logger::smf_app().debug("Default DNN: %s", smf_cfg.dnn[0].dnn.c_str());
-  // return smf_cfg.dnn[0].dnn;
   if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
     for (int i = 0; i < upf_nwi_list.size(); i++) {
       if (node_id.u1.ipv4_address.s_addr ==

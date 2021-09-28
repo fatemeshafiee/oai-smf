@@ -1194,6 +1194,10 @@ void session_update_sm_context_procedure::handle_itti_msg(
 
       // set UpCnxState to ACTIVATED
       sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
+      // Display UE Context Info
+      Logger::smf_app().info(
+          "SMF context: \n %s", sc.get()->toString().c_str());
+
       // Trigger Event_exposure event
       std::string str_scid = n11_trigger.get()->scid;
       // TODO: validate the str_scid
