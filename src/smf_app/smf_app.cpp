@@ -892,7 +892,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   // If no DNN information from UE, set to default value
   std::string dnn = smreq->req.get_dnn();
   if (dnn.length() == 0) {
-    dnn == smf_cfg.get_default_dnn();
+    dnn = smf_cfg.get_default_dnn();
   }
 
   // TODO: For the moment, not support PDU session authentication and
