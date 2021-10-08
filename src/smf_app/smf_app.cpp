@@ -273,7 +273,8 @@ void smf_app_task(void*) {
           Logger::smf_app().info("TIME-OUT event timer id %d", to->timer_id);
           switch (to->arg1_user) {
             case TASK_SMF_APP_TRIGGER_T3591:
-              smf_app_inst->timer_t3591_timeout(to->timer_id, to->arg2_user);
+              smf_app_inst->timer_t3591_timeout(
+                  to->timer_id, (scid_t) to->arg2_user);
               break;
             case TASK_SMF_APP_TIMEOUT_NRF_HEARTBEAT:
               smf_app_inst->timer_nrf_heartbeat_timeout(
@@ -1597,7 +1598,7 @@ void smf_app::update_pdu_session_upCnx_state(
       upCnx_state_e2str.at(static_cast<int>(state)).c_str());
 }
 //---------------------------------------------------------------------------------------------
-void smf_app::timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user) {
+void smf_app::timer_t3591_timeout(timer_id_t timer_id, scid_t scid) {
   // TODO: send session modification request again...
 }
 

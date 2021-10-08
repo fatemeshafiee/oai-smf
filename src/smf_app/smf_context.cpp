@@ -1792,11 +1792,21 @@ bool smf_context::handle_pdu_session_modification_request(
   // Update PDU Session status
   sp.get()->set_pdu_session_status(
       pdu_session_status_e::PDU_SESSION_MODIFICATION_PENDING);
+
+  scid_t scid = {};
+  try {
+    scid = std::stoi(sm_context_request.get()->scid);
+  } catch (const std::exception& err) {
+    Logger::smf_app().warn(
+        "Couldn't retrieve "
+        "the corresponding SMF context, ignore message!");
+    return false;
+  }
+
   // start timer T3591
   // get smf_pdu_session and set the corresponding timer
   sp.get()->timer_T3591 = itti_inst->timer_setup(
-      T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591,
-      sm_context_request.get()->req.get_pdu_session_id());
+      T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591, scid);
 
   free_wrapper((void**) &nas_msg.plain.sm.pdu_session_modification_request
                    .qosflowdescriptions.qosflowdescriptionscontents);

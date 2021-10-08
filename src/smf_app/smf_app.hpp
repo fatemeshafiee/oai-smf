@@ -615,10 +615,10 @@ class smf_app {
   /*
    * will be executed when timer T3591 expires
    * @param [timer_id_t] timer_id
-   * @param [uint64_t] arg2_user
+   * @param [scid_t] scid
    * @return void
    */
-  void timer_t3591_timeout(timer_id_t timer_id, uint64_t arg2_user);
+  void timer_t3591_timeout(timer_id_t timer_id, scid_t scid);
 
   /*
    * will be executed when NRF Heartbeat timer expires
