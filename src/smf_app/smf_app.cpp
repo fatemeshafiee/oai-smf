@@ -1486,6 +1486,48 @@ bool smf_app::scid_2_smf_context(
 }
 
 //------------------------------------------------------------------------------
+bool smf_app::find_pdu_session(
+    const scid_t& scid, std::shared_ptr<smf_pdu_session>& sp) const {
+  // get the SMF Context
+  std::shared_ptr<smf_context_ref> scf = {};
+
+  if (is_scid_2_smf_context(scid)) {
+    scf = scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+    return false;
+  }
+
+  supi_t supi                     = scf.get()->supi;
+  supi64_t supi64                 = smf_supi_to_u64(supi);
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
+
+  std::shared_ptr<smf_context> sc = {};
+
+  if (is_supi_2_smf_context(supi64)) {
+    sc = supi_2_smf_context(supi64);
+    Logger::smf_app().debug(
+        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
+  } else {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF context with "
+        "Supi " SUPI_64_FMT "!",
+        supi64);
+    return false;
+  }
+
+  // Get PDU Session
+  if (!sc.get()->find_pdu_session(pdu_session_id, sp)) {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF PDU Session context!");
+    return false;
+  }
+  if (!sp) return false;
+  return true;
+}
+
+//------------------------------------------------------------------------------
 bool smf_app::use_local_configuration_subscription_data(
     const std::string& dnn_selection_mode) {
   // TODO: should be implemented
@@ -1599,7 +1641,79 @@ void smf_app::update_pdu_session_upCnx_state(
 }
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_t3591_timeout(timer_id_t timer_id, scid_t scid) {
-  // TODO: send session modification request again...
+  // Send session modification request again ...
+
+  // get the SMF Context
+  std::shared_ptr<smf_context_ref> scf = {};
+
+  if (is_scid_2_smf_context(scid)) {
+    scf = scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+  }
+
+  supi_t supi                     = scf.get()->supi;
+  supi64_t supi64                 = smf_supi_to_u64(supi);
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
+
+  std::shared_ptr<smf_context> sc = {};
+
+  if (is_supi_2_smf_context(supi64)) {
+    sc = supi_2_smf_context(supi64);
+    Logger::smf_app().debug(
+        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
+  } else {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF context with "
+        "Supi " SUPI_64_FMT "!",
+        supi64);
+  }
+
+  // Get PDU Session
+  std::shared_ptr<smf_pdu_session> sp = {};
+
+  if (!sc.get()->find_pdu_session(pdu_session_id, sp)) {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF PDU Session context!");
+    return;
+  }
+
+  std::shared_ptr<itti_n11_msg> pending_n11_msg = {};
+  sp.get()->get_pending_n11_msg(pending_n11_msg);
+
+  if (!pending_n11_msg) {
+    Logger::smf_app().warn("Could not retrieve the pending message!");
+    return;
+  }
+  std::shared_ptr<itti_n11_update_sm_context_response> n11_msg =
+      std::static_pointer_cast<itti_n11_update_sm_context_response>(
+          pending_n11_msg);
+
+  if (n11_msg) {
+    uint8_t number_retransmission = sp.get()->get_number_retransmission_T3591();
+    if (number_retransmission < 5) {
+      sp.get()->set_number_retransmission_T3591(number_retransmission + 1);
+    } else {
+      return;
+    }
+    Logger::smf_app().info(
+        "Sending ITTI message %s to task TASK_SMF_APP to trigger response",
+        n11_msg->get_msg_name());
+    int ret = itti_inst->send_msg(n11_msg);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_SBI",
+          n11_msg->get_msg_name());
+    }
+
+    // Start timer T3591
+    sp.get()->timer_T3591 = itti_inst->timer_setup(
+        T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591,
+        scid);
+
+    return;
+  }
 }
 
 //---------------------------------------------------------------------------------------------

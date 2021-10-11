@@ -658,6 +658,33 @@ void smf_pdu_session::set_snssai(const snssai_t s) {
 }
 
 //------------------------------------------------------------------------------
+void smf_pdu_session::set_pending_n11_msg(
+    const std::shared_ptr<itti_n11_msg>& msg) {
+  pending_n11_msg = msg;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_pending_n11_msg(
+    std::shared_ptr<itti_n11_msg>& msg) const {
+  msg = pending_n11_msg;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::set_number_retransmission_T3591(const uint8_t& n) {
+  number_retransmission_T3591 = n;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_number_retransmission_T3591(uint8_t& n) const {
+  n = number_retransmission_T3591;
+}
+
+//------------------------------------------------------------------------------
+uint8_t smf_pdu_session::get_number_retransmission_T3591() const {
+  return number_retransmission_T3591;
+}
+
+//------------------------------------------------------------------------------
 void session_management_subscription::insert_dnn_configuration(
     const std::string& dnn,
     std::shared_ptr<dnn_configuration_t>& dnn_configuration) {
@@ -1803,6 +1830,9 @@ bool smf_context::handle_pdu_session_modification_request(
     return false;
   }
 
+  // Store the context for the timer handling
+  sp.get()->set_pending_n11_msg(
+      std::dynamic_pointer_cast<itti_n11_msg>(sm_context_resp));
   // start timer T3591
   // get smf_pdu_session and set the corresponding timer
   sp.get()->timer_T3591 = itti_inst->timer_setup(

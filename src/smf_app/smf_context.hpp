@@ -135,6 +135,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     timer_T3592        = ITTI_INVALID_TIMER_ID;
     number_of_supported_packet_filters         = 0;
     maximum_number_of_supported_packet_filters = 0;
+    number_retransmission_T3591                = 0;
   }
 
   void clear() {
@@ -150,13 +151,14 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     seid                = 0;
     up_fseid            = {};
     qos_flows.clear();
-    default_qfi.qfi    = NO_QOS_FLOW_IDENTIFIER_ASSIGNED;
-    pdu_session_status = pdu_session_status_e::PDU_SESSION_INACTIVE;
-    upCnx_state        = upCnx_state_e::UPCNX_STATE_DEACTIVATED;
-    ho_state           = ho_state_e::HO_STATE_NONE;
-    timer_T3590        = ITTI_INVALID_TIMER_ID;
-    timer_T3591        = ITTI_INVALID_TIMER_ID;
-    timer_T3592        = ITTI_INVALID_TIMER_ID;
+    default_qfi.qfi             = NO_QOS_FLOW_IDENTIFIER_ASSIGNED;
+    pdu_session_status          = pdu_session_status_e::PDU_SESSION_INACTIVE;
+    upCnx_state                 = upCnx_state_e::UPCNX_STATE_DEACTIVATED;
+    ho_state                    = ho_state_e::HO_STATE_NONE;
+    timer_T3590                 = ITTI_INVALID_TIMER_ID;
+    timer_T3591                 = ITTI_INVALID_TIMER_ID;
+    timer_T3592                 = ITTI_INVALID_TIMER_ID;
+    number_retransmission_T3591 = 0;
   }
 
   smf_pdu_session(smf_pdu_session& b) = delete;
@@ -493,6 +495,12 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    */
   void set_snssai(const snssai_t s);
 
+  void set_pending_n11_msg(const std::shared_ptr<itti_n11_msg>& msg);
+  void get_pending_n11_msg(std::shared_ptr<itti_n11_msg>& msg) const;
+  void set_number_retransmission_T3591(const uint8_t& n);
+  void get_number_retransmission_T3591(uint8_t& n) const;
+  uint8_t get_number_retransmission_T3591() const;
+
  public:
   bool ipv4;                            // IPv4 Addr
   struct in_addr ipv4_address;          // IPv4 Addr
@@ -541,6 +549,10 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   // Shared lock
   mutable std::shared_mutex m_pdu_session_mutex;
+
+ private:
+  std::shared_ptr<itti_n11_msg> pending_n11_msg;
+  uint8_t number_retransmission_T3591;
 };
 
 class session_management_subscription {

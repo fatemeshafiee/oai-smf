@@ -484,6 +484,15 @@ class smf_app {
   std::shared_ptr<smf_context> supi_2_smf_context(const supi64_t& supi) const;
 
   /*
+   * Find the PDU Session with its SCID
+   * @param [const scid_t &] scid: SMF Context ID
+   * @param [std::shared_ptr<smf_pdu_session> &] sp: pointer to the PDU session
+   * @return bool: return true if found, otherwise return false
+   */
+  bool find_pdu_session(
+      const scid_t& scid, std::shared_ptr<smf_pdu_session>& sp) const;
+
+  /*
    * Handle PDUSession_CreateSMContextRequest from AMF
    * @param [std::shared_ptr<itti_n11_create_sm_context_request>&] Request
    * message
