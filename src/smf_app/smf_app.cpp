@@ -1703,17 +1703,17 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, scid_t scid) {
     int ret = itti_inst->send_msg(n11_msg);
     if (RETURNok != ret) {
       Logger::smf_app().error(
-          "Could not send ITTI message %s to task TASK_SMF_SBI",
+          "Could not send ITTI message %s to task TASK_SMF_APP",
           n11_msg->get_msg_name());
+    } else {
+      // Start timer T3591
+      sp.get()->timer_T3591 = itti_inst->timer_setup(
+          T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591,
+          scid);
     }
-
-    // Start timer T3591
-    sp.get()->timer_T3591 = itti_inst->timer_setup(
-        T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591,
-        scid);
-
     return;
   }
+  return;
 }
 
 //---------------------------------------------------------------------------------------------
