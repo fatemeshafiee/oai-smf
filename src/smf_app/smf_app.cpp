@@ -1639,9 +1639,10 @@ void smf_app::update_pdu_session_upCnx_state(
       "Set PDU Session UpCnxState to %s",
       upCnx_state_e2str.at(static_cast<int>(state)).c_str());
 }
+
 //---------------------------------------------------------------------------------------------
 void smf_app::timer_t3591_timeout(timer_id_t timer_id, scid_t scid) {
-  // Send session modification request again ...
+  // Re-send Session Modification Command ...
 
   // get the SMF Context
   std::shared_ptr<smf_context_ref> scf = {};
@@ -1692,9 +1693,13 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, scid_t scid) {
 
   if (n11_msg) {
     uint8_t number_retransmission = sp.get()->get_number_retransmission_T3591();
-    if (number_retransmission < 5) {
+    if (number_retransmission <= NUMBER_RETRANSMISSION_TIMES_T3591) {
       sp.get()->set_number_retransmission_T3591(number_retransmission + 1);
     } else {
+      // Update PDU Session status -> ACTIVE
+      sp.get()->set_pdu_session_status(
+          pdu_session_status_e::PDU_SESSION_ACTIVE);
+      // TODO: check 6.3.2.5 a,@3GPP TS 24.501 V16.1.0 (2019-06)
       return;
     }
     Logger::smf_app().info(
@@ -1709,6 +1714,87 @@ void smf_app::timer_t3591_timeout(timer_id_t timer_id, scid_t scid) {
       // Start timer T3591
       sp.get()->timer_T3591 = itti_inst->timer_setup(
           T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591,
+          scid);
+    }
+    return;
+  }
+  return;
+}
+
+//---------------------------------------------------------------------------------------------
+void smf_app::timer_t3592_timeout(timer_id_t timer_id, scid_t scid) {
+  // Re-send Session Release Command ...
+
+  // get the SMF Context
+  std::shared_ptr<smf_context_ref> scf = {};
+
+  if (is_scid_2_smf_context(scid)) {
+    scf = scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+  }
+
+  supi_t supi                     = scf.get()->supi;
+  supi64_t supi64                 = smf_supi_to_u64(supi);
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
+
+  std::shared_ptr<smf_context> sc = {};
+
+  if (is_supi_2_smf_context(supi64)) {
+    sc = supi_2_smf_context(supi64);
+    Logger::smf_app().debug(
+        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
+  } else {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF context with "
+        "Supi " SUPI_64_FMT "!",
+        supi64);
+  }
+
+  // Get PDU Session
+  std::shared_ptr<smf_pdu_session> sp = {};
+
+  if (!sc.get()->find_pdu_session(pdu_session_id, sp)) {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF PDU Session context!");
+    return;
+  }
+
+  std::shared_ptr<itti_n11_msg> pending_n11_msg = {};
+  sp.get()->get_pending_n11_msg(pending_n11_msg);
+
+  if (!pending_n11_msg) {
+    Logger::smf_app().warn("Could not retrieve the pending message!");
+    return;
+  }
+
+  std::shared_ptr<itti_n11_update_sm_context_response> n11_msg =
+      std::static_pointer_cast<itti_n11_update_sm_context_response>(
+          pending_n11_msg);
+
+  if (n11_msg) {
+    uint8_t number_retransmission = sp.get()->get_number_retransmission_T3592();
+    if (number_retransmission <= NUMBER_RETRANSMISSION_TIMES_T3592) {
+      sp.get()->set_number_retransmission_T3592(number_retransmission + 1);
+    } else {
+      // Update PDU Session status -> INACTIVE -  to be verified
+      sp.get()->set_pdu_session_status(
+          pdu_session_status_e::PDU_SESSION_INACTIVE);
+      return;
+    }
+    Logger::smf_app().info(
+        "Sending ITTI message %s to task TASK_SMF_APP to trigger response",
+        n11_msg->get_msg_name());
+    int ret = itti_inst->send_msg(n11_msg);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_APP",
+          n11_msg->get_msg_name());
+    } else {
+      // Start timer T3591
+      sp.get()->timer_T3592 = itti_inst->timer_setup(
+          T3592_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3592,
           scid);
     }
     return;

@@ -136,6 +136,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     number_of_supported_packet_filters         = 0;
     maximum_number_of_supported_packet_filters = 0;
     number_retransmission_T3591                = 0;
+    number_retransmission_T3592                = 0;
   }
 
   void clear() {
@@ -159,6 +160,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
     timer_T3591                 = ITTI_INVALID_TIMER_ID;
     timer_T3592                 = ITTI_INVALID_TIMER_ID;
     number_retransmission_T3591 = 0;
+    number_retransmission_T3592 = 0;
   }
 
   smf_pdu_session(smf_pdu_session& b) = delete;
@@ -501,6 +503,10 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   void get_number_retransmission_T3591(uint8_t& n) const;
   uint8_t get_number_retransmission_T3591() const;
 
+  void set_number_retransmission_T3592(const uint8_t& n);
+  void get_number_retransmission_T3592(uint8_t& n) const;
+  uint8_t get_number_retransmission_T3592() const;
+
  public:
   bool ipv4;                            // IPv4 Addr
   struct in_addr ipv4_address;          // IPv4 Addr
@@ -553,6 +559,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
  private:
   std::shared_ptr<itti_n11_msg> pending_n11_msg;
   uint8_t number_retransmission_T3591;
+  uint8_t number_retransmission_T3592;
 };
 
 class session_management_subscription {

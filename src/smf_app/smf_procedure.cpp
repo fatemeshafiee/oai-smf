@@ -1334,12 +1334,25 @@ void session_update_sm_context_procedure::handle_itti_msg(
       // TODO: To be completed
       // TODO: start timer T3592 (see Section 6.3.3@3GPP TS 24.501)
       // get smf_pdu_session and set the corresponding timer
-      sps->timer_T3592 = itti_inst->timer_setup(
-          T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3592,
-          n11_trigger->req.get_pdu_session_id());
 
-      // TODO: How SMF can retransmit the PDU SESSION RELEASE COMMAND message on
-      // the expiry of the timer T3592
+      scid_t scid = {};
+      try {
+        scid = (scid_t) std::stoul(n11_trigger.get()->scid, nullptr, 10);
+      } catch (const std::exception& e) {
+        Logger::smf_n1().warn(
+            "Error when converting from string to int for SCID, "
+            "error: %s",
+            e.what());
+        return;
+      }
+
+      // Store the context for the timer handling
+      sps.get()->set_pending_n11_msg(
+          std::dynamic_pointer_cast<itti_n11_msg>(n11_triggered_pending));
+
+      sps->timer_T3592 = itti_inst->timer_setup(
+          T3592_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3592,
+          scid);
 
     } break;
 

@@ -685,6 +685,21 @@ uint8_t smf_pdu_session::get_number_retransmission_T3591() const {
 }
 
 //------------------------------------------------------------------------------
+void smf_pdu_session::set_number_retransmission_T3592(const uint8_t& n) {
+  number_retransmission_T3592 = n;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_number_retransmission_T3592(uint8_t& n) const {
+  n = number_retransmission_T3592;
+}
+
+//------------------------------------------------------------------------------
+uint8_t smf_pdu_session::get_number_retransmission_T3592() const {
+  return number_retransmission_T3592;
+}
+
+//------------------------------------------------------------------------------
 void session_management_subscription::insert_dnn_configuration(
     const std::string& dnn,
     std::shared_ptr<dnn_configuration_t>& dnn_configuration) {
