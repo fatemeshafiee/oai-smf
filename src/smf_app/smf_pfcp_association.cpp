@@ -418,6 +418,7 @@ bool pfcp_associations::select_up_node(
     pfcp::node_id_t& node_id, const snssai_t& snssai, const std::string& dnn) {
   node_id = {};
   if (associations.empty()) {
+    Logger::smf_app().debug("No UPF available");
     return false;
   }
   folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
@@ -433,7 +434,11 @@ bool pfcp_associations::select_up_node(
     // else, verify that UPF belongs to the same slice and supports this dnn
     std::vector<snssai_t> snssais = {};
     upf_info_t upf_info           = {};
+
     a->upf_node_profile.get_upf_info(upf_info);
+    Logger::smf_app().debug(
+        "UPF profile info: %s", upf_info.to_string().c_str());
+
     for (auto ui : upf_info.snssai_upf_info_list) {
       if (ui.snssai == snssai) {
         for (auto d : ui.dnn_upf_info_list) {

@@ -342,6 +342,22 @@ typedef struct interface_upf_info_item_s {
 typedef struct upf_info_s {
   std::vector<interface_upf_info_item_t> interface_upf_info_list;
   std::vector<snssai_upf_info_item_t> snssai_upf_info_list;
+
+  std::string to_string() const {
+    std::string s = {};
+    // TODO: Interface UPF Info List
+    if (!snssai_upf_info_list.empty()) {
+      s.append("SNSSAI UPF Info: \n");
+      for (auto sn : snssai_upf_info_list) {
+        s.append("SNSSAI: " + sn.snssai.toString() + "\n");
+        s.append("DNN UPF Info: ");
+        for (auto d : sn.dnn_upf_info_list) {
+          s.append("," + d.dnn);
+        }
+      }
+    }
+    return s;
+  }
 } upf_info_t;
 
 typedef struct patch_item_s {
