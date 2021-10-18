@@ -324,11 +324,23 @@ typedef struct dnn_upf_info_item_s {
   std::string dnn;
   // std::vector<std::string> dnai_list
   // std::vector<std::string> pdu_session_types
+
+  dnn_upf_info_item_s& operator=(const dnn_upf_info_item_s& d) {
+    dnn = d.dnn;
+    return *this;
+  }
 } dnn_upf_info_item_t;
 
 typedef struct snssai_upf_info_item_s {
   snssai_t snssai;
   std::vector<dnn_upf_info_item_t> dnn_upf_info_list;
+
+  snssai_upf_info_item_s& operator=(const snssai_upf_info_item_s& s) {
+    snssai            = s.snssai;
+    dnn_upf_info_list = s.dnn_upf_info_list;
+    return *this;
+  }
+
 } snssai_upf_info_item_t;
 
 typedef struct interface_upf_info_item_s {
@@ -337,11 +349,28 @@ typedef struct interface_upf_info_item_s {
   std::vector<struct in6_addr> ipv6_addresses;
   std::string endpoint_fqdn;
   std::string network_instance;
+
+  interface_upf_info_item_s& operator=(const interface_upf_info_item_s& i) {
+    interface_type   = i.interface_type;
+    ipv4_addresses   = i.ipv4_addresses;
+    ipv6_addresses   = i.ipv6_addresses;
+    endpoint_fqdn    = i.endpoint_fqdn;
+    network_instance = i.network_instance;
+
+    return *this;
+  }
+
 } interface_upf_info_item_t;
 
 typedef struct upf_info_s {
   std::vector<interface_upf_info_item_t> interface_upf_info_list;
   std::vector<snssai_upf_info_item_t> snssai_upf_info_list;
+
+  upf_info_s& operator=(const upf_info_s& s) {
+    interface_upf_info_list = s.interface_upf_info_list;
+    snssai_upf_info_list    = s.snssai_upf_info_list;
+    return *this;
+  }
 
   std::string to_string() const {
     std::string s = {};

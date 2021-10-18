@@ -209,6 +209,8 @@ bool pfcp_associations::add_association(
       }
     }
     associations.insert((int32_t) hash_node_id, sa);
+    // Display UPF Node profile
+    sa->get_upf_node_profile().display();
     trigger_heartbeat_request_procedure(sa);
   }
   return true;
@@ -435,7 +437,7 @@ bool pfcp_associations::select_up_node(
     std::vector<snssai_t> snssais = {};
     upf_info_t upf_info           = {};
 
-    a->upf_node_profile.get_upf_info(upf_info);
+    a->get_upf_node_profile().get_upf_info(upf_info);
     Logger::smf_app().debug(
         "UPF profile info: %s", upf_info.to_string().c_str());
 
