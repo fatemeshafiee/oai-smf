@@ -209,6 +209,8 @@ bool pfcp_associations::add_association(
       }
     }
     associations.insert((int32_t) hash_node_id, sa);
+    // Display UPF Node profile
+    sa->get_upf_node_profile().display();
     trigger_heartbeat_request_procedure(sa);
   }
   return true;
@@ -418,6 +420,7 @@ bool pfcp_associations::select_up_node(
     pfcp::node_id_t& node_id, const snssai_t& snssai, const std::string& dnn) {
   node_id = {};
   if (associations.empty()) {
+    Logger::smf_app().debug("No UPF available");
     return false;
   }
   folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
@@ -433,7 +436,13 @@ bool pfcp_associations::select_up_node(
     // else, verify that UPF belongs to the same slice and supports this dnn
     std::vector<snssai_t> snssais = {};
     upf_info_t upf_info           = {};
-    a->upf_node_profile.get_upf_info(upf_info);
+
+    a->get_upf_node_profile().get_upf_info(upf_info);
+    // UPF info
+    a->get_upf_node_profile().display();
+
+    Logger::smf_app().debug("UPF info: %s", upf_info.to_string().c_str());
+
     for (auto ui : upf_info.snssai_upf_info_list) {
       if (ui.snssai == snssai) {
         for (auto d : ui.dnn_upf_info_list) {
