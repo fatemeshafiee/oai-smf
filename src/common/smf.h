@@ -376,13 +376,13 @@ typedef struct upf_info_s {
     std::string s = {};
     // TODO: Interface UPF Info List
     if (!snssai_upf_info_list.empty()) {
-      s.append("SNSSAI UPF Info: \n");
+      s.append("SNSSAI UPF Info: ");
       for (auto sn : snssai_upf_info_list) {
-        s.append("SNSSAI: " + sn.snssai.toString() + "\n");
-        s.append("DNN UPF Info: ");
+        s.append("{" + sn.snssai.toString() + ", ");
         for (auto d : sn.dnn_upf_info_list) {
-          s.append("," + d.dnn);
+          s.append("{DNN = " + d.dnn + "}, ");
         }
+        s.append("};");
       }
     }
     return s;

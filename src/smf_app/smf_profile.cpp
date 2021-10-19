@@ -203,7 +203,7 @@ void nf_profile::display() const {
     Logger::smf_app().debug("\tSNSSAI:");
   }
   for (auto s : snssais) {
-    Logger::smf_app().debug("\t\t SST, SD: %d, %s", s.sST, s.sD.c_str());
+    Logger::smf_app().debug("\t\t SST %d, SD %s", s.sST, s.sD.c_str());
   }
   if (!fqdn.empty()) {
     Logger::smf_app().debug("\tFQDN: %s", fqdn.c_str());

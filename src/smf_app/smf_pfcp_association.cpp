@@ -438,8 +438,10 @@ bool pfcp_associations::select_up_node(
     upf_info_t upf_info           = {};
 
     a->get_upf_node_profile().get_upf_info(upf_info);
-    Logger::smf_app().debug(
-        "UPF profile info: %s", upf_info.to_string().c_str());
+    // UPF info
+    a->get_upf_node_profile().display();
+
+    Logger::smf_app().debug("UPF info: %s", upf_info.to_string().c_str());
 
     for (auto ui : upf_info.snssai_upf_info_list) {
       if (ui.snssai == snssai) {

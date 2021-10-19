@@ -482,7 +482,7 @@ class upf_profile : public nf_profile {
   // upf_profile(upf_profile &b) = delete;
 
   virtual ~upf_profile() {
-    Logger::smf_app().debug("Delete UPF Profile instance...");
+    // Logger::smf_app().debug("Delete UPF Profile instance...");
   }
 
   /*
