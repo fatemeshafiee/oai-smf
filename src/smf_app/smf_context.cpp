@@ -658,6 +658,48 @@ void smf_pdu_session::set_snssai(const snssai_t s) {
 }
 
 //------------------------------------------------------------------------------
+void smf_pdu_session::set_pending_n11_msg(
+    const std::shared_ptr<itti_n11_msg>& msg) {
+  pending_n11_msg = msg;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_pending_n11_msg(
+    std::shared_ptr<itti_n11_msg>& msg) const {
+  msg = pending_n11_msg;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::set_number_retransmission_T3591(const uint8_t& n) {
+  number_retransmission_T3591 = n;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_number_retransmission_T3591(uint8_t& n) const {
+  n = number_retransmission_T3591;
+}
+
+//------------------------------------------------------------------------------
+uint8_t smf_pdu_session::get_number_retransmission_T3591() const {
+  return number_retransmission_T3591;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::set_number_retransmission_T3592(const uint8_t& n) {
+  number_retransmission_T3592 = n;
+}
+
+//------------------------------------------------------------------------------
+void smf_pdu_session::get_number_retransmission_T3592(uint8_t& n) const {
+  n = number_retransmission_T3592;
+}
+
+//------------------------------------------------------------------------------
+uint8_t smf_pdu_session::get_number_retransmission_T3592() const {
+  return number_retransmission_T3592;
+}
+
+//------------------------------------------------------------------------------
 void session_management_subscription::insert_dnn_configuration(
     const std::string& dnn,
     std::shared_ptr<dnn_configuration_t>& dnn_configuration) {
@@ -1792,11 +1834,24 @@ bool smf_context::handle_pdu_session_modification_request(
   // Update PDU Session status
   sp.get()->set_pdu_session_status(
       pdu_session_status_e::PDU_SESSION_MODIFICATION_PENDING);
+
+  scid_t scid = {};
+  try {
+    scid = std::stoi(sm_context_request.get()->scid);
+  } catch (const std::exception& err) {
+    Logger::smf_app().warn(
+        "Couldn't retrieve "
+        "the corresponding SMF context, ignore message!");
+    return false;
+  }
+
+  // Store the context for the timer handling
+  sp.get()->set_pending_n11_msg(
+      std::dynamic_pointer_cast<itti_n11_msg>(sm_context_resp));
   // start timer T3591
   // get smf_pdu_session and set the corresponding timer
   sp.get()->timer_T3591 = itti_inst->timer_setup(
-      T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591,
-      sm_context_request.get()->req.get_pdu_session_id());
+      T3591_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3591, scid);
 
   free_wrapper((void**) &nas_msg.plain.sm.pdu_session_modification_request
                    .qosflowdescriptions.qosflowdescriptionscontents);

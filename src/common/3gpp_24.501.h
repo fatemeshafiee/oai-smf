@@ -382,6 +382,10 @@ struct paa_s {
 };
 
 typedef struct paa_s paa_t;
+
+constexpr uint8_t NUMBER_RETRANSMISSION_TIMES_T3591 = 4;
+constexpr uint8_t NUMBER_RETRANSMISSION_TIMES_T3592 = 4;
+
 #endif
 
 #endif
