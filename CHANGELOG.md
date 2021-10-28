@@ -1,5 +1,11 @@
 # RELEASE NOTES: #
 
+## v1.2.1 -- October 2021 ##
+
+* Fix build issue
+* Fix UPF selection
+* Timers handling: T3591/T3952
+
 ## v1.2.0 -- September 2021 ##
 
 * Event Exposure implemented
