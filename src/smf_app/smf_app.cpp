@@ -2145,6 +2145,7 @@ void smf_app::generate_smf_profile() {
   endpoint.ipv4_address = addrs[0];  // TODO: use first IP ADDR for now
   endpoint.transport    = "TCP";
   endpoint.port         = smf_cfg.sbi.port;
+  if (smf_cfg.http_version == 2) endpoint.port = smf_cfg.sbi_http2_port;
   nf_service.ip_endpoints.push_back(endpoint);
 
   nf_instance_profile.add_nf_service(nf_service);
