@@ -1323,32 +1323,8 @@ bool smf_app::handle_nf_status_notification(
         std::vector<struct in_addr> ipv4_addrs = {};
         profile.get()->get_nf_ipv4_addresses(ipv4_addrs);
 
-        // Use IPv4 addr first if available
-        if (ipv4_addrs.size() >= 1) {
-          bool found = false;
-          for (auto node : smf_cfg.upfs) {
-            if (node.u1.ipv4_address.s_addr == ipv4_addrs[0].s_addr) {
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            // Add a new UPF node
-            Logger::smf_app().debug(
-                "Add a new UPF node, Ipv4 Addr %s", inet_ntoa(ipv4_addrs[0]));
-            pfcp::node_id_t n        = {};
-            n.node_id_type           = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-            n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
-            smf_cfg.upfs.push_back(n);
-            upf_profile* upf_node_profile =
-                dynamic_cast<upf_profile*>(profile.get());
-            start_upf_association(n, std::ref(*upf_node_profile));
-          } else {
-            Logger::smf_app().debug(
-                "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
-          }
-
-        } else if (!upf_fqdn.empty()) {  // use FQDN
+        // Use FQDN if available
+        if (!upf_fqdn.empty()) {
           uint8_t addr_type            = {0};
           std::string address          = {};
           uint32_t upf_port            = {0};
@@ -1394,6 +1370,31 @@ bool smf_app::handle_nf_status_notification(
             Logger::smf_app().debug(
                 "UPF node already exist (%s)", address.c_str());
           }
+        } else if (ipv4_addrs.size() >= 1) {  // If FQDN isn't available, check
+                                              // IP address
+          bool found = false;
+          for (auto node : smf_cfg.upfs) {
+            if (node.u1.ipv4_address.s_addr == ipv4_addrs[0].s_addr) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            // Add a new UPF node
+            Logger::smf_app().debug(
+                "Add a new UPF node, Ipv4 Addr %s", inet_ntoa(ipv4_addrs[0]));
+            pfcp::node_id_t n        = {};
+            n.node_id_type           = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+            n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
+            smf_cfg.upfs.push_back(n);
+            upf_profile* upf_node_profile =
+                dynamic_cast<upf_profile*>(profile.get());
+            start_upf_association(n, std::ref(*upf_node_profile));
+          } else {
+            Logger::smf_app().debug(
+                "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
+          }
+
         } else {
           Logger::smf_app().debug("No IP Addr/FQDN found");
           return false;

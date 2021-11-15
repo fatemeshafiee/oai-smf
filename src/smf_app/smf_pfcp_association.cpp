@@ -107,8 +107,8 @@ bool pfcp_associations::add_association(
       }
 
       if (record->h_addrtype == AF_INET) {
-        in_addr* address        = (struct in_addr*) record->h_addr;
-        node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+        in_addr* address = (struct in_addr*) record->h_addr;
+        // node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
         node_id.u1.ipv4_address = *address;
         Logger::smf_app().info(
             "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
@@ -173,8 +173,8 @@ bool pfcp_associations::add_association(
         return false;
       }
       if (record->h_addrtype == AF_INET) {
-        in_addr* address        = (struct in_addr*) record->h_addr;
-        node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+        in_addr* address = (struct in_addr*) record->h_addr;
+        // node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
         node_id.u1.ipv4_address = *address;
         Logger::smf_app().info(
             "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
@@ -451,7 +451,7 @@ bool pfcp_associations::select_up_node(
             Logger::smf_app().info(
                 "Select the UPF for the corresponding DNN %s, NSSSAI (SD: %s, "
                 "SST: %d) ",
-                d.dnn.c_str(), snssai.sD, snssai.sST);
+                d.dnn.c_str(), snssai.sD.c_str(), snssai.sST);
             return true;
           }
         }
