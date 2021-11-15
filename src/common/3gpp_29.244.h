@@ -1011,6 +1011,7 @@ typedef struct fseid_s {
 // 8.2.38 Node ID
 enum node_id_type_value_e {
   /* Request / Initial message */
+  NODE_ID_TYPE_UNKNOWN      = -1,
   NODE_ID_TYPE_IPV4_ADDRESS = 0,
   NODE_ID_TYPE_IPV6_ADDRESS = 1,
   NODE_ID_TYPE_FQDN         = 2,
@@ -1025,21 +1026,48 @@ struct node_id_s {
   } u1;
   std::string fqdn;  // should be in union but problem with virtual ~
   bool operator==(const struct node_id_s& i) const {
-    if ((i.node_id_type == this->node_id_type) &&
-        (i.u1.ipv4_address.s_addr == this->u1.ipv4_address.s_addr) &&
-        (i.fqdn == this->fqdn) &&
-        (i.u1.ipv6_address.s6_addr32[0] ==
-         this->u1.ipv6_address.s6_addr32[0]) &&
-        (i.u1.ipv6_address.s6_addr32[1] ==
-         this->u1.ipv6_address.s6_addr32[1]) &&
-        (i.u1.ipv6_address.s6_addr32[2] ==
-         this->u1.ipv6_address.s6_addr32[2]) &&
-        (i.u1.ipv6_address.s6_addr32[3] ==
-         this->u1.ipv6_address.s6_addr32[3])) {
-      return true;
-    } else {
-      return false;
+    if (i.node_id_type != this->node_id_type) return false;
+    switch (i.node_id_type) {
+      case NODE_ID_TYPE_IPV4_ADDRESS: {
+        if (i.u1.ipv4_address.s_addr == this->u1.ipv4_address.s_addr)
+          return true;
+      } break;
+      case NODE_ID_TYPE_IPV6_ADDRESS: {
+        if ((i.u1.ipv6_address.s6_addr32[0] ==
+             this->u1.ipv6_address.s6_addr32[0]) &&
+            (i.u1.ipv6_address.s6_addr32[1] ==
+             this->u1.ipv6_address.s6_addr32[1]) &&
+            (i.u1.ipv6_address.s6_addr32[2] ==
+             this->u1.ipv6_address.s6_addr32[2]) &&
+            (i.u1.ipv6_address.s6_addr32[3] ==
+             this->u1.ipv6_address.s6_addr32[3]))
+          return true;
+      } break;
+      case NODE_ID_TYPE_FQDN: {
+        if (i.fqdn == this->fqdn) return true;
+      } break;
+      default: {
+        return false;
+      }
     }
+
+    /*
+        if ((i.node_id_type == this->node_id_type) &&
+            (i.u1.ipv4_address.s_addr == this->u1.ipv4_address.s_addr) &&
+            (i.fqdn == this->fqdn) &&
+            (i.u1.ipv6_address.s6_addr32[0] ==
+             this->u1.ipv6_address.s6_addr32[0]) &&
+            (i.u1.ipv6_address.s6_addr32[1] ==
+             this->u1.ipv6_address.s6_addr32[1]) &&
+            (i.u1.ipv6_address.s6_addr32[2] ==
+             this->u1.ipv6_address.s6_addr32[2]) &&
+            (i.u1.ipv6_address.s6_addr32[3] ==
+             this->u1.ipv6_address.s6_addr32[3])) {
+          return true;
+        } else {
+          return false;
+        }
+        */
   };
   bool operator==(const std::string& f) const {
     if ((NODE_ID_TYPE_FQDN == this->node_id_type) && (fqdn.compare(f) == 0)) {
