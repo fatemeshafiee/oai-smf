@@ -62,6 +62,7 @@
 #include "smf_paa_dynamic.hpp"
 #include "string.hpp"
 #include "fqdn.hpp"
+#include "smf_config.hpp"
 
 extern "C" {
 #include "dynamic_memory_check.h"
@@ -83,29 +84,38 @@ void smf_app_task(void*);
 int smf_app::apply_config(const smf_config& cfg) {
   Logger::smf_app().info("Apply config...");
 
-  paa_t paa = {};
-  for (int ia = 0; ia < cfg.num_dnn; ia++) {
-    if (cfg.dnn[ia].pool_id_iv4 >= 0) {
-      int pool_id = cfg.dnn[ia].pool_id_iv4;
-      int range   = be32toh(cfg.ue_pool_range_high[pool_id].s_addr) -
-                  be32toh(cfg.ue_pool_range_low[pool_id].s_addr);
+  paa_t paa   = {};
+  int pool_id = 0;
+  for (std::map<std::string, dnn_t>::const_iterator it = cfg.dnns.begin();
+       it != cfg.dnns.end(); it++) {
+    if ((it->second.pdu_session_type.pdu_session_type ==
+         PDU_SESSION_TYPE_E_IPV4) or
+        (it->second.pdu_session_type.pdu_session_type ==
+         PDU_SESSION_TYPE_E_IPV4V6)) {
+      int range = be32toh(it->second.ue_pool_range_high.s_addr) -
+                  be32toh(it->second.ue_pool_range_high.s_addr);
       paa_dynamic::get_instance().add_pool(
-          cfg.dnn[ia].dnn, pool_id, cfg.ue_pool_range_low[pool_id], range);
+          it->second.dnn, pool_id, it->second.ue_pool_range_low, range);
       // TODO: check with dnn_label
-      Logger::smf_app().info("Applied config %s", cfg.dnn[ia].dnn.c_str());
-      paa.ipv4_address = cfg.ue_pool_range_low[pool_id];
+      Logger::smf_app().info("Applied config %s", it->second.dnn.c_str());
+      paa.ipv4_address = it->second.ue_pool_range_low;
     }
-    if (cfg.dnn[ia].pool_id_iv6 >= 0) {
-      int pool_id = cfg.dnn[ia].pool_id_iv6;
+
+    if ((it->second.pdu_session_type.pdu_session_type ==
+         PDU_SESSION_TYPE_E_IPV6) or
+        (it->second.pdu_session_type.pdu_session_type ==
+         PDU_SESSION_TYPE_E_IPV4V6)) {
       paa_dynamic::get_instance().add_pool(
-          cfg.dnn[ia].dnn, pool_id, cfg.paa_pool6_prefix[pool_id],
-          cfg.paa_pool6_prefix_len[pool_id]);
-      paa.ipv6_address = cfg.paa_pool6_prefix[pool_id];
+          it->second.dnn, pool_id, it->second.paa_pool6_prefix,
+          it->second.paa_pool6_prefix_len);
+      paa.ipv6_address = it->second.paa_pool6_prefix;
 
       // TODO: check with dnn_label
       Logger::smf_app().info(
-          "Applied config for IPv6 %s", cfg.dnn[ia].dnn.c_str());
+          "Applied config for IPv6 %s", it->second.dnn.c_str());
     }
+
+    pool_id++;
   }
 
   Logger::smf_app().info("Applied config");

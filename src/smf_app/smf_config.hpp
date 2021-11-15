@@ -81,6 +81,8 @@
 #define SMF_CONFIG_STRING_PDU_SESSION_TYPE "PDU_SESSION_TYPE"
 #define SMF_CONFIG_STRING_IPV4_POOL "IPV4_POOL"
 #define SMF_CONFIG_STRING_IPV6_POOL "IPV6_POOL"
+#define SMF_CONFIG_STRING_IPV4_RANGE "IPV4_RANGE"
+#define SMF_CONFIG_STRING_IPV6_PREFIX "IPV6_PREFIX"
 
 #define SMF_ABORT_ON_ERROR true
 #define SMF_WARN_ON_ERROR false
@@ -169,6 +171,19 @@ typedef struct itti_cfg_s {
   util::thread_sched_params async_cmd_sched_params;
 } itti_cfg_t;
 
+typedef struct dnn_s {
+  std::string dnn;
+  std::string dnn_label;
+  bool is_ipv4;
+  bool is_ipv6;
+  int pool_id_iv4;
+  int pool_id_iv6;
+  struct in_addr ue_pool_range_low;
+  struct in_addr ue_pool_range_high;
+  struct in6_addr paa_pool6_prefix;
+  uint8_t paa_pool6_prefix_len;
+  pdu_session_type_t pdu_session_type;
+} dnn_t;
 class smf_config {
  private:
   int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
@@ -195,32 +210,7 @@ class smf_config {
   struct in6_addr default_dnsv6;
   struct in6_addr default_dns_secv6;
 
-#define SMF_NUM_DNN_MAX 5
-  int num_dnn;
-  struct {
-    std::string dnn;
-    std::string dnn_label;
-    int pool_id_iv4;
-    int pool_id_iv6;
-    pdu_session_type_t pdu_session_type;
-  } dnn[SMF_NUM_DNN_MAX];
-
-  int num_ue_pool;
-#define SMF_NUM_UE_POOL_MAX 96
-  struct in_addr ue_pool_range_low[SMF_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_range_high[SMF_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_network[SMF_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_netmask[SMF_NUM_UE_POOL_MAX];
-  // computed from config, UE IP adresses that matches
-  // ue_pool_network[]/ue_pool_netmask[] but do not match ue_pool_range_low[] -
-  // ue_pool_range_high[]
-  // The problem here is that OpenFlow do not deal with ip ranges but with
-  // netmasks
-  std::vector<struct in_addr> ue_pool_excluded[SMF_NUM_UE_POOL_MAX];
-
-  int num_paa6_pool;
-  struct in6_addr paa_pool6_prefix[SMF_NUM_UE_POOL_MAX];
-  uint8_t paa_pool6_prefix_len[SMF_NUM_UE_POOL_MAX];
+  std::map<std::string, dnn_t> dnns;
 
   bool force_push_pco;
   uint ue_mtu;
@@ -281,33 +271,12 @@ class smf_config {
   uint8_t num_session_management_subscription;
 
   smf_config()
-      : m_rw_lock(),
-        num_dnn(0),
-        pid_dir(),
-        instance(0),
-        n4(),
-        sbi(),
-        itti(),
-        upfs() {
-    for (int i = 0; i < SMF_NUM_DNN_MAX; i++) {
-      dnn[i] = {};
-    }
+      : m_rw_lock(), pid_dir(), instance(0), n4(), sbi(), itti(), upfs() {
     default_dnsv4.s_addr     = INADDR_ANY;
     default_dns_secv4.s_addr = INADDR_ANY;
     default_dnsv6            = in6addr_any;
     default_dns_secv6        = in6addr_any;
 
-    num_ue_pool   = 0;
-    num_paa6_pool = 0;
-    for (int i = 0; i < SMF_NUM_UE_POOL_MAX; i++) {
-      ue_pool_range_low[i]    = {};
-      ue_pool_range_high[i]   = {};
-      ue_pool_network[i]      = {};
-      ue_pool_netmask[i]      = {};
-      paa_pool6_prefix[i]     = {};
-      paa_pool6_prefix_len[i] = {};
-      ue_pool_excluded[i]     = {};
-    }
     force_push_pco = true;
     ue_mtu         = 1358;
 
