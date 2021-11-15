@@ -93,12 +93,14 @@ int smf_app::apply_config(const smf_config& cfg) {
         (it->second.pdu_session_type.pdu_session_type ==
          PDU_SESSION_TYPE_E_IPV4V6)) {
       int range = be32toh(it->second.ue_pool_range_high.s_addr) -
-                  be32toh(it->second.ue_pool_range_high.s_addr);
+                  be32toh(it->second.ue_pool_range_low.s_addr);
       paa_dynamic::get_instance().add_pool(
           it->second.dnn, pool_id, it->second.ue_pool_range_low, range);
       // TODO: check with dnn_label
       Logger::smf_app().info("Applied config %s", it->second.dnn.c_str());
       paa.ipv4_address = it->second.ue_pool_range_low;
+      std::string ipv4_addr(inet_ntoa(paa.ipv4_address));
+      Logger::smf_app().info("PAA Ipv4 ", ipv4_addr.c_str());
     }
 
     if ((it->second.pdu_session_type.pdu_session_type ==
