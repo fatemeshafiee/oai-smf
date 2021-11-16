@@ -478,27 +478,24 @@ void smf_http2_server::update_sm_context_handler(
         sm_context_response.get_n1_sm_message(),
         sm_context_response.get_n2_sm_information(), json_format);
     h.emplace(
-        "content-type",
-        header_value{
-            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)});
+        "content-type", header_value{"multipart/related; boundary=" +
+                                     std::string(CURL_MIME_BOUNDARY)});
   } else if (sm_context_response.n1_sm_msg_is_set()) {
     mime_parser::create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n1_sm_message(),
         multipart_related_content_part_e::NAS, json_format);
     h.emplace(
-        "content-type",
-        header_value{
-            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)});
+        "content-type", header_value{"multipart/related; boundary=" +
+                                     std::string(CURL_MIME_BOUNDARY)});
   } else if (sm_context_response.n2_sm_info_is_set()) {
     mime_parser::create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
         sm_context_response.get_n2_sm_information(),
         multipart_related_content_part_e::NGAP, json_format);
     h.emplace(
-        "content-type",
-        header_value{
-            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)});
+        "content-type", header_value{"multipart/related; boundary=" +
+                                     std::string(CURL_MIME_BOUNDARY)});
   } else {
     h.emplace("content-type", header_value{json_format});
     body = json_data.dump().c_str();
