@@ -184,6 +184,30 @@ typedef struct dnn_s {
   uint8_t paa_pool6_prefix_len;
   pdu_session_type_t pdu_session_type;
 } dnn_t;
+
+typedef struct session_management_subscription_s {
+  snssai_t single_nssai;
+  std::string session_type;
+  std::string dnn;
+  uint8_t ssc_mode;
+  subscribed_default_qos_t default_qos;
+  session_ambr_t session_ambr;
+} session_management_subscription_t;
+
+/*
+#define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 10
+  struct {
+    snssai_t single_nssai;
+    std::string session_type;
+    std::string dnn;
+    uint8_t ssc_mode;
+    subscribed_default_qos_t default_qos;
+    session_ambr_t session_ambr;
+  } session_management_subscription
+      [SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX];
+  uint8_t num_session_management_subscription;
+*/
+
 class smf_config {
  private:
   int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
@@ -258,17 +282,8 @@ class smf_config {
 
   std::vector<upf_nwi_list_t> upf_nwi_list;
 
-#define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 10
-  struct {
-    snssai_t single_nssai;
-    std::string session_type;
-    std::string dnn;
-    uint8_t ssc_mode;
-    subscribed_default_qos_t default_qos;
-    session_ambr_t session_ambr;
-  } session_management_subscription
-      [SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX];
-  uint8_t num_session_management_subscription;
+  std::vector<session_management_subscription_t>
+      session_management_subscriptions;
 
   smf_config()
       : m_rw_lock(), pid_dir(), instance(0), n4(), sbi(), itti(), upfs() {
@@ -306,11 +321,12 @@ class smf_config {
     nrf_addr.api_version      = "v1";
     nrf_addr.fqdn             = {};
 
-    num_session_management_subscription = 0;
+    /*  num_session_management_subscription = 0;
 
-    for (int i = 0; i < SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX; i++) {
-      session_management_subscription[i] = {};
-    }
+      for (int i = 0; i < SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX; i++) {
+        session_management_subscription[i] = {};
+      }
+      */
     sbi_http2_port  = 8080;
     sbi_api_version = "v1";
     http_version    = 1;
@@ -325,7 +341,6 @@ class smf_config {
   void lock() { m_rw_lock.lock(); };
   void unlock() { m_rw_lock.unlock(); };
   int load(const std::string& config_file);
-  int finalize();
   void display();
   int get_pfcp_node_id(pfcp::node_id_t& node_id);
   int get_pfcp_fseid(pfcp::fseid_t& fseid);

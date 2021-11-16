@@ -34,7 +34,6 @@
 #include <iostream>
 #include "string.hpp"
 
-// C includes
 #include <arpa/inet.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -57,14 +56,6 @@ using namespace libconfig;
 using namespace smf;
 
 extern smf_config smf_cfg;
-
-//------------------------------------------------------------------------------
-int smf_config::finalize() {
-  Logger::smf_app().info("Finalize config...");
-
-  Logger::smf_app().info("Finalized config");
-  return 0;
-}
 
 //------------------------------------------------------------------------------
 int smf_config::load_thread_sched_params(
@@ -307,7 +298,9 @@ int smf_config::load(const string& config_file) {
   }
 
   try {
-    string astring              = {};
+    string astring = {};
+
+    // DNN list
     const Setting& dnn_list_cfg = smf_cfg[SMF_CONFIG_STRING_DNN_LIST];
     int count                   = dnn_list_cfg.getLength();
 
@@ -399,14 +392,6 @@ int smf_config::load(const string& config_file) {
             "in " SMF_CONFIG_STRING_IPV4_ADDRESS_LIST);
       }
 
-      /*
-            std::string range_low(inet_ntoa(dnn_item.ue_pool_range_low));
-            std::string range_high(inet_ntoa(dnn_item.ue_pool_range_high));
-            Logger::smf_app().info(
-                "    IPv4 pool %d .........: %s - %s", i, range_low.c_str(),
-                range_high.c_str());
-      */
-
       string ipv6_prefix = {};
       dnn_cfg.lookupValue(SMF_CONFIG_STRING_IPV6_PREFIX, ipv6_prefix);
       std::vector<std::string> ips6 = {};
@@ -445,6 +430,7 @@ int smf_config::load(const string& config_file) {
       dnns.insert(std::pair<std::string, dnn_t>(dnn_item.dnn, dnn_item));
     }
 
+    // DNS
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_IPV4_ADDRESS, astring);
     IPV4_STR_ADDR_TO_INADDR(
         util::trim(astring).c_str(), default_dnsv4,
@@ -774,7 +760,7 @@ int smf_config::load(const string& config_file) {
 
     // Local configuration
     if (use_local_subscription_info) {
-      num_session_management_subscription = 0;
+      // num_session_management_subscription = 0;
       const Setting& local_cfg = smf_cfg[SMF_CONFIG_STRING_LOCAL_CONFIGURATION];
 
       const Setting& session_management_subscription_list_cfg =
@@ -783,6 +769,7 @@ int smf_config::load(const string& config_file) {
       for (int i = 0; i < count; i++) {
         const Setting& session_management_subscription_cfg =
             session_management_subscription_list_cfg[i];
+        session_management_subscription_t sub_item = {};
 
         unsigned int nssai_sst                      = 0;
         string nssai_sd                             = {};
@@ -825,32 +812,28 @@ int smf_config::load(const string& config_file) {
         session_management_subscription_cfg.lookupValue(
             SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
 
-        session_management_subscription[i].single_nssai.sST = nssai_sst;
-        session_management_subscription[i].single_nssai.sD  = nssai_sd;
-        session_management_subscription[i].session_type = default_session_type;
-        session_management_subscription[i].dnn          = dnn;
-        session_management_subscription[i].ssc_mode     = default_ssc_mode;
-        session_management_subscription[i].default_qos._5qi = qos_profile_5qi;
-        session_management_subscription[i].default_qos.priority_level =
-            qos_profile_priority_level;
-        session_management_subscription[i].default_qos.arp.priority_level =
+        sub_item.single_nssai.sST           = nssai_sst;
+        sub_item.single_nssai.sD            = nssai_sd;
+        sub_item.session_type               = default_session_type;
+        sub_item.dnn                        = dnn;
+        sub_item.ssc_mode                   = default_ssc_mode;
+        sub_item.default_qos._5qi           = qos_profile_5qi;
+        sub_item.default_qos.priority_level = qos_profile_priority_level;
+        sub_item.default_qos.arp.priority_level =
             qos_profile_arp_priority_level;
-        session_management_subscription[i].default_qos.arp.preempt_cap =
-            qos_profile_arp_preemptcap;
-        session_management_subscription[i].default_qos.arp.preempt_vuln =
-            qos_profile_arp_preemptvuln;
-        session_management_subscription[i].session_ambr.downlink =
-            session_ambr_dl;
-        session_management_subscription[i].session_ambr.uplink =
-            session_ambr_ul;
-        num_session_management_subscription++;
+        sub_item.default_qos.arp.preempt_cap  = qos_profile_arp_preemptcap;
+        sub_item.default_qos.arp.preempt_vuln = qos_profile_arp_preemptvuln;
+        sub_item.session_ambr.downlink        = session_ambr_dl;
+        sub_item.session_ambr.uplink          = session_ambr_ul;
+        // num_session_management_subscription++;
+        session_management_subscriptions.push_back(sub_item);
       }
     }
   } catch (const SettingNotFoundException& nfex) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }
-  return finalize();
+  // return finalize();
 }
 
 //------------------------------------------------------------------------------
@@ -1035,45 +1018,43 @@ void smf_config::display() {
 
   if (use_local_subscription_info) {
     Logger::smf_app().info("- Local Subscription Configuration:");
-    for (int i = 0; i < num_session_management_subscription; i++) {
-      Logger::smf_app().info("    Session Management Subscription Data %d:", i);
+    uint8_t index = 0;
+    for (auto sub : session_management_subscriptions) {
+      Logger::smf_app().info(
+          "    Session Management Subscription Data %d:", index);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_NSSAI_SST
           ":  %d, " SMF_CONFIG_STRING_NSSAI_SD " %s",
-          session_management_subscription[i].single_nssai.sST,
-          session_management_subscription[i].single_nssai.sD.c_str());
+          sub.single_nssai.sST, sub.single_nssai.sD.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DNN ":  %s",
-          session_management_subscription[i].dnn.c_str());
+          "        " SMF_CONFIG_STRING_DNN ":  %s", sub.dnn.c_str());
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE ":  %s",
-          session_management_subscription[i].session_type.c_str());
+          sub.session_type.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE ":  %d",
-          session_management_subscription[i].ssc_mode);
+          "        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE ":  %d", sub.ssc_mode);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_5QI ":  %d",
-          session_management_subscription[i].default_qos._5qi);
+          sub.default_qos._5qi);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ":  %d",
-          session_management_subscription[i].default_qos.priority_level);
+          sub.default_qos.priority_level);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL ":  %d",
-          session_management_subscription[i].default_qos.arp.priority_level);
+          sub.default_qos.arp.priority_level);
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP ":  %s",
-          session_management_subscription[i]
-              .default_qos.arp.preempt_cap.c_str());
+          sub.default_qos.arp.preempt_cap.c_str());
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN ":  %s",
-          session_management_subscription[i]
-              .default_qos.arp.preempt_vuln.c_str());
+          sub.default_qos.arp.preempt_vuln.c_str());
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_SESSION_AMBR_UL ":  %s",
-          session_management_subscription[i].session_ambr.uplink.c_str());
+          sub.session_ambr.uplink.c_str());
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_SESSION_AMBR_DL ":  %s",
-          session_management_subscription[i].session_ambr.downlink.c_str());
+          sub.session_ambr.downlink.c_str());
+      index++;
     }
   }
 }
