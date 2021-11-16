@@ -194,20 +194,6 @@ typedef struct session_management_subscription_s {
   session_ambr_t session_ambr;
 } session_management_subscription_t;
 
-/*
-#define SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX 10
-  struct {
-    snssai_t single_nssai;
-    std::string session_type;
-    std::string dnn;
-    uint8_t ssc_mode;
-    subscribed_default_qos_t default_qos;
-    session_ambr_t session_ambr;
-  } session_management_subscription
-      [SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX];
-  uint8_t num_session_management_subscription;
-*/
-
 class smf_config {
  private:
   int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
@@ -321,12 +307,6 @@ class smf_config {
     nrf_addr.api_version      = "v1";
     nrf_addr.fqdn             = {};
 
-    /*  num_session_management_subscription = 0;
-
-      for (int i = 0; i < SMF_NUM_SESSION_MANAGEMENT_SUBSCRIPTION_MAX; i++) {
-        session_management_subscription[i] = {};
-      }
-      */
     sbi_http2_port  = 8080;
     sbi_api_version = "v1";
     http_version    = 1;

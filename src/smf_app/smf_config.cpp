@@ -667,8 +667,7 @@ int smf_config::load(const string& config_file) {
           if (addr_type != 0) {  // IPv6
             // TODO:
             throw("DO NOT SUPPORT IPV6 ADDR FOR NRF!");
-          } else {  // IPv4
-            // pfcp::node_id_t n = {};
+          } else {                                             // IPv4
             n.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;  // actually
             n.fqdn         = astring;
             if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) ==
@@ -745,7 +744,6 @@ int smf_config::load(const string& config_file) {
               "BAD IPv4 ADDRESS FORMAT FOR NRF !");
           nrf_addr.ipv4_addr = nrf_ipv4_addr;
           // nrf_addr.port        = nrf_port;
-
           // We hardcode nrf port from config for the moment
           if (!(nrf_cfg.lookupValue(SMF_CONFIG_STRING_NRF_PORT, nrf_port))) {
             Logger::smf_app().error(SMF_CONFIG_STRING_NRF_PORT "failed");
@@ -760,7 +758,6 @@ int smf_config::load(const string& config_file) {
 
     // Local configuration
     if (use_local_subscription_info) {
-      // num_session_management_subscription = 0;
       const Setting& local_cfg = smf_cfg[SMF_CONFIG_STRING_LOCAL_CONFIGURATION];
 
       const Setting& session_management_subscription_list_cfg =
@@ -783,6 +780,7 @@ int smf_config::load(const string& config_file) {
         string qos_profile_arp_preemptvuln          = {};
         string session_ambr_ul                      = {};
         string session_ambr_dl                      = {};
+
         session_management_subscription_cfg.lookupValue(
             SMF_CONFIG_STRING_NSSAI_SST, nssai_sst);
         session_management_subscription_cfg.lookupValue(
@@ -825,7 +823,6 @@ int smf_config::load(const string& config_file) {
         sub_item.default_qos.arp.preempt_vuln = qos_profile_arp_preemptvuln;
         sub_item.session_ambr.downlink        = session_ambr_dl;
         sub_item.session_ambr.uplink          = session_ambr_ul;
-        // num_session_management_subscription++;
         session_management_subscriptions.push_back(sub_item);
       }
     }
@@ -833,7 +830,6 @@ int smf_config::load(const string& config_file) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }
-  // return finalize();
 }
 
 //------------------------------------------------------------------------------
