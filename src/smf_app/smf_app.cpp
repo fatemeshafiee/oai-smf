@@ -100,7 +100,7 @@ int smf_app::apply_config(const smf_config& cfg) {
       Logger::smf_app().info("Applied config %s", it->second.dnn.c_str());
       paa.ipv4_address = it->second.ue_pool_range_low;
       std::string ipv4_addr(inet_ntoa(paa.ipv4_address));
-      Logger::smf_app().info("PAA Ipv4 ", ipv4_addr.c_str());
+      Logger::smf_app().info("PAA Ipv4: %s", ipv4_addr.c_str());
     }
 
     if ((it->second.pdu_session_type.pdu_session_type ==
