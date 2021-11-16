@@ -212,6 +212,8 @@ typedef struct qos_profile_s {
   "/callback/N1N2MsgTxfrFailureNotification/{}"  // UE Id
 #define NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL "/sm-contexts"
 #define NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL "/sm-contexts/"
+#define NSMF_SMF_CONFIGURATION_BASE "/nsmf-configuration/"
+#define NSMF_SMF_CONFIGURATION_CREATE_DNN "/dnn-configurations"
 
 // NRF
 #define NNRF_NFM_BASE "/nnrf-nfm/"
