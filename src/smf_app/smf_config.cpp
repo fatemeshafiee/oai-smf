@@ -830,6 +830,7 @@ int smf_config::load(const string& config_file) {
     Logger::smf_app().error("%s : %s", nfex.what(), nfex.getPath());
     return RETURNerror;
   }
+  return RETURNok;
 }
 
 //------------------------------------------------------------------------------

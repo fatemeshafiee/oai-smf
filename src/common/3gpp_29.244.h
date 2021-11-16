@@ -1011,10 +1011,10 @@ typedef struct fseid_s {
 // 8.2.38 Node ID
 enum node_id_type_value_e {
   /* Request / Initial message */
-  NODE_ID_TYPE_UNKNOWN      = -1,
   NODE_ID_TYPE_IPV4_ADDRESS = 0,
   NODE_ID_TYPE_IPV6_ADDRESS = 1,
   NODE_ID_TYPE_FQDN         = 2,
+  NODE_ID_TYPE_UNKNOWN      = 3
 };
 
 struct node_id_s {
@@ -1050,6 +1050,7 @@ struct node_id_s {
         return false;
       }
     }
+    return false;
 
     /*
         if ((i.node_id_type == this->node_id_type) &&
