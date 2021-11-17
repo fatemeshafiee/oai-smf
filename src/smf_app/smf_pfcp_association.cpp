@@ -94,6 +94,7 @@ bool pfcp_associations::add_association(
     }
     sa->recovery_time_stamp = recovery_time_stamp;
     sa->function_features   = {};
+    trigger_heartbeat_request_procedure(sa);
   } else {
     // Resolve FQDN to get UPF IP address if necessary
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
@@ -162,6 +163,7 @@ bool pfcp_associations::add_association(
     sa->recovery_time_stamp      = recovery_time_stamp;
     sa->function_features.first  = true;
     sa->function_features.second = function_features;
+    trigger_heartbeat_request_procedure(sa);
   } else {
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
       Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
@@ -233,6 +235,7 @@ bool pfcp_associations::add_association(
     sa->recovery_time_stamp      = recovery_time_stamp;
     sa->function_features.first  = true;
     sa->function_features.second = function_features;
+    trigger_heartbeat_request_procedure(sa);
   } else {
     restore_n4_sessions = false;
     sa                  = std::make_shared<pfcp_association>(

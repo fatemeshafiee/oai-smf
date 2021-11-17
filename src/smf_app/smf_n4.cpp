@@ -239,7 +239,7 @@ smf_n4::smf_n4()
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_pfcp_msg(
     pfcp_msg& msg, const endpoint& remote_endpoint) {
-  Logger::smf_n4().trace(
+  Logger::smf_n4().debug(
       "handle_receive_pfcp_msg msg type %d length %d", msg.get_message_type(),
       msg.get_message_length());
   switch (msg.get_message_type()) {
@@ -346,6 +346,8 @@ void smf_n4::handle_receive_association_setup_request(
   bool error                                       = true;
   uint64_t trxn_id                                 = 0;
   pfcp_association_setup_request msg_ies_container = {};
+
+  Logger::smf_n4().debug("Received N4 ASSOCIATION SETUP REQUEST");
   msg.to_core_type(msg_ies_container);
 
   handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
@@ -353,8 +355,8 @@ void smf_n4::handle_receive_association_setup_request(
     if (not msg_ies_container.node_id.first) {
       // Should be detected by lower layers
       Logger::smf_n4().warn(
-          "Received N4 ASSOCIATION SETUP REQUEST without node id IE!, ignore "
-          "message");
+          "Received N4 ASSOCIATION SETUP REQUEST without node id IE, ignore "
+          "message!");
       return;
     }
     if (not msg_ies_container.recovery_time_stamp.first) {
@@ -733,7 +735,8 @@ void smf_n4::send_heartbeat_request(std::shared_ptr<pfcp_association>& a) {
   h.set(r);
 
   pfcp::node_id_t& node_id = a->node_id;
-  if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+  if ((node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) or
+      (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN)) {
     a->timer_heartbeat = itti_inst->timer_setup(
         5, 0, TASK_SMF_N4, TASK_SMF_N4_TIMEOUT_HEARTBEAT_REQUEST,
         a->hash_node_id);
@@ -743,7 +746,7 @@ void smf_n4::send_heartbeat_request(std::shared_ptr<pfcp_association>& a) {
     send_request(r_endpoint, h, TASK_SMF_N4, a->trxn_id_heartbeat);
 
   } else {
-    Logger::smf_n4().warn("TODO send_heartbeat_request() node_id IPV6, FQDN!");
+    Logger::smf_n4().warn("TODO send_heartbeat_request() node_id IPV6!");
   }
 }
 
