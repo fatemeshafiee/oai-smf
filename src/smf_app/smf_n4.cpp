@@ -395,12 +395,13 @@ void smf_n4::handle_receive_association_setup_request(
                                            (uint32_t) recovery_time_stamp};
       a.pfcp_ies.set(r);
       a.pfcp_ies.set(cp_function_features);
-      if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+      if ((node_id.node_id_type != pfcp::NODE_ID_TYPE_IPV6_ADDRESS) and
+          (node_id.node_id_type != pfcp::NODE_ID_TYPE_UNKNOWN)) {
         a.r_endpoint = remote_endpoint;
         send_n4_msg(a);
       } else {
         Logger::smf_n4().warn(
-            "Received N4 ASSOCIATION SETUP REQUEST node_id IPV6, FQDN!, "
+            "Received N4 ASSOCIATION SETUP REQUEST node_id IPV6!"
             "ignore message");
         return;
       }
