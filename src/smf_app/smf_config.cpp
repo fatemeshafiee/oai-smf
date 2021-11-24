@@ -1163,3 +1163,17 @@ bool smf_config::get_nwi_list_index(
   }
   return true;
 }
+
+//------------------------------------------------------------------------------
+std::string smf_config::get_nwi(
+    const std::vector<interface_upf_info_item_t>& int_list,
+    const std::string& int_type) {
+  std::string nwi = {};
+  for (auto ui : int_list) {
+    if (!ui.interface_type.compare(int_type)) nwi = ui.network_instance;
+  }
+  Logger::smf_app().debug(
+      "Interface Type - %s, NWI - %s", int_type.c_str(), nwi.c_str());
+  return nwi;
+}
+//------------------------------------------------------------------------------
