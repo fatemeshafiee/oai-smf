@@ -420,7 +420,8 @@ bool pfcp_associations::select_up_node(
 
 //------------------------------------------------------------------------------
 bool pfcp_associations::select_up_node(
-    pfcp::node_id_t& node_id, const snssai_t& snssai, const std::string& dnn) {
+    pfcp::node_id_t& node_id, const snssai_t& snssai, const std::string& dnn,
+    upf_info_t& upf_info) {
   node_id = {};
   if (associations.empty()) {
     Logger::smf_app().debug("No UPF available");
@@ -438,7 +439,6 @@ bool pfcp_associations::select_up_node(
     }
     // else, verify that UPF belongs to the same slice and supports this dnn
     std::vector<snssai_t> snssais = {};
-    upf_info_t upf_info           = {};
 
     a->get_upf_node_profile().get_upf_info(upf_info);
     // UPF info

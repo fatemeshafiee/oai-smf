@@ -449,6 +449,34 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   pdu_session_type_t get_pdu_session_type() const;
 
   /*
+   * Get NWI associated with this PDU Session
+   * @param void
+   * @return std::string: NWI
+   */
+  std::string get_nwi_access() const;
+
+  /*
+   * Set DNN associated with this PDU Session
+   * @param [const std::string&] nwi: NWI
+   * @return void
+   */
+  void set_nwi_access(const std::string& nwiAccess);
+
+  /*
+   * Get NWI associated with this PDU Session
+   * @param void
+   * @return std::string: NWI
+   */
+  std::string get_nwi_core() const;
+
+  /*
+   * Set DNN associated with this PDU Session
+   * @param [const std::string&] nwi: NWI
+   * @return void
+   */
+  void set_nwi_core(const std::string& nwiCore);
+
+  /*
    * Set UPF Node ID of this PDU Session
    * @param [const pfcp::node_id_t&] node_id: UPF Node Id
    * @return void
@@ -519,6 +547,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint32_t pdu_session_id;
   std::string dnn;  // associated DNN
   snssai_t snssai;  // associated SNSSAI
+
+  std::string nwi_access;  // associated nwi_access
+  std::string nwi_core;    // associated nwi_core
 
   pfcp::node_id_t upf_node_id;
 
