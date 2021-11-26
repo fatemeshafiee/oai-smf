@@ -106,9 +106,10 @@ int session_create_sm_context_procedure::run(
   snssai_t snssai                 = sm_context_req->req.get_snssai();
   std::string dnn                 = sm_context_req->req.get_dnn();
   pdu_session_id_t pdu_session_id = sm_context_req->req.get_pdu_session_id();
+  upf_info_t upf_info             = {};
 
   if (not pfcp_associations::get_instance().select_up_node(
-          up_node_id, snssai, dnn)) {
+          up_node_id, snssai, dnn, upf_info)) {
     sm_context_resp->res.set_cause(
         PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
     return RETURNerror;
@@ -168,10 +169,13 @@ int session_create_sm_context_procedure::run(
   //-------------------
   bool nwi_list_present  = false;
   uint8_t nwi_list_index = 0;
-  if (smf_cfg.get_nwi_list_index(nwi_list_present, nwi_list_index, up_node_id) &
+  if ((smf_cfg.get_nwi_list_index(
+           nwi_list_present, nwi_list_index, up_node_id) ||
+       !upf_info.interface_upf_info_list.empty()) &
       smf_cfg.use_nwi)
     nwi_list_present = true;
-
+  else
+    Logger::smf_app().debug("NWI (optional) config not found");
   //*******************
   // UPLINK
   //*******************
@@ -195,8 +199,13 @@ int session_create_sm_context_procedure::run(
 
   if (nwi_list_present) {
     pfcp::network_instance_t network_instance = {};
-    network_instance.network_instance =
-        smf_cfg.upf_nwi_list[nwi_list_index].domain_core;
+    if (!upf_info.interface_upf_info_list.empty()) {
+      network_instance.network_instance =
+          smf_cfg.get_nwi(upf_info.interface_upf_info_list, "N6");
+    } else
+      network_instance.network_instance =
+          smf_cfg.upf_nwi_list[nwi_list_index].domain_core;
+    sps.get()->set_nwi_core(network_instance.network_instance);
     forwarding_parameters.set(network_instance);
   }
 
@@ -249,7 +258,13 @@ int session_create_sm_context_procedure::run(
 
   if (nwi_list_present) {
     pfcp::network_instance_t network_instance = {};
-    network_instance.network_instance = smf_cfg.upf_nwi_list[0].domain_access;
+    if (!upf_info.interface_upf_info_list.empty()) {
+      network_instance.network_instance =
+          smf_cfg.get_nwi(upf_info.interface_upf_info_list, "N3");
+    } else
+      network_instance.network_instance =
+          smf_cfg.upf_nwi_list[nwi_list_index].domain_access;
+    sps.get()->set_nwi_access(network_instance.network_instance);
     pdi.set(network_instance);
   }
 
@@ -588,15 +603,6 @@ int session_update_sm_context_procedure::run(
   */
 
   //-------------------
-  // IE network instance
-  //-------------------
-  bool nwi_list_present  = false;
-  uint8_t nwi_list_index = 0;
-  if (smf_cfg.get_nwi_list_index(nwi_list_present, nwi_list_index, up_node_id) &
-      smf_cfg.use_nwi)
-    nwi_list_present = true;
-
-  //-------------------
   n11_trigger           = sm_context_req;
   n11_triggered_pending = sm_context_resp;
   uint64_t seid         = smf_app_inst->generate_seid();
@@ -729,10 +735,9 @@ int session_update_sm_context_procedure::run(
           destination_interface.interface_value =
               pfcp::INTERFACE_VALUE_ACCESS;  // ACCESS is for downlink, CORE for
                                              // uplink
-          if (nwi_list_present) {
+          if (smf_cfg.use_nwi) {
             pfcp::network_instance_t network_instance = {};
-            network_instance.network_instance =
-                smf_cfg.upf_nwi_list[0].domain_access;
+            network_instance.network_instance = sps.get()->get_nwi_access();
             forwarding_parameters.set(network_instance);
           }
           forwarding_parameters.set(destination_interface);
@@ -787,11 +792,10 @@ int session_update_sm_context_procedure::run(
           // pfcp::framed_routing_t           framed_routing = {};
           // pfcp::framed_ipv6_route_t        framed_ipv6_route = {};
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
-          if (nwi_list_present) {
+          if (smf_cfg.use_nwi) {
             pfcp::network_instance_t network_instance =
                 {};  // mandatory for travelping
-            network_instance.network_instance =
-                smf_cfg.upf_nwi_list[0].domain_core;
+            network_instance.network_instance = sps.get()->get_nwi_core();
             pdi.set(network_instance);
           }
           // local_fteid.from_core_fteid(qos_flow.qos_flow.dl_fteid);
@@ -875,11 +879,10 @@ int session_update_sm_context_procedure::run(
           precedence.precedence = flow.precedence.precedence;
 
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
-          if (nwi_list_present) {
+          if (smf_cfg.use_nwi) {
             pfcp::network_instance_t network_instance =
                 {};  // mandatory for travelping
-            network_instance.network_instance =
-                smf_cfg.upf_nwi_list[0].domain_core;
+            network_instance.network_instance = sps.get()->get_nwi_core();
             pdi.set(network_instance);
           }
           pdi.set(source_interface);

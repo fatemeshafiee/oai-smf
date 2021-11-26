@@ -329,6 +329,9 @@ class smf_config {
   std::string get_default_dnn();
   bool get_nwi_list_index(
       bool nwi_enabled, uint8_t nwi_list_index, pfcp::node_id_t node_id);
+  std::string get_nwi(
+      const std::vector<interface_upf_info_item_t>& int_list,
+      const std::string& int_type);
 };
 
 }  // namespace smf

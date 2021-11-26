@@ -636,6 +636,25 @@ void smf_pdu_session::get_upf_node_id(pfcp::node_id_t& node_id) const {
 pfcp::node_id_t smf_pdu_session::get_upf_node_id() const {
   return upf_node_id;
 }
+//-----------------------------------------------------------------------------
+void smf_pdu_session::set_nwi_access(const std::string& nwiAccess) {
+  nwi_access = nwiAccess;
+}
+
+//-----------------------------------------------------------------------------
+std::string smf_pdu_session::get_nwi_access() const {
+  return nwi_access;
+}
+
+//-----------------------------------------------------------------------------
+void smf_pdu_session::set_nwi_core(const std::string& nwiCore) {
+  nwi_core = nwiCore;
+}
+
+//-----------------------------------------------------------------------------
+std::string smf_pdu_session::get_nwi_core() const {
+  return nwi_core;
+}
 
 //-----------------------------------------------------------------------------
 std::string smf_pdu_session::get_dnn() const {
