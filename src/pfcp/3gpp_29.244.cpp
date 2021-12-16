@@ -38,7 +38,7 @@ pfcp_ie* pfcp_ie::new_pfcp_ie_from_stream(std::istream& is) {
   tlv.load_from(is);
   if (tlv.length) {
     switch (tlv.type) {
-      case PFCP_IE_ENTERPRISE_SPECIFIC: {
+      case PFCP_IE_ENTERPRISE_SPECIFIC_RANGE_START ... PFCP_IE_ENTERPRISE_SPECIFIC_RANGE_END: {
         pfcp_enterprise_specific_ie* ie = new pfcp_enterprise_specific_ie(tlv);
         ie->load_from(is);
         return ie;

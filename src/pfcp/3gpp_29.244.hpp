@@ -95,10 +95,10 @@ class pfcp_tlv : public stream_serializable {
     type = be16toh(type);
     is.read(reinterpret_cast<char*>(&length), sizeof(length));
     length = be16toh(length);
-    if (type & 0x8000) {
-      is.read(reinterpret_cast<char*>(&enterprise_id), sizeof(enterprise_id));
-      enterprise_id = be16toh(enterprise_id);
-    }
+    // if (type & 0x8000) {
+    //  is.read(reinterpret_cast<char*>(&enterprise_id), sizeof(enterprise_id));
+    //  enterprise_id = be16toh(enterprise_id);
+    //}
   }
 };
 //------------------------------------------------------------------------------
@@ -612,13 +612,14 @@ class pfcp_enterprise_specific_ie : public pfcp_ie {
 
   //--------
   explicit pfcp_enterprise_specific_ie(const pfcp::enterprise_specific_t& b)
-      : pfcp_ie(PFCP_IE_ENTERPRISE_SPECIFIC) {
+      : pfcp_ie(PFCP_IE_ENTERPRISE_SPECIFIC_RANGE_END) {
     enterprise_id    = b.enterprise_id;
     proprietary_data = b.proprietary_data;
     tlv.set_length(2 + proprietary_data.size());
   }
   //--------
-  pfcp_enterprise_specific_ie() : pfcp_ie(PFCP_IE_ENTERPRISE_SPECIFIC) {
+  pfcp_enterprise_specific_ie()
+      : pfcp_ie(PFCP_IE_ENTERPRISE_SPECIFIC_RANGE_END) {
     enterprise_id    = 0;
     proprietary_data = {};
     tlv.set_length(2);
