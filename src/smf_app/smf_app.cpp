@@ -63,6 +63,7 @@
 #include "string.hpp"
 #include "fqdn.hpp"
 #include "smf_config.hpp"
+#include "smf_pfcp_association.hpp"
 
 extern "C" {
 #include "dynamic_memory_check.h"
@@ -70,6 +71,9 @@ extern "C" {
 }
 
 using namespace smf;
+
+#define PFCP_ASSOC_RETRY_COUNT 10
+#define PFCP_ASSOC_RESP_WAIT 2
 
 extern util::async_shell_cmd* async_shell_cmd_inst;
 extern smf_app* smf_app_inst;
@@ -367,7 +371,16 @@ void smf_app::start_nf_registration_discovery() {
     // verified)
     for (std::vector<pfcp::node_id_t>::const_iterator it = smf_cfg.upfs.begin();
          it != smf_cfg.upfs.end(); ++it) {
-      start_upf_association(*it);
+      for (int i = 0; i < PFCP_ASSOC_RETRY_COUNT; i++) {
+        start_upf_association(*it);
+        sleep(PFCP_ASSOC_RESP_WAIT);
+        std::shared_ptr<pfcp_association> sa = {};
+        if (not pfcp_associations::get_instance().get_association(*it, sa))
+          Logger::smf_app().warn(
+              "Failed to receive PFCP Association Response, Retrying .....!!");
+        else
+          break;
+      }
     }
   }
 
@@ -1412,7 +1425,17 @@ bool smf_app::handle_nf_status_notification(
           smf_cfg.upfs.push_back(n);
           upf_profile* upf_node_profile =
               dynamic_cast<upf_profile*>(profile.get());
-          start_upf_association(n, std::ref(*upf_node_profile));
+          for (int i = 0; i < PFCP_ASSOC_RETRY_COUNT; i++) {
+            start_upf_association(n, std::ref(*upf_node_profile));
+            sleep(PFCP_ASSOC_RESP_WAIT);
+            std::shared_ptr<pfcp_association> sa = {};
+            if (not pfcp_associations::get_instance().get_association(n, sa))
+              Logger::smf_app().warn(
+                  "Failed to receive PFCP Association Response, Retrying "
+                  ".....!!");
+            else
+              break;
+          }
         } else {
           Logger::smf_app().debug("No IP Addr/FQDN found");
           return false;

@@ -270,9 +270,29 @@ bool pfcp_associations::get_association(
     std::shared_ptr<pfcp_association>& sa) const {
   std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
   auto pit                 = associations.find((int32_t) hash_node_id);
-  if (pit == associations.end())
+
+  if (pit == associations.end()) {
+    // We didn't found association, may be because hash map is made with
+    // node_id_type FQDN
+    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+      struct hostent* hostname = gethostbyaddr(
+          &node_id.u1.ipv4_address.s_addr,
+          sizeof(node_id.u1.ipv4_address.s_addr), AF_INET);
+      pfcp::node_id_t node_id_tmp = {};
+      node_id_tmp.node_id_type    = pfcp::NODE_ID_TYPE_FQDN;
+      node_id_tmp.fqdn            = hostname->h_name;
+      Logger::smf_app().debug(
+          "Hash lookup for association retry: Associated Hostname -> %s",
+          hostname->h_name);
+      std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id_tmp);
+      auto pit                 = associations.find((int32_t) hash_node_id);
+      if (get_association(node_id_tmp, sa)) return true;
+    }
+    // We didn't found association, may be because hash map is made with
+    // node_id_type IP ADDR
+    // ToDo (Might stuck in recursive loop here)
     return false;
-  else {
+  } else {
     sa = pit->second;
     return true;
   }
