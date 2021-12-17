@@ -93,11 +93,11 @@ class pfcp_ies_container {
   //  PFCP_IE_ENTERPRISE_SPECIFIC
   virtual bool get(pfcp::enterprise_specific_t& v) const {
     throw pfcp_msg_illegal_ie_exception(
-        0, PFCP_IE_ENTERPRISE_SPECIFIC, __FILE__, __LINE__);
+        0, PFCP_IE_ENTERPRISE_SPECIFIC_RANGE_END, __FILE__, __LINE__);
   }
   virtual void set(const pfcp::enterprise_specific_t& v) {
     throw pfcp_msg_illegal_ie_exception(
-        0, PFCP_IE_ENTERPRISE_SPECIFIC, __FILE__, __LINE__);
+        0, PFCP_IE_ENTERPRISE_SPECIFIC_RANGE_END, __FILE__, __LINE__);
   }
 
   //  PFCP_IE_CREATE_PDR
