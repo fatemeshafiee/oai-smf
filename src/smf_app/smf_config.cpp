@@ -1151,8 +1151,23 @@ bool smf_config::get_nwi_list_index(
     return false;
   }
   if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+    // Resove FQDN here because, node id type is always IPV4_ADDRESS in
+    // upf_nwi_list
+    unsigned char buf_in_addr[sizeof(struct in_addr) + 1];
+    unsigned int upf_port = {0};
+    uint8_t addr_type     = {0};
+    std::string address   = {};
+    struct in_addr ipv4_Address;
+    fqdn::resolve(node_id.fqdn, address, upf_port, addr_type, "");
+    if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) == 1) {
+      memcpy(&ipv4_Address, buf_in_addr, sizeof(struct in_addr));
+    } else {
+      Logger::smf_app().error("FQDN resolve failed for get_nwi_list_index");
+    }
+
     for (int i = 0; i < upf_nwi_list.size(); i++) {
-      if (node_id.fqdn == upf_nwi_list[i].upf_id.fqdn) {
+      if (ipv4_Address.s_addr ==
+          upf_nwi_list[i].upf_id.u1.ipv4_address.s_addr) {
         nwi_list_index = i;
         nwi_enabled    = true;
         return true;
@@ -1161,7 +1176,7 @@ bool smf_config::get_nwi_list_index(
     nwi_enabled = false;
     return false;
   }
-  return true;
+  return false;
 }
 
 //------------------------------------------------------------------------------
