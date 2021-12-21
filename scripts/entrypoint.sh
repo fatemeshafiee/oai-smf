@@ -24,6 +24,19 @@ if [[ ${USE_FQDN_DNS} == "yes" ]];then
 fi
 HTTP_VERSION=${HTTP_VERSION:-1}
 
+DNN_NI0=${DNN_NI0:-oai.ipv4}
+TYPE0=${TYPE0:-IPv4}
+DNN_RANGE0=${DNN_RANGE0:-'12.1.1.2 - 12.1.1.128'}
+DNN_NI1=${DNN_NI1:-default}
+TYPE1=${TYPE1:-IPv4}
+DNN_RANGE1=${DNN_RANGE1:-'12.2.1.2 - 12.2.1.128'}
+DNN_NI2=${DNN_NI2:-oai}
+TYPE2=${TYPE2:-IPv4}
+DNN_RANGE2=${DNN_RANGE2:-'12.1.1.129 - 12.1.1.224'}
+DNN_NI3=${DNN_NI3:-ims}
+TYPE3=${TYPE3:-IPv4v6}
+DNN_RANGE3=${DNN_RANGE3:-'12.2.1.129 - 12.2.1.224'}
+
 for c in ${CONFIG_DIR}/*.conf; do
     # grep variable names (format: ${VAR}) from template to be rendered
     if ! grep -oP '@[a-zA-Z0-9_]+@' ${c}; then
