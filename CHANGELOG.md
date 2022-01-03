@@ -1,5 +1,14 @@
 # RELEASE NOTES: #
 
+## v1.3.0 -- January 2022 ##
+
+* Update NWI from NF profile
+* Update SMF profile
+* Fix retrieving the list of NWI
+* Fix entreprise IE decoding
+* Fix issue for UPF selection
+* Docker optimization
+
 ## v1.2.1 -- October 2021 ##
 
 * Fix build issue
