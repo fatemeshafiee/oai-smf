@@ -7,6 +7,7 @@ CONFIG_DIR="/openair-smf/etc"
 # Default values
 # (Default NWI Domain for all UPFs in OAI-Integration)
 USE_NETWORK_INSTANCE=${USE_NETWORK_INSTANCE:-no}
+USE_LOCAL_SUBSCRIPTION_INFO=${USE_LOCAL_SUBSCRIPTION_INFO:-yes}
 DOMAIN_ACCESS=${DOMAIN_ACCESS:-access.oai.org}
 DOMAIN_CORE=${DOMAIN_CORE:-core.oai.org}
 NSSAI_SST0=${NSSAI_SST0:-222}
