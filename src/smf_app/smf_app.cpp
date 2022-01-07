@@ -85,6 +85,25 @@ extern itti_mw* itti_inst;
 void smf_app_task(void*);
 
 //------------------------------------------------------------------------------
+void trigger_upf_association_task(void* arg) {
+  upf_assoc_retry_t upf_assoc_retry = *(upf_assoc_retry_t*) arg;
+  for (int i = 0; i < PFCP_ASSOC_RETRY_COUNT; i++) {
+    smf_app_inst->start_upf_association(
+        upf_assoc_retry.node_id, upf_assoc_retry.upf_nf_profile);
+    sleep(PFCP_ASSOC_RESP_WAIT);
+    std::shared_ptr<pfcp_association> sa = {};
+    if (not pfcp_associations::get_instance().get_association(
+            upf_assoc_retry.node_id, sa))
+      Logger::smf_app().warn(
+          "Failed to receive PFCP Association Response, Retrying "
+          ".....!!");
+    else
+      break;
+  }
+  return;
+}
+
+//------------------------------------------------------------------------------
 int smf_app::apply_config(const smf_config& cfg) {
   Logger::smf_app().info("Apply config...");
 
@@ -1425,17 +1444,12 @@ bool smf_app::handle_nf_status_notification(
           smf_cfg.upfs.push_back(n);
           upf_profile* upf_node_profile =
               dynamic_cast<upf_profile*>(profile.get());
-          for (int i = 0; i < PFCP_ASSOC_RETRY_COUNT; i++) {
-            start_upf_association(n, std::ref(*upf_node_profile));
-            sleep(PFCP_ASSOC_RESP_WAIT);
-            std::shared_ptr<pfcp_association> sa = {};
-            if (not pfcp_associations::get_instance().get_association(n, sa))
-              Logger::smf_app().warn(
-                  "Failed to receive PFCP Association Response, Retrying "
-                  ".....!!");
-            else
-              break;
-          }
+          // start_upf_association(n, std::ref(*upf_node_profile));
+          upf_assoc_retry_t assoc_retry_param;
+          assoc_retry_param.node_id        = n;
+          assoc_retry_param.upf_nf_profile = std::ref(*upf_node_profile);
+          itti_inst->create_task(
+              TASK_SMF_N4, trigger_upf_association_task, &assoc_retry_param);
         } else {
           Logger::smf_app().debug("No IP Addr/FQDN found");
           return false;

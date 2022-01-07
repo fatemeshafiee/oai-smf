@@ -72,6 +72,11 @@ typedef enum {
   PDU_SESSION_RELEASE       = 3
 } pdu_session_procedure_t;
 
+typedef struct upf_assoc_retry_s {
+  pfcp::node_id_t node_id;
+  upf_profile upf_nf_profile;
+} upf_assoc_retry_t;
+
 class smf_config;
 
 class smf_context_ref {
