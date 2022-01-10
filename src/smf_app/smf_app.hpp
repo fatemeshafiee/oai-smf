@@ -72,11 +72,6 @@ typedef enum {
   PDU_SESSION_RELEASE       = 3
 } pdu_session_procedure_t;
 
-typedef struct upf_assoc_retry_s {
-  pfcp::node_id_t node_id;
-  upf_profile upf_nf_profile;
-} upf_assoc_retry_t;
-
 class smf_config;
 
 class smf_context_ref {
@@ -311,6 +306,12 @@ class smf_app {
    * @return void
    */
   void handle_itti_msg(std::shared_ptr<itti_n4_session_report_request> snr);
+  /*
+   * Handle ITTI message (Trigger N4 Association with Retry)
+   * @param [itti_n4_association_retry&] snf
+   * @return void
+   */
+  void handle_itti_msg(std::shared_ptr<itti_n4_association_retry> snar);
 
   /*
    * Handle ITTI message (N4 Association Setup Request)

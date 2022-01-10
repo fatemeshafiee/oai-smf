@@ -85,25 +85,6 @@ extern itti_mw* itti_inst;
 void smf_app_task(void*);
 
 //------------------------------------------------------------------------------
-void trigger_upf_association_task(void* arg) {
-  upf_assoc_retry_t upf_assoc_retry = *(upf_assoc_retry_t*) arg;
-  for (int i = 0; i < PFCP_ASSOC_RETRY_COUNT; i++) {
-    smf_app_inst->start_upf_association(
-        upf_assoc_retry.node_id, upf_assoc_retry.upf_nf_profile);
-    sleep(PFCP_ASSOC_RESP_WAIT);
-    std::shared_ptr<pfcp_association> sa = {};
-    if (not pfcp_associations::get_instance().get_association(
-            upf_assoc_retry.node_id, sa))
-      Logger::smf_app().warn(
-          "Failed to receive PFCP Association Response, Retrying "
-          ".....!!");
-    else
-      break;
-  }
-  return;
-}
-
-//------------------------------------------------------------------------------
 int smf_app::apply_config(const smf_config& cfg) {
   Logger::smf_app().info("Apply config...");
 
@@ -228,6 +209,11 @@ void smf_app_task(void*) {
     std::shared_ptr<itti_msg> shared_msg = itti_inst->receive_msg(task_id);
     auto* msg                            = shared_msg.get();
     switch (msg->msg_type) {
+      case N4_ASSOCIATION_TRIGGER_WITH_RETRY:
+        smf_app_inst->handle_itti_msg(
+            std::static_pointer_cast<itti_n4_association_retry>(shared_msg));
+        break;
+
       case N4_SESSION_ESTABLISHMENT_RESPONSE:
         if (itti_n4_session_establishment_response* m =
                 dynamic_cast<itti_n4_session_establishment_response*>(msg)) {
@@ -494,6 +480,24 @@ void smf_app::start_upf_association(
     } else {
       Logger::smf_app().warn("Start_association() node_id IPV6!");
     }
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_association_retry> snar) {
+  pfcp::node_id_t node_id = snar->node_id;
+  upf_profile profile     = snar->profile;
+
+  for (int i = 0; i < PFCP_ASSOC_RETRY_COUNT; i++) {
+    smf_app_inst->start_upf_association(node_id, profile);
+    sleep(PFCP_ASSOC_RESP_WAIT);
+    std::shared_ptr<pfcp_association> sa = {};
+    if (not pfcp_associations::get_instance().get_association(node_id, sa))
+      Logger::smf_app().warn(
+          "Failed to receive PFCP Association Response, Retrying "
+          ".....!!");
+    else
+      break;
   }
 }
 
@@ -1444,12 +1448,19 @@ bool smf_app::handle_nf_status_notification(
           smf_cfg.upfs.push_back(n);
           upf_profile* upf_node_profile =
               dynamic_cast<upf_profile*>(profile.get());
-          // start_upf_association(n, std::ref(*upf_node_profile));
-          upf_assoc_retry_t assoc_retry_param;
-          assoc_retry_param.node_id        = n;
-          assoc_retry_param.upf_nf_profile = std::ref(*upf_node_profile);
-          itti_inst->create_task(
-              TASK_SMF_N4, trigger_upf_association_task, &assoc_retry_param);
+
+          // Trigger N4 association request with retry if needed
+          std::shared_ptr<itti_n4_association_retry> itti_msg =
+              std::make_shared<itti_n4_association_retry>(
+                  TASK_SMF_N4, TASK_SMF_APP);
+          itti_msg->node_id = n;
+          itti_msg->profile = std::ref(*upf_node_profile);
+          int ret           = itti_inst->send_msg(itti_msg);
+          if (RETURNok != ret) {
+            Logger::smf_n4().error(
+                "Could not send ITTI message %s to task TASK_SMF_N4",
+                itti_msg->get_msg_name());
+          }
         } else {
           Logger::smf_app().debug("No IP Addr/FQDN found");
           return false;
@@ -1919,8 +1930,8 @@ bool smf_app::get_session_management_subscription_data(
 
   /*
     for (int i = 0; i < smf_cfg.num_session_management_subscription; i++) {
-      if ((0 == dnn.compare(smf_cfg.session_management_subscription[i].dnn)) and
-          (snssai.sST ==
+      if ((0 == dnn.compare(smf_cfg.session_management_subscription[i].dnn))
+    and (snssai.sST ==
            smf_cfg.session_management_subscription[i].single_nssai.sST) and
           (0 ==
            snssai.sD.compare(
@@ -2133,7 +2144,8 @@ void smf_app::trigger_session_create_sm_context_response(
     pdu_session_create_sm_context_response& sm_context_response,
     uint32_t& pid) {
   Logger::smf_app().debug(
-      "Trigger PDU Session Create SM Context Response: Set promise with ID %d "
+      "Trigger PDU Session Create SM Context Response: Set promise with ID "
+      "%d "
       "to ready",
       pid);
   std::unique_lock lock(m_sm_context_create_promises);
@@ -2149,7 +2161,8 @@ void smf_app::trigger_session_update_sm_context_response(
     pdu_session_update_sm_context_response& sm_context_response,
     uint32_t& pid) {
   Logger::smf_app().debug(
-      "Trigger PDU Session Update SM Context Response: Set promise with ID %d "
+      "Trigger PDU Session Update SM Context Response: Set promise with ID "
+      "%d "
       "to ready",
       pid);
   std::unique_lock lock(m_sm_context_update_promises);
@@ -2165,7 +2178,8 @@ void smf_app::trigger_session_release_sm_context_response(
     pdu_session_release_sm_context_response& sm_context_response,
     uint32_t& pid) {
   Logger::smf_app().debug(
-      "Trigger PDU Session Release SM Context Response: Set promise with ID %d "
+      "Trigger PDU Session Release SM Context Response: Set promise with ID "
+      "%d "
       "to ready",
       pid);
   std::unique_lock lock(m_sm_context_release_promises);
@@ -2325,7 +2339,8 @@ void smf_app::trigger_nf_registration_request() {
 //------------------------------------------------------------------------------
 void smf_app::trigger_nf_deregistration() {
   Logger::smf_app().debug(
-      "Send ITTI msg to N11 task to trigger the deregistration request to NRF");
+      "Send ITTI msg to N11 task to trigger the deregistration request to "
+      "NRF");
 
   std::shared_ptr<itti_n11_deregister_nf_instance> itti_msg =
       std::make_shared<itti_n11_deregister_nf_instance>(
