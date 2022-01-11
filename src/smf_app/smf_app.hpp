@@ -306,6 +306,12 @@ class smf_app {
    * @return void
    */
   void handle_itti_msg(std::shared_ptr<itti_n4_session_report_request> snr);
+  /*
+   * Handle ITTI message (Trigger N4 Association with Retry)
+   * @param [itti_n4_association_retry&] snf
+   * @return void
+   */
+  void handle_itti_msg(std::shared_ptr<itti_n4_association_retry> snar);
 
   /*
    * Handle ITTI message (N4 Association Setup Request)
