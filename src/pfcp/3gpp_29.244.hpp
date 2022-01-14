@@ -3653,52 +3653,58 @@ class pfcp_measurement_method_ie : public pfcp_ie {
 //      s.set(usage_report_trigger);
 //  }
 //};
-////-------------------------------------
-//// IE MEASUREMENT_PERIOD
-// class pfcp_measurement_period_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_measurement_period_ie(const pfcp::measurement_period_t& b) :
-//  pfcp_ie(PFCP_IE_MEASUREMENT_PERIOD){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_measurement_period_ie() : pfcp_ie(PFCP_IE_MEASUREMENT_PERIOD){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_measurement_period_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::measurement_period_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::measurement_period_t measurement_period = {};
-//      to_core_type(measurement_period);
-//      s.set(measurement_period);
-//  }
-//};
+//-------------------------------------
+// IE MEASUREMENT_PERIOD
+class pfcp_measurement_period_ie : public pfcp_ie {
+ public:
+  uint32_t measurement_period;
+
+  //--------
+  explicit pfcp_measurement_period_ie(const pfcp::measurement_period_t& b)
+      : pfcp_ie(PFCP_IE_MEASUREMENT_PERIOD) {
+    measurement_period = b.measurement_period;
+    tlv.set_length(sizeof(measurement_period));
+  }
+  //--------
+  pfcp_measurement_period_ie() : pfcp_ie(PFCP_IE_MEASUREMENT_PERIOD) {
+    measurement_period = 0;
+    tlv.set_length(sizeof(measurement_period));
+  }
+  //--------
+  explicit pfcp_measurement_period_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    measurement_period = 0;
+  };
+  //--------
+  void to_core_type(pfcp::measurement_period_t& b) {
+    b.measurement_period = measurement_period;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_measurement_period = htobe32(measurement_period);
+    os.write(
+        reinterpret_cast<const char*>(&be_measurement_period),
+        sizeof(be_measurement_period));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(measurement_period)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(
+        reinterpret_cast<char*>(&measurement_period),
+        sizeof(measurement_period));
+    measurement_period = be32toh(measurement_period);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::measurement_period_t v = {};
+    to_core_type(v);
+    s.set(v);
+  }
+};
 ////-------------------------------------
 //// IE FQ_CSID
 // class pfcp_fq_csid_ie : public pfcp_ie {
@@ -8834,6 +8840,11 @@ class pfcp_create_urr_ie : public pfcp_grouped_ie {
     if (b.urr_id.first) {
       std::shared_ptr<pfcp_reporting_triggers_ie> sie(
           new pfcp_reporting_triggers_ie(b.reporting_triggers.second));
+      add_ie(sie);
+    }
+    if (b.urr_id.first) {
+      std::shared_ptr<pfcp_measurement_period_ie> sie(
+          new pfcp_measurement_period_ie(b.measurement_period.second));
       add_ie(sie);
     }
     // ToDo: Optional IEs
