@@ -1597,6 +1597,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     boost::split(split_result, amf_status_uri, boost::is_any_of("/"));
     if (split_result.size() >= 3) {
       std::string addr = split_result[2];
+      // remove http port from the URI if existed
+      std::size_t found_port = addr.find(":");
+      if (found_port != std::string::npos) addr = addr.substr(0, found_port);
       struct in_addr amf_ipv4_addr;
       if (inet_aton(util::trim(addr).c_str(), &amf_ipv4_addr) == 0) {
         Logger::smf_api_server().warn("Bad IPv4 for AMF");
