@@ -4,9 +4,12 @@
 
 * Update NWI from NF profile
 * Update SMF profile
+* Added retry for PFCP association request
+* More flexible DNN/IP ranges when deploying container
 * Fix retrieving the list of NWI
 * Fix entreprise IE decoding
 * Fix issue for UPF selection
+* Fix for IE Measurement Period
 * Docker optimization
 
 ## v1.2.1 -- October 2021 ##
