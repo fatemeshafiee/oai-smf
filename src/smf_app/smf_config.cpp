@@ -573,7 +573,12 @@ int smf_config::load(const string& config_file) {
         IPV4_STR_ADDR_TO_INADDR(
             util::trim(address).c_str(), amf_ipv4_addr,
             "BAD IPv4 ADDRESS FORMAT FOR AMF !");
-        amf_addr.ipv4_addr   = amf_ipv4_addr;
+        amf_addr.ipv4_addr = amf_ipv4_addr;
+        // We hardcode amf port from config for the moment
+        if (!(amf_cfg.lookupValue(SMF_CONFIG_STRING_AMF_PORT, amf_port))) {
+          Logger::smf_app().error(SMF_CONFIG_STRING_AMF_PORT "failed");
+          throw(SMF_CONFIG_STRING_AMF_PORT "failed");
+        }
         amf_addr.port        = amf_port;
         amf_addr.api_version = "v1";  // TODO: to get API version from DNS
         amf_addr.fqdn        = astring;
