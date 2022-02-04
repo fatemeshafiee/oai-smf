@@ -3607,52 +3607,131 @@ class pfcp_measurement_method_ie : public pfcp_ie {
     s.set(measurement_method);
   }
 };
-////-------------------------------------
-//// IE USAGE_REPORT_TRIGGER
-// class pfcp_usage_report_trigger_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_usage_report_trigger_ie(const pfcp::usage_report_trigger_t& b) :
-//  pfcp_ie(PFCP_IE_USAGE_REPORT_TRIGGER){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_usage_report_trigger_ie() : pfcp_ie(PFCP_IE_USAGE_REPORT_TRIGGER){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_usage_report_trigger_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::usage_report_trigger_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::usage_report_trigger_t usage_report_trigger = {};
-//      to_core_type(usage_report_trigger);
-//      s.set(usage_report_trigger);
-//  }
-//};
+//-------------------------------------
+// IE USAGE_REPORT_TRIGGER
+class pfcp_usage_report_trigger_ie : public pfcp_ie {
+ public:
+  union {
+    struct {
+      uint8_t perio : 1;
+      uint8_t volth : 1;
+      uint8_t timth : 1;
+      uint8_t quhti : 1;
+      uint8_t start : 1;
+      uint8_t stop : 1;
+      uint8_t droth : 1;
+      uint8_t immer : 1;
+    } bf;
+    uint8_t b;
+  } u1;
+  union {
+    struct {
+      uint8_t volqu : 1;
+      uint8_t timqu : 1;
+      uint8_t liusa : 1;
+      uint8_t termr : 1;
+      uint8_t monit : 1;
+      uint8_t envcl : 1;
+      uint8_t macar : 1;
+      uint8_t eveth : 1;
+    } bf;
+    uint8_t b;
+  } u2;
+  union {
+    struct {
+      uint8_t evequ : 1;
+      uint8_t tebur : 1;
+      uint8_t spare : 6;
+    } bf;
+    uint8_t b;
+  } u3;
+
+  //--------
+  explicit pfcp_usage_report_trigger_ie(const pfcp::usage_report_trigger_t& b)
+      : pfcp_ie(PFCP_IE_USAGE_REPORT_TRIGGER) {
+    u1.b = 0;
+    u2.b = 0;
+    u3.b = 0;
+    tlv.set_length(3);
+    u1.bf.immer = b.immer;
+    u1.bf.droth = b.droth;
+    u1.bf.stop  = b.stop;
+    u1.bf.start = b.start;
+    u1.bf.quhti = b.quhti;
+    u1.bf.timth = b.timth;
+    u1.bf.volth = b.volth;
+    u1.bf.perio = b.perio;
+
+    u2.bf.eveth = b.eveth;
+    u2.bf.macar = b.macar;
+    u2.bf.envcl = b.envcl;
+    u2.bf.monit = b.monit;
+    u2.bf.termr = b.termr;
+    u2.bf.timqu = b.timqu;
+    u2.bf.liusa = b.liusa;
+    u2.bf.volqu = b.volqu;
+
+    u3.bf.tebur = b.tebur;
+    u3.bf.evequ = b.evequ;
+  }
+  //--------
+  pfcp_usage_report_trigger_ie() : pfcp_ie(PFCP_IE_USAGE_REPORT_TRIGGER) {
+    u1.b = 0;
+    u2.b = 0;
+    u3.b = 0;
+    tlv.set_length(3);
+  }
+  //--------
+  explicit pfcp_usage_report_trigger_ie(const pfcp_tlv& t) : pfcp_ie(t){};
+  //--------
+  void to_core_type(pfcp::usage_report_trigger_t& b) {
+    b.immer = u1.bf.immer;
+    b.droth = u1.bf.droth;
+    b.stop  = u1.bf.stop;
+    b.start = u1.bf.start;
+    b.quhti = u1.bf.quhti;
+    b.timth = u1.bf.timth;
+    b.volth = u1.bf.volth;
+    b.perio = u1.bf.perio;
+
+    b.eveth = u2.bf.eveth;
+    b.macar = u2.bf.macar;
+    b.envcl = u2.bf.envcl;
+    b.monit = u2.bf.monit;
+    b.termr = u2.bf.termr;
+    b.timqu = u2.bf.timqu;
+    b.liusa = u2.bf.liusa;
+    b.volqu = u2.bf.volqu;
+
+    b.tebur = u3.bf.tebur;
+    b.evequ = u3.bf.evequ;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.set_length(3);
+    tlv.dump_to(os);
+    os.write(reinterpret_cast<const char*>(&u1.b), sizeof(u1.b));
+    os.write(reinterpret_cast<const char*>(&u2.b), sizeof(u2.b));
+    os.write(reinterpret_cast<const char*>(&u3.b), sizeof(u3.b));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != 3) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&u1.b), sizeof(u1.b));
+    is.read(reinterpret_cast<char*>(&u2.b), sizeof(u2.b));
+    is.read(reinterpret_cast<char*>(&u3.b), sizeof(u3.b));
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::usage_report_trigger_t usage_report_trigger = {};
+    to_core_type(usage_report_trigger);
+    s.set(usage_report_trigger);
+  }
+};
 //-------------------------------------
 // IE MEASUREMENT_PERIOD
 class pfcp_measurement_period_ie : public pfcp_ie {
@@ -3750,98 +3829,260 @@ class pfcp_measurement_period_ie : public pfcp_ie {
 //      s.set(fq_csid);
 //  }
 //};
-////-------------------------------------
-//// IE VOLUME_MEASUREMENT
-// class pfcp_volume_measurement_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_volume_measurement_ie(const pfcp::volume_measurement_t& b) :
-//  pfcp_ie(PFCP_IE_VOLUME_MEASUREMENT){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_volume_measurement_ie() : pfcp_ie(PFCP_IE_VOLUME_MEASUREMENT){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_volume_measurement_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::volume_measurement_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::volume_measurement_t volume_measurement = {};
-//      to_core_type(volume_measurement);
-//      s.set(volume_measurement);
-//  }
-//};
-////-------------------------------------
-//// IE DURATION_MEASUREMENT
-// class pfcp_duration_measurement_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_duration_measurement_ie(const pfcp::duration_measurement_t& b) :
-//  pfcp_ie(PFCP_IE_DURATION_MEASUREMENT){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_duration_measurement_ie() : pfcp_ie(PFCP_IE_DURATION_MEASUREMENT){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_duration_measurement_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::duration_measurement_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::duration_measurement_t duration_measurement = {};
-//      to_core_type(duration_measurement);
-//      s.set(duration_measurement);
-//  }
-//};
+//-------------------------------------
+// IE VOLUME_MEASUREMENT
+class pfcp_volume_measurement_ie : public pfcp_ie {
+ public:
+  union {
+    struct {
+      uint8_t tovol : 1;
+      uint8_t ulvol : 1;
+      uint8_t dlvol : 1;
+      uint8_t tonop : 1;
+      uint8_t ulnop : 1;
+      uint8_t dlnop : 1;
+      uint8_t spare : 2;
+    } bf;
+    uint8_t b;
+  } u1;
+  uint64_t total_volume;
+  uint64_t uplink_volume;
+  uint64_t downlink_volume;
+  uint64_t total_nop;
+  uint64_t uplink_nop;
+  uint64_t downlink_nop;
+
+  //--------
+  explicit pfcp_volume_measurement_ie(const pfcp::volume_measurement_t& b)
+      : pfcp_ie(PFCP_IE_VOLUME_MEASUREMENT) {
+    tlv.set_length(1);
+    u1.b        = 0;
+    u1.bf.tovol = b.tovol;
+    u1.bf.ulvol = b.ulvol;
+    u1.bf.dlvol = b.dlvol;
+    u1.bf.tonop = b.tonop;
+    u1.bf.ulnop = b.ulnop;
+    u1.bf.dlnop = b.dlnop;
+    if (u1.bf.tovol) {
+      total_volume = b.total_volume;
+      tlv.add_length(sizeof(total_volume));
+    } else {
+      total_volume = 0;
+    }
+    if (u1.bf.ulvol) {
+      uplink_volume = b.uplink_volume;
+      tlv.add_length(sizeof(uplink_volume));
+    } else {
+      uplink_volume = 0;
+    }
+    if (u1.bf.dlvol) {
+      downlink_volume = b.downlink_volume;
+      tlv.add_length(sizeof(downlink_volume));
+    } else {
+      downlink_volume = 0;
+    }
+    if (u1.bf.tonop) {
+      total_nop = b.total_nop;
+      tlv.add_length(sizeof(total_nop));
+    } else {
+      total_nop = 0;
+    }
+    if (u1.bf.ulnop) {
+      uplink_nop = b.uplink_nop;
+      tlv.add_length(sizeof(uplink_nop));
+    } else {
+      uplink_nop = 0;
+    }
+    if (u1.bf.dlnop) {
+      downlink_nop = b.downlink_nop;
+      tlv.add_length(sizeof(downlink_nop));
+    } else {
+      downlink_nop = 0;
+    }
+  }
+  //--------
+  pfcp_volume_measurement_ie() : pfcp_ie(PFCP_IE_VOLUME_MEASUREMENT) {
+    u1.b            = 0;
+    total_volume    = 0;
+    uplink_volume   = 0;
+    downlink_volume = 0;
+    total_nop       = 0;
+    uplink_nop      = 0;
+    downlink_nop    = 0;
+    tlv.set_length(1);
+  }
+  //--------
+  explicit pfcp_volume_measurement_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    u1.b            = 0;
+    total_volume    = 0;
+    uplink_volume   = 0;
+    downlink_volume = 0;
+    total_nop       = 0;
+    uplink_nop      = 0;
+    downlink_nop    = 0;
+  };
+  //--------
+  void to_core_type(pfcp::volume_measurement_t& f) {
+    f                 = {0};
+    f.tovol           = u1.bf.tovol;
+    f.ulvol           = u1.bf.ulvol;
+    f.dlvol           = u1.bf.dlvol;
+    f.tonop           = u1.bf.tonop;
+    f.ulnop           = u1.bf.ulnop;
+    f.dlnop           = u1.bf.dlnop;
+    f.total_volume    = total_volume;
+    f.uplink_volume   = uplink_volume;
+    f.downlink_volume = downlink_volume;
+    f.total_nop       = total_nop;
+    f.uplink_nop      = uplink_nop;
+    f.downlink_nop    = downlink_nop;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.set_length(1);
+    if (u1.bf.tovol) {
+      tlv.add_length(sizeof(total_volume));
+    }
+    if (u1.bf.ulvol) {
+      tlv.add_length(sizeof(uplink_volume));
+    }
+    if (u1.bf.dlvol) {
+      tlv.add_length(sizeof(downlink_volume));
+    }
+    if (u1.bf.tonop) {
+      tlv.add_length(sizeof(total_nop));
+    }
+    if (u1.bf.ulnop) {
+      tlv.add_length(sizeof(uplink_nop));
+    }
+    if (u1.bf.dlnop) {
+      tlv.add_length(sizeof(downlink_nop));
+    }
+
+    tlv.dump_to(os);
+    os.write(reinterpret_cast<const char*>(&u1.b), sizeof(u1.b));
+    if (u1.bf.tovol) {
+      auto be_total_volume = htobe64(total_volume);
+      os.write(
+          reinterpret_cast<const char*>(&be_total_volume),
+          sizeof(be_total_volume));
+    }
+    if (u1.bf.ulvol) {
+      auto be_uplink_volume = htobe64(uplink_volume);
+      os.write(
+          reinterpret_cast<const char*>(&be_uplink_volume),
+          sizeof(be_uplink_volume));
+    }
+    if (u1.bf.dlvol) {
+      auto be_downlink_volume = htobe64(downlink_volume);
+      os.write(
+          reinterpret_cast<const char*>(&be_downlink_volume),
+          sizeof(be_downlink_volume));
+    }
+    if (u1.bf.tonop) {
+      auto be_total_nop = htobe64(total_nop);
+      os.write(
+          reinterpret_cast<const char*>(&be_total_nop), sizeof(be_total_nop));
+    }
+    if (u1.bf.ulnop) {
+      auto be_uplink_nop = htobe64(uplink_nop);
+      os.write(
+          reinterpret_cast<const char*>(&be_uplink_nop), sizeof(be_uplink_nop));
+    }
+    if (u1.bf.dlnop) {
+      auto be_downlink_nop = htobe64(downlink_nop);
+      os.write(
+          reinterpret_cast<const char*>(&be_downlink_nop),
+          sizeof(be_downlink_nop));
+    }
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    is.read(reinterpret_cast<char*>(&u1.b), sizeof(u1.b));
+    if (tlv.get_length() < 1) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    if (u1.bf.tovol) {
+      is.read(reinterpret_cast<char*>(&total_volume), sizeof(total_volume));
+      total_volume = be64toh(total_volume);
+    }
+    if (u1.bf.ulvol) {
+      is.read(reinterpret_cast<char*>(&uplink_volume), sizeof(uplink_volume));
+      uplink_volume = be64toh(uplink_volume);
+    }
+    if (u1.bf.dlvol) {
+      is.read(
+          reinterpret_cast<char*>(&downlink_volume), sizeof(downlink_volume));
+      downlink_volume = be64toh(downlink_volume);
+    }
+    if (u1.bf.tonop) {
+      is.read(reinterpret_cast<char*>(&total_nop), sizeof(total_nop));
+      total_nop = be64toh(total_nop);
+    }
+    if (u1.bf.ulnop) {
+      is.read(reinterpret_cast<char*>(&uplink_nop), sizeof(uplink_nop));
+      uplink_nop = be64toh(uplink_nop);
+    }
+    if (u1.bf.dlnop) {
+      is.read(reinterpret_cast<char*>(&downlink_nop), sizeof(downlink_nop));
+      downlink_nop = be64toh(downlink_nop);
+    }
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::volume_measurement_t volume_measurement = {};
+    to_core_type(volume_measurement);
+    s.set(volume_measurement);
+  }
+};
+//-------------------------------------
+// IE DURATION_MEASUREMENT
+class pfcp_duration_measurement_ie : public pfcp_ie {
+ public:
+  uint32_t duration;
+
+  //--------
+  explicit pfcp_duration_measurement_ie(const pfcp::duration_measurement_t& b)
+      : pfcp_ie(PFCP_IE_DURATION_MEASUREMENT) {
+    duration = b.duration;
+    tlv.set_length(sizeof(duration));
+  }
+  //--------
+  pfcp_duration_measurement_ie() : pfcp_ie(PFCP_IE_DURATION_MEASUREMENT) {
+    duration = 0;
+    tlv.set_length(sizeof(duration));
+  }
+  //--------
+  explicit pfcp_duration_measurement_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    duration = 0;
+  };
+  //--------
+  void to_core_type(pfcp::duration_measurement_t& b) { b.duration = duration; }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_duration = htobe32(duration);
+    os.write(reinterpret_cast<const char*>(&be_duration), sizeof(be_duration));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(duration)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&duration), sizeof(duration));
+    duration = be32toh(duration);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::duration_measurement_t v = {};
+    to_core_type(v);
+    s.set(v);
+  }
+};
 ////-------------------------------------
 //// IE APPLICATION_DETECTION_INFORMATION
 // class pfcp_application_detection_information_ie : public pfcp_ie {
@@ -3891,98 +4132,110 @@ class pfcp_measurement_period_ie : public pfcp_ie {
 //      s.set(application_detection_information);
 //  }
 //};
-////-------------------------------------
-//// IE TIME_OF_FIRST_PACKET
-// class pfcp_time_of_first_packet_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_time_of_first_packet_ie(const pfcp::time_of_first_packet_t& b) :
-//  pfcp_ie(PFCP_IE_TIME_OF_FIRST_PACKET){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_time_of_first_packet_ie() : pfcp_ie(PFCP_IE_TIME_OF_FIRST_PACKET){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_time_of_first_packet_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::time_of_first_packet_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::time_of_first_packet_t time_of_first_packet = {};
-//      to_core_type(time_of_first_packet);
-//      s.set(time_of_first_packet);
-//  }
-//};
-////-------------------------------------
-//// IE TIME_OF_LAST_PACKET
-// class pfcp_time_of_last_packet_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_time_of_last_packet_ie(const pfcp::time_of_last_packet_t& b) :
-//  pfcp_ie(PFCP_IE_TIME_OF_LAST_PACKET){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_time_of_last_packet_ie() : pfcp_ie(PFCP_IE_TIME_OF_LAST_PACKET){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_time_of_last_packet_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::time_of_last_packet_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::time_of_last_packet_t time_of_last_packet = {};
-//      to_core_type(time_of_last_packet);
-//      s.set(time_of_last_packet);
-//  }
-//};
+//-------------------------------------
+// IE TIME_OF_FIRST_PACKET
+class pfcp_time_of_first_packet_ie : public pfcp_ie {
+ public:
+  uint32_t time_of_first_packet;
+
+  //--------
+  explicit pfcp_time_of_first_packet_ie(const pfcp::time_of_first_packet_t& b)
+      : pfcp_ie(PFCP_IE_TIME_OF_FIRST_PACKET) {
+    time_of_first_packet = b.time_of_first_packet;
+    tlv.set_length(sizeof(time_of_first_packet));
+  }
+  //--------
+  pfcp_time_of_first_packet_ie() : pfcp_ie(PFCP_IE_TIME_OF_FIRST_PACKET) {
+    time_of_first_packet = 0;
+    tlv.set_length(sizeof(time_of_first_packet));
+  }
+  //--------
+  pfcp_time_of_first_packet_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    time_of_first_packet = 0;
+  };
+  //--------
+  void to_core_type(pfcp::time_of_first_packet_t& b) {
+    b.time_of_first_packet = time_of_first_packet;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_time_of_first_packet = htobe32(time_of_first_packet);
+    os.write(
+        reinterpret_cast<const char*>(&be_time_of_first_packet),
+        sizeof(be_time_of_first_packet));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(time_of_first_packet)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(
+        reinterpret_cast<char*>(&time_of_first_packet),
+        sizeof(time_of_first_packet));
+    time_of_first_packet = be32toh(time_of_first_packet);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::time_of_first_packet_t time_of_first_packet = {};
+    to_core_type(time_of_first_packet);
+    s.set(time_of_first_packet);
+  }
+};
+//-------------------------------------
+// IE TIME_OF_LAST_PACKET
+class pfcp_time_of_last_packet_ie : public pfcp_ie {
+ public:
+  uint32_t time_of_last_packet;
+
+  //--------
+  explicit pfcp_time_of_last_packet_ie(const pfcp::time_of_last_packet_t& b)
+      : pfcp_ie(PFCP_IE_TIME_OF_LAST_PACKET) {
+    time_of_last_packet = 0;
+    tlv.set_length(sizeof(time_of_last_packet));
+  }
+  //--------
+  pfcp_time_of_last_packet_ie() : pfcp_ie(PFCP_IE_TIME_OF_LAST_PACKET) {
+    time_of_last_packet = 0;
+    tlv.set_length(sizeof(time_of_last_packet));
+  }
+  //--------
+  pfcp_time_of_last_packet_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    time_of_last_packet = 0;
+  };
+  //--------
+  void to_core_type(pfcp::time_of_last_packet_t& b) {
+    b.time_of_last_packet = time_of_last_packet;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_time_of_last_packet = htobe32(time_of_last_packet);
+    os.write(
+        reinterpret_cast<const char*>(&be_time_of_last_packet),
+        sizeof(be_time_of_last_packet));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(time_of_last_packet)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(
+        reinterpret_cast<char*>(&time_of_last_packet),
+        sizeof(time_of_last_packet));
+    time_of_last_packet = be32toh(time_of_last_packet);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::time_of_last_packet_t time_of_last_packet = {};
+    to_core_type(time_of_last_packet);
+    s.set(time_of_last_packet);
+  }
+};
 ////-------------------------------------
 //// IE QUOTA_HOLDING_TIME
 // class pfcp_quota_holding_time_ie : public pfcp_ie {
@@ -4169,98 +4422,97 @@ class pfcp_measurement_period_ie : public pfcp_ie {
 //      s.set(time_quota);
 //  }
 //};
-////-------------------------------------
-//// IE START_TIME
-// class pfcp_start_time_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_start_time_ie(const pfcp::start_time_t& b) :
-//  pfcp_ie(PFCP_IE_START_TIME){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_start_time_ie() : pfcp_ie(PFCP_IE_START_TIME){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_start_time_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::start_time_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::start_time_t start_time = {};
-//      to_core_type(start_time);
-//      s.set(start_time);
-//  }
-//};
-////-------------------------------------
-//// IE END_TIME
-// class pfcp_end_time_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_end_time_ie(const pfcp::end_time_t& b) : pfcp_ie(PFCP_IE_END_TIME){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_end_time_ie() : pfcp_ie(PFCP_IE_END_TIME){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_end_time_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::end_time_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::end_time_t end_time = {};
-//      to_core_type(end_time);
-//      s.set(end_time);
-//  }
-//};
-////-------------------------------------
+//-------------------------------------
+// IE START_TIME
+class pfcp_start_time_ie : public pfcp_ie {
+ public:
+  uint32_t start_time;
+
+  //--------
+  explicit pfcp_start_time_ie(const pfcp::start_time_t& b)
+      : pfcp_ie(PFCP_IE_START_TIME) {
+    start_time = b.start_time;
+    tlv.set_length(sizeof(start_time));
+  }
+  //--------
+  pfcp_start_time_ie() : pfcp_ie(PFCP_IE_START_TIME) {
+    start_time = 0;
+    tlv.set_length(sizeof(start_time));
+  }
+  explicit pfcp_start_time_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    start_time = 0;
+  };
+  //--------
+  void to_core_type(pfcp::start_time_t& b) { b.start_time = start_time; }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_start_time = htobe32(start_time);
+    os.write(
+        reinterpret_cast<const char*>(&be_start_time), sizeof(be_start_time));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(start_time)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&start_time), sizeof(start_time));
+    start_time = be32toh(start_time);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::start_time_t start_time = {};
+    to_core_type(start_time);
+    s.set(start_time);
+  }
+};
+//-------------------------------------
+// IE END_TIME
+class pfcp_end_time_ie : public pfcp_ie {
+ public:
+  uint32_t end_time;
+
+  //--------
+  explicit pfcp_end_time_ie(const pfcp::end_time_t& b)
+      : pfcp_ie(PFCP_IE_END_TIME) {
+    end_time = b.end_time;
+    tlv.set_length(sizeof(end_time));
+  }
+  //--------
+  pfcp_end_time_ie() : pfcp_ie(PFCP_IE_END_TIME) {
+    end_time = 0;
+    tlv.set_length(sizeof(end_time));
+  }
+  //--------
+  pfcp_end_time_ie(const pfcp_tlv& t) : pfcp_ie(t) { end_time = 0; };
+  //--------
+  void to_core_type(pfcp::end_time_t& b) { b.end_time = end_time; }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_end_time = htobe32(end_time);
+    os.write(reinterpret_cast<const char*>(&be_end_time), sizeof(be_end_time));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(end_time)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&end_time), sizeof(end_time));
+    end_time = be32toh(end_time);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::end_time_t end_time = {};
+    to_core_type(end_time);
+    s.set(end_time);
+  }
+};
+//-------------------------------------
 //// IE QUERY_URR
 // class pfcp_query_urr_ie : public pfcp_ie {
 // public:
@@ -4406,57 +4658,6 @@ class pfcp_measurement_period_ie : public pfcp_ie {
 //      usage_report_within_session_deletion_response = {};
 //      to_core_type(usage_report_within_session_deletion_response);
 //      s.set(usage_report_within_session_deletion_response);
-//  }
-//};
-////-------------------------------------
-//// IE USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST
-// class pfcp_usage_report_within_session_report_request_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_usage_report_within_session_report_request_ie(const
-//  pfcp::usage_report_within_pfcp_session_report_request& b) :
-//  pfcp_ie(PFCP_IE_USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_usage_report_within_session_report_request_ie() :
-//  pfcp_ie(PFCP_IE_USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_usage_report_within_session_report_request_ie(const pfcp_tlv& t) :
-//  pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::usage_report_within_pfcp_session_report_request& b)
-//  {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::usage_report_within_pfcp_session_report_request
-//      usage_report_within_session_report_request = {};
-//      to_core_type(usage_report_within_session_report_request);
-//      s.set(usage_report_within_session_report_request);
 //  }
 //};
 //-------------------------------------
@@ -5723,51 +5924,176 @@ class pfcp_node_report_type_ie : public pfcp_ie {
 //      s.set(v);
 //  }
 //};
-////-------------------------------------
-//// IE UR_SEQN
-// class pfcp_ur_seqn_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_ur_seqn_ie(const pfcp::ur_seqn_t& b) : pfcp_ie(PFCP_IE_UR_SEQN){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_ur_seqn_ie() : pfcp_ie(PFCP_IE_UR_SEQN){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_ur_seqn_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::ur_seqn_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::ur_seqn_t ur_seqn = {};
-//      to_core_type(ur_seqn);
-//      s.set(ur_seqn);
-//  }
-//};
+//-------------------------------------
+// IE UR_SEQN
+class pfcp_ur_seqn_ie : public pfcp_ie {
+ public:
+  uint32_t ur_seqn;
+
+  //--------
+  pfcp_ur_seqn_ie(const pfcp::ur_seqn_t& b) : pfcp_ie(PFCP_IE_UR_SEQN) {
+    ur_seqn = b.ur_seqn;
+    tlv.set_length(sizeof(ur_seqn));
+  }
+  //--------
+  pfcp_ur_seqn_ie() : pfcp_ie(PFCP_IE_UR_SEQN) {
+    ur_seqn = 0;
+    tlv.set_length(sizeof(ur_seqn));
+  }
+  //--------
+  pfcp_ur_seqn_ie(const pfcp_tlv& t) : pfcp_ie(t) { ur_seqn = 0; };
+  //--------
+  void to_core_type(pfcp::ur_seqn_t& b) { b.ur_seqn = ur_seqn; }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_ur_seqn = htobe32(ur_seqn);
+    os.write(reinterpret_cast<const char*>(&be_ur_seqn), sizeof(be_ur_seqn));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(ur_seqn)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&ur_seqn), sizeof(ur_seqn));
+    ur_seqn = be32toh(ur_seqn);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::ur_seqn_t v = {};
+    to_core_type(v);
+    s.set(v);
+  }
+};
+//-------------------------------------
+// IE USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST
+class pfcp_usage_report_within_session_report_request_ie
+    : public pfcp_grouped_ie {
+ public:
+  //--------
+  pfcp_usage_report_within_session_report_request_ie(
+      const pfcp::usage_report_within_pfcp_session_report_request& b)
+      : pfcp_grouped_ie(PFCP_IE_USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST) {
+    tlv.set_length(0);
+    if (b.urr_id.first) {
+      std::shared_ptr<pfcp_urr_id_ie> sie(new pfcp_urr_id_ie(b.urr_id.second));
+      add_ie(sie);
+    }
+    if (b.ur_seqn.first) {
+      std::shared_ptr<pfcp_ur_seqn_ie> sie(
+          new pfcp_ur_seqn_ie(b.ur_seqn.second));
+      add_ie(sie);
+    }
+    if (b.usage_report_trigger.first) {
+      std::shared_ptr<pfcp_usage_report_trigger_ie> sie(
+          new pfcp_usage_report_trigger_ie(b.usage_report_trigger.second));
+      add_ie(sie);
+    }
+    if (b.start_time.first) {
+      std::shared_ptr<pfcp_start_time_ie> sie(
+          new pfcp_start_time_ie(b.start_time.second));
+      add_ie(sie);
+    }
+    if (b.end_time.first) {
+      std::shared_ptr<pfcp_end_time_ie> sie(
+          new pfcp_end_time_ie(b.end_time.second));
+      add_ie(sie);
+    }
+    if (b.volume_measurement.first) {
+      std::shared_ptr<pfcp_volume_measurement_ie> sie(
+          new pfcp_volume_measurement_ie(b.volume_measurement.second));
+      add_ie(sie);
+    }
+    if (b.duration_measurement.first) {
+      std::shared_ptr<pfcp_duration_measurement_ie> sie(
+          new pfcp_duration_measurement_ie(b.duration_measurement.second));
+      add_ie(sie);
+    }
+    // if (b.application_detection_information.first) {
+    //   std::shared_ptr<pfcp_application_detection_information_ie> sie(
+    //       new
+    //       pfcp_application_detection_information_ie(b.application_detection_information.second));
+    //   add_ie(sie);
+    // }
+    if (b.ue_ip_address.first) {
+      std::shared_ptr<pfcp_ue_ip_address_ie> sie(
+          new pfcp_ue_ip_address_ie(b.ue_ip_address.second));
+      add_ie(sie);
+    }
+    if (b.network_instance.first) {
+      std::shared_ptr<pfcp_network_instance_ie> sie(
+          new pfcp_network_instance_ie(b.network_instance.second));
+      add_ie(sie);
+    }
+    if (b.time_of_first_packet.first) {
+      std::shared_ptr<pfcp_time_of_first_packet_ie> sie(
+          new pfcp_time_of_first_packet_ie(b.time_of_first_packet.second));
+      add_ie(sie);
+    }
+    if (b.time_of_last_packet.first) {
+      std::shared_ptr<pfcp_time_of_last_packet_ie> sie(
+          new pfcp_time_of_last_packet_ie(b.time_of_last_packet.second));
+      add_ie(sie);
+    }
+    // if (b.usage_information.first) {
+    //   std::shared_ptr<pfcp_usage_information_ie> sie(
+    //       new pfcp_usage_information_ie(b.usage_information.second));
+    //   add_ie(sie);
+    // }
+    // if (b.query_urr_reference.first) {
+    //   std::shared_ptr<pfcp_query_urr_reference_ie> sie(
+    //       new pfcp_query_urr_reference_ie(b.query_urr_reference.second));
+    //   add_ie(sie);
+    // }
+    // if (b.ethernet_traffic_information.first) {
+    //   std::shared_ptr<pfcp_ethernet_traffic_information_ie> sie(
+    //       new
+    //       pfcp_ethernet_traffic_information_ie(b.ethernet_traffic_information.second));
+    //   add_ie(sie);
+    // }
+  }
+  //--------
+  pfcp_usage_report_within_session_report_request_ie()
+      : pfcp_grouped_ie(PFCP_IE_USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST) {}
+  //--------
+  explicit pfcp_usage_report_within_session_report_request_ie(const pfcp_tlv& t)
+      : pfcp_grouped_ie(t){};
+  //--------
+  void to_core_type(pfcp::usage_report_within_pfcp_session_report_request& c) {
+    for (auto sie : ies) {
+      sie.get()->to_core_type(c);
+    }
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::usage_report_within_pfcp_session_report_request i = {};
+    to_core_type(i);
+    s.set(i);
+  }
+  //  //--------
+  //  void dump_to(std::ostream& os) {
+  //    tlv.dump_to(os);
+  //    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
+  //  }
+  //  //--------
+  //  void load_from(std::istream& is) {
+  //    //tlv.load_from(is);
+  //    if (tlv.get_length() != 1) {
+  //      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
+  //      __FILE__, __LINE__);
+  //    }
+  //    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
+  //  }
+  //  //--------
+  //  void to_core_type(pfcp_ies_container& s) {
+  //      pfcp::usage_report_within_pfcp_session_report_request
+  //      usage_report_within_session_report_request = {};
+  //      to_core_type(usage_report_within_session_report_request);
+  //      s.set(usage_report_within_session_report_request);
+  //  }
+};
 ////-------------------------------------
 //// IE UPDATE_DUPLICATING_PARAMETERS
 // class pfcp_update_duplicating_parameters_ie : public pfcp_ie {
@@ -9360,7 +9686,7 @@ class pfcp_create_traffic_endpoint_ie : public pfcp_grouped_ie {
     s.set(i);
   }
 };
-
+//-------------------------------------
 }  // namespace pfcp
 
 #endif /* FILE_3GPP_29_244_HPP_SEEN */
