@@ -499,6 +499,9 @@ void session_create_sm_context_procedure::handle_itti_msg(
   Logger::smf_app().debug(
       "N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
 
+  // HTTP version
+  n11_triggered_pending->http_version = smf_cfg.http_version;
+
   // Fill the json part
   nlohmann::json json_data = {};
   // N1SM
