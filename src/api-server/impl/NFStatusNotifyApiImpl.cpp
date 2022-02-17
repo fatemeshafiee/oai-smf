@@ -74,7 +74,7 @@ void NFStatusNotifyApiImpl::receive_nf_status_notification(
 
   if (m_smf_app->handle_nf_status_notification(
           itti_msg, problem_details, http_code)) {
-    response.send(Pistache::Http::Code(204));
+    response.send(Pistache::Http::Code(HTTP_STATUS_CODE_204_NO_CONTENT));
   } else {
     nlohmann::json json_data = {};
     to_json(json_data, problem_details);
