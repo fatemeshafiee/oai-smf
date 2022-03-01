@@ -449,6 +449,20 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   pdu_session_type_t get_pdu_session_type() const;
 
   /*
+   * Get URR_ID associated with this PDU Session
+   * @param void
+   * @return uint32_t: urrId
+   */
+  uint32_t get_urr_id() const;
+
+  /*
+   * Set URR_ID associated with this PDU Session
+   * @param [const uint32_t&] urrId: URR_ID
+   * @return void
+   */
+  void set_urr_id(const uint32_t& urrId);
+
+  /*
    * Get NWI associated with this PDU Session
    * @param void
    * @return std::string: NWI
@@ -547,6 +561,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint32_t pdu_session_id;
   std::string dnn;  // associated DNN
   snssai_t snssai;  // associated SNSSAI
+
+  uint32_t
+      urr_Id;  // We maintain URR ID to reuse for DL PDR (session modification)
 
   std::string nwi_access;  // associated nwi_access
   std::string nwi_core;    // associated nwi_core

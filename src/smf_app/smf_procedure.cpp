@@ -308,6 +308,28 @@ int session_create_sm_context_procedure::run(
 
   create_pdr.set(far_id);
   // TODO: list of Usage reporting Rule IDs
+  //-------------------
+  // IE create_urr ( Usage Reporting Rules)
+  //-------------------
+  if (smf_cfg.enable_ur) {
+    pfcp::urr_id_t urr_id = {};
+    sps->generate_urr_id(urr_id);
+    create_pdr.set(urr_id);
+    sps.get()->set_urr_id(urr_id.urr_id);
+    pfcp::create_urr create_urr                   = {};
+    pfcp::measurement_method_t measurement_method = {};
+    pfcp::measurement_period_t measurement_Period = {};
+    pfcp::reporting_triggers_t reporting_triggers = {};
+    // Hardcoded values for the moment
+    measurement_method.volum              = 1;   // Volume based usage report
+    measurement_Period.measurement_period = 10;  // Every 10 Sec
+    reporting_triggers.perio              = 1;   // Periodic usage report
+    create_urr.set(urr_id);
+    create_urr.set(measurement_method);
+    create_urr.set(measurement_Period);
+    create_urr.set(reporting_triggers);
+    n4_triggered->pfcp_ies.set(create_urr);
+  }
   // TODO: list of QoS Enforcement Rule IDs
 
   //-------------------
@@ -824,6 +846,12 @@ int session_update_sm_context_procedure::run(
           // pdi.set(local_fteid);
           pdi.set(ue_ip_address);
 
+          if (smf_cfg.enable_ur) {
+            pfcp::urr_id_t urr_Id = {};
+            urr_Id.urr_id         = sps.get()->get_urr_id();
+            create_pdr.set(urr_Id);
+          }
+
           create_pdr.set(pdr_id);
           create_pdr.set(precedence);
           create_pdr.set(pdi);
@@ -890,6 +918,12 @@ int session_update_sm_context_procedure::run(
           }
           pdi.set(source_interface);
           pdi.set(ue_ip_address);
+
+          if (smf_cfg.enable_ur) {
+            pfcp::urr_id_t urr_Id = {};
+            urr_Id.urr_id         = sps.get()->get_urr_id();
+            update_pdr.set(urr_Id);
+          }
 
           update_pdr.set(flow.pdr_id_dl);
           update_pdr.set(precedence);
