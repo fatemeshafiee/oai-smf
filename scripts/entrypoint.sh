@@ -5,7 +5,7 @@ set -euo pipefail
 CONFIG_DIR="/openair-smf/etc"
 
 # Default values
-# (Default NWI Domain for all UPFs in OAI-Integration)
+ENABLE_USAGE_REPORTING=${ENABLE_USAGE_REPORTING:-no}
 USE_NETWORK_INSTANCE=${USE_NETWORK_INSTANCE:-no}
 USE_LOCAL_SUBSCRIPTION_INFO=${USE_LOCAL_SUBSCRIPTION_INFO:-yes}
 DOMAIN_ACCESS=${DOMAIN_ACCESS:-access.oai.org}

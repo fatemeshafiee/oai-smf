@@ -691,11 +691,11 @@ void smf_n4::handle_receive_session_deletion_response(
 //------------------------------------------------------------------------------
 void smf_n4::handle_receive_session_report_request(
     pfcp::pfcp_msg& msg, const endpoint& remote_endpoint) {
+  Logger::smf_n4().info("Received N4 SESSION REPORT REQUEST from an UPF");
   bool error                                    = true;
   uint64_t trxn_id                              = 0;
   pfcp_session_report_request msg_ies_container = {};
   msg.to_core_type(msg_ies_container);
-
   handle_receive_message_cb(msg, remote_endpoint, TASK_SMF_N4, error, trxn_id);
   if (!error) {
     std::shared_ptr<itti_n4_session_report_request> itti_msg =
@@ -705,7 +705,8 @@ void smf_n4::handle_receive_session_report_request(
     itti_msg->r_endpoint = remote_endpoint;
     itti_msg->trxn_id    = trxn_id;
     itti_msg->seid       = msg.get_seid();
-    int ret              = itti_inst->send_msg(itti_msg);
+
+    int ret = itti_inst->send_msg(itti_msg);
     if (RETURNok != ret) {
       Logger::smf_n4().error(
           "Could not send ITTI message %s to task TASK_SMF_APP",

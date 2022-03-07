@@ -530,6 +530,14 @@ int smf_config::load(const string& config_file) {
         use_nwi = false;
       }
 
+      support_features.lookupValue(
+          SMF_CONFIG_STRING_SUPPORT_FEATURES_ENABLE_USAGE_REPORTING, opt);
+      if (boost::iequals(opt, "yes")) {
+        enable_ur = true;
+      } else {
+        enable_ur = false;
+      }
+
     } catch (const SettingNotFoundException& nfex) {
       Logger::smf_app().error(
           "%s : %s, using defaults", nfex.what(), nfex.getPath());

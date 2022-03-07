@@ -637,6 +637,16 @@ pfcp::node_id_t smf_pdu_session::get_upf_node_id() const {
   return upf_node_id;
 }
 //-----------------------------------------------------------------------------
+void smf_pdu_session::set_urr_id(const uint32_t& urrId) {
+  urr_Id = urrId;
+}
+
+//-----------------------------------------------------------------------------
+uint32_t smf_pdu_session::get_urr_id() const {
+  return urr_Id;
+}
+
+//-----------------------------------------------------------------------------
 void smf_pdu_session::set_nwi_access(const std::string& nwiAccess) {
   nwi_access = nwiAccess;
 }
@@ -965,7 +975,50 @@ void smf_context::handle_itti_msg(
     // Usage Report
     if (report_type.usar) {
       // TODO
-      Logger::smf_app().debug("PFCP_SESSION_REPORT_REQUEST/Usage Report");
+      // Step 1. send N4 Data Report Ack to UPF
+      pfcp::usage_report_within_pfcp_session_report_request ur;
+      if (req->pfcp_ies.get(ur)) {
+        pfcp::volume_measurement_t vm;
+        pfcp::duration_measurement_t dm;
+        pfcp::ur_seqn_t seqn;
+
+        if (ur.get(vm)) {
+          Logger::smf_app().info("\t\t SEID            -> %lld", req->seid);
+          if (ur.get(seqn))
+            Logger::smf_app().info("\t\t UR-SEQN         -> %ld", seqn.ur_seqn);
+          if (ur.get(dm))
+            Logger::smf_app().info("\t\t Duration        -> %ld", dm.duration);
+          Logger::smf_app().info("\t\t NoP    Total    -> %lld", vm.total_nop);
+          Logger::smf_app().info("\t\t        Uplink   -> %lld", vm.uplink_nop);
+          Logger::smf_app().info(
+              "\t\t        Downlink -> %lld", vm.downlink_nop);
+          Logger::smf_app().info(
+              "\t\t Volume Total    -> %lld", vm.total_volume);
+          Logger::smf_app().info(
+              "\t\t        Uplink   -> %lld", vm.uplink_volume);
+          Logger::smf_app().info(
+              "\t\t        Downlink -> %lld", vm.downlink_volume);
+        }
+      }
+      std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
+          std::make_shared<itti_n4_session_report_response>(
+              TASK_SMF_APP, TASK_SMF_N4);
+      n4_report_ack->seid    = req->seid;
+      n4_report_ack->trxn_id = req->trxn_id;
+      pfcp::cause_t cause = {.cause_value = pfcp::CAUSE_VALUE_REQUEST_ACCEPTED};
+      n4_report_ack->pfcp_ies.set(cause);
+      n4_report_ack->r_endpoint = req->r_endpoint;
+
+      Logger::smf_app().info(
+          "Sending ITTI message %s to task TASK_SMF_N4",
+          n4_report_ack->get_msg_name());
+      int ret = itti_inst->send_msg(n4_report_ack);
+      if (RETURNok != ret) {
+        Logger::smf_app().error(
+            "Could not send ITTI message %s to task TASK_SMF_N4",
+            n4_report_ack->get_msg_name());
+        return;
+      }
     }
     // Error Indication Report
     if (report_type.erir) {

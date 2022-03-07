@@ -149,6 +149,8 @@
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION "HTTP_VERSION"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_NETWORK_INSTANCE                \
   "USE_NETWORK_INSTANCE"
+#define SMF_CONFIG_STRING_SUPPORT_FEATURES_ENABLE_USAGE_REPORTING              \
+  "ENABLE_USAGE_REPORTING"
 
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -231,6 +233,7 @@ class smf_config {
   bool use_fqdn_dns;
   unsigned int http_version;
   bool use_nwi;
+  bool enable_ur;
 
   struct {
     struct in_addr ipv4_addr;

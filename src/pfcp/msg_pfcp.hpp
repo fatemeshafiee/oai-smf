@@ -5100,6 +5100,7 @@ class usage_report_within_pfcp_session_report_request
   // std::pair<bool, pfcp::event_reporting>                   event_reporting;
   std::pair<bool, pfcp::ethernet_traffic_information>
       ethernet_traffic_information;
+  std::pair<bool, pfcp::enterprise_specific_t> enterprise_specific;
 
   usage_report_within_pfcp_session_report_request()
       : urr_id(),
@@ -5117,7 +5118,8 @@ class usage_report_within_pfcp_session_report_request
         usage_information(),
         query_urr_reference(),
         // event_reporting(),
-        ethernet_traffic_information() {}
+        ethernet_traffic_information(),
+        enterprise_specific() {}
 
   usage_report_within_pfcp_session_report_request(
       const usage_report_within_pfcp_session_report_request& u)
@@ -5136,7 +5138,8 @@ class usage_report_within_pfcp_session_report_request
         usage_information(u.usage_information),
         query_urr_reference(u.query_urr_reference),
         // event_reporting(u.event_reporting),
-        ethernet_traffic_information(u.ethernet_traffic_information) {}
+        ethernet_traffic_information(u.ethernet_traffic_information),
+        enterprise_specific(u.enterprise_specific) {}
 
   // virtual ~usage_report_within_pfcp_session_report_request() {};
   void set(const pfcp::urr_id_t& v) {
@@ -5200,6 +5203,10 @@ class usage_report_within_pfcp_session_report_request
   void set(const pfcp::ethernet_traffic_information& v) {
     ethernet_traffic_information.first  = true;
     ethernet_traffic_information.second = v;
+  }
+  void set(const pfcp::enterprise_specific_t& v) {
+    enterprise_specific.first  = true;
+    enterprise_specific.second = v;
   }
 
   bool get(pfcp::urr_id_t& v) const {
@@ -5296,6 +5303,13 @@ class usage_report_within_pfcp_session_report_request
   bool get(pfcp::query_urr_reference_t& v) const {
     if (query_urr_reference.first) {
       v = query_urr_reference.second;
+      return true;
+    }
+    return false;
+  }
+  bool get(pfcp::enterprise_specific_t& v) const {
+    if (enterprise_specific.first) {
+      v = enterprise_specific.second;
       return true;
     }
     return false;
@@ -7244,15 +7258,16 @@ class pfcp_session_report_request : public pfcp_ies_container {
         overload_control_information(),
         additional_usage_reports_information() {}
 
-  pfcp_session_report_request(const pfcp_session_report_request& i)
-      : report_type(i.report_type),
-        downlink_data_report(i.downlink_data_report),
-        usage_report(i.usage_report),
-        error_indication_report(i.error_indication_report),
-        load_control_information(i.load_control_information),
-        overload_control_information(i.overload_control_information),
-        additional_usage_reports_information(
-            i.additional_usage_reports_information) {}
+  pfcp_session_report_request(const pfcp_session_report_request& i) {
+    report_type                  = i.report_type;
+    downlink_data_report         = i.downlink_data_report;
+    usage_report                 = i.usage_report;
+    error_indication_report      = i.error_indication_report;
+    load_control_information     = i.load_control_information;
+    overload_control_information = i.overload_control_information;
+    additional_usage_reports_information =
+        i.additional_usage_reports_information;
+  }
 
   const char* get_msg_name() const { return "PFCP_SESSION_REPORT_REQUEST"; };
 
