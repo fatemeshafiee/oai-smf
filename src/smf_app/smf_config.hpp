@@ -279,7 +279,7 @@ class smf_config {
       ue_pool_excluded[i]     = {};
     }
     force_push_pco = true;
-    ue_mtu         = 1500;
+    ue_mtu         = 1358;
 
     itti.itti_timer_sched_params.sched_priority = 85;
     itti.n4_sched_params.sched_priority         = 84;
