@@ -203,6 +203,14 @@ class smf_app {
       protocol_configuration_options_t& pco_resp,
       const pco_protocol_or_container_id_t* const poc_id);
 
+  int process_pco_p_cscf_request(
+      protocol_configuration_options_t& pco_resp,
+      const pco_protocol_or_container_id_t* const poc_id);
+
+   int process_pco_p_cscf_v6_request(
+      protocol_configuration_options_t& pco_resp,
+      const pco_protocol_or_container_id_t* const poc_id);     
+
  public:
   explicit smf_app(const std::string& config_file);
   smf_app(smf_app const&) = delete;
