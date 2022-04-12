@@ -853,7 +853,7 @@ class HtmlReport():
 									result = re.search('oai-smf *ci-tmp', line)
 								else:
 									result = re.search('oai-smf *develop', line)
-							if result is not None:
+							if result is not None and not status:
 								result = re.search('ago  *([0-9A-Z ]+)', line)
 								if result is not None:
 									size = result.group(1)

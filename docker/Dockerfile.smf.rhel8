@@ -80,7 +80,8 @@ RUN yum update -y && \
         procps-ng \
         net-tools \
         libevent && \
-    rm -rf /var/lib/apt/lists/*
+    yum clean all -y && \
+    rm -rf /var/cache/yum /var/cache/dnf
 
 # Copying executable and generated libraries
 WORKDIR /openair-smf/bin
