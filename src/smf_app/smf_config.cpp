@@ -675,7 +675,7 @@ int smf_config::load(const string& config_file) {
         }
       }
     }
-
+    // Get PCF address if necessary
     if (!use_local_pcc_rules) {
       if (!discover_pcf) {
         const Setting& pcf_cfg       = smf_cfg[SMF_CONFIG_STRING_PCF];
@@ -687,7 +687,7 @@ int smf_config::load(const string& config_file) {
           pcf_cfg.lookupValue(SMF_CONFIG_STRING_PCF_IPV4_ADDRESS, astring);
           IPV4_STR_ADDR_TO_INADDR(
               util::trim(astring).c_str(), pcf_ipv4_addr,
-              "BAD IPv4 ADDRESS FORMAT FOR UDM !");
+              "BAD IPv4 ADDRESS FORMAT FOR PCF !");
           pcf_addr.ipv4_addr = pcf_ipv4_addr;
           if (!(pcf_cfg.lookupValue(SMF_CONFIG_STRING_PCF_PORT, pcf_port))) {
             Logger::smf_app().error(SMF_CONFIG_STRING_PCF_PORT "failed");
@@ -709,11 +709,11 @@ int smf_config::load(const string& config_file) {
           fqdn::resolve(astring, address, pcf_port, addr_type);
           if (addr_type != 0) {  // IPv6
             // TODO:
-            throw("DO NOT SUPPORT IPV6 ADDR FOR UDM!");
+            throw("DO NOT SUPPORT IPV6 ADDR FOR PCF!");
           } else {  // IPv4
             IPV4_STR_ADDR_TO_INADDR(
                 util::trim(address).c_str(), pcf_ipv4_addr,
-                "BAD IPv4 ADDRESS FORMAT FOR UDM !");
+                "BAD IPv4 ADDRESS FORMAT FOR PCF !");
             pcf_addr.ipv4_addr   = pcf_ipv4_addr;
             pcf_addr.port        = pcf_port;
             pcf_addr.api_version = "v1";  // TODO: to get API version from DNS

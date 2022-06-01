@@ -32,30 +32,82 @@
 #include <string>
 #include "Snssai.h"
 #include "PlmnId.h"
+#include "SmPolicyDecision.h"
+#include "SmPolicyContextData.h"
 
 namespace smf::n7 {
 
+/**
+ * @brief Status codes for the communication with the PCF
+ *
+ */
+enum class sm_policy_status_code {
+  CREATED,
+  USER_UNKOWN,
+  INVALID_PARAMETERS,
+  CONTEXT_DENIED,
+  NOT_FOUND,
+  OK,
+  PCF_NOT_AVAILABLE
+};
+
+/**
+ * @brief Implements the N7 procedures (communication between SMF and PCF). It
+ * is the interface for PCF communication that should be used by other
+ * components
+ *
+ */
 class smf_n7 {
  public:
+  static smf_n7& get_instance() {
+    static smf_n7 instance;
+    return instance;
+  }
+
   explicit smf_n7();
 
   virtual ~smf_n7();
 
+  smf::n7::sm_policy_status_code create_sm_policy_association(
+      const std::string pcf_addr, const std::string pcf_api_version,
+      const oai::smf_server::model::SmPolicyContextData& context,
+      oai::smf_server::model::SmPolicyDecision& policy_decision);
+
+  /**
+   * @brief Allows the discovery of a PCF, either via NRF or local
+   * configuration, depending on the DISCOVER_PCF option in the configuration
+   * file.
+   *
+   * @param addr output: The address of the PCF, ip:port
+   * @param api_version output: The API version of the PCF
+   * @param snssai input: The Snssai of the context
+   * @param plmn_id input: The PLMN of the context
+   * @param dnn input: The DNN of the context
+   * @return true
+   * @return false
+   */
   bool discover_pcf(
-      std::string& addr, std::string& port, std::string& api_version,
+      std::string& addr, std::string& api_version,
       const oai::smf_server::model::Snssai snssai,
-      const oai::smf_server::model::PlmnId, const std::string);
+      const oai::smf_server::model::PlmnId plmn_id, const std::string dnn);
 
  private:
   bool discover_pcf_with_nrf(
-      std::string& addr, std::string& port, std::string& api_version,
+      std::string& addr, std::string& api_version,
       const oai::smf_server::model::Snssai snssai,
-      const oai::smf_server::model::PlmnId, const std::string);
+      const oai::smf_server::model::PlmnId plmn_id, const std::string dnn);
 
   bool discover_pcf_from_config_file(
-      std::string& addr, std::string& port, std::string& api_version,
+      std::string& addr, std::string& api_version,
       const oai::smf_server::model::Snssai snssai,
-      const oai::smf_server::model::PlmnId, const std::string);
+      const oai::smf_server::model::PlmnId plmn_id, const std::string dnn);
 };
+
+/**
+ * @brief Client which handles the SMPolicyControl API (3GPP TS 29.512)
+ *
+ */
+class smf_pcf_client {};
+
 }  // namespace smf::n7
 #endif /* FILE_SMF_N4_HPP_SEEN */
