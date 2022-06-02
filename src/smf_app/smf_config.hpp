@@ -225,10 +225,7 @@ class smf_config {
   struct in_addr default_cscfv4;
   struct in6_addr default_dnsv6;
   struct in6_addr default_dns_secv6;
-<<<<<<< HEAD
-
   std::map<std::string, dnn_t> dnns;
-=======
   struct in6_addr default_cscfv6;
 #define SMF_NUM_DNN_MAX 5
   int num_dnn;
@@ -256,7 +253,6 @@ class smf_config {
   int num_paa6_pool;
   struct in6_addr paa_pool6_prefix[SMF_NUM_UE_POOL_MAX];
   uint8_t paa_pool6_prefix_len[SMF_NUM_UE_POOL_MAX];
->>>>>>> 89b5f827... backup before adding qos rule update
 
   bool force_push_pco;
   uint ue_mtu;

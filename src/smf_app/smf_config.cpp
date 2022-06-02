@@ -901,9 +901,7 @@ void smf_config::display() {
     n4.thread_rd_sched_params.sched_policy); Logger::smf_app().info( "
     Scheduling prio .....: %d", n4.thread_rd_sched_params.sched_priority);
 
-<<<<<<< HEAD
-    Logger::smf_app().info("- ITTI Timer Task Threading:");
-=======
+
   Logger::smf_app().info(
       "   CSCF .........: %s",
       inet_ntoa(*((struct in_addr*) &default_cscfv4)));
@@ -914,7 +912,6 @@ void smf_config::display() {
   Logger::smf_app().info("- " SMF_CONFIG_STRING_DNN_LIST ":");
   for (int i = 0; i < num_dnn; i++) {
     Logger::smf_app().info("    DNN %d:", i);
->>>>>>> 89b5f827... backup before adding qos rule update
     Logger::smf_app().info(
         "    CPU id ..............: %d", itti.itti_timer_sched_params.cpu_id);
     Logger::smf_app().info(
