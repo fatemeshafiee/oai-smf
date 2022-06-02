@@ -32,6 +32,8 @@ typedef uint64_t supi64_t;
 
 #define SUPI_DIGITS_MAX 15
 
+const uint8_t SST_MAX_STANDARDIZED_VALUE = 127;
+
 typedef struct {
   uint32_t length;
   char data[SUPI_DIGITS_MAX + 1];
