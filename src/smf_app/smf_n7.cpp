@@ -22,19 +22,35 @@
 /*! \file smf_n7.cpp
  \author  Stefan Spettel
  \company Openairinterface Software Alliance
- \date 2021
- \email: stefan.spettel@gmx.at
+ \date 2022
+ \email: stefan.spettel@eurecom.fr
  */
 
 #include "smf_n7.hpp"
 #include "smf_config.hpp"
 #include "fqdn.hpp"
+#include "smf_sbi.hpp"
+#include "nlohmann/json.hpp"
+#include "3gpp_29.500.h"
+#include "ProblemDetails.h"
 
 using namespace smf;
 using namespace smf::n7;
 using namespace oai::smf_server::model;
 
 extern smf_config smf_cfg;
+extern smf_sbi* smf_sbi_inst;
+
+sm_policy_status_code smf_n7::create_sm_policy_association(
+    const std::string pcf_addr, const std::string pcf_api_version,
+    const oai::smf_server::model::SmPolicyContextData& context,
+    oai::smf_server::model::SmPolicyDecision& policy_decision) {
+  // TODO abstraction: Here we should choose between local PCC rules and PCF
+  // client
+
+  return policy_api_client.send_create_policy_association(
+      pcf_addr, pcf_api_version, context, policy_decision);
+}
 
 bool smf_n7::discover_pcf(
     std::string& addr, std::string& api_version, const Snssai snssai,
@@ -99,4 +115,102 @@ bool smf_n7::discover_pcf_from_config_file(
       return true;
     }
   }
+}
+smf_n7::~smf_n7() {
+  Logger::smf_n7().info("Deleting SMF N7 instance...");
+}
+
+///////////////////////////////////////////////////////////////////////////
+/////////////////////// smf_pcf_client ////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+sm_policy_status_code smf_pcf_client::send_create_policy_association(
+    const std::string pcf_addr, const std::string pcf_api_version,
+    const SmPolicyContextData& context, SmPolicyDecision& policy_decision) {
+  nlohmann::json json_data;
+  to_json(json_data, context);
+
+  Logger::smf_n7().info("Sending PCF SM policy association creation request");
+
+  std::string url = "http://" + pcf_addr + "/" + sm_api_name + "/" +
+                    pcf_api_version + "/" + sm_api_policy_resource_part;
+
+  std::string response_data;
+
+  // generate a promise for the curl handle
+  uint32_t promise_id = smf_sbi_inst->generate_promise_id();
+
+  Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
+  uint32_t* pid_ptr = &promise_id;
+  boost::shared_ptr<boost::promise<uint32_t>> p =
+      boost::make_shared<boost::promise<uint32_t>>();
+  boost::shared_future<uint32_t> f;
+  f = p->get_future();
+  smf_sbi_inst->add_promise(promise_id, p);
+
+  // Create a new curl easy handle and add to the multi handle
+  if (!smf_sbi_inst->curl_create_handle(
+          url, json_data.dump(), response_data, pid_ptr, "POST",
+          smf_cfg.http_version)) {
+    Logger::smf_sbi().warn(
+        "Could not create a new handle to send message to PCF");
+    smf_sbi_inst->remove_promise(promise_id);
+    return sm_policy_status_code::INTERNAL_ERROR;
+  }
+
+  // Wait for the response
+  // TODO what happens if PCF is not reachable? Should check that scenario
+  // TODO it seems that it just hangs and is stuck "forever".. The problem is
+  // that the CURL ERROR CODE in curl_release_handles are just ignored. e.g when
+  // I have an error code 28, does that mean that this thread is just stuck?
+
+  uint32_t response_code = smf_sbi_inst->get_available_response(f);
+
+  Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
+  Logger::smf_sbi().debug("Response data %s", response_data.c_str());
+
+  if (response_code == http_status_code_e::HTTP_STATUS_CODE_201_CREATED) {
+    from_json(response_data, policy_decision);
+    Logger::smf_n7().info(
+        "Successfully created SM Policy Association for SUPI %s",
+        context.getSupi().c_str());
+    return sm_policy_status_code::CREATED;
+  }
+
+  // failure case
+  ProblemDetails problem_details;
+  from_json(response_data, problem_details);
+
+  std::string info = "";
+  sm_policy_status_code response;
+  switch (response_code) {
+    case http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN:
+      info     = "SM Policy Association Creation Forbidden";
+      response = sm_policy_status_code::CONTEXT_DENIED;
+      break;
+    case http_status_code_e::HTTP_STATUS_CODE_400_BAD_REQUEST:
+      if (problem_details.getCause() == "USER_UNKNOWN") {
+        response = sm_policy_status_code::USER_UNKOWN;
+        info     = "SM Policy Association Creation: Unknown User";
+      } else {
+        response = sm_policy_status_code::INVALID_PARAMETERS;
+        info     = "SM Policy Association Creation: Bad Request";
+      }
+      break;
+    case http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR:
+      response = sm_policy_status_code::INTERNAL_ERROR;
+      info     = "SM Policy Association Creation: Internal Error";
+      break;
+    default:
+      response = sm_policy_status_code::INTERNAL_ERROR;
+      info =
+          "SM Policy Association Creation: Unknown Error Code from "
+          "PCF: " +
+          response_code;
+  }
+
+  Logger::smf_n7().warn(
+      "%s -- Details: %s - %s", info.c_str(),
+      problem_details.getCause().c_str(), problem_details.getDetail().c_str());
+  return response;
 }

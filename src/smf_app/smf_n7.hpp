@@ -22,8 +22,8 @@
 /*! \file smf_n7.hpp
  \author  Stefan Spettel
  \company Openairinterface Software Alliance
- \date 2021
- \email: stefan.spettel@gmx.at
+ \date 2022
+ \email: stefan.spettel@eurecom.fr
  */
 
 #ifndef FILE_SMF_N7_HPP_SEEN
@@ -48,7 +48,22 @@ enum class sm_policy_status_code {
   CONTEXT_DENIED,
   NOT_FOUND,
   OK,
-  PCF_NOT_AVAILABLE
+  PCF_NOT_AVAILABLE,
+  INTERNAL_ERROR
+};
+
+/**
+ *
+ */
+class smf_pcf_client {
+ public:
+  const std::string sm_api_name                 = "npcf-smpolicycontrol";
+  const std::string sm_api_policy_resource_part = "sm-policies";
+
+  sm_policy_status_code send_create_policy_association(
+      const std::string pcf_addr, const std::string pcf_api_version,
+      const oai::smf_server::model::SmPolicyContextData& context,
+      oai::smf_server::model::SmPolicyDecision& policy_decision);
 };
 
 /**
@@ -59,15 +74,28 @@ enum class sm_policy_status_code {
  */
 class smf_n7 {
  public:
+  smf_n7(){};
+  smf_n7(smf_n7 const&) = delete;
+  void operator=(smf_n7 const&) = delete;
+  virtual ~smf_n7();
+
   static smf_n7& get_instance() {
     static smf_n7 instance;
     return instance;
   }
 
-  explicit smf_n7();
-
-  virtual ~smf_n7();
-
+  /**
+   * @brief Creates a SM Policy Association (as defined in 3GPP TS 29.512)
+   * towards the PCF specified with pcf_addr.
+   *
+   * @param pcf_addr PCF address in format ip:port (see discover_pcf)
+   * @param pcf_api_version PCF API version
+   * @param context context data, the mandatory parameters need to be set
+   * @param policy_decision policy decision received from the PCF (is empty on
+   * error)
+   * @return smf::n7::sm_policy_status_code Status code depending on the result
+   * from the PCF API
+   */
   smf::n7::sm_policy_status_code create_sm_policy_association(
       const std::string pcf_addr, const std::string pcf_api_version,
       const oai::smf_server::model::SmPolicyContextData& context,
@@ -101,13 +129,9 @@ class smf_n7 {
       std::string& addr, std::string& api_version,
       const oai::smf_server::model::Snssai snssai,
       const oai::smf_server::model::PlmnId plmn_id, const std::string dnn);
-};
 
-/**
- * @brief Client which handles the SMPolicyControl API (3GPP TS 29.512)
- *
- */
-class smf_pcf_client {};
+  smf_pcf_client policy_api_client = {};
+};
 
 }  // namespace smf::n7
 #endif /* FILE_SMF_N4_HPP_SEEN */
