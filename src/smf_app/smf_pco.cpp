@@ -335,17 +335,15 @@ int smf_app::process_pco_link_mtu_request(
   return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
 }
 
-
 //------------------------------------------------------------------------------
 int smf_app::process_pco_p_cscf_request(
     protocol_configuration_options_t& pco_resp,
     const pco_protocol_or_container_id_t* const poc_id) {
-  in_addr_t cscf_ipv4_addr      = smf_cfg.default_cscfv4.s_addr;
+  in_addr_t cscf_ipv4_addr                   = smf_cfg.default_cscfv4.s_addr;
   pco_protocol_or_container_id_t poc_id_resp = {0};
   uint8_t cscf_array[4];
 
-  Logger::smf_app().debug(
-      "PCO: Protocol identifier P CSCF Request");
+  Logger::smf_app().debug("PCO: Protocol identifier P CSCF Request");
   poc_id_resp.protocol_id = PCO_CONTAINER_IDENTIFIER_P_CSCF_IPV4_ADDRESS;
   poc_id_resp.length_of_protocol_id_contents = 4;
   cscf_array[0] = (uint8_t)(cscf_ipv4_addr & 0x000000FF);
@@ -362,25 +360,23 @@ int smf_app::process_pco_p_cscf_request(
 int smf_app::process_pco_p_cscf_v6_request(
     protocol_configuration_options_t& pco_resp,
     const pco_protocol_or_container_id_t* const poc_id) {
-  in6_addr cscf_ipv6_addr       = smf_cfg.default_cscfv6;
+  in6_addr cscf_ipv6_addr                    = smf_cfg.default_cscfv6;
   pco_protocol_or_container_id_t poc_id_resp = {0};
   uint8_t cscfv6_array[16];
 
-  Logger::smf_app().debug(
-      "PCO: Protocol identifier P CSCF v6 Request");
+  Logger::smf_app().debug("PCO: Protocol identifier P CSCF v6 Request");
   poc_id_resp.protocol_id = PCO_CONTAINER_IDENTIFIER_P_CSCF_IPV6_ADDRESS;
   poc_id_resp.length_of_protocol_id_contents = 16;
 
   char str_addr6[INET6_ADDRSTRLEN];
-  if (inet_ntop(
-          AF_INET6, &cscf_ipv6_addr, str_addr6,
-          sizeof(str_addr6))) {
+  if (inet_ntop(AF_INET6, &cscf_ipv6_addr, str_addr6, sizeof(str_addr6))) {
     std::string ipv6_addr_str((char*) str_addr6, INET6_ADDRSTRLEN);
     Logger::smf_app().info(" CSCF Ipv6 address....: %s", ipv6_addr_str.c_str());
     unsigned char buf_in6_addr[sizeof(struct in6_addr)];
     if (inet_pton(AF_INET6, util::trim(ipv6_addr_str).c_str(), buf_in6_addr) ==
         1) {
-      for (int i = 0; i <= 15; i++) cscfv6_array[i] = (uint8_t)(buf_in6_addr[i]);
+      for (int i = 0; i <= 15; i++)
+        cscfv6_array[i] = (uint8_t)(buf_in6_addr[i]);
     }
   }
 
@@ -389,8 +385,6 @@ int smf_app::process_pco_p_cscf_v6_request(
 
   return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
 }
-
-
 
 //------------------------------------------------------------------------------
 int smf_app::process_pco_request(

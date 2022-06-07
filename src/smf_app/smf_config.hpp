@@ -227,32 +227,6 @@ class smf_config {
   struct in6_addr default_dns_secv6;
   std::map<std::string, dnn_t> dnns;
   struct in6_addr default_cscfv6;
-#define SMF_NUM_DNN_MAX 5
-  int num_dnn;
-  struct {
-    std::string dnn;
-    std::string dnn_label;
-    int pool_id_iv4;
-    int pool_id_iv6;
-    pdu_session_type_t pdu_session_type;
-  } dnn[SMF_NUM_DNN_MAX];
-
-  int num_ue_pool;
-#define SMF_NUM_UE_POOL_MAX 96
-  struct in_addr ue_pool_range_low[SMF_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_range_high[SMF_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_network[SMF_NUM_UE_POOL_MAX];
-  struct in_addr ue_pool_netmask[SMF_NUM_UE_POOL_MAX];
-  // computed from config, UE IP adresses that matches
-  // ue_pool_network[]/ue_pool_netmask[] but do not match ue_pool_range_low[] -
-  // ue_pool_range_high[]
-  // The problem here is that OpenFlow do not deal with ip ranges but with
-  // netmasks
-  std::vector<struct in_addr> ue_pool_excluded[SMF_NUM_UE_POOL_MAX];
-
-  int num_paa6_pool;
-  struct in6_addr paa_pool6_prefix[SMF_NUM_UE_POOL_MAX];
-  uint8_t paa_pool6_prefix_len[SMF_NUM_UE_POOL_MAX];
 
   bool force_push_pco;
   uint ue_mtu;

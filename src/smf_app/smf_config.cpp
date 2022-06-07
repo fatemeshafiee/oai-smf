@@ -436,16 +436,13 @@ int smf_config::load(const string& config_file) {
         util::trim(astring).c_str(), default_dnsv4,
         "BAD IPv4 ADDRESS FORMAT FOR DEFAULT DNS !");
 
-
     smf_cfg.lookupValue(
         SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV4_ADDRESS, astring);
     IPV4_STR_ADDR_TO_INADDR(
         util::trim(astring).c_str(), default_dns_secv4,
         "BAD IPv4 ADDRESS FORMAT FOR DEFAULT DNS !");
 
-
-
-
+    // Default CSCF
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_CSCF_IPV4_ADDRESS, astring);
     IPV4_STR_ADDR_TO_INADDR(
         util::trim(astring).c_str(), default_cscfv4,
@@ -464,8 +461,6 @@ int smf_config::load(const string& config_file) {
           " %s",
           astring.c_str());
     }
-
-
 
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS, astring);
     if (inet_pton(AF_INET6, util::trim(astring).c_str(), buf_in6_addr) == 1) {
@@ -901,17 +896,6 @@ void smf_config::display() {
     n4.thread_rd_sched_params.sched_policy); Logger::smf_app().info( "
     Scheduling prio .....: %d", n4.thread_rd_sched_params.sched_priority);
 
-
-  Logger::smf_app().info(
-      "   CSCF .........: %s",
-      inet_ntoa(*((struct in_addr*) &default_cscfv4)));
-  if (inet_ntop(AF_INET6, &default_cscfv6, str_addr6, sizeof(str_addr6))) {
-    Logger::smf_app().info("    CSCF v6 ......: %s", str_addr6);
-  }
-
-  Logger::smf_app().info("- " SMF_CONFIG_STRING_DNN_LIST ":");
-  for (int i = 0; i < num_dnn; i++) {
-    Logger::smf_app().info("    DNN %d:", i);
     Logger::smf_app().info(
         "    CPU id ..............: %d", itti.itti_timer_sched_params.cpu_id);
     Logger::smf_app().info(
@@ -1007,6 +991,12 @@ void smf_config::display() {
   }
   if (inet_ntop(AF_INET6, &default_dns_secv6, str_addr6, sizeof(str_addr6))) {
     Logger::smf_app().info("    Secondary DNS v6 ....: %s", str_addr6);
+  }
+
+  Logger::smf_app().info(
+      "   CSCF .........: %s", inet_ntoa(*((struct in_addr*) &default_cscfv4)));
+  if (inet_ntop(AF_INET6, &default_cscfv6, str_addr6, sizeof(str_addr6))) {
+    Logger::smf_app().info("    CSCF v6 ......: %s", str_addr6);
   }
 
   Logger::smf_app().info("- Default UE MTU: %d", ue_mtu);
