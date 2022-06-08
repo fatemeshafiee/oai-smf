@@ -47,7 +47,8 @@ RUN rm -f /etc/rhsm-host && \
         psmisc \
         git \
         diffutils \
-        file && \
+        file \
+        boost-devel &&\
     rm -rf /var/lib/apt/lists/* 
 
 # Some GIT configuration command quite useful
