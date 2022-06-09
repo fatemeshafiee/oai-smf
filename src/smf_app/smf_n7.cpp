@@ -41,34 +41,92 @@ using namespace oai::smf_server::model;
 extern smf_config smf_cfg;
 extern smf_sbi* smf_sbi_inst;
 
-sm_policy_status_code smf_n7::create_sm_policy_association(
-    const std::string pcf_addr, const std::string pcf_api_version,
-    const oai::smf_server::model::SmPolicyContextData& context,
-    oai::smf_server::model::SmPolicyDecision& policy_decision) {
+uint32_t smf_n7::select_pcf(const SmPolicyContextData& context) {
   // TODO abstraction: Here we should choose between local PCC rules and PCF
   // client
 
-  return policy_api_client.send_create_policy_association(
-      pcf_addr, pcf_api_version, context, policy_decision);
+  // TODO PCF selection
+
+  if (policy_storages.empty()) {
+    // TODO choose between local PCC rules and PCF client, for now only PCF
+    // client
+    PlmnId plmn_id = {};
+    plmn_id.setMcc(context.getServingNetwork().getMcc());
+    plmn_id.setMnc(context.getServingNetwork().getMnc());
+    std::shared_ptr<smf_pcf_client> storage = smf_pcf_client::discover_pcf(
+        context.getSliceInfo(), plmn_id, context.getDnn());
+
+    if (storage) {
+      // TODO for now, only use the first PCF
+      policy_storages.insert(1, storage);
+      return 1;  // ID is always 1, only one PF
+    } else {
+      return -1;
+    }
+  }
 }
 
-bool smf_n7::discover_pcf(
-    std::string& addr, std::string& api_version, const Snssai snssai,
-    const PlmnId plmn_id, const std::string dnn) {
+sm_policy_status_code smf_n7::create_sm_policy_association(
+    policy_association& association) {
+  uint32_t pcf_id = select_pcf(association.context);
+  if (pcf_id == 0) {
+    return sm_policy_status_code::PCF_NOT_AVAILABLE;
+  }
+  /*std::shared_ptr<policy_storage> store;
+
+  try {
+    store = policy_storages.at(pcf_id);
+  } catch (std::exception) {
+    return sm_policy_status_code::PCF_NOT_AVAILABLE;
+  } */
+
+  folly::AtomicHashMap<uint32_t, std::shared_ptr<policy_storage>>::iterator it =
+      policy_storages.find(pcf_id);
+
+  if (it == policy_storages.end()) {
+    return sm_policy_status_code::PCF_NOT_AVAILABLE;
+  }
+
+  return it->second->create_policy_association(association);
+
+  // return store->create_policy_association(association);
+}
+
+smf_n7::~smf_n7() {
+  Logger::smf_n7().info("Deleting SMF N7 instance...");
+}
+
+///////////////////////////////////////////////////////////////////////////
+/////////////////////// smf_pcf_client ////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<smf_pcf_client> smf_pcf_client::discover_pcf(
+    const Snssai snssai, const PlmnId plmn_id, const std::string dnn) {
   if (smf_cfg.use_local_pcc_rules) {
     Logger::smf_n7().info("Local PCC rules are enabled, do not discover PCF");
-    return false;
+    return nullptr;
   }
+
+  std::string pcf_addr;
+  std::string api_version;
 
   if (smf_cfg.discover_pcf) {
-    return discover_pcf_with_nrf(addr, api_version, snssai, plmn_id, dnn);
+    if (!discover_pcf_with_nrf(pcf_addr, api_version, snssai, plmn_id, dnn)) {
+      Logger::smf_n7().warn("Could not discover PCF from NRF");
+      return nullptr;
+    }
   } else {
-    return discover_pcf_from_config_file(
-        addr, api_version, snssai, plmn_id, dnn);
+    if (!discover_pcf_from_config_file(
+            pcf_addr, api_version, snssai, plmn_id, dnn)) {
+      Logger::smf_n7().warn("Could not discover PCF from config file");
+      return nullptr;
+    }
   }
+  Logger::smf_n7().info("Created new PCF connection: %s", pcf_addr.c_str());
+  return std::make_unique<smf_pcf_client>(pcf_addr, api_version);
 }
 
-bool smf_n7::discover_pcf_with_nrf(
+bool smf_pcf_client::discover_pcf_with_nrf(
     std::string& addr, std::string& api_version, const Snssai snssai,
     const PlmnId plmn_id, const std::string dnn) {
   Logger::smf_n7().debug("Discover PCF with NRF");
@@ -76,7 +134,7 @@ bool smf_n7::discover_pcf_with_nrf(
   return false;
 }
 
-bool smf_n7::discover_pcf_from_config_file(
+bool smf_pcf_client::discover_pcf_from_config_file(
     std::string& addr, std::string& api_version, const Snssai snssai,
     const PlmnId plmn_id, const std::string dnn) {
   // TODO ignore snssai, plmn_id and dnn, because it is not part of
@@ -116,24 +174,13 @@ bool smf_n7::discover_pcf_from_config_file(
     }
   }
 }
-smf_n7::~smf_n7() {
-  Logger::smf_n7().info("Deleting SMF N7 instance...");
-}
 
-///////////////////////////////////////////////////////////////////////////
-/////////////////////// smf_pcf_client ////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-
-sm_policy_status_code smf_pcf_client::send_create_policy_association(
-    const std::string pcf_addr, const std::string pcf_api_version,
-    const SmPolicyContextData& context, SmPolicyDecision& policy_decision) {
+sm_policy_status_code smf_pcf_client::create_policy_association(
+    policy_association& association) {
   nlohmann::json json_data;
-  to_json(json_data, context);
+  to_json(json_data, association.context);
 
   Logger::smf_n7().info("Sending PCF SM policy association creation request");
-
-  std::string url = "http://" + pcf_addr + "/" + sm_api_name + "/" +
-                    pcf_api_version + "/" + sm_api_policy_resource_part;
 
   std::string response_data;
 
@@ -150,7 +197,7 @@ sm_policy_status_code smf_pcf_client::send_create_policy_association(
 
   // Create a new curl easy handle and add to the multi handle
   if (!smf_sbi_inst->curl_create_handle(
-          url, json_data.dump(), response_data, pid_ptr, "POST",
+          root_uri, json_data.dump(), response_data, pid_ptr, "POST",
           smf_cfg.http_version)) {
     Logger::smf_sbi().warn(
         "Could not create a new handle to send message to PCF");
@@ -159,10 +206,6 @@ sm_policy_status_code smf_pcf_client::send_create_policy_association(
   }
 
   // Wait for the response
-  // TODO what happens if PCF is not reachable? Should check that scenario
-  // TODO it seems that it just hangs and is stuck "forever".. The problem is
-  // that the CURL ERROR CODE in curl_release_handles are just ignored. e.g when
-  // I have an error code 28, does that mean that this thread is just stuck?
 
   uint32_t response_code = smf_sbi_inst->get_available_response(f);
 
@@ -170,10 +213,10 @@ sm_policy_status_code smf_pcf_client::send_create_policy_association(
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
 
   if (response_code == http_status_code_e::HTTP_STATUS_CODE_201_CREATED) {
-    from_json(response_data, policy_decision);
+    from_json(response_data, association.decision);
     Logger::smf_n7().info(
         "Successfully created SM Policy Association for SUPI %s",
-        context.getSupi().c_str());
+        association.context.getSupi().c_str());
     return sm_policy_status_code::CREATED;
   }
 
@@ -213,4 +256,27 @@ sm_policy_status_code smf_pcf_client::send_create_policy_association(
       "%s -- Details: %s - %s", info.c_str(),
       problem_details.getCause().c_str(), problem_details.getDetail().c_str());
   return response;
+}
+
+sm_policy_status_code smf_pcf_client::remove_policy_association(
+    uint32_t policy_id, const SmPolicyDeleteData& delete_data) {
+  // TODO
+  return sm_policy_status_code::INTERNAL_ERROR;
+}
+
+sm_policy_status_code smf_pcf_client::update_policy_association(
+    uint32_t policy_id, const SmPolicyUpdateContextData& update_data,
+    policy_association& association) {
+  // TODO
+  return sm_policy_status_code::INTERNAL_ERROR;
+}
+
+sm_policy_status_code smf_pcf_client::get_policy_association(
+    uint32_t policy_id, policy_association& association) {
+  // TODO
+  return sm_policy_status_code::INTERNAL_ERROR;
+}
+
+smf_pcf_client::~smf_pcf_client() {
+  Logger::smf_n7().debug("Deleting PCF client instance");
 }

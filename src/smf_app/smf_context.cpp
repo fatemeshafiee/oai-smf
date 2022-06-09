@@ -1499,69 +1499,35 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // Maximum Data Rate
   // TODO: (Optional) Secondary authentication/authorization
 
-  // Step 5. PCF selection
+  // Step 5. Create SM Policy Association with PCF or local PCC rules
 
   std::string smContextRef = std::to_string(smreq->scid);
   oai::smf_server::model::SmPolicyDecision policy_decision;
+  n7::policy_association policy_ass;
   bool use_pcf_policy = false;
   if (!smf_cfg.use_local_pcc_rules) {
-    std::string pcf_addr;
-    std::string pcf_api_version;
-    oai::smf_server::model::Snssai snssai_model;
-    snssai_model.setSst(snssai.sST);
-    snssai_model.setSd(snssai.sD);
-    oai::smf_server::model::PlmnId plmn_id_model;
-    std::string mnc_string = std::to_string(plmn.mnc_digit1) +
-                             std::to_string(plmn.mnc_digit2) +
-                             std::to_string(plmn.mnc_digit3);
-    std::string mcc_string = std::to_string(plmn.mcc_digit1) +
-                             std::to_string(plmn.mcc_digit2) +
-                             std::to_string(plmn.mcc_digit3);
-    plmn_id_model.setMnc(mnc_string);
-    plmn_id_model.setMcc(mcc_string);
+    policy_ass.set_context(
+        smf_supi_to_string(smreq->req.get_supi()), smreq->req.get_dnn(), snssai,
+        plmn, smreq->req.get_pdu_session_id(),
+        smreq->req.get_pdu_session_type());
 
-    // get the PCF (either from config file, DNS or NRF based on local config)
-    bool pcf_found = n7::smf_n7::get_instance().discover_pcf(
-        pcf_addr, pcf_api_version, snssai_model, plmn_id_model, dnn);
+    // TODO what is the exact meaning of SCID? Is this unique per registration
+    // or unique per PDU session?
+    policy_ass.id = smreq->scid;
 
-    if (pcf_found) {
-      oai::smf_server::model::SmPolicyContextData context;
-      context.setPduSessionId(pdu_session_id);
-      std::string supi_string = smf_supi_to_string(smreq->req.get_supi());
-      // TODO only support imsi SUPI, not NAI
-      context.setSupi("imsi-" + supi_string);
-      oai::smf_server::model::PduSessionType pdu_session_type;
-      // hacky
-      pdu_session_type_t pdu_type = smreq->req.get_pdu_session_type();
-      from_json(pdu_type.toString(), pdu_session_type);
-      context.setPduSessionType(pdu_session_type);
-      context.setDnn(smreq->req.get_dnn());
-      // TODO which notification URI should we use for PCF updates?
-      // atm it is
-      // {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts-policy/{smContextRef}
-      std::string notification_uri =
-          smreq->req.get_api_root() + "-policy/" + smContextRef;
-
-      n7::sm_policy_status_code status =
-          n7::smf_n7::get_instance().create_sm_policy_association(
-              pcf_addr, pcf_api_version, context, policy_decision);
-
-      if (status != n7::sm_policy_status_code::CREATED) {
-        Logger::smf_n7().info(
-            "PCF SM Policy Association Creation was not successful. Continue "
-            "using local rules");
-        use_pcf_policy = false;
-        // Here, the standard says that we could reject the PDU session or allow
-        // the PDU session applying local policies 29.512 Chapter 4.2.2.2
-        // TODO I propose to have this behavior configurable, for now we
-        // continue
-      } else {
-        use_pcf_policy = true;
-      }
-
-    } else {
+    n7::sm_policy_status_code status =
+        n7::smf_n7::get_instance().create_sm_policy_association(policy_ass);
+    if (status != n7::sm_policy_status_code::CREATED) {
       Logger::smf_n7().info(
-          "PCF can not be found. Continue with local PCC rules");
+          "PCF SM Policy Association Creation was not successful. Continue "
+          "using default rules");
+      use_pcf_policy = false;
+      // Here, the standard says that we could reject the PDU session or allow
+      // the PDU session applying local policies 29.512 Chapter 4.2.2.2
+      // TODO I propose to have this behavior configurable, for now we
+      // continue
+    } else {
+      use_pcf_policy = true;
     }
   }
   // TODO use the PCC rules also for QoS and other policy information
