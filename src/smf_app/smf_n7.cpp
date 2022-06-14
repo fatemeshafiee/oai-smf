@@ -33,6 +33,9 @@
 #include "nlohmann/json.hpp"
 #include "3gpp_29.500.h"
 #include "ProblemDetails.h"
+#include "uint_generator.hpp"
+
+#include <regex>
 
 using namespace smf;
 using namespace smf::n7;
@@ -61,9 +64,13 @@ uint32_t smf_n7::select_pcf(const SmPolicyContextData& context) {
       policy_storages.insert(1, storage);
       return 1;  // ID is always 1, only one PF
     } else {
-      return -1;
+      Logger::smf_n7().info("Did not find PCF");
+      return 0;
     }
   }
+
+  // TODO for now, only use first PCF
+  return 1;
 }
 
 sm_policy_status_code smf_n7::create_sm_policy_association(
@@ -87,9 +94,22 @@ sm_policy_status_code smf_n7::create_sm_policy_association(
     return sm_policy_status_code::PCF_NOT_AVAILABLE;
   }
 
-  return it->second->create_policy_association(association);
+  sm_policy_status_code res =
+      it->second->create_policy_association(association);
 
-  // return store->create_policy_association(association);
+  if (res == sm_policy_status_code::CREATED) {
+    if (association.id == 0) {
+      association.id =
+          util::uint_uid_generator<uint64_t>::get_instance().get_uid();
+    }
+    association.pcf_id = pcf_id;
+
+    Logger::smf_n7().debug(
+        "Successfully created policy association with ID: %lu ",
+        association.id);
+  }
+
+  return res;
 }
 
 smf_n7::~smf_n7() {
@@ -183,6 +203,7 @@ sm_policy_status_code smf_pcf_client::create_policy_association(
   Logger::smf_n7().info("Sending PCF SM policy association creation request");
 
   std::string response_data;
+  std::string response_headers;
 
   // generate a promise for the curl handle
   uint32_t promise_id = smf_sbi_inst->generate_promise_id();
@@ -197,8 +218,8 @@ sm_policy_status_code smf_pcf_client::create_policy_association(
 
   // Create a new curl easy handle and add to the multi handle
   if (!smf_sbi_inst->curl_create_handle(
-          root_uri, json_data.dump(), response_data, pid_ptr, "POST",
-          smf_cfg.http_version)) {
+          root_uri, json_data.dump(), response_data, response_headers, pid_ptr,
+          "POST", smf_cfg.http_version)) {
     Logger::smf_sbi().warn(
         "Could not create a new handle to send message to PCF");
     smf_sbi_inst->remove_promise(promise_id);
@@ -213,10 +234,22 @@ sm_policy_status_code smf_pcf_client::create_policy_association(
   Logger::smf_sbi().debug("Response data %s", response_data.c_str());
 
   if (response_code == http_status_code_e::HTTP_STATUS_CODE_201_CREATED) {
-    from_json(response_data, association.decision);
-    Logger::smf_n7().info(
-        "Successfully created SM Policy Association for SUPI %s",
-        association.context.getSupi().c_str());
+    std::regex rgx("Location: *(.*)");
+    std::smatch match;
+
+    if (std::regex_search(response_headers, match, rgx)) {
+      association.pcf_location = match[1];
+      nlohmann::json j         = nlohmann::json::parse(response_data);
+      from_json(j, association.decision);
+      Logger::smf_n7().info(
+          "Successfully created SM Policy Association for SUPI %s",
+          association.context.getSupi().c_str());
+    } else {
+      Logger::smf_n7().debug(
+          "SM Policy Association response does not contain Location!");
+      return sm_policy_status_code::INTERNAL_ERROR;
+    }
+
     return sm_policy_status_code::CREATED;
   }
 

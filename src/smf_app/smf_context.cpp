@@ -451,6 +451,12 @@ std::string smf_pdu_session::toString() const {
       }
     }
   }
+
+  if (policy_ptr) {
+    s.append("\t Policy Decision:").append("\n");
+    s.append(policy_ptr->toString());
+  }
+
   return s;
 }
 
@@ -1502,21 +1508,21 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // Step 5. Create SM Policy Association with PCF or local PCC rules
 
   std::string smContextRef = std::to_string(smreq->scid);
-  oai::smf_server::model::SmPolicyDecision policy_decision;
-  n7::policy_association policy_ass;
-  bool use_pcf_policy = false;
+  sp.get()->policy_ptr     = std::make_shared<n7::policy_association>();
+  bool use_pcf_policy      = false;
   if (!smf_cfg.use_local_pcc_rules) {
-    policy_ass.set_context(
+    sp.get()->policy_ptr->set_context(
         smf_supi_to_string(smreq->req.get_supi()), smreq->req.get_dnn(), snssai,
         plmn, smreq->req.get_pdu_session_id(),
         smreq->req.get_pdu_session_type());
 
     // TODO what is the exact meaning of SCID? Is this unique per registration
     // or unique per PDU session?
-    policy_ass.id = smreq->scid;
+    sp.get()->policy_ptr->id = smreq->scid;
 
     n7::sm_policy_status_code status =
-        n7::smf_n7::get_instance().create_sm_policy_association(policy_ass);
+        n7::smf_n7::get_instance().create_sm_policy_association(
+            *sp->policy_ptr);
     if (status != n7::sm_policy_status_code::CREATED) {
       Logger::smf_n7().info(
           "PCF SM Policy Association Creation was not successful. Continue "

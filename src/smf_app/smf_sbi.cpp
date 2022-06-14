@@ -1198,6 +1198,66 @@ bool smf_sbi::curl_create_handle(
   return true;
 }
 
+// TODO we should not repeat ourselves... propose to make a private function
+// which does curl_init
+//------------------------------------------------------------------------------
+bool smf_sbi::curl_create_handle(
+    const std::string& uri, const std::string& data, std::string& response_data,
+    std::string& response_headers, uint32_t* promise_id,
+    const std::string& method, uint8_t http_version) {
+  // Create handle for a curl request
+  CURL* curl = curl_easy_init();
+
+  if ((curl == nullptr) or (headers == nullptr)) {
+    Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
+    return false;
+  }
+
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
+  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+  curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
+
+  if (method.compare("POST") == 0)
+    curl_easy_setopt(curl, CURLOPT_POST, 1);
+  else if (method.compare("PATCH") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+  else if (method.compare("PUT") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+  else
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+
+  if (http_version == 2) {
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    // We use a self-signed test server, skip verification during debugging
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(
+        curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+  }
+
+  // Hook up data handling function.
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+  curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &response_headers);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  if (method.compare("DELETE") != 0) {
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.length());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+  }
+  // Add to the multi handle
+  curl_multi_add_handle(curl_multi, curl);
+  handles.push_back(curl);
+
+  // Curl cmd will actually be performed in perform_curl_multi
+  perform_curl_multi(
+      0);  // TODO: current time as parameter if curl is performed per event
+  return true;
+}
+
 //------------------------------------------------------------------------------
 bool smf_sbi::curl_create_handle(
     const std::string& uri, std::string& response_data, uint32_t* promise_id,

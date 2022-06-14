@@ -66,8 +66,8 @@ enum class sm_policy_status_code {
 struct policy_association {
   oai::smf_server::model::SmPolicyDecision decision;
   oai::smf_server::model::SmPolicyContextData context;
-  uint32_t id     = -1;
-  uint32_t pcf_id = -1;
+  uint64_t id     = 0;
+  uint64_t pcf_id = 0;
   std::string pcf_location;
 
   void set_context(
@@ -95,6 +95,23 @@ struct policy_association {
     from_json(pdu_session_type.toString(), pdu_session_type_model);
     context.setPduSessionType(pdu_session_type_model);
     context.setDnn(dnn);
+  }
+
+  std::string toString() {
+    std::string s = "";
+    if (decision.pccRulesIsSet()) {
+      s.append("\t\tPCC Rules:\n");
+      for (auto it : decision.getPccRules()) {
+        s.append("\t\t\t\t").append(it.second.getPccRuleId()).append("\n");
+      }
+    }
+    if (decision.traffContDecsIsSet()) {
+      s.append("\t\tTraffic Control Descriptions:\n");
+      for (auto it : decision.getTraffContDecs()) {
+        s.append("\t\t\t\t").append(it.second.getTcId()).append("\n");
+      }
+    }
+    return s;
   }
 };
 
@@ -231,10 +248,9 @@ class smf_pcf_client : public policy_storage {
  */
 class smf_n7 {
  public:
-  const uint32_t ASSOCIATIONS_SIZE = 1024;
-  const uint32_t PCF_CLIENTS       = 16;
+  const uint32_t PCF_CLIENTS = 16;
 
-  smf_n7() : associations(ASSOCIATIONS_SIZE), policy_storages(PCF_CLIENTS){};
+  smf_n7() : policy_storages(PCF_CLIENTS){};
   smf_n7(smf_n7 const&) = delete;
   void operator=(smf_n7 const&) = delete;
   virtual ~smf_n7();
@@ -261,6 +277,30 @@ class smf_n7 {
   sm_policy_status_code create_sm_policy_association(
       policy_association& association);
 
+  /**
+   * @brief Removes an SM Policy Association on the PCF. The params pcf_id and
+   * id of the association parameter need to be set
+   *
+   * @param association input: pcf_id and id need to be set and exist
+   * @return sm_policy_status_code OK in case of success, otherwise NOT_FOUND,
+   * INTERNAL_ERROR, PCF_NOT_AVAILABLE
+   */
+  sm_policy_status_code remove_sm_policy_association(
+      const policy_association& association);
+
+  /**
+   * @brief Updates an SM Policy Association, requires the triggers to be set as
+   * defined in 3GPP TS 29.512
+   *
+   * @param association The association to update
+   * @param update_data The update context data
+   * @return sm_policy_status_code OK in case of success, otherwise NOT_FOUND,
+   * INTERNAL_ERROR, PCF_NOT_AVAILABLE
+   */
+  sm_policy_status_code update_sm_policy_association(
+      policy_association& association,
+      const oai::smf_server::model::SmPolicyUpdateContextData& update_data);
+
  private:
   /**
    * @brief Allows the discovery of a PCF, either via NRF or local
@@ -279,7 +319,6 @@ class smf_n7 {
   // amount of objects is known upfront.
   folly::AtomicHashMap<uint32_t, std::shared_ptr<policy_storage>>
       policy_storages;
-  folly::AtomicHashMap<uint32_t, smf::n7::policy_association> associations;
 };
 }  // namespace smf::n7
 #endif /* FILE_SMF_N4_HPP_SEEN */
