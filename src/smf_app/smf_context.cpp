@@ -55,6 +55,7 @@
 #include "EventNotification.h"
 #include "SmPolicyContextData.h"
 #include "SmPolicyDecision.h"
+#include "SmPolicyDeleteData.h"
 #include "PlmnId.h"
 #include "Snssai.h"
 #include "PduSessionType.h"
@@ -2234,8 +2235,13 @@ bool smf_context::handle_pdu_session_release_complete(
       supi64, sm_context_request.get()->req.get_pdu_session_id(),
       sm_context_request.get()->http_version);
 
-  // TODO: if dynamic PCC applied, SMF invokes an SM Policy Association
-  // Termination
+  // SM Policy Association termination
+  if (sp->policy_ptr) {
+    oai::smf_server::model::SmPolicyDeleteData delete_data;
+    // TODO set data such as release cause, usage reports etc
+    n7::smf_n7::get_instance().remove_sm_policy_association(
+        *sp->policy_ptr, delete_data);
+  }
   // TODO: SMF un-subscribes from Session Management Subscription data
   // changes notification from UDM by invoking Numd_SDM_Unsubscribe
 

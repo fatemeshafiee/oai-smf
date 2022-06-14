@@ -596,7 +596,7 @@ void to_json(nlohmann::json& j, const SmPolicyUpdateContextData& o) {
   // if (o.creditManageStatusIsSet())
   //  j["creditManageStatus"] = o.m_CreditManageStatus;
   // if (o.servNfIdIsSet()) j["servNfId"] = o.m_ServNfId;
-  // if (o.traceReqIsSet()) j["traceReq"] = o.m_TraceReq;
+  if (o.traceReqIsSet()) j["traceReq"] = o.m_TraceReq;
   // if (o.maPduIndIsSet()) j["maPduInd"] = o.m_MaPduInd;
   // if (o.atsssCapabIsSet()) j["atsssCapab"] = o.m_AtsssCapab;
   // if (o.tsnBridgeInfoIsSet()) j["tsnBridgeInfo"] = o.m_TsnBridgeInfo;
@@ -767,10 +767,12 @@ void from_json(const nlohmann::json& j, SmPolicyUpdateContextData& o) {
     j.at("servNfId").get_to(o.m_ServNfId);
     o.m_ServNfIdIsSet = true;
   }
+  */
   if (j.find("traceReq") != j.end()) {
     j.at("traceReq").get_to(o.m_TraceReq);
     o.m_TraceReqIsSet = true;
   }
+  /*
   if (j.find("maPduInd") != j.end()) {
     j.at("maPduInd").get_to(o.m_MaPduInd);
     o.m_MaPduIndIsSet = true;
@@ -1309,6 +1311,7 @@ bool SmPolicyUpdateContextData::servNfIdIsSet() const {
 void SmPolicyUpdateContextData::unsetServNfId() {
   m_ServNfIdIsSet = false;
 }
+*/
 TraceData SmPolicyUpdateContextData::getTraceReq() const {
   return m_TraceReq;
 }
@@ -1322,6 +1325,7 @@ bool SmPolicyUpdateContextData::traceReqIsSet() const {
 void SmPolicyUpdateContextData::unsetTraceReq() {
   m_TraceReqIsSet = false;
 }
+/*
 MaPduIndication SmPolicyUpdateContextData::getMaPduInd() const {
   return m_MaPduInd;
 }

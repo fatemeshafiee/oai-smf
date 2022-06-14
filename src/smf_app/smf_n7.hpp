@@ -41,6 +41,7 @@
 #include "SmPolicyUpdateContextData.h"
 #include "SmPolicyDeleteData.h"
 #include "smf.h"
+#include "3gpp_29.500.h"
 
 namespace smf::n7 {
 
@@ -141,41 +142,39 @@ class policy_storage {
   /**
    * @brief Removes a policy association, identified by the ID,
    *
-   * @param policy_id input: policy ID
+   * @param policy_association input: must contain PCF location, object is not
+   * removed
    * @param delete_data input: must not be null, but values are optional
    * @return sm_policy_status_code OK in case of success, otherwise NOT_FOUND,
    * INTERNAL_ERROR, PCF_NOT_AVAILABLE
    */
   virtual sm_policy_status_code remove_policy_association(
-      uint32_t policy_id,
+      const policy_association& association,
       const oai::smf_server::model::SmPolicyDeleteData& delete_data) = 0;
 
   /**
    * @brief Updates a policy association, identified by the ID
    *
-   * @param policy_id input: policy ID
    * @param update_data input: must not be null and set accordingly to the
    * triggers
-   * @param policy_association output: Updated policy association with new
-   * context and decision in case of OK status code
+   * @param policy_association Updated policy association with new
+   * context and decision in case of OK status code, must contain PCF location
    * @return sm_policy_status_code OK in case of success, otherwise NOT_FOUND,
    * INTERNAL_ERROR, PCF_NOT_AVAILABLE
    */
   virtual sm_policy_status_code update_policy_association(
-      uint32_t policy_id,
       const oai::smf_server::model::SmPolicyUpdateContextData& update_data,
       policy_association& association) = 0;
   /**
    * @brief Get the the policy association together with the original context
    *
-   * @param policy_id input: policy ID
-   * @param association output: contains the original context and the policy
-   * decision
+   * @param association contains the original context and the policy
+   * decision, must contain policy ID and PCF location
    * @return sm_policy_status_code OK in case of success, otherwise NOT_FOUND,
    * ITERNAL_ERROR, PCF_NOT_AVAILABLE
    */
   virtual sm_policy_status_code get_policy_association(
-      uint32_t policy_id, policy_association& association) = 0;
+      policy_association& association) = 0;
 };
 
 /**
@@ -186,6 +185,8 @@ class smf_pcf_client : public policy_storage {
  public:
   const std::string sm_api_name                 = "npcf-smpolicycontrol";
   const std::string sm_api_policy_resource_part = "sm-policies";
+  const std::string delete_suffix               = "delete";
+  const std::string update_suffix               = "update";
 
   explicit smf_pcf_client(std::string pcf_addr, std::string pcf_api_version) {
     root_uri = "http://" + pcf_addr + "/" + sm_api_name + "/" +
@@ -211,16 +212,15 @@ class smf_pcf_client : public policy_storage {
       policy_association& association) override;
 
   sm_policy_status_code remove_policy_association(
-      uint32_t policy_id,
+      const policy_association& association,
       const oai::smf_server::model::SmPolicyDeleteData& delete_data) override;
 
   sm_policy_status_code update_policy_association(
-      uint32_t policy_id,
       const oai::smf_server::model::SmPolicyUpdateContextData& update_data,
       policy_association& association) override;
 
   sm_policy_status_code get_policy_association(
-      uint32_t policy_id, policy_association& association) override;
+      policy_association& association) override;
 
  private:
   static bool discover_pcf_with_nrf(
@@ -232,6 +232,11 @@ class smf_pcf_client : public policy_storage {
       std::string& addr, std::string& api_version,
       const oai::smf_server::model::Snssai snssai,
       const oai::smf_server::model::PlmnId plmn_id, const std::string dnn);
+
+  http_status_code_e send_request(
+      const std::string& uri, const std::string& body,
+      std::string& response_body, std::string& response_headers,
+      std::string method, bool use_response_headers = false);
 
   std::string root_uri;
 };
@@ -282,11 +287,13 @@ class smf_n7 {
    * id of the association parameter need to be set
    *
    * @param association input: pcf_id and id need to be set and exist
+   * @param delete_data input: Values are optional but cannot be null
    * @return sm_policy_status_code OK in case of success, otherwise NOT_FOUND,
    * INTERNAL_ERROR, PCF_NOT_AVAILABLE
    */
   sm_policy_status_code remove_sm_policy_association(
-      const policy_association& association);
+      const policy_association& association,
+      const oai::smf_server::model::SmPolicyDeleteData& delete_data);
 
   /**
    * @brief Updates an SM Policy Association, requires the triggers to be set as

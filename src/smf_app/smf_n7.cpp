@@ -34,7 +34,7 @@
 #include "3gpp_29.500.h"
 #include "ProblemDetails.h"
 #include "uint_generator.hpp"
-
+#include "SmPolicyControl.h"
 #include <regex>
 
 using namespace smf;
@@ -110,6 +110,31 @@ sm_policy_status_code smf_n7::create_sm_policy_association(
   }
 
   return res;
+}
+
+sm_policy_status_code smf_n7::remove_sm_policy_association(
+    const policy_association& association,
+    const SmPolicyDeleteData& delete_data) {
+  folly::AtomicHashMap<uint32_t, std::shared_ptr<policy_storage>>::iterator it =
+      policy_storages.find(association.pcf_id);
+
+  if (it == policy_storages.end()) {
+    return sm_policy_status_code::PCF_NOT_AVAILABLE;
+  }
+  return it->second->remove_policy_association(association, delete_data);
+}
+
+sm_policy_status_code smf_n7::update_sm_policy_association(
+    policy_association& association,
+    const SmPolicyUpdateContextData& update_data) {
+  folly::AtomicHashMap<uint32_t, std::shared_ptr<policy_storage>>::iterator it =
+      policy_storages.find(association.pcf_id);
+
+  if (it == policy_storages.end()) {
+    return sm_policy_status_code::PCF_NOT_AVAILABLE;
+  }
+
+  return it->second->update_policy_association(update_data, association);
 }
 
 smf_n7::~smf_n7() {
@@ -195,15 +220,14 @@ bool smf_pcf_client::discover_pcf_from_config_file(
   }
 }
 
-sm_policy_status_code smf_pcf_client::create_policy_association(
-    policy_association& association) {
-  nlohmann::json json_data;
-  to_json(json_data, association.context);
-
-  Logger::smf_n7().info("Sending PCF SM policy association creation request");
-
-  std::string response_data;
-  std::string response_headers;
+http_status_code_e smf_pcf_client::send_request(
+    const std::string& uri, const std::string& body, std::string& response_body,
+    std::string& response_headers, std::string method,
+    bool use_response_headers) {
+  if (uri == "") {
+    Logger::smf_n7().warn("PCF URI is not set");
+    return http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR;
+  }
 
   // generate a promise for the curl handle
   uint32_t promise_id = smf_sbi_inst->generate_promise_id();
@@ -215,23 +239,44 @@ sm_policy_status_code smf_pcf_client::create_policy_association(
   boost::shared_future<uint32_t> f;
   f = p->get_future();
   smf_sbi_inst->add_promise(promise_id, p);
-
+  bool res = false;
   // Create a new curl easy handle and add to the multi handle
-  if (!smf_sbi_inst->curl_create_handle(
-          root_uri, json_data.dump(), response_data, response_headers, pid_ptr,
-          "POST", smf_cfg.http_version)) {
+  if (use_response_headers) {
+    res = smf_sbi_inst->curl_create_handle(
+        root_uri, body, response_body, response_headers, pid_ptr, method,
+        smf_cfg.http_version);
+  } else {
+    res = smf_sbi_inst->curl_create_handle(
+        root_uri, body, response_body, pid_ptr, method, smf_cfg.http_version);
+  }
+
+  if (!res) {
     Logger::smf_sbi().warn(
         "Could not create a new handle to send message to PCF");
     smf_sbi_inst->remove_promise(promise_id);
-    return sm_policy_status_code::INTERNAL_ERROR;
+    return http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR;
   }
-
-  // Wait for the response
 
   uint32_t response_code = smf_sbi_inst->get_available_response(f);
 
-  Logger::smf_sbi().debug("Got result for promise ID %d", promise_id);
-  Logger::smf_sbi().debug("Response data %s", response_data.c_str());
+  Logger::smf_n7().debug("Got result for promise ID %d", promise_id);
+  Logger::smf_n7().debug("Response data %s", response_body.c_str());
+  return http_status_code_e(response_code);
+}
+
+sm_policy_status_code smf_pcf_client::create_policy_association(
+    policy_association& association) {
+  nlohmann::json json_data;
+  to_json(json_data, association.context);
+
+  Logger::smf_n7().info("Sending PCF SM policy association creation request");
+
+  std::string response_data;
+  std::string response_headers;
+
+  http_status_code_e response_code = send_request(
+      root_uri, json_data.dump(), response_data, response_headers, "POST",
+      true);
 
   if (response_code == http_status_code_e::HTTP_STATUS_CODE_201_CREATED) {
     std::regex rgx("Location: *(.*)");
@@ -292,22 +337,91 @@ sm_policy_status_code smf_pcf_client::create_policy_association(
 }
 
 sm_policy_status_code smf_pcf_client::remove_policy_association(
-    uint32_t policy_id, const SmPolicyDeleteData& delete_data) {
-  // TODO
-  return sm_policy_status_code::INTERNAL_ERROR;
+    const policy_association& association,
+    const SmPolicyDeleteData& delete_data) {
+  std::string uri = association.pcf_location + "/" + delete_suffix;
+  nlohmann::json json_data;
+  to_json(json_data, delete_data);
+  std::string resp;
+
+  http_status_code_e response_code =
+      send_request(uri, json_data.dump(), resp, resp, "POST", false);
+
+  switch (response_code) {
+    case http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT:
+      Logger::smf_n7().info("Successfully removed PCF Policy Association");
+      return sm_policy_status_code::OK;
+    case http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND:
+      Logger::smf_n7().info(
+          "Could not remove PCF Policy Association. Wrong PCF Location");
+      return sm_policy_status_code::NOT_FOUND;
+    default:
+      Logger::smf_n7().info(
+          "Could not remove PCF Policy Association: Unknown Return code");
+      return sm_policy_status_code::INTERNAL_ERROR;
+  }
 }
 
 sm_policy_status_code smf_pcf_client::update_policy_association(
-    uint32_t policy_id, const SmPolicyUpdateContextData& update_data,
+    const SmPolicyUpdateContextData& update_data,
     policy_association& association) {
-  // TODO
-  return sm_policy_status_code::INTERNAL_ERROR;
+  std::string uri = association.pcf_location + "/" + update_suffix;
+  std::string resp;
+  nlohmann::json json_data;
+  to_json(json_data, update_data);
+  http_status_code_e response_code =
+      send_request(uri, json_data.dump(), resp, resp, "POST", false);
+
+  nlohmann::json json_resp;
+
+  // TODO in the standard it is written that PCF should only update to decision
+  // but here we overwrite object this works because PCF does the same but it is
+  // not standard-compliant
+
+  switch (response_code) {
+    case http_status_code_e::HTTP_STATUS_CODE_200_OK:
+      json_resp = nlohmann::json::parse(resp);
+      from_json(json_resp, association.decision);
+      Logger::smf_n7().info("Successfully updated PCF association");
+      return sm_policy_status_code::OK;
+    case http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND:
+      Logger::smf_n7().info(
+          "Could not update PCF Policy Association. Wrong PCF Location");
+      return sm_policy_status_code::NOT_FOUND;
+    default:
+      Logger::smf_n7().info(
+          "Could not update PCF Policy Association: Unknown Return code");
+      return sm_policy_status_code::INTERNAL_ERROR;
+  }
 }
 
 sm_policy_status_code smf_pcf_client::get_policy_association(
-    uint32_t policy_id, policy_association& association) {
-  // TODO
-  return sm_policy_status_code::INTERNAL_ERROR;
+    policy_association& association) {
+  std::string uri = association.pcf_location;
+  std::string resp;
+  std::string empty = "";
+  http_status_code_e response_code =
+      send_request(uri, empty, resp, resp, "GET", false);
+  nlohmann::json j = nlohmann::json::parse(resp);
+  SmPolicyControl control;
+  switch (response_code) {
+    case http_status_code_e::HTTP_STATUS_CODE_200_OK:
+
+      from_json(j, control);
+      association.decision = control.getPolicy();
+      association.context  = control.getContext();
+
+      Logger::smf_n7().info("Successfully retrieved PCF Policy Association");
+      return sm_policy_status_code::OK;
+    case http_status_code_e::HTTP_STATUS_CODE_404_NOT_FOUND:
+      Logger::smf_n7().info(
+          "Could not retrieve PCF Policy Association. Wrong PCF Location");
+      return sm_policy_status_code::NOT_FOUND;
+    default:
+      Logger::smf_n7().info(
+          "Could not retrieve PCF Policy Association: Unknown Return code");
+      return sm_policy_status_code::INTERNAL_ERROR;
+  }
 }
 
 smf_pcf_client::~smf_pcf_client() {
