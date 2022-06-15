@@ -34,6 +34,7 @@ bool Tai::validate(std::stringstream& msg) const {
 bool Tai::validate(
     std::stringstream& msg, const std::string& pathPrefix) const {
   // TODO implement validation
+  return true;
 }
 
 bool Tai::operator==(const Tai& rhs) const {
