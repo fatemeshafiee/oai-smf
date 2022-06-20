@@ -519,7 +519,10 @@ int smf_config::load(const string& config_file) {
       support_features.lookupValue(
           SMF_CONFIG_STRING_SUPPORT_FEATURES_DISCOVER_PCF, opt);
       if (boost::iequals(opt, "yes")) {
-        discover_pcf = true;
+        Logger::smf_app().warn(
+            "Discover PCF feature is not supported, you need to configure the "
+            "PCF in the config file. This feature is set to false.");
+        discover_pcf = false;  // set to false as not yet supported
       } else {
         discover_pcf = false;
       }
@@ -527,8 +530,11 @@ int smf_config::load(const string& config_file) {
       support_features.lookupValue(
           SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_LOCAL_PCC_RULES, opt);
       if (boost::iequals(opt, "yes")) {
-        use_local_pcc_rules = true;
-        discover_pcf        = false;
+        Logger::smf_app().warn(
+            "Local PCC rules feature is not supported, you need to configure "
+            "and use the PCF. This feature is set to false");
+        use_local_pcc_rules = false;  // set to false as not yet supported
+        // discover_pcf        = false;
       } else {
         use_local_pcc_rules = false;
       }

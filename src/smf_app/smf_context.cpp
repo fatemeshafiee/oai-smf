@@ -1511,31 +1511,27 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   std::string smContextRef = std::to_string(smreq->scid);
   sp.get()->policy_ptr     = std::make_shared<n7::policy_association>();
   bool use_pcf_policy      = false;
-  if (!smf_cfg.use_local_pcc_rules) {
-    sp.get()->policy_ptr->set_context(
-        smf_supi_to_string(smreq->req.get_supi()), smreq->req.get_dnn(), snssai,
-        plmn, smreq->req.get_pdu_session_id(),
-        smreq->req.get_pdu_session_type());
+  sp.get()->policy_ptr->set_context(
+      smf_supi_to_string(smreq->req.get_supi()), smreq->req.get_dnn(), snssai,
+      plmn, smreq->req.get_pdu_session_id(), smreq->req.get_pdu_session_type());
 
-    // TODO what is the exact meaning of SCID? Is this unique per registration
-    // or unique per PDU session?
-    sp.get()->policy_ptr->id = smreq->scid;
+  // TODO what is the exact meaning of SCID? Is this unique per registration
+  // or unique per PDU session?
+  sp.get()->policy_ptr->id = smreq->scid;
 
-    n7::sm_policy_status_code status =
-        n7::smf_n7::get_instance().create_sm_policy_association(
-            *sp->policy_ptr);
-    if (status != n7::sm_policy_status_code::CREATED) {
-      Logger::smf_n7().info(
-          "PCF SM Policy Association Creation was not successful. Continue "
-          "using default rules");
-      use_pcf_policy = false;
-      // Here, the standard says that we could reject the PDU session or allow
-      // the PDU session applying local policies 29.512 Chapter 4.2.2.2
-      // TODO I propose to have this behavior configurable, for now we
-      // continue
-    } else {
-      use_pcf_policy = true;
-    }
+  n7::sm_policy_status_code status =
+      n7::smf_n7::get_instance().create_sm_policy_association(*sp->policy_ptr);
+  if (status != n7::sm_policy_status_code::CREATED) {
+    Logger::smf_n7().info(
+        "PCF SM Policy Association Creation was not successful. Continue "
+        "using default rules");
+    use_pcf_policy = false;
+    // Here, the standard says that we could reject the PDU session or allow
+    // the PDU session applying local policies 29.512 Chapter 4.2.2.2
+    // TODO I propose to have this behavior configurable, for now we
+    // continue
+  } else {
+    use_pcf_policy = true;
   }
   // TODO use the PCC rules also for QoS and other policy information
 
