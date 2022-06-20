@@ -31,8 +31,8 @@
 
 #include <string>
 #include <memory>
-//#include <folly/concurrency/ConcurrentHashMap.h>
-#include <folly/AtomicHashMap.h>
+#include <unordered_map>
+#include <shared_mutex>
 
 #include "Snssai.h"
 #include "PlmnId.h"
@@ -253,9 +253,7 @@ class smf_pcf_client : public policy_storage {
  */
 class smf_n7 {
  public:
-  const uint32_t PCF_CLIENTS = 16;
-
-  smf_n7() : policy_storages(PCF_CLIENTS){};
+  smf_n7() : policy_storages(){};
   smf_n7(smf_n7 const&) = delete;
   void operator=(smf_n7 const&) = delete;
   virtual ~smf_n7();
@@ -321,11 +319,16 @@ class smf_n7 {
   uint32_t select_pcf(
       const oai::smf_server::model::SmPolicyContextData& context);
 
-  // TODO the ConcurrentHashMap of folly would be much better, but I get a
-  // linker error, we should fix that Reason: AtomicHashMap requires that the
-  // amount of objects is known upfront.
-  folly::AtomicHashMap<uint32_t, std::shared_ptr<policy_storage>>
-      policy_storages;
+  /**
+   * @brief Helper method to receive the policy storage (thread safe)
+   *
+   * @param pcf_id ID of the policy storage
+   * @return std::shared_ptr<policy_storage>  -> nullptr in case not found
+   */
+  std::shared_ptr<policy_storage> get_policy_storage(uint32_t pcf_id);
+
+  std::unordered_map<uint32_t, std::shared_ptr<policy_storage>> policy_storages;
+  mutable std::shared_mutex policy_storages_mutex;
 };
 }  // namespace smf::n7
 #endif /* FILE_SMF_N4_HPP_SEEN */

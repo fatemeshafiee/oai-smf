@@ -45,27 +45,30 @@ extern smf_config smf_cfg;
 extern smf_sbi* smf_sbi_inst;
 
 uint32_t smf_n7::select_pcf(const SmPolicyContextData& context) {
-  // TODO abstraction: Here we should choose between local PCC rules and PCF
-  // client
-
   // TODO PCF selection
 
   if (policy_storages.empty()) {
+    std::unique_lock policies_lock(policy_storages_mutex);
     // TODO choose between local PCC rules and PCF client, for now only PCF
     // client
-    PlmnId plmn_id = {};
-    plmn_id.setMcc(context.getServingNetwork().getMcc());
-    plmn_id.setMnc(context.getServingNetwork().getMnc());
-    std::shared_ptr<smf_pcf_client> storage = smf_pcf_client::discover_pcf(
-        context.getSliceInfo(), plmn_id, context.getDnn());
-
-    if (storage) {
-      // TODO for now, only use the first PCF
-      policy_storages.insert(1, storage);
-      return 1;  // ID is always 1, only one PF
-    } else {
-      Logger::smf_n7().info("Did not find PCF");
+    if (smf_cfg.use_local_pcc_rules) {
+      Logger::smf_n7().warn("Local PCC rules are not supported yet");
       return 0;
+    } else {
+      PlmnId plmn_id = {};
+      plmn_id.setMcc(context.getServingNetwork().getMcc());
+      plmn_id.setMnc(context.getServingNetwork().getMnc());
+      std::shared_ptr<smf_pcf_client> storage = smf_pcf_client::discover_pcf(
+          context.getSliceInfo(), plmn_id, context.getDnn());
+
+      if (storage) {
+        // TODO for now, only use the first PCF
+        policy_storages.insert(std::make_pair(1, storage));
+        return 1;  // ID is always 1, only one PF
+      } else {
+        Logger::smf_n7().info("Did not find PCF");
+        return 0;
+      }
     }
   }
 
@@ -79,23 +82,15 @@ sm_policy_status_code smf_n7::create_sm_policy_association(
   if (pcf_id == 0) {
     return sm_policy_status_code::PCF_NOT_AVAILABLE;
   }
-  /*std::shared_ptr<policy_storage> store;
+  association.pcf_id = pcf_id;
+  std::shared_ptr<policy_storage> storage =
+      get_policy_storage(association.pcf_id);
 
-  try {
-    store = policy_storages.at(pcf_id);
-  } catch (std::exception) {
-    return sm_policy_status_code::PCF_NOT_AVAILABLE;
-  } */
-
-  folly::AtomicHashMap<uint32_t, std::shared_ptr<policy_storage>>::iterator it =
-      policy_storages.find(pcf_id);
-
-  if (it == policy_storages.end()) {
+  if (!storage) {
     return sm_policy_status_code::PCF_NOT_AVAILABLE;
   }
 
-  sm_policy_status_code res =
-      it->second->create_policy_association(association);
+  sm_policy_status_code res = storage->create_policy_association(association);
 
   if (res == sm_policy_status_code::CREATED) {
     if (association.id == 0) {
@@ -115,26 +110,32 @@ sm_policy_status_code smf_n7::create_sm_policy_association(
 sm_policy_status_code smf_n7::remove_sm_policy_association(
     const policy_association& association,
     const SmPolicyDeleteData& delete_data) {
-  folly::AtomicHashMap<uint32_t, std::shared_ptr<policy_storage>>::iterator it =
-      policy_storages.find(association.pcf_id);
+  std::shared_ptr<policy_storage> storage =
+      get_policy_storage(association.pcf_id);
+  if (!storage) return sm_policy_status_code::PCF_NOT_AVAILABLE;
 
-  if (it == policy_storages.end()) {
-    return sm_policy_status_code::PCF_NOT_AVAILABLE;
-  }
-  return it->second->remove_policy_association(association, delete_data);
+  return storage->remove_policy_association(association, delete_data);
 }
 
 sm_policy_status_code smf_n7::update_sm_policy_association(
     policy_association& association,
     const SmPolicyUpdateContextData& update_data) {
-  folly::AtomicHashMap<uint32_t, std::shared_ptr<policy_storage>>::iterator it =
-      policy_storages.find(association.pcf_id);
+  std::shared_ptr<policy_storage> storage =
+      get_policy_storage(association.pcf_id);
+
+  if (!storage) return sm_policy_status_code::PCF_NOT_AVAILABLE;
+
+  return storage->update_policy_association(update_data, association);
+}
+
+std::shared_ptr<policy_storage> smf_n7::get_policy_storage(uint32_t pcf_id) {
+  std::shared_lock policies_lock(policy_storages_mutex);
+  auto it = policy_storages.find(pcf_id);
 
   if (it == policy_storages.end()) {
-    return sm_policy_status_code::PCF_NOT_AVAILABLE;
+    return nullptr;
   }
-
-  return it->second->update_policy_association(update_data, association);
+  return it->second;
 }
 
 smf_n7::~smf_n7() {
@@ -251,7 +252,7 @@ http_status_code_e smf_pcf_client::send_request(
   }
 
   if (!res) {
-    Logger::smf_sbi().warn(
+    Logger::smf_n7().warn(
         "Could not create a new handle to send message to PCF");
     smf_sbi_inst->remove_promise(promise_id);
     return http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR;
