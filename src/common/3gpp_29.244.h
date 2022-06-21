@@ -1566,7 +1566,7 @@ typedef struct user_plane_ip_resource_information_s {
   uint8_t teid_range;
   struct in_addr ipv4_address;
   struct in6_addr ipv6_address;
-  uint16_t network_instance;
+  std::string network_instance;
   uint8_t source_interface;
 } user_plane_ip_resource_information_t;
 
