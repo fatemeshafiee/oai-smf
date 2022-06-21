@@ -27,6 +27,9 @@
 #include "3gpp_24.501.h"
 #include <nlohmann/json.hpp>
 
+#include <map>
+#include <vector>
+
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT "%" SCNu64
 
@@ -336,11 +339,15 @@ typedef struct nf_service_s {
 
 typedef struct dnn_upf_info_item_s {
   std::string dnn;
-  // std::vector<std::string> dnai_list
+  std::vector<std::string> dnai_list;
+  // supported from R16.8
+  std::map<std::string, std::string> dnai_nw_instance_list;
   // std::vector<std::string> pdu_session_types
 
   dnn_upf_info_item_s& operator=(const dnn_upf_info_item_s& d) {
-    dnn = d.dnn;
+    dnn                   = d.dnn;
+    dnai_list             = d.dnai_list;
+    dnai_nw_instance_list = d.dnai_nw_instance_list;
     return *this;
   }
 } dnn_upf_info_item_t;
