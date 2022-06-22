@@ -2552,8 +2552,10 @@ class pfcp_up_function_features_ie : public pfcp_ie {
     is.read(reinterpret_cast<char*>(&u2.b), sizeof(u2.b));
     is.read(reinterpret_cast<char*>(&u3.b), sizeof(u3.b));
     is.read(reinterpret_cast<char*>(&u4.b), sizeof(u4.b));
-    is.read(reinterpret_cast<char*>(&u5.b), sizeof(u5.b));
-    is.read(reinterpret_cast<char*>(&u6.b), sizeof(u6.b));
+    if (tlv.get_length() > 4) {
+      is.read(reinterpret_cast<char*>(&u5.b), sizeof(u5.b));
+      is.read(reinterpret_cast<char*>(&u6.b), sizeof(u6.b));
+    }
   }
   //--------
   void to_core_type(pfcp_ies_container& s) {
@@ -6700,7 +6702,7 @@ class pfcp_user_plane_ip_resource_information_ie : public pfcp_ie {
   uint8_t teid_range;
   struct in_addr ipv4_address;
   struct in6_addr ipv6_address;
-  uint16_t network_instance;
+  std::string network_instance;
   union {
     struct {
       uint8_t source_interface : 4;
@@ -6717,7 +6719,7 @@ class pfcp_user_plane_ip_resource_information_ie : public pfcp_ie {
     teid_range          = 0;
     ipv4_address.s_addr = INADDR_ANY;
     ipv6_address        = in6addr_any;
-    network_instance    = 0;
+    network_instance    = {};
     tlv.set_length(1);
 
     u1.bf.v4     = b.v4;
@@ -6736,7 +6738,7 @@ class pfcp_user_plane_ip_resource_information_ie : public pfcp_ie {
     }
     if (u1.bf.assoni) {
       network_instance = b.network_instance;
-      tlv.add_length(2);
+      tlv.add_length(network_instance.size());
     }
     if (u1.bf.assosi) {
       u2.bf.source_interface = b.source_interface;
@@ -6751,7 +6753,7 @@ class pfcp_user_plane_ip_resource_information_ie : public pfcp_ie {
     teid_range          = 0;
     ipv4_address.s_addr = INADDR_ANY;
     ipv6_address        = in6addr_any;
-    network_instance    = 0;
+    network_instance    = {};
     tlv.set_length(1);
   }
   //--------
@@ -6762,7 +6764,7 @@ class pfcp_user_plane_ip_resource_information_ie : public pfcp_ie {
     teid_range          = 0;
     ipv4_address.s_addr = INADDR_ANY;
     ipv6_address        = in6addr_any;
-    network_instance    = 0;
+    network_instance    = {};
   };
   //--------
   void to_core_type(pfcp::user_plane_ip_resource_information_t& b) {
@@ -6800,10 +6802,7 @@ class pfcp_user_plane_ip_resource_information_ie : public pfcp_ie {
       ipv6_address_dump_to(os, ipv6_address);
     }
     if (u1.bf.assoni) {
-      auto be_network_instance = htobe32(network_instance);
-      os.write(
-          reinterpret_cast<const char*>(&be_network_instance),
-          sizeof(be_network_instance));
+      os << network_instance;
     }
     if (u1.bf.assosi) {
       os.write(reinterpret_cast<const char*>(&u2.b), sizeof(u2.b));
@@ -6826,9 +6825,9 @@ class pfcp_user_plane_ip_resource_information_ie : public pfcp_ie {
       ipv6_address_load_from(is, ipv6_address);
     }
     if (u1.bf.assoni) {
-      is.read(
-          reinterpret_cast<char*>(&network_instance), sizeof(network_instance));
-      network_instance = be16toh(network_instance);
+      char e[tlv.get_length()];
+      is.read(e, tlv.get_length());
+      network_instance.assign(e, tlv.get_length());
     }
     if (u1.bf.assosi) {
       is.read(reinterpret_cast<char*>(&u2.b), sizeof(u2.b));
