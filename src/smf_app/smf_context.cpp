@@ -945,9 +945,9 @@ void smf_context::handle_itti_msg(
             json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
                      ["contentId"] = N2_SM_CONTENT_ID;  // NGAP part
             json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
-                session_report_msg.get_snssai().sST;
+                session_report_msg.get_snssai().sst;
             json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
-                session_report_msg.get_snssai().sD;
+                std::to_string(session_report_msg.get_snssai().sd);
 
             session_report_msg.set_json_data(json_data);
 
@@ -1057,7 +1057,7 @@ void smf_context::get_default_qos(
     const snssai_t& snssai, const std::string& dnn,
     subscribed_default_qos_t& default_qos) {
   Logger::smf_app().info(
-      "Get default QoS for a PDU Session, key %d", (uint8_t) snssai.sST);
+      "Get default QoS for a PDU Session, key %d", (uint8_t) snssai.sst);
   // get the default QoS profile
   std::shared_ptr<session_management_subscription> ss = {};
   std::shared_ptr<dnn_configuration_t> sdc            = {};
@@ -3162,9 +3162,9 @@ void smf_context::handle_pdu_session_modification_network_requested(
   json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
            ["contentId"] = N2_SM_CONTENT_ID;  // NGAP part
   json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
-      itti_msg->msg.get_snssai().sST;
+      itti_msg->msg.get_snssai().sst;
   json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
-      itti_msg->msg.get_snssai().sD;
+      std::to_string(itti_msg->msg.get_snssai().sd);
   json_data["n2InfoContainer"]["ranInfo"] = "SM";
 
   json_data["pduSessionId"] = itti_msg->msg.get_pdu_session_id();
@@ -3561,16 +3561,7 @@ bool smf_context::handle_ho_cancellation(
 
 //------------------------------------------------------------------------------
 void smf_context::get_snssai_key(const snssai_t& snssai, uint32_t& key) {
-  uint32_t sd = SD_NO_VALUE;
-  try {
-    sd = std::stoul(snssai.sD, nullptr, 10);
-  } catch (const std::exception& e) {
-    Logger::smf_app().warn(
-        "Error when converting from string to int for snssai.SD, error: %s",
-        e.what());
-  }
-
-  key = (sd << 8 | snssai.sST);
+  key = (snssai.sd << 8 | snssai.sst);
 }
 
 //------------------------------------------------------------------------------
@@ -3582,11 +3573,10 @@ void smf_context::insert_dnn_subscription(
   get_snssai_key(snssai, key);
 
   std::unique_lock<std::recursive_mutex> lock(m_context);
-
   dnn_subscriptions[key] = ss;
   Logger::smf_app().info(
-      "Inserted DNN Subscription, key: %ld (SST %d, SD %s)", key, snssai.sST,
-      snssai.sD.c_str());
+      "Inserted DNN Subscription, key: %ld (SST %d, SD %#0x)", key, snssai.sst,
+      snssai.sd);
 }
 
 //------------------------------------------------------------------------------
@@ -3598,11 +3588,9 @@ void smf_context::insert_dnn_subscription(
   get_snssai_key(snssai, key);
 
   std::unique_lock<std::recursive_mutex> lock(m_context);
-
   if (dnn_subscriptions.count(key) > 0) {
     std::shared_ptr<session_management_subscription> old_ss =
         dnn_subscriptions.at(key);
-
     std::shared_ptr<dnn_configuration_t> dnn_configuration = {};
     ss.get()->find_dnn_configuration(dnn, dnn_configuration);
     if (dnn_configuration != nullptr) {
@@ -3613,8 +3601,8 @@ void smf_context::insert_dnn_subscription(
     dnn_subscriptions[key] = ss;
   }
   Logger::smf_app().info(
-      "Inserted DNN Subscription, key: %ld (SST %d, SD %s), dnn %s", key,
-      snssai.sST, snssai.sD.c_str(), dnn.c_str());
+      "Inserted DNN Subscription, key: %ld (SST %d, SD %#0x), dnn %s", key,
+      snssai.sst, snssai.sd, dnn.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -3645,8 +3633,8 @@ bool smf_context::find_dnn_subscription(
   get_snssai_key(snssai, key);
 
   Logger::smf_app().info(
-      "Find a DNN Subscription with key: %ld (SST %d, SD %s), map size %d",
-      (uint8_t) snssai.sST, snssai.sD.c_str(), dnn_subscriptions.size());
+      "Find a DNN Subscription with key: %ld (SST %d, SD %#0x), map size %d",
+      (uint8_t) snssai.sst, snssai.sd, dnn_subscriptions.size());
 
   std::unique_lock<std::recursive_mutex> lock(m_context);
   if (dnn_subscriptions.count(key) > 0) {
@@ -3655,8 +3643,8 @@ bool smf_context::find_dnn_subscription(
   }
 
   Logger::smf_app().info(
-      "DNN subscription (SST %d, SD %s) not found", (uint8_t) snssai.sST,
-      snssai.sD.c_str());
+      "DNN subscription (SST %d, SD %#0x) not found", (uint8_t) snssai.sst,
+      snssai.sd);
   return false;
 }
 
@@ -4157,8 +4145,8 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       cj["pdu_session_type"] =
           sp->pdu_session_type.toString();  // PDU Session Type
       // NSSAI
-      cj["snssai"]["sst"] = sp->get_snssai().sST;
-      cj["snssai"]["sd"]  = sp->get_snssai().sD;
+      cj["snssai"]["sst"] = sp->get_snssai().sst;
+      cj["snssai"]["sd"]  = std::to_string(sp->get_snssai().sd);
       cj["dnn"]           = sp->get_dnn();       // DNN
       cj["amf_addr"]      = sc->get_amf_addr();  // Serving AMF addr
 

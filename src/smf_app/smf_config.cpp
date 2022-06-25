@@ -843,8 +843,17 @@ int smf_config::load(const string& config_file) {
         session_management_subscription_cfg.lookupValue(
             SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
 
-        sub_item.single_nssai.sST           = nssai_sst;
-        sub_item.single_nssai.sD            = nssai_sd;
+        sub_item.single_nssai.sst = nssai_sst;
+
+        sub_item.single_nssai.sd = 0xFFFFFF;
+        try {
+          sub_item.single_nssai.sd = std::stoul(nssai_sd, nullptr, 10);
+        } catch (const std::exception& e) {
+          Logger::smf_app().warn(
+              "Error when converting from string to int for snssai.SD, error: "
+              "%s",
+              e.what());
+        }
         sub_item.session_type               = default_session_type;
         sub_item.dnn                        = dnn;
         sub_item.ssc_mode                   = default_ssc_mode;
@@ -1062,13 +1071,13 @@ void smf_config::display() {
       nssai_str             = nssai_str.append("        ")
                       .append(SMF_CONFIG_STRING_NSSAI_SST)
                       .append(": ")
-                      .append(std::to_string(sub.single_nssai.sST));
+                      .append(std::to_string(sub.single_nssai.sst));
 
-      if (!boost::iequals(sub.single_nssai.sD, "0xffffff")) {
+      if (sub.single_nssai.sd != 0xffffff) {
         nssai_str = nssai_str.append(", ")
                         .append(SMF_CONFIG_STRING_NSSAI_SD)
                         .append(": ")
-                        .append(sub.single_nssai.sD);
+                        .append(std::to_string(sub.single_nssai.sd));
       }
 
       Logger::smf_app().info("%s", nssai_str.c_str());

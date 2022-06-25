@@ -203,7 +203,7 @@ void nf_profile::display() const {
     Logger::smf_app().debug("\tSNSSAI:");
   }
   for (auto s : snssais) {
-    Logger::smf_app().debug("\t\t SST %d, SD %s", s.sST, s.sD.c_str());
+    Logger::smf_app().debug("\t\t SST %d, SD %#0x", s.sst, s.sd);
   }
   if (!fqdn.empty()) {
     Logger::smf_app().debug("\tFQDN: %s", fqdn.c_str());
@@ -235,8 +235,8 @@ void nf_profile::to_json(nlohmann::json& data) const {
   data["sNssais"] = nlohmann::json::array();
   for (auto s : snssais) {
     nlohmann::json tmp = {};
-    tmp["sst"]         = s.sST;
-    tmp["sd"]          = s.sD;
+    tmp["sst"]         = s.sst;
+    tmp["sd"]          = std::to_string(s.sd);
     data["sNssais"].push_back(tmp);
   }
   if (!fqdn.empty()) {
@@ -282,8 +282,17 @@ void nf_profile::from_json(const nlohmann::json& data) {
   if (data.find("sNssais") != data.end()) {
     for (auto it : data["sNssais"]) {
       snssai_t s = {};
-      s.sST      = it["sst"].get<int>();
-      s.sD       = it["sd"].get<std::string>();
+      s.sst      = it["sst"].get<int>();
+      s.sd       = 0xFFFFFF;
+      try {
+        s.sd = std::stoul(it["sd"].get<std::string>(), nullptr, 10);
+      } catch (const std::exception& e) {
+        Logger::smf_app().warn(
+            "Error when converting from string to int for snssai.SD, error: %s",
+            e.what());
+      }
+
+      // s.sD       = it["sd"].get<std::string>();
       snssais.push_back(s);
     }
   }
@@ -384,7 +393,7 @@ void smf_profile::display() const {
   for (auto s : smf_info.snssai_smf_info_list) {
     Logger::smf_app().debug("\t\tParameters supported by the SMF:");
     Logger::smf_app().debug(
-        "\t\t\tSNSSAI (SST %d, SD %s)", s.snssai.sST, s.snssai.sD.c_str());
+        "\t\t\tSNSSAI (SST %d, SD %#0x)", s.snssai.sst, s.snssai.sd);
     for (auto d : s.dnn_smf_info_list) {
       Logger::smf_app().debug("\t\t\tDNN %s", d.dnn.c_str());
     }
@@ -430,8 +439,8 @@ void smf_profile::to_json(nlohmann::json& data) const {
   data["smfInfo"]["sNssaiSmfInfoList"] = nlohmann::json::array();
   for (auto s : smf_info.snssai_smf_info_list) {
     nlohmann::json tmp    = {};
-    tmp["sNssai"]["sst"]  = s.snssai.sST;
-    tmp["sNssai"]["sd"]   = s.snssai.sD;
+    tmp["sNssai"]["sst"]  = s.snssai.sst;
+    tmp["sNssai"]["sd"]   = std::to_string(s.snssai.sd);
     tmp["dnnSmfInfoList"] = nlohmann::json::array();
     for (auto d : s.dnn_smf_info_list) {
       nlohmann::json dnn_json = {};
@@ -464,9 +473,19 @@ void smf_profile::from_json(const nlohmann::json& data) {
         snssai_smf_info_item_t smf_info_item = {};
         if (it.find("sNssai") != it.end()) {
           if (it["sNssai"].find("sst") != it["sNssai"].end())
-            smf_info_item.snssai.sST = it["sNssai"]["sst"].get<int>();
-          if (it["sNssai"].find("sd") != it["sNssai"].end())
-            smf_info_item.snssai.sD = it["sNssai"]["sd"].get<std::string>();
+            smf_info_item.snssai.sst = it["sNssai"]["sst"].get<int>();
+          if (it["sNssai"].find("sd") != it["sNssai"].end()) {
+            smf_info_item.snssai.sd = 0xFFFFFF;
+            try {
+              smf_info_item.snssai.sd = std::stoul(
+                  it["sNssai"]["sd"].get<std::string>(), nullptr, 10);
+            } catch (const std::exception& e) {
+              Logger::smf_app().warn(
+                  "Error when converting from string to int for snssai.SD, "
+                  "error: %s",
+                  e.what());
+            }
+          }
         }
         if (it.find("dnnSmfInfoList") != it.end()) {
           for (auto d : it["dnnSmfInfoList"]) {
@@ -514,7 +533,7 @@ void upf_profile::display() const {
   for (auto s : upf_info.snssai_upf_info_list) {
     Logger::smf_app().debug("\t\tParameters supported by the UPF:");
     Logger::smf_app().debug(
-        "\t\t\tSNSSAI (SST %d, SD %s)", s.snssai.sST, s.snssai.sD.c_str());
+        "\t\t\tSNSSAI (SST %d, SD %#0x)", s.snssai.sst, s.snssai.sd);
     for (auto d : s.dnn_upf_info_list) {
       Logger::smf_app().debug("\t\t\tDNN %s", d.dnn.c_str());
     }
@@ -550,8 +569,8 @@ void upf_profile::to_json(nlohmann::json& data) const {
   data["upfInfo"]["sNssaiUpfInfoList"] = nlohmann::json::array();
   for (auto s : upf_info.snssai_upf_info_list) {
     nlohmann::json tmp    = {};
-    tmp["sNssai"]["sst"]  = s.snssai.sST;
-    tmp["sNssai"]["sd"]   = s.snssai.sD;
+    tmp["sNssai"]["sst"]  = s.snssai.sst;
+    tmp["sNssai"]["sd"]   = std::to_string(s.snssai.sd);
     tmp["dnnSmfInfoList"] = nlohmann::json::array();
     for (auto d : s.dnn_upf_info_list) {
       nlohmann::json dnn_json = {};
@@ -598,9 +617,19 @@ void upf_profile::from_json(const nlohmann::json& data) {
         snssai_upf_info_item_t upf_info_item = {};
         if (it.find("sNssai") != it.end()) {
           if (it["sNssai"].find("sst") != it["sNssai"].end())
-            upf_info_item.snssai.sST = it["sNssai"]["sst"].get<int>();
-          if (it["sNssai"].find("sd") != it["sNssai"].end())
-            upf_info_item.snssai.sD = it["sNssai"]["sd"].get<std::string>();
+            upf_info_item.snssai.sst = it["sNssai"]["sst"].get<int>();
+          if (it["sNssai"].find("sd") != it["sNssai"].end()) {
+            upf_info_item.snssai.sd = 0xFFFFFF;
+            try {
+              upf_info_item.snssai.sd = std::stoul(
+                  it["sNssai"]["sd"].get<std::string>(), nullptr, 10);
+            } catch (const std::exception& e) {
+              Logger::smf_app().warn(
+                  "Error when converting from string to int for snssai.SD, "
+                  "error: %s",
+                  e.what());
+            }
+          }
         }
         if (it.find("dnnUpfInfoList") != it.end()) {
           for (auto d : it["dnnUpfInfoList"]) {

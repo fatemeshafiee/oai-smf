@@ -62,15 +62,23 @@ static uint64_t smf_supi_to_u64(supi_t supi) {
 
 typedef struct s_nssai  // section 28.4, TS23.003
 {
-  uint8_t sST;
-  // uint32_t sD:24;
-  std::string sD;
-  // s_nssai(const uint8_t& sst,  const uint32_t sd) : sST(sst), sD(sd) {}
-  s_nssai(const uint8_t& sst, const std::string sd) : sST(sst), sD(sd) {}
-  s_nssai() : sST(), sD() {}
-  s_nssai(const s_nssai& p) : sST(p.sST), sD(p.sD) {}
+  uint8_t sst;
+  uint32_t sd;
+  s_nssai(const uint8_t& m_sst, const uint32_t m_sd) : sst(m_sst), sd(m_sd) {}
+  s_nssai(const uint8_t& m_sst, const std::string m_sd) : sst(m_sst) {
+    sd = 0xFFFFFF;
+    try {
+      sd = std::stoul(m_sd, nullptr, 10);
+    } catch (const std::exception& e) {
+      Logger::smf_app().warn(
+          "Error when converting from string to int for snssai.SD, error: %s",
+          e.what());
+    }
+  }
+  s_nssai() : sst(), sd() {}
+  s_nssai(const s_nssai& p) : sst(p.sst), sd(p.sd) {}
   bool operator==(const struct s_nssai& s) const {
-    if ((s.sST == this->sST) && (s.sD.compare(this->sD) == 0)) {
+    if ((s.sst == this->sst) && (s.sd == this->sd)) {
       return true;
     } else {
       return false;
@@ -78,15 +86,15 @@ typedef struct s_nssai  // section 28.4, TS23.003
   }
 
   s_nssai& operator=(const struct s_nssai& s) {
-    sST = s.sST;
-    sD  = s.sD;
+    sst = s.sst;
+    sd  = s.sd;
     return *this;
   }
 
   std::string toString() const {
     std::string s = {};
-    s.append("SST=").append(std::to_string(sST));
-    s.append(", SD=").append(sD);
+    s.append("SST=").append(std::to_string(sst));
+    s.append(", SD=").append(std::to_string(sd));
     return s;
   }
 

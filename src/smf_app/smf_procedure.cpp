@@ -542,9 +542,9 @@ void session_create_sm_context_procedure::handle_itti_msg(
     json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
              ["contentId"] = N2_SM_CONTENT_ID;  // NGAP part
     json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
-        n11_triggered_pending->res.get_snssai().sST;
+        n11_triggered_pending->res.get_snssai().sst;
     json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
-        n11_triggered_pending->res.get_snssai().sD;
+        std::to_string(n11_triggered_pending->res.get_snssai().sd);
     json_data["n2InfoContainer"]["ranInfo"] = "SM";
 
     // N1N2MsgTxfrFailureNotification
