@@ -3558,25 +3558,50 @@ bool smf_context::handle_ho_cancellation(
 
   return true;
 }
+
+//------------------------------------------------------------------------------
+void smf_context::get_snssai_key(const snssai_t& snssai, uint32_t& key) {
+  uint32_t sd = SD_NO_VALUE;
+  try {
+    sd = std::stoul(snssai.sD, nullptr, 10);
+  } catch (const std::exception& e) {
+    Logger::smf_app().warn(
+        "Error when converting from string to int for snssai.SD, error: %s",
+        e.what());
+  }
+
+  key = (sd << 8 | snssai.sST);
+}
+
 //------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(
     const snssai_t& snssai,
     std::shared_ptr<session_management_subscription>& ss) {
+  // Get a unique key from S-NSSAI
+  uint32_t key = 0;
+  get_snssai_key(snssai, key);
+
   std::unique_lock<std::recursive_mutex> lock(m_context);
 
-  dnn_subscriptions[(uint8_t) snssai.sST] = ss;
+  dnn_subscriptions[key] = ss;
   Logger::smf_app().info(
-      "Inserted DNN Subscription, key: %d", (uint8_t) snssai.sST);
+      "Inserted DNN Subscription, key: %ld (SST %d, SD %s)", key, snssai.sST,
+      snssai.sD.c_str());
 }
 
 //------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(
     const snssai_t& snssai, const std::string& dnn,
     std::shared_ptr<session_management_subscription>& ss) {
+  // Get a unique key from S-NSSAI
+  uint32_t key = 0;
+  get_snssai_key(snssai, key);
+
   std::unique_lock<std::recursive_mutex> lock(m_context);
-  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
+
+  if (dnn_subscriptions.count(key) > 0) {
     std::shared_ptr<session_management_subscription> old_ss =
-        dnn_subscriptions.at((uint8_t) snssai.sST);
+        dnn_subscriptions.at(key);
 
     std::shared_ptr<dnn_configuration_t> dnn_configuration = {};
     ss.get()->find_dnn_configuration(dnn, dnn_configuration);
@@ -3585,20 +3610,24 @@ void smf_context::insert_dnn_subscription(
     }
 
   } else {
-    dnn_subscriptions[(uint8_t) snssai.sST] = ss;
+    dnn_subscriptions[key] = ss;
   }
   Logger::smf_app().info(
-      "Inserted DNN Subscription, key: %d, dnn %s", (uint8_t) snssai.sST,
-      dnn.c_str());
+      "Inserted DNN Subscription, key: %ld (SST %d, SD %s), dnn %s", key,
+      snssai.sST, snssai.sD.c_str(), dnn.c_str());
 }
 
 //------------------------------------------------------------------------------
 bool smf_context::is_dnn_snssai_subscription_data(
     const std::string& dnn, const snssai_t& snssai) {
+  // Get a unique key from S-NSSAI
+  uint32_t key = 0;
+  get_snssai_key(snssai, key);
+
   std::unique_lock<std::recursive_mutex> lock(m_context);
-  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
+  if (dnn_subscriptions.count(key) > 0) {
     std::shared_ptr<session_management_subscription> ss =
-        dnn_subscriptions.at((uint8_t) snssai.sST);
+        dnn_subscriptions.at(key);
     if (ss.get()->dnn_configuration(dnn))
       return true;
     else
@@ -3611,17 +3640,23 @@ bool smf_context::is_dnn_snssai_subscription_data(
 bool smf_context::find_dnn_subscription(
     const snssai_t& snssai,
     std::shared_ptr<session_management_subscription>& ss) {
+  // Get a unique key from S-NSSAI
+  uint32_t key = 0;
+  get_snssai_key(snssai, key);
+
   Logger::smf_app().info(
-      "Find a DNN Subscription with key: %d, map size %d", (uint8_t) snssai.sST,
-      dnn_subscriptions.size());
+      "Find a DNN Subscription with key: %ld (SST %d, SD %s), map size %d",
+      (uint8_t) snssai.sST, snssai.sD.c_str(), dnn_subscriptions.size());
+
   std::unique_lock<std::recursive_mutex> lock(m_context);
-  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
-    ss = dnn_subscriptions.at((uint8_t) snssai.sST);
+  if (dnn_subscriptions.count(key) > 0) {
+    ss = dnn_subscriptions.at(key);
     return true;
   }
 
   Logger::smf_app().info(
-      "DNN subscription (SNSSAI %d) not found", (uint8_t) snssai.sST);
+      "DNN subscription (SST %d, SD %s) not found", (uint8_t) snssai.sST,
+      snssai.sD.c_str());
   return false;
 }
 

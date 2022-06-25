@@ -32,6 +32,8 @@ typedef uint64_t supi64_t;
 
 #define SUPI_DIGITS_MAX 15
 
+const uint32_t SD_NO_VALUE               = 0xFFFFFF;
+const std::string SD_NO_VALUE_STR        = "0xFFFFFF";
 const uint8_t SST_MAX_STANDARDIZED_VALUE = 127;
 
 typedef struct {
@@ -176,8 +178,8 @@ enum class sm_context_status_e {
   SM_CONTEXT_STATUS_RELEASED = 1
 };
 
-static const std::vector<std::string> sm_context_status_e2str = {"ACTIVE",
-                                                                 "RELEASED"};
+static const std::vector<std::string> sm_context_status_e2str = {
+    "ACTIVE", "RELEASED"};
 
 typedef struct qos_profile_gbr_s {
   gfbr_t gfbr;  // Guaranteed Flow Bit Rate
