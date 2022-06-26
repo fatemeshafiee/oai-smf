@@ -802,7 +802,7 @@ int smf_config::load(const string& config_file) {
         session_management_subscription_t sub_item = {};
 
         unsigned int nssai_sst                      = 0;
-        string nssai_sd                             = {};
+        string nssai_sd                             = SD_NO_VALUE_STR;
         string dnn                                  = {};
         string default_session_type                 = {};
         unsigned int default_ssc_mode               = 0;
@@ -843,8 +843,17 @@ int smf_config::load(const string& config_file) {
         session_management_subscription_cfg.lookupValue(
             SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
 
-        sub_item.single_nssai.sST           = nssai_sst;
-        sub_item.single_nssai.sD            = nssai_sd;
+        sub_item.single_nssai.sst = nssai_sst;
+
+        sub_item.single_nssai.sd = 0xFFFFFF;
+        try {
+          sub_item.single_nssai.sd = std::stoul(nssai_sd, nullptr, 10);
+        } catch (const std::exception& e) {
+          Logger::smf_app().warn(
+              "Error when converting from string to int for snssai.SD, error: "
+              "%s",
+              e.what());
+        }
         sub_item.session_type               = default_session_type;
         sub_item.dnn                        = dnn;
         sub_item.ssc_mode                   = default_ssc_mode;
@@ -1057,37 +1066,48 @@ void smf_config::display() {
     for (auto sub : session_management_subscriptions) {
       Logger::smf_app().info(
           "    Session Management Subscription Data %d:", index);
+
+      std::string nssai_str = {};
+      nssai_str             = nssai_str.append("        ")
+                      .append(SMF_CONFIG_STRING_NSSAI_SST)
+                      .append(": ")
+                      .append(std::to_string(sub.single_nssai.sst));
+
+      if (sub.single_nssai.sd != 0xffffff) {
+        nssai_str = nssai_str.append(", ")
+                        .append(SMF_CONFIG_STRING_NSSAI_SD)
+                        .append(": ")
+                        .append(std::to_string(sub.single_nssai.sd));
+      }
+
+      Logger::smf_app().info("%s", nssai_str.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_NSSAI_SST
-          ":  %d, " SMF_CONFIG_STRING_NSSAI_SD " %s",
-          sub.single_nssai.sST, sub.single_nssai.sD.c_str());
+          "        " SMF_CONFIG_STRING_DNN ": %s", sub.dnn.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DNN ":  %s", sub.dnn.c_str());
-      Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE ":  %s",
+          "        " SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE ": %s",
           sub.session_type.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE ":  %d", sub.ssc_mode);
+          "        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE ": %d", sub.ssc_mode);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_5QI ":  %d",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_5QI ": %d",
           sub.default_qos._5qi);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ":  %d",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ": %d",
           sub.default_qos.priority_level);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL ":  %d",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL ": %d",
           sub.default_qos.arp.priority_level);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP ":  %s",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP ": %s",
           sub.default_qos.arp.preempt_cap.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN ":  %s",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN ": %s",
           sub.default_qos.arp.preempt_vuln.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_SESSION_AMBR_UL ":  %s",
+          "        " SMF_CONFIG_STRING_SESSION_AMBR_UL ": %s",
           sub.session_ambr.uplink.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_SESSION_AMBR_DL ":  %s",
+          "        " SMF_CONFIG_STRING_SESSION_AMBR_DL ": %s",
           sub.session_ambr.downlink.c_str());
       index++;
     }

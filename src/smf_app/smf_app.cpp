@@ -785,8 +785,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   std::string n1_sm_message, n1_sm_message_hex;
   nas_message_t decoded_nas_msg       = {};
   cause_value_5gsm_e cause_n1         = {cause_value_5gsm_e::CAUSE_0_UNKNOWN};
-  pdu_session_type_t pdu_session_type = {.pdu_session_type =
-                                             PDU_SESSION_TYPE_E_IPV4};
+  pdu_session_type_t pdu_session_type = {
+      .pdu_session_type = PDU_SESSION_TYPE_E_IPV4};
 
   // Step 1. Decode NAS and get the necessary information
   int decoder_rc = smf_n1::get_instance().decode_n1_sm_container(
@@ -853,8 +853,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   snssai_t snssai         = smreq->req.get_snssai();
   Logger::smf_app().info(
       "Handle a PDU Session Create SM Context Request message from AMF, "
-      "SUPI " SUPI_64_FMT ", SNSSAI SST %d, SD %s",
-      supi64, snssai.sST, snssai.sD.c_str());
+      "SUPI " SUPI_64_FMT ", SNSSAI SST %d, SD %#0x",
+      supi64, snssai.sst, snssai.sd);
 
   // Step 2. Verify Procedure transaction id, pdu session id, message type,
   // request type, etc.
@@ -1878,8 +1878,8 @@ bool smf_app::get_session_management_subscription_data(
       std::make_shared<dnn_configuration_t>();
 
   for (auto sub : smf_cfg.session_management_subscriptions) {
-    if ((0 == dnn.compare(sub.dnn)) and (snssai.sST == sub.single_nssai.sST) and
-        (0 == snssai.sD.compare(sub.single_nssai.sD))) {
+    if ((0 == dnn.compare(sub.dnn)) and (snssai.sst == sub.single_nssai.sst) and
+        (snssai.sd == sub.single_nssai.sd)) {
       // PDU Session Type
       pdu_session_type_t pdu_session_type(
           pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
@@ -2278,14 +2278,14 @@ void smf_app::generate_smf_profile() {
   for (auto sms : smf_cfg.session_management_subscriptions) {
     // SNSSAIS
     snssai_t snssai = {};
-    snssai.sD       = sms.single_nssai.sD;
-    snssai.sST      = sms.single_nssai.sST;
+    snssai.sd       = sms.single_nssai.sd;
+    snssai.sst      = sms.single_nssai.sst;
     // Verify if this SNSSAI exist
     std::vector<snssai_t> ss = {};
     nf_instance_profile.get_nf_snssais(ss);
     bool found = false;
     for (auto it : ss) {
-      if ((it.sD == snssai.sD) and (it.sST == snssai.sST)) {
+      if ((it.sd == snssai.sd) and (it.sst == snssai.sst)) {
         found = true;
         break;
       }
@@ -2296,8 +2296,8 @@ void smf_app::generate_smf_profile() {
     dnn_smf_info_item_t dnn_item         = {.dnn = sms.dnn};
     snssai_smf_info_item_t smf_info_item = {};
     smf_info_item.dnn_smf_info_list.push_back(dnn_item);
-    smf_info_item.snssai.sD  = sms.single_nssai.sD;
-    smf_info_item.snssai.sST = sms.single_nssai.sST;
+    smf_info_item.snssai.sd  = sms.single_nssai.sd;
+    smf_info_item.snssai.sst = sms.single_nssai.sst;
     nf_instance_profile.add_smf_info_item(smf_info_item);
   }
 
