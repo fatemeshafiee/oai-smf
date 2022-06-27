@@ -45,7 +45,8 @@ int encode_snssai(SNSSAI snssai, uint8_t iei, uint8_t* buffer, uint32_t len) {
 
   ielen = snssai.len;
 
-  if (snssai.sd == 0) ielen = 1;  // Don't include SD if it = 0
+  if (snssai.sd == 0xffffff)
+    ielen = SST_LENGTH;  // TODO: Don't include SD if it = 0xffffff
 
   *(buffer + encoded) = ielen;
   encoded++;
