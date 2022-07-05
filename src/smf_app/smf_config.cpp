@@ -843,11 +843,9 @@ int smf_config::load(const string& config_file) {
             SMF_CONFIG_STRING_SESSION_AMBR_UL, session_ambr_ul);
         session_management_subscription_cfg.lookupValue(
             SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
-
         sub_item.single_nssai.sst = nssai_sst;
         sub_item.single_nssai.sd  = SD_NO_VALUE;
         xgpp_conv::sd_string_to_int(nssai_sd, sub_item.single_nssai.sd);
-
         sub_item.session_type               = default_session_type;
         sub_item.dnn                        = dnn;
         sub_item.ssc_mode                   = default_ssc_mode;
