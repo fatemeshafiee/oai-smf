@@ -212,8 +212,9 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       sm_context_res.get_snssai().sd;
 
   Logger::smf_n1().debug(
-      "SNSSAI SST %d, SD %#0x",
+      "SNSSAI SST %d, SD %ld (0x%x)",
       sm_msg->pdu_session_establishment_accept.snssai.sst,
+      sm_msg->pdu_session_establishment_accept.snssai.sd,
       sm_msg->pdu_session_establishment_accept.snssai.sd);
 
   // TODO: AlwaysonPDUSessionIndication

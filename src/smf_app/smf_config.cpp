@@ -1059,20 +1059,14 @@ void smf_config::display() {
       Logger::smf_app().info(
           "    Session Management Subscription Data %d:", index);
 
-      std::string nssai_str = {};
-      nssai_str             = nssai_str.append("        ")
-                      .append(SMF_CONFIG_STRING_NSSAI_SST)
-                      .append(": ")
-                      .append(std::to_string(sub.single_nssai.sst));
-
-      if (sub.single_nssai.sd != 0xffffff) {
-        nssai_str = nssai_str.append(", ")
-                        .append(SMF_CONFIG_STRING_NSSAI_SD)
-                        .append(": ")
-                        .append(std::to_string(sub.single_nssai.sd));
+      if (sub.single_nssai.sd != SD_NO_VALUE) {
+        Logger::smf_app().info(
+            "        SST, SD: %d, %ld (0x%x)", sub.single_nssai.sst,
+            sub.single_nssai.sd, sub.single_nssai.sd);
+      } else {
+        Logger::smf_app().info("        SST: %d", sub.single_nssai.sst);
       }
 
-      Logger::smf_app().info("%s", nssai_str.c_str());
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_DNN ": %s", sub.dnn.c_str());
       Logger::smf_app().info(
