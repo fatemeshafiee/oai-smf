@@ -50,6 +50,7 @@
 #include "logger.hpp"
 #include "fqdn.hpp"
 #include "smf_app.hpp"
+#include "3gpp_conversions.hpp"
 
 using namespace std;
 using namespace libconfig;
@@ -844,16 +845,9 @@ int smf_config::load(const string& config_file) {
             SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
 
         sub_item.single_nssai.sst = nssai_sst;
+        sub_item.single_nssai.sd  = SD_NO_VALUE;
+        xgpp_conv::sd_string_to_int(nssai_sd, sub_item.single_nssai.sd);
 
-        sub_item.single_nssai.sd = 0xFFFFFF;
-        try {
-          sub_item.single_nssai.sd = std::stoul(nssai_sd, nullptr, 10);
-        } catch (const std::exception& e) {
-          Logger::smf_app().warn(
-              "Error when converting from string to int for snssai.SD, error: "
-              "%s",
-              e.what());
-        }
         sub_item.session_type               = default_session_type;
         sub_item.dnn                        = dnn;
         sub_item.ssc_mode                   = default_ssc_mode;

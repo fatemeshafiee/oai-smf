@@ -32,6 +32,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <inttypes.h>
+#include <boost/algorithm/string.hpp>
+
 #include "SmContextCreateData.h"
 #include "SmContextUpdateData.h"
 #include "SmContextReleaseData.h"
@@ -637,12 +639,20 @@ void xgpp_conv::update_sm_context_response_from_ctx_request(
 
 //------------------------------------------------------------------------------
 void xgpp_conv::sd_string_to_int(const std::string& sd_str, uint32_t& sd) {
-  sd = 0xFFFFFF;
+  sd = SD_NO_VALUE;
+  if (sd_str.empty()) return;
+  uint8_t base = 10;
   try {
-    sd = std::stoul(sd_str, nullptr, 10);
+    if (sd_str.size() > 2) {
+      if (boost::iequals(sd_str.substr(0, 2), "0x")) {
+        base = 16;
+      }
+    }
+    sd = std::stoul(sd_str, nullptr, base);
   } catch (const std::exception& e) {
-    Logger::smf_app().warn(
+    Logger::smf_app().error(
         "Error when converting from string to int for S-NSSAI SD, error: %s",
         e.what());
+    sd = SD_NO_VALUE;
   }
 }
