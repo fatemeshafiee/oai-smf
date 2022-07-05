@@ -50,6 +50,7 @@
 #include "logger.hpp"
 #include "fqdn.hpp"
 #include "smf_app.hpp"
+#include "3gpp_conversions.hpp"
 
 using namespace std;
 using namespace libconfig;
@@ -842,18 +843,9 @@ int smf_config::load(const string& config_file) {
             SMF_CONFIG_STRING_SESSION_AMBR_UL, session_ambr_ul);
         session_management_subscription_cfg.lookupValue(
             SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
-
         sub_item.single_nssai.sst = nssai_sst;
-
-        sub_item.single_nssai.sd = 0xFFFFFF;
-        try {
-          sub_item.single_nssai.sd = std::stoul(nssai_sd, nullptr, 10);
-        } catch (const std::exception& e) {
-          Logger::smf_app().warn(
-              "Error when converting from string to int for snssai.SD, error: "
-              "%s",
-              e.what());
-        }
+        sub_item.single_nssai.sd  = SD_NO_VALUE;
+        xgpp_conv::sd_string_to_int(nssai_sd, sub_item.single_nssai.sd);
         sub_item.session_type               = default_session_type;
         sub_item.dnn                        = dnn;
         sub_item.ssc_mode                   = default_ssc_mode;
@@ -1067,20 +1059,14 @@ void smf_config::display() {
       Logger::smf_app().info(
           "    Session Management Subscription Data %d:", index);
 
-      std::string nssai_str = {};
-      nssai_str             = nssai_str.append("        ")
-                      .append(SMF_CONFIG_STRING_NSSAI_SST)
-                      .append(": ")
-                      .append(std::to_string(sub.single_nssai.sst));
-
-      if (sub.single_nssai.sd != 0xffffff) {
-        nssai_str = nssai_str.append(", ")
-                        .append(SMF_CONFIG_STRING_NSSAI_SD)
-                        .append(": ")
-                        .append(std::to_string(sub.single_nssai.sd));
+      if (sub.single_nssai.sd != SD_NO_VALUE) {
+        Logger::smf_app().info(
+            "        SST, SD: %d, %ld (0x%x)", sub.single_nssai.sst,
+            sub.single_nssai.sd, sub.single_nssai.sd);
+      } else {
+        Logger::smf_app().info("        SST: %d", sub.single_nssai.sst);
       }
 
-      Logger::smf_app().info("%s", nssai_str.c_str());
       Logger::smf_app().info(
           "        " SMF_CONFIG_STRING_DNN ": %s", sub.dnn.c_str());
       Logger::smf_app().info(

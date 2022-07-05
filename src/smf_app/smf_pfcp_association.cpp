@@ -476,8 +476,8 @@ bool pfcp_associations::select_up_node(
               Logger::smf_app().info(
                   "Select the UPF for the corresponding DNN %s, NSSSAI (SST: "
                   "%d, "
-                  "SD: %d) ",
-                  d.dnn.c_str(), snssai.sst, snssai.sd);
+                  "SD: %ld (0x%x)) ",
+                  d.dnn.c_str(), snssai.sst, snssai.sd, snssai.sd);
               return true;
             }
           }

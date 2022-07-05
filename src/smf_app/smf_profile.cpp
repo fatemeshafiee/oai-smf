@@ -203,7 +203,7 @@ void nf_profile::display() const {
     Logger::smf_app().debug("\tSNSSAI:");
   }
   for (auto s : snssais) {
-    Logger::smf_app().debug("\t\t SST %d, SD %#0x", s.sst, s.sd);
+    Logger::smf_app().debug("\t\t SST %d, SD %ld (0x%x)", s.sst, s.sd, s.sd);
   }
   if (!fqdn.empty()) {
     Logger::smf_app().debug("\tFQDN: %s", fqdn.c_str());
@@ -393,7 +393,8 @@ void smf_profile::display() const {
   for (auto s : smf_info.snssai_smf_info_list) {
     Logger::smf_app().debug("\t\tParameters supported by the SMF:");
     Logger::smf_app().debug(
-        "\t\t\tSNSSAI (SST %d, SD %#0x)", s.snssai.sst, s.snssai.sd);
+        "\t\t\tSNSSAI (SST %d, SD %ld (0x%x))", s.snssai.sst, s.snssai.sd,
+        s.snssai.sd);
     for (auto d : s.dnn_smf_info_list) {
       Logger::smf_app().debug("\t\t\tDNN %s", d.dnn.c_str());
     }
@@ -533,7 +534,8 @@ void upf_profile::display() const {
   for (auto s : upf_info.snssai_upf_info_list) {
     Logger::smf_app().debug("\t\tParameters supported by the UPF:");
     Logger::smf_app().debug(
-        "\t\t\tSNSSAI (SST %d, SD %#0x)", s.snssai.sst, s.snssai.sd);
+        "\t\t\tSNSSAI (SST %d, SD %ld (0x%x))", s.snssai.sst, s.snssai.sd,
+        s.snssai.sd);
     for (auto d : s.dnn_upf_info_list) {
       Logger::smf_app().debug("\t\t\tDNN %s", d.dnn.c_str());
     }
