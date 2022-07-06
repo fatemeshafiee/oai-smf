@@ -43,6 +43,7 @@
 #include "itti.hpp"
 #include "logger.hpp"
 #include "mime_parser.hpp"
+#include "3gpp_conversions.hpp"
 #include "smf.h"
 #include "smf_app.hpp"
 #include "smf_config.hpp"
@@ -844,8 +845,8 @@ bool smf_sbi::get_sm_data(
   std::string mnc         = {};
   conv::plmnToMccMnc(plmn, mcc, mnc);
 
-  query_str = "?single-nssai={\"sst\":" + std::to_string(snssai.sST) +
-              ",\"sd\":\"" + snssai.sD + "\"}&dnn=" + dnn +
+  query_str = "?single-nssai={\"sst\":" + std::to_string(snssai.sst) +
+              ",\"sd\":\"" + std::to_string(snssai.sd) + "\"}&dnn=" + dnn +
               "&plmn-id={\"mcc\":\"" + mcc + "\",\"mnc\":\"" + mnc + "\"}";
   std::string url =
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) +
@@ -906,13 +907,16 @@ bool smf_sbi::get_sm_data(
     if (jsonData.find("singleNssai") == jsonData.end()) return false;
     if (jsonData["singleNssai"].find("sst") != jsonData["singleNssai"].end()) {
       uint8_t sst = jsonData["singleNssai"]["sst"].get<uint8_t>();
-      if (sst != snssai.sST) {
+      if (sst != snssai.sst) {
         return false;
       }
     }
     if (jsonData["singleNssai"].find("sd") != jsonData["singleNssai"].end()) {
-      std::string sd = jsonData["singleNssai"]["sd"];
-      if (sd.compare(snssai.sD) != 0) {
+      std::string sd_str = jsonData["singleNssai"]["sd"];
+      uint32_t sd        = 0xFFFFFF;
+      xgpp_conv::sd_string_to_int(
+          jsonData["singleNssai"]["sd"].get<std::string>(), sd);
+      if (sd != snssai.sd) {
         return false;
       }
     }

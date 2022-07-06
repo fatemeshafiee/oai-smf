@@ -32,6 +32,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <inttypes.h>
+#include <boost/algorithm/string.hpp>
+
 #include "SmContextCreateData.h"
 #include "SmContextUpdateData.h"
 #include "SmContextReleaseData.h"
@@ -558,8 +560,8 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
 void xgpp_conv::sm_context_request_from_nas(
     const nas_message_t& nas_msg,
     smf::pdu_session_create_sm_context_request& pcr) {
-  pdu_session_type_t pdu_session_type = {.pdu_session_type =
-                                             PDU_SESSION_TYPE_E_IPV4};
+  pdu_session_type_t pdu_session_type = {
+      .pdu_session_type = PDU_SESSION_TYPE_E_IPV4};
   // Extended Protocol Discriminator
   pcr.set_epd(nas_msg.header.extended_protocol_discriminator);
   // Message Type
@@ -633,4 +635,24 @@ void xgpp_conv::update_sm_context_response_from_ctx_request(
   ct_response->res.set_pdu_session_id(ct_request->req.get_pdu_session_id());
   ct_response->res.set_snssai(ct_request->req.get_snssai());
   ct_response->res.set_dnn(ct_request->req.get_dnn());
+}
+
+//------------------------------------------------------------------------------
+void xgpp_conv::sd_string_to_int(const std::string& sd_str, uint32_t& sd) {
+  sd = SD_NO_VALUE;
+  if (sd_str.empty()) return;
+  uint8_t base = 10;
+  try {
+    if (sd_str.size() > 2) {
+      if (boost::iequals(sd_str.substr(0, 2), "0x")) {
+        base = 16;
+      }
+    }
+    sd = std::stoul(sd_str, nullptr, base);
+  } catch (const std::exception& e) {
+    Logger::smf_app().error(
+        "Error when converting from string to int for S-NSSAI SD, error: %s",
+        e.what());
+    sd = SD_NO_VALUE;
+  }
 }

@@ -467,15 +467,19 @@ bool pfcp_associations::select_up_node(
     Logger::smf_app().debug("UPF info: %s", upf_info.to_string().c_str());
 
     for (auto ui : upf_info.snssai_upf_info_list) {
-      if (ui.snssai == snssai) {
-        for (auto d : ui.dnn_upf_info_list) {
-          if (d.dnn.compare(dnn) == 0) {
-            node_id = it->second->node_id;
-            Logger::smf_app().info(
-                "Select the UPF for the corresponding DNN %s, NSSSAI (SD: %s, "
-                "SST: %d) ",
-                d.dnn.c_str(), snssai.sD.c_str(), snssai.sST);
-            return true;
+      if (ui.snssai.sst == snssai.sst) {
+        if ((ui.snssai.sst <= SST_MAX_STANDARDIZED_VALUE) or
+            (snssai.sd == ui.snssai.sd)) {
+          for (auto d : ui.dnn_upf_info_list) {
+            if (d.dnn.compare(dnn) == 0) {
+              node_id = it->second->node_id;
+              Logger::smf_app().info(
+                  "Select the UPF for the corresponding DNN %s, NSSSAI (SST: "
+                  "%d, "
+                  "SD: %ld (0x%x)) ",
+                  d.dnn.c_str(), snssai.sst, snssai.sd, snssai.sd);
+              return true;
+            }
           }
         }
       }

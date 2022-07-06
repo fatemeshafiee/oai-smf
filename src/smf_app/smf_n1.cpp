@@ -201,24 +201,20 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
   // sm_msg->pdu_session_establishment_accept.gprstimer.timeValue = 0;
 
   // SNSSAI
-  sm_msg->pdu_session_establishment_accept.snssai.len = SST_AND_SD_LENGTH;
-  sm_msg->pdu_session_establishment_accept.snssai.sst =
-      sm_context_res.get_snssai().sST;
-
-  try {
-    sm_msg->pdu_session_establishment_accept.snssai.sd =
-        std::stoul(sm_context_res.get_snssai().sD, nullptr, 10);
-  } catch (const std::exception& e) {
-    Logger::smf_n1().warn(
-        "Error when converting from string to int for snssai.SD, error: %s",
-        e.what());
-    //"no SD value associated with the SST"
-    sm_msg->pdu_session_establishment_accept.snssai.sd = 0xFFFFFF;
+  if (sm_context_res.get_snssai().sd == SD_NO_VALUE) {
+    sm_msg->pdu_session_establishment_accept.snssai.len = SST_LENGTH;
+  } else {
+    sm_msg->pdu_session_establishment_accept.snssai.len = SST_AND_SD_LENGTH;
   }
+  sm_msg->pdu_session_establishment_accept.snssai.sst =
+      sm_context_res.get_snssai().sst;
+  sm_msg->pdu_session_establishment_accept.snssai.sd =
+      sm_context_res.get_snssai().sd;
 
   Logger::smf_n1().debug(
-      "SNSSAI SST %d, SD %#0x",
+      "SNSSAI SST %d, SD %ld (0x%x)",
       sm_msg->pdu_session_establishment_accept.snssai.sst,
+      sm_msg->pdu_session_establishment_accept.snssai.sd,
       sm_msg->pdu_session_establishment_accept.snssai.sd);
 
   // TODO: AlwaysonPDUSessionIndication

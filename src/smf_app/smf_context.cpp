@@ -637,6 +637,16 @@ pfcp::node_id_t smf_pdu_session::get_upf_node_id() const {
   return upf_node_id;
 }
 //-----------------------------------------------------------------------------
+void smf_pdu_session::set_urr_id(const uint32_t& urrId) {
+  urr_Id = urrId;
+}
+
+//-----------------------------------------------------------------------------
+uint32_t smf_pdu_session::get_urr_id() const {
+  return urr_Id;
+}
+
+//-----------------------------------------------------------------------------
 void smf_pdu_session::set_nwi_access(const std::string& nwiAccess) {
   nwi_access = nwiAccess;
 }
@@ -935,9 +945,9 @@ void smf_context::handle_itti_msg(
             json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
                      ["contentId"] = N2_SM_CONTENT_ID;  // NGAP part
             json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
-                session_report_msg.get_snssai().sST;
+                session_report_msg.get_snssai().sst;
             json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
-                session_report_msg.get_snssai().sD;
+                std::to_string(session_report_msg.get_snssai().sd);
 
             session_report_msg.set_json_data(json_data);
 
@@ -965,7 +975,50 @@ void smf_context::handle_itti_msg(
     // Usage Report
     if (report_type.usar) {
       // TODO
-      Logger::smf_app().debug("PFCP_SESSION_REPORT_REQUEST/Usage Report");
+      // Step 1. send N4 Data Report Ack to UPF
+      pfcp::usage_report_within_pfcp_session_report_request ur;
+      if (req->pfcp_ies.get(ur)) {
+        pfcp::volume_measurement_t vm;
+        pfcp::duration_measurement_t dm;
+        pfcp::ur_seqn_t seqn;
+
+        if (ur.get(vm)) {
+          Logger::smf_app().info("\t\t SEID            -> %lld", req->seid);
+          if (ur.get(seqn))
+            Logger::smf_app().info("\t\t UR-SEQN         -> %ld", seqn.ur_seqn);
+          if (ur.get(dm))
+            Logger::smf_app().info("\t\t Duration        -> %ld", dm.duration);
+          Logger::smf_app().info("\t\t NoP    Total    -> %lld", vm.total_nop);
+          Logger::smf_app().info("\t\t        Uplink   -> %lld", vm.uplink_nop);
+          Logger::smf_app().info(
+              "\t\t        Downlink -> %lld", vm.downlink_nop);
+          Logger::smf_app().info(
+              "\t\t Volume Total    -> %lld", vm.total_volume);
+          Logger::smf_app().info(
+              "\t\t        Uplink   -> %lld", vm.uplink_volume);
+          Logger::smf_app().info(
+              "\t\t        Downlink -> %lld", vm.downlink_volume);
+        }
+      }
+      std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
+          std::make_shared<itti_n4_session_report_response>(
+              TASK_SMF_APP, TASK_SMF_N4);
+      n4_report_ack->seid    = req->seid;
+      n4_report_ack->trxn_id = req->trxn_id;
+      pfcp::cause_t cause = {.cause_value = pfcp::CAUSE_VALUE_REQUEST_ACCEPTED};
+      n4_report_ack->pfcp_ies.set(cause);
+      n4_report_ack->r_endpoint = req->r_endpoint;
+
+      Logger::smf_app().info(
+          "Sending ITTI message %s to task TASK_SMF_N4",
+          n4_report_ack->get_msg_name());
+      int ret = itti_inst->send_msg(n4_report_ack);
+      if (RETURNok != ret) {
+        Logger::smf_app().error(
+            "Could not send ITTI message %s to task TASK_SMF_N4",
+            n4_report_ack->get_msg_name());
+        return;
+      }
     }
     // Error Indication Report
     if (report_type.erir) {
@@ -1004,7 +1057,7 @@ void smf_context::get_default_qos(
     const snssai_t& snssai, const std::string& dnn,
     subscribed_default_qos_t& default_qos) {
   Logger::smf_app().info(
-      "Get default QoS for a PDU Session, key %d", (uint8_t) snssai.sST);
+      "Get default QoS for a PDU Session, key %d", (uint8_t) snssai.sst);
   // get the default QoS profile
   std::shared_ptr<session_management_subscription> ss = {};
   std::shared_ptr<dnn_configuration_t> sdc            = {};
@@ -1596,15 +1649,21 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
     boost::split(split_result, amf_status_uri, boost::is_any_of("/"));
     if (split_result.size() >= 3) {
-      std::string addr = split_result[2];
-      // remove http port from the URI if existed
-      std::size_t found_port = addr.find(":");
-      if (found_port != std::string::npos) addr = addr.substr(0, found_port);
+      std::string full_addr = split_result[2];
+      // Check if the AMF addr is valid
+      std::size_t found_port = full_addr.find(":");
+
+      std::string addr = {};  // Addr without port
+      if (found_port != std::string::npos) {
+        addr = full_addr.substr(0, found_port);
+      } else {
+        addr = full_addr;
+      }
       struct in_addr amf_ipv4_addr;
       if (inet_aton(util::trim(addr).c_str(), &amf_ipv4_addr) == 0) {
         Logger::smf_api_server().warn("Bad IPv4 for AMF");
       } else {
-        amf_addr_str = addr;
+        amf_addr_str = full_addr;
         Logger::smf_api_server().debug("AMF IP Addr %s", amf_addr_str.c_str());
       }
     }
@@ -3103,9 +3162,9 @@ void smf_context::handle_pdu_session_modification_network_requested(
   json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
            ["contentId"] = N2_SM_CONTENT_ID;  // NGAP part
   json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
-      itti_msg->msg.get_snssai().sST;
+      itti_msg->msg.get_snssai().sst;
   json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
-      itti_msg->msg.get_snssai().sD;
+      std::to_string(itti_msg->msg.get_snssai().sd);
   json_data["n2InfoContainer"]["ranInfo"] = "SM";
 
   json_data["pduSessionId"] = itti_msg->msg.get_pdu_session_id();
@@ -3499,26 +3558,39 @@ bool smf_context::handle_ho_cancellation(
 
   return true;
 }
+
+//------------------------------------------------------------------------------
+void smf_context::get_snssai_key(const snssai_t& snssai, uint32_t& key) {
+  key = (snssai.sd << 8 | snssai.sst);
+}
+
 //------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(
     const snssai_t& snssai,
     std::shared_ptr<session_management_subscription>& ss) {
-  std::unique_lock<std::recursive_mutex> lock(m_context);
+  // Get a unique key from S-NSSAI
+  uint32_t key = 0;
+  get_snssai_key(snssai, key);
 
-  dnn_subscriptions[(uint8_t) snssai.sST] = ss;
+  std::unique_lock<std::recursive_mutex> lock(m_context);
+  dnn_subscriptions[key] = ss;
   Logger::smf_app().info(
-      "Inserted DNN Subscription, key: %d", (uint8_t) snssai.sST);
+      "Inserted DNN Subscription, key: %ld (SST %d, SD %ld (0x%x))", key,
+      snssai.sst, snssai.sd, snssai.sd);
 }
 
 //------------------------------------------------------------------------------
 void smf_context::insert_dnn_subscription(
     const snssai_t& snssai, const std::string& dnn,
     std::shared_ptr<session_management_subscription>& ss) {
-  std::unique_lock<std::recursive_mutex> lock(m_context);
-  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
-    std::shared_ptr<session_management_subscription> old_ss =
-        dnn_subscriptions.at((uint8_t) snssai.sST);
+  // Get a unique key from S-NSSAI
+  uint32_t key = 0;
+  get_snssai_key(snssai, key);
 
+  std::unique_lock<std::recursive_mutex> lock(m_context);
+  if (dnn_subscriptions.count(key) > 0) {
+    std::shared_ptr<session_management_subscription> old_ss =
+        dnn_subscriptions.at(key);
     std::shared_ptr<dnn_configuration_t> dnn_configuration = {};
     ss.get()->find_dnn_configuration(dnn, dnn_configuration);
     if (dnn_configuration != nullptr) {
@@ -3526,20 +3598,24 @@ void smf_context::insert_dnn_subscription(
     }
 
   } else {
-    dnn_subscriptions[(uint8_t) snssai.sST] = ss;
+    dnn_subscriptions[key] = ss;
   }
   Logger::smf_app().info(
-      "Inserted DNN Subscription, key: %d, dnn %s", (uint8_t) snssai.sST,
-      dnn.c_str());
+      "Inserted DNN Subscription, key: %ld (SST %d, SD %ld (0x%x)), dnn %s",
+      key, snssai.sst, snssai.sd, snssai.sd, dnn.c_str());
 }
 
 //------------------------------------------------------------------------------
 bool smf_context::is_dnn_snssai_subscription_data(
     const std::string& dnn, const snssai_t& snssai) {
+  // Get a unique key from S-NSSAI
+  uint32_t key = 0;
+  get_snssai_key(snssai, key);
+
   std::unique_lock<std::recursive_mutex> lock(m_context);
-  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
+  if (dnn_subscriptions.count(key) > 0) {
     std::shared_ptr<session_management_subscription> ss =
-        dnn_subscriptions.at((uint8_t) snssai.sST);
+        dnn_subscriptions.at(key);
     if (ss.get()->dnn_configuration(dnn))
       return true;
     else
@@ -3552,17 +3628,24 @@ bool smf_context::is_dnn_snssai_subscription_data(
 bool smf_context::find_dnn_subscription(
     const snssai_t& snssai,
     std::shared_ptr<session_management_subscription>& ss) {
+  // Get a unique key from S-NSSAI
+  uint32_t key = 0;
+  get_snssai_key(snssai, key);
+
   Logger::smf_app().info(
-      "Find a DNN Subscription with key: %d, map size %d", (uint8_t) snssai.sST,
-      dnn_subscriptions.size());
+      "Find a DNN Subscription with key: %ld (SST %d, SD %ld (0x%x)), map size "
+      "%d",
+      (uint8_t) snssai.sst, snssai.sd, snssai.sd, dnn_subscriptions.size());
+
   std::unique_lock<std::recursive_mutex> lock(m_context);
-  if (dnn_subscriptions.count((uint8_t) snssai.sST) > 0) {
-    ss = dnn_subscriptions.at((uint8_t) snssai.sST);
+  if (dnn_subscriptions.count(key) > 0) {
+    ss = dnn_subscriptions.at(key);
     return true;
   }
 
   Logger::smf_app().info(
-      "DNN subscription (SNSSAI %d) not found", (uint8_t) snssai.sST);
+      "DNN subscription (SST %d, SD %ld (0x%x)) not found",
+      (uint8_t) snssai.sst, snssai.sd, snssai.sd);
   return false;
 }
 
@@ -4063,8 +4146,8 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       cj["pdu_session_type"] =
           sp->pdu_session_type.toString();  // PDU Session Type
       // NSSAI
-      cj["snssai"]["sst"] = sp->get_snssai().sST;
-      cj["snssai"]["sd"]  = sp->get_snssai().sD;
+      cj["snssai"]["sst"] = sp->get_snssai().sst;
+      cj["snssai"]["sd"]  = std::to_string(sp->get_snssai().sd);
       cj["dnn"]           = sp->get_dnn();       // DNN
       cj["amf_addr"]      = sc->get_amf_addr();  // Serving AMF addr
 

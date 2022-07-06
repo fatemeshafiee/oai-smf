@@ -50,6 +50,7 @@
 #include "logger.hpp"
 #include "fqdn.hpp"
 #include "smf_app.hpp"
+#include "3gpp_conversions.hpp"
 
 using namespace std;
 using namespace libconfig;
@@ -442,6 +443,26 @@ int smf_config::load(const string& config_file) {
         util::trim(astring).c_str(), default_dns_secv4,
         "BAD IPv4 ADDRESS FORMAT FOR DEFAULT DNS !");
 
+    // Default CSCF
+    smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_CSCF_IPV4_ADDRESS, astring);
+    IPV4_STR_ADDR_TO_INADDR(
+        util::trim(astring).c_str(), default_cscfv4,
+        "BAD IPv4 ADDRESS FORMAT FOR DEFAULT CSCF !");
+
+    smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_CSCF_IPV6_ADDRESS, astring);
+    if (inet_pton(AF_INET6, util::trim(astring).c_str(), buf_in6_addr) == 1) {
+      memcpy(&default_cscfv6, buf_in6_addr, sizeof(struct in6_addr));
+    } else {
+      Logger::smf_app().error(
+          "CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_CSCF_IPV6_ADDRESS
+          " %s",
+          astring.c_str());
+      throw(
+          "CONFIG : BAD ADDRESS in " SMF_CONFIG_STRING_DEFAULT_CSCF_IPV6_ADDRESS
+          " %s",
+          astring.c_str());
+    }
+
     smf_cfg.lookupValue(SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS, astring);
     if (inet_pton(AF_INET6, util::trim(astring).c_str(), buf_in6_addr) == 1) {
       memcpy(&default_dnsv6, buf_in6_addr, sizeof(struct in6_addr));
@@ -528,6 +549,14 @@ int smf_config::load(const string& config_file) {
         use_nwi = true;
       } else {
         use_nwi = false;
+      }
+
+      support_features.lookupValue(
+          SMF_CONFIG_STRING_SUPPORT_FEATURES_ENABLE_USAGE_REPORTING, opt);
+      if (boost::iequals(opt, "yes")) {
+        enable_ur = true;
+      } else {
+        enable_ur = false;
       }
 
     } catch (const SettingNotFoundException& nfex) {
@@ -774,7 +803,7 @@ int smf_config::load(const string& config_file) {
         session_management_subscription_t sub_item = {};
 
         unsigned int nssai_sst                      = 0;
-        string nssai_sd                             = {};
+        string nssai_sd                             = SD_NO_VALUE_STR;
         string dnn                                  = {};
         string default_session_type                 = {};
         unsigned int default_ssc_mode               = 0;
@@ -814,9 +843,9 @@ int smf_config::load(const string& config_file) {
             SMF_CONFIG_STRING_SESSION_AMBR_UL, session_ambr_ul);
         session_management_subscription_cfg.lookupValue(
             SMF_CONFIG_STRING_SESSION_AMBR_DL, session_ambr_dl);
-
-        sub_item.single_nssai.sST           = nssai_sst;
-        sub_item.single_nssai.sD            = nssai_sd;
+        sub_item.single_nssai.sst = nssai_sst;
+        sub_item.single_nssai.sd  = SD_NO_VALUE;
+        xgpp_conv::sd_string_to_int(nssai_sd, sub_item.single_nssai.sd);
         sub_item.session_type               = default_session_type;
         sub_item.dnn                        = dnn;
         sub_item.ssc_mode                   = default_ssc_mode;
@@ -868,7 +897,6 @@ void smf_config::display() {
     n4.thread_rd_sched_params.sched_policy); Logger::smf_app().info( "
     Scheduling prio .....: %d", n4.thread_rd_sched_params.sched_priority);
 
-    Logger::smf_app().info("- ITTI Timer Task Threading:");
     Logger::smf_app().info(
         "    CPU id ..............: %d", itti.itti_timer_sched_params.cpu_id);
     Logger::smf_app().info(
@@ -966,6 +994,12 @@ void smf_config::display() {
     Logger::smf_app().info("    Secondary DNS v6 ....: %s", str_addr6);
   }
 
+  Logger::smf_app().info(
+      "   CSCF .........: %s", inet_ntoa(*((struct in_addr*) &default_cscfv4)));
+  if (inet_ntop(AF_INET6, &default_cscfv6, str_addr6, sizeof(str_addr6))) {
+    Logger::smf_app().info("    CSCF v6 ......: %s", str_addr6);
+  }
+
   Logger::smf_app().info("- Default UE MTU: %d", ue_mtu);
   Logger::smf_app().info("- Supported Features:");
   Logger::smf_app().info(
@@ -1024,37 +1058,42 @@ void smf_config::display() {
     for (auto sub : session_management_subscriptions) {
       Logger::smf_app().info(
           "    Session Management Subscription Data %d:", index);
+
+      if (sub.single_nssai.sd != SD_NO_VALUE) {
+        Logger::smf_app().info(
+            "        SST, SD: %d, %ld (0x%x)", sub.single_nssai.sst,
+            sub.single_nssai.sd, sub.single_nssai.sd);
+      } else {
+        Logger::smf_app().info("        SST: %d", sub.single_nssai.sst);
+      }
+
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_NSSAI_SST
-          ":  %d, " SMF_CONFIG_STRING_NSSAI_SD " %s",
-          sub.single_nssai.sST, sub.single_nssai.sD.c_str());
+          "        " SMF_CONFIG_STRING_DNN ": %s", sub.dnn.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DNN ":  %s", sub.dnn.c_str());
-      Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE ":  %s",
+          "        " SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE ": %s",
           sub.session_type.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE ":  %d", sub.ssc_mode);
+          "        " SMF_CONFIG_STRING_DEFAULT_SSC_MODE ": %d", sub.ssc_mode);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_5QI ":  %d",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_5QI ": %d",
           sub.default_qos._5qi);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ":  %d",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL ": %d",
           sub.default_qos.priority_level);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL ":  %d",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL ": %d",
           sub.default_qos.arp.priority_level);
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP ":  %s",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP ": %s",
           sub.default_qos.arp.preempt_cap.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN ":  %s",
+          "        " SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN ": %s",
           sub.default_qos.arp.preempt_vuln.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_SESSION_AMBR_UL ":  %s",
+          "        " SMF_CONFIG_STRING_SESSION_AMBR_UL ": %s",
           sub.session_ambr.uplink.c_str());
       Logger::smf_app().info(
-          "        " SMF_CONFIG_STRING_SESSION_AMBR_DL ":  %s",
+          "        " SMF_CONFIG_STRING_SESSION_AMBR_DL ": %s",
           sub.session_ambr.downlink.c_str());
       index++;
     }

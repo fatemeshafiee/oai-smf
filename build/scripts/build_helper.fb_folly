@@ -67,9 +67,9 @@ install_fb_folly_from_source(){
       ret=$?;[[ $ret -ne 0 ]] && return $ret
     elif [[ $OS_DISTRO == "ubuntu" ]]; then
       $SUDO $INSTALLER install $OPTION \
+        $CMAKE \
         g++ \
         libevent-dev \
-        libboost1.67-dev \
         libdouble-conversion-dev \
         libgoogle-glog-dev \
         libgflags-dev \

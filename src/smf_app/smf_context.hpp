@@ -449,6 +449,20 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   pdu_session_type_t get_pdu_session_type() const;
 
   /*
+   * Get URR_ID associated with this PDU Session
+   * @param void
+   * @return uint32_t: urrId
+   */
+  uint32_t get_urr_id() const;
+
+  /*
+   * Set URR_ID associated with this PDU Session
+   * @param [const uint32_t&] urrId: URR_ID
+   * @return void
+   */
+  void set_urr_id(const uint32_t& urrId);
+
+  /*
    * Get NWI associated with this PDU Session
    * @param void
    * @return std::string: NWI
@@ -547,6 +561,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   uint32_t pdu_session_id;
   std::string dnn;  // associated DNN
   snssai_t snssai;  // associated SNSSAI
+
+  uint32_t
+      urr_Id;  // We maintain URR ID to reuse for DL PDR (session modification)
 
   std::string nwi_access;  // associated nwi_access
   std::string nwi_core;    // associated nwi_core
@@ -1066,6 +1083,14 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<session_management_subscription>& ss);
 
   /*
+   * Get a unique key from SNSSAI
+   * @param [const snssai_t&] snssai
+   * @param [uint32_t&] key: generated key
+   * @return void
+   */
+  void get_snssai_key(const snssai_t& snssai, uint32_t& key);
+
+  /*
    * Convert all members of this class to string for logging
    * @return std::string
    */
@@ -1333,8 +1358,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
 
  private:
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
-  // snssai-sst <-> session management subscription
-  std::map<uint8_t, std::shared_ptr<session_management_subscription>>
+  // snssai <-> session management subscription
+  std::map<uint32_t, std::shared_ptr<session_management_subscription>>
       dnn_subscriptions;
   std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>
       pdu_sessions;  // Store all PDU Sessions associated with this UE

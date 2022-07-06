@@ -67,6 +67,9 @@
 #define SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER "-"
 #define SMF_CONFIG_STRING_IPV6_ADDRESS_PREFIX_DELIMITER "/"
 #define SMF_CONFIG_STRING_DEFAULT_DNS_IPV4_ADDRESS "DEFAULT_DNS_IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_DEFAULT_CSCF_IPV4_ADDRESS "DEFAULT_CSCF_IPV4_ADDRESS"
+#define SMF_CONFIG_STRING_DEFAULT_CSCF_IPV6_ADDRESS "DEFAULT_CSCF_IPV6_ADDRESS"
+
 #define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV4_ADDRESS                         \
   "DEFAULT_DNS_SEC_IPV4_ADDRESS"
 #define SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS "DEFAULT_DNS_IPV6_ADDRESS"
@@ -149,6 +152,8 @@
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION "HTTP_VERSION"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_NETWORK_INSTANCE                \
   "USE_NETWORK_INSTANCE"
+#define SMF_CONFIG_STRING_SUPPORT_FEATURES_ENABLE_USAGE_REPORTING              \
+  "ENABLE_USAGE_REPORTING"
 
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -217,10 +222,11 @@ class smf_config {
 
   struct in_addr default_dnsv4;
   struct in_addr default_dns_secv4;
+  struct in_addr default_cscfv4;
   struct in6_addr default_dnsv6;
   struct in6_addr default_dns_secv6;
-
   std::map<std::string, dnn_t> dnns;
+  struct in6_addr default_cscfv6;
 
   bool force_push_pco;
   uint ue_mtu;
@@ -231,6 +237,7 @@ class smf_config {
   bool use_fqdn_dns;
   unsigned int http_version;
   bool use_nwi;
+  bool enable_ur;
 
   struct {
     struct in_addr ipv4_addr;

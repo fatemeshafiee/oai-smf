@@ -1169,6 +1169,8 @@ typedef struct usage_report_trigger_s {
   uint16_t liusa : 1;
   uint16_t timqu : 1;
   uint16_t volqu : 1;
+  uint16_t tebur : 1;
+  uint16_t evequ : 1;
 } usage_report_trigger_t;
 
 //-------------------------------------
@@ -1181,16 +1183,23 @@ typedef struct measurement_period_s {
 // 8.2.43 Fully qualified PDN Connection Set Identifier (FQ-CSID)
 // typedef fq_csid_t fq_csid_t;
 
+// Extended as per Release 16.5.0, to handle stats related to packet count
 //-------------------------------------
 // 8.2.44 Volume Measurement
 typedef struct volume_measurement_s {
-  uint8_t spare : 5;
+  uint8_t spare : 2;
+  uint8_t dlnop : 1;
+  uint8_t ulnop : 1;
+  uint8_t tonop : 1;
   uint8_t dlvol : 1;
   uint8_t ulvol : 1;
   uint8_t tovol : 1;
   uint64_t total_volume;
   uint64_t uplink_volume;
   uint64_t downlink_volume;
+  uint64_t total_nop;
+  uint64_t uplink_nop;
+  uint64_t downlink_nop;
 } volume_measurement_t;
 
 //-------------------------------------
@@ -1557,7 +1566,7 @@ typedef struct user_plane_ip_resource_information_s {
   uint8_t teid_range;
   struct in_addr ipv4_address;
   struct in6_addr ipv6_address;
-  uint16_t network_instance;
+  std::string network_instance;
   uint8_t source_interface;
 } user_plane_ip_resource_information_t;
 
