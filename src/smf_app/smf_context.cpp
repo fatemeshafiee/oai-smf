@@ -1526,6 +1526,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         "PCF SM Policy Association Creation was not successful. Continue "
         "using default rules");
     use_pcf_policy = false;
+    sp->policy_ptr.reset();
     // Here, the standard says that we could reject the PDU session or allow
     // the PDU session applying local policies 29.512 Chapter 4.2.2.2
     // TODO I propose to have this behavior configurable, for now we
