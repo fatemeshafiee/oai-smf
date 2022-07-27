@@ -4050,6 +4050,22 @@ void smf_context::trigger_ue_ip_change(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
+void smf_context::handle_qos_monitoring(scid_t scid, uint8_t http_version) {
+  // TODO
+  Logger::smf_app().debug(
+      "Send request to N11 to trigger QoS Monitoring, "
+      "SMF Context ID " SCID_FMT " ",
+      scid);
+  return;
+}
+
+//------------------------------------------------------------------------------
+void smf_context::trigger_qos_monitoring(scid_t scid, uint8_t http_version) {
+  event_sub.ee_qos_monitoring(scid, http_version);
+}
+
+
+//------------------------------------------------------------------------------
 void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN, "

@@ -67,6 +67,12 @@ bs2::connection smf_event::subscribe_ee_ddds(
 }
 
 //------------------------------------------------------------------------------
+bs2::connection smf_event::subscribe_ee_qos_monitoring(
+    const ee_qos_monitoring_sig_t::slot_type& sig) {
+  return ee_qos_monitoring.connect(sig);
+}
+
+//------------------------------------------------------------------------------
 bs2::connection smf_event::subscribe_ee_flexcn_event(
     const ee_flexcn_sig_t::slot_type& sig) {
   return ee_flexcn.connect(sig);
