@@ -945,7 +945,7 @@ class pfcp_sdf_filter_ie : public pfcp_ie {
     u1.bf.fl                   = b.fl;
     u1.bf.bid                  = b.bid;
     if (u1.bf.fd) {
-      length_of_flow_description = b.length_of_flow_description;
+      length_of_flow_description = b.flow_description.length();
       flow_description           = b.flow_description;
       tlv.add_length(
           sizeof(length_of_flow_description) + flow_description.size());
