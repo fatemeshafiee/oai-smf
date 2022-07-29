@@ -51,6 +51,26 @@ EventNotification::EventNotification() {
   m_DddStatusIsSet          = false;
   m_MaxWaitTime             = "";
   m_MaxWaitTimeIsSet        = false;
+
+  // QoS Monitoring (Usage Report)
+  m_SEndID                  = 0;
+  m_SEndIDIsSet             = false;
+  m_urSeqN                  = 0;
+  m_urSeqNIsSet             = false;
+  m_duration                = 0;
+  m_durationIsSet           = false;
+  m_totNoP                  = 0;
+  m_totNoPIsSet             = false;
+  m_ulNoP                   = 0;
+  m_ulNoPIsSet              = false;
+  m_dlNoP                   = 0;
+  m_dlNoPIsSet              = false;
+  m_totVol                  = 0;
+  m_totVolIsSet             = false;
+  m_ulVol                   = 0;
+  m_ulVolIsSet              = false;
+  m_dlVol                   = 0;
+  m_dlVolIsSet              = false;
 }
 
 EventNotification::~EventNotification() {}
@@ -86,6 +106,17 @@ void to_json(nlohmann::json& j, const EventNotification& o) {
   if (o.pduSeIdIsSet()) j["pduSeId"] = o.m_PduSeId;
   if (o.dddStatusIsSet()) j["dddStatus"] = o.m_DddStatus;
   if (o.maxWaitTimeIsSet()) j["maxWaitTime"] = o.m_MaxWaitTime;
+
+  // QoS Monitoring (Usage Report)
+  if (o.SEndIDIsSet()) j["SEndID"] = o.m_SEndID;
+  if (o.urSeqNIsSet()) j["urSeqN"] = o.m_urSeqN;
+  if (o.durationIsSet()) j["duration"] = o.m_duration;
+  if (o.totNoPIsSet()) j["totNoP"] = o.m_totNoP;
+  if (o.ulNoPIsSet()) j["ulNoP"] = o.m_ulNoP;
+  if (o.dlNoPIsSet()) j["dlNoP"] = o.m_dlNoP;
+  if (o.totVolIsSet()) j["totVol"] = o.m_totVol;
+  if (o.ulVolIsSet()) j["ulVol"] = o.m_ulVol;
+  if (o.dlVolIsSet()) j["dlVol"] = o.m_dlVol;
 }
 
 void from_json(const nlohmann::json& j, EventNotification& o) {
@@ -174,6 +205,44 @@ void from_json(const nlohmann::json& j, EventNotification& o) {
   if (j.find("maxWaitTime") != j.end()) {
     j.at("maxWaitTime").get_to(o.m_MaxWaitTime);
     o.m_MaxWaitTimeIsSet = true;
+  }
+
+  // Qos Monitoring (Usage Report)
+  if (j.find("SEndID") != j.end()) {
+    j.at("SEndID").get_to(o.m_SEndID);
+    o.m_SEndIDIsSet = true;
+  }
+  if (j.find("urSeqN") != j.end()) {
+    j.at("urSeqN").get_to(o.m_urSeqN);
+    o.m_urSeqNIsSet = true;
+  }
+  if (j.find("duration") != j.end()) {
+    j.at("duration").get_to(o.m_duration);
+    o.m_durationIsSet = true;
+  }
+  if (j.find("totNoP") != j.end()) {
+    j.at("totNoP").get_to(o.m_totNoP);
+    o.m_totNoPIsSet = true;
+  }
+  if (j.find("ulNoP") != j.end()) {
+    j.at("ulNoP").get_to(o.m_ulNoP);
+    o.m_ulNoPIsSet = true;
+  }
+  if (j.find("dlNoP") != j.end()) {
+    j.at("dlNoP").get_to(o.m_dlNoP);
+    o.m_dlNoPIsSet = true;
+  }
+  if (j.find("totVol") != j.end()) {
+    j.at("totVol").get_to(o.m_totVol);
+    o.m_totVolIsSet = true;
+  }
+  if (j.find("ulVol") != j.end()) {
+    j.at("ulVol").get_to(o.m_ulVol);
+    o.m_ulVolIsSet = true;
+  }
+  if (j.find("dlVol") != j.end()) {
+    j.at("dlVol").get_to(o.m_dlVol);
+    o.m_dlVolIsSet = true;
   }
 }
 
@@ -462,6 +531,127 @@ bool EventNotification::maxWaitTimeIsSet() const {
 void EventNotification::unsetMaxWaitTime() {
   m_MaxWaitTimeIsSet = false;
 }
+
+// QoS Monitoring (Usage Report)
+
+int64_t EventNotification::getSEndID() const {
+  return m_SEndID;
+}
+void EventNotification::setSEndID(int64_t const& value) {
+  m_SEndID      = value;
+  m_SEndIDIsSet = true;
+}
+bool EventNotification::SEndIDIsSet() const {
+  return m_SEndIDIsSet;
+}
+void EventNotification::unsetSEndID() {
+  m_SEndIDIsSet = false;
+}
+int32_t EventNotification::geturSeqN() const {
+  return m_urSeqN;
+}
+void EventNotification::seturSeqN(int32_t const& value) {
+  m_urSeqN      = value;
+  m_urSeqNIsSet = true;
+}
+bool EventNotification::urSeqNIsSet() const {
+  return m_urSeqNIsSet;
+}
+void EventNotification::unseturSeqN() {
+  m_urSeqNIsSet = false;
+}
+int32_t EventNotification::getDuration() const {
+  return m_duration;
+}
+void EventNotification::setDuration(int32_t const& value) {
+  m_duration      = value;
+  m_durationIsSet = true;
+}
+bool EventNotification::durationIsSet() const {
+  return m_durationIsSet;
+}
+void EventNotification::unsetDuration() {
+  m_durationIsSet = false;
+}
+int64_t EventNotification::getTotNoP() const {
+  return m_totNoP;
+}
+void EventNotification::setTotNoP(int64_t const& value) {
+  m_totNoP      = value;
+  m_totNoPIsSet = true;
+}
+bool EventNotification::totNoPIsSet() const {
+  return m_totNoPIsSet;
+}
+void EventNotification::unsetTotNoP() {
+  m_totNoPIsSet = false;
+}
+int64_t EventNotification::getUlNoP() const {
+  return m_ulNoP;
+}
+void EventNotification::setUlNoP(int64_t const& value) {
+  m_ulNoP      = value;
+  m_ulNoPIsSet = true;
+}
+bool EventNotification::ulNoPIsSet() const {
+  return m_ulNoPIsSet;
+}
+void EventNotification::unsetUlNoP() {
+  m_ulNoPIsSet = false;
+}
+int64_t EventNotification::getDlNoP() const {
+  return m_dlNoP;
+}
+void EventNotification::setDlNoP(int64_t const& value) {
+  m_dlNoP      = value;
+  m_dlNoPIsSet = true;
+}
+bool EventNotification::dlNoPIsSet() const {
+  return m_dlNoPIsSet;
+}
+void EventNotification::unsetDlNoP() {
+  m_dlNoPIsSet = false;
+}
+int64_t EventNotification::getTotVol() const {
+  return m_totVol;
+}
+void EventNotification::setTotVol(int64_t const& value) {
+  m_totVol      = value;
+  m_totVolIsSet = true;
+}
+bool EventNotification::totVolIsSet() const {
+  return m_totVolIsSet;
+}
+void EventNotification::unsetTotVol() {
+  m_totVolIsSet = false;
+}
+int64_t EventNotification::getUlVol() const {
+  return m_ulVol;
+}
+void EventNotification::setUlVol(int64_t const& value) {
+  m_ulVol      = value;
+  m_ulVolIsSet = true;
+}
+bool EventNotification::ulVolIsSet() const {
+  return m_ulVolIsSet;
+}
+void EventNotification::unsetUlVol() {
+  m_ulVolIsSet = false;
+}
+int64_t EventNotification::getDlVol() const {
+  return m_dlVol;
+}
+void EventNotification::setDlVol(int64_t const& value) {
+  m_dlVol      = value;
+  m_dlVolIsSet = true;
+}
+bool EventNotification::dlVolIsSet() const {
+  return m_dlVolIsSet;
+}
+void EventNotification::unsetDlVol() {
+  m_dlVolIsSet = false;
+}
+
 
 }  // namespace model
 }  // namespace smf_server
