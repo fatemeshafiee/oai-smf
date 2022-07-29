@@ -70,6 +70,11 @@ typedef bs2::signal_type<
     void(scid_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
     ee_ddds_sig_t;
 
+// Signal for PDU SESSION ESTABLISHMENT 
+// SCID, HTTP version
+typedef bs2::signal_type<
+    void(scid_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    ee_pdusesest_sig_t;
 // Signal for FlexCN event (for Event Exposure)
 // SCID, HTTP version
 typedef bs2::signal_type<

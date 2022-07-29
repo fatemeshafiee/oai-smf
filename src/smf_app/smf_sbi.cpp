@@ -522,6 +522,14 @@ void smf_sbi::notify_subscribed_event(
       // event_notif["dddStatus"] = i.get_ddds();
       event_notif["dddStatus"] = "TRANSMITTED";
     }
+    if (i.is_dnn_set()) event_notif["dnn"] = i.get_dnn();
+    if (i.is_pdu_session_type_set()) event_notif["pduSessType"] = i.get_pdu_session_type();
+    if (i.is_sst_set()){
+      nlohmann::json snssai_data = {};
+      snssai_data["sst"] = i.get_sst();
+      if (i.is_sd_set()) snssai_data["sd"] = i.get_sd();
+      event_notif["snssai"] = snssai_data;
+    }
 
     // customized data
     nlohmann::json customized_data = {};

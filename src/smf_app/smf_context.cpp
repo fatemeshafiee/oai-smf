@@ -4209,9 +4209,181 @@ void smf_context::trigger_flexcn_event(scid_t scid, uint8_t http_version) {
 }
 
 ////------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
+  Logger::smf_app().debug(
+      "Send request to N11 to triger pdusesest, "
+      "SMF Context ID " SCID_FMT " ",
+      scid);
+
+  // get the smf context
+  std::shared_ptr<smf_context_ref> scf = {};
+
+  if (smf_app_inst->is_scid_2_smf_context(scid)) {
+    scf = smf_app_inst->scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+    return;
+  }
+
+  supi_t supi                     = scf.get()->supi;
+  supi64_t supi64                 = smf_supi_to_u64(supi);
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
+
+  std::shared_ptr<smf_context> sc = {};
+
+  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+    sc = smf_app_inst->supi_2_smf_context(supi64);
+    Logger::smf_app().debug(
+        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
+  } else {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF context with "
+        "Supi " SUPI_64_FMT "!",
+        supi64);
+  }
+  // get smf_pdu_session
+  std::shared_ptr<smf_pdu_session> sp = {};
+
+  if (!find_pdu_session(pdu_session_id, sp)) {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF PDU Session context!");
+    return;
+  }
+
+  Logger::smf_app().debug(
+      "Send request to N11 to triger PDU_SES_EST (Event "
+      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
+      supi, pdu_session_id, http_version);
+
+  std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
+  smf_app_inst->get_ee_subscriptions(
+      smf_event_t::SMF_EVENT_PDUSESEST, subscriptions);
+
+  if (subscriptions.size() > 0) {
+    // Send request to N11 to trigger the notification to the subscribed event
+    Logger::smf_app().debug(
+        "Send ITTI msg to SMF N11 to trigger the event notification");
+    std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg =
+        std::make_shared<itti_n11_notify_subscribed_event>(
+            TASK_SMF_APP, TASK_SMF_SBI);
+
+    for (auto i : subscriptions) {
+      event_notification ev_notif = {};
+      ev_notif.set_supi(supi64);                    // SUPI
+      ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
+      ev_notif.set_smf_event(smf_event_t::SMF_EVENT_PDUSESEST);
+      ev_notif.set_notif_uri(i.get()->notif_uri);
+      ev_notif.set_notif_id(i.get()->notif_id);
+      // timestamp
+      std::time_t time_epoch_ntp = std::time(nullptr);
+      uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
+      ev_notif.set_timestamp(std::to_string(tv_ntp));
+      
+     
+
+      //  UE IPv4
+      if (sp->ipv4) {
+        ev_notif.set_ad_ipv4_addr(conv::toString(sp->ipv4_address));
+      }
+      //  UE IPv6 Prefix
+      if (sp->ipv6) {
+        char str_addr6[INET6_ADDRSTRLEN];
+        if (inet_ntop(
+                AF_INET6, &sp->ipv6_address, str_addr6, sizeof(str_addr6))) {
+          // TODO
+          // ev_notif.set_ad_ipv6_prefix(conv::toString(sp->ipv4_address));
+        }
+      }
+      ev_notif.set_pdu_session_type(sp->pdu_session_type.toString()); // PDU Session Type
+      ev_notif.set_sst(sp->get_snssai().sst);
+      ev_notif.set_sd(std::to_string(sp->get_snssai().sd));
+      ev_notif.set_dnn(sp->get_dnn());
+
+      itti_msg->event_notifs.push_back(ev_notif);
+    }
+
+    itti_msg->http_version = http_version;
+
+    int ret = itti_inst->send_msg(itti_msg);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_SBI",
+          itti_msg->get_msg_name());
+    }
+  } else {
+    Logger::smf_app().debug("No subscription available for this event");
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_context::trigger_pdusesest(scid_t scid, uint8_t http_version) {
+  event_sub.ee_pdusesest(scid, http_version);
+}
+
+////------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//-----------
+
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void smf_context::trigger_plmn_change(scid_t scid, uint8_t http_version) {
   event_sub.ee_plmn_change(scid, http_version);
 }
+
 
 //------------------------------------------------------------------------------
 void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {
