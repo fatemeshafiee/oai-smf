@@ -1258,8 +1258,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void trigger_ddds(scid_t scid, uint8_t http_version);
   void handle_ddds(scid_t scid, uint8_t http_version);
 
-  void trigger_qos_monitoring(scid_t scid, uint8_t http_version);
-  void handle_qos_monitoring(scid_t scid, uint8_t http_version);
+  void trigger_qos_monitoring(supi_t supi, uint8_t http_version);
+  void handle_qos_monitoring(supi_t supi, uint8_t http_version);
 
   void trigger_flexcn_event(scid_t scid, uint8_t http_version);
   void handle_flexcn_event(scid_t scid, uint8_t http_version);

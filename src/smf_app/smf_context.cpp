@@ -1000,6 +1000,19 @@ void smf_context::handle_itti_msg(
               "\t\t        Downlink -> %lld", vm.downlink_volume);
         }
       }
+
+
+      // Trigger QoS Monitoring Event report notification
+      std::shared_ptr<smf_context> pc = {};
+      if (smf_app_inst->seid_2_smf_context(req->seid, pc)) {
+        pc.get()->trigger_qos_monitoring(pc.get()->supi, 1);
+      } else {
+        Logger::smf_app().debug(
+            "No SFM context found for SEID " TEID_FMT
+            ". Unable to notify QoS Monitoring Event Report.",
+            req->seid);
+      }
+
       std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
           std::make_shared<itti_n4_session_report_response>(
               TASK_SMF_APP, TASK_SMF_N4);
@@ -4050,18 +4063,98 @@ void smf_context::trigger_ue_ip_change(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_qos_monitoring(scid_t scid, uint8_t http_version) {
-  // TODO
+void smf_context::handle_qos_monitoring(supi_t supi, uint8_t http_version) {
+
+  supi64_t supi64 = smf_supi_to_u64(supi);
+
   Logger::smf_app().debug(
-      "Send request to N11 to trigger QoS Monitoring, "
-      "SMF Context ID " SCID_FMT " ",
-      scid);
-  return;
+      "Send request to N11 to trigger QoS Monitoring Event report, "
+      "SMF Context-related SUPI  " SUPI_64_FMT " ",
+      supi64);
+
+  // get the smf context
+  std::shared_ptr<smf_context_ref> scf = {};
+
+  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+    sc = smf_app_inst->supi_2_smf_context(supi64);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SUPI_64_FMT " does not exit!", supi64);
+    return;
+  }
+  
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
+  std::shared_ptr<smf_context> sc = {};
+
+  // if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+  //   sc = smf_app_inst->supi_2_smf_context(supi64);
+  //   Logger::smf_app().debug(
+  //       "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
+  // } else {
+  //   Logger::smf_app().warn(
+  //       "Could not retrieve the corresponding SMF context with "
+  //       "Supi " SUPI_64_FMT "!",
+  //       supi64);
+  // }
+
+  // get smf_pdu_session
+  std::shared_ptr<smf_pdu_session> sp = {};
+  if (!find_pdu_session(pdu_session_id, sp)) {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF PDU Session context!");
+    return;
+  }
+
+  Logger::smf_app().debug(
+      "Send request to N11 to trigger QoS Monitoring (Event "
+      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
+      supi, pdu_session_id, http_version);
+
+  std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
+  smf_app_inst->get_ee_subscriptions(
+      smf_event_t::SMF_EVENT_QOS_MON, subscriptions);
+
+  if (subscriptions.size() > 0) {
+    // Send request to N11 to trigger the notification to the subscribed event
+    Logger::smf_app().debug(
+        "Send ITTI msg to SMF N11 to trigger the event notification");
+    std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg =
+        std::make_shared<itti_n11_notify_subscribed_event>(
+            TASK_SMF_APP, TASK_SMF_SBI);
+
+    for (auto i : subscriptions) {
+      event_notification ev_notif = {};
+      ev_notif.set_supi(supi64);                    // SUPI
+      ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
+      ev_notif.set_smf_event(smf_event_t::SMF_EVENT_QOS_MON);
+      ev_notif.set_notif_uri(i.get()->notif_uri);
+      ev_notif.set_notif_id(i.get()->notif_id);
+      // timestamp
+      std::time_t time_epoch_ntp = std::time(nullptr);
+      uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
+      ev_notif.set_timestamp(std::to_string(tv_ntp));
+
+      // TODO: QoS Monitoring Event data
+
+      itti_msg->event_notifs.push_back(ev_notif);
+    }
+
+    itti_msg->http_version = http_version;
+
+    int ret = itti_inst->send_msg(itti_msg);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_SBI",
+          itti_msg->get_msg_name());
+    }
+  } else {
+    Logger::smf_app().debug("No subscription available for this event");
+  }
 }
 
 //------------------------------------------------------------------------------
-void smf_context::trigger_qos_monitoring(scid_t scid, uint8_t http_version) {
-  event_sub.ee_qos_monitoring(scid, http_version);
+void smf_context::trigger_qos_monitoring(supi_t supi, uint8_t http_version) {
+  event_sub.ee_qos_monitoring(supi, http_version);
 }
 
 
