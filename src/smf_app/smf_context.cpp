@@ -51,6 +51,7 @@
 #include "smf_procedure.hpp"
 #include "3gpp_conversions.hpp"
 #include "string.hpp"
+#include "EventNotification.h"
 
 extern "C" {
 #include "Ngap_AssociatedQosFlowItem.h"
@@ -999,18 +1000,31 @@ void smf_context::handle_itti_msg(
           Logger::smf_app().info(
               "\t\t        Downlink -> %lld", vm.downlink_volume);
         }
-      }
 
-
-      // Trigger QoS Monitoring Event report notification
-      std::shared_ptr<smf_context> pc = {};
-      if (smf_app_inst->seid_2_smf_context(req->seid, pc)) {
-        pc.get()->trigger_qos_monitoring(pc.get()->supi, 1);
-      } else {
-        Logger::smf_app().debug(
-            "No SFM context found for SEID " TEID_FMT
-            ". Unable to notify QoS Monitoring Event Report.",
-            req->seid);
+        // Trigger QoS Monitoring Event report notification
+        std::shared_ptr<smf_context> pc = {};
+        if (smf_app_inst->seid_2_smf_context(req->seid, pc)) {
+          oai::smf_server::model::EventNotification ev_notif = {};
+          if (ur.get(vm)) {
+            ev_notif.setSEndID(req->seid);
+            if (ur.get(seqn))
+              ev_notif.seturSeqN(seqn.ur_seqn);
+            if (ur.get(dm))
+              ev_notif.setDuration(dm.duration);
+            ev_notif.setTotNoP(vm.total_nop);
+            ev_notif.setUlNoP(vm.uplink_nop);
+            ev_notif.setDlNoP(vm.downlink_nop);
+            ev_notif.setTotVol(vm.total_volume);
+            ev_notif.setUlVol(vm.uplink_volume);
+            ev_notif.setDlVol(vm.downlink_volume);
+          }
+          pc.get()->trigger_qos_monitoring(req->seid, ev_notif, 1);
+        } else {
+          Logger::smf_app().debug(
+              "No SFM context found for SEID " TEID_FMT
+              ". Unable to notify QoS Monitoring Event Report.",
+              req->seid);
+        }
       }
 
       std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
@@ -4063,52 +4077,24 @@ void smf_context::trigger_ue_ip_change(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_qos_monitoring(supi_t supi, uint8_t http_version) {
-
-  supi64_t supi64 = smf_supi_to_u64(supi);
+void smf_context::handle_qos_monitoring(seid_t seid,
+  oai::smf_server::model::EventNotification ev_notif_model, uint8_t http_version) {
 
   Logger::smf_app().debug(
-      "Send request to N11 to trigger QoS Monitoring Event report, "
-      "SMF Context-related SUPI  " SUPI_64_FMT " ",
-      supi64);
+      "Send request to N11 to trigger QoS Monitoring (Usage Report) Event, "
+      "SMF Context-related SEID  " SEID_FMT ,
+      seid);
 
-  // get the smf context
-  std::shared_ptr<smf_context_ref> scf = {};
-
-  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
-    sc = smf_app_inst->supi_2_smf_context(supi64);
-  } else {
+  // Get the smf context
+  std::shared_ptr<smf_context> pc = {};
+  if (!smf_app_inst->seid_2_smf_context(seid, pc)) {
     Logger::smf_app().warn(
-        "Context associated with this id " SUPI_64_FMT " does not exit!", supi64);
-    return;
-  }
-  
-  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
-  std::shared_ptr<smf_context> sc = {};
-
-  // if (smf_app_inst->is_supi_2_smf_context(supi64)) {
-  //   sc = smf_app_inst->supi_2_smf_context(supi64);
-  //   Logger::smf_app().debug(
-  //       "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
-  // } else {
-  //   Logger::smf_app().warn(
-  //       "Could not retrieve the corresponding SMF context with "
-  //       "Supi " SUPI_64_FMT "!",
-  //       supi64);
-  // }
-
-  // get smf_pdu_session
-  std::shared_ptr<smf_pdu_session> sp = {};
-  if (!find_pdu_session(pdu_session_id, sp)) {
-    Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF PDU Session context!");
+        "Context associated with this SEID " SEID_FMT " does not exit!", seid);
     return;
   }
 
-  Logger::smf_app().debug(
-      "Send request to N11 to trigger QoS Monitoring (Event "
-      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
-      supi, pdu_session_id, http_version);
+  supi_t supi =       pc.get()->supi;
+  supi64_t supi64 =   smf_supi_to_u64(supi);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4123,9 +4109,10 @@ void smf_context::handle_qos_monitoring(supi_t supi, uint8_t http_version) {
             TASK_SMF_APP, TASK_SMF_SBI);
 
     for (auto i : subscriptions) {
+      // TODO (?): Add check for repeated notifications
+
       event_notification ev_notif = {};
-      ev_notif.set_supi(supi64);                    // SUPI
-      ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
+      ev_notif.set_supi(supi64);
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_QOS_MON);
       ev_notif.set_notif_uri(i.get()->notif_uri);
       ev_notif.set_notif_id(i.get()->notif_id);
@@ -4134,8 +4121,28 @@ void smf_context::handle_qos_monitoring(supi_t supi, uint8_t http_version) {
       uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
       ev_notif.set_timestamp(std::to_string(tv_ntp));
 
-      // TODO: QoS Monitoring Event data
+      // Custom json for Usage Report
+      nlohmann::json cj = {};
 
+      cj["SEID"] = std::to_string(seid);
+      if (ev_notif_model.urSeqNIsSet())
+        cj["UR-SEQN"] = std::to_string(ev_notif_model.geturSeqN());
+      if (ev_notif_model.durationIsSet())
+        cj["Duration"] = std::to_string(ev_notif_model.getDuration());
+      if (ev_notif_model.totNoPIsSet())
+        cj["NoP"]["Total"] = std::to_string(ev_notif_model.getTotNoP());
+      if (ev_notif_model.ulNoPIsSet())
+        cj["NoP"]["Uplink"] = std::to_string(ev_notif_model.getUlNoP());
+      if (ev_notif_model.dlNoPIsSet())
+        cj["NoP"]["Downlink"] = std::to_string(ev_notif_model.getDlNoP());
+      if (ev_notif_model.totVolIsSet())
+        cj["Volume"]["Total"] = std::to_string(ev_notif_model.getTotVol());
+      if (ev_notif_model.ulVolIsSet())
+        cj["Volume"]["Uplink"] = std::to_string(ev_notif_model.getUlVol());
+      if (ev_notif_model.dlVolIsSet())
+        cj["Volume"]["Downlink"] = std::to_string(ev_notif_model.getDlVol());
+
+      ev_notif.set_custom_info(cj);
       itti_msg->event_notifs.push_back(ev_notif);
     }
 
@@ -4153,8 +4160,9 @@ void smf_context::handle_qos_monitoring(supi_t supi, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::trigger_qos_monitoring(supi_t supi, uint8_t http_version) {
-  event_sub.ee_qos_monitoring(supi, http_version);
+void smf_context::trigger_qos_monitoring(seid_t seid,
+  oai::smf_server::model::EventNotification ev_notif_model, uint8_t http_version) {
+  event_sub.ee_qos_monitoring(seid, ev_notif_model, http_version);
 }
 
 

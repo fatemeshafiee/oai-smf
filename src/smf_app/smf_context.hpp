@@ -692,7 +692,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     
     // Subscribe to QoS Monitoring Event
     ee_qos_monitoring_connection = event_sub.subscribe_ee_qos_monitoring(
-        boost::bind(&smf_context::handle_qos_monitoring, this, _1, _2));
+        boost::bind(&smf_context::handle_qos_monitoring, this, _1, _2, _3));
 
     // Subscribe to FlexCN event
     ee_flexcn = event_sub.subscribe_ee_flexcn_event(
@@ -1258,8 +1258,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void trigger_ddds(scid_t scid, uint8_t http_version);
   void handle_ddds(scid_t scid, uint8_t http_version);
 
-  void trigger_qos_monitoring(supi_t supi, uint8_t http_version);
-  void handle_qos_monitoring(supi_t supi, uint8_t http_version);
+  void trigger_qos_monitoring(seid_t seid, oai::smf_server::model::EventNotification ev_notif_model, uint8_t http_version);
+  void handle_qos_monitoring(seid_t seid, oai::smf_server::model::EventNotification ev_notif_model, uint8_t http_version);
 
   void trigger_flexcn_event(scid_t scid, uint8_t http_version);
   void handle_flexcn_event(scid_t scid, uint8_t http_version);
