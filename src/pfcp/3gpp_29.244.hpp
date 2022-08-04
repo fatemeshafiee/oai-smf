@@ -9167,9 +9167,14 @@ class pfcp_create_urr_ie : public pfcp_grouped_ie {
           new pfcp_reporting_triggers_ie(b.reporting_triggers.second));
       add_ie(sie);
     }
-    if (b.urr_id.first) {
+    if (b.urr_id.first && b.measurement_period.first) {
       std::shared_ptr<pfcp_measurement_period_ie> sie(
           new pfcp_measurement_period_ie(b.measurement_period.second));
+      add_ie(sie);
+    }
+    if (b.urr_id.first && b.volume_threshold.first) {
+      std::shared_ptr<pfcp_volume_threshold_ie> sie(
+        new pfcp_volume_threshold_ie(b.volume_threshold.second));
       add_ie(sie);
     }
     // ToDo: Optional IEs
