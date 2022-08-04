@@ -27,6 +27,7 @@
 #include "PlmnId.h"
 #include "RouteToLocation.h"
 #include "AccessType.h"
+#include "UsageReport.h"
 #include <nlohmann/json.hpp>
 
 namespace oai {
@@ -203,78 +204,13 @@ class EventNotification {
   void setMaxWaitTime(std::string const& value);
   bool maxWaitTimeIsSet() const;
   void unsetMaxWaitTime();
-
   /// <summary>
   ///
   /// </summary>
-  int64_t getSEndID() const;
-  void setSEndID(int64_t const& value);
-  bool SEndIDIsSet() const;
-  void unsetSEndID();
-
-  /// <summary>
-  ///
-  /// </summary>
-  int32_t geturSeqN() const;
-  void seturSeqN(int32_t const& value);
-  bool urSeqNIsSet() const;
-  void unseturSeqN();
-
-  /// <summary>
-  ///
-  /// </summary>
-  int32_t getDuration() const;
-  void setDuration(int32_t const& value);
-  bool durationIsSet() const;
-  void unsetDuration();
-
-  /// <summary>
-  ///
-  /// </summary>
-  int64_t getTotNoP() const;
-  void setTotNoP(int64_t const& value);
-  bool totNoPIsSet() const;
-  void unsetTotNoP();
-
-  /// <summary>
-  ///
-  /// </summary>
-  int64_t getUlNoP() const;
-  void setUlNoP(int64_t const& value);
-  bool ulNoPIsSet() const;
-  void unsetUlNoP();
-
-  /// <summary>
-  ///
-  /// </summary>  
-  int64_t getDlNoP() const;
-  void setDlNoP(int64_t const& value);
-  bool dlNoPIsSet() const;
-  void unsetDlNoP();
-
-  /// <summary>
-  ///
-  /// </summary>
-  int64_t getTotVol() const;
-  void setTotVol(int64_t const& value);
-  bool totVolIsSet() const;
-  void unsetTotVol();
-
-  /// <summary>
-  ///
-  /// </summary>
-  int64_t getUlVol() const;
-  void setUlVol(int64_t const& value);
-  bool ulVolIsSet() const;
-  void unsetUlVol();
-
-  /// <summary>
-  ///
-  /// </summary>
-  int64_t getDlVol() const;
-  void setDlVol(int64_t const& value);
-  bool dlVolIsSet() const;
-  void unsetDlVol();
+  UsageReport getUsageReport() const;
+  void setUsageReport(UsageReport const& value);
+  bool usageReportIsSet() const;
+  void unsetUsageReport();
 
   friend void to_json(nlohmann::json& j, const EventNotification& o);
   friend void from_json(const nlohmann::json& j, EventNotification& o);
@@ -326,26 +262,8 @@ class EventNotification {
   bool m_DddStatusIsSet;
   std::string m_MaxWaitTime;
   bool m_MaxWaitTimeIsSet;
-
-  // QoS Monitoring (Usage Report)
-  int64_t m_SEndID;
-  bool m_SEndIDIsSet;
-  int32_t m_urSeqN;
-  bool m_urSeqNIsSet;
-  int32_t m_duration;
-  bool m_durationIsSet;
-  int64_t m_totNoP;
-  bool m_totNoPIsSet;
-  int64_t m_ulNoP;
-  bool m_ulNoPIsSet;
-  int64_t m_dlNoP;
-  bool m_dlNoPIsSet;
-  int64_t m_totVol;
-  bool m_totVolIsSet;
-  int64_t m_ulVol;
-  bool m_ulVolIsSet;
-  int64_t m_dlVol;
-  bool m_dlVolIsSet;
+  UsageReport m_usageReport;
+  bool m_usageReportIsSet;
 };
 
 }  // namespace model
