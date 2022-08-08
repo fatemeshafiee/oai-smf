@@ -4332,52 +4332,139 @@ class pfcp_time_of_last_packet_ie : public pfcp_ie {
 //      s.set(dropped_dl_traffic_threshold);
 //  }
 //};
-////-------------------------------------
-//// IE VOLUME_QUOTA
-// class pfcp_volume_quota_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_volume_quota_ie(const pfcp::volume_quota_t& b) :
-//  pfcp_ie(PFCP_IE_VOLUME_QUOTA){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_volume_quota_ie() : pfcp_ie(PFCP_IE_VOLUME_QUOTA){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_volume_quota_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::volume_quota_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::volume_quota_t volume_quota = {};
-//      to_core_type(volume_quota);
-//      s.set(volume_quota);
-//  }
-//};
+
+//-------------------------------------
+// IE VOLUME_QUOTA
+class pfcp_volume_quota_ie : public pfcp_ie {
+  public:
+    union {
+      struct {
+        uint8_t tovol : 1;
+        uint8_t ulvol : 1;
+        uint8_t dlvol : 1;
+        uint8_t spare : 5;
+      } bf;
+      uint8_t b;
+    } u1;
+    uint64_t total_volume;
+    uint64_t uplink_volume;
+    uint64_t downlink_volume;
+    //--------
+    explicit pfcp_volume_quota_ie(const pfcp::volume_quota_t& b)
+        : pfcp_ie(PFCP_IE_VOLUME_QUOTA) {
+      tlv.set_length(1);
+      u1.b        = 0;
+      u1.bf.tovol = b.tovol;
+      u1.bf.ulvol = b.ulvol;
+      u1.bf.dlvol = b.dlvol;
+      if (u1.bf.tovol) {
+        total_volume = b.total_volume;
+        tlv.add_length(sizeof(total_volume));
+      } else {
+        total_volume = 0;
+      }
+      if (u1.bf.ulvol) {
+        uplink_volume = b.uplink_volume;
+        tlv.add_length(sizeof(uplink_volume));
+      } else {
+        uplink_volume = 0;
+      }
+      if (u1.bf.dlvol) {
+        downlink_volume = b.downlink_volume;
+        tlv.add_length(sizeof(downlink_volume));
+      } else {
+        downlink_volume = 0;
+      }
+    }
+    //--------
+    pfcp_volume_quota_ie() : pfcp_ie(PFCP_IE_VOLUME_QUOTA) {
+      tlv.set_length(1);
+      u1.b            = 0;
+      total_volume    = 0;
+      uplink_volume   = 0;
+      downlink_volume = 0;
+    }
+    //--------
+    explicit pfcp_volume_quota_ie(const pfcp_tlv& t) : pfcp_ie(t){};
+    //--------
+    void to_core_type(pfcp::volume_quota_t& b) {
+      b       = {};
+      b.tovol = u1.bf.tovol;
+      b.ulvol = u1.bf.ulvol;
+      b.dlvol = u1.bf.dlvol;
+      if (u1.bf.tovol) {
+        b.total_volume = total_volume;
+      }
+      if (u1.bf.ulvol) {
+        b.uplink_volume = uplink_volume;
+      }
+      if (u1.bf.dlvol) {
+        b.downlink_volume = downlink_volume;
+      }
+    }
+    //--------
+    void dump_to(std::ostream& os) {
+      tlv.set_length(1);
+      if (u1.bf.tovol) {
+        tlv.add_length(sizeof(total_volume));
+      }
+      if (u1.bf.ulvol) {
+        tlv.add_length(sizeof(uplink_volume));
+      }
+      if (u1.bf.dlvol) {
+        tlv.add_length(sizeof(downlink_volume));
+      }
+
+      tlv.dump_to(os);
+      os.write(reinterpret_cast<const char*>(&u1.b), sizeof(u1.b));
+      if (u1.bf.tovol) {
+        auto be_total_volume = htobe64(total_volume);
+        os.write(
+            reinterpret_cast<const char*>(&be_total_volume),
+            sizeof(be_total_volume));
+      }
+      if (u1.bf.ulvol) {
+        auto be_uplink_volume = htobe64(uplink_volume);
+        os.write(
+            reinterpret_cast<const char*>(&be_uplink_volume),
+            sizeof(be_uplink_volume));
+      }
+      if (u1.bf.dlvol) {
+        auto be_downlink_volume = htobe64(downlink_volume);
+        os.write(
+            reinterpret_cast<const char*>(&be_downlink_volume),
+            sizeof(be_downlink_volume));
+      }
+    }
+    //--------
+    void load_from(std::istream& is) {
+      // tlv.load_from(is);
+      if (tlv.get_length() < 1) {
+        throw pfcp_tlv_bad_length_exception(
+            tlv.type, tlv.get_length(), __FILE__, __LINE__);
+      }
+      if (u1.bf.tovol) {
+        is.read(reinterpret_cast<char*>(&total_volume), sizeof(total_volume));
+        total_volume = be64toh(total_volume);
+      }
+      if (u1.bf.ulvol) {
+        is.read(reinterpret_cast<char*>(&uplink_volume), sizeof(uplink_volume));
+        total_volume = be64toh(uplink_volume);
+      }
+      if (u1.bf.dlvol) {
+        is.read(
+            reinterpret_cast<char*>(&downlink_volume), sizeof(downlink_volume));
+        total_volume = be64toh(downlink_volume);
+      }
+    }
+    //--------
+    void to_core_type(pfcp_ies_container& s) {
+      pfcp::volume_quota_t v = {};
+      to_core_type(v);
+      s.set(v);
+    }
+};
+
 ////-------------------------------------
 //// IE TIME_QUOTA
 // class pfcp_time_quota_ie : public pfcp_ie {
@@ -9167,15 +9254,22 @@ class pfcp_create_urr_ie : public pfcp_grouped_ie {
           new pfcp_reporting_triggers_ie(b.reporting_triggers.second));
       add_ie(sie);
     }
-    if (b.urr_id.first && b.measurement_period.first) {
-      std::shared_ptr<pfcp_measurement_period_ie> sie(
-          new pfcp_measurement_period_ie(b.measurement_period.second));
-      add_ie(sie);
-    }
-    if (b.urr_id.first && b.volume_threshold.first) {
-      std::shared_ptr<pfcp_volume_threshold_ie> sie(
-        new pfcp_volume_threshold_ie(b.volume_threshold.second));
-      add_ie(sie);
+    if (b.urr_id.first) {
+      if (b.measurement_period.first) {
+        std::shared_ptr<pfcp_measurement_period_ie> sie(
+            new pfcp_measurement_period_ie(b.measurement_period.second));
+        add_ie(sie);
+      }
+      if (b.volume_threshold.first) {
+        std::shared_ptr<pfcp_volume_threshold_ie> sie(
+          new pfcp_volume_threshold_ie(b.volume_threshold.second));
+        add_ie(sie);
+      }
+      if (b.volume_quota.first) {
+        std::shared_ptr<pfcp_volume_quota_ie> sie(
+          new pfcp_volume_quota_ie(b.volume_quota.second));
+        add_ie(sie);
+      }
     }
     // ToDo: Optional IEs
   }
