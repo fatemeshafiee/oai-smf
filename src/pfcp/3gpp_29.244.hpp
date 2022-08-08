@@ -9270,11 +9270,11 @@ class pfcp_create_urr_ie : public pfcp_grouped_ie {
           new pfcp_volume_quota_ie(b.volume_quota.second));
         add_ie(sie);
       }
-    }
-    if (b.urr_id.first && b.volume_threshold.first) {
-      std::shared_ptr<pfcp_volume_threshold_ie> sie(
-        new pfcp_volume_threshold_ie(b.volume_threshold.second));
-      add_ie(sie);
+      if (b.time_threshold.first) {
+        std::shared_ptr<pfcp_time_threshold_ie> sie(
+          new pfcp_time_threshold_ie(b.time_threshold.second));
+        add_ie(sie);
+      }
     }
     // ToDo: Optional IEs
   }
