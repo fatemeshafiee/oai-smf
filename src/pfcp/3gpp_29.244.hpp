@@ -4465,52 +4465,56 @@ class pfcp_volume_quota_ie : public pfcp_ie {
     }
 };
 
-////-------------------------------------
-//// IE TIME_QUOTA
-// class pfcp_time_quota_ie : public pfcp_ie {
-// public:
-//  uint8_t todo;
-//
-//  //--------
-//  pfcp_time_quota_ie(const pfcp::time_quota_t& b) :
-//  pfcp_ie(PFCP_IE_TIME_QUOTA){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_time_quota_ie() : pfcp_ie(PFCP_IE_TIME_QUOTA){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_time_quota_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::time_quota_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::time_quota_t time_quota = {};
-//      to_core_type(time_quota);
-//      s.set(time_quota);
-//  }
-//};
+//-------------------------------------
+// IE TIME_QUOTA
+class pfcp_time_quota_ie : public pfcp_ie {
+ public:
+  uint32_t time_quota;
+
+  //--------
+  explicit pfcp_time_quota_ie(const pfcp::time_quota_t& b)
+      : pfcp_ie(PFCP_IE_TIME_QUOTA) {
+    time_quota = b.time_quota;
+    tlv.set_length(sizeof(time_quota));
+  }
+  //--------
+  pfcp_time_quota_ie()
+      : pfcp_ie(PFCP_IE_TIME_QUOTA), time_quota(0) {
+    tlv.set_length(sizeof(time_quota));
+  }
+  //--------
+  explicit pfcp_time_quota_ie(const pfcp_tlv& t)
+      : pfcp_ie(t), time_quota(0){};
+  //--------
+  void to_core_type(pfcp::time_quota_t& b) {
+    b.time_quota = time_quota;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_time_quota = htobe32(time_quota);
+    os.write(
+        reinterpret_cast<const char*>(&be_time_quota),
+        sizeof(be_time_quota));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(time_quota)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&time_quota), sizeof(time_quota));
+    time_quota = be32toh(time_quota);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::time_quota_t v = {};
+    to_core_type(v);
+    s.set(v);
+  }
+};
+
 //-------------------------------------
 // IE START_TIME
 class pfcp_start_time_ie : public pfcp_ie {
@@ -9273,6 +9277,11 @@ class pfcp_create_urr_ie : public pfcp_grouped_ie {
       if (b.time_threshold.first) {
         std::shared_ptr<pfcp_time_threshold_ie> sie(
           new pfcp_time_threshold_ie(b.time_threshold.second));
+        add_ie(sie);
+      }
+      if (b.time_quota.first) {
+        std::shared_ptr<pfcp_time_quota_ie> sie(
+          new pfcp_time_quota_ie(b.time_quota.second));
         add_ie(sie);
       }
     }
