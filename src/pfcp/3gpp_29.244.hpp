@@ -9271,6 +9271,11 @@ class pfcp_create_urr_ie : public pfcp_grouped_ie {
         add_ie(sie);
       }
     }
+    if (b.urr_id.first && b.volume_threshold.first) {
+      std::shared_ptr<pfcp_volume_threshold_ie> sie(
+        new pfcp_volume_threshold_ie(b.volume_threshold.second));
+      add_ie(sie);
+    }
     // ToDo: Optional IEs
   }
   pfcp_create_urr_ie() : pfcp_grouped_ie(PFCP_IE_CREATE_URR) {}
