@@ -338,7 +338,7 @@ int session_create_sm_context_procedure::run(
     volume_threshold.tovol                    = 0;
     volume_threshold.downlink_volume          = 1000;
 
-    time_threshold.time_threshold             = 30;
+    time_threshold.time_threshold             = 5;
 
     create_urr.set(urr_id);
     create_urr.set(measurement_method);
