@@ -989,25 +989,11 @@ void smf_context::handle_itti_msg(
           if (ur.get(seqn))
             Logger::smf_app().info("\t\t UR-SEQN         -> %ld", seqn.ur_seqn);
           if (ur.get(trig))
-            if (trig.droth) Logger::smf_app().info("\t\t Trigger         -> Dropped DL Traffic Threshold");
-            if (trig.envcl) Logger::smf_app().info("\t\t Trigger         -> Envelope Closure");
-            if (trig.evequ) Logger::smf_app().info("\t\t Trigger         -> Event Quota");
-            if (trig.eveth) Logger::smf_app().info("\t\t Trigger         -> Event Threshold");
-            if (trig.immer) Logger::smf_app().info("\t\t Trigger         -> Immediate Report");
-            if (trig.liusa) Logger::smf_app().info("\t\t Trigger         -> Linked Usage Reporting");
-            if (trig.macar) Logger::smf_app().info("\t\t Trigger         -> MAC Addresses Reporting");
-            if (trig.monit) Logger::smf_app().info("\t\t Trigger         -> Monitoring Time");
             if (trig.perio) Logger::smf_app().info("\t\t Trigger         -> Periodic Reporting");
-            if (trig.quhti) Logger::smf_app().info("\t\t Trigger         -> Quota Holding Time");
-            if (trig.start) Logger::smf_app().info("\t\t Trigger         -> Start of Traffic");
-            if (trig.stop) Logger::smf_app().info("\t\t Trigger         -> Stop of Traffic");
-            if (trig.tebur) Logger::smf_app().info("\t\t Trigger         -> Termination by UP Function Report");
-            if (trig.termr) Logger::smf_app().info("\t\t Trigger         -> Termination Report");
             if (trig.timqu) Logger::smf_app().info("\t\t Trigger         -> Time Quota");
             if (trig.timth) Logger::smf_app().info("\t\t Trigger         -> Time Threshold");
             if (trig.volqu) Logger::smf_app().info("\t\t Trigger         -> Volume Quota");
             if (trig.volth) Logger::smf_app().info("\t\t Trigger         -> Volume Threshold");
-            
           if (ur.get(dm))
             Logger::smf_app().info("\t\t Duration        -> %ld", dm.duration);
           Logger::smf_app().info("\t\t NoP    Total    -> %lld", vm.total_nop);
@@ -1040,6 +1026,8 @@ void smf_context::handle_itti_msg(
             ur_model.setUlVol(vm.uplink_volume);
             ur_model.setDlVol(vm.downlink_volume);
           }
+          if (ur.usage_report_trigger.first)
+            ur_model.setURTrigger(ur.usage_report_trigger.second);
           ev_notif.setUsageReport(ur_model);
           pc.get()->trigger_qos_monitoring(req->seid, ev_notif, 1);
         } else {

@@ -5,6 +5,7 @@
  */
 
 #include "UsageReport.h"
+// #include <sstream>
 
 namespace oai {
 namespace smf_server {
@@ -29,6 +30,8 @@ UsageReport::UsageReport() {
   m_ulVolIsSet              = false;
   m_dlVol                   = 0;
   m_dlVolIsSet              = false;
+  m_urTrig                  = {};
+  m_urTrigIsSet             = false;
 }
 
 UsageReport::~UsageReport() {}
@@ -43,6 +46,37 @@ void to_json(nlohmann::json& j, const UsageReport& o) {
     j["SEID"] = o.m_SEndID;
   if (o.urSeqNIsSet())
     j["UR-SEQN"] = o.m_urSeqN;
+  if (o.urTriggerIsSet()) {
+    if (o.m_urTrig.perio)
+      j["Trigger"] = "Periodic Reporting";
+    if (o.m_urTrig.volth)
+      j["Trigger"] = "Volume Threshold";
+    if (o.m_urTrig.timth)
+      j["Trigger"] = "Time Threshold";
+    if (o.m_urTrig.volqu)
+      j["Trigger"] = "Volume Quota";
+    if (o.m_urTrig.timqu)
+      j["Trigger"] = "Time Quota";
+    /*
+    switch (o.m_urTrig) {
+      case :
+        j["Trigger"] = "Periodic Reporting";
+        break;
+      case UsageReportTrigger::VOLTH:
+        j["Trigger"] = "Volume Threshold";
+        break;
+      case UsageReportTrigger::TIMTH:
+        j["Trigger"] = "Time Threshold";
+        break;
+      case UsageReportTrigger::VOLQU:
+        j["Trigger"] = "Volume Quota";
+        break;
+      case UsageReportTrigger::TIMQU:
+        j["Trigger"] = "Time Quota";
+        break;
+    }
+    */
+  }
   if (o.durationIsSet())
     j["Duration"] = o.m_duration;
   if (o.totNoPIsSet())
@@ -67,6 +101,25 @@ void from_json(const nlohmann::json& j, UsageReport& o) {
   if (j.find("UR-SEQN") != j.end()) {
     j.at("UR-SEQN").get_to(o.m_urSeqN);
     o.m_urSeqNIsSet = true;
+  }
+  if (j.find("Trigger") != j.end()) {
+    o.m_urTrigIsSet = true;
+    auto s = j.get<std::string>();
+    s = j.at("Trigger");
+    if (s == "Periodic Reporting")
+      o.m_urTrig.perio = 1;
+    if (s == "Volume Threshold")
+      o.m_urTrig.volth = 1;
+    if (s == "Time Threshold")
+      o.m_urTrig.timth = 1;
+    if (s == "Volume Quota")
+      o.m_urTrig.volqu = 1;
+    if (s == "Time Quota")
+      o.m_urTrig.timqu = 1;
+    else {
+      o.m_urTrigIsSet = false;
+      // TODO: Handle invalid JSON
+    }
   }
   if (j.find("Duration") != j.end()) {
     j.at("Duration").get_to(o.m_duration);
@@ -219,7 +272,19 @@ bool UsageReport::dlVolIsSet() const {
 void UsageReport::unsetDlVol() {
   m_dlVolIsSet = false;
 }
-
+pfcp::usage_report_trigger_t UsageReport::getURTrigger() const {
+  return m_urTrig;
+}
+void UsageReport::setURTrigger(pfcp::usage_report_trigger_t const& value) {
+  m_urTrig      = value;
+  m_urTrigIsSet = true;
+}
+bool UsageReport::urTriggerIsSet() const {
+  return m_urTrigIsSet;
+}
+void UsageReport::unsetURTrigger() {
+  m_urTrigIsSet = false;
+}
 
 }  // namespace model
 }  // namespace smf_server

@@ -14,6 +14,16 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+// TODO: Redefine in separate files
+enum UsageReportTrigger {
+  PERIO = 1,
+  VOLTH,
+  TIMTH,
+  VOLQU,
+  TIMQU
+};
+
+
 /// <summary>
 ///
 /// </summary>
@@ -99,18 +109,18 @@ class UsageReport {
   bool dlVolIsSet() const;
   void unsetDlVol();
 
+  /// <summary>
+  ///
+  /// </summary>
+  pfcp::usage_report_trigger_t getURTrigger() const;
+  void setURTrigger(pfcp::usage_report_trigger_t const& value);
+  bool urTriggerIsSet() const;
+  void unsetURTrigger();
+
   friend void to_json(nlohmann::json& j, const UsageReport& o);
   friend void from_json(const nlohmann::json& j, UsageReport& o);
 
  protected:
-
-  pfcp::usage_report_within_pfcp_session_deletion_response m_URSessDel;
-  bool m_URSessDelIsSet;
-  pfcp::usage_report_within_pfcp_session_modification_response m_URSessMod;
-  bool m_URSessModIsSet;
-  pfcp::usage_report_within_pfcp_session_report_request m_URRequest;
-  bool m_URRequestIsSet;
-
   int64_t m_SEndID;
   bool m_SEndIDIsSet;
   int32_t m_urSeqN;
@@ -129,11 +139,9 @@ class UsageReport {
   bool m_ulVolIsSet;
   int64_t m_dlVol;
   bool m_dlVolIsSet;
-
-  // pfcp::usage_report_trigger_t m_urTrig;
-  // bool m_urTrigIsSet;
-  // pfcp::usage_report_within_pfcp_session_modification_response m_urSessMod;
-  // bool m_urSessModIsSet;
+  // UsageReportTrigger m_urTrig;
+  pfcp::usage_report_trigger_t m_urTrig;
+  bool m_urTrigIsSet;
 };
 
 }  // namespace model

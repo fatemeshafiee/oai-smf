@@ -321,38 +321,31 @@ int session_create_sm_context_procedure::run(
     pfcp::measurement_period_t measurement_Period = {};
     pfcp::reporting_triggers_t reporting_triggers = {};
     pfcp::volume_threshold_t volume_threshold     = {};
-    pfcp::volume_quota_t volume_quota             = {};
     pfcp::time_threshold_t time_threshold         = {};
-    pfcp::time_quota_t time_quota                 = {};
 
     // Hardcoded values for the moment
-    // measurement_method.volum                  = 1;   // Volume based usage report
+    measurement_method.volum                  = 1;   // Volume based usage report
     measurement_method.durat                  = 1;
-    // measurement_Period.measurement_period     = 10;  // Every 10 Sec
-    reporting_triggers.perio                  = 0;   // Periodic usage report
-    reporting_triggers.volth                  = 0;
+    measurement_Period.measurement_period     = 10;  // Every 10 Sec
+    reporting_triggers.perio                  = 1;   // Periodic usage report
+    reporting_triggers.volth                  = 1;
+    reporting_triggers.timth                  = 1;
     reporting_triggers.volqu                  = 0;
-    reporting_triggers.timth                  = 0;
-    reporting_triggers.timqu                  = 1;
+    reporting_triggers.timqu                  = 0;
 
-    // volume_quota.tovol                        = 1;
-    // volume_threshold.dlvol                    = 1;
-    // volume_threshold.ulvol                    = 1;
-    // volume_threshold.tovol                    = 0;
-    // volume_threshold.downlink_volume          = 10;
-    // volume_threshold.uplink_volume            = 10;
-    // volume_quota.total_volume                 = 1000;
-    // time_threshold.time_threshold             = 30;
-    time_quota.time_quota                     = 15;
+    volume_threshold.dlvol                    = 1;
+    volume_threshold.ulvol                    = 0;
+    volume_threshold.tovol                    = 0;
+    volume_threshold.downlink_volume          = 1000;
+
+    time_threshold.time_threshold             = 30;
 
     create_urr.set(urr_id);
     create_urr.set(measurement_method);
-    // create_urr.set(measurement_Period);
+    create_urr.set(measurement_Period);
     create_urr.set(reporting_triggers);
-    create_urr.set(time_quota);
-    // create_urr.set(time_threshold);
-    // create_urr.set(volume_threshold);
-    // create_urr.set(volume_quota);
+    create_urr.set(time_threshold);
+    create_urr.set(volume_threshold);
 
     n4_triggered->pfcp_ies.set(create_urr);
   }
