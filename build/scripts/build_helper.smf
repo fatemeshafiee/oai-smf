@@ -351,6 +351,7 @@ check_install_smf_deps() {
       autoconf \
       automake \
       bison \
+      gcc-c++ \
       $CMAKE \
       make \
       doxygen \
@@ -408,6 +409,7 @@ check_install_smf_deps() {
       libasan?"
   elif [[ "$OS_BASEDISTRO" == "fedora" ]]; then
     PACKAGE_LIST="\
+      boost-devel \
       guile-devel \
       libconfig-devel \
       libgcrypt-devel \
