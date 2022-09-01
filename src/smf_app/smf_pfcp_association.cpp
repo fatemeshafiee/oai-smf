@@ -140,8 +140,12 @@ bool pfcp_associations::add_association(
         break;
       }
     }
-    associations.insert((int32_t) hash_node_id, sa);
-    trigger_heartbeat_request_procedure(sa);
+    if (associations.size() < PFCP_MAX_ASSOCIATIONS) {
+      associations.insert({(int32_t) hash_node_id, sa});
+      trigger_heartbeat_request_procedure(sa);
+    } else {
+      Logger::smf_app().info("What do we do if too many associations?");
+    }
   }
   return true;
 }
@@ -210,10 +214,14 @@ bool pfcp_associations::add_association(
         break;
       }
     }
-    associations.insert((int32_t) hash_node_id, sa);
-    // Display UPF Node profile
-    sa->get_upf_node_profile().display();
-    trigger_heartbeat_request_procedure(sa);
+    if (associations.size() < PFCP_MAX_ASSOCIATIONS) {
+      associations.insert({(int32_t) hash_node_id, sa});
+      // Display UPF Node profile
+      sa->get_upf_node_profile().display();
+      trigger_heartbeat_request_procedure(sa);
+    } else {
+      Logger::smf_app().info("What do we do if too many associations?");
+    }
   }
   return true;
 }
@@ -244,8 +252,12 @@ bool pfcp_associations::add_association(
     sa->function_features.first  = true;
     sa->function_features.second = function_features;
     std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
-    associations.insert((int32_t) hash_node_id, sa);
-    trigger_heartbeat_request_procedure(sa);
+    if (associations.size() < PFCP_MAX_ASSOCIATIONS) {
+      associations.insert({(int32_t) hash_node_id, sa});
+      trigger_heartbeat_request_procedure(sa);
+    } else {
+      Logger::smf_app().info("What do we do if too many associations?");
+    }
   }
   return true;
 }
@@ -302,9 +314,7 @@ bool pfcp_associations::get_association(
 bool pfcp_associations::get_association(
     const pfcp::fseid_t& cp_fseid,
     std::shared_ptr<pfcp_association>& sa) const {
-  folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
-
-  FOR_EACH(it, associations) {
+  for (auto it = associations.begin(); it != associations.end(); ++it) {
     std::shared_ptr<pfcp_association> a = it->second;
     if (it->second->has_session(cp_fseid)) {
       sa = it->second;
@@ -400,9 +410,7 @@ void pfcp_associations::timeout_release_request(
 //------------------------------------------------------------------------------
 void pfcp_associations::handle_receive_heartbeat_response(
     const uint64_t trxn_id) {
-  folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
-
-  FOR_EACH(it, associations) {
+  for (auto it = associations.begin(); it != associations.end(); ++it) {
     std::shared_ptr<pfcp_association> a = it->second;
     if (it->second->trxn_id_heartbeat == trxn_id) {
       itti_inst->timer_remove(it->second->timer_heartbeat);
@@ -419,8 +427,7 @@ bool pfcp_associations::select_up_node(
   if (associations.empty()) {
     return false;
   }
-  folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
-  FOR_EACH(it, associations) {
+  for (auto it = associations.begin(); it != associations.end(); ++it) {
     std::shared_ptr<pfcp_association> a = it->second;
     // TODO
     switch (node_selection_criteria) {
@@ -447,8 +454,7 @@ bool pfcp_associations::select_up_node(
     Logger::smf_app().debug("No UPF available");
     return false;
   }
-  folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>>::iterator it;
-  FOR_EACH(it, associations) {
+  for (auto it = associations.begin(); it != associations.end(); ++it) {
     std::shared_ptr<pfcp_association> a = it->second;
     // get the first node id if there's no upf profile (get UPFs from conf file)
     if (!a->upf_profile_is_set) {
