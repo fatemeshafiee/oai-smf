@@ -320,14 +320,33 @@ int session_create_sm_context_procedure::run(
     pfcp::measurement_method_t measurement_method = {};
     pfcp::measurement_period_t measurement_Period = {};
     pfcp::reporting_triggers_t reporting_triggers = {};
+    pfcp::volume_threshold_t volume_threshold     = {};
+    pfcp::time_threshold_t time_threshold         = {};
+
     // Hardcoded values for the moment
-    measurement_method.volum              = 1;   // Volume based usage report
-    measurement_Period.measurement_period = 10;  // Every 10 Sec
-    reporting_triggers.perio              = 1;   // Periodic usage report
+    measurement_method.volum                  = 1;   // Volume based usage report
+    measurement_method.durat                  = 1;
+    measurement_Period.measurement_period     = 10;  // Every 10 Sec
+    reporting_triggers.perio                  = 1;   // Periodic usage report
+    reporting_triggers.volth                  = 1;
+    reporting_triggers.timth                  = 1;
+    reporting_triggers.volqu                  = 0;
+    reporting_triggers.timqu                  = 0;
+
+    volume_threshold.dlvol                    = 1;
+    volume_threshold.ulvol                    = 0;
+    volume_threshold.tovol                    = 0;
+    volume_threshold.downlink_volume          = 1000;
+
+    time_threshold.time_threshold             = 5;
+
     create_urr.set(urr_id);
     create_urr.set(measurement_method);
     create_urr.set(measurement_Period);
     create_urr.set(reporting_triggers);
+    create_urr.set(time_threshold);
+    create_urr.set(volume_threshold);
+
     n4_triggered->pfcp_ies.set(create_urr);
   }
   // TODO: list of QoS Enforcement Rule IDs
