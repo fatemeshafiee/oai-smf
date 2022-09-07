@@ -538,13 +538,10 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
       event_subscription.smf_event = smf_event_e::SMF_EVENT_UE_IP_CH;
     } else if (event_id.compare("DDDS") == 0) {
       event_subscription.smf_event = smf_event_e::SMF_EVENT_DDDS;
-<<<<<<< HEAD
     } else if (event_id.compare("PDU_SES_EST") == 0) {
       event_subscription.smf_event = smf_event_e::SMF_EVENT_PDUSESEST;
-=======
     } else if (event_id.compare("QOS_MON") == 0) {
       event_subscription.smf_event = smf_event_e::SMF_EVENT_QOS_MON;
->>>>>>> origin/qos_monitoring_event
     } else if (event_id.compare("FLEXCN") == 0) {
       event_subscription.smf_event = smf_event_e::SMF_EVENT_FLEXCN;
     } else {

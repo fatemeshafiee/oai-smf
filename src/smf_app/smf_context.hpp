@@ -1263,13 +1263,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void trigger_ddds(scid_t scid, uint8_t http_version);
   void handle_ddds(scid_t scid, uint8_t http_version);
 
-<<<<<<< HEAD
   void trigger_pdusesest(scid_t scid, uint8_t http_version);
   void handle_pdusesest(scid_t scid, uint8_t http_version);
-=======
+
   void trigger_qos_monitoring(seid_t seid, oai::smf_server::model::EventNotification ev_notif_model, uint8_t http_version);
   void handle_qos_monitoring(seid_t seid, oai::smf_server::model::EventNotification ev_notif_model, uint8_t http_version);
->>>>>>> origin/qos_monitoring_event
 
   void trigger_flexcn_event(scid_t scid, uint8_t http_version);
   void handle_flexcn_event(scid_t scid, uint8_t http_version);
@@ -1403,11 +1401,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bs2::connection ee_ue_ip_change_connection;
   bs2::connection ee_plmn_change_connection;
   bs2::connection ee_ddds_connection;
-<<<<<<< HEAD
   bs2::connection ee_pdusesest;
-=======
   bs2::connection ee_qos_monitoring_connection;
->>>>>>> origin/qos_monitoring_event
   bs2::connection ee_flexcn;
 };
 }  // namespace smf

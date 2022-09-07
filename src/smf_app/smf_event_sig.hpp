@@ -71,13 +71,11 @@ typedef bs2::signal_type<
     void(scid_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
     ee_ddds_sig_t;
 
-<<<<<<< HEAD
 // Signal for PDU SESSION ESTABLISHMENT 
 // SCID, HTTP version
 typedef bs2::signal_type<
     void(scid_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
     ee_pdusesest_sig_t;
-=======
 // Signal for QoS Monitoring Event exposure (Usage Report)
 // SEID, Event Notification Model , HTTP version
 // TODO: use SCID and access PDU Session ID (need binding SCIDs - PDUSessID)
@@ -86,7 +84,6 @@ typedef bs2::signal_type<
     bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
     ee_qos_monitoring_sig_t;
 
->>>>>>> origin/qos_monitoring_event
 // Signal for FlexCN event (for Event Exposure)
 // SCID, HTTP version
 typedef bs2::signal_type<

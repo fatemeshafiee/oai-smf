@@ -31,11 +31,8 @@ typedef enum smf_event_e {
   SMF_EVENT_PLMN_CH     = 4,
   SMF_EVENT_UE_IP_CH    = 5,
   SMF_EVENT_DDDS        = 6,
-<<<<<<< HEAD
   SMF_EVENT_PDUSESEST   = 7,
-=======
-  SMF_EVENT_QOS_MON     = 7,
->>>>>>> origin/qos_monitoring_event
+  SMF_EVENT_QOS_MON     = 8,
   SMF_EVENT_FLEXCN      = 99
 } smf_event_t;
 
@@ -60,11 +57,8 @@ static const std::vector<std::string> smf_event_e2str = {
     "PLMN Change",
     "UE IP address change",
     "Downlink data delivery status",
-<<<<<<< HEAD
     "PDU Session Establishment",
-=======
     "QoS Monitoring",
->>>>>>> origin/qos_monitoring_event
     "FlexCN"};
 
 enum class notification_method_e {
