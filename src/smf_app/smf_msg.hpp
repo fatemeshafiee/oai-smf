@@ -632,6 +632,23 @@ class event_notification {
   oai::smf_server::model::DddStatus get_ddds() const;
   bool is_ddds_is_set() const;
 
+
+  void set_dnn(std::string const& value);
+  std::string get_dnn() const;
+  bool is_dnn_set() const;
+
+  void set_sst(uint8_t const& value);
+  uint8_t get_sst() const;
+  bool is_sst_set() const;
+
+  void set_sd(std::string const& value);
+  std::string get_sd() const;
+  bool is_sd_set() const;
+
+  void set_pdu_session_type(std::string const& value);
+  std::string get_pdu_session_type() const;
+  bool is_pdu_session_type_set() const;
+
   void set_pdu_session_id(const pdu_session_id_t value);
   pdu_session_id_t get_pdu_session_id() const;
   bool is_psi_is_set() const;
@@ -667,6 +684,15 @@ class event_notification {
   // for ddds change
   oai::smf_server::model::DddStatus m_DddStatus;
   bool m_DddStatusIsSet;
+
+  bool m_dnn_is_set;
+  std::string m_dnn;
+  bool m_sst_is_set;
+  uint8_t m_sst;
+  bool m_sd_is_set;
+  std::string m_sd;
+  bool m_pdu_session_type_is_set;
+  std::string m_pdu_session_type;
 
   // for an access type change
   // AccessType m_AccType;

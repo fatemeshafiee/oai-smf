@@ -31,6 +31,7 @@ typedef enum smf_event_e {
   SMF_EVENT_PLMN_CH     = 4,
   SMF_EVENT_UE_IP_CH    = 5,
   SMF_EVENT_DDDS        = 6,
+  SMF_EVENT_PDUSESEST   = 7,
   SMF_EVENT_FLEXCN      = 99
 } smf_event_t;
 
@@ -41,6 +42,7 @@ static std::string smf_event_from_enum(smf_event_t e) {
   if (e == smf_event_t::SMF_EVENT_PLMN_CH) return "PLMN_CH";
   if (e == smf_event_t::SMF_EVENT_UE_IP_CH) return "UE_IP_CH";
   if (e == smf_event_t::SMF_EVENT_DDDS) return "DDDS";
+  if (e == smf_event_t::SMF_EVENT_PDUSESEST) return "PDU_SES_EST";
   if (e == smf_event_t::SMF_EVENT_FLEXCN) return "FLEXCN";
   return "";
 }
@@ -53,6 +55,7 @@ static const std::vector<std::string> smf_event_e2str = {
     "PLMN Change",
     "UE IP address change",
     "Downlink data delivery status",
+    "PDU Session Establishment",
     "FlexCN"};
 
 enum class notification_method_e {
