@@ -165,6 +165,7 @@ class pfcp_associations {
  private:
   std::vector<std::shared_ptr<pfcp_association>> pending_associations;
   std::map<int32_t, std::shared_ptr<pfcp_association>> associations;
+  mutable std::mutex m_mutex;
 
   pfcp_associations(){};
   void trigger_heartbeat_request_procedure(

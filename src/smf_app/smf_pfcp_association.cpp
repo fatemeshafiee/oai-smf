@@ -141,6 +141,8 @@ bool pfcp_associations::add_association(
       }
     }
     if (associations.size() < PFCP_MAX_ASSOCIATIONS) {
+      // Protect the insertion
+      std::lock_guard<std::mutex> lck(m_mutex);
       associations.insert({(int32_t) hash_node_id, sa});
       trigger_heartbeat_request_procedure(sa);
     } else {
@@ -215,6 +217,8 @@ bool pfcp_associations::add_association(
       }
     }
     if (associations.size() < PFCP_MAX_ASSOCIATIONS) {
+      // Protect the insertion
+      std::lock_guard<std::mutex> lck(m_mutex);
       associations.insert({(int32_t) hash_node_id, sa});
       // Display UPF Node profile
       sa->get_upf_node_profile().display();
@@ -253,6 +257,8 @@ bool pfcp_associations::add_association(
     sa->function_features.second = function_features;
     std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
     if (associations.size() < PFCP_MAX_ASSOCIATIONS) {
+      // Protect the insertion
+      std::lock_guard<std::mutex> lck(m_mutex);
       associations.insert({(int32_t) hash_node_id, sa});
       trigger_heartbeat_request_procedure(sa);
     } else {
@@ -314,6 +320,9 @@ bool pfcp_associations::get_association(
 bool pfcp_associations::get_association(
     const pfcp::fseid_t& cp_fseid,
     std::shared_ptr<pfcp_association>& sa) const {
+  // Protect the parsing
+  std::lock_guard<std::mutex> lck(m_mutex);
+
   for (auto it = associations.begin(); it != associations.end(); ++it) {
     std::shared_ptr<pfcp_association> a = it->second;
     if (it->second->has_session(cp_fseid)) {
@@ -410,6 +419,9 @@ void pfcp_associations::timeout_release_request(
 //------------------------------------------------------------------------------
 void pfcp_associations::handle_receive_heartbeat_response(
     const uint64_t trxn_id) {
+  // Protect the parsing
+  std::lock_guard<std::mutex> lck(m_mutex);
+
   for (auto it = associations.begin(); it != associations.end(); ++it) {
     std::shared_ptr<pfcp_association> a = it->second;
     if (it->second->trxn_id_heartbeat == trxn_id) {
@@ -427,6 +439,9 @@ bool pfcp_associations::select_up_node(
   if (associations.empty()) {
     return false;
   }
+  // Protect the parsing
+  std::lock_guard<std::mutex> lck(m_mutex);
+
   for (auto it = associations.begin(); it != associations.end(); ++it) {
     std::shared_ptr<pfcp_association> a = it->second;
     // TODO
@@ -454,6 +469,9 @@ bool pfcp_associations::select_up_node(
     Logger::smf_app().debug("No UPF available");
     return false;
   }
+  // Protect the parsing
+  std::lock_guard<std::mutex> lck(m_mutex);
+
   for (auto it = associations.begin(); it != associations.end(); ++it) {
     std::shared_ptr<pfcp_association> a = it->second;
     // get the first node id if there's no upf profile (get UPFs from conf file)
@@ -520,6 +538,8 @@ bool pfcp_associations::add_peer_candidate_node(
     if ((*it)->node_id == node_id) {
       // TODO purge sessions of this node
       Logger::smf_app().info("TODO purge sessions of this node");
+      // Protect the deletion
+      std::lock_guard<std::mutex> lck(m_mutex);
       pending_associations.erase(it);
       break;
     }
