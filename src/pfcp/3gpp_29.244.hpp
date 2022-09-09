@@ -9174,7 +9174,7 @@ class pfcp_create_urr_ie : public pfcp_grouped_ie {
     }
     if (b.urr_id.first && b.volume_threshold.first) {
       std::shared_ptr<pfcp_volume_threshold_ie> sie(
-        new pfcp_volume_threshold_ie(b.volume_threshold.second));
+          new pfcp_volume_threshold_ie(b.volume_threshold.second));
       add_ie(sie);
     }
     // ToDo: Optional IEs
