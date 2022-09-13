@@ -28,8 +28,7 @@
 #ifndef FILE_SMF_PFCP_ASSOCIATION_HPP_SEEN
 #define FILE_SMF_PFCP_ASSOCIATION_HPP_SEEN
 
-#include <folly/AtomicHashMap.h>
-#include <folly/AtomicLinkedList.h>
+#include <map>
 #include <mutex>
 #include <vector>
 
@@ -165,10 +164,10 @@ enum node_selection_criteria_e {
 class pfcp_associations {
  private:
   std::vector<std::shared_ptr<pfcp_association>> pending_associations;
-  folly::AtomicHashMap<int32_t, std::shared_ptr<pfcp_association>> associations;
+  std::map<int32_t, std::shared_ptr<pfcp_association>> associations;
+  mutable std::mutex m_mutex;
 
-  pfcp_associations()
-      : associations(PFCP_MAX_ASSOCIATIONS), pending_associations(){};
+  pfcp_associations(){};
   void trigger_heartbeat_request_procedure(
       std::shared_ptr<pfcp_association>& s);
 
