@@ -368,8 +368,6 @@ check_install_smf_deps() {
       libconfig-devel \
       libgcrypt-devel \
       gmp-devel \
-      lksctp-tools \
-      lksctp-tools-devel \
       openssl-devel \
       libtool \
       libxml2 \
