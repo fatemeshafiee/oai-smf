@@ -606,7 +606,7 @@ class HtmlReport():
 				status = False
 				if nfType == 'SMF':
 					section_start_pattern = 'build_smf --clean --Verbose --build-type Release --jobs'
-					section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
+					section_end_pattern = 'FROM .* as oai-smf$'
 					pass_pattern = 'smf installed'
 				section_status = False
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
@@ -656,7 +656,7 @@ class HtmlReport():
 			if os.path.isfile(cwd + '/archives/' + logFileName):
 				if nfType == 'SMF':
 					section_start_pattern = 'build_smf --clean --Verbose --build-type Release --jobs'
-					section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
+					section_end_pattern = 'FROM .* as oai-smf$'
 				section_status = False
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
 					for line in logfile:
@@ -719,7 +719,7 @@ class HtmlReport():
 		for variant in variants:
 			logFileName = 'smf_' + variant + '_image_build.log'
 			if os.path.isfile(cwd + '/archives/' + logFileName):
-				section_start_pattern = 'FROM ubuntu:bionic as oai-smf$'
+				section_start_pattern = 'FROM .* as oai-smf$'
 				section_end_pattern = 'WORKDIR /openair-smf/etc'
 				section_status = False
 				status = False
