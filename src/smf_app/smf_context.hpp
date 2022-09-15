@@ -55,6 +55,8 @@ extern "C" {
 #include "nas_message.h"
 }
 
+using namespace boost::placeholders;
+
 namespace smf {
 
 class smf_qos_flow {

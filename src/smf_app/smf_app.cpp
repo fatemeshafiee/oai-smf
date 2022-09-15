@@ -785,8 +785,8 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   std::string n1_sm_message, n1_sm_message_hex;
   nas_message_t decoded_nas_msg       = {};
   cause_value_5gsm_e cause_n1         = {cause_value_5gsm_e::CAUSE_0_UNKNOWN};
-  pdu_session_type_t pdu_session_type = {
-      .pdu_session_type = PDU_SESSION_TYPE_E_IPV4};
+  pdu_session_type_t pdu_session_type = {};
+  pdu_session_type.pdu_session_type   = PDU_SESSION_TYPE_E_IPV4;
 
   // Step 1. Decode NAS and get the necessary information
   int decoder_rc = smf_n1::get_instance().decode_n1_sm_container(

@@ -568,11 +568,11 @@ class HtmlReport():
 				else:
 					cell_msg += '   ** Nlohmann Json Installation: KO\n'
 				if base_image:
-					cell_msg += '   ** nghttp2 Installation: N/A\n'
+					cell_msg += '   ** nghttp2-asio Installation: N/A\n'
 				elif nghttp2_build_status:
-					cell_msg += '   ** nghttp2 Installation: OK\n'
+					cell_msg += '   ** nghttp2-asio Installation: OK\n'
 				else:
-					cell_msg += '   ** nghttp2 Installation: KO\n'
+					cell_msg += '   ** nghttp2-asio Installation: KO\n'
 				cell_msg += '</b></pre></td>\n'
 			else:
 				cell_msg = '	  <td bgcolor="Tomato"><pre style="border:none; background-color:Tomato"><b>'
@@ -606,7 +606,7 @@ class HtmlReport():
 				status = False
 				if nfType == 'SMF':
 					section_start_pattern = 'build_smf --clean --Verbose --build-type Release --jobs'
-					section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
+					section_end_pattern = 'FROM .* as oai-smf$'
 					pass_pattern = 'smf installed'
 				section_status = False
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
@@ -656,7 +656,7 @@ class HtmlReport():
 			if os.path.isfile(cwd + '/archives/' + logFileName):
 				if nfType == 'SMF':
 					section_start_pattern = 'build_smf --clean --Verbose --build-type Release --jobs'
-					section_end_pattern = 'FROM ubuntu:bionic as oai-smf$'
+					section_end_pattern = 'FROM .* as oai-smf$'
 				section_status = False
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
 					for line in logfile:
@@ -719,7 +719,7 @@ class HtmlReport():
 		for variant in variants:
 			logFileName = 'smf_' + variant + '_image_build.log'
 			if os.path.isfile(cwd + '/archives/' + logFileName):
-				section_start_pattern = 'FROM ubuntu:bionic as oai-smf$'
+				section_start_pattern = 'FROM .* as oai-smf$'
 				section_end_pattern = 'WORKDIR /openair-smf/etc'
 				section_status = False
 				status = False
