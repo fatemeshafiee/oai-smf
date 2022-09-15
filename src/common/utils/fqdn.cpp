@@ -23,7 +23,8 @@
 #include "logger.hpp"
 #include <boost/asio.hpp>
 #include <iostream>
-#include <unistd.h>
+#include <chrono>
+#include <thread>
 
 #define MAX_NB_RESOLVE_TRIES 4
 #define TIME_BETWEEN_TRIES 2
@@ -65,7 +66,7 @@ bool fqdn::resolve(
             std::to_string(tries) + " tries");
         return false;
       }
-      sleep(TIME_BETWEEN_TRIES);
+      std::this_thread::sleep_for(std::chrono::seconds(TIME_BETWEEN_TRIES));
     }
   }
 
