@@ -32,6 +32,7 @@ bool fqdn::resolve(
     const std::string& host_name, std::string& address, uint32_t& port,
     uint8_t& addr_type, const std::string& protocol) {
   int tries = 0;
+  Logger::smf_app().debug("Resolving a DNS (name %s)", host_name.c_str());
   while (tries < MAX_NB_RESOLVE_TRIES) {
     try {
       boost::asio::io_context io_context = {};
@@ -48,7 +49,7 @@ bool fqdn::resolve(
         address = endpoint.address().to_string();
         port    = endpoint.port();
         Logger::smf_app().debug(
-            "Resolve a DNS (name %s, protocol %s): Ip Addr %s, port %u",
+            "Resolved a DNS (name %s, protocol %s): Ip Addr %s, port %u",
             host_name.c_str(), protocol.c_str(), address.c_str(), port);
         if (endpoint.address().is_v4())
           addr_type = 0;
