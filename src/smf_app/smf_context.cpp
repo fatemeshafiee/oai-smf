@@ -311,7 +311,8 @@ void smf_pdu_session::remove_qos_flow(const pfcp::qfi_t& qfi) {
 //------------------------------------------------------------------------------
 void smf_pdu_session::remove_qos_flow(smf_qos_flow& flow) {
   std::unique_lock lock(m_pdu_session_mutex);
-  pfcp::qfi_t qfi = {.qfi = flow.qfi.qfi};
+  pfcp::qfi_t qfi = {};
+  qfi.qfi         = flow.qfi.qfi;
   flow.deallocate_ressources();
   qos_flows.erase(qfi.qfi);
 }
@@ -4587,7 +4588,8 @@ void smf_context::update_qos_info(
   uint16_t length_of_rule_ie = nas_msg.plain.sm.pdu_session_modification_request
                                    .qosrules.lengthofqosrulesie;
 
-  pfcp::qfi_t generated_qfi = {.qfi = 0};
+  pfcp::qfi_t generated_qfi{};
+  generated_qfi.qfi = 0;
 
   // QOSFlowDescriptions
   uint8_t number_of_flow_descriptions =
