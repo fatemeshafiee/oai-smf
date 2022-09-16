@@ -33,13 +33,14 @@
 ARG BASE_IMAGE=ubuntu:bionic
 FROM oai-smf-base:latest as oai-smf-builder
 
+RUN rm -Rf /openair-smf/
 WORKDIR /openair-smf/
 COPY . /openair-smf
-RUN cp -Rf /openair-smf-ext-ref /openair-smf/build/ext
 
 # Building SMF
 WORKDIR /openair-smf/build/scripts
 RUN ldconfig && \
+    cp -Rf /openair-smf-ext-ref /openair-smf/build/ext && \
     ./build_smf --clean --Verbose --build-type Release --jobs && \
     ldd /openair-smf/build/smf/build/smf && \
     mv /openair-smf/build/smf/build/smf /openair-smf/build/smf/build/oai_smf
