@@ -990,11 +990,17 @@ void smf_context::handle_itti_msg(
           if (ur.get(seqn))
             Logger::smf_app().info("\t\t UR-SEQN         -> %ld", seqn.ur_seqn);
           if (ur.get(trig))
-            if (trig.perio) Logger::smf_app().info("\t\t Trigger         -> Periodic Reporting");
-            if (trig.timqu) Logger::smf_app().info("\t\t Trigger         -> Time Quota");
-            if (trig.timth) Logger::smf_app().info("\t\t Trigger         -> Time Threshold");
-            if (trig.volqu) Logger::smf_app().info("\t\t Trigger         -> Volume Quota");
-            if (trig.volth) Logger::smf_app().info("\t\t Trigger         -> Volume Threshold");
+            if (trig.perio)
+              Logger::smf_app().info(
+                  "\t\t Trigger         -> Periodic Reporting");
+          if (trig.timqu)
+            Logger::smf_app().info("\t\t Trigger         -> Time Quota");
+          if (trig.timth)
+            Logger::smf_app().info("\t\t Trigger         -> Time Threshold");
+          if (trig.volqu)
+            Logger::smf_app().info("\t\t Trigger         -> Volume Quota");
+          if (trig.volth)
+            Logger::smf_app().info("\t\t Trigger         -> Volume Threshold");
           if (ur.get(dm))
             Logger::smf_app().info("\t\t Duration        -> %ld", dm.duration);
           Logger::smf_app().info("\t\t NoP    Total    -> %lld", vm.total_nop);
@@ -1013,13 +1019,11 @@ void smf_context::handle_itti_msg(
         std::shared_ptr<smf_context> pc = {};
         if (smf_app_inst->seid_2_smf_context(req->seid, pc)) {
           oai::smf_server::model::EventNotification ev_notif = {};
-          oai::smf_server::model::UsageReport ur_model = {};
+          oai::smf_server::model::UsageReport ur_model       = {};
           if (ur.get(vm)) {
             ur_model.setSEndID(req->seid);
-            if (ur.get(seqn))
-              ur_model.seturSeqN(seqn.ur_seqn);
-            if (ur.get(dm))
-              ur_model.setDuration(dm.duration);
+            if (ur.get(seqn)) ur_model.seturSeqN(seqn.ur_seqn);
+            if (ur.get(dm)) ur_model.setDuration(dm.duration);
             ur_model.setTotNoP(vm.total_nop);
             ur_model.setUlNoP(vm.uplink_nop);
             ur_model.setDlNoP(vm.downlink_nop);
@@ -4089,12 +4093,12 @@ void smf_context::trigger_ue_ip_change(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_qos_monitoring(seid_t seid,
-  oai::smf_server::model::EventNotification ev_notif_model, uint8_t http_version) {
-
+void smf_context::handle_qos_monitoring(
+    seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
+    uint8_t http_version) {
   Logger::smf_app().debug(
       "Send request to N11 to trigger QoS Monitoring (Usage Report) Event, "
-      "SMF Context-related SEID  " SEID_FMT ,
+      "SMF Context-related SEID  " SEID_FMT,
       seid);
 
   // Get the smf context
@@ -4105,8 +4109,8 @@ void smf_context::handle_qos_monitoring(seid_t seid,
     return;
   }
 
-  supi_t supi =       pc.get()->supi;
-  supi64_t supi64 =   smf_supi_to_u64(supi);
+  supi_t supi     = pc.get()->supi;
+  supi64_t supi64 = smf_supi_to_u64(supi);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4153,11 +4157,11 @@ void smf_context::handle_qos_monitoring(seid_t seid,
 }
 
 //------------------------------------------------------------------------------
-void smf_context::trigger_qos_monitoring(seid_t seid,
-  oai::smf_server::model::EventNotification ev_notif_model, uint8_t http_version) {
+void smf_context::trigger_qos_monitoring(
+    seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
+    uint8_t http_version) {
   event_sub.ee_qos_monitoring(seid, ev_notif_model, http_version);
 }
-
 
 //------------------------------------------------------------------------------
 void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
@@ -4415,8 +4419,6 @@ void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
       std::time_t time_epoch_ntp = std::time(nullptr);
       uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
       ev_notif.set_timestamp(std::to_string(tv_ntp));
-      
-     
 
       //  UE IPv4
       if (sp->ipv4) {
@@ -4431,7 +4433,8 @@ void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
           // ev_notif.set_ad_ipv6_prefix(conv::toString(sp->ipv4_address));
         }
       }
-      ev_notif.set_pdu_session_type(sp->pdu_session_type.toString()); // PDU Session Type
+      ev_notif.set_pdu_session_type(
+          sp->pdu_session_type.toString());  // PDU Session Type
       ev_notif.set_sst(sp->get_snssai().sst);
       ev_notif.set_sd(std::to_string(sp->get_snssai().sd));
       ev_notif.set_dnn(sp->get_dnn());
@@ -4463,8 +4466,6 @@ void smf_context::trigger_pdusesest(scid_t scid, uint8_t http_version) {
 //------------------------------------------------------------------------------
 //-----------
 
-
-
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -4493,7 +4494,6 @@ void smf_context::trigger_pdusesest(scid_t scid, uint8_t http_version) {
 void smf_context::trigger_plmn_change(scid_t scid, uint8_t http_version) {
   event_sub.ee_plmn_change(scid, http_version);
 }
-
 
 //------------------------------------------------------------------------------
 void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {

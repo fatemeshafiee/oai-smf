@@ -1185,9 +1185,6 @@ bool event_notification::is_sst_set() const {
   return m_sst_is_set;
 }
 
-
-
-
 //-----------------------------------------------------------------------------
 void event_notification::set_sd(std::string const& value) {
   m_sd        = value;
@@ -1203,9 +1200,6 @@ std::string event_notification::get_sd() const {
 bool event_notification::is_sd_set() const {
   return m_sd_is_set;
 }
-
-
-
 
 //-----------------------------------------------------------------------------
 void event_notification::set_pdu_session_type(std::string const& value) {

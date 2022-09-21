@@ -1,6 +1,6 @@
 /**
  * Nsmf_EventExposure
- * 
+ *
  * UsageReport.cpp
  */
 
@@ -12,26 +12,26 @@ namespace smf_server {
 namespace model {
 
 UsageReport::UsageReport() {
-  m_SEndID                  = 0;
-  m_SEndIDIsSet             = false;
-  m_urSeqN                  = 0;
-  m_urSeqNIsSet             = false;
-  m_duration                = 0;
-  m_durationIsSet           = false;
-  m_totNoP                  = 0;
-  m_totNoPIsSet             = false;
-  m_ulNoP                   = 0;
-  m_ulNoPIsSet              = false;
-  m_dlNoP                   = 0;
-  m_dlNoPIsSet              = false;
-  m_totVol                  = 0;
-  m_totVolIsSet             = false;
-  m_ulVol                   = 0;
-  m_ulVolIsSet              = false;
-  m_dlVol                   = 0;
-  m_dlVolIsSet              = false;
-  m_urTrig                  = {};
-  m_urTrigIsSet             = false;
+  m_SEndID        = 0;
+  m_SEndIDIsSet   = false;
+  m_urSeqN        = 0;
+  m_urSeqNIsSet   = false;
+  m_duration      = 0;
+  m_durationIsSet = false;
+  m_totNoP        = 0;
+  m_totNoPIsSet   = false;
+  m_ulNoP         = 0;
+  m_ulNoPIsSet    = false;
+  m_dlNoP         = 0;
+  m_dlNoPIsSet    = false;
+  m_totVol        = 0;
+  m_totVolIsSet   = false;
+  m_ulVol         = 0;
+  m_ulVolIsSet    = false;
+  m_dlVol         = 0;
+  m_dlVolIsSet    = false;
+  m_urTrig        = {};
+  m_urTrigIsSet   = false;
 }
 
 UsageReport::~UsageReport() {}
@@ -41,22 +41,15 @@ void UsageReport::validate() {
 }
 
 void to_json(nlohmann::json& j, const UsageReport& o) {
-  j              = nlohmann::json();
-  if (o.SEndIDIsSet())
-    j["SEID"] = o.m_SEndID;
-  if (o.urSeqNIsSet())
-    j["UR-SEQN"] = o.m_urSeqN;
+  j = nlohmann::json();
+  if (o.SEndIDIsSet()) j["SEID"] = o.m_SEndID;
+  if (o.urSeqNIsSet()) j["UR-SEQN"] = o.m_urSeqN;
   if (o.urTriggerIsSet()) {
-    if (o.m_urTrig.perio)
-      j["Trigger"] = "Periodic Reporting";
-    if (o.m_urTrig.volth)
-      j["Trigger"] = "Volume Threshold";
-    if (o.m_urTrig.timth)
-      j["Trigger"] = "Time Threshold";
-    if (o.m_urTrig.volqu)
-      j["Trigger"] = "Volume Quota";
-    if (o.m_urTrig.timqu)
-      j["Trigger"] = "Time Quota";
+    if (o.m_urTrig.perio) j["Trigger"] = "Periodic Reporting";
+    if (o.m_urTrig.volth) j["Trigger"] = "Volume Threshold";
+    if (o.m_urTrig.timth) j["Trigger"] = "Time Threshold";
+    if (o.m_urTrig.volqu) j["Trigger"] = "Volume Quota";
+    if (o.m_urTrig.timqu) j["Trigger"] = "Time Quota";
     /*
     switch (o.m_urTrig) {
       case :
@@ -77,20 +70,13 @@ void to_json(nlohmann::json& j, const UsageReport& o) {
     }
     */
   }
-  if (o.durationIsSet())
-    j["Duration"] = o.m_duration;
-  if (o.totNoPIsSet())
-    j["NoP"]["Total"] = o.m_totNoP;
-  if (o.ulNoPIsSet())
-    j["NoP"]["Uplink"] = o.m_ulNoP;
-  if (o.dlNoPIsSet())
-    j["NoP"]["Downlink"] = o.m_dlNoP;
-  if (o.totVolIsSet())
-    j["Volume"]["Total"] = o.m_totVol;
-  if (o.ulVolIsSet())
-    j["Volume"]["Uplink"] = o.m_ulVol;
-  if (o.dlVolIsSet())
-    j["Volume"]["Downlink"] = o.m_dlVol;
+  if (o.durationIsSet()) j["Duration"] = o.m_duration;
+  if (o.totNoPIsSet()) j["NoP"]["Total"] = o.m_totNoP;
+  if (o.ulNoPIsSet()) j["NoP"]["Uplink"] = o.m_ulNoP;
+  if (o.dlNoPIsSet()) j["NoP"]["Downlink"] = o.m_dlNoP;
+  if (o.totVolIsSet()) j["Volume"]["Total"] = o.m_totVol;
+  if (o.ulVolIsSet()) j["Volume"]["Uplink"] = o.m_ulVol;
+  if (o.dlVolIsSet()) j["Volume"]["Downlink"] = o.m_dlVol;
 }
 
 void from_json(const nlohmann::json& j, UsageReport& o) {
@@ -104,16 +90,12 @@ void from_json(const nlohmann::json& j, UsageReport& o) {
   }
   if (j.find("Trigger") != j.end()) {
     o.m_urTrigIsSet = true;
-    auto s = j.get<std::string>();
-    s = j.at("Trigger");
-    if (s == "Periodic Reporting")
-      o.m_urTrig.perio = 1;
-    if (s == "Volume Threshold")
-      o.m_urTrig.volth = 1;
-    if (s == "Time Threshold")
-      o.m_urTrig.timth = 1;
-    if (s == "Volume Quota")
-      o.m_urTrig.volqu = 1;
+    auto s          = j.get<std::string>();
+    s               = j.at("Trigger");
+    if (s == "Periodic Reporting") o.m_urTrig.perio = 1;
+    if (s == "Volume Threshold") o.m_urTrig.volth = 1;
+    if (s == "Time Threshold") o.m_urTrig.timth = 1;
+    if (s == "Volume Quota") o.m_urTrig.volqu = 1;
     if (s == "Time Quota")
       o.m_urTrig.timqu = 1;
     else {

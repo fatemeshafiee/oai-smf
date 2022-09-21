@@ -71,7 +71,7 @@ typedef bs2::signal_type<
     void(scid_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
     ee_ddds_sig_t;
 
-// Signal for PDU SESSION ESTABLISHMENT 
+// Signal for PDU SESSION ESTABLISHMENT
 // SCID, HTTP version
 typedef bs2::signal_type<
     void(scid_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
@@ -81,8 +81,7 @@ typedef bs2::signal_type<
 // TODO: use SCID and access PDU Session ID (need binding SCIDs - PDUSessID)
 typedef bs2::signal_type<
     void(seid_t, oai::smf_server::model::EventNotification, uint8_t),
-    bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
-    ee_qos_monitoring_sig_t;
+    bs2::keywords::mutex_type<bs2::dummy_mutex>>::type ee_qos_monitoring_sig_t;
 
 // Signal for FlexCN event (for Event Exposure)
 // SCID, HTTP version

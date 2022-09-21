@@ -1,6 +1,6 @@
 /**
  * Nsmf_EventExposure
- * 
+ *
  * UsageReport.h
  */
 
@@ -15,14 +15,7 @@ namespace smf_server {
 namespace model {
 
 // TODO: Redefine in separate files
-enum UsageReportTrigger {
-  PERIO = 1,
-  VOLTH,
-  TIMTH,
-  VOLQU,
-  TIMQU
-};
-
+enum UsageReportTrigger { PERIO = 1, VOLTH, TIMTH, VOLQU, TIMQU };
 
 /// <summary>
 ///
@@ -79,7 +72,7 @@ class UsageReport {
 
   /// <summary>
   ///
-  /// </summary>  
+  /// </summary>
   int64_t getDlNoP() const;
   void setDlNoP(int64_t const& value);
   bool dlNoPIsSet() const;

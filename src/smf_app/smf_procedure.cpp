@@ -324,21 +324,21 @@ int session_create_sm_context_procedure::run(
     pfcp::time_threshold_t time_threshold         = {};
 
     // Hardcoded values for the moment
-    measurement_method.volum                  = 1;   // Volume based usage report
-    measurement_method.durat                  = 1;
-    measurement_Period.measurement_period     = 10;  // Every 10 Sec
-    reporting_triggers.perio                  = 1;   // Periodic usage report
-    reporting_triggers.volth                  = 1;
-    reporting_triggers.timth                  = 1;
-    reporting_triggers.volqu                  = 0;
-    reporting_triggers.timqu                  = 0;
+    measurement_method.volum              = 1;  // Volume based usage report
+    measurement_method.durat              = 1;
+    measurement_Period.measurement_period = 10;  // Every 10 Sec
+    reporting_triggers.perio              = 1;   // Periodic usage report
+    reporting_triggers.volth              = 1;
+    reporting_triggers.timth              = 1;
+    reporting_triggers.volqu              = 0;
+    reporting_triggers.timqu              = 0;
 
-    volume_threshold.dlvol                    = 1;
-    volume_threshold.ulvol                    = 0;
-    volume_threshold.tovol                    = 0;
-    volume_threshold.downlink_volume          = 1000;
+    volume_threshold.dlvol           = 1;
+    volume_threshold.ulvol           = 0;
+    volume_threshold.tovol           = 0;
+    volume_threshold.downlink_volume = 1000;
 
-    time_threshold.time_threshold             = 5;
+    time_threshold.time_threshold = 5;
 
     create_urr.set(urr_id);
     create_urr.set(measurement_method);

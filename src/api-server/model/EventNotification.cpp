@@ -53,7 +53,6 @@ EventNotification::EventNotification() {
   m_MaxWaitTimeIsSet        = false;
   m_usageReport             = {};
   m_usageReportIsSet        = false;
-
 }
 
 EventNotification::~EventNotification() {}
@@ -90,7 +89,6 @@ void to_json(nlohmann::json& j, const EventNotification& o) {
   if (o.dddStatusIsSet()) j["dddStatus"] = o.m_DddStatus;
   if (o.maxWaitTimeIsSet()) j["maxWaitTime"] = o.m_MaxWaitTime;
   if (o.usageReportIsSet()) j["Usage Report"] = o.m_usageReport;
-
 }
 
 void from_json(const nlohmann::json& j, EventNotification& o) {
@@ -484,7 +482,6 @@ bool EventNotification::usageReportIsSet() const {
 void EventNotification::unsetUsageReport() {
   m_usageReportIsSet = false;
 }
-
 
 }  // namespace model
 }  // namespace smf_server

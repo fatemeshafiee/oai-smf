@@ -632,7 +632,6 @@ class event_notification {
   oai::smf_server::model::DddStatus get_ddds() const;
   bool is_ddds_is_set() const;
 
-
   void set_dnn(std::string const& value);
   std::string get_dnn() const;
   bool is_dnn_set() const;
