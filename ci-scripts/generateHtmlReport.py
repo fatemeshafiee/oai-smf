@@ -492,7 +492,7 @@ class HtmlReport():
 				base_image = False
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
 					for line in logfile:
-						result = re.search('FROM oai-smf-base', line)
+						result = re.search('FROM oai-smf-base:latest', line)
 						if result is not None:
 							base_image = True
 						result = re.search(section_start_pattern, line)
