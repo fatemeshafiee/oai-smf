@@ -31,9 +31,9 @@ typedef enum smf_event_e {
   SMF_EVENT_PLMN_CH     = 4,
   SMF_EVENT_UE_IP_CH    = 5,
   SMF_EVENT_DDDS        = 6,
-  SMF_EVENT_PDUSESEST   = 7,
-  SMF_EVENT_QOS_MON     = 8,
-  SMF_EVENT_FLEXCN      = 99
+  SMF_EVENT_PDUSESEST   = 97,  // Customized event
+  SMF_EVENT_QOS_MON     = 98,  // Customized event
+  SMF_EVENT_FLEXCN      = 99   // Customized event
 } smf_event_t;
 
 static std::string smf_event_from_enum(smf_event_t e) {
