@@ -692,6 +692,14 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     ee_ddds_connection = event_sub.subscribe_ee_ddds(
         boost::bind(&smf_context::handle_ddds, this, _1, _2));
 
+    // Subscribe to QoS Monitoring Event
+    ee_qos_monitoring_connection = event_sub.subscribe_ee_qos_monitoring(
+        boost::bind(&smf_context::handle_qos_monitoring, this, _1, _2, _3));
+
+    // Subscribe to PDU SESSION ESTABLISHMENT event
+    ee_pdusesest = event_sub.subscribe_ee_pdusesest(
+        boost::bind(&smf_context::handle_pdusesest, this, _1, _2));
+
     // Subscribe to FlexCN event
     ee_flexcn = event_sub.subscribe_ee_flexcn_event(
         boost::bind(&smf_context::handle_flexcn_event, this, _1, _2));
@@ -710,7 +718,10 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       ee_ue_ip_change_connection.disconnect();
     if (ee_plmn_change_connection.connected())
       ee_plmn_change_connection.disconnect();
+    if (ee_qos_monitoring_connection.connected())
+      ee_qos_monitoring_connection.disconnect();
     if (ee_ddds_connection.connected()) ee_ddds_connection.disconnect();
+    if (ee_pdusesest.connected()) ee_pdusesest.disconnect();
     if (ee_flexcn.connected()) ee_flexcn.disconnect();
   }
 
@@ -1254,6 +1265,16 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   void trigger_ddds(scid_t scid, uint8_t http_version);
   void handle_ddds(scid_t scid, uint8_t http_version);
 
+  void trigger_pdusesest(scid_t scid, uint8_t http_version);
+  void handle_pdusesest(scid_t scid, uint8_t http_version);
+
+  void trigger_qos_monitoring(
+      seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
+      uint8_t http_version);
+  void handle_qos_monitoring(
+      seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
+      uint8_t http_version);
+
   void trigger_flexcn_event(scid_t scid, uint8_t http_version);
   void handle_flexcn_event(scid_t scid, uint8_t http_version);
   /*
@@ -1386,6 +1407,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bs2::connection ee_ue_ip_change_connection;
   bs2::connection ee_plmn_change_connection;
   bs2::connection ee_ddds_connection;
+  bs2::connection ee_pdusesest;
+  bs2::connection ee_qos_monitoring_connection;
   bs2::connection ee_flexcn;
 };
 }  // namespace smf

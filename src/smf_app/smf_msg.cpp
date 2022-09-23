@@ -1152,3 +1152,67 @@ void data_notification_msg::set_profile(const std::shared_ptr<nf_profile>& p) {
 void data_notification_msg::get_profile(std::shared_ptr<nf_profile>& p) const {
   p = profile;
 }
+
+//-----------------------------------------------------------------------------
+void event_notification::set_dnn(std::string const& value) {
+  m_dnn        = value;
+  m_dnn_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_dnn() const {
+  return m_dnn;
+}
+
+//-----------------------------------------------------------------------------
+bool event_notification::is_dnn_set() const {
+  return m_dnn_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_sst(uint8_t const& value) {
+  m_sst        = value;
+  m_sst_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+uint8_t event_notification::get_sst() const {
+  return m_sst;
+}
+
+//-----------------------------------------------------------------------------
+bool event_notification::is_sst_set() const {
+  return m_sst_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_sd(std::string const& value) {
+  m_sd        = value;
+  m_sd_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_sd() const {
+  return m_sd;
+}
+
+//-----------------------------------------------------------------------------
+bool event_notification::is_sd_set() const {
+  return m_sd_is_set;
+}
+
+//-----------------------------------------------------------------------------
+void event_notification::set_pdu_session_type(std::string const& value) {
+  m_pdu_session_type        = value;
+  m_pdu_session_type_is_set = true;
+}
+
+//-----------------------------------------------------------------------------
+std::string event_notification::get_pdu_session_type() const {
+  return m_pdu_session_type;
+}
+
+//-----------------------------------------------------------------------------
+bool event_notification::is_pdu_session_type_set() const {
+  return m_pdu_session_type_is_set;
+}
