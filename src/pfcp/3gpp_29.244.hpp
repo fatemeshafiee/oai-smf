@@ -735,28 +735,26 @@ class pfcp_fteid_ie : public pfcp_ie {
   //--------
   explicit pfcp_fteid_ie(const pfcp::fteid_t& b) : pfcp_ie(PFCP_IE_F_TEID) {
     tlv.set_length(1);
-    u1.b         = 0;
-    u1.bf.ch     = b.ch;
-    u1.bf.chid   = b.chid;
-    teid         = b.teid;
-    ipv4_address = b.ipv4_address;
-    ipv6_address = b.ipv6_address;
+    u1.b       = 0;
+    u1.bf.ch   = b.ch;
+    u1.bf.chid = b.chid;
+    teid       = b.teid;
     if (!u1.bf.ch) {
       tlv.add_length(4);  // teid
       u1.bf.v4 = b.v4;
       u1.bf.v6 = b.v6;
       if (u1.bf.v4) {
         tlv.add_length(4);
+        ipv4_address = b.ipv4_address;
       }
       if (u1.bf.v6) {
         tlv.add_length(16);
+        ipv6_address = b.ipv6_address;
       }
     }
     if (u1.bf.ch & b.v4) {
       u1.bf.v4 = b.v4;
     } else {
-      ipv4_address.s_addr = INADDR_ANY;
-      ipv6_address        = in6addr_any;
       // else should clear v4 v6 bits
       if (u1.bf.chid) {
         choose_id = b.choose_id;
