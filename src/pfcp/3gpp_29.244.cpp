@@ -471,14 +471,14 @@ pfcp_ie* pfcp_ie::new_pfcp_ie_from_stream(std::istream& is) {
         //        return ie;
         //      }
         //      break;
-        //    case PFCP_IE_USAGE_REPORT_WITHIN_SESSION_DELETION_RESPONSE: {
-        //        pfcp_usage_report_within_session_deletion_response_ie *ie =
-        //        new
-        //        pfcp_usage_report_within_session_deletion_response_ie(tlv);
-        //        ie->load_from(is);
-        //        return ie;
-        //      }
-        //      break;
+        case PFCP_IE_USAGE_REPORT_WITHIN_SESSION_DELETION_RESPONSE: {
+               pfcp_usage_report_within_session_deletion_response_ie *ie =
+               new
+               pfcp_usage_report_within_session_deletion_response_ie(tlv);
+               ie->load_from(is);
+               return ie;
+             }
+             break;
       case PFCP_IE_USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST: {
         pfcp_usage_report_within_session_report_request_ie* ie =
             new pfcp_usage_report_within_session_report_request_ie(tlv);
@@ -1384,11 +1384,12 @@ pfcp_msg::pfcp_msg(const pfcp_session_deletion_response& pfcp_ies)
   // add_ie(sie);} if (pfcp_ies.overload_control_information.first)
   // {std::shared_ptr<pfcp_overload_control_information_ie> sie(new
   // pfcp_overload_control_information_ie(pfcp_ies.overload_control_information.second));
-  // add_ie(sie);} if (pfcp_ies.usage_report_information.first)
-  // {std::shared_ptr<pfcp_usage_report_within_session_deletion_response_ie>
-  // sie(new
-  // pfcp_usage_report_within_session_deletion_response_ie(pfcp_ies.additional_usage_reports_information.second));
-  // add_ie(sie);}
+  // add_ie(sie);} 
+  if (pfcp_ies.usage_report.first)
+   {std::shared_ptr<pfcp_usage_report_within_session_deletion_response_ie>
+   sie(new
+   pfcp_usage_report_within_session_deletion_response_ie(pfcp_ies.usage_report.second));
+   add_ie(sie);}
 }
 //------------------------------------------------------------------------------
 pfcp_msg::pfcp_msg(const pfcp_session_report_request& pfcp_ies)
