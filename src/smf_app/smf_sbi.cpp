@@ -911,6 +911,11 @@ bool smf_sbi::get_sm_data(
 
   // Process the response
   if (!jsonData.empty()) {
+    if (jsonData.type() == json::value_t::array) {
+      if (!jsonData[0].empty())
+        jsonData = jsonData[0];  // Array with only 1 member!
+    }
+
     Logger::smf_sbi().debug("Response from UDM %s", jsonData.dump().c_str());
     // Verify SNSSAI
     if (jsonData.find("singleNssai") == jsonData.end()) return false;
@@ -929,6 +934,9 @@ bool smf_sbi::get_sm_data(
         return false;
       }
     }
+
+    // Verify DNN configurations
+    if (jsonData.find("dnnConfigurations") == jsonData.end()) return false;
 
     // Retrieve SessionManagementSubscription and store in the context
     for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin();
