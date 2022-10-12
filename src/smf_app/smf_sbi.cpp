@@ -1322,13 +1322,18 @@ void smf_sbi::curl_release_handles() {
 
 //---------------------------------------------------------------------------------------------
 uint32_t smf_sbi::get_available_response(boost::shared_future<uint32_t>& f) {
-  f.wait();  // Wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
-
-  uint32_t response_code = f.get();
-  return response_code;
+  boost::future_status status;
+  // wait for timeout or ready
+  status = f.wait_for(boost::chrono::milliseconds(FUTURE_STATUS_TIMEOUT_MS));
+  if (status == boost::future_status::ready) {
+    assert(f.is_ready());
+    assert(f.has_value());
+    assert(!f.has_exception());
+    uint32_t response_code = f.get();
+    return response_code;
+  } else {
+    return 408;  // timeout, TODO: remove hardcoded value
+  }
 }
 
 //---------------------------------------------------------------------------------------------
