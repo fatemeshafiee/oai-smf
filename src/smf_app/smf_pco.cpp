@@ -387,6 +387,23 @@ int smf_app::process_pco_p_cscf_v6_request(
 }
 
 //------------------------------------------------------------------------------
+int smf_app::process_pco_selected_bearer_control_mode(
+    protocol_configuration_options_t& pco_resp,
+    const pco_protocol_or_container_id_t* const poc_id) {
+  pco_protocol_or_container_id_t poc_id_resp = {0};
+  uint8_t value;
+
+  Logger::smf_app().debug(
+      "PCO: Protocol identifier Selected Bearer Control Mode");
+  poc_id_resp.protocol_id =
+      PCO_CONTAINER_IDENTIFIER_SELECTED_BEARER_CONTROL_MODE;
+  poc_id_resp.length_of_protocol_id_contents = 1;
+  value                            = 0x02;  // MS/NW mode, hardcoded for now
+  poc_id_resp.protocol_id_contents = std::to_string(value);
+  return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
+}
+
+//------------------------------------------------------------------------------
 int smf_app::process_pco_request(
     const protocol_configuration_options_t& pco_req,
     protocol_configuration_options_t& pco_resp,
@@ -445,6 +462,11 @@ int smf_app::process_pco_request(
         process_pco_p_cscf_request(
             pco_resp, &pco_req.protocol_or_container_ids[id]);
         pco_ids.ci_ipv4_p_cscf_request = true;
+        break;
+      case PCO_CONTAINER_IDENTIFIER_SELECTED_BEARER_CONTROL_MODE:
+        process_pco_selected_bearer_control_mode(
+            pco_resp, &pco_req.protocol_or_container_ids[id]);
+        pco_ids.ci_selected_bearer_control_mode = true;
         break;
       default:
         Logger::smf_app().warn(
