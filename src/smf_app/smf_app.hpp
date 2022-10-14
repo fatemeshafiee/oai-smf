@@ -213,6 +213,16 @@ class smf_app {
       protocol_configuration_options_t& pco_resp,
       const pco_protocol_or_container_id_t* const poc_id);
 
+  /*
+   * process_pco_selected_bearer_control_mode
+   * @param [protocol_configuration_options_t &] pco_resp
+   * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @return
+   */
+  int process_pco_selected_bearer_control_mode(
+      protocol_configuration_options_t& pco_resp,
+      const pco_protocol_or_container_id_t* const poc_id);
+
  public:
   explicit smf_app(const std::string& config_file);
   smf_app(smf_app const&) = delete;

@@ -153,7 +153,8 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
     return false;
   }
 
-  sm_msg->pdu_session_establishment_accept.presence = 0x038a;
+  sm_msg->pdu_session_establishment_accept.presence =
+      0x039a;  // Update Presence when adding a new IE
   if (static_cast<uint8_t>(sm_cause) > 0) {
     sm_msg->pdu_session_establishment_accept.presence = 0x039b;
     sm_msg->pdu_session_establishment_accept._5gsmcause =
@@ -217,9 +218,9 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
       sm_msg->pdu_session_establishment_accept.snssai.sd,
       sm_msg->pdu_session_establishment_accept.snssai.sd);
 
-  // TODO: AlwaysonPDUSessionIndication
-  // sm_msg->pdu_session_establishment_accept.alwaysonpdusessionindication.apsi_indication
-  // = ALWAYSON_PDU_SESSION_REQUIRED;
+  // AlwaysonPDUSessionIndication
+  sm_msg->pdu_session_establishment_accept.alwaysonpdusessionindication
+      .apsi_indication = ALWAYSON_PDU_SESSION_REQUIRED;
 
   // TODO: MappedEPSBearerContexts
   // TODO: EAPMessage
