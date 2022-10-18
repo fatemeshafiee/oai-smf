@@ -85,12 +85,22 @@ void IndividualSMContextApiImpl::release_sm_context(
   itti_msg->http_version = 1;
   m_smf_app->handle_pdu_session_release_sm_context_request(itti_msg);
 
-  // Wait for the result from APP and send reply to AMF
-  smf::pdu_session_release_sm_context_response sm_context_response = f.get();
-  Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
+  boost::future_status status;
+  // wait for timeout or ready
+  status = f.wait_for(boost::chrono::milliseconds(FUTURE_STATUS_TIMEOUT_MS));
+  if (status == boost::future_status::ready) {
+    assert(f.is_ready());
+    assert(f.has_value());
+    assert(!f.has_exception());
+    // Wait for the result from APP and send reply to NF consumer (e.g., AMF)
+    smf::pdu_session_release_sm_context_response sm_context_response = f.get();
+    Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
-  // TODO: Process the response
-  response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
+    // TODO: Process the response
+    response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
+  } else {
+    response.send(Pistache::Http::Code::Request_Timeout);
+  }
 }
 
 void IndividualSMContextApiImpl::retrieve_sm_context(
@@ -138,54 +148,67 @@ void IndividualSMContextApiImpl::update_sm_context(
   itti_msg->http_version = 1;
   m_smf_app->handle_pdu_session_update_sm_context_request(itti_msg);
 
-  // Wait for the result from APP and send reply to AMF
-  smf::pdu_session_update_sm_context_response sm_context_response = f.get();
-  Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
+  boost::future_status status;
+  // wait for timeout or ready
+  status = f.wait_for(boost::chrono::milliseconds(FUTURE_STATUS_TIMEOUT_MS));
+  if (status == boost::future_status::ready) {
+    assert(f.is_ready());
+    assert(f.has_value());
+    assert(!f.has_exception());
+    // Wait for the result from APP and send reply to NF consumer (e.g., AMF)
+    smf::pdu_session_update_sm_context_response sm_context_response = f.get();
+    Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
-  nlohmann::json json_data = {};
-  std::string body         = {};
-  std::string json_format;
+    nlohmann::json json_data = {};
+    std::string body         = {};
+    std::string json_format;
 
-  sm_context_response.get_json_format(json_format);
-  sm_context_response.get_json_data(json_data);
-  Logger::smf_api_server().debug("Json data %s", json_data.dump().c_str());
+    sm_context_response.get_json_format(json_format);
+    sm_context_response.get_json_data(json_data);
+    Logger::smf_api_server().debug("Json data %s", json_data.dump().c_str());
 
-  if (sm_context_response.n1_sm_msg_is_set() and
-      sm_context_response.n2_sm_info_is_set()) {
-    mime_parser::create_multipart_related_content(
-        body, json_data.dump(), CURL_MIME_BOUNDARY,
-        sm_context_response.get_n1_sm_message(),
-        sm_context_response.get_n2_sm_information(), json_format);
-    response.headers().add<Pistache::Http::Header::ContentType>(
-        Pistache::Http::Mime::MediaType(
-            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
-  } else if (sm_context_response.n1_sm_msg_is_set()) {
-    mime_parser::create_multipart_related_content(
-        body, json_data.dump(), CURL_MIME_BOUNDARY,
-        sm_context_response.get_n1_sm_message(),
-        multipart_related_content_part_e::NAS, json_format);
-    response.headers().add<Pistache::Http::Header::ContentType>(
-        Pistache::Http::Mime::MediaType(
-            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
-  } else if (sm_context_response.n2_sm_info_is_set()) {
-    mime_parser::create_multipart_related_content(
-        body, json_data.dump(), CURL_MIME_BOUNDARY,
-        sm_context_response.get_n2_sm_information(),
-        multipart_related_content_part_e::NGAP, json_format);
-    response.headers().add<Pistache::Http::Header::ContentType>(
-        Pistache::Http::Mime::MediaType(
-            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)));
-  } else if (json_data.size() > 0) {
-    response.headers().add<Pistache::Http::Header::ContentType>(
-        Pistache::Http::Mime::MediaType(json_format));
-    body = json_data.dump().c_str();
+    if (sm_context_response.n1_sm_msg_is_set() and
+        sm_context_response.n2_sm_info_is_set()) {
+      mime_parser::create_multipart_related_content(
+          body, json_data.dump(), CURL_MIME_BOUNDARY,
+          sm_context_response.get_n1_sm_message(),
+          sm_context_response.get_n2_sm_information(), json_format);
+      response.headers().add<Pistache::Http::Header::ContentType>(
+          Pistache::Http::Mime::MediaType(
+              "multipart/related; boundary=" +
+              std::string(CURL_MIME_BOUNDARY)));
+    } else if (sm_context_response.n1_sm_msg_is_set()) {
+      mime_parser::create_multipart_related_content(
+          body, json_data.dump(), CURL_MIME_BOUNDARY,
+          sm_context_response.get_n1_sm_message(),
+          multipart_related_content_part_e::NAS, json_format);
+      response.headers().add<Pistache::Http::Header::ContentType>(
+          Pistache::Http::Mime::MediaType(
+              "multipart/related; boundary=" +
+              std::string(CURL_MIME_BOUNDARY)));
+    } else if (sm_context_response.n2_sm_info_is_set()) {
+      mime_parser::create_multipart_related_content(
+          body, json_data.dump(), CURL_MIME_BOUNDARY,
+          sm_context_response.get_n2_sm_information(),
+          multipart_related_content_part_e::NGAP, json_format);
+      response.headers().add<Pistache::Http::Header::ContentType>(
+          Pistache::Http::Mime::MediaType(
+              "multipart/related; boundary=" +
+              std::string(CURL_MIME_BOUNDARY)));
+    } else if (json_data.size() > 0) {
+      response.headers().add<Pistache::Http::Header::ContentType>(
+          Pistache::Http::Mime::MediaType(json_format));
+      body = json_data.dump().c_str();
+    } else {
+      response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
+      return;
+    }
+
+    response.send(
+        Pistache::Http::Code(sm_context_response.get_http_code()), body);
   } else {
-    response.send(Pistache::Http::Code(sm_context_response.get_http_code()));
-    return;
+    response.send(Pistache::Http::Code::Request_Timeout);
   }
-
-  response.send(
-      Pistache::Http::Code(sm_context_response.get_http_code()), body);
 }
 }  // namespace api
 }  // namespace smf_server
