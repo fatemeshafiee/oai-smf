@@ -391,15 +391,16 @@ int smf_app::process_pco_selected_bearer_control_mode(
     protocol_configuration_options_t& pco_resp,
     const pco_protocol_or_container_id_t* const poc_id) {
   pco_protocol_or_container_id_t poc_id_resp = {0};
-  uint8_t value;
+  uint8_t value[1];
 
   Logger::smf_app().debug(
       "PCO: Protocol identifier Selected Bearer Control Mode");
   poc_id_resp.protocol_id =
       PCO_CONTAINER_IDENTIFIER_SELECTED_BEARER_CONTROL_MODE;
   poc_id_resp.length_of_protocol_id_contents = 1;
-  value                            = 0x02;  // MS/NW mode, hardcoded for now
-  poc_id_resp.protocol_id_contents = std::to_string(value);
+  value[0] = (uint8_t)(0x02);  // MS/NW mode, hardcoded for now
+  std::string tmp_s((const char*) &value[0], sizeof(value));
+  poc_id_resp.protocol_id_contents = tmp_s;
   return pco_push_protocol_or_container_id(pco_resp, &poc_id_resp);
 }
 
