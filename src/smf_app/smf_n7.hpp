@@ -72,8 +72,9 @@ struct policy_association {
   std::string pcf_location;
 
   void set_context(
-      std::string supi, std::string dnn, snssai_t snssai, plmn_t plmn,
-      uint8_t pdu_session_id, pdu_session_type_t pdu_session_type) {
+      const std::string& supi, const std::string& dnn, const snssai_t& snssai,
+      const plmn_t& plmn, const uint8_t pdu_session_id,
+      const pdu_session_type_t& pdu_session_type) {
     oai::smf_server::model::Snssai snssai_model;
     snssai_model.setSst(snssai.sst);
     snssai_model.setSd(std::to_string(snssai.sd));
@@ -100,17 +101,17 @@ struct policy_association {
     context.setServingNetwork(plmn_id_model);
   }
 
-  std::string toString() {
-    std::string s = "";
+  std::string toString() const {
+    std::string s;
     if (decision.pccRulesIsSet()) {
       s.append("\t\tPCC Rules:\n");
-      for (auto it : decision.getPccRules()) {
+      for (const auto& it : decision.getPccRules()) {
         s.append("\t\t\t\t").append(it.second.getPccRuleId()).append("\n");
       }
     }
     if (decision.traffContDecsIsSet()) {
       s.append("\t\tTraffic Control Descriptions:\n");
-      for (auto it : decision.getTraffContDecs()) {
+      for (const auto& it : decision.getTraffContDecs()) {
         s.append("\t\t\t\t").append(it.second.getTcId()).append("\n");
       }
     }
@@ -190,7 +191,8 @@ class smf_pcf_client : public policy_storage {
   const std::string delete_suffix               = "delete";
   const std::string update_suffix               = "update";
 
-  explicit smf_pcf_client(std::string pcf_addr, std::string pcf_api_version) {
+  explicit smf_pcf_client(
+      const std::string& pcf_addr, const std::string& pcf_api_version) {
     root_uri = "http://" + pcf_addr + "/" + sm_api_name + "/" +
                pcf_api_version + "/" + sm_api_policy_resource_part;
   }
@@ -207,8 +209,8 @@ class smf_pcf_client : public policy_storage {
    * @return & smf_pcf_client nullptr in case of an error
    */
   static std::shared_ptr<smf_pcf_client> discover_pcf(
-      const oai::smf_server::model::Snssai snssai,
-      const oai::smf_server::model::PlmnId plmn_id, const std::string dnn);
+      const oai::smf_server::model::Snssai& snssai,
+      const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
 
   sm_policy_status_code create_policy_association(
       policy_association& association) override;
@@ -227,18 +229,18 @@ class smf_pcf_client : public policy_storage {
  private:
   static bool discover_pcf_with_nrf(
       std::string& addr, std::string& api_version,
-      const oai::smf_server::model::Snssai snssai,
-      const oai::smf_server::model::PlmnId plmn_id, const std::string dnn);
+      const oai::smf_server::model::Snssai& snssai,
+      const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
 
   static bool discover_pcf_from_config_file(
       std::string& addr, std::string& api_version,
-      const oai::smf_server::model::Snssai snssai,
-      const oai::smf_server::model::PlmnId plmn_id, const std::string dnn);
+      const oai::smf_server::model::Snssai& snssai,
+      const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
 
   http_status_code_e send_request(
       const std::string& uri, const std::string& body,
-      std::string& response_body, std::string& response_headers,
-      std::string method, bool use_response_headers = false);
+      const std::string& method, std::string& response_body,
+      std::string& response_headers, bool use_response_headers = false);
 
   std::string root_uri;
 };
@@ -333,4 +335,4 @@ class smf_n7 {
   mutable std::shared_mutex policy_storages_mutex;
 };
 }  // namespace smf::n7
-#endif /* FILE_SMF_N4_HPP_SEEN */
+#endif /* FILE_SMF_N7_HPP_SEEN */

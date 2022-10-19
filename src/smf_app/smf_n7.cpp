@@ -147,7 +147,7 @@ smf_n7::~smf_n7() {
 ///////////////////////////////////////////////////////////////////////////
 
 std::shared_ptr<smf_pcf_client> smf_pcf_client::discover_pcf(
-    const Snssai snssai, const PlmnId plmn_id, const std::string dnn) {
+    const Snssai& snssai, const PlmnId& plmn_id, const std::string& dnn) {
   if (smf_cfg.use_local_pcc_rules) {
     Logger::smf_n7().info("Local PCC rules are enabled, do not discover PCF");
     return nullptr;
@@ -173,16 +173,16 @@ std::shared_ptr<smf_pcf_client> smf_pcf_client::discover_pcf(
 }
 
 bool smf_pcf_client::discover_pcf_with_nrf(
-    std::string& addr, std::string& api_version, const Snssai snssai,
-    const PlmnId plmn_id, const std::string dnn) {
+    std::string& addr, std::string& api_version, const Snssai& snssai,
+    const PlmnId& plmn_id, const std::string& dnn) {
   Logger::smf_n7().debug("Discover PCF with NRF");
   Logger::smf_n7().warn("NRF discovery not yet supported!");
   return false;
 }
 
 bool smf_pcf_client::discover_pcf_from_config_file(
-    std::string& addr, std::string& api_version, const Snssai snssai,
-    const PlmnId plmn_id, const std::string dnn) {
+    std::string& addr, std::string& api_version, const Snssai& snssai,
+    const PlmnId& plmn_id, const std::string& dnn) {
   // TODO ignore snssai, plmn_id and dnn, because it is not part of
   // configuration
   Logger::smf_n7().debug("Discover PCF from config file");
@@ -197,9 +197,9 @@ bool smf_pcf_client::discover_pcf_from_config_file(
     Logger::smf_n7().debug(
         "Resolving %s with DNS", smf_cfg.pcf_addr.fqdn.c_str());
     // resolve IP address
-    uint8_t addr_type     = 0;
-    uint32_t pcf_port     = 0;
-    std::string addr_temp = "";
+    uint8_t addr_type = 0;
+    uint32_t pcf_port = 0;
+    std::string addr_temp;
     if (!fqdn::resolve(smf_cfg.fqdn, addr_temp, pcf_port, addr_type)) {
       Logger::smf_n7().warn("Could not resolve FQDN %s", smf_cfg.fqdn.c_str());
       return false;
@@ -222,16 +222,16 @@ bool smf_pcf_client::discover_pcf_from_config_file(
 }
 
 http_status_code_e smf_pcf_client::send_request(
-    const std::string& uri, const std::string& body, std::string& response_body,
-    std::string& response_headers, std::string method,
+    const std::string& uri, const std::string& body, const std::string& method,
+    std::string& response_body, std::string& response_headers,
     bool use_response_headers) {
-  if (uri == "") {
+  if (uri.empty()) {
     Logger::smf_n7().warn("PCF URI is not set");
     return http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR;
   }
 
   // generate a promise for the curl handle
-  uint32_t promise_id = smf_sbi_inst->generate_promise_id();
+  uint32_t promise_id = smf::smf_sbi::generate_promise_id();
 
   Logger::smf_sbi().debug("Promise ID generated %d", promise_id);
   uint32_t* pid_ptr = &promise_id;
@@ -240,7 +240,7 @@ http_status_code_e smf_pcf_client::send_request(
   boost::shared_future<uint32_t> f;
   f = p->get_future();
   smf_sbi_inst->add_promise(promise_id, p);
-  bool res = false;
+  bool res;
   // Create a new curl easy handle and add to the multi handle
   if (use_response_headers) {
     res = smf_sbi_inst->curl_create_handle(
@@ -276,7 +276,7 @@ sm_policy_status_code smf_pcf_client::create_policy_association(
   std::string response_headers;
 
   http_status_code_e response_code = send_request(
-      root_uri, json_data.dump(), response_data, response_headers, "POST",
+      root_uri, json_data.dump(), "POST", response_data, response_headers,
       true);
 
   if (response_code == http_status_code_e::HTTP_STATUS_CODE_201_CREATED) {
@@ -303,7 +303,7 @@ sm_policy_status_code smf_pcf_client::create_policy_association(
   ProblemDetails problem_details;
   from_json(response_data, problem_details);
 
-  std::string info = "";
+  std::string info;
   sm_policy_status_code response;
   switch (response_code) {
     case http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN:
@@ -328,7 +328,7 @@ sm_policy_status_code smf_pcf_client::create_policy_association(
       info =
           "SM Policy Association Creation: Unknown Error Code from "
           "PCF: " +
-          response_code;
+          std::to_string(response_code);
   }
 
   Logger::smf_n7().warn(
@@ -346,7 +346,7 @@ sm_policy_status_code smf_pcf_client::remove_policy_association(
   std::string resp;
 
   http_status_code_e response_code =
-      send_request(uri, json_data.dump(), resp, resp, "POST", false);
+      send_request(uri, json_data.dump(), "POST", resp, resp, false);
 
   switch (response_code) {
     case http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT:
@@ -371,7 +371,7 @@ sm_policy_status_code smf_pcf_client::update_policy_association(
   nlohmann::json json_data;
   to_json(json_data, update_data);
   http_status_code_e response_code =
-      send_request(uri, json_data.dump(), resp, resp, "POST", false);
+      send_request(uri, json_data.dump(), "POST", resp, resp, false);
 
   nlohmann::json json_resp;
 
@@ -400,9 +400,9 @@ sm_policy_status_code smf_pcf_client::get_policy_association(
     policy_association& association) {
   std::string uri = association.pcf_location;
   std::string resp;
-  std::string empty = "";
+  std::string empty;
   http_status_code_e response_code =
-      send_request(uri, empty, resp, resp, "GET", false);
+      send_request(uri, empty, "GET", resp, resp, false);
   nlohmann::json j = nlohmann::json::parse(resp);
   SmPolicyControl control;
   switch (response_code) {
