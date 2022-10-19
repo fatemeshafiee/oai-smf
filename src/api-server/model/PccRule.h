@@ -210,6 +210,8 @@ class PccRule {
   void unsetTscaiInputUl();
   */
 
+  std::string getFirstFlowDescription() const;
+
   friend void to_json(nlohmann::json& j, const PccRule& o);
   friend void from_json(const nlohmann::json& j, PccRule& o);
 
