@@ -102,38 +102,49 @@ int session_create_sm_context_procedure::run(
     std::shared_ptr<smf::smf_context> sc) {
   Logger::smf_app().info("Perform a procedure - Create SM Context Request");
   // TODO check if compatible with ongoing procedures if any
-  pfcp::node_id_t up_node_id      = {};
   snssai_t snssai                 = sm_context_req->req.get_snssai();
   std::string dnn                 = sm_context_req->req.get_dnn();
   pdu_session_id_t pdu_session_id = sm_context_req->req.get_pdu_session_id();
-  upf_info_t upf_info             = {};
+  std::shared_ptr<upf_graph> graph;
 
-  if (not pfcp_associations::get_instance().select_up_node(
-          up_node_id, snssai, dnn, upf_info)) {
-    sm_context_resp->res.set_cause(
-        PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
-    return RETURNerror;
-  } else {
-    // Store UPF node
-    std::shared_ptr<smf_context_ref> scf = {};
-    if (smf_app_inst->is_scid_2_smf_context(sm_context_req->scid)) {
-      scf = smf_app_inst->scid_2_smf_context(sm_context_req->scid);
-      // scf.get()->upf_node_id = up_node_id;
-      std::shared_ptr<smf_pdu_session> sp = {};
-      if (!sc.get()->find_pdu_session(scf.get()->pdu_session_id, sp)) {
-        Logger::smf_app().warn("PDU session context does not exist!");
-        sm_context_resp->res.set_cause(
-            PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND);
-        return RETURNerror;
-      }
-      sp.get()->set_upf_node_id(up_node_id);
-
-    } else {
-      Logger::smf_app().warn(
-          "SM Context associated with this id " SCID_FMT " does not exit!",
-          sm_context_req->scid);
-      // TODO:
+  // Find PDU session
+  std::shared_ptr<smf_context_ref> scf = {};
+  if (smf_app_inst->is_scid_2_smf_context(sm_context_req->scid)) {
+    scf = smf_app_inst->scid_2_smf_context(sm_context_req->scid);
+    // scf.get()->upf_node_id = up_node_id;
+    std::shared_ptr<smf_pdu_session> sp = {};
+    if (!sc.get()->find_pdu_session(scf.get()->pdu_session_id, sp)) {
+      Logger::smf_app().warn("PDU session context does not exist!");
+      sm_context_resp->res.set_cause(
+          PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND);
+      return RETURNerror;
     }
+
+    if (sp->policy_ptr) {
+      graph = pfcp_associations::get_instance().select_up_node(
+          sp->policy_ptr->decision, snssai, dnn);
+      if (!graph) {
+        Logger::smf_app().warn(
+            "UPF selection based on PCC rules failed. Use any UPF.");
+      }
+    }
+    if (!graph) {
+      // No policies found or graph selection failed, use default UPF selection
+      graph = pfcp_associations::get_instance().select_up_node(snssai, dnn);
+    }
+    // if still there is no graph, send an error
+    if (!graph) {
+      sm_context_resp->res.set_cause(
+          PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
+      return RETURNerror;
+    } else {
+      sp->set_sessions_graph(graph);
+    }
+  } else {
+    Logger::smf_app().warn(
+        "SM Context associated with this id " SCID_FMT " does not exit!",
+        sm_context_req->scid);
+    // TODO:
   }
 
   //-------------------
@@ -142,12 +153,28 @@ int session_create_sm_context_procedure::run(
   uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
 
+  // TODO QOS FLow of graph is not used, we need to refactor everything here
+  smf_qos_flow empty_flow;
+
+  graph->start_asynch_dfs_procedure(true, empty_flow);
+  // TODO for now just use first UPF from the graph
+  std::vector<edge> ul_edges;
+  std::vector<edge> dl_edges;
+  std::shared_ptr<pfcp_association> current_upf;
+
+  graph->dfs_next_upf(dl_edges, ul_edges, current_upf);
+
+  if (!current_upf) {
+    Logger::smf_app().warn("UPF selection failed!");
+    return RETURNerror;
+  }
+
   n4_triggered = std::make_shared<itti_n4_session_establishment_request>(
       TASK_SMF_APP, TASK_SMF_N4);
   n4_triggered->seid    = 0;
   n4_triggered->trxn_id = this->trxn_id;
   n4_triggered->r_endpoint =
-      endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
+      endpoint(current_upf->node_id.u1.ipv4_address, pfcp::default_port);
 
   //-------------------
   // IE node_id_t
@@ -164,18 +191,6 @@ int session_create_sm_context_procedure::run(
   cp_fseid.seid = sps->seid;
   n4_triggered->pfcp_ies.set(cp_fseid);
 
-  //-------------------
-  // IE network instance
-  //-------------------
-  bool nwi_list_present  = false;
-  uint8_t nwi_list_index = 0;
-  if ((smf_cfg.get_nwi_list_index(
-           nwi_list_present, nwi_list_index, up_node_id) ||
-       !upf_info.interface_upf_info_list.empty()) &
-      smf_cfg.use_nwi)
-    nwi_list_present = true;
-  else
-    Logger::smf_app().debug("NWI (optional) config not found");
   //*******************
   // UPLINK
   //*******************
@@ -197,15 +212,12 @@ int session_create_sm_context_procedure::run(
       pfcp::INTERFACE_VALUE_CORE;  // ACCESS is for downlink, CORE for uplink
   forwarding_parameters.set(destination_interface);
 
-  if (nwi_list_present) {
+  // TODO for now just use one UL (core N6) edge
+  if (!ul_edges[0].nw_instance.empty()) {
     pfcp::network_instance_t network_instance = {};
-    if (!upf_info.interface_upf_info_list.empty()) {
-      network_instance.network_instance =
-          smf_cfg.get_nwi(upf_info.interface_upf_info_list, "N6");
-    } else
-      network_instance.network_instance =
-          smf_cfg.upf_nwi_list[nwi_list_index].domain_core;
-    sps.get()->set_nwi_core(network_instance.network_instance);
+    network_instance.network_instance         = ul_edges[0].nw_instance;
+    // TODO I believe we can remove that in pdu session
+    sps->set_nwi_core(ul_edges[0].nw_instance);
     forwarding_parameters.set(network_instance);
   }
 
@@ -256,15 +268,12 @@ int session_create_sm_context_procedure::run(
   source_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
   pdi.set(source_interface);
 
-  if (nwi_list_present) {
+  //-------------------
+  // Network Instance for Forward Action
+  //------------------
+  if (!dl_edges[0].nw_instance.empty()) {
     pfcp::network_instance_t network_instance = {};
-    if (!upf_info.interface_upf_info_list.empty()) {
-      network_instance.network_instance =
-          smf_cfg.get_nwi(upf_info.interface_upf_info_list, "N3");
-    } else
-      network_instance.network_instance =
-          smf_cfg.upf_nwi_list[nwi_list_index].domain_access;
-    sps.get()->set_nwi_access(network_instance.network_instance);
+    network_instance.network_instance         = dl_edges[0].nw_instance;
     pdi.set(network_instance);
   }
 
@@ -607,7 +616,6 @@ int session_update_sm_context_procedure::run(
   bool send_n4 = false;
   Logger::smf_app().info("Perform a procedure - Update SM Context Request");
   // TODO check if compatible with ongoing procedures if any
-  pfcp::node_id_t up_node_id = {};
   // Get UPF node
   std::shared_ptr<smf_context_ref> scf = {};
   scid_t scid                          = {};
@@ -616,7 +624,7 @@ int session_update_sm_context_procedure::run(
   } catch (const std::exception& err) {
     Logger::smf_app().warn(
         "SM Context associated with this id %s does not exit!",
-        sm_context_req->scid);
+        sm_context_req->scid.c_str());
   }
   if (smf_app_inst->is_scid_2_smf_context(scid)) {
     scf = smf_app_inst->scid_2_smf_context(scid);
@@ -633,7 +641,23 @@ int session_update_sm_context_procedure::run(
     Logger::smf_app().warn("PDU session context does not exist!");
     return RETURNerror;
   }
-  sp.get()->get_upf_node_id(up_node_id);
+
+  std::shared_ptr<upf_graph> graph = sp->get_sessions_graph();
+
+  if (!graph) {
+    Logger::smf_app().warn("PDU session does not have a UPF association");
+    return RETURNerror;
+  }
+  // TODO use qos flow from graph
+  smf_qos_flow empty_flow;
+
+  graph->start_asynch_dfs_procedure(false, empty_flow);
+
+  std::vector<edge> dl_edges;
+  std::vector<edge> ul_edges;
+  std::shared_ptr<pfcp_association> current_upf;
+
+  graph->dfs_next_upf(dl_edges, ul_edges, current_upf);
 
   // TODO: UPF insertion in case of Handover
 
@@ -657,7 +681,7 @@ int session_update_sm_context_procedure::run(
   n4_triggered->seid    = sps->up_fseid.seid;
   n4_triggered->trxn_id = this->trxn_id;
   n4_triggered->r_endpoint =
-      endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
+      endpoint(current_upf->node_id.u1.ipv4_address, pfcp::default_port);
 
   // qos Flow to be modified
   pdu_session_update_sm_context_request sm_context_req_msg =
@@ -779,9 +803,10 @@ int session_update_sm_context_procedure::run(
           destination_interface.interface_value =
               pfcp::INTERFACE_VALUE_ACCESS;  // ACCESS is for downlink, CORE for
                                              // uplink
-          if (smf_cfg.use_nwi) {
+          // TODO only use one DL Edge
+          if (!dl_edges[0].nw_instance.empty()) {
             pfcp::network_instance_t network_instance = {};
-            network_instance.network_instance = sps.get()->get_nwi_access();
+            network_instance.network_instance         = dl_edges[0].nw_instance;
             forwarding_parameters.set(network_instance);
           }
           forwarding_parameters.set(destination_interface);
@@ -836,10 +861,10 @@ int session_update_sm_context_procedure::run(
           // pfcp::framed_routing_t           framed_routing = {};
           // pfcp::framed_ipv6_route_t        framed_ipv6_route = {};
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
-          if (smf_cfg.use_nwi) {
-            pfcp::network_instance_t network_instance =
-                {};  // mandatory for travelping
-            network_instance.network_instance = sps.get()->get_nwi_core();
+          if (!ul_edges[0].nw_instance.empty()) {
+            // mandatory for travelping
+            pfcp::network_instance_t network_instance = {};
+            network_instance.network_instance         = ul_edges[0].nw_instance;
             pdi.set(network_instance);
           }
           // local_fteid.from_core_fteid(qos_flow.qos_flow.dl_fteid);
@@ -929,12 +954,13 @@ int session_update_sm_context_procedure::run(
           precedence.precedence = flow.precedence.precedence;
 
           source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
-          if (smf_cfg.use_nwi) {
-            pfcp::network_instance_t network_instance =
-                {};  // mandatory for travelping
-            network_instance.network_instance = sps.get()->get_nwi_core();
+          if (!ul_edges[0].nw_instance.empty()) {
+            // mandatory for travelping
+            pfcp::network_instance_t network_instance = {};
+            network_instance.network_instance         = ul_edges[0].nw_instance;
             pdi.set(network_instance);
           }
+
           pdi.set(source_interface);
           pdi.set(ue_ip_address);
 
@@ -1537,7 +1563,7 @@ int session_release_sm_context_procedure::run(
   } catch (const std::exception& err) {
     Logger::smf_app().warn(
         "SM Context associated with this id %s does not exit!",
-        sm_context_req->scid);
+        sm_context_req->scid.c_str());
   }
   if (smf_app_inst->is_scid_2_smf_context(scid)) {
     scf = smf_app_inst->scid_2_smf_context(scid);
@@ -1555,7 +1581,20 @@ int session_release_sm_context_procedure::run(
     return RETURNerror;
   }
 
-  sp.get()->get_upf_node_id(up_node_id);
+  std::shared_ptr<upf_graph> graph = sp->get_sessions_graph();
+
+  if (!graph) {
+    Logger::smf_app().warn("PDU session does not have a UPF association");
+    return RETURNerror;
+  }
+
+  smf_qos_flow empty_flow;
+  graph->start_asynch_dfs_procedure(true, empty_flow);
+
+  std::vector<edge> dl_edges;
+  std::vector<edge> ul_edges;
+  std::shared_ptr<pfcp_association> current_upf;
+  graph->dfs_next_upf(dl_edges, ul_edges, current_upf);
 
   /*  if (not pfcp_associations::get_instance().select_up_node(
             up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
@@ -1576,7 +1615,7 @@ int session_release_sm_context_procedure::run(
   n4_triggered->seid    = sps->up_fseid.seid;
   n4_triggered->trxn_id = this->trxn_id;
   n4_triggered->r_endpoint =
-      endpoint(up_node_id.u1.ipv4_address, pfcp::default_port);
+      endpoint(current_upf->node_id.u1.ipv4_address, pfcp::default_port);
 
   Logger::smf_app().info(
       "Sending ITTI message %s to task TASK_SMF_N4",

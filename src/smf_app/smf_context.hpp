@@ -47,6 +47,7 @@
 #include "smf_procedure.hpp"
 #include "uint_generator.hpp"
 #include "smf_n7.hpp"
+#include "smf_pfcp_association.hpp"
 
 extern "C" {
 #include "Ngap_PDUSessionAggregateMaximumBitRate.h"
@@ -54,63 +55,13 @@ extern "C" {
 #include "QOSFlowDescriptions.h"
 #include "QOSRules.h"
 #include "nas_message.h"
+#include "smf_pfcp_association.hpp"
 }
 
 using namespace boost::placeholders;
 
 namespace smf {
 
-class smf_qos_flow {
- public:
-  smf_qos_flow() { clear(); }
-
-  void clear() {
-    ul_fteid    = {};
-    dl_fteid    = {};
-    pdr_id_ul   = {};
-    pdr_id_dl   = {};
-    precedence  = {};
-    far_id_ul   = {};
-    far_id_dl   = {};
-    released    = false;
-    qos_profile = {};
-    cause_value = 0;
-  }
-
-  /*
-   * Release resources associated with this flow
-   * @param void
-   * @return void
-   */
-  void deallocate_ressources();
-
-  /*
-   * Mark this flow as released
-   * @param void
-   * @return void
-   */
-  void mark_as_released();
-
-  /*
-   * Represent flow as string to be printed
-   * @param void
-   * @return void
-   */
-  std::string toString() const;
-
-  pfcp::qfi_t qfi;           // QoS Flow Identifier
-  pfcp::fteid_t ul_fteid;    // fteid of UPF
-  pfcp::fteid_t dl_fteid;    // fteid of AN
-  pfcp::pdr_id_t pdr_id_ul;  // Packet Detection Rule ID, UL
-  pfcp::pdr_id_t pdr_id_dl;  // Packet Detection Rule ID, DL
-  pfcp::precedence_t precedence;
-  std::pair<bool, pfcp::far_id_t> far_id_ul;  // FAR ID, UL
-  std::pair<bool, pfcp::far_id_t> far_id_dl;  // FAR ID, DL
-  bool released;  // finally seems necessary, TODO try to find heuristic ?
-  pdu_session_id_t pdu_session_id;
-  qos_profile_t qos_profile;  // QoS profile
-  uint8_t cause_value;        // cause
-};
 
 class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
  public:
@@ -493,26 +444,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    */
   void set_nwi_core(const std::string& nwiCore);
 
-  /*
-   * Set UPF Node ID of this PDU Session
-   * @param [const pfcp::node_id_t&] node_id: UPF Node Id
-   * @return void
-   */
-  void set_upf_node_id(const pfcp::node_id_t& node_id);
+  void set_sessions_graph(const std::shared_ptr<upf_graph> upf_graph);
 
-  /*
-   * Get UPF Node ID of this PDU Session
-   * @param [pfcp::node_id_t&] node_id: UPF Node Id
-   * @return void
-   */
-  void get_upf_node_id(pfcp::node_id_t& node_id) const;
-
-  /*
-   * Get UPF Node ID of this PDU Session
-   * @param void
-   * @return UPF Node Id
-   */
-  pfcp::node_id_t get_upf_node_id() const;
+  std::shared_ptr<upf_graph> get_sessions_graph() const;
 
   /*
    * Get DNN associated with this PDU Session
@@ -573,7 +507,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   std::string nwi_access;  // associated nwi_access
   std::string nwi_core;    // associated nwi_core
 
-  pfcp::node_id_t upf_node_id;
+  std::shared_ptr<upf_graph> sessions_graph;
 
   pdu_session_status_e pdu_session_status;
   upCnx_state_e

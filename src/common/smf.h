@@ -65,6 +65,9 @@ static uint64_t smf_supi_to_u64(supi_t supi) {
 
 typedef struct s_nssai  // section 28.4, TS23.003
 {
+  const uint8_t HASH_SEED   = 17;
+  const uint8_t HASH_FACTOR = 31;
+
   uint8_t sst;
   uint32_t sd;
   s_nssai(const uint8_t& m_sst, const uint32_t m_sd) : sst(m_sst), sd(m_sd) {}
@@ -99,6 +102,13 @@ typedef struct s_nssai  // section 28.4, TS23.003
     s.append("SST=").append(std::to_string(sst));
     s.append(", SD=").append(std::to_string(sd));
     return s;
+  }
+
+  size_t operator()(const s_nssai&) const {
+    size_t res = HASH_SEED;
+    res        = res * HASH_FACTOR + std::hash<uint32_t>()(sd);
+    res        = res * HASH_FACTOR + std::hash<uint32_t>()(sst);
+    return res;
   }
 
 } snssai_t;

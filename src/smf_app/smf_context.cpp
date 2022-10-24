@@ -642,15 +642,15 @@ void smf_pdu_session::add_qos_rule(const QOSRulesIE& qos_rule) {
   }
 }
 
-void smf_pdu_session::set_upf_node_id(const pfcp::node_id_t& node_id) {
-  upf_node_id = node_id;
+std::shared_ptr<upf_graph> smf_pdu_session::get_sessions_graph() const {
+  return sessions_graph;
 }
-void smf_pdu_session::get_upf_node_id(pfcp::node_id_t& node_id) const {
-  node_id = upf_node_id;
+
+void smf_pdu_session::set_sessions_graph(
+    const std::shared_ptr<upf_graph> upf_graph) {
+  sessions_graph = upf_graph;
 }
-pfcp::node_id_t smf_pdu_session::get_upf_node_id() const {
-  return upf_node_id;
-}
+
 //-----------------------------------------------------------------------------
 void smf_pdu_session::set_urr_id(const uint32_t& urrId) {
   urr_Id = urrId;
