@@ -288,9 +288,9 @@ struct edge {
       const std::string& dnai) const;
 
   bool operator==(const edge& other) const {
-    return dnai == other.dnai && flow_description == other.flow_description &&
-           nw_instance == other.nw_instance && type == other.type &&
-           uplink == other.uplink && association == other.association;
+    return dnai == other.dnai && nw_instance == other.nw_instance &&
+           type == other.type && uplink == other.uplink &&
+           association == other.association;
   }
 
   [[nodiscard]] std::string to_string() const {

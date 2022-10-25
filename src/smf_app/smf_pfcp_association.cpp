@@ -1306,8 +1306,9 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
               dnais, flow_description, precedence, snssai, dnn);
 
           create_subgraph_dfs(sub_graph_ptr, node.first, visited);
+          // Verify the merged graph with all DNAIs so far
           sub_graph_ptr->set_dfs_selection_criteria(
-              dnais, flow_description, precedence, snssai, dnn);
+              dnais_from_all_rules, flow_description, precedence, snssai, dnn);
 
           if (!sub_graph_ptr->verify()) {
             // in case copy is null, new subgraph_ptr is also null, and we
