@@ -118,6 +118,8 @@ std::string pfcp_association::string_from_iface_type(const iface_type& type) {
       return "N6";
     case iface_type::N9:
       return "N9";
+    default:
+      return "?";
   }
 }
 
@@ -237,6 +239,7 @@ std::string pfcp_association::get_printable_name() {
       }
       return addresses;
     }
+    return std::to_string(hash_node_id);
   } else {
     return std::to_string(hash_node_id);
   }
@@ -1170,7 +1173,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
   std::shared_ptr<pfcp_association> association;
   std::shared_ptr<upf_graph> upf_graph_ptr = std::make_shared<upf_graph>();
 
-  Logger::smf_app().error("Called non-implemented UFP selection function");
+  Logger::smf_app().error("Called non-implemented UPF selection function");
 
   if (adjacency_list.empty()) {
     upf_graph_ptr.reset();
@@ -1191,13 +1194,11 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
     }
     // just add first node and then break
     upf_graph_ptr->add_upf_graph_node(association);
-    for (const auto& it : adjacency_list) {
-      if (!it.first->is_upf_profile_set()) {
-        for (auto edge : it.second) {
-          if (edge.type != iface_type::N9) {
-            upf_graph_ptr->add_upf_graph_edge(it.first, edge);
-          }
-        }
+    for (auto edge : it.second)
+    {
+      if (edge.type != iface_type::N9)
+      {
+        upf_graph_ptr->add_upf_graph_edge(it.first, edge);
       }
     }
     return upf_graph_ptr;

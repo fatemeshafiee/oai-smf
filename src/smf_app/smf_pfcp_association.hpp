@@ -584,7 +584,7 @@ class pfcp_associations {
   }
 
   pfcp_associations(pfcp_associations const&) = delete;
-  void operator=(pfcp_associations const&)    = delete;
+  void operator=(pfcp_associations const&) = delete;
 
   bool add_association(
       pfcp::node_id_t& node_id,

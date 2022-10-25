@@ -62,7 +62,6 @@ using namespace boost::placeholders;
 
 namespace smf {
 
-
 class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
  public:
   smf_pdu_session() : m_pdu_session_mutex() { clear(); }
