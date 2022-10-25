@@ -965,12 +965,10 @@ void upf_graph::dfs_next_upf(
     // set correct edge infos
     for (auto edge_it = node_it->second.begin();
          edge_it != node_it->second.end(); ++edge_it) {
-      if (qos_flow_asynch.qfi.qfi != 0) {
-        // TODO for now we only use first QOS FLOW
-
-        edge_it->qos_flows[0].pdu_session_id = qos_flow_asynch.pdu_session_id;
-        edge_it->qos_flows[0].qfi            = qos_flow_asynch.qfi;
-        edge_it->qos_flows[0].qos_profile    = qos_flow_asynch.qos_profile;
+      // copy QOS Flow for the whole graph
+      //  TODO currently only one flow is supported
+      if (edge_it->qos_flows.empty()) {
+        edge_it->qos_flows.emplace_back(qos_flow_asynch);
       }
 
       // pointer is not null -> N9 interface
@@ -979,6 +977,10 @@ void upf_graph::dfs_next_upf(
         // direct access is safe as we know the edge exists
         auto edge_node = adjacency_list[edge_it->association];
         for (auto edge_edge : edge_node) {
+          if (edge_edge.qos_flows.empty()) {
+            edge_edge.qos_flows.emplace_back(qos_flow_asynch);
+          }
+
           if (edge_edge.association &&
               edge_edge.association == node_it->first) {
             if (edge_edge.type == iface_type::N9 && edge_edge.uplink) {
@@ -1046,7 +1048,7 @@ void upf_graph::dfs_current_upf(
 
 //------------------------------------------------------------------------------
 void upf_graph::start_asynch_dfs_procedure(
-    bool uplink, const smf_qos_flow& qos_flow) {
+    bool uplink, smf_qos_flow& qos_flow) {
   std::unique_lock graph_lock(graph_mutex);
   if (!stack_asynch.empty()) {
     Logger::smf_app().error(
@@ -1060,10 +1062,11 @@ void upf_graph::start_asynch_dfs_procedure(
 
   // uplink start at the exit nodes, downlink start at access nodes, do not
   // actually do DFS but put them on the stack
-  for (const auto& it : adjacency_list) {
-    for (const auto& edge : it.second) {
+  for (auto& it : adjacency_list) {
+    for (auto& edge : it.second) {
       if ((uplink && edge.type == iface_type::N6) ||
           (!uplink && edge.type == iface_type::N3)) {
+        edge.qos_flows.emplace_back(qos_flow_asynch);
         stack_asynch.push(it.first);
         break;
       }

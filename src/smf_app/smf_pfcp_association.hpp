@@ -522,7 +522,7 @@ class upf_graph {
    * @param uplink if uplink or downlink direction
    * @param qos_flow SMF flow to be used for this procedure
    */
-  void start_asynch_dfs_procedure(bool uplink, const smf_qos_flow& qos_flow);
+  void start_asynch_dfs_procedure(bool uplink, smf_qos_flow& qos_flow);
 
   /**
    * @brief Returns the access edge of this graph. If multiple exist, first is
