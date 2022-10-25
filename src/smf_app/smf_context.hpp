@@ -46,6 +46,7 @@
 #include "smf_event.hpp"
 #include "smf_procedure.hpp"
 #include "uint_generator.hpp"
+#include "smf_n7.hpp"
 
 extern "C" {
 #include "Ngap_PDUSessionAggregateMaximumBitRate.h"
@@ -559,6 +560,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   pdu_session_type_t pdu_session_type;  // IPv4, IPv6, IPv4v6 or Non-IP
 
   bool released;  // release session request
+
+  std::shared_ptr<n7::policy_association> policy_ptr;
 
   uint32_t pdu_session_id;
   std::string dnn;  // associated DNN

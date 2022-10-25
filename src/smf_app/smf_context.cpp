@@ -46,12 +46,19 @@
 #include "smf_n1.hpp"
 #include "smf_sbi.hpp"
 #include "smf_n2.hpp"
+#include "smf_n7.hpp"
 #include "smf_paa_dynamic.hpp"
 #include "smf_pfcp_association.hpp"
 #include "smf_procedure.hpp"
 #include "3gpp_conversions.hpp"
 #include "string.hpp"
 #include "EventNotification.h"
+#include "SmPolicyContextData.h"
+#include "SmPolicyDecision.h"
+#include "SmPolicyDeleteData.h"
+#include "PlmnId.h"
+#include "Snssai.h"
+#include "PduSessionType.h"
 
 extern "C" {
 #include "Ngap_AssociatedQosFlowItem.h"
@@ -445,6 +452,12 @@ std::string smf_pdu_session::toString() const {
       }
     }
   }
+
+  if (policy_ptr) {
+    s.append("\t Policy Decision:").append("\n");
+    s.append(policy_ptr->toString());
+  }
+
   return s;
 }
 
@@ -1493,10 +1506,36 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   // Maximum Data Rate
   // TODO: (Optional) Secondary authentication/authorization
 
-  // TODO: Step 5. PCF selection
-  // TODO: Step 5.1. SM Policy Association Establishment to get default PCC
-  // rules for this PDU session from PCF  For the moment, SMF uses the local
-  // policy (e.g., default QoS rule)
+  // Step 5. Create SM Policy Association with PCF or local PCC rules
+
+  std::string smContextRef = std::to_string(smreq->scid);
+  sp.get()->policy_ptr     = std::make_shared<n7::policy_association>();
+  bool use_pcf_policy      = false;
+  sp.get()->policy_ptr->set_context(
+      smf_supi_to_string_without_nulls(smreq->req.get_supi()),
+      smreq->req.get_dnn(), snssai, plmn, smreq->req.get_pdu_session_id(),
+      smreq->req.get_pdu_session_type());
+
+  // TODO what is the exact meaning of SCID? Is this unique per registration
+  // or unique per PDU session?
+  sp.get()->policy_ptr->id = smreq->scid;
+
+  n7::sm_policy_status_code status =
+      n7::smf_n7::get_instance().create_sm_policy_association(*sp->policy_ptr);
+  if (status != n7::sm_policy_status_code::CREATED) {
+    Logger::smf_n7().info(
+        "PCF SM Policy Association Creation was not successful. Continue "
+        "using default rules");
+    use_pcf_policy = false;
+    sp->policy_ptr.reset();
+    // Here, the standard says that we could reject the PDU session or allow
+    // the PDU session applying local policies 29.512 Chapter 4.2.2.2
+    // TODO I propose to have this behavior configurable, for now we
+    // continue
+  } else {
+    use_pcf_policy = true;
+  }
+  // TODO use the PCC rules also for QoS and other policy information
 
   // Step 6. PCO
   // section 6.2.4.2, TS 24.501
@@ -1722,7 +1761,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         "Send ITTI msg to SMF APP to trigger the response of Server");
 
     pdu_session_create_sm_context_response sm_context_response = {};
-    std::string smContextRef = std::to_string(smreq->scid);
     // headers: Location: contains the URI of the newly created resource,
     // according to the structure:
     // {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
@@ -2195,8 +2233,13 @@ bool smf_context::handle_pdu_session_release_complete(
       supi64, sm_context_request.get()->req.get_pdu_session_id(),
       sm_context_request.get()->http_version);
 
-  // TODO: if dynamic PCC applied, SMF invokes an SM Policy Association
-  // Termination
+  // SM Policy Association termination
+  if (sp->policy_ptr) {
+    oai::smf_server::model::SmPolicyDeleteData delete_data;
+    // TODO set data such as release cause, usage reports etc
+    n7::smf_n7::get_instance().remove_sm_policy_association(
+        *sp->policy_ptr, delete_data);
+  }
   // TODO: SMF un-subscribes from Session Management Subscription data
   // changes notification from UDM by invoking Numd_SDM_Unsubscribe
 
