@@ -1194,10 +1194,8 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
     }
     // just add first node and then break
     upf_graph_ptr->add_upf_graph_node(association);
-    for (auto edge : it.second)
-    {
-      if (edge.type != iface_type::N9)
-      {
+    for (auto edge : it.second) {
+      if (edge.type != iface_type::N9) {
         upf_graph_ptr->add_upf_graph_edge(it.first, edge);
       }
     }
