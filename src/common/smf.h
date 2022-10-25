@@ -57,6 +57,18 @@ static std::string smf_supi_to_string(supi_t const supi) {
   return supi_str;
 }
 
+// TODO should we just replace the other function? Because this null chars are
+// annoying
+static std::string smf_supi_to_string_without_nulls(supi_t const supi) {
+  std::string supi_str;
+  for (char c : supi.data) {
+    if (c != '\u0000') {
+      supi_str += c;
+    }
+  }
+  return supi_str;
+}
+
 static uint64_t smf_supi_to_u64(supi_t supi) {
   uint64_t uint_supi;
   sscanf(supi.data, "%" SCNu64, &uint_supi);
