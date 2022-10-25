@@ -1134,14 +1134,14 @@ void smf_context::get_default_qos_rule(
         (Create_ModifyAndAdd_ModifyAndReplace*) calloc(
             1, sizeof(Create_ModifyAndAdd_ModifyAndReplace));
     qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0]
-        .packetfilterdirection = 0b11;  // bi-directional
+        .packetfilterdirection = 0b10;  // TODO: Uplink only!
     qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0]
         .packetfilteridentifier = 1;
     qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0]
         .packetfiltercontents.component_type = QOS_RULE_MATCHALL_TYPE;
     // qos_rule.packetfilterlist.create_modifyandadd_modifyandreplace[0].packetfiltercontents.component_value
     // = bfromcstralloc(2, "\0");
-    qos_rule.qosruleprecedence = 0xff;
+    qos_rule.qosruleprecedence = 0x01;
   }
 
   if (pdu_session_type == PDU_SESSION_TYPE_E_UNSTRUCTURED) {
