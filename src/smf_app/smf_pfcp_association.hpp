@@ -566,6 +566,17 @@ class pfcp_associations {
   void trigger_heartbeat_request_procedure(
       std::shared_ptr<pfcp_association>& s);
 
+  std::shared_ptr<pfcp_association> check_association_on_add(
+      pfcp::node_id_t& node_id,
+      pfcp::recovery_time_stamp_t& recovery_time_stamp,
+      bool& restore_n4_sessions, const bool use_function_features,
+      pfcp::up_function_features_s& function_features);
+
+  bool resolve_upf_hostname(pfcp::node_id_t& node_id);
+
+  void associate_with_upf_profile(
+      std::shared_ptr<pfcp_association>& sa, const pfcp::node_id_t& node_id);
+
  public:
   static pfcp_associations& get_instance() {
     static pfcp_associations instance;

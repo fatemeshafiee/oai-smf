@@ -33,6 +33,8 @@
 #include "smf_n4.hpp"
 #include "smf_procedure.hpp"
 #include "smf_config.hpp"
+#include "fqdn.hpp"
+#include <arpa/inet.h>
 
 using namespace smf;
 using namespace std;
@@ -244,12 +246,11 @@ std::string pfcp_association::get_printable_name() {
 /***************************** PFCP ASSOCIATIONS ******************************/
 /******************************************************************************/
 
-//------------------------------------------------------------------------------
-bool pfcp_associations::add_association(
+std::shared_ptr<pfcp_association> pfcp_associations::check_association_on_add(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
-    bool& restore_n4_sessions) {
-  std::shared_ptr<pfcp_association> sa =
-      std::shared_ptr<pfcp_association>(nullptr);
+    bool& restore_n4_sessions, const bool use_function_features,
+    pfcp::up_function_features_s& function_features) {
+  std::shared_ptr<pfcp_association> sa;
   if (get_association(node_id, sa)) {
     itti_inst->timer_remove(sa->timer_heartbeat);
     if (sa->recovery_time_stamp == recovery_time_stamp) {
@@ -258,59 +259,95 @@ bool pfcp_associations::add_association(
       restore_n4_sessions = true;
     }
     sa->recovery_time_stamp = recovery_time_stamp;
-    sa->function_features   = {};
-    trigger_heartbeat_request_procedure(sa);
-  } else {
-    // Resolve FQDN to get UPF IP address if necessary
-    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
-      Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
-      struct hostent* record = gethostbyname(node_id.fqdn.c_str());
-      if (record == NULL) {
-        Logger::smf_app().info(
-            "Add association with node (FQDN) %s: cannot resolve the hostname!",
-            node_id.fqdn.c_str());
-        return false;
-      }
+    if (use_function_features) {
+      sa->function_features = {};
+    } else {
+      sa->function_features.first  = true;
+      sa->function_features.second = function_features;
+    }
 
-      if (record->h_addrtype == AF_INET) {
-        in_addr* address = (struct in_addr*) record->h_addr;
-        // node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-        node_id.u1.ipv4_address = *address;
-        Logger::smf_app().info(
-            "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
-            inet_ntoa(*address));
-      } else if (record->h_addrtype == AF_INET6) {
+    trigger_heartbeat_request_procedure(sa);
+    return sa;
+  }
+  return {};  // empty ptr
+}
+
+bool pfcp_associations::resolve_upf_hostname(pfcp::node_id_t& node_id) {
+  // TODO why is this even here? We can see in the logs that UPF IP is requested
+  // before, at least for NRF scenario
+  //  Resolve FQDN to get UPF IP address if necessary
+  if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+    Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
+
+    std::string ip_addr;
+    uint32_t port;
+    uint8_t addr_type;
+
+    if (!fqdn::resolve(node_id.fqdn, ip_addr, port, addr_type)) {
+      Logger::smf_app().warn(
+          "Add association with node (FQDN) %s: cannot resolve the hostname!",
+          node_id.fqdn.c_str());
+      return false;
+    }
+    struct sockaddr_in sa {};
+    switch (addr_type) {
+      case 0:
+        inet_pton(AF_INET, ip_addr.c_str(), &(sa.sin_addr));
+        node_id.u1.ipv4_address = sa.sin_addr;
+        return true;
+      case 1:
         // TODO
-        Logger::smf_app().info(
+        Logger::smf_app().warn(
             "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been "
             "supported yet!",
             node_id.fqdn.c_str());
         return false;
-      } else {
+      default:
+        Logger::smf_app().warn("Unknown Address type");
         return false;
-      }
     }
+  }
+  return true;  // no FQDN so we just continue
+}
 
-    restore_n4_sessions = false;
-    sa = std::make_shared<pfcp_association>(node_id, recovery_time_stamp);
-    sa->recovery_time_stamp  = recovery_time_stamp;
-    std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
-    // Associate with UPF profile if exist
-    for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
-             pending_associations.begin();
-         it < pending_associations.end(); ++it) {
-      if (((*it)->node_id == node_id) and ((*it)->is_upf_profile_set())) {
-        Logger::smf_app().info("Associate with UPF profile");
-        sa->set_upf_node_profile((*it)->get_upf_node_profile());
-        break;
-      }
+void pfcp_associations::associate_with_upf_profile(
+    std::shared_ptr<pfcp_association>& sa, const pfcp::node_id_t& node_id) {
+  // TODO wouldn't it be better to use a shared lock? because here we have only
+  // read access
+  std::lock_guard<std::mutex> lck(m_mutex);
+  // Associate with UPF profile if exist
+  for (const auto& it : pending_associations) {
+    if ((it->node_id == node_id) and (it->is_upf_profile_set())) {
+      Logger::smf_app().info("Associate with UPF profile");
+      sa->set_upf_node_profile(it->get_upf_node_profile());
+      return;
     }
-    if (!associations_graph.full()) {
-      associations_graph.insert_into_graph(sa);
-      trigger_heartbeat_request_procedure(sa);
-    } else {
-      Logger::smf_app().info("What do we do if too many associations?");
-    }
+  }
+}
+
+//------------------------------------------------------------------------------
+bool pfcp_associations::add_association(
+    pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
+    bool& restore_n4_sessions) {
+  pfcp::up_function_features_s tmp;
+  std::shared_ptr<pfcp_association> sa = check_association_on_add(
+      node_id, recovery_time_stamp, restore_n4_sessions, false, tmp);
+  if (sa) return true;
+
+  if (!resolve_upf_hostname(node_id)) return false;
+
+  restore_n4_sessions = false;
+  sa = std::make_shared<pfcp_association>(node_id, recovery_time_stamp);
+  sa->recovery_time_stamp  = recovery_time_stamp;
+  std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
+
+  associate_with_upf_profile(sa, node_id);
+
+  if (!associations_graph.full()) {
+    associations_graph.insert_into_graph(sa);
+    trigger_heartbeat_request_procedure(sa);
+  } else {
+    Logger::smf_app().info("What do we do if too many associations?");
   }
   return true;
 }
@@ -320,73 +357,30 @@ bool pfcp_associations::add_association(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
     pfcp::up_function_features_s& function_features,
     bool& restore_n4_sessions) {
-  std::shared_ptr<pfcp_association> sa =
-      std::shared_ptr<pfcp_association>(nullptr);
-  if (get_association(node_id, sa)) {
-    itti_inst->timer_remove(sa->timer_heartbeat);
-    if (sa->recovery_time_stamp == recovery_time_stamp) {
-      restore_n4_sessions = false;
-    } else {
-      restore_n4_sessions = true;
-    }
-    sa->recovery_time_stamp      = recovery_time_stamp;
-    sa->function_features.first  = true;
-    sa->function_features.second = function_features;
+  std::shared_ptr<pfcp_association> sa = check_association_on_add(
+      node_id, recovery_time_stamp, restore_n4_sessions, true,
+      function_features);
+  if (sa) return true;
+
+  if (!resolve_upf_hostname(node_id)) return false;
+
+  restore_n4_sessions = false;
+  sa                  = std::make_shared<pfcp_association>(
+      node_id, recovery_time_stamp, function_features);
+  sa->recovery_time_stamp      = recovery_time_stamp;
+  sa->function_features.first  = true;
+  sa->function_features.second = function_features;
+  std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
+
+  associate_with_upf_profile(sa, node_id);
+
+  if (!associations_graph.full()) {
+    associations_graph.insert_into_graph(sa);
+    // Display UPF Node profile
+    sa->get_upf_node_profile().display();
     trigger_heartbeat_request_procedure(sa);
   } else {
-    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
-      Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
-      struct hostent* record = gethostbyname(node_id.fqdn.c_str());
-      if (record == NULL) {
-        Logger::smf_app().info(
-            "Add association with node (FQDN) %s: cannot resolve the hostname!",
-            node_id.fqdn.c_str());
-        return false;
-      }
-      if (record->h_addrtype == AF_INET) {
-        in_addr* address = (struct in_addr*) record->h_addr;
-        // node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-        node_id.u1.ipv4_address = *address;
-        Logger::smf_app().info(
-            "Node ID Type FQDN: %s, IPv4 Addr: %s", node_id.fqdn.c_str(),
-            inet_ntoa(*address));
-      } else if (record->h_addrtype == AF_INET6) {
-        // TODO
-        Logger::smf_app().info(
-            "Node ID Type FQDN: %s. IPv6 Addr, this mode has not been "
-            "supported yet!",
-            node_id.fqdn.c_str());
-        return false;
-      } else {
-        return false;
-      }
-    }
-
-    restore_n4_sessions = false;
-    sa                  = std::make_shared<pfcp_association>(
-        node_id, recovery_time_stamp, function_features);
-    sa->recovery_time_stamp      = recovery_time_stamp;
-    sa->function_features.first  = true;
-    sa->function_features.second = function_features;
-    std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
-    // Associate with UPF profile if exist
-    for (std::vector<std::shared_ptr<pfcp_association>>::iterator it =
-             pending_associations.begin();
-         it < pending_associations.end(); ++it) {
-      if (((*it)->node_id == node_id) and ((*it)->is_upf_profile_set())) {
-        Logger::smf_app().info("Associate with UPF profile");
-        sa->set_upf_node_profile((*it)->get_upf_node_profile());
-        break;
-      }
-    }
-    if (!associations_graph.full()) {
-      associations_graph.insert_into_graph(sa);
-      // Display UPF Node profile
-      sa->get_upf_node_profile().display();
-      trigger_heartbeat_request_procedure(sa);
-    } else {
-      Logger::smf_app().info("What do we do if too many associations?");
-    }
+    Logger::smf_app().info("What do we do if too many associations?");
   }
   return true;
 }
@@ -396,33 +390,30 @@ bool pfcp_associations::add_association(
     pfcp::up_function_features_s& function_features,
     pfcp::enterprise_specific_s& enterprise_specific,
     bool& restore_n4_sessions) {
-  std::shared_ptr<pfcp_association> sa =
-      std::shared_ptr<pfcp_association>(nullptr);
-  if (get_association(node_id, sa)) {
-    itti_inst->timer_remove(sa->timer_heartbeat);
-    if (sa->recovery_time_stamp == recovery_time_stamp) {
-      restore_n4_sessions = false;
-    } else {
-      restore_n4_sessions = true;
-    }
-    sa->recovery_time_stamp      = recovery_time_stamp;
-    sa->function_features.first  = true;
-    sa->function_features.second = function_features;
+  // TODO what is this enterprise_specfic, this is not used at all, even before
+  // the refactor
+
+  std::shared_ptr<pfcp_association> sa = check_association_on_add(
+      node_id, recovery_time_stamp, restore_n4_sessions, true,
+      function_features);
+  if (sa) return true;
+
+  restore_n4_sessions = false;
+  sa                  = std::make_shared<pfcp_association>(
+      node_id, recovery_time_stamp, function_features);
+  sa->recovery_time_stamp      = recovery_time_stamp;
+  sa->function_features.first  = true;
+  sa->function_features.second = function_features;
+  std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
+
+  // TODO why don't we check the FQDN and associate with UPF profile here as
+  // well?
+
+  if (!associations_graph.full()) {
+    associations_graph.insert_into_graph(sa);
     trigger_heartbeat_request_procedure(sa);
   } else {
-    restore_n4_sessions = false;
-    sa                  = std::make_shared<pfcp_association>(
-        node_id, recovery_time_stamp, function_features);
-    sa->recovery_time_stamp      = recovery_time_stamp;
-    sa->function_features.first  = true;
-    sa->function_features.second = function_features;
-    std::size_t hash_node_id     = std::hash<pfcp::node_id_t>{}(node_id);
-    if (!associations_graph.full()) {
-      associations_graph.insert_into_graph(sa);
-      trigger_heartbeat_request_procedure(sa);
-    } else {
-      Logger::smf_app().info("What do we do if too many associations?");
-    }
+    Logger::smf_app().info("What do we do if too many associations?");
   }
   return true;
 }
@@ -537,8 +528,8 @@ void pfcp_associations::timeout_heartbeat_request(
           "association with this UPF",
           PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES);
       // Related session contexts and PFCP associations become invalid and may
-      // be deleted-> Send request to SMF App to remove all associated sessions
-      // and notify AMF accordingly
+      // be deleted-> Send request to SMF App to remove all associated
+      // sessions and notify AMF accordingly
       std::shared_ptr<itti_n4_node_failure> itti_msg =
           std::make_shared<itti_n4_node_failure>(TASK_SMF_N4, TASK_SMF_APP);
       itti_msg->node_id = association->node_id;
@@ -672,14 +663,16 @@ bool pfcp_associations::remove_association(const int32_t& hash_node_id) {
 }
 
 /******************************************************************************/
-/***************************** UPF GRAPH **************************************/
+/***************************** UPF GRAPH
+ * **************************************/
 /******************************************************************************/
 
 //------------------------------------------------------------------------------
 void upf_graph::insert_into_graph(const std::shared_ptr<pfcp_association>& sa) {
   if (!sa->upf_profile_is_set) {
     Logger::smf_app().info(
-        "Cannot connect UPF to other nodes in the graph as it has no profile, "
+        "Cannot connect UPF to other nodes in the graph as it has no "
+        "profile, "
         "just add the node");
     Logger::smf_app().warn("Assume that the UPF has a N3 and a N6 interface.");
 
@@ -718,7 +711,8 @@ void upf_graph::insert_into_graph(const std::shared_ptr<pfcp_association>& sa) {
         } else {
           Logger::smf_app().warn(
               "Found edge from %s to %s, but not in the other direction. You "
-              "have an error in your UPF configuration. This UPF is not added "
+              "have an error in your UPF configuration. This UPF is not "
+              "added "
               "to the graph",
               sa->get_printable_name().c_str(),
               it.first->get_printable_name().c_str());
@@ -922,8 +916,8 @@ void upf_graph::dfs_next_upf(
     upf = node_it->first;
 
     // here we need to check if we have more than one unvisited N9_UL edge
-    // if yes, we have a UL CL scenario, and we need to finish the other branch
-    // first
+    // if yes, we have a UL CL scenario, and we need to finish the other
+    // branch first
     Logger::smf_app().debug(
         "DFS Asynch: Handle UPF %s", upf->get_printable_name().c_str());
     int unvisited_n9_ul_nodes = 0;
@@ -1497,8 +1491,8 @@ void upf_graph::create_subgraph_dfs(
         // graph and find the original node; direct access is safe as we know
         // this element exists in graph as we have double lists
 
-        // Note: We could also remove this step as this node is evaluated anyway
-        // but then we need to somehow track the visited
+        // Note: We could also remove this step as this node is evaluated
+        // anyway but then we need to somehow track the visited
         //  This is O(#edges_per_upf) so quite small
         auto edge_node = adjacency_list[edge_it.association];
         for (const auto& edge_edge : edge_node) {
