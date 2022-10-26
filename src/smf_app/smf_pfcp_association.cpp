@@ -285,7 +285,7 @@ std::string pfcp_association::get_printable_name() {
     if (!ipv4_addresses.empty()) {
       std::string addresses;
       for (auto add : ipv4_addresses) {
-        addresses.append(inet_ntoa(add));
+        addresses.append(conv::toString(add));
         addresses.append(";");
       }
       return addresses;
@@ -343,11 +343,9 @@ bool pfcp_associations::resolve_upf_hostname(pfcp::node_id_t& node_id) {
           node_id.fqdn.c_str());
       return false;
     }
-    struct sockaddr_in sa {};
     switch (addr_type) {
       case 0:
-        inet_pton(AF_INET, ip_addr.c_str(), &(sa.sin_addr));
-        node_id.u1.ipv4_address = sa.sin_addr;
+        node_id.u1.ipv4_address = conv::fromString(ip_addr);
         return true;
       case 1:
         // TODO
@@ -498,15 +496,21 @@ bool pfcp_associations::get_association(
     // We didn't find association, may be because hash map is made with
     // node_id_type FQDN
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
-      struct hostent* hostname = gethostbyaddr(
-          &node_id.u1.ipv4_address.s_addr,
-          sizeof(node_id.u1.ipv4_address.s_addr), AF_INET);
+      std::string hostname;
+      std::string ip_str = conv::toString(node_id.u1.ipv4_address);
+
+      if (!fqdn::reverse_resolve(ip_str, hostname)) {
+        Logger::smf_app().warn(
+            "Could not resolve hostname for IP address %s", ip_str.c_str());
+        return false;
+      }
+
       pfcp::node_id_t node_id_tmp = {};
       node_id_tmp.node_id_type    = pfcp::NODE_ID_TYPE_FQDN;
-      node_id_tmp.fqdn            = hostname->h_name;
+      node_id_tmp.fqdn            = hostname;
       Logger::smf_app().debug(
           "Hash lookup for association retry: Associated Hostname -> %s",
-          hostname->h_name);
+          hostname.c_str());
       if (get_association(node_id_tmp, sa)) return true;
     }
     // We didn't found association, may be because hash map is made with

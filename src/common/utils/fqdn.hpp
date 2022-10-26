@@ -40,6 +40,15 @@ class fqdn {
   static bool resolve(
       const std::string& host_name, std::string& address, uint32_t& port,
       uint8_t& addr_type, const std::string& protocol = "http");
+
+  /**
+   * @brief Resolves an IP address to get the hostname
+   * @param ip_address to resolve
+   * @param host_name result, if return=true
+   * @return true if successful
+   */
+  static bool reverse_resolve(
+      const std::string& ip_address, std::string& host_name);
 };
 
 #endif /* FILE_FQDN_HPP_SEEN */

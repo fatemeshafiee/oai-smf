@@ -72,3 +72,39 @@ bool fqdn::resolve(
 
   return false;
 }
+
+bool fqdn::reverse_resolve(const std::string& ip_addr, std::string& host_name) {
+  Logger::smf_app().debug("Resolving an IP address (name %s)", ip_addr.c_str());
+  int tries = 0;
+  while (tries < MAX_NB_RESOLVE_TRIES) {
+    try {
+      boost::asio::io_context io_context = {};
+      Logger::smf_app().debug("Reverse Resolving Try #%u", tries);
+
+      boost::asio::ip::address addr =
+          boost::asio::ip::address::from_string(ip_addr);
+      boost::asio::ip::tcp::endpoint ep;
+      ep.address(addr);
+
+      boost::asio::ip::tcp::resolver resolver(io_context);
+      boost::asio::ip::tcp::resolver::results_type endpoints =
+          resolver.resolve(ep);
+
+      for (const auto& endpoint : endpoints) {
+        // get the first endpoint
+        host_name = endpoint.host_name();
+        return true;
+      }
+    } catch (std::exception& e) {
+      tries++;
+      if (tries == MAX_NB_RESOLVE_TRIES) {
+        Logger::smf_app().warn(
+            "Cannot resolve IP address %s: %s -- After %d tries",
+            ip_addr.c_str(), e.what(), tries);
+        return false;
+      }
+      std::this_thread::sleep_for(std::chrono::seconds(TIME_BETWEEN_TRIES));
+    }
+  }
+  return false;
+}
