@@ -108,14 +108,18 @@ bool edge::serves_network(
     dnn_item.dnn = dnn;
     auto dnn_it  = snssai_it->dnn_upf_info_list.find(dnn_item);
     if (dnn_it != snssai_it->dnn_upf_info_list.end()) {
-      // should be only 1 DNAI
-      for (const auto& dnai : dnn_it->dnai_list) {
-        // O(1)
-        auto found_dnai = dnais.find(dnai);
-        if (found_dnai != dnais.end()) {
-          matched_dnai = dnai;
-          return true;
+      if (!dnais.empty()) {
+        // should be only 1 DNAI
+        for (const auto& dnai : dnn_it->dnai_list) {
+          // O(1)
+          auto found_dnai = dnais.find(dnai);
+          if (found_dnai != dnais.end()) {
+            matched_dnai = dnai;
+            return true;
+          }
         }
+      } else {
+        return true;
       }
     }
   }
