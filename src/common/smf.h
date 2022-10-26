@@ -29,6 +29,7 @@
 
 #include <map>
 #include <vector>
+#include <unordered_set>
 
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT "%" SCNu64
@@ -361,7 +362,7 @@ typedef struct nf_service_s {
 
 typedef struct dnn_upf_info_item_s {
   std::string dnn;
-  std::vector<std::string> dnai_list;
+  std::unordered_set<std::string> dnai_list;
   // supported from R16.8
   std::map<std::string, std::string> dnai_nw_instance_list;
   // std::vector<std::string> pdu_session_types
@@ -372,16 +373,32 @@ typedef struct dnn_upf_info_item_s {
     dnai_nw_instance_list = d.dnai_nw_instance_list;
     return *this;
   }
+
+  bool operator==(const dnn_upf_info_item_s& s) const { return dnn == s.dnn; }
+
+  size_t operator()(const dnn_upf_info_item_s&) const {
+    return std::hash<std::string>()(dnn);
+  }
+
 } dnn_upf_info_item_t;
 
 typedef struct snssai_upf_info_item_s {
   snssai_t snssai;
-  std::vector<dnn_upf_info_item_t> dnn_upf_info_list;
+  std::unordered_set<dnn_upf_info_item_t, dnn_upf_info_item_t>
+      dnn_upf_info_list;
 
   snssai_upf_info_item_s& operator=(const snssai_upf_info_item_s& s) {
     snssai            = s.snssai;
     dnn_upf_info_list = s.dnn_upf_info_list;
     return *this;
+  }
+
+  bool operator==(const snssai_upf_info_item_s& s) const {
+    return snssai == s.snssai;
+  }
+
+  size_t operator()(const snssai_upf_info_item_s&) const {
+    return snssai.operator()(snssai);
   }
 
 } snssai_upf_info_item_t;

@@ -264,9 +264,9 @@ const std::string DEFAULT_FLOW_DESCRIPTION =
     "permit out ip from any to assigned";
 
 struct edge {
-  std::string dnai;
   // this might need to be replaced by FlowInformation model in the future, but
   // for now we know this is always uplink
+  std::string used_dnai;
   std::string flow_description;
   unsigned int precedence = 0;
   std::string nw_instance;
@@ -275,22 +275,27 @@ struct edge {
   std::vector<smf_qos_flow> qos_flows;
   bool n4_sent = false;
   std::shared_ptr<pfcp_association> association;
-  std::unordered_set<std::string> dnns;
-  std::unordered_set<snssai_t, snssai_t> snssais;
+  // we use parts of the upf_interface here
+  // the reason why we do is that all the info is split up into several parts
+  // in the API. It is more time-efficient to have all in one place
+  std::unordered_set<snssai_upf_info_item_s, snssai_upf_info_item_s>
+      snssai_dnns;
 
   static edge from_upf_info(
       const upf_info_t& upf_info, const interface_upf_info_item_t& interface);
+
+  static edge from_upf_info(const upf_info_t& upf_info);
 
   bool serves_network(const std::string& dnn, const snssai_t& snssai) const;
 
   bool serves_network(
       const std::string& dnn, const snssai_t& snssai,
-      const std::string& dnai) const;
+      const std::unordered_set<std::string>& dnais,
+      std::string& found_dnai) const;
 
   bool operator==(const edge& other) const {
-    return dnai == other.dnai && nw_instance == other.nw_instance &&
-           type == other.type && uplink == other.uplink &&
-           association == other.association;
+    return nw_instance == other.nw_instance && type == other.type &&
+           uplink == other.uplink && association == other.association;
   }
 
   [[nodiscard]] std::string to_string() const {
@@ -330,7 +335,7 @@ class upf_graph {
   smf_qos_flow qos_flow_asynch;
 
   // normal DFS temporary values
-  std::set<std::string> dfs_all_dnais;
+  std::unordered_set<std::string> dfs_all_dnais;
   std::string dfs_flow_description;
   snssai_t dfs_snssai;
   std::string dfs_dnn;
@@ -376,7 +381,7 @@ class upf_graph {
    * @param dnn The DNN to match against
    */
   void set_dfs_selection_criteria(
-      const std::set<std::string>& all_dnais,
+      const std::unordered_set<std::string>& all_dnais,
       const std::string& flow_description, uint32_t precedence,
       const snssai_t& snssai, const std::string& dnn);
 
@@ -409,7 +414,7 @@ class upf_graph {
    * @param dnais
    * @return
    */
-  static std::string get_dnai_list(const std::set<string>& dnais);
+  static std::string get_dnai_list(const std::unordered_set<string>& dnais);
 
  public:
   upf_graph() : adjacency_list(), visited_asynch(){};

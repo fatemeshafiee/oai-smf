@@ -44,53 +44,89 @@ extern itti_mw* itti_inst;
 extern smf_n4* smf_n4_inst;
 extern smf_config smf_cfg;
 
+edge edge::from_upf_info(const upf_info_t& upf_info) {
+  edge e;
+  snssai_upf_info_item_s snssai_item;
+
+  for (const auto& snssai : upf_info.snssai_upf_info_list) {
+    snssai_item.snssai            = snssai.snssai;
+    snssai_item.dnn_upf_info_list = snssai.dnn_upf_info_list;
+    e.snssai_dnns.insert(snssai);
+  }
+  return e;
+}
+
 edge edge::from_upf_info(
     const upf_info_t& upf_info, const interface_upf_info_item_t& interface) {
   edge e;
   e.type = pfcp_association::iface_type_from_string(interface.interface_type);
   e.nw_instance = interface.network_instance;
-  for (const auto& snssai : upf_info.snssai_upf_info_list) {
-    for (const auto& dnn : snssai.dnn_upf_info_list) {
-      // Stefan: I would say when a DNAI and a matching NW INSTANCE LIST is
-      // there, that means that for this interface only this specific SNSSAI and
-      // DNN combination counts still, to support non_DNAI option, just add all
-      // DNNs/SNSSAIs here in that case
-      if (dnn.dnai_list.empty()) {
-        e.dnns.insert(dnn.dnn);
-        e.snssais.insert(snssai.snssai);
-      }
-      for (const auto& dnai : dnn.dnai_list) {
-        auto dnai_nw_instance = dnn.dnai_nw_instance_list.find(dnai);
 
-        if (dnai_nw_instance != dnn.dnai_nw_instance_list.end()) {
-          if (dnai_nw_instance->second == e.nw_instance) {
-            e.dnai = dnai;
-            e.dnns.insert(dnn.dnn);
-            e.snssais.insert(snssai.snssai);
+  // we filter out the DNAIs which do not map to the given NW interface
+  for (const auto& snssai_item : upf_info.snssai_upf_info_list) {
+    snssai_upf_info_item_s new_snssai_item;
+    new_snssai_item.snssai = snssai_item.snssai;
+
+    for (const auto& dnn_item : snssai_item.dnn_upf_info_list) {
+      dnn_upf_info_item_s new_dnn_item;
+      new_dnn_item.dnn = dnn_item.dnn;
+      if (!dnn_item.dnai_list.empty() &&
+          !dnn_item.dnai_nw_instance_list.empty()) {
+        for (const auto& dnai : dnn_item.dnai_list) {
+          auto dnai_it = dnn_item.dnai_nw_instance_list.find(dnai);
+          if (dnai_it != dnn_item.dnai_nw_instance_list.end()) {
+            if (dnai_it->second == e.nw_instance) {
+              new_dnn_item.dnai_list.insert(dnai);
+              break;
+            }
           }
         }
+      } else {
+        Logger::smf_app().debug(
+            "DNAI List or DNAI NW Instance List is empty for this UPF.");
       }
+      new_snssai_item.dnn_upf_info_list.insert(new_dnn_item);
     }
+    e.snssai_dnns.insert(new_snssai_item);
   }
+
   return e;
 }
 
 bool edge::serves_network(
-    const std::string& dnn, const snssai_t& snssai) const {
-  auto dnn_it = dnns.find(dnn);
-  if (dnn_it != dnns.end()) {
-    auto snssai_it = snssais.find(snssai);
-    if (snssai_it != snssais.end()) {
-      return true;
+    const std::string& dnn, const snssai_t& snssai,
+    const std::unordered_set<std::string>& dnais,
+    std::string& matched_dnai) const {
+  // just create a snssai_upf_info_item for fast lookup
+  snssai_upf_info_item_s snssai_item;
+  snssai_item.snssai = snssai;
+
+  auto snssai_it = snssai_dnns.find(snssai_item);
+  if (snssai_it != snssai_dnns.end()) {
+    // create temp item for fast lookup
+    dnn_upf_info_item_s dnn_item;
+    dnn_item.dnn = dnn;
+    auto dnn_it  = snssai_it->dnn_upf_info_list.find(dnn_item);
+    if (dnn_it != snssai_it->dnn_upf_info_list.end()) {
+      // should be only 1 DNAI
+      for (const auto& dnai : dnn_it->dnai_list) {
+        // O(1)
+        auto found_dnai = dnais.find(dnai);
+        if (found_dnai != dnais.end()) {
+          matched_dnai = dnai;
+          return true;
+        }
+      }
     }
   }
   return false;
 }
 
 bool edge::serves_network(
-    const std::string& dnn, const snssai_t& snssai,
-    const std::string& dnai_in) const {
-  return dnai == dnai_in && serves_network(dnn, snssai);
+    const std::string& dnn, const snssai_t& snssai) const {
+  std::unordered_set<string> set;
+  std::string s;
+  return serves_network(dnn, snssai, set, s);
 }
 
 //------------------------------------------------------------------------------
@@ -177,6 +213,17 @@ bool pfcp_association::find_interface_edge(
       edges.emplace_back(edge::from_upf_info(upf_info, iface));
     }
   }
+  // Because interfaceUpfInfoList is optional in TS 29.510 (why even?), we
+  // just guess that this UPF has a N3 or N6 interface
+  if (upf_info.interface_upf_info_list.empty()) {
+    Logger::smf_app().info(
+        "UPF Interface list ist empty: Assume that the UPF has a N3 and a N6 "
+        "interface.");
+    edge e = edge::from_upf_info(upf_info);
+    e.type = type_match;
+    edges.emplace_back(e);
+  }
+
   return !edges.empty();
 }
 
@@ -444,8 +491,6 @@ bool pfcp_associations::get_association(
   auto association         = associations_graph.get_association(hash_node_id);
 
   if (!association) {
-    // TODO verify if this is still necessary with the graph
-
     // We didn't find association, may be because hash map is made with
     // node_id_type FQDN
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
@@ -677,7 +722,7 @@ void upf_graph::insert_into_graph(const std::shared_ptr<pfcp_association>& sa) {
         "Cannot connect UPF to other nodes in the graph as it has no "
         "profile, "
         "just add the node");
-    Logger::smf_app().warn("Assume that the UPF has a N3 and a N6 interface.");
+    Logger::smf_app().info("Assume that the UPF has a N3 and a N6 interface.");
 
     edge n3_edge;
     n3_edge.type   = iface_type::N3;
@@ -1225,13 +1270,13 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
   std::unordered_set<uint32_t> precedences;
 
   // std::shared_ptr<upf_graph> correct_sub_graph_ptr;
-  std::set<std::string> dnais_from_all_rules;
+  std::unordered_set<std::string> dnais_from_all_rules;
   std::shared_ptr<upf_graph> sub_graph_ptr;
 
   // run DFS for each PCC rule, get different graphs and merge them
 
   for (const auto& rule : pcc_rules) {
-    std::set<std::string> dnais;
+    std::unordered_set<std::string> dnais;
     if (!rule.second.getRefTcData().empty()) {
       // we just take the first traffic control, as defined in the standard
       // see Note 1 in table 5.6.2.6-1 in TS29.512
@@ -1283,6 +1328,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
         for (const auto& edge : node.second) {
           if (edge.type == iface_type::N3) {
             has_n3 = true;
+            break;
           }
         }
 
@@ -1317,9 +1363,11 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
   }
 
   // Now we verify the merged graph
-  sub_graph_ptr->set_dfs_selection_criteria(
-      dnais_from_all_rules, dfs_flow_description, dfs_precedence, snssai, dnn);
-
+  if (sub_graph_ptr) {
+    sub_graph_ptr->set_dfs_selection_criteria(
+        dnais_from_all_rules, dfs_flow_description, dfs_precedence, snssai,
+        dnn);
+  }
   if (sub_graph_ptr && sub_graph_ptr->verify()) {
     Logger::smf_app().info("Dynamic UPF selection successful.");
     sub_graph_ptr->print_graph();
@@ -1342,7 +1390,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
 bool upf_graph::verify() {
   int access_count = 0;
   bool has_exit    = false;
-  std::set<std::string> all_dnais_in_graph;
+  std::unordered_set<std::string> all_dnais_in_graph;
   for (const auto& node : adjacency_list) {
     for (const auto& edge : node.second) {
       if (edge.type == iface_type::N3) {
@@ -1350,7 +1398,7 @@ bool upf_graph::verify() {
       } else if (edge.type == iface_type::N6) {
         has_exit = true;
       }
-      all_dnais_in_graph.insert(edge.dnai);
+      all_dnais_in_graph.insert(edge.used_dnai);
     }
   }
 
@@ -1407,7 +1455,7 @@ bool upf_graph::verify() {
   return false;
 }
 
-std::string upf_graph::get_dnai_list(const std::set<string>& dnais) {
+std::string upf_graph::get_dnai_list(const std::unordered_set<string>& dnais) {
   std::string out;
 
   for (const auto& dnai : dnais) {
@@ -1420,8 +1468,9 @@ std::string upf_graph::get_dnai_list(const std::set<string>& dnais) {
 }
 
 void upf_graph::set_dfs_selection_criteria(
-    const std::set<std::string>& all_dnais, const std::string& flow_description,
-    uint32_t precedence, const snssai_t& snssai, const std::string& dnn) {
+    const std::unordered_set<std::string>& all_dnais,
+    const std::string& flow_description, uint32_t precedence,
+    const snssai_t& snssai, const std::string& dnn) {
   dfs_all_dnais        = all_dnais;
   dfs_flow_description = flow_description;
   dfs_precedence       = precedence;
@@ -1459,13 +1508,13 @@ void upf_graph::create_subgraph_dfs(
     // DFS: Go through all edges and check if the UPF serves one of the DNAIs
     // from the PCC rule
     for (auto edge_it : node_it->second) {
-      auto dnai_it = dfs_all_dnais.find(edge_it.dnai);
-      if (dnai_it == dfs_all_dnais.end()) {
-        continue;  // do not consider this edge, it does not serve DNAI
+      std::string found_dnai;
+      if (!edge_it.serves_network(
+              dfs_dnn, dfs_snssai, dfs_all_dnais, found_dnai)) {
+        continue;  // do not consider this edge, does not serve DNN or SNSSAI or
+                   // any DNAI
       }
-      if (!edge_it.serves_network(dfs_dnn, dfs_snssai)) {
-        continue;  // do not consider this edge, does not serve DNN or SNSSAI
-      }
+      edge_it.used_dnai = found_dnai;
 
       edge_it.flow_description = dfs_flow_description;
       // TODO move this precedence to the QOS FLOW?
@@ -1498,6 +1547,15 @@ void upf_graph::create_subgraph_dfs(
           if (edge_edge.association == node_it->first) {
             dst_src        = edge_edge;
             dst_src.uplink = false;
+            std::string used_dnai;
+            if (!edge_edge.serves_network(
+                    dfs_dnn, dfs_snssai, dfs_all_dnais, used_dnai)) {
+              Logger::smf_app().error(
+                  "Back-Edge in DFS does not serve network. check your "
+                  "configuration");
+              break;
+            }
+            dst_src.used_dnai = used_dnai;
           }
         }
         sub_graph->add_upf_graph_edge(
