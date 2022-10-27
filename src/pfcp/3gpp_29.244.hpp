@@ -39,7 +39,7 @@
 #include <cstring>
 #include <endian.h>
 #include <exception>
-//#include <fmt/format.h> conflicts with spdlog
+// #include <fmt/format.h> conflicts with spdlog
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -751,11 +751,10 @@ class pfcp_fteid_ie : public pfcp_ie {
         tlv.add_length(16);
         ipv6_address = b.ipv6_address;
       }
-    }
-    if (u1.bf.ch & b.v4) {
-      u1.bf.v4 = b.v4;
     } else {
-      // else should clear v4 v6 bits
+      if (u1.bf.ch & b.v4) {
+        u1.bf.v4 = b.v4;
+      }
       if (u1.bf.chid) {
         choose_id = b.choose_id;
         tlv.add_length(1);
