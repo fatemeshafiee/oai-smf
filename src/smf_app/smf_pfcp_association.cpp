@@ -133,6 +133,85 @@ bool edge::serves_network(
   return serves_network(dnn, snssai, set, s);
 }
 
+std::shared_ptr<smf_qos_flow> edge::get_qos_flow(const pfcp::pdr_id_t& pdr_id) {
+  // it may happen that 2 qos flows have the same PDR ID e.g. in an
+  // UL CL scenario, but then they will also have the same FTEID
+  for (auto& flow_it : qos_flows) {
+    if (flow_it->pdr_id_ul == pdr_id || flow_it->pdr_id_dl == pdr_id) {
+      return flow_it;
+    }
+  }
+  return {};
+}
+
+std::shared_ptr<smf_qos_flow> edge::get_qos_flow(const pfcp::qfi_t& qfi) {
+  for (auto& flow_it : qos_flows) {
+    if (flow_it->qfi == qfi) {
+      return flow_it;
+    }
+  }
+  return {};
+}
+
+std::shared_ptr<smf_qos_flow> edge::get_qos_flow(const pfcp::far_id_t& far_id) {
+  for (auto& flow_it : qos_flows) {
+    if (flow_it->far_id_ul.second == far_id ||
+        flow_it->far_id_dl.second == far_id) {
+      return flow_it;
+    }
+  }
+  return {};
+}
+
+//------------------------------------------------------------------------------
+void smf_qos_flow::mark_as_released() {
+  released = true;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_qos_flow::toString() const {
+  std::string s = {};
+  s.append("QoS Flow:\n");
+  s.append("\t\tQFI:\t\t")
+      .append(std::to_string((uint8_t) qfi.qfi))
+      .append("\n");
+  s.append("\t\tUL FTEID:\t").append(ul_fteid.toString()).append("\n");
+  s.append("\t\tDL FTEID:\t").append(dl_fteid.toString()).append("\n");
+  s.append("\t\tPDR ID UL:\t")
+      .append(std::to_string(pdr_id_ul.rule_id))
+      .append("\n");
+  s.append("\t\tPDR ID DL:\t")
+      .append(std::to_string(pdr_id_dl.rule_id))
+      .append("\n");
+
+  s.append("\t\tPrecedence:\t")
+      .append(std::to_string(precedence.precedence))
+      .append("\n");
+  if (far_id_ul.first) {
+    s.append("\t\tFAR ID UL:\t")
+        .append(std::to_string(far_id_ul.second.far_id))
+        .append("\n");
+  }
+  if (far_id_dl.first) {
+    s.append("\t\tFAR ID DL:\t")
+        .append(std::to_string(far_id_dl.second.far_id))
+        .append("\n");
+  }
+  if (urr_id.urr_id != 0) {
+    s.append("\t\tURR ID:\t")
+        .append(std::to_string(urr_id.urr_id))
+        .append("\n");
+  }
+  return s;
+}
+//------------------------------------------------------------------------------
+void smf_qos_flow::deallocate_ressources() {
+  clear();
+  Logger::smf_app().info(
+      "Resources associated with this QoS Flow (%d) have been released",
+      (uint8_t) qfi.qfi);
+}
+
 //------------------------------------------------------------------------------
 iface_type pfcp_association::iface_type_from_string(const std::string& input) {
   iface_type type_tmp;
@@ -238,7 +317,7 @@ bool pfcp_association::find_n3_edge(std::vector<edge>& edges) {
 bool pfcp_association::find_n6_edge(std::vector<edge>& edges) {
   bool success = find_interface_edge(iface_type::N6, edges);
   if (success) {
-    for (auto e : edges) {
+    for (auto& e : edges) {
       e.uplink = true;
     }
   }
@@ -1018,46 +1097,21 @@ void upf_graph::dfs_next_upf(
       // copy QOS Flow for the whole graph
       //  TODO currently only one flow is supported
       if (edge_it->qos_flows.empty()) {
-        edge_it->qos_flows.emplace_back(qos_flow_asynch);
+        std::shared_ptr<smf_qos_flow> flow =
+            std::make_shared<smf_qos_flow>(qos_flow_asynch);
+        edge_it->qos_flows.emplace_back(flow);
       }
 
-      // pointer is not null -> N9 interface
-      if (edge_it->association) {
-        // we add the TEID here for the edge in the other direction
-        // direct access is safe as we know the edge exists
-        auto edge_node = adjacency_list[edge_it->association];
-        for (auto edge_edge : edge_node) {
-          if (edge_edge.qos_flows.empty()) {
-            edge_edge.qos_flows.emplace_back(qos_flow_asynch);
-          }
-
-          if (edge_edge.association &&
-              edge_edge.association == node_it->first) {
-            if (edge_edge.type == iface_type::N9 && edge_edge.uplink) {
-              // downlink direction
-              edge_it->qos_flows[0].dl_fteid = edge_edge.qos_flows[0].dl_fteid;
-            } else if (edge_edge.type == iface_type::N9) {
-              edge_it->qos_flows[0].ul_fteid = edge_edge.qos_flows[0].ul_fteid;
-            }
-          }
-        }
-        if (edge_it->type == N9 && edge_it->uplink) {
-          info_ul.push_back(*edge_it);
-        } else if (edge_it->type == N9) {
-          info_dl.push_back(*edge_it);
-        }
+      // set the correct edges to return
+      if (edge_it->uplink) {
+        info_ul.push_back(*edge_it);
       } else {
-        // N3 or N6 interface
-        if (edge_it->type == iface_type::N6) {
-          info_ul.push_back(*edge_it);
-        } else if (edge_it->type == iface_type::N3) {
-          info_dl.push_back(*edge_it);
-        }
+        info_dl.push_back(*edge_it);
       }
+      current_upf_asynch      = upf;
+      current_edges_dl_asynch = info_dl;
+      current_edges_ul_asynch = info_ul;
     }
-    current_upf_asynch      = upf;
-    current_edges_dl_asynch = info_dl;
-    current_edges_ul_asynch = info_ul;
   }
 }
 
@@ -1069,31 +1123,6 @@ void upf_graph::dfs_current_upf(
   upf     = current_upf_asynch;
   info_dl = current_edges_dl_asynch;
   info_ul = current_edges_ul_asynch;
-
-  auto it = adjacency_list.find(upf);
-
-  if (it != adjacency_list.end()) {
-    // update edge info
-    info_dl.clear();
-    info_ul.clear();
-    for (const auto& edge_it : it->second) {
-      for (const auto& current_edge : current_edges_dl_asynch) {
-        if (edge_it.nw_instance == current_edge.nw_instance) {
-          info_dl.push_back(edge_it);
-        }
-      }
-      for (const auto& current_edge : current_edges_ul_asynch) {
-        if (edge_it.nw_instance == current_edge.nw_instance) {
-          info_ul.push_back(edge_it);
-        }
-      }
-    }
-
-  } else {
-    Logger::smf_app().error(
-        "We want to get the current UPF in DFS, but it is not in graph "
-        "(anymore");
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -1116,7 +1145,6 @@ void upf_graph::start_asynch_dfs_procedure(
     for (auto& edge : it.second) {
       if ((uplink && edge.type == iface_type::N6) ||
           (!uplink && edge.type == iface_type::N3)) {
-        edge.qos_flows.emplace_back(qos_flow_asynch);
         stack_asynch.push(it.first);
         break;
       }
@@ -1140,8 +1168,7 @@ edge upf_graph::get_access_edge() const {
 }
 
 void upf_graph::update_edge_info(
-    const std::shared_ptr<pfcp_association>& upf,
-    const std::string& nw_instance, const edge& info) {
+    const std::shared_ptr<pfcp_association>& upf, const edge& info) {
   std::unique_lock graph_lock(graph_mutex);
   auto it = adjacency_list.find(upf);
   if (it == adjacency_list.end()) {
@@ -1150,7 +1177,7 @@ void upf_graph::update_edge_info(
   }
 
   for (auto& edge_it : it->second) {
-    if (edge_it.nw_instance == nw_instance) {
+    if (edge_it == info) {
       edge_it = info;
       break;
     }

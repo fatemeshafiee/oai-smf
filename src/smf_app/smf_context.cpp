@@ -87,50 +87,6 @@ extern smf::smf_app* smf_app_inst;
 extern smf::smf_config smf_cfg;
 
 //------------------------------------------------------------------------------
-void smf_qos_flow::mark_as_released() {
-  released = true;
-}
-
-//------------------------------------------------------------------------------
-std::string smf_qos_flow::toString() const {
-  std::string s = {};
-  s.append("QoS Flow:\n");
-  s.append("\t\tQFI:\t\t")
-      .append(std::to_string((uint8_t) qfi.qfi))
-      .append("\n");
-  s.append("\t\tUL FTEID:\t").append(ul_fteid.toString()).append("\n");
-  s.append("\t\tDL FTEID:\t").append(dl_fteid.toString()).append("\n");
-  s.append("\t\tPDR ID UL:\t")
-      .append(std::to_string(pdr_id_ul.rule_id))
-      .append("\n");
-  s.append("\t\tPDR ID DL:\t")
-      .append(std::to_string(pdr_id_dl.rule_id))
-      .append("\n");
-
-  s.append("\t\tPrecedence:\t")
-      .append(std::to_string(precedence.precedence))
-      .append("\n");
-  if (far_id_ul.first) {
-    s.append("\t\tFAR ID UL:\t")
-        .append(std::to_string(far_id_ul.second.far_id))
-        .append("\n");
-  }
-  if (far_id_dl.first) {
-    s.append("\t\tFAR ID DL:\t")
-        .append(std::to_string(far_id_dl.second.far_id))
-        .append("\n");
-  }
-  return s;
-}
-//------------------------------------------------------------------------------
-void smf_qos_flow::deallocate_ressources() {
-  clear();
-  Logger::smf_app().info(
-      "Resources associated with this QoS Flow (%d) have been released",
-      (uint8_t) qfi.qfi);
-}
-
-//------------------------------------------------------------------------------
 void smf_pdu_session::get_pdu_session_id(uint32_t& psi) const {
   psi = pdu_session_id;
 }

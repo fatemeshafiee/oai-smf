@@ -251,6 +251,7 @@ class smf_qos_flow {
   pfcp::fteid_t dl_fteid;    // fteid of AN
   pfcp::pdr_id_t pdr_id_ul;  // Packet Detection Rule ID, UL
   pfcp::pdr_id_t pdr_id_dl;  // Packet Detection Rule ID, DL
+  pfcp::urr_id_t urr_id;     // Usage reporting Rule, use same for UL and DL
   pfcp::precedence_t precedence;
   std::pair<bool, pfcp::far_id_t> far_id_ul;  // FAR ID, UL
   std::pair<bool, pfcp::far_id_t> far_id_dl;  // FAR ID, DL
@@ -272,7 +273,7 @@ struct edge {
   std::string nw_instance;
   iface_type type;
   bool uplink = false;
-  std::vector<smf_qos_flow> qos_flows;
+  std::vector<std::shared_ptr<smf_qos_flow>> qos_flows;
   bool n4_sent = false;
   std::shared_ptr<pfcp_association> association;
   // we use parts of the upf_interface here
@@ -292,6 +293,12 @@ struct edge {
       const std::string& dnn, const snssai_t& snssai,
       const std::unordered_set<std::string>& dnais,
       std::string& found_dnai) const;
+
+  std::shared_ptr<smf_qos_flow> get_qos_flow(const pfcp::pdr_id_t& pdr_id);
+
+  std::shared_ptr<smf_qos_flow> get_qos_flow(const pfcp::qfi_t& qfi);
+
+  std::shared_ptr<smf_qos_flow> get_qos_flow(const pfcp::far_id_t& far_id);
 
   bool operator==(const edge& other) const {
     return nw_instance == other.nw_instance && type == other.type &&
@@ -539,12 +546,10 @@ class upf_graph {
   /**
    * Update edge information in the graph
    * @param upf UPF for which edge info should be updated
-   * @param nw_instance NW instance of the edge, must be unique for this UPF
    * @param info info to update
    */
   void update_edge_info(
-      const std::shared_ptr<pfcp_association>& upf,
-      const std::string& nw_instance, const edge& info);
+      const std::shared_ptr<pfcp_association>& upf, const edge& info);
 
   /**
    * @brief: Debug-prints the current graph
