@@ -48,6 +48,8 @@ namespace smf {
 class smf_context;
 class smf_pdu_session;
 
+enum class smf_procedure_code : uint8_t { CONTINUE, ERROR, OK };
+
 //------------------------------------------------------------------------------
 class smf_procedure {
  private:
@@ -63,13 +65,13 @@ class smf_procedure {
   explicit smf_procedure(uint64_t tx) { trxn_id = tx; }
   virtual ~smf_procedure() {}
   virtual itti_msg_type_t get_procedure_type() { return ITTI_MSG_TYPE_NONE; }
-  virtual void handle_itti_msg(
+  virtual smf_procedure_code handle_itti_msg(
       itti_n4_session_establishment_response& resp,
       std::shared_ptr<smf::smf_context> pc) {}
-  virtual void handle_itti_msg(
+  virtual smf_procedure_code handle_itti_msg(
       itti_n4_session_modification_response& resp,
       std::shared_ptr<smf::smf_context> pc) {}
-  virtual void handle_itti_msg(
+  virtual smf_procedure_code handle_itti_msg(
       itti_n4_session_deletion_response& resp,
       std::shared_ptr<smf::smf_context> pc) {}
 };
@@ -138,7 +140,7 @@ class session_create_sm_context_procedure : public smf_session_procedure {
    * @param [std::shared_ptr<smf::smf_context>] sc: smf context
    * @return
    */
-  int run(
+  smf_procedure_code run(
       std::shared_ptr<itti_n11_create_sm_context_request> req,
       std::shared_ptr<itti_n11_create_sm_context_response> resp,
       std::shared_ptr<smf::smf_context> sc);
@@ -149,7 +151,7 @@ class session_create_sm_context_procedure : public smf_session_procedure {
    * @param [std::shared_ptr<smf::smf_context>] sc smf context
    * @return void
    */
-  void handle_itti_msg(
+  smf_procedure_code handle_itti_msg(
       itti_n4_session_establishment_response& resp,
       std::shared_ptr<smf::smf_context> sc) override;
 
@@ -177,7 +179,7 @@ class session_update_sm_context_procedure : public smf_session_procedure {
    * @param [std::shared_ptr<smf::smf_context>] sc: smf context
    * @return
    */
-  int run(
+  smf_procedure_code run(
       std::shared_ptr<itti_n11_update_sm_context_request> req,
       std::shared_ptr<itti_n11_update_sm_context_response> resp,
       std::shared_ptr<smf::smf_context> sc);
@@ -188,7 +190,7 @@ class session_update_sm_context_procedure : public smf_session_procedure {
    * @param [std::shared_ptr<smf::smf_context>] sc smf context
    * @return void
    */
-  void handle_itti_msg(
+  smf_procedure_code handle_itti_msg(
       itti_n4_session_modification_response& resp,
       std::shared_ptr<smf::smf_context> sc) override;
 
@@ -216,7 +218,7 @@ class session_release_sm_context_procedure : public smf_session_procedure {
    * @param [std::shared_ptr<smf::smf_context>] sc: smf context
    * @return
    */
-  int run(
+  smf_procedure_code run(
       std::shared_ptr<itti_n11_release_sm_context_request> req,
       std::shared_ptr<itti_n11_release_sm_context_response> resp,
       std::shared_ptr<smf::smf_context> sc);
@@ -227,7 +229,7 @@ class session_release_sm_context_procedure : public smf_session_procedure {
    * @param [std::shared_ptr<smf::smf_context>] sc smf context
    * @return void
    */
-  void handle_itti_msg(
+  smf_procedure_code handle_itti_msg(
       itti_n4_session_deletion_response& resp,
       std::shared_ptr<smf::smf_context> sc) override;
 

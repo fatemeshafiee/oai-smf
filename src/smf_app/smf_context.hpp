@@ -1315,6 +1315,31 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       const ng_ran_target_id_t& ran_target_id,
       const pdu_session_id_t& pdu_session_id) const;
 
+  /**
+   * Send a PDU session Create Response, based on the content of resp.
+   * @param resp
+   */
+  void send_pdu_session_create_response(
+      const std::shared_ptr<itti_n11_create_sm_context_response>& resp);
+
+  /**
+   * Create a PDU session UPDATE response, based on the content of resp
+   * @param resp
+   * @pram session_procedure_type The session procedure type of this reply
+   */
+  void send_pdu_session_update_response(
+      const std::shared_ptr<itti_n11_update_sm_context_request>& req,
+      const std::shared_ptr<itti_n11_update_sm_context_response>& resp,
+      const session_management_procedures_type_e& session_procedure_type,
+      const std::shared_ptr<smf_pdu_session>& sps);
+
+  /**
+   * Create a PDU session Release response, based on the content of resp
+   * @param resp
+   */
+  void send_pdu_session_release_response(
+      const std::shared_ptr<itti_n11_release_sm_context_response>& resp);
+
  private:
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
   // snssai <-> session management subscription

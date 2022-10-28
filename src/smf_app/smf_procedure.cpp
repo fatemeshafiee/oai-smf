@@ -34,7 +34,6 @@
 #include "3gpp_29.500.h"
 #include "3gpp_29.502.h"
 #include "3gpp_conversions.hpp"
-#include "SmContextCreatedData.h"
 #include "common_defs.h"
 #include "conversions.hpp"
 #include "itti.hpp"
@@ -43,9 +42,6 @@
 #include "smf_app.hpp"
 #include "smf_config.hpp"
 #include "smf_context.hpp"
-#include "smf_n1.hpp"
-#include "smf_sbi.hpp"
-#include "smf_n2.hpp"
 #include "smf_pfcp_association.hpp"
 #include "ProblemDetails.h"
 #include "3gpp_24.501.h"
@@ -223,7 +219,6 @@ pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
   // pdi IEs
   pfcp::source_interface_t source_interface          = {};
   pfcp::fteid_t local_fteid                          = {};
-  pfcp::ue_ip_address_t ue_ip_address                = {};
   pfcp::sdf_filter_t sdf_filter                      = {};
   pfcp::application_id_t application_id              = {};
   pfcp::_3gpp_interface_type_t source_interface_type = {};
@@ -409,7 +404,7 @@ int n4_session_restore_procedure::run() {
 }
 
 //------------------------------------------------------------------------------
-int session_create_sm_context_procedure::run(
+smf_procedure_code session_create_sm_context_procedure::run(
     std::shared_ptr<itti_n11_create_sm_context_request> sm_context_req,
     std::shared_ptr<itti_n11_create_sm_context_response> sm_context_resp,
     std::shared_ptr<smf::smf_context> sc) {
@@ -430,7 +425,7 @@ int session_create_sm_context_procedure::run(
       Logger::smf_app().warn("PDU session context does not exist!");
       sm_context_resp->res.set_cause(
           PDU_SESSION_APPLICATION_ERROR_CONTEXT_NOT_FOUND);
-      return RETURNerror;
+      return smf_procedure_code::ERROR;
     }
 
     if (sp->policy_ptr) {
@@ -447,9 +442,10 @@ int session_create_sm_context_procedure::run(
     }
     // if still there is no graph, send an error
     if (!graph) {
+      // TODO better error code?
       sm_context_resp->res.set_cause(
           PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
-      return RETURNerror;
+      return smf_procedure_code::ERROR;
     } else {
       sp->set_sessions_graph(graph);
     }
@@ -505,13 +501,13 @@ int session_create_sm_context_procedure::run(
 
   if (!current_upf) {
     Logger::smf_app().warn("UPF selection failed!");
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
   if (dl_edges.size() != 1 || ul_edges.size() != 1) {
     Logger::smf_app().warn(
         "Unsupported UPF Configuration. We need one N3 and one N6 interface!");
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
   n4_triggered = std::make_shared<itti_n4_session_establishment_request>(
@@ -581,22 +577,21 @@ int session_create_sm_context_procedure::run(
     Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_N4",
         n4_triggered->get_msg_name());
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
-  return RETURNok;
+  return smf_procedure_code::OK;
 }
 
 //------------------------------------------------------------------------------
-void session_create_sm_context_procedure::handle_itti_msg(
+smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
     itti_n4_session_establishment_response& resp,
     std::shared_ptr<smf::smf_context> sc) {
   Logger::smf_app().info(
       "Handle N4 Session Establishment Response (PDU Session Id %d)",
-      n11_trigger.get()->req.get_pdu_session_id());
+      n11_trigger->req.get_pdu_session_id());
 
-  cause_value_5gsm_e cause_n1 = {cause_value_5gsm_e::CAUSE_0_UNKNOWN};
-  pfcp::cause_t cause         = {};
+  pfcp::cause_t cause = {};
   resp.pfcp_ies.get(cause);
   if (cause.cause_value == pfcp::CAUSE_VALUE_REQUEST_ACCEPTED) {
     resp.pfcp_ies.get(sps->up_fseid);
@@ -673,129 +668,16 @@ void session_create_sm_context_procedure::handle_itti_msg(
 
   n11_triggered_pending->res.set_qos_flow_context(flow_updated);
 
-  // fill content for N1N2MessageTransfer (including N1, N2 SM)
-  // Create N1 SM container & N2 SM Information
-  std::string n1_sm_msg      = {};
-  std::string n1_sm_msg_hex  = {};
-  std::string n2_sm_info     = {};
-  std::string n2_sm_info_hex = {};
-
-  if (n11_triggered_pending->res.get_cause() !=
+  if (flow_updated.cause_value !=
       static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
-    // PDU Session Establishment Reject
-    Logger::smf_app().debug(
-        "Prepare a PDU Session Establishment Reject message and send to UE");
-    cause_n1 = cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE;
-    // TODO: Support IPv4 only for now
-    if (n11_triggered_pending->res.get_pdu_session_type() ==
-        PDU_SESSION_TYPE_E_IPV6) {
-      n11_triggered_pending->res.set_pdu_session_type(PDU_SESSION_TYPE_E_IPV4);
-      cause_n1 =
-          cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
-    }
-
-    smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
-        n11_triggered_pending->res, n1_sm_msg, cause_n1);
-    conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-    n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
-
-  } else {  // PDU Session Establishment Accept
-    Logger::smf_app().debug(
-        "Prepare a PDU Session Establishment Accept message and send to UE");
-
-    // TODO: Support IPv4 only for now
-    if (n11_triggered_pending->res.get_pdu_session_type() ==
-        PDU_SESSION_TYPE_E_IPV6) {
-      n11_triggered_pending->res.set_pdu_session_type(PDU_SESSION_TYPE_E_IPV4);
-      cause_n1 =
-          cause_value_5gsm_e::CAUSE_50_PDU_SESSION_TYPE_IPV4_ONLY_ALLOWED;
-    }
-
-    smf_n1::get_instance().create_n1_pdu_session_establishment_accept(
-        n11_triggered_pending->res, n1_sm_msg, cause_n1);
-    conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-    n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
-    // N2 SM Information (Step 11, section 4.3.2.2.1 @ 3GPP TS 23.502):
-    // PDUSessionRessourceSetupRequestTransfer IE
-    smf_n2::get_instance()
-        .create_n2_pdu_session_resource_setup_request_transfer(
-            n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
-            n2_sm_info);
-
-    conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-    n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
+    return smf_procedure_code::ERROR;
   }
 
-  // Fill N1N2MesasgeTransferRequestData
-  // get SUPI and put into URL
-  supi_t supi          = n11_triggered_pending->res.get_supi();
-  std::string supi_str = n11_triggered_pending->res.get_supi_prefix() + "-" +
-                         smf_supi_to_string(supi);
-  std::string url =
-      "http://" + sc.get()->get_amf_addr() + NAMF_COMMUNICATION_BASE +
-      smf_cfg.amf_addr.api_version +
-      fmt::format(
-          NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
-  n11_triggered_pending->res.set_amf_url(url);
-  Logger::smf_app().debug(
-      "N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
-
-  // HTTP version
-  n11_triggered_pending->http_version = smf_cfg.http_version;
-
-  // Fill the json part
-  nlohmann::json json_data = {};
-  // N1SM
-  json_data["n1MessageContainer"]["n1MessageClass"] = N1N2_MESSAGE_CLASS;
-  json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
-      N1_SM_CONTENT_ID;  // NAS part
-  // N2SM
-  if (n11_triggered_pending->res.get_cause() ==
-      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
-    json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-    json_data["n2InfoContainer"]["smInfo"]["pduSessionId"] =
-        n11_triggered_pending->res.get_pdu_session_id();
-    // N2InfoContent (section 6.1.6.2.27@3GPP TS 29.518)
-    json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-        "PDU_RES_SETUP_REQ";  // NGAP message type
-    json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-             ["contentId"] = N2_SM_CONTENT_ID;  // NGAP part
-    json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sst"] =
-        n11_triggered_pending->res.get_snssai().sst;
-    json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
-        std::to_string(n11_triggered_pending->res.get_snssai().sd);
-    json_data["n2InfoContainer"]["ranInfo"] = "SM";
-
-    // N1N2MsgTxfrFailureNotification
-    std::string callback_uri =
-        sc.get()->get_amf_addr() + NSMF_PDU_SESSION_BASE +
-        smf_cfg.sbi_api_version +
-        fmt::format(
-            NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE, supi_str.c_str());
-    json_data["n1n2FailureTxfNotifURI"] = callback_uri.c_str();
-  }
-  // Others information
-  // n11_triggered_pending->res.n1n2_message_transfer_data["pti"] = 1;  //Don't
-  // need this info for the moment
-  json_data["pduSessionId"] = n11_triggered_pending->res.get_pdu_session_id();
-
-  n11_triggered_pending->res.set_json_data(json_data);
-
-  // send ITTI message to APP to trigger N1N2MessageTransfer towards AMFs
-  Logger::smf_app().info(
-      "Sending ITTI message %s to task TASK_SMF_APP",
-      n11_triggered_pending->get_msg_name());
-
-  int ret = itti_inst->send_msg(n11_triggered_pending);
-  if (RETURNok != ret) {
-    Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_SBI",
-        n11_triggered_pending->get_msg_name());
-  }
+  return smf_procedure_code::OK;
 }
 
 //------------------------------------------------------------------------------
-int session_update_sm_context_procedure::run(
+smf_procedure_code session_update_sm_context_procedure::run(
     std::shared_ptr<itti_n11_update_sm_context_request> sm_context_req,
     std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp,
     std::shared_ptr<smf::smf_context> sc) {
@@ -824,20 +706,20 @@ int session_update_sm_context_procedure::run(
     Logger::smf_app().warn(
         "SM Context associated with this id " SCID_FMT " does not exit!", scid);
     // TODO:
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
   std::shared_ptr<smf_pdu_session> sp = {};
   if (!sc.get()->find_pdu_session(scf.get()->pdu_session_id, sp)) {
     Logger::smf_app().warn("PDU session context does not exist!");
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
   std::shared_ptr<upf_graph> graph = sp->get_sessions_graph();
 
   if (!graph) {
     Logger::smf_app().warn("PDU session does not have a UPF association");
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
   std::vector<edge> dl_edges;
@@ -1166,29 +1048,39 @@ int session_update_sm_context_procedure::run(
       Logger::smf_app().error(
           "Could not send ITTI message %s to task TASK_SMF_N4",
           n4_triggered->get_msg_name());
-      return RETURNerror;
+      return smf_procedure_code::ERROR;
     }
   } else {
     Logger::smf_app().error(
         "Update SM Context procedure: There is no QoS flow to be modified");
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
-  return RETURNok;
+  return smf_procedure_code::OK;
 }
 
 //------------------------------------------------------------------------------
-void session_update_sm_context_procedure::handle_itti_msg(
+smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
     itti_n4_session_modification_response& resp,
     std::shared_ptr<smf::smf_context> sc) {
-  std::string n1_sm_msg, n1_sm_msg_hex;
-  std::string n2_sm_info, n2_sm_info_hex;
-
   Logger::smf_app().info(
       "Handle N4 Session Modification Response (PDU Session Id %d)",
       n11_trigger.get()->req.get_pdu_session_id());
 
   pfcp::cause_t cause = {};
   resp.pfcp_ies.get(cause);
+
+  n11_triggered_pending->res.set_cause(static_cast<uint8_t>(
+      cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
+
+  if (cause.cause_value != CAUSE_VALUE_REQUEST_ACCEPTED) {
+    // TODO: Nsmf_PDUSession_SMContextStatusNotify
+    /*  If the PDU Session establishment is not successful, the SMF informs the
+     AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The SMF
+     also releases any N4 session(s) created, any PDU Session address if
+     allocated (e.g. IP address) and releases the association with PCF, if any.
+     see step 18, section 4.3.2.2.1@3GPP TS 23.502)
+     */
+  }
 
   // list of accepted QFI(s) and AN Tunnel Info corresponding to the PDU Session
   std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified = {};
@@ -1324,7 +1216,7 @@ void session_update_sm_context_procedure::handle_itti_msg(
             http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
             PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE,
             n11_triggered_pending->pid);
-        return;
+        return smf_procedure_code::ERROR;
       }
     } break;
 
@@ -1349,299 +1241,11 @@ void session_update_sm_context_procedure::handle_itti_msg(
   n11_triggered_pending->res.set_http_code(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);
 
-  // TODO: check we got all responses vs
-  // n11_triggered_pending->res.flow_context_modified
-
-  // TODO: Optional: send ITTI message to N10 to trigger UDM registration
-  // (Nudm_UECM_Registration)  see TS29503_Nudm_UECM.yaml (
-  // /{ueId}/registrations/smf-registrations/{pduSessionId}:)
-
-  switch (session_procedure_type) {
-      // PDU Session Establishment UE-Requested
-    case session_management_procedures_type_e::
-        PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
-      // No need to create N1/N2 Container, just Cause
-      Logger::smf_app().info(
-          "PDU Session Establishment Request (UE-Initiated)");
-      nlohmann::json json_data = {};
-      json_data["cause"]       = n11_triggered_pending->res.get_cause();
-      n11_triggered_pending->res.set_json_data(json_data);
-
-      // Update PDU session status to ACTIVE
-      sps->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_ACTIVE);
-
-      // set UpCnxState to ACTIVATED
-      sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
-      // Display UE Context Info
-      Logger::smf_app().info(
-          "SMF context: \n %s", sc.get()->toString().c_str());
-
-      // Trigger Event_exposure event
-      std::string str_scid = n11_trigger.get()->scid;
-      // TODO: validate the str_scid
-      //
-
-      scid_t scid = (scid_t) std::stoul(str_scid, nullptr, 0);
-      sc.get()->trigger_ue_ip_change(scid, 1);
-      sc.get()->trigger_plmn_change(scid, 1);
-      sc.get()->trigger_ddds(scid, 1);
-      sc.get()->trigger_pdusesest(scid, 1);
-      sc.get()->trigger_flexcn_event(scid, 1);
-
-    } break;
-
-      // UE-Triggered Service Request Procedure (Step 1)
-    case session_management_procedures_type_e::
-        SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
-      // Create N2 SM Information: PDU Session Resource Setup Request Transfer
-      // IE
-
-      // N2 SM Information
-      smf_n2::get_instance()
-          .create_n2_pdu_session_resource_setup_request_transfer(
-              n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ,
-              n2_sm_info);
-
-      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
-
-      // fill the content of SmContextUpdatedData
-      nlohmann::json json_data                           = {};
-      json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-      json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-          n11_triggered_pending->res.get_pdu_session_id();
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-               ["contentId"] = N2_SM_CONTENT_ID;
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PDU_RES_SETUP_REQ";  // NGAP message
-      json_data["upCnxState"] = "ACTIVATING";
-      n11_triggered_pending->res.set_json_data(json_data);
-      // TODO: verify whether cause is needed (as in 23.502 but not in 3GPP
-      // TS 29.502)
-
-      // Update upCnxState to ACTIVATING
-      sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATING);
-    } break;
-
-      // UE-triggered Service Request (Step 2)
-    case session_management_procedures_type_e::
-        SERVICE_REQUEST_UE_TRIGGERED_STEP2: {
-      // No need to create N1/N2 Container, just Cause
-      Logger::smf_app().info("UE Triggered Service Request (Step 2)");
-      nlohmann::json json_data = {};
-      json_data["cause"]       = n11_triggered_pending->res.get_cause();
-      json_data["upCnxState"]  = "ACTIVATED";
-      n11_triggered_pending->res.set_json_data(json_data);
-      n11_triggered_pending->res.set_http_code(
-          http_status_code_e::HTTP_STATUS_CODE_200_OK);
-    } break;
-
-      // PDU Session Modification UE-initiated (Step 2)
-    case session_management_procedures_type_e::
-        PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
-      // No need to create N1/N2 Container
-      Logger::smf_app().info("PDU Session Modification UE-initiated (Step 2)");
-    } break;
-
-      // PDU Session Modification UE-initiated (Step 3)
-    case session_management_procedures_type_e::
-        PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3: {
-      // No need to create N1/N2 Container
-      Logger::smf_app().info("PDU Session Modification UE-initiated (Step 3)");
-      // TODO: To be completed
-    } break;
-
-      // PDU Session Release UE-initiated (Step 1)
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-      // N1 SM: PDU Session Release Command​
-      // N2 SM: PDU Session Resource Release Command Transfer
-      Logger::smf_app().info("PDU Session Release UE-initiated (Step 1))");
-
-      // N1 SM
-      smf_n1::get_instance().create_n1_pdu_session_release_command(
-          n11_triggered_pending->res, n1_sm_msg,
-          cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);  // TODO: check
-                                                                 // Cause
-      conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-      n11_triggered_pending->res.set_n1_sm_message(n1_sm_msg_hex);
-
-      // include N2 SM Resource Release Request only when User Plane connection
-      // is activated
-      if (sps->get_upCnx_state() == upCnx_state_e::UPCNX_STATE_ACTIVATED) {
-        // N2 SM Information
-        smf_n2::get_instance()
-            .create_n2_pdu_session_resource_release_command_transfer(
-                n11_triggered_pending->res, n2_sm_info_type_e::PDU_RES_REL_CMD,
-                n2_sm_info);
-        conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-        n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
-
-        // Prepare response to send to AMF (N1N2MessageTransfer or
-        // PDUSession_UpdateSMContextResponse)
-        nlohmann::json sm_context_updated_data = {};
-        sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
-            N1N2_MESSAGE_CLASS;
-        sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]
-                               ["contentId"] = N1_SM_CONTENT_ID;
-        sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] =
-            N1N2_MESSAGE_CLASS;
-        sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-            n11_triggered_pending->res.get_pdu_session_id();
-        sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]
-                               ["ngapData"]["contentId"] = N2_SM_CONTENT_ID;
-        sm_context_updated_data["n2SmInfoType"] =
-            //["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-            "PDU_RES_REL_CMD";  // NGAP message
-        n11_triggered_pending->res.set_json_data(sm_context_updated_data);
-      } else {
-        // fill the content of SmContextUpdatedData
-        nlohmann::json json_data                          = {};
-        json_data["n1MessageContainer"]["n1MessageClass"] = N1N2_MESSAGE_CLASS;
-        json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
-            N1_SM_CONTENT_ID;
-        n11_triggered_pending->res.set_json_data(json_data);
-      }
-
-      // Update PDU session status to PDU_SESSION_INACTIVE_PENDING
-      sps->set_pdu_session_status(
-          pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING);
-
-      // set UpCnxState to DEACTIVATED
-      sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_DEACTIVATED);
-
-      // TODO: To be completed
-      // TODO: start timer T3592 (see Section 6.3.3@3GPP TS 24.501)
-      // get smf_pdu_session and set the corresponding timer
-
-      scid_t scid = {};
-      try {
-        scid = (scid_t) std::stoul(n11_trigger.get()->scid, nullptr, 10);
-      } catch (const std::exception& e) {
-        Logger::smf_n1().warn(
-            "Error when converting from string to int for SCID, "
-            "error: %s",
-            e.what());
-        return;
-      }
-
-      // Store the context for the timer handling
-      sps.get()->set_pending_n11_msg(
-          std::dynamic_pointer_cast<itti_n11_msg>(n11_triggered_pending));
-
-      sps->timer_T3592 = itti_inst->timer_setup(
-          T3592_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3592,
-          scid);
-
-    } break;
-
-      // PDU Session Release UE-initiated (Step 2)
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP2: {
-      // No need to create N1/N2 Container
-      Logger::smf_app().info("PDU Session Release UE-initiated (Step 2)");
-      // TODO: To be completed
-    } break;
-
-      // PDU Session Release UE-initiated (Step 3)
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP3: {
-      // No need to create N1/N2 Container
-      Logger::smf_app().info("PDU Session Release UE-initiated (Step 3)");
-      // TODO: To be completed
-    } break;
-    case session_management_procedures_type_e::HO_PATH_SWITCH_REQ: {
-      // Create N2 SM Information: Path Switch Request Acknowledge Transfer IE
-
-      // N2 SM Information
-      smf_n2::get_instance().create_n2_path_switch_request_ack(
-          n11_triggered_pending->res, n2_sm_info_type_e::PATH_SWITCH_REQ_ACK,
-          n2_sm_info);
-
-      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
-
-      // fill the content of SmContextUpdatedData
-      nlohmann::json json_data                           = {};
-      json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-      json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-          n11_triggered_pending->res.get_pdu_session_id();
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-               ["contentId"] = N2_SM_CONTENT_ID;
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PATH_SWITCH_REQ_ACK";
-      // NGAP message json_data["upCnxState"] ="ACTIVATING";
-      n11_triggered_pending->res.set_json_data(json_data);
-
-    } break;
-
-    case session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2: {
-      // Create N2 SM Information: Handover Command Transfer IE
-
-      // N2 SM Information
-      smf_n2::get_instance().create_n2_handover_command_transfer(
-          n11_triggered_pending->res, n2_sm_info_type_e::HANDOVER_CMD,
-          n2_sm_info);
-
-      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      n11_triggered_pending->res.set_n2_sm_information(n2_sm_info_hex);
-
-      // fill the content of SmContextUpdatedData
-      nlohmann::json json_data                           = {};
-      json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-      json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-          n11_triggered_pending->res.get_pdu_session_id();
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-               ["contentId"] = N2_SM_CONTENT_ID;
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "HANDOVER_CMD";
-      json_data["hoState"] = "PREPARED";
-      n11_triggered_pending->res.set_json_data(json_data);
-
-      // Set HO State to prepared
-      sps->set_ho_state(ho_state_e::HO_STATE_PREPARED);
-    } break;
-
-    default: {
-      Logger::smf_app().info(
-          "Unknown session procedure type %d", session_procedure_type);
-    }
-  }
-
-  // send ITTI message to SMF_APP interface to trigger
-  // SessionUpdateSMContextResponse towards AMFs
-  Logger::smf_app().info(
-      "Sending ITTI message %s to task TASK_SMF_APP",
-      n11_triggered_pending->get_msg_name());
-  n11_triggered_pending->session_procedure_type = session_procedure_type;
-  int ret = itti_inst->send_msg(n11_triggered_pending);
-  if (RETURNok != ret) {
-    Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_APP",
-        n11_triggered_pending->get_msg_name());
-  }
-
-  // The SMF may subscribe to the UE mobility event notification from the AMF
-  // (e.g. location reporting, UE  moving into or out of Area Of Interest), by
-  // invoking Namf_EventExposure_Subscribe service operation
-  // For LADN, the SMF subscribes to the UE moving into or out of LADN service
-  // area event notification by providing the LADN DNN as an indicator for the
-  // Area Of Interest
-  // see step 17@section 4.3.2.2.1@3GPP TS 23.502
-
-  if (cause.cause_value != CAUSE_VALUE_REQUEST_ACCEPTED) {
-    // TODO: Nsmf_PDUSession_SMContextStatusNotify
-    /*  If the PDU Session establishment is not successful, the SMF informs the
-     AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The SMF
-     also releases any N4 session(s) created, any PDU Session address if
-     allocated (e.g. IP address) and releases the association with PCF, if any.
-     see step 18, section 4.3.2.2.1@3GPP TS 23.502)
-     */
-  }
+  return smf_procedure_code::OK;
 }
 
 //------------------------------------------------------------------------------
-int session_release_sm_context_procedure::run(
+smf_procedure_code session_release_sm_context_procedure::run(
     std::shared_ptr<itti_n11_release_sm_context_request> sm_context_req,
     std::shared_ptr<itti_n11_release_sm_context_response> sm_context_res,
     std::shared_ptr<smf::smf_context> sc) {
@@ -1665,20 +1269,20 @@ int session_release_sm_context_procedure::run(
     Logger::smf_app().warn(
         "SM Context associated with this id " SCID_FMT " does not exit!", scid);
     // TODO:
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
   std::shared_ptr<smf_pdu_session> sp = {};
   if (!sc.get()->find_pdu_session(scf.get()->pdu_session_id, sp)) {
     Logger::smf_app().warn("PDU session context does not exist!");
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
   std::shared_ptr<upf_graph> graph = sp->get_sessions_graph();
 
   if (!graph) {
     Logger::smf_app().warn("PDU session does not have a UPF association");
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
 
   smf_qos_flow empty_flow;
@@ -1718,13 +1322,13 @@ int session_release_sm_context_procedure::run(
     Logger::smf_app().error(
         "Could not send ITTI message %s to task TASK_SMF_N4",
         n4_triggered->get_msg_name());
-    return RETURNerror;
+    return smf_procedure_code::ERROR;
   }
-  return RETURNok;
+  return smf_procedure_code::OK;
 }
 
 //------------------------------------------------------------------------------
-void session_release_sm_context_procedure::handle_itti_msg(
+smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
     itti_n4_session_deletion_response& resp,
     std::shared_ptr<smf::smf_context> sc) {
   Logger::smf_app().info(
@@ -1734,22 +1338,22 @@ void session_release_sm_context_procedure::handle_itti_msg(
 
   pfcp::cause_t cause = {};
   resp.pfcp_ies.get(cause);
-
   if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
+    n11_triggered_pending->res.set_cause(
+        static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
     Logger::smf_app().info("PDU Session Release SM Context accepted by UPF");
     // clear the resources including addresses allocated to this Session and
     // associated QoS flows
     sps->deallocate_ressources(
-        n11_trigger.get()
-            ->req.get_dnn());  // TODO: for IPv6 (only for Ipv4 for the moment)
+        n11_trigger->req
+            .get_dnn());  // TODO: for IPv6 (only for Ipv4 for the moment)
     // trigger to send reply to AMF
-    smf_app_inst->trigger_http_response(
-        http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT,
-        n11_triggered_pending->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+    return smf_procedure_code::OK;
   } else {
-    oai::smf_server::model::ProblemDetails problem_details = {};
-    problem_details.setCause(pdu_session_application_error_e2str.at(
-        PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE));
+    n11_triggered_pending->res.set_cause(static_cast<uint8_t>(
+        cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
+
+    return smf_procedure_code::ERROR;
     // trigger to send reply to AMF
     /*
     smf_app_inst->trigger_http_response(
