@@ -198,6 +198,9 @@ void smf_session_procedure::synch_ul_dl_edges(
       if (dle_flow->urr_id.urr_id != 0) {
         ule_flow->urr_id = dle_flow->urr_id;
       }
+      if (!dle_flow->ul_fteid.is_zero()) {
+        ule_flow->ul_fteid = dle_flow->ul_fteid;
+      }
     }
   }
 }
@@ -317,6 +320,10 @@ pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
 
   create_pdr.set(far_id);
 
+  if (smf_cfg.enable_ur) {
+    create_pdr.set(flow->urr_id);
+  }
+
   return create_pdr;
 }
 
@@ -366,6 +373,47 @@ pfcp::create_urr smf_session_procedure::pfcp_create_urr(
   return create_urr;
 }
 
+smf_procedure_code smf_session_procedure::get_current_upf(
+    std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
+    std::shared_ptr<pfcp_association>& current_upf) {
+  std::shared_ptr<upf_graph> graph = sps->get_sessions_graph();
+  if (!graph) {
+    Logger::smf_app().warn("UPF graph does not exist. Abort PFCP procedure");
+    return smf_procedure_code::ERROR;
+  }
+
+  graph->dfs_current_upf(dl_edges, ul_edges, current_upf);
+
+  if (!current_upf || ul_edges.empty() || dl_edges.empty()) {
+    Logger::smf_app().warn("UPF selection failed!");
+    return smf_procedure_code::ERROR;
+  }
+  return smf_procedure_code::OK;
+}
+
+smf_procedure_code smf_session_procedure::get_next_upf(
+    std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
+    std::shared_ptr<pfcp_association>& next_upf) {
+  std::shared_ptr<upf_graph> graph = sps->get_sessions_graph();
+  if (!graph) {
+    Logger::smf_app().warn("UPF graph does not exist. Abort PFCP procedure");
+    return smf_procedure_code::ERROR;
+  }
+
+  graph->dfs_next_upf(dl_edges, ul_edges, next_upf);
+  if (!next_upf) {
+    Logger::smf_app().debug("UPF graph in SMF finished");
+    return smf_procedure_code::OK;
+  }
+
+  if (dl_edges.empty() || ul_edges.empty()) {
+    Logger::smf_app().warn("UPF selection failed!");
+    return smf_procedure_code::ERROR;
+  }
+
+  return smf_procedure_code::CONTINUE;
+}
+
 //------------------------------------------------------------------------------
 int n4_session_restore_procedure::run() {
   if (pending_sessions.size()) {
@@ -401,6 +449,99 @@ int n4_session_restore_procedure::run() {
     }
   }
   return RETURNok;
+}
+
+smf_procedure_code
+session_create_sm_context_procedure::send_n4_session_establishment_request() {
+  std::shared_ptr<pfcp_association> current_upf;
+  std::vector<edge> dl_edges;
+  std::vector<edge> ul_edges;
+  smf_procedure_code res = get_current_upf(dl_edges, ul_edges, current_upf);
+  if (res != smf_procedure_code::OK) {
+    return res;
+  }
+
+  n4_triggered = std::make_shared<itti_n4_session_establishment_request>(
+      TASK_SMF_APP, TASK_SMF_N4);
+  n4_triggered->seid    = 0;
+  n4_triggered->trxn_id = this->trxn_id;
+  n4_triggered->r_endpoint =
+      endpoint(current_upf->node_id.u1.ipv4_address, pfcp::default_port);
+
+  //-------------------
+  // IE node_id_t
+  //-------------------
+  pfcp::node_id_t node_id = {};
+  smf_cfg.get_pfcp_node_id(node_id);
+  n4_triggered->pfcp_ies.set(node_id);
+
+  //-------------------
+  // IE fseid_t
+  //-------------------
+  pfcp::fseid_t cp_fseid = {};
+  smf_cfg.get_pfcp_fseid(cp_fseid);
+  cp_fseid.seid = sps->seid;
+  n4_triggered->pfcp_ies.set(cp_fseid);
+
+  edge dl_edge = dl_edges[0];
+
+  //-------------------
+  // IE CREATE_URR ( Usage Reporting Rules)
+  //-------------------
+  if (smf_cfg.enable_ur) {
+    pfcp::create_urr create_urr = pfcp_create_urr(dl_edge, current_flow.qfi);
+    n4_triggered->pfcp_ies.set(create_urr);
+
+    // set URR ID also for other edge
+    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+  }
+
+  // Here, we only consider an UL CL, so we create PDRs based on how many
+  // Uplink edges we have, DL edge is fixed to first one
+
+  // In UL CL case, we have 2 PDRs, but they have the same choose ID -> same
+  // TEID We also set the same URR ID for all edges
+  for (auto ul_edge : ul_edges) {
+    //-------------------
+    // IE CREATE_FAR
+    //-------------------
+    pfcp::create_far create_far = pfcp_create_far(ul_edge, current_flow.qfi);
+    // copy created FAR ID to DL edge for PDR
+    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+
+    // copy values from UL edge, so we simulate two downlink edges for PFCP
+    auto flow                = dl_edge.get_qos_flow(current_flow.qfi);
+    flow->pdr_id_ul          = 0;
+    dl_edge.flow_description = ul_edge.flow_description;
+    dl_edge.precedence       = ul_edge.precedence;
+
+    //-------------------
+    // IE CREATE_PDR
+    //-------------------
+    pfcp::create_pdr create_pdr = pfcp_create_pdr(dl_edge, current_flow.qfi);
+    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+
+    //-------------------
+    // ADD IEs to message
+    //-------------------
+    n4_triggered->pfcp_ies.set(create_pdr);
+    n4_triggered->pfcp_ies.set(create_far);
+  }
+
+  // TODO: verify whether N4 SessionID should be included in PDR and FAR
+  // (Section 5.8.2.11@3GPP TS 23.501)
+
+  Logger::smf_app().info(
+      "Sending ITTI message %s to task TASK_SMF_N4",
+      n4_triggered->get_msg_name());
+  int ret = itti_inst->send_msg(n4_triggered);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N4",
+        n4_triggered->get_msg_name());
+    return smf_procedure_code::ERROR;
+  }
+  return smf_procedure_code::CONTINUE;
 }
 
 //------------------------------------------------------------------------------
@@ -461,6 +602,8 @@ smf_procedure_code session_create_sm_context_procedure::run(
   n11_triggered_pending = sm_context_resp;
   uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
+  // for finding procedure when receiving response
+  smf_app_inst->set_seid_2_smf_context(seid, sc);
 
   // get the default QoS profile
   subscribed_default_qos_t default_qos                = {};
@@ -490,97 +633,16 @@ smf_procedure_code session_create_sm_context_procedure::run(
 
   sps->add_qos_flow(flow);
   sps->set_default_qos_flow(flow.qfi);
-
+  current_flow = flow;
   graph->start_asynch_dfs_procedure(true, flow);
-  // TODO for now just use first UPF from the graph
-  std::vector<edge> ul_edges;
+
   std::vector<edge> dl_edges;
-  std::shared_ptr<pfcp_association> current_upf;
+  std::vector<edge> ul_edges;
+  std::shared_ptr<pfcp_association> upf;
+  // Get next UPF for the first N4 session establishment
+  get_next_upf(dl_edges, ul_edges, upf);
 
-  graph->dfs_next_upf(dl_edges, ul_edges, current_upf);
-
-  if (!current_upf) {
-    Logger::smf_app().warn("UPF selection failed!");
-    return smf_procedure_code::ERROR;
-  }
-
-  if (dl_edges.size() != 1 || ul_edges.size() != 1) {
-    Logger::smf_app().warn(
-        "Unsupported UPF Configuration. We need one N3 and one N6 interface!");
-    return smf_procedure_code::ERROR;
-  }
-
-  n4_triggered = std::make_shared<itti_n4_session_establishment_request>(
-      TASK_SMF_APP, TASK_SMF_N4);
-  n4_triggered->seid    = 0;
-  n4_triggered->trxn_id = this->trxn_id;
-  n4_triggered->r_endpoint =
-      endpoint(current_upf->node_id.u1.ipv4_address, pfcp::default_port);
-
-  //-------------------
-  // IE node_id_t
-  //-------------------
-  pfcp::node_id_t node_id = {};
-  smf_cfg.get_pfcp_node_id(node_id);
-  n4_triggered->pfcp_ies.set(node_id);
-
-  //-------------------
-  // IE fseid_t
-  //-------------------
-  pfcp::fseid_t cp_fseid = {};
-  smf_cfg.get_pfcp_fseid(cp_fseid);
-  cp_fseid.seid = sps->seid;
-  n4_triggered->pfcp_ies.set(cp_fseid);
-
-  //-------------------
-  // IE CREATE_FAR
-  //-------------------
-  pfcp::create_far create_far = pfcp_create_far(ul_edges[0], flow.qfi);
-  // copy created FAR ID to DL edge for PDR
-  synch_ul_dl_edges(dl_edges, ul_edges, flow.qfi);
-
-  //-------------------
-  // IE CREATE_PDR
-  //-------------------
-  pfcp::create_pdr create_pdr = pfcp_create_pdr(dl_edges[0], flow.qfi);
-  synch_ul_dl_edges(dl_edges, ul_edges, flow.qfi);
-
-  //-------------------
-  // IE CREATE_URR ( Usage Reporting Rules)
-  //-------------------
-  if (smf_cfg.enable_ur) {
-    pfcp::create_urr create_urr = pfcp_create_urr(dl_edges[0], flow.qfi);
-    create_pdr.set(create_urr.urr_id.second);
-    n4_triggered->pfcp_ies.set(create_urr);
-
-    // set URR ID also for other edge
-    synch_ul_dl_edges(dl_edges, ul_edges, flow.qfi);
-  }
-
-  //-------------------
-  // ADD IEs to message
-  //-------------------
-  n4_triggered->pfcp_ies.set(create_pdr);
-  n4_triggered->pfcp_ies.set(create_far);
-
-  // TODO: verify whether N4 SessionID should be included in PDR and FAR
-  // (Section 5.8.2.11@3GPP TS 23.501)
-
-  // for finding procedure when receiving response
-  smf_app_inst->set_seid_2_smf_context(cp_fseid.seid, sc);
-
-  Logger::smf_app().info(
-      "Sending ITTI message %s to task TASK_SMF_N4",
-      n4_triggered->get_msg_name());
-  int ret = itti_inst->send_msg(n4_triggered);
-  if (RETURNok != ret) {
-    Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N4",
-        n4_triggered->get_msg_name());
-    return smf_procedure_code::ERROR;
-  }
-
-  return smf_procedure_code::OK;
+  return send_n4_session_establishment_request();
 }
 
 //------------------------------------------------------------------------------
@@ -601,22 +663,24 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
     // TODO we should have a good cause mapping here
     n11_triggered_pending->res.set_cause(static_cast<uint8_t>(
         cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
+    // TODO we need to abort all ongoing sessions
+    return smf_procedure_code::ERROR;
   }
 
-  // TODO refactor, we should only do that when request is accepted
-  std::shared_ptr<upf_graph> graph = sps->get_sessions_graph();
   std::shared_ptr<pfcp_association> current_upf;
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
-
-  graph->dfs_current_upf(dl_edges, ul_edges, current_upf);
-  // we know that DL edges and UL edges is 1
+  if (get_current_upf(dl_edges, ul_edges, current_upf) !=
+      smf_procedure_code::OK) {
+    return smf_procedure_code::ERROR;
+  }
 
   std::shared_ptr<smf_qos_flow> default_qos_flow = {};
   for (const auto& it : resp.pfcp_ies.created_pdrs) {
     pfcp::pdr_id_t pdr_id = {};
     pfcp::far_id_t far_id = {};
     if (it.get(pdr_id)) {
+      // even in UL CL scenario, taking the TEID from one PDR is enough
       auto flow = dl_edges[0].get_qos_flow(pdr_id);
       if (flow) {
         // pfcp::fteid_t local_up_fteid = { };
@@ -627,7 +691,8 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
           default_qos_flow = flow;
         }
       } else {
-        Logger::smf_app().error(
+        // This may happen in UL CL, when we have 2 PDR IDs but only one DL edge
+        Logger::smf_app().debug(
             "Could not get QoS Flow for created_pdr %d", pdr_id.rule_id);
       }
     } else {
@@ -635,6 +700,47 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
           "Could not get pdr_id for created_pdr in %s",
           resp.pfcp_ies.get_msg_name());
     }
+  }
+
+  synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+
+  // covers the case that UL CL is returned from algorithm, but not all TEIDs
+  // have been set (not all paths explored yet)
+  //  we go through until no UPF is left or until we find one to send N4 to
+  bool search_upf                = true;
+  bool send_n4                   = true;
+  smf_procedure_code send_n4_res = smf_procedure_code::ERROR;
+  while (search_upf) {
+    std::vector<edge> next_dl_edges;
+    std::vector<edge> next_ul_edges;
+    std::shared_ptr<pfcp_association> next_upf;
+    send_n4_res = get_next_upf(next_dl_edges, next_ul_edges, next_upf);
+    if (send_n4_res != smf_procedure_code::CONTINUE) {
+      search_upf = false;
+      send_n4    = false;
+    } else {
+      Logger::smf_app().debug(
+          "Try to send N4 to UPF %s", next_upf->get_printable_name().c_str());
+      // update FTEID for forward tunnel info for this edge
+      send_n4 = true;
+      for (auto ul_edge : next_ul_edges) {
+        auto flow = ul_edge.get_qos_flow(current_flow.qfi);
+        if (ul_edge.association && ul_edge.association == current_upf) {
+          flow->ul_fteid = default_qos_flow->ul_fteid;
+        }
+        if (ul_edge.type == iface_type::N9 && flow->ul_fteid.is_zero()) {
+          Logger::smf_app().debug(
+              "UPF %s has unvisited UL edges",
+              next_upf->get_printable_name().c_str());
+          send_n4 = false;
+        }
+      }
+      // if we found UPF to send N4, we don't need to search UPF anymore
+      search_upf = !send_n4;
+    }
+  }
+  if (send_n4) {
+    return send_n4_session_establishment_request();
   }
 
   // flow_updated info will be used to construct N1,N2 container

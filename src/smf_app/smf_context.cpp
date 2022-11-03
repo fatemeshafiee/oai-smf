@@ -1766,8 +1766,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     std::shared_ptr<smf_procedure> sproc = proc;
 
     insert_procedure(sproc);
-    if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) !=
-        smf_procedure_code::OK) {
+    if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) ==
+        smf_procedure_code::ERROR) {
       // error !
       Logger::smf_app().info(
           "PDU Session Establishment Request: Create SM Context Request "
@@ -2992,8 +2992,8 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
     proc->session_procedure_type         = procedure_type;
 
     insert_procedure(sproc);
-    if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) !=
-        smf_procedure_code::OK) {
+    if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) ==
+        smf_procedure_code::ERROR) {
       // error
       Logger::smf_app().info(
           "PDU Update SM Context Request procedure failed (session procedure "
@@ -3125,8 +3125,8 @@ void smf_context::handle_pdu_session_release_sm_context_request(
   std::shared_ptr<smf_procedure> sproc = proc;
 
   insert_procedure(sproc);
-  if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) !=
-      smf_procedure_code::OK) {
+  if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) ==
+      smf_procedure_code::ERROR) {
     Logger::smf_app().info("PDU Release SM Context Request procedure failed");
     // Trigger to send reply to AMF
     smf_app_inst->trigger_http_response(

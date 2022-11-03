@@ -104,6 +104,29 @@ class smf_session_procedure : public smf_procedure {
   void synch_ul_dl_edges(
       const vector<edge>& dl_edges, const vector<edge>& ul_edges,
       const pfcp::qfi_t& qfi);
+
+  /**
+   * Helper function to get current UPF from graph in a safe way
+   * @param dl_edges
+   * @param ul_edges
+   * @param current_upf
+   * @return ERROR in case not successful
+   */
+  smf_procedure_code get_current_upf(
+      std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
+      std::shared_ptr<pfcp_association>& current_upf);
+
+  /**
+   * Helper function to get next UPF from graph in a safe way
+   * @param dl_edges
+   * @param ul_edges
+   * @param current_upf
+   * @return ERROR in case not successful, OK when UPF graph is empty and
+   * CONTINUE if UPF is not null
+   */
+  smf_procedure_code get_next_upf(
+      std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
+      std::shared_ptr<pfcp_association>& next_upf);
 };
 
 //------------------------------------------------------------------------------
@@ -155,10 +178,19 @@ class session_create_sm_context_procedure : public smf_session_procedure {
       itti_n4_session_establishment_response& resp,
       std::shared_ptr<smf::smf_context> sc) override;
 
+  /**
+   * Sends a session establishment request, based on current UPF graph
+   * @return
+   */
+  smf_procedure_code send_n4_session_establishment_request();
+
   std::shared_ptr<itti_n4_session_establishment_request> n4_triggered;
 
   std::shared_ptr<itti_n11_create_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_create_sm_context_response> n11_triggered_pending;
+
+ private:
+  smf_qos_flow current_flow;
 };
 
 //------------------------------------------------------------------------------

@@ -1036,8 +1036,6 @@ void upf_graph::dfs_next_upf(
     std::shared_ptr<pfcp_association> association = stack_asynch.top();
     stack_asynch.pop();
 
-    visited_asynch[association] = true;
-
     auto node_it = adjacency_list.find(association);
     if (node_it == adjacency_list.end()) {
       // TODO this scenario might happen when in the meantime one of the UPFs
@@ -1048,39 +1046,37 @@ void upf_graph::dfs_next_upf(
           "happen");
       return;
     }
-    upf = node_it->first;
 
     // here we need to check if we have more than one unvisited N9_UL edge
     // if yes, we have a UL CL scenario, and we need to finish the other
     // branch first
     Logger::smf_app().debug(
-        "DFS Asynch: Handle UPF %s", upf->get_printable_name().c_str());
-    int unvisited_n9_ul_nodes = 0;
-    bool add_neighbors        = true;
+        "DFS Asynch: Handle UPF %s",
+        node_it->first->get_printable_name().c_str());
+    bool unvisited_n9_node = false;
     // as we have no diamond shape, we only need to care about this in UL
     // direction
     if (uplink_asynch) {
       for (const auto& edge_it : node_it->second) {
         if (edge_it.association) {
           if (!visited_asynch[edge_it.association]) {
-            if (edge_it.type == iface_type::N9) {
-              ++unvisited_n9_ul_nodes;
-              if (unvisited_n9_ul_nodes > 0) {
-                // we continue here, but we need to set visited false because
-                // this node is evaluated late;r also we cannot add the
-                // neighbors of this node (yet)
-                visited_asynch[association] = false;
-                add_neighbors               = false;
-                Logger::smf_app().debug(
-                    "UL CL scenario: We have a node with an unvisited N9_UL "
-                    "node.");
-              }
+            if (edge_it.type == iface_type::N9 && edge_it.uplink) {
+              unvisited_n9_node = true;
+              Logger::smf_app().debug(
+                  "UL CL scenario: We have a node with an unvisited N9_UL "
+                  "node.");
+              break;
             }
           }
         }
       }
     }
-    if (add_neighbors) {
+    // we removed the current UPF from stack, but did not set visited
+    // so it is re-visited again from another branch
+    // we also dont add the neighbors yet
+    if (!unvisited_n9_node) {
+      visited_asynch[association] = true;
+
       for (const auto& edge_it : node_it->second) {
         // first add all neighbors to the stack
         if (edge_it.association) {
@@ -1090,23 +1086,23 @@ void upf_graph::dfs_next_upf(
         }
       }
     }
+    upf = node_it->first;
 
     // set correct edge infos
-    for (auto edge_it = node_it->second.begin();
-         edge_it != node_it->second.end(); ++edge_it) {
+    for (auto& edge_it : node_it->second) {
       // copy QOS Flow for the whole graph
       //  TODO currently only one flow is supported
-      if (edge_it->qos_flows.empty()) {
+      if (edge_it.qos_flows.empty()) {
         std::shared_ptr<smf_qos_flow> flow =
             std::make_shared<smf_qos_flow>(qos_flow_asynch);
-        edge_it->qos_flows.emplace_back(flow);
+        edge_it.qos_flows.emplace_back(flow);
       }
 
       // set the correct edges to return
-      if (edge_it->uplink) {
-        info_ul.push_back(*edge_it);
+      if (edge_it.uplink) {
+        info_ul.push_back(edge_it);
       } else {
-        info_dl.push_back(*edge_it);
+        info_dl.push_back(edge_it);
       }
       current_upf_asynch      = upf;
       current_edges_dl_asynch = info_dl;
