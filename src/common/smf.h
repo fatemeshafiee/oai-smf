@@ -212,8 +212,8 @@ enum class sm_context_status_e {
   SM_CONTEXT_STATUS_RELEASED = 1
 };
 
-static const std::vector<std::string> sm_context_status_e2str = {"ACTIVE",
-                                                                 "RELEASED"};
+static const std::vector<std::string> sm_context_status_e2str = {
+    "ACTIVE", "RELEASED"};
 
 typedef struct qos_profile_gbr_s {
   gfbr_t gfbr;  // Guaranteed Flow Bit Rate
@@ -277,7 +277,8 @@ constexpr uint64_t SECONDS_SINCE_FIRST_EPOCH = 2208988800;
 // 8.22  Fully Qualified TEID (F-TEID) - 3GPP TS 29.274 V16.0.0
 #define TEID_GRE_KEY_LENGTH 4
 
-#define DEFAULT_QFI 6
+#define DEFAULT_QFI 1
+#define DEFAULT_5QI 9  // TODO: from conf file
 
 typedef struct dnn_smf_info_item_s {
   std::string dnn;
