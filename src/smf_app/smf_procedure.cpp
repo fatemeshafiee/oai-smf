@@ -271,9 +271,10 @@ pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
   if (edge.type != iface_type::N6) {
     // in UPLINK always choose ID
     if (edge.uplink) {
-      local_fteid = pfcp_prepare_fteid(flow->ul_fteid);
+      local_fteid      = pfcp_prepare_fteid(flow->dl_fteid);
+      local_fteid.chid = 0;
     } else {
-      local_fteid = pfcp_prepare_fteid(flow->dl_fteid);
+      local_fteid = pfcp_prepare_fteid(flow->ul_fteid);
     }
     pdi.set(local_fteid);
   }
@@ -725,8 +726,8 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
       send_n4 = true;
       for (auto ul_edge : next_ul_edges) {
         auto flow = ul_edge.get_qos_flow(current_flow.qfi);
-        if (ul_edge.association && ul_edge.association == current_upf) {
-          flow->ul_fteid = default_qos_flow->ul_fteid;
+        if (!flow) {
+          send_n4 = false;
         }
         if (ul_edge.type == iface_type::N9 && flow->ul_fteid.is_zero()) {
           Logger::smf_app().debug(
@@ -783,6 +784,61 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
 }
 
 //------------------------------------------------------------------------------
+smf_procedure_code
+session_update_sm_context_procedure::send_n4_session_modification_request() {
+  std::shared_ptr<pfcp_association> current_upf{};
+  std::vector<edge> dl_edges{};
+  std::vector<edge> ul_edges{};
+
+  if (get_current_upf(dl_edges, ul_edges, current_upf) !=
+      smf_procedure_code::OK) {
+    return smf_procedure_code::ERROR;
+  }
+
+  n4_triggered = std::make_shared<itti_n4_session_modification_request>(
+      TASK_SMF_APP, TASK_SMF_N4);
+  n4_triggered->seid    = sps->up_fseid.seid;
+  n4_triggered->trxn_id = this->trxn_id;
+  n4_triggered->r_endpoint =
+      endpoint(current_upf->node_id.u1.ipv4_address, pfcp::default_port);
+
+  edge dl_edge = dl_edges[0];
+  for (auto& ul_edge : ul_edges) {
+    // we set PDR ID UL to 0, so we create new ones
+    auto flow_dl = dl_edge.get_qos_flow(current_flow.qfi);
+    auto ul_flow = ul_edge.get_qos_flow(current_flow.qfi);
+    if (!flow_dl || !ul_flow) {
+      Logger::smf_app().error("Could not get the QOS Flow for DL procedure");
+      continue;
+    }
+    flow_dl->pdr_id_dl = 0;
+
+    pfcp::create_far create_far = pfcp_create_far(dl_edge, current_flow.qfi);
+
+    ul_flow->far_id_dl = create_far.far_id;
+
+    pfcp::create_pdr create_pdr = pfcp_create_pdr(ul_edge, current_flow.qfi);
+
+    // Add IEs to message
+    n4_triggered->pfcp_ies.set(create_far);
+    n4_triggered->pfcp_ies.set(create_pdr);
+  }
+  synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+
+  Logger::smf_app().info(
+      "Sending ITTI message %s to task TASK_SMF_N4",
+      n4_triggered->get_msg_name());
+  int ret = itti_inst->send_msg(n4_triggered);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N4",
+        n4_triggered->get_msg_name());
+    return smf_procedure_code::ERROR;
+  }
+  return smf_procedure_code::CONTINUE;
+}
+
+//------------------------------------------------------------------------------
 smf_procedure_code session_update_sm_context_procedure::run(
     std::shared_ptr<itti_n11_update_sm_context_request> sm_context_req,
     std::shared_ptr<itti_n11_update_sm_context_response> sm_context_resp,
@@ -828,24 +884,21 @@ smf_procedure_code session_update_sm_context_procedure::run(
     return smf_procedure_code::ERROR;
   }
 
-  std::vector<edge> dl_edges;
-  std::vector<edge> ul_edges;
-  std::shared_ptr<pfcp_association> current_upf;
-
-  graph->dfs_current_upf(dl_edges, ul_edges, current_upf);
-
-  // smf_qos_flow empty_flow;
-  // graph->start_asynch_dfs_procedure(false, empty_flow);
   //  TODO: UPF insertion in case of Handover
 
-  /*  if (not pfcp_associations::get_instance().select_up_node(
-            up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-      sm_context_resp->res.set_cause(
-          PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
-      Logger::smf_app().info("[SMF Procedure] REMOTE_PEER_NOT_RESPONDING");
-      return RETURNerror;
-    }
-  */
+  // The flow is not needed anymore in DL direction, as we already have flows
+  smf_qos_flow empty_flow{};
+  graph->start_asynch_dfs_procedure(false, empty_flow);
+
+  std::shared_ptr<pfcp_association> current_upf;
+  std::vector<edge> dl_edges;
+  std::vector<edge> ul_edges;
+
+  if (get_next_upf(dl_edges, ul_edges, current_upf) !=
+      smf_procedure_code::CONTINUE) {
+    Logger::smf_app().error("DL Procedure Error: No UPF to select");
+    return smf_procedure_code::ERROR;
+  }
 
   //-------------------
   n11_trigger           = sm_context_req;
@@ -868,6 +921,8 @@ smf_procedure_code session_update_sm_context_procedure::run(
 
   for (auto i : list_of_qfis_to_be_modified) {
     Logger::smf_app().debug("QoS Flow to be modified (QFI %d)", i.qfi);
+    // TODO currently just support one flow
+    current_flow.qfi = i;
   }
 
   Logger::smf_app().debug(
@@ -891,7 +946,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
     case session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2: {
       pfcp::fteid_t dl_fteid = {};
       sm_context_req_msg.get_dl_fteid(dl_fteid);  // eNB's fteid
-
+      // we use the first dl_edge as we can only have one N3 interface
       for (const auto& qfi : list_of_qfis_to_be_modified) {
         auto flow = dl_edges[0].get_qos_flow(qfi);
         if (!flow) {  // no QoS flow found
@@ -954,10 +1009,19 @@ smf_procedure_code session_update_sm_context_procedure::run(
         } else {
           flow->dl_fteid = dl_fteid;
           Logger::smf_app().debug("Create FAR DL");
-          pfcp::create_far create_far = pfcp_create_far(dl_edges[0], flow->qfi);
-          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
-          // Add IEs to message
-          n4_triggered->pfcp_ies.set(create_far);
+          // for each UL edge we need a FAR, because of UL CL
+          edge dl_edge = dl_edges[0];
+          for (auto& edge : ul_edges) {
+            // we set PDR ID UL to 0, so we create new ones
+            auto flow_dl       = dl_edge.get_qos_flow(flow->qfi);
+            flow_dl->pdr_id_dl = 0;
+
+            pfcp::create_far create_far = pfcp_create_far(dl_edge, flow->qfi);
+
+            synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+            // Add IEs to message
+            n4_triggered->pfcp_ies.set(create_far);
+          }
 
           send_n4 = true;
           Logger::smf_app().debug(
@@ -971,9 +1035,13 @@ smf_procedure_code session_update_sm_context_procedure::run(
           //-------------------
           // IE create_pdr
           //-------------------
-          pfcp::create_pdr create_pdr = pfcp_create_pdr(ul_edges[0], flow->qfi);
-          n4_triggered->pfcp_ies.set(create_pdr);
-          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+          // for each UL edge we need a PDR
+          for (auto& ul_edge : ul_edges) {
+            pfcp::create_pdr create_pdr = pfcp_create_pdr(ul_edge, flow->qfi);
+            n4_triggered->pfcp_ies.set(create_pdr);
+            synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+          }
+
           send_n4 = true;
 
           Logger::smf_app().debug(
@@ -1192,12 +1260,18 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
   std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified = {};
   n11_trigger->req.get_qfis(list_of_qfis_to_be_modified);
 
-  std::shared_ptr<upf_graph> graph = sps->get_sessions_graph();
-  std::shared_ptr<pfcp_association> current_upf;
-  std::vector<edge> dl_edges;
-  std::vector<edge> ul_edges;
+  std::shared_ptr<pfcp_association> current_upf{};
+  std::vector<edge> dl_edges{};
+  std::vector<edge> ul_edges{};
 
-  graph->dfs_current_upf(dl_edges, ul_edges, current_upf);
+  if (get_current_upf(dl_edges, ul_edges, current_upf) ==
+      smf_procedure_code::ERROR) {
+    Logger::smf_app().error("SMF DL procedure: Could not get current UPF");
+    // TODO is this enough as an error message? We have cause 31 but not values
+    return smf_procedure_code::ERROR;
+  }
+
+  bool continue_n4 = true;
 
   Logger::smf_app().debug(
       "Session procedure type: %s",
@@ -1218,13 +1292,13 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
         PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2:
     case session_management_procedures_type_e::HO_PATH_SWITCH_REQ:
     case session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2: {
-      pfcp::fteid_t dl_fteid = {};
-      n11_trigger->req.get_dl_fteid(dl_fteid);
+      pfcp::fteid_t n3_dl_fteid = {};
+      n11_trigger->req.get_dl_fteid(n3_dl_fteid);
 
       Logger::smf_app().debug(
           "AN F-TEID ID"
           "0x%" PRIx32 ", IP Addr %s",
-          dl_fteid.teid, conv::toString(dl_fteid.ipv4_address).c_str());
+          n3_dl_fteid.teid, conv::toString(n3_dl_fteid.ipv4_address).c_str());
 
       std::map<uint8_t, qos_flow_context_updated>
           qos_flow_context_to_be_updateds = {};
@@ -1239,36 +1313,42 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
       for (const auto& it_created_pdr : resp.pfcp_ies.created_pdrs) {
         pfcp::pdr_id_t pdr_id = {};
         if (it_created_pdr.get(pdr_id)) {
-          auto flow = ul_edges[0].get_qos_flow(pdr_id);
-          if (flow) {
-            Logger::smf_app().debug("QoS Flow, QFI %d", flow->qfi.qfi);
-            for (const auto& it : qos_flow_context_to_be_updateds) {
-              flow->dl_fteid = dl_fteid;
-              if (it_created_pdr.get(flow->ul_fteid)) {
-                Logger::smf_app().debug(
-                    "Got local_up_fteid from created_pdr %s",
-                    flow->ul_fteid.toString().c_str());
-              } else {
-                // UPF doesn't include its fteid in the response
-                Logger::smf_app().debug(
-                    "Could not get local_up_fteid from created_pdr");
+          for (auto& ul_edge : ul_edges) {
+            auto flow = ul_edge.get_qos_flow(pdr_id);
+            if (flow) {
+              Logger::smf_app().debug("QoS Flow, QFI %d", flow->qfi.qfi);
+              for (const auto& it : qos_flow_context_to_be_updateds) {
+                if (!it_created_pdr.get(flow->dl_fteid)) {
+                  Logger::smf_app().warn(
+                      "Could not get DL FTEID from PDR in DL");
+                }
+
+                if (it_created_pdr.get(flow->ul_fteid)) {
+                  Logger::smf_app().debug(
+                      "Got local_up_fteid from created_pdr %s",
+                      flow->ul_fteid.toString().c_str());
+                } else {
+                  // UPF doesn't include its fteid in the response
+                  Logger::smf_app().debug(
+                      "Could not get local_up_fteid from created_pdr");
+                }
+
+                flow->released = false;
+                // TODO can i safely remove that
+                // sps->add_qos_flow(flow);
+
+                qos_flow_context_updated qcu = {};
+                qcu.set_cause(static_cast<uint8_t>(
+                    cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
+                qcu.set_qfi(pfcp::qfi_t(it.first));
+                qcu.set_ul_fteid(flow->ul_fteid);
+                qcu.set_dl_fteid(flow->dl_fteid);
+                qcu.set_qos_profile(flow->qos_profile);
+                n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
+                // TODO: remove this QFI from the list (as well as in
+                // n11_trigger->req)
+                break;
               }
-
-              flow->released = false;
-              // TODO can i safely remove that
-              // sps->add_qos_flow(flow);
-
-              qos_flow_context_updated qcu = {};
-              qcu.set_cause(static_cast<uint8_t>(
-                  cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
-              qcu.set_qfi(pfcp::qfi_t(it.first));
-              qcu.set_ul_fteid(flow->ul_fteid);
-              qcu.set_dl_fteid(flow->dl_fteid);
-              qcu.set_qos_profile(flow->qos_profile);
-              n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-              // TODO: remove this QFI from the list (as well as in
-              // n11_trigger->req)
-              break;
             }
           }
         } else {
@@ -1281,32 +1361,39 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
       if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
         // TODO failed rule id
         for (const auto& it_update_far : n4_triggered->pfcp_ies.update_fars) {
+          // TODO Stefan: I think when there is an update FAR in DL, we dont
+          // need to update other UPFs, is that correct?
+          continue_n4 = false;
+
           pfcp::far_id_t far_id = {};
           if (it_update_far.get(far_id)) {
-            auto flow = ul_edges[0].get_qos_flow(far_id);
-            if (flow) {
-              for (const auto& it : qos_flow_context_to_be_updateds) {
-                if (it.first == flow->qfi.qfi) {
-                  flow->dl_fteid = dl_fteid;
+            for (auto& ul_edge : ul_edges) {
+              auto flow = ul_edge.get_qos_flow(far_id);
+              if (flow) {
+                for (const auto& it : qos_flow_context_to_be_updateds) {
+                  if (it.first == flow->qfi.qfi) {
+                    flow->dl_fteid = n3_dl_fteid;
 
-                  // TODO can i safely remove that?
-                  // sps->add_qos_flow(flow);
+                    // TODO can i safely remove that?
+                    // sps->add_qos_flow(flow);
 
-                  qos_flow_context_updated qcu = {};
-                  qcu.set_cause(static_cast<uint8_t>(
-                      cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
-                  qcu.set_qfi(pfcp::qfi_t(it.first));
-                  qcu.set_ul_fteid(flow->ul_fteid);
-                  qcu.set_dl_fteid(flow->dl_fteid);
-                  qcu.set_qos_profile(flow->qos_profile);
-                  n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-                  break;
+                    qos_flow_context_updated qcu = {};
+                    qcu.set_cause(static_cast<uint8_t>(
+                        cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
+                    qcu.set_qfi(pfcp::qfi_t(it.first));
+                    qcu.set_ul_fteid(flow->ul_fteid);
+                    qcu.set_dl_fteid(flow->dl_fteid);
+                    qcu.set_qos_profile(flow->qos_profile);
+                    n11_triggered_pending->res.add_qos_flow_context_updated(
+                        qcu);
+                    break;
+                  }
                 }
+              } else {
+                Logger::smf_app().error(
+                    "Could not get QoS flow for far_id for update_far in %s",
+                    resp.pfcp_ies.get_msg_name());
               }
-            } else {
-              Logger::smf_app().error(
-                  "Could not get QoS flow for far_id for update_far in %s",
-                  resp.pfcp_ies.get_msg_name());
             }
           } else {
             Logger::smf_app().error(
@@ -1341,6 +1428,15 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
                                                 // for the moment)
       }
     }
+  }
+
+  std::shared_ptr<pfcp_association> next_upf{};
+  std::vector<edge> next_dl_edges{};
+  std::vector<edge> next_ul_edges{};
+
+  if (continue_n4 && get_next_upf(next_dl_edges, next_ul_edges, next_upf) ==
+                         smf_procedure_code::CONTINUE) {
+    return send_n4_session_modification_request();
   }
 
   n11_triggered_pending->res.set_cause(cause.cause_value);

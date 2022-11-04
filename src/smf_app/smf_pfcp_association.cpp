@@ -1097,6 +1097,31 @@ void upf_graph::dfs_next_upf(
             std::make_shared<smf_qos_flow>(qos_flow_asynch);
         edge_it.qos_flows.emplace_back(flow);
       }
+      // TODO thought for refactor: It would be much nicer if it would be the
+      // same edge object so we dont have to do that
+
+      // pointer is not null -> N9 interface
+      if (edge_it.association) {
+        // we add the TEID here for the edge in the other direction
+        // direct access is safe as we know the edge exists
+        auto edge_node = adjacency_list[edge_it.association];
+        for (auto edge_edge : edge_node) {
+          if (edge_edge.qos_flows.empty()) {
+            edge_edge.qos_flows.emplace_back(
+                std::make_shared<smf_qos_flow>(qos_flow_asynch));
+          }
+
+          if (edge_edge.association &&
+              edge_edge.association == node_it->first) {
+            if (edge_edge.type == iface_type::N9 && edge_edge.uplink) {
+              // downlink direction
+              edge_it.qos_flows[0]->dl_fteid = edge_edge.qos_flows[0]->dl_fteid;
+            } else if (edge_edge.type == iface_type::N9) {
+              edge_it.qos_flows[0]->ul_fteid = edge_edge.qos_flows[0]->ul_fteid;
+            }
+          }
+        }
+      }
 
       // set the correct edges to return
       if (edge_it.uplink) {
