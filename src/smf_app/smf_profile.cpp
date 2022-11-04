@@ -538,6 +538,16 @@ void upf_profile::display() const {
         s.snssai.sd);
     for (auto d : s.dnn_upf_info_list) {
       Logger::smf_app().debug("\t\t\tDNN %s", d.dnn.c_str());
+
+      for (auto dnai : d.dnai_list) {
+        Logger::smf_app().debug("\t\t\t\tDNAI List: %s", dnai.c_str());
+      }
+      for (auto nwinstance : d.dnai_nw_instance_list) {
+        Logger::smf_app().debug(
+            "\t\t\t\tDNAI NW Instance List: %s : "
+            "%s",
+            nwinstance.first.c_str(), nwinstance.second.c_str());
+      }
     }
   }
   if (!upf_info.interface_upf_info_list.empty()) {
@@ -575,8 +585,10 @@ void upf_profile::to_json(nlohmann::json& data) const {
     tmp["sNssai"]["sd"]   = std::to_string(s.snssai.sd);
     tmp["dnnSmfInfoList"] = nlohmann::json::array();
     for (auto d : s.dnn_upf_info_list) {
-      nlohmann::json dnn_json = {};
-      dnn_json["dnn"]         = d.dnn;
+      nlohmann::json dnn_json        = {};
+      dnn_json["dnn"]                = d.dnn;
+      dnn_json["dnaiList"]           = d.dnai_list;
+      dnn_json["dnaiNwInstanceList"] = d.dnai_nw_instance_list;
       tmp["dnnSmfInfoList"].push_back(dnn_json);
     }
     data["upfInfo"]["sNssaiUpfInfoList"].push_back(tmp);
@@ -637,8 +649,17 @@ void upf_profile::from_json(const nlohmann::json& data) {
           for (auto d : it["dnnUpfInfoList"]) {
             if (d.find("dnn") != d.end()) {
               dnn_item.dnn = d["dnn"].get<std::string>();
-              upf_info_item.dnn_upf_info_list.push_back(dnn_item);
             }
+            if (d.find("dnaiList") != d.end()) {
+              dnn_item.dnai_list =
+                  d["dnaiList"].get<std::unordered_set<std::string>>();
+            }
+            if (d.find("dnaiNwInstanceList") != d.end()) {
+              dnn_item.dnai_nw_instance_list =
+                  d["dnaiNwInstanceList"]
+                      .get<std::map<std::string, std::string>>();
+            }
+            upf_info_item.dnn_upf_info_list.insert(dnn_item);
           }
         }
         upf_info.snssai_upf_info_list.push_back(upf_info_item);

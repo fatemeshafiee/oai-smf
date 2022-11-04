@@ -573,6 +573,11 @@ void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf) {
 
     std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>> sessions;
     sc.get()->get_pdu_sessions(sessions);
+    // TODO commented out because this code does not anything (except logging)
+    // when does this happen? when a pfcp association fails? Then we need to
+    // remove all the other PFCP sessions in this graph and remove the PDU
+    // session as well
+    /*
     for (auto s : sessions) {
       pfcp::node_id_t n = s.second->get_upf_node_id();
       if (n == node_id) {
@@ -582,7 +587,7 @@ void smf_app::handle_itti_msg(std::shared_ptr<itti_n4_node_failure> snf) {
             supi64, it.first);
         // TODO: remove the session
       }
-    }
+    } */
   }
 }
 
@@ -669,7 +674,28 @@ void smf_app::handle_itti_msg(
           return;
         }
 
-        sp.get()->get_upf_node_id(up_node_id);
+        // TODO when is this triggered and what should we do in that case?
+
+        std::shared_ptr<upf_graph> graph = sp->get_sessions_graph();
+        if (!graph) {
+          Logger::smf_app().warn("PDU sessions graph does not exist!");
+          return;
+        }
+        std::vector<edge> dl_edges;
+        std::vector<edge> ul_edges;
+        std::shared_ptr<pfcp_association> current_upf;
+        smf_qos_flow empty_flow;
+        // TODO what is exactly happening here or should happen?
+        // and why is this not in the procedure?
+        graph->start_asynch_dfs_procedure(true, empty_flow);
+        graph->dfs_next_upf(dl_edges, ul_edges, current_upf);
+
+        if (!current_upf) {
+          Logger::smf_app().warn("Could not select UPF in graph!");
+          return;
+        }
+
+        up_node_id = current_upf->node_id;
 
         std::shared_ptr<itti_n4_session_failure_indication>
             itti_n4_failure_indication =

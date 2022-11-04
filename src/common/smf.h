@@ -27,6 +27,10 @@
 #include "3gpp_24.501.h"
 #include <nlohmann/json.hpp>
 
+#include <map>
+#include <vector>
+#include <unordered_set>
+
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT "%" SCNu64
 
@@ -74,6 +78,9 @@ static uint64_t smf_supi_to_u64(supi_t supi) {
 
 typedef struct s_nssai  // section 28.4, TS23.003
 {
+  const uint8_t HASH_SEED   = 17;
+  const uint8_t HASH_FACTOR = 31;
+
   uint8_t sst;
   uint32_t sd;
   s_nssai(const uint8_t& m_sst, const uint32_t m_sd) : sst(m_sst), sd(m_sd) {}
@@ -108,6 +115,13 @@ typedef struct s_nssai  // section 28.4, TS23.003
     s.append("SST=").append(std::to_string(sst));
     s.append(", SD=").append(std::to_string(sd));
     return s;
+  }
+
+  size_t operator()(const s_nssai&) const {
+    size_t res = HASH_SEED;
+    res        = res * HASH_FACTOR + std::hash<uint32_t>()(sd);
+    res        = res * HASH_FACTOR + std::hash<uint32_t>()(sst);
+    return res;
   }
 
 } snssai_t;
@@ -348,23 +362,43 @@ typedef struct nf_service_s {
 
 typedef struct dnn_upf_info_item_s {
   std::string dnn;
-  // std::vector<std::string> dnai_list
+  std::unordered_set<std::string> dnai_list;
+  // supported from R16.8
+  std::map<std::string, std::string> dnai_nw_instance_list;
   // std::vector<std::string> pdu_session_types
 
   dnn_upf_info_item_s& operator=(const dnn_upf_info_item_s& d) {
-    dnn = d.dnn;
+    dnn                   = d.dnn;
+    dnai_list             = d.dnai_list;
+    dnai_nw_instance_list = d.dnai_nw_instance_list;
     return *this;
   }
+
+  bool operator==(const dnn_upf_info_item_s& s) const { return dnn == s.dnn; }
+
+  size_t operator()(const dnn_upf_info_item_s&) const {
+    return std::hash<std::string>()(dnn);
+  }
+
 } dnn_upf_info_item_t;
 
 typedef struct snssai_upf_info_item_s {
   snssai_t snssai;
-  std::vector<dnn_upf_info_item_t> dnn_upf_info_list;
+  std::unordered_set<dnn_upf_info_item_t, dnn_upf_info_item_t>
+      dnn_upf_info_list;
 
   snssai_upf_info_item_s& operator=(const snssai_upf_info_item_s& s) {
     snssai            = s.snssai;
     dnn_upf_info_list = s.dnn_upf_info_list;
     return *this;
+  }
+
+  bool operator==(const snssai_upf_info_item_s& s) const {
+    return snssai == s.snssai;
+  }
+
+  size_t operator()(const snssai_upf_info_item_s&) const {
+    return snssai.operator()(snssai);
   }
 
 } snssai_upf_info_item_t;

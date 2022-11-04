@@ -732,6 +732,16 @@ void PccRule::unsetTscaiInputUl() {
 }
 */
 
+std::string PccRule::getFirstFlowDescription() const {
+  std::string flow = "";
+  if (flowInfosIsSet() && getFlowInfos().size() > 0) {
+    if (getFlowInfos()[0].flowDescriptionIsSet()) {
+      flow = getFlowInfos()[0].getFlowDescription();
+    }
+  }
+  return flow;
+}
+
 }  // namespace model
 }  // namespace smf_server
 }  // namespace oai
