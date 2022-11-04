@@ -1447,6 +1447,37 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
 }
 
 //------------------------------------------------------------------------------
+smf_procedure_code
+session_release_sm_context_procedure::send_n4_session_deletion_request() {
+  std::vector<edge> dl_edges;
+  std::vector<edge> ul_edges;
+  std::shared_ptr<pfcp_association> current_upf;
+
+  if (get_current_upf(dl_edges, ul_edges, current_upf) ==
+      smf_procedure_code::ERROR) {
+    return smf_procedure_code::ERROR;
+  }
+
+  n4_triggered = std::make_shared<itti_n4_session_deletion_request>(
+      TASK_SMF_APP, TASK_SMF_N4);
+  n4_triggered->seid    = sps->up_fseid.seid;
+  n4_triggered->trxn_id = this->trxn_id;
+  n4_triggered->r_endpoint =
+      endpoint(current_upf->node_id.u1.ipv4_address, pfcp::default_port);
+
+  Logger::smf_app().info(
+      "Sending ITTI message %s to task TASK_SMF_N4",
+      n4_triggered->get_msg_name());
+  int ret = itti_inst->send_msg(n4_triggered);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_N4",
+        n4_triggered->get_msg_name());
+    return smf_procedure_code::ERROR;
+  }
+  return smf_procedure_code::CONTINUE;
+}
+//------------------------------------------------------------------------------
 smf_procedure_code session_release_sm_context_procedure::run(
     std::shared_ptr<itti_n11_release_sm_context_request> sm_context_req,
     std::shared_ptr<itti_n11_release_sm_context_response> sm_context_res,
@@ -1486,47 +1517,24 @@ smf_procedure_code session_release_sm_context_procedure::run(
     Logger::smf_app().warn("PDU session does not have a UPF association");
     return smf_procedure_code::ERROR;
   }
-
+  // we start from the access nodes, because we have only ULCLs we don't have
+  // the situation that one UPF is returned more than once
   smf_qos_flow empty_flow;
-  graph->start_asynch_dfs_procedure(true, empty_flow);
+  graph->start_asynch_dfs_procedure(false, empty_flow);
 
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
   std::shared_ptr<pfcp_association> current_upf;
-  graph->dfs_next_upf(dl_edges, ul_edges, current_upf);
+  if (get_next_upf(dl_edges, ul_edges, current_upf) ==
+      smf_procedure_code::ERROR) {
+    return smf_procedure_code::ERROR;
+  }
 
-  /*  if (not pfcp_associations::get_instance().select_up_node(
-            up_node_id, NODE_SELECTION_CRITERIA_MIN_PFCP_SESSIONS)) {
-      sm_context_res->res.set_cause(
-          PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING);
-      Logger::smf_app().info("REMOTE_PEER_NOT_RESPONDING");
-      return RETURNerror;
-    }
-  */
-  //-------------------
   n11_trigger           = sm_context_req;
   n11_triggered_pending = sm_context_res;
   uint64_t seid         = smf_app_inst->generate_seid();
   sps->set_seid(seid);
-
-  n4_triggered = std::make_shared<itti_n4_session_deletion_request>(
-      TASK_SMF_APP, TASK_SMF_N4);
-  n4_triggered->seid    = sps->up_fseid.seid;
-  n4_triggered->trxn_id = this->trxn_id;
-  n4_triggered->r_endpoint =
-      endpoint(current_upf->node_id.u1.ipv4_address, pfcp::default_port);
-
-  Logger::smf_app().info(
-      "Sending ITTI message %s to task TASK_SMF_N4",
-      n4_triggered->get_msg_name());
-  int ret = itti_inst->send_msg(n4_triggered);
-  if (RETURNok != ret) {
-    Logger::smf_app().error(
-        "Could not send ITTI message %s to task TASK_SMF_N4",
-        n4_triggered->get_msg_name());
-    return smf_procedure_code::ERROR;
-  }
-  return smf_procedure_code::OK;
+  return send_n4_session_deletion_request();
 }
 
 //------------------------------------------------------------------------------
@@ -1540,10 +1548,23 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
 
   pfcp::cause_t cause = {};
   resp.pfcp_ies.get(cause);
+
+  std::vector<edge> dl_edges;
+  std::vector<edge> ul_edges;
+  std::shared_ptr<pfcp_association> current_upf;
+  bool continue_n4 = false;
+  if (get_next_upf(dl_edges, ul_edges, current_upf) ==
+      smf_procedure_code::CONTINUE) {
+    // If we have to continue, we ignore the PFCP error code, because we should
+    // at least remove other UPF sessions
+    return send_n4_session_deletion_request();
+    continue_n4 = false;
+  }
+
   if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
     n11_triggered_pending->res.set_cause(
         static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
-    Logger::smf_app().info("PDU Session Release SM Context accepted by UPF");
+    Logger::smf_app().info("PDU Session Release SM Context accepted by UPFs");
     // clear the resources including addresses allocated to this Session and
     // associated QoS flows
     sps->deallocate_ressources(
@@ -1554,14 +1575,8 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
   } else {
     n11_triggered_pending->res.set_cause(static_cast<uint8_t>(
         cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
-
+    // We cannot return an error here, because we need to delete all the UPFs
     return smf_procedure_code::ERROR;
-    // trigger to send reply to AMF
-    /*
-    smf_app_inst->trigger_http_response(
-    http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE,
-    n11_triggered_pending->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
-    */
   }
 
   // TODO:

@@ -279,6 +279,9 @@ class session_release_sm_context_procedure : public smf_session_procedure {
 
   std::shared_ptr<itti_n11_release_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_release_sm_context_response> n11_triggered_pending;
+
+ private:
+  smf_procedure_code send_n4_session_deletion_request();
 };
 
 }  // namespace smf
