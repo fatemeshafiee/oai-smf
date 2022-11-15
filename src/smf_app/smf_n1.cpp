@@ -744,7 +744,13 @@ bool smf_n1::create_n1_pdu_session_release_command(
   // Fill the content of PDU Session Release Command
   sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
   sm_msg->header.procedure_transaction_identity =
-      sm_context_res.get_pti().procedure_transaction_id;
+      sm_context_res.get_pti()
+          .procedure_transaction_id;  // TODO: if PDU session release procedure
+                                      // is not triggered by a UE-requested PDU
+                                      // session release set the PTI IE of the
+                                      // PDU SESSION RELEASE COMMAND message
+                                      // to "No procedure transaction identity
+                                      // assigned"
   sm_msg->header.message_type = PDU_SESSION_RELEASE_COMMAND;
   sm_msg->pdu_session_release_command._5gsmcause =
       static_cast<uint8_t>(sm_cause);

@@ -2535,6 +2535,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
   std::string n2_sm_info                                   = {};
   std::string n2_sm_info_hex                               = {};
   bool update_upf                                          = false;
+  bool pdu_session_release_procedure                       = false;
   session_management_procedures_type_e procedure_type(
       session_management_procedures_type_e::
           PDU_SESSION_ESTABLISHMENT_UE_REQUESTED);
@@ -2660,7 +2661,8 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
           return false;
         }
         // need to update UPF accordingly
-        update_upf = true;
+        update_upf                    = true;
+        pdu_session_release_procedure = true;
       } break;
 
       case PDU_SESSION_RELEASE_COMPLETE: {
@@ -2987,69 +2989,142 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
   // Step 5. Create a procedure for update SM context and let the procedure
   // handle the request if necessary
   if (update_upf) {
-    auto proc = std::make_shared<session_update_sm_context_procedure>(sp);
-    std::shared_ptr<smf_procedure> sproc = proc;
-    proc->session_procedure_type         = procedure_type;
+    if (!pdu_session_release_procedure) {
+      auto proc = std::make_shared<session_update_sm_context_procedure>(sp);
+      std::shared_ptr<smf_procedure> sproc = proc;
+      proc->session_procedure_type         = procedure_type;
 
-    insert_procedure(sproc);
-    if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) ==
-        smf_procedure_code::ERROR) {
-      // error
-      Logger::smf_app().info(
-          "PDU Update SM Context Request procedure failed (session procedure "
-          "type %s)",
-          session_management_procedures_type_e2str
-              .at(static_cast<int>(procedure_type))
-              .c_str());
-      remove_procedure(sproc.get());
+      insert_procedure(sproc);
+      if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) ==
+          smf_procedure_code::ERROR) {
+        // error
+        Logger::smf_app().info(
+            "PDU Update SM Context Request procedure failed (session procedure "
+            "type %s)",
+            session_management_procedures_type_e2str
+                .at(static_cast<int>(procedure_type))
+                .c_str());
+        remove_procedure(sproc.get());
 
-      // send error to AMF according to the procedure
-      switch (procedure_type) {
-        case session_management_procedures_type_e::
-            PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
-          // PDU Session Establishment Reject
-          if (smf_n1::get_instance().create_n1_pdu_session_establishment_reject(
-                  sm_context_req_msg, n1_sm_msg,
-                  cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE)) {
-            conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-            // trigger to send reply to AMF
+        // send error to AMF according to the procedure
+        switch (procedure_type) {
+          case session_management_procedures_type_e::
+              PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
+            // PDU Session Establishment Reject
+            if (smf_n1::get_instance()
+                    .create_n1_pdu_session_establishment_reject(
+                        sm_context_req_msg, n1_sm_msg,
+                        cause_value_5gsm_e::CAUSE_38_NETWORK_FAILURE)) {
+              conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+              // trigger to send reply to AMF
+              smf_app_inst->trigger_update_context_error_response(
+                  http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                  PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING,
+                  smreq->pid);
+            } else {
+              smf_app_inst->trigger_http_response(
+                  http_status_code_e::
+                      HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+                  smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+            }
+          } break;
+
+          case session_management_procedures_type_e::
+              SERVICE_REQUEST_UE_TRIGGERED_STEP1:
+          case session_management_procedures_type_e::
+              PDU_SESSION_MODIFICATION_SMF_REQUESTED:
+          case session_management_procedures_type_e::
+              PDU_SESSION_MODIFICATION_AN_REQUESTED:
+          case session_management_procedures_type_e::
+              PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2:
+          case session_management_procedures_type_e::
+              PDU_SESSION_RELEASE_AMF_INITIATED:
+          case session_management_procedures_type_e::
+              PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
+            // trigger the reply to AMF
             smf_app_inst->trigger_update_context_error_response(
                 http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
                 PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING, smreq->pid);
-          } else {
-            smf_app_inst->trigger_http_response(
-                http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
-                smreq->pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+          } break;
+
+          default: {
+            // trigger the reply to AMF
+            smf_app_inst->trigger_update_context_error_response(
+                http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+                PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING, smreq->pid);
           }
-        } break;
-
-        case session_management_procedures_type_e::
-            SERVICE_REQUEST_UE_TRIGGERED_STEP1:
-        case session_management_procedures_type_e::
-            PDU_SESSION_MODIFICATION_SMF_REQUESTED:
-        case session_management_procedures_type_e::
-            PDU_SESSION_MODIFICATION_AN_REQUESTED:
-        case session_management_procedures_type_e::
-            PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2:
-        case session_management_procedures_type_e::
-            PDU_SESSION_RELEASE_AMF_INITIATED:
-        case session_management_procedures_type_e::
-            PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-          // trigger the reply to AMF
-          smf_app_inst->trigger_update_context_error_response(
-              http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING, smreq->pid);
-        } break;
-
-        default: {
-          // trigger the reply to AMF
-          smf_app_inst->trigger_update_context_error_response(
-              http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-              PDU_SESSION_APPLICATION_ERROR_PEER_NOT_RESPONDING, smreq->pid);
         }
+        return false;
       }
-      return false;
+    } else {
+      // UE-triggered PDU Session Release
+      pdu_session_release_sm_context_request sm_context_rel_req_msg = {};
+
+      // TODO: check if update message contain N2 SM info
+      if (sm_context_req_msg.n2_sm_info_is_set()) {
+        // get necessary information (N2 SM information)
+        sm_context_rel_req_msg.set_n2_sm_information(
+            smreq->req.get_n2_sm_information());
+        sm_context_rel_req_msg.set_n2_sm_info_type(
+            smreq->req.get_n2_sm_info_type());
+      }
+
+      // Create an itti_n11_release_sm_context_request message and handling it
+      // accordingly
+      std::shared_ptr<itti_n11_release_sm_context_request> smreq_release =
+          std::make_shared<itti_n11_release_sm_context_request>(
+              TASK_SMF_APP, TASK_SMF_APP, smreq->pid, smreq->scid);
+      smreq_release->req          = sm_context_rel_req_msg;
+      smreq_release->http_version = 1;
+      // handle_pdu_session_release_sm_context_request(smreq_release);
+
+      //        std::shared_ptr<itti_n11_release_sm_context_request>
+      //  smreq_release = {};
+
+      std::shared_ptr<itti_n11_release_sm_context_response>
+          sm_context_rel_resp_pending =
+              std::make_shared<itti_n11_release_sm_context_response>(
+                  TASK_SMF_SBI, TASK_SMF_APP, smreq_release->pid);
+
+      sm_context_rel_resp_pending->res.set_http_code(
+          http_status_code_e::HTTP_STATUS_CODE_200_OK);
+      sm_context_rel_resp_pending->res.set_supi(smreq_release->req.get_supi());
+      sm_context_rel_resp_pending->res.set_supi_prefix(
+          smreq_release->req.get_supi_prefix());
+      sm_context_rel_resp_pending->res.set_cause(
+          static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
+      sm_context_rel_resp_pending->res.set_pdu_session_id(
+          smreq_release->req.get_pdu_session_id());
+      sm_context_rel_resp_pending->res.set_snssai(
+          smreq_release->req.get_snssai());
+      sm_context_rel_resp_pending->res.set_dnn(smreq_release->req.get_dnn());
+
+      auto proc = std::make_shared<session_release_sm_context_procedure>(sp);
+      std::shared_ptr<smf_procedure> sproc = proc;
+
+      insert_procedure(sproc);
+
+      if (proc->run(
+              smreq_release, sm_context_rel_resp_pending, shared_from_this()) ==
+          smf_procedure_code::ERROR) {
+        Logger::smf_app().info(
+            "PDU Release SM Context Request procedure failed");
+
+        remove_procedure(sproc.get());
+        // Trigger to send reply to AMF
+        smf_app_inst->trigger_http_response(
+            http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
+            smreq_release->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+        return false;
+      }
+      /*
+      // Trigger to send reply to AMF
+      smf_app_inst->trigger_http_response(
+          http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT,
+      smreq_release->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+          */
     }
+
   } else {
     Logger::smf_app().info(
         "Sending ITTI message %s to task TASK_SMF_APP to trigger response",
@@ -3076,9 +3151,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
 //-------------------------------------------------------------------------------------
 void smf_context::handle_pdu_session_release_sm_context_request(
     std::shared_ptr<itti_n11_release_sm_context_request> smreq) {
-  Logger::smf_app().info(
-      "Handle a PDU Session Release SM Context Request message from AMF");
-  bool update_upf = false;
+  Logger::smf_app().info("Handle a PDU Session Release SM Context Request");
 
   // Step 1. get SMF PDU session context. At this stage, pdu_session must be
   // existed
@@ -3125,16 +3198,22 @@ void smf_context::handle_pdu_session_release_sm_context_request(
   std::shared_ptr<smf_procedure> sproc = proc;
 
   insert_procedure(sproc);
+  http_status_code_e http_response_code =
+      http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT;
+
   if (proc->run(smreq, sm_context_resp_pending, shared_from_this()) ==
       smf_procedure_code::ERROR) {
     Logger::smf_app().info("PDU Release SM Context Request procedure failed");
-    // Trigger to send reply to AMF
-    smf_app_inst->trigger_http_response(
-        http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR,
-        smreq->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
-    return;
-    // TODO @Thinh: Why dont we remove the procedure here? Is this on purpose?
+
+    remove_procedure(sproc.get());
+    http_response_code =
+        http_status_code_e::HTTP_STATUS_CODE_500_INTERNAL_SERVER_ERROR;
+  } else {
+    http_response_code = http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT;
   }
+  // Trigger to send reply to AMF
+  smf_app_inst->trigger_http_response(
+      http_response_code, smreq->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
 }
 
 //------------------------------------------------------------------------------
