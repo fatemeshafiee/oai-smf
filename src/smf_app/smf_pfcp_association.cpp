@@ -1254,6 +1254,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
     }
     return upf_graph_ptr;
   }
+  return upf_graph_ptr;
 }
 
 //------------------------------------------------------------------------------

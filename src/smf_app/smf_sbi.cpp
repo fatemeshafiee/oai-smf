@@ -927,7 +927,7 @@ bool smf_sbi::get_sm_data(
     }
     if (jsonData["singleNssai"].find("sd") != jsonData["singleNssai"].end()) {
       std::string sd_str = jsonData["singleNssai"]["sd"];
-      uint32_t sd        = 0xFFFFFF;
+      uint32_t sd        = SD_NO_VALUE;
       xgpp_conv::sd_string_to_int(
           jsonData["singleNssai"]["sd"].get<std::string>(), sd);
       if (sd != snssai.sd) {

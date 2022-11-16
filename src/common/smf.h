@@ -26,6 +26,7 @@
 #include "3gpp_29.571.h"
 #include "3gpp_24.501.h"
 #include <nlohmann/json.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <map>
 #include <vector>
@@ -85,13 +86,21 @@ typedef struct s_nssai  // section 28.4, TS23.003
   uint32_t sd;
   s_nssai(const uint8_t& m_sst, const uint32_t m_sd) : sst(m_sst), sd(m_sd) {}
   s_nssai(const uint8_t& m_sst, const std::string m_sd) : sst(m_sst) {
-    sd = 0xFFFFFF;
+    sd = SD_NO_VALUE;
+    if (m_sd.empty()) return;
+    uint8_t base = 10;
     try {
-      sd = std::stoul(m_sd, nullptr, 10);
+      if (m_sd.size() > 2) {
+        if (boost::iequals(m_sd.substr(0, 2), "0x")) {
+          base = 16;
+        }
+      }
+      sd = std::stoul(m_sd, nullptr, base);
     } catch (const std::exception& e) {
-      Logger::smf_app().warn(
-          "Error when converting from string to int for snssai.SD, error: %s",
+      Logger::smf_app().error(
+          "Error when converting from string to int for S-NSSAI SD, error: %s",
           e.what());
+      sd = SD_NO_VALUE;
     }
   }
   s_nssai() : sst(), sd() {}
@@ -212,8 +221,8 @@ enum class sm_context_status_e {
   SM_CONTEXT_STATUS_RELEASED = 1
 };
 
-static const std::vector<std::string> sm_context_status_e2str = {"ACTIVE",
-                                                                 "RELEASED"};
+static const std::vector<std::string> sm_context_status_e2str = {
+    "ACTIVE", "RELEASED"};
 
 typedef struct qos_profile_gbr_s {
   gfbr_t gfbr;  // Guaranteed Flow Bit Rate
