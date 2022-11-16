@@ -22,15 +22,15 @@
 #ifndef FILE_SMF_SEEN
 #define FILE_SMF_SEEN
 
+#include <boost/algorithm/string.hpp>
+#include <map>
+#include <nlohmann/json.hpp>
+#include <unordered_set>
+#include <vector>
+
+#include "3gpp_24.501.h"
 #include "3gpp_29.274.h"
 #include "3gpp_29.571.h"
-#include "3gpp_24.501.h"
-#include <nlohmann/json.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include <map>
-#include <vector>
-#include <unordered_set>
 
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT "%" SCNu64
