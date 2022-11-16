@@ -22,14 +22,15 @@
 #ifndef FILE_SMF_SEEN
 #define FILE_SMF_SEEN
 
+#include <boost/algorithm/string.hpp>
+#include <map>
+#include <nlohmann/json.hpp>
+#include <unordered_set>
+#include <vector>
+
+#include "3gpp_24.501.h"
 #include "3gpp_29.274.h"
 #include "3gpp_29.571.h"
-#include "3gpp_24.501.h"
-#include <nlohmann/json.hpp>
-
-#include <map>
-#include <vector>
-#include <unordered_set>
 
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT "%" SCNu64
@@ -85,13 +86,21 @@ typedef struct s_nssai  // section 28.4, TS23.003
   uint32_t sd;
   s_nssai(const uint8_t& m_sst, const uint32_t m_sd) : sst(m_sst), sd(m_sd) {}
   s_nssai(const uint8_t& m_sst, const std::string m_sd) : sst(m_sst) {
-    sd = 0xFFFFFF;
+    sd = SD_NO_VALUE;
+    if (m_sd.empty()) return;
+    uint8_t base = 10;
     try {
-      sd = std::stoul(m_sd, nullptr, 10);
+      if (m_sd.size() > 2) {
+        if (boost::iequals(m_sd.substr(0, 2), "0x")) {
+          base = 16;
+        }
+      }
+      sd = std::stoul(m_sd, nullptr, base);
     } catch (const std::exception& e) {
-      Logger::smf_app().warn(
-          "Error when converting from string to int for snssai.SD, error: %s",
+      Logger::smf_app().error(
+          "Error when converting from string to int for S-NSSAI SD, error: %s",
           e.what());
+      sd = SD_NO_VALUE;
     }
   }
   s_nssai() : sst(), sd() {}

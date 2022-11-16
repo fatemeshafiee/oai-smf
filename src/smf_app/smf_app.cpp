@@ -690,6 +690,11 @@ void smf_app::handle_itti_msg(
         graph->start_asynch_dfs_procedure(true, empty_flow);
         graph->dfs_next_upf(dl_edges, ul_edges, current_upf);
 
+        if (!current_upf) {
+          Logger::smf_app().warn("Could not select UPF in graph!");
+          return;
+        }
+
         up_node_id = current_upf->node_id;
 
         std::shared_ptr<itti_n4_session_failure_indication>
