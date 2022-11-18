@@ -399,10 +399,13 @@ void smf_app::start_nf_registration_discovery() {
 
 //------------------------------------------------------------------------------
 void smf_app::start_upf_association(const pfcp::node_id_t& node_id) {
+  Logger::smf_app().debug("Start a PFCP Association procedure with an UPF");
   std::time_t time_epoch = std::time(nullptr);
   uint64_t tv_ntp        = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
 
-  pfcp_associations::get_instance().add_peer_candidate_node(node_id);
+  pfcp::node_id_t node_id_tmp = node_id;
+  fqdn::resolve(node_id_tmp);  // Resolve FQDN/IP addr if necessary
+  pfcp_associations::get_instance().add_peer_candidate_node(node_id_tmp);
   std::shared_ptr<itti_n4_association_setup_request> n4_asc =
       std::shared_ptr<itti_n4_association_setup_request>(
           new itti_n4_association_setup_request(TASK_SMF_APP, TASK_SMF_N4));
@@ -438,9 +441,12 @@ void smf_app::start_upf_association(const pfcp::node_id_t& node_id) {
 //------------------------------------------------------------------------------
 void smf_app::start_upf_association(
     const pfcp::node_id_t& node_id, const upf_profile& profile) {
+  Logger::smf_app().debug("Start a PFCP Association procedure with an UPF");
   std::time_t time_epoch = std::time(nullptr);
   uint64_t tv_ntp        = time_epoch + SECONDS_SINCE_FIRST_EPOCH;
 
+  pfcp::node_id_t node_id_tmp = node_id;
+  fqdn::resolve(node_id_tmp);  // Resolve FQDN/IP addr if necessary
   pfcp_associations::get_instance().add_peer_candidate_node(node_id, profile);
   std::shared_ptr<itti_n4_association_setup_request> n4_asc =
       std::shared_ptr<itti_n4_association_setup_request>(
@@ -1455,18 +1461,25 @@ bool smf_app::handle_nf_status_notification(
             // Add a new UPF node
             Logger::smf_app().debug(
                 "Add a new UPF node, Ipv4 Addr %s", inet_ntoa(ipv4_addrs[0]));
-            // pfcp::node_id_t n        = {};
             if (n.node_id_type == pfcp::NODE_ID_TYPE_UNKNOWN)
               n.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
             n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
-            /*smf_cfg.upfs.push_back(n);
-            upf_profile* upf_node_profile =
-                dynamic_cast<upf_profile*>(profile.get());
-            start_upf_association(n, std::ref(*upf_node_profile));
-            */
           } else {
             Logger::smf_app().debug(
                 "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
+          }
+
+          // Do reserve_resolve to find FQDN if not available
+          if (n.fqdn.empty()) {
+            std::string hostname = {};
+            std::string ip_str   = conv::toString(n.u1.ipv4_address);
+            if (!fqdn::reverse_resolve(ip_str, hostname)) {
+              Logger::smf_app().debug(
+                  "Could not resolve hostname for IP address %s",
+                  ip_str.c_str());
+            } else {
+              n.fqdn = hostname;
+            }
           }
         }
 
@@ -1478,7 +1491,7 @@ bool smf_app::handle_nf_status_notification(
           // Trigger N4 association request with retry if needed
           std::shared_ptr<itti_n4_association_retry> itti_msg =
               std::make_shared<itti_n4_association_retry>(
-                  TASK_SMF_N4, TASK_SMF_APP);
+                  TASK_SMF_APP, TASK_SMF_APP);
           itti_msg->node_id = n;
           itti_msg->profile = std::ref(*upf_node_profile);
           int ret           = itti_inst->send_msg(itti_msg);

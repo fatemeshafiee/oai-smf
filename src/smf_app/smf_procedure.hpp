@@ -67,13 +67,19 @@ class smf_procedure {
   virtual itti_msg_type_t get_procedure_type() { return ITTI_MSG_TYPE_NONE; }
   virtual smf_procedure_code handle_itti_msg(
       itti_n4_session_establishment_response& resp,
-      std::shared_ptr<smf::smf_context> pc) {}
+      std::shared_ptr<smf::smf_context> pc) {
+    return smf_procedure_code::OK;
+  }
   virtual smf_procedure_code handle_itti_msg(
       itti_n4_session_modification_response& resp,
-      std::shared_ptr<smf::smf_context> pc) {}
+      std::shared_ptr<smf::smf_context> pc) {
+    return smf_procedure_code::OK;
+  }
   virtual smf_procedure_code handle_itti_msg(
       itti_n4_session_deletion_response& resp,
-      std::shared_ptr<smf::smf_context> pc) {}
+      std::shared_ptr<smf::smf_context> pc) {
+    return smf_procedure_code::OK;
+  }
 };
 
 class smf_qos_flow;

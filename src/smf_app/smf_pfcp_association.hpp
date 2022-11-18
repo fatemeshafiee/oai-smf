@@ -92,6 +92,7 @@ class pfcp_association {
     timer_association           = ITTI_INVALID_TIMER_ID;
     timer_graceful_release      = ITTI_INVALID_TIMER_ID;
   }
+
   pfcp_association(
       const pfcp::node_id_t& node_id,
       pfcp::recovery_time_stamp_t& recovery_time_stamp)
@@ -129,6 +130,7 @@ class pfcp_association {
     timer_association           = ITTI_INVALID_TIMER_ID;
     timer_graceful_release      = ITTI_INVALID_TIMER_ID;
   }
+
   pfcp_association(pfcp_association const& p)
       : node_id(p.node_id),
         hash_node_id(p.hash_node_id),
@@ -190,7 +192,20 @@ class pfcp_association {
   bool find_upf_edge(
       const std::shared_ptr<pfcp_association>& other_upf, edge& out_edge);
 
+  /**
+   * @brief Get the readble name of the UPF associated with this association
+   * @param void
+   * @return string representing the name of the UPF associated with this
+   * association
+   */
   std::string get_printable_name();
+
+  /*
+   * Print related-information for this association
+   * @param void
+   * @return void:
+   */
+  void display();
 
  private:
   bool find_interface_edge(
@@ -615,8 +630,7 @@ class pfcp_associations {
       pfcp::node_id_t& node_id,
       pfcp::up_function_features_s& function_features);
   bool get_association(
-      const pfcp::node_id_t& node_id,
-      std::shared_ptr<pfcp_association>& sa) const;
+      const pfcp::node_id_t& node_id, std::shared_ptr<pfcp_association>& sa);
   bool get_association(
       const pfcp::fseid_t& cp_fseid,
       std::shared_ptr<pfcp_association>& sa) const;

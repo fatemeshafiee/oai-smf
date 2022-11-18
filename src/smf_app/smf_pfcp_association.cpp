@@ -375,6 +375,16 @@ std::string pfcp_association::get_printable_name() {
   }
 }
 
+//------------------------------------------------------------------------------
+void pfcp_association::display() {
+  Logger::smf_app().debug("\tUPF Node Id: %s", node_id.toString().c_str());
+
+  if (upf_profile_is_set) {
+    Logger::smf_app().debug("\tUPF Node profile:");
+    upf_node_profile.display();
+  }
+}
+
 /******************************************************************************/
 /***************************** PFCP ASSOCIATIONS ******************************/
 /******************************************************************************/
@@ -566,40 +576,57 @@ bool pfcp_associations::update_association(
 
 //------------------------------------------------------------------------------
 bool pfcp_associations::get_association(
-    const pfcp::node_id_t& node_id,
-    std::shared_ptr<pfcp_association>& sa) const {
-  std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
-  auto association         = associations_graph.get_association(hash_node_id);
+    const pfcp::node_id_t& node_id, std::shared_ptr<pfcp_association>& sa) {
+  std::shared_ptr<pfcp_association> association = {};
+  std::size_t hash_node_id                      = {};
+  pfcp::node_id_t node_id_tmp                   = node_id;
 
-  if (!association) {
-    // We didn't find association, may be because hash map is made with
-    // node_id_type FQDN
-    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
-      std::string hostname;
-      std::string ip_str = conv::toString(node_id.u1.ipv4_address);
+  // Resolve FQDN/IP Addr if necessary
+  fqdn::resolve(node_id_tmp);
 
-      if (!fqdn::reverse_resolve(ip_str, hostname)) {
-        Logger::smf_app().warn(
-            "Could not resolve hostname for IP address %s", ip_str.c_str());
-        return false;
-      }
-
-      pfcp::node_id_t node_id_tmp = {};
-      node_id_tmp.node_id_type    = pfcp::NODE_ID_TYPE_FQDN;
-      node_id_tmp.fqdn            = hostname;
-      Logger::smf_app().debug(
-          "Hash lookup for association retry: Associated Hostname -> %s",
-          hostname.c_str());
-      if (get_association(node_id_tmp, sa)) return true;
+  // We suppose that by default hash map is made with node_id_type FQDN
+  if (node_id_tmp.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+    // Resolve to get IP addr if necessary
+    // resolve_upf_hostname(node_id_tmp);
+    hash_node_id = std::hash<pfcp::node_id_t>{}(node_id_tmp);
+    association  = associations_graph.get_association(hash_node_id);
+    if (association) {
+      sa = association;
+      return true;
     }
-    // We didn't found association, may be because hash map is made with
-    // node_id_type IP ADDR
-    // ToDo (Might stuck in recursive loop here)
-    return false;
-  } else {
+    node_id_tmp.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+  } else if (node_id_tmp.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+    /*
+// Don't need to do reserve_resolve if FQDN is already available
+if (node_id_tmp.fqdn.empty()) {
+ std::string hostname = {};
+ std::string ip_str   = conv::toString(node_id_tmp.u1.ipv4_address);
+ if (!fqdn::reverse_resolve(ip_str, hostname)) {
+   Logger::smf_app().debug(
+       "Could not resolve hostname for IP address %s", ip_str.c_str());
+ } else {
+   node_id_tmp.fqdn = hostname;
+ }
+}*/
+
+    hash_node_id = std::hash<pfcp::node_id_t>{}(node_id_tmp);
+    association  = associations_graph.get_association(hash_node_id);
+    if (association) {
+      sa = association;
+      return true;
+    }
+    node_id_tmp.node_id_type = pfcp::NODE_ID_TYPE_FQDN;
+  }
+
+  // We didn't found association, may be because hash map is made with different
+  // node type
+  hash_node_id = std::hash<pfcp::node_id_t>{}(node_id_tmp);
+  association  = associations_graph.get_association(hash_node_id);
+  if (association) {
     sa = association;
     return true;
   }
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -781,6 +808,8 @@ bool pfcp_associations::add_peer_candidate_node(
       std::make_shared<pfcp_association>(node_id);
   s->set_upf_node_profile(profile);
   pending_associations.push_back(s);
+  Logger::smf_app().info("Added a pending association candidate");
+  s->display();
   return true;
 }
 
