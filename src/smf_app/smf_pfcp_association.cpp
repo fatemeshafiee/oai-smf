@@ -51,7 +51,7 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
   Logger::smf_app().debug(
       "Edge from UPF info, UPF info %s", upf_info.to_string().c_str());
 
-  for (const auto& snssai : upf_info.snssai_upf_info_list) {
+  for (auto& snssai : upf_info.snssai_upf_info_list) {
     snssai_item.snssai = snssai.snssai;
     bool found         = false;
     for (auto& item : e.snssai_dnns) {
