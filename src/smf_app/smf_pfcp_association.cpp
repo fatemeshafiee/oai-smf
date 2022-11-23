@@ -97,16 +97,27 @@ bool edge::serves_network(
     const std::string& dnn, const snssai_t& snssai,
     const std::unordered_set<std::string>& dnais,
     std::string& matched_dnai) const {
+  Logger::smf_app().debug(
+      "Serves Network, DNN %s, S-NSSAI %s", dnn.c_str(),
+      snssai.toString().c_str());
   // just create a snssai_upf_info_item for fast lookup
-  snssai_upf_info_item_s snssai_item;
-  snssai_item.snssai = snssai;
+  snssai_upf_info_item_s snssai_item = {};
+  snssai_item.snssai                 = snssai;
+  // For debuging purpose
+  if (!snssai_dnns.empty()) {
+    Logger::smf_app().debug("S-NSSAI UPF info list");
+    for (const auto& s : snssai_dnns) {
+      Logger::smf_app().debug(
+          "S-NSSAI UPF info item %s", s.to_string().c_str());
+    }
+  }
 
   auto snssai_it = snssai_dnns.find(snssai_item);
   if (snssai_it != snssai_dnns.end()) {
     // create temp item for fast lookup
-    dnn_upf_info_item_s dnn_item;
-    dnn_item.dnn = dnn;
-    auto dnn_it  = snssai_it->dnn_upf_info_list.find(dnn_item);
+    dnn_upf_info_item_s dnn_item = {};
+    dnn_item.dnn                 = dnn;
+    auto dnn_it                  = snssai_it->dnn_upf_info_list.find(dnn_item);
     if (dnn_it != snssai_it->dnn_upf_info_list.end()) {
       if (!dnais.empty()) {
         // should be only 1 DNAI
@@ -123,6 +134,8 @@ bool edge::serves_network(
       }
     }
   }
+
+  Logger::smf_app().debug("Could not serve network, return false");
   return false;
 }
 
@@ -287,7 +300,7 @@ bool pfcp_association::find_interface_edge(
   if (!is_upf_profile_set()) {
     return false;
   }
-  upf_info_t upf_info;
+  upf_info_t upf_info = {};
 
   upf_node_profile.get_upf_info(upf_info);
   for (const auto& iface : upf_info.interface_upf_info_list) {
@@ -1236,17 +1249,20 @@ void upf_graph::update_edge_info(
 
 std::shared_ptr<upf_graph> upf_graph::select_upf_node(
     const snssai_t& snssai, const std::string& dnn) {
+  Logger::smf_app().info("Select UPF Node");
   std::shared_ptr<upf_graph> upf_graph_ptr = std::make_shared<upf_graph>();
   std::shared_lock graph_lock(graph_mutex);
-  std::shared_ptr<pfcp_association> not_found;
+  std::shared_ptr<pfcp_association> not_found = {};
   if (adjacency_list.empty()) {
     Logger::smf_app().warn("No UPF available");
   }
   // First, only consider UPFs with profile ID set
   for (const auto& it : adjacency_list) {
     std::shared_ptr<pfcp_association> current_upf = it.first;
+    Logger::smf_app().debug("Current UPF info");
+    current_upf->display();
     if (current_upf->is_upf_profile_set()) {
-      upf_info_t upf_info;
+      upf_info_t upf_info           = {};
       std::vector<snssai_t> snssais = {};
       current_upf->get_upf_node_profile().get_upf_info(upf_info);
       bool has_access = false;
@@ -1254,6 +1270,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
       edge access_edge;
       edge exit_edge;
       for (const auto& edge : it.second) {
+        Logger::smf_app().debug("Verify Slice/DNN support");
         // verify that UPF belongs to the same slice and supports this dnn
         if (edge.serves_network(dnn, snssai)) {
           if (edge.type == iface_type::N3) {

@@ -328,6 +328,13 @@ struct edge {
     if (association && nw_instance.empty()) {
       output.append("(").append(association->get_printable_name()).append(")");
     }
+    if (!snssai_dnns.empty()) {
+      output.append("S-NSSAI UPF info list: { ");
+      for (const auto& s : snssai_dnns) {
+        output.append(" " + s.to_string() + ", ");
+      }
+      output.append("}");
+    }
     return output;
   }
 };

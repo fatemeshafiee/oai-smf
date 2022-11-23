@@ -390,7 +390,34 @@ typedef struct dnn_upf_info_item_s {
     return std::hash<std::string>()(dnn);
   }
 
-} dnn_upf_info_item_t;
+  std::string to_string() const {
+    std::string s = {};
+
+    s.append("DNN = " + dnn + ", ");
+
+    if (dnai_list.size() > 0) {
+      s.append("DNAI list: {");
+
+      for (auto dnai : dnai_list) {
+        s.append("DNAI = " + dnai + ", ");
+      }
+      s.append("}, ");
+    }
+
+    if (dnai_nw_instance_list.size() > 0) {
+      s.append("DNAI NW Instance list: {");
+
+      for (auto dnai_nw : dnai_nw_instance_list) {
+        s.append("(" + dnai_nw.first + ", " + dnai_nw.second + "),");
+      }
+      s.append("}, ");
+    }
+    return s;
+  }
+
+}
+
+dnn_upf_info_item_t;
 
 typedef struct snssai_upf_info_item_s {
   snssai_t snssai;
@@ -409,6 +436,22 @@ typedef struct snssai_upf_info_item_s {
 
   size_t operator()(const snssai_upf_info_item_s&) const {
     return snssai.operator()(snssai);
+  }
+
+  std::string to_string() const {
+    std::string s = {};
+
+    s.append("SNSSAI Info: " + snssai.toString() + ",");
+
+    if (dnn_upf_info_list.size() > 0) {
+      s.append("DNN UPF Info list: {");
+
+      for (auto dnn_upf : dnn_upf_info_list) {
+        s.append(dnn_upf.to_string() + ", ");
+      }
+      s.append("}, ");
+    }
+    return s;
   }
 
 } snssai_upf_info_item_t;
