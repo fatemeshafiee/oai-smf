@@ -51,22 +51,23 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
   Logger::smf_app().debug(
       "Edge from UPF info, UPF info %s", upf_info.to_string().c_str());
 
-  for (auto& snssai : upf_info.snssai_upf_info_list) {
-    snssai_item.snssai = snssai.snssai;
-    bool found         = false;
-    for (auto& item : e.snssai_dnns) {
+  for (const auto& snssai : upf_info.snssai_upf_info_list) {
+    snssai_item.snssai            = snssai.snssai;
+    snssai_item.dnn_upf_info_list = snssai.dnn_upf_info_list;
+    bool found                    = false;
+    for (const auto& item : e.snssai_dnns) {
       if (item.snssai == snssai.snssai) {
         // update item
         found = true;
-        item.dnn_upf_info_list.insert(
-            snssai.dnn_upf_info_list.begin(), snssai.dnn_upf_info_list.end());
+        snssai_item.dnn_upf_info_list.insert(
+            item.dnn_upf_info_list.begin(), item.dnn_upf_info_list.end());
         break;
       }
     }
-    if (!found) {
-      snssai_item.dnn_upf_info_list = snssai.dnn_upf_info_list;
-      e.snssai_dnns.insert(snssai_item);
+    if (found) {
+      e.snssai_dnns.erase(snssai_item);
     }
+    e.snssai_dnns.insert(snssai_item);
   }
 
   if (!e.snssai_dnns.empty()) {
