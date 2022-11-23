@@ -52,9 +52,20 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
       "Edge from UPF info, UPF info %s", upf_info.to_string().c_str());
 
   for (const auto& snssai : upf_info.snssai_upf_info_list) {
-    snssai_item.snssai            = snssai.snssai;
-    snssai_item.dnn_upf_info_list = snssai.dnn_upf_info_list;
-    e.snssai_dnns.insert(snssai_item);
+    snssai_item.snssai = snssai.snssai;
+    bool found         = false;
+    for (auto& item : e.snssai_dnns) {
+      if (item.snssai == snssai.snssai) {
+        // update item
+        found = true;
+        item.dnn_upf_info_list.insert(snssai.dnn_upf_info_list);
+        break;
+      }
+    }
+    if (!found) {
+      snssai_item.dnn_upf_info_list = snssai.dnn_upf_info_list;
+      e.snssai_dnns.insert(snssai_item);
+    }
   }
 
   if (!e.snssai_dnns.empty()) {

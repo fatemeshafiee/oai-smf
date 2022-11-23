@@ -441,7 +441,7 @@ typedef struct snssai_upf_info_item_s {
   std::string to_string() const {
     std::string s = {};
 
-    s.append("SNSSAI Info: " + snssai.toString() + ",");
+    s.append("SNSSAI Info: " + snssai.toString() + ", ");
 
     if (dnn_upf_info_list.size() > 0) {
       s.append("DNN UPF Info list: {");
