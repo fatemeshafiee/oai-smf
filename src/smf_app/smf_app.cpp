@@ -1464,22 +1464,21 @@ bool smf_app::handle_nf_status_notification(
             if (n.node_id_type == pfcp::NODE_ID_TYPE_UNKNOWN)
               n.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
             n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
+            // Do reserve_resolve to find FQDN if not available
+            if (n.fqdn.empty()) {
+              std::string hostname = {};
+              std::string ip_str   = conv::toString(n.u1.ipv4_address);
+              if (!fqdn::reverse_resolve(ip_str, hostname)) {
+                Logger::smf_app().debug(
+                    "Could not resolve hostname for IP address %s",
+                    ip_str.c_str());
+              } else {
+                n.fqdn = hostname;
+              }
+            }
           } else {
             Logger::smf_app().debug(
                 "UPF node already exist (%s)", inet_ntoa(ipv4_addrs[0]));
-          }
-
-          // Do reserve_resolve to find FQDN if not available
-          if (n.fqdn.empty()) {
-            std::string hostname = {};
-            std::string ip_str   = conv::toString(n.u1.ipv4_address);
-            if (!fqdn::reverse_resolve(ip_str, hostname)) {
-              Logger::smf_app().debug(
-                  "Could not resolve hostname for IP address %s",
-                  ip_str.c_str());
-            } else {
-              n.fqdn = hostname;
-            }
           }
         }
 

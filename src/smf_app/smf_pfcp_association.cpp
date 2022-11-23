@@ -998,8 +998,12 @@ void upf_graph::add_upf_graph_edge(
   add_upf_graph_node(source);
 
   std::unique_lock lock_graph(graph_mutex);
-
   auto it_src = adjacency_list.find(source);
+
+  if (it_src == adjacency_list.end()) {
+    return;
+  }
+
   bool exists = false;
   for (const auto& edge : it_src->second) {
     if (edge == edge_info_src_dst) {

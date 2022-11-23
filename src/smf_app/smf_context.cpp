@@ -3703,8 +3703,9 @@ bool smf_context::find_dnn_subscription(
 
   Logger::smf_app().info(
       "Find a DNN Subscription with key: %ld (SST %d, SD %ld (0x%x)), map size "
-      "%d",
-      (uint8_t) snssai.sst, snssai.sd, snssai.sd, dnn_subscriptions.size());
+      "%ld",
+      key, (uint8_t) snssai.sst, snssai.sd, snssai.sd,
+      dnn_subscriptions.size());
 
   std::unique_lock<std::recursive_mutex> lock(m_context);
   if (dnn_subscriptions.count(key) > 0) {
