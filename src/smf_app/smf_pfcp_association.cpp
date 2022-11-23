@@ -51,23 +51,24 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
   Logger::smf_app().debug(
       "Edge from UPF info, UPF info %s", upf_info.to_string().c_str());
 
-  for (const auto& snssai : upf_info.snssai_upf_info_list) {
+  for (auto& snssai : upf_info.snssai_upf_info_list) {
     snssai_item.snssai            = snssai.snssai;
     snssai_item.dnn_upf_info_list = snssai.dnn_upf_info_list;
     bool found                    = false;
-    for (const auto& item : e.snssai_dnns) {
+    for (auto& item : e.snssai_dnns) {
       if (item.snssai == snssai.snssai) {
         // update item
         found = true;
         snssai_item.dnn_upf_info_list.insert(
             item.dnn_upf_info_list.begin(), item.dnn_upf_info_list.end());
+        item.dnn_upf_info_list = snssai_item.dnn_upf_info_list;
+        Logger::smf_app().debug(
+            "Updated item info: %s", snssai_item.to_string().c_str());
         break;
       }
     }
-    if (found) {
-      e.snssai_dnns.erase(snssai_item);
-    }
-    e.snssai_dnns.insert(snssai_item);
+    // Insert new item
+    if (!found) e.snssai_dnns.insert(snssai_item);
   }
 
   if (!e.snssai_dnns.empty()) {
@@ -137,25 +138,26 @@ bool edge::serves_network(
     }
   }
 
-  auto snssai_it = snssai_dnns.find(snssai_item);
-  if (snssai_it != snssai_dnns.end()) {
-    // create temp item for fast lookup
-    dnn_upf_info_item_s dnn_item = {};
-    dnn_item.dnn                 = dnn;
-    auto dnn_it                  = snssai_it->dnn_upf_info_list.find(dnn_item);
-    if (dnn_it != snssai_it->dnn_upf_info_list.end()) {
-      if (!dnais.empty()) {
-        // should be only 1 DNAI
-        for (const auto& dnai : dnn_it->dnai_list) {
-          // O(1)
-          auto found_dnai = dnais.find(dnai);
-          if (found_dnai != dnais.end()) {
-            matched_dnai = dnai;
-            return true;
+  for (const auto& snssai_it : snssai_dnns) {
+    if (snssai_it.snssai == snssai_item.snssai) {
+      // create temp item for fast lookup
+      dnn_upf_info_item_s dnn_item = {};
+      dnn_item.dnn                 = dnn;
+      auto dnn_it                  = snssai_it.dnn_upf_info_list.find(dnn_item);
+      if (dnn_it != snssai_it.dnn_upf_info_list.end()) {
+        if (!dnais.empty()) {
+          // should be only 1 DNAI
+          for (const auto& dnai : dnn_it->dnai_list) {
+            // O(1)
+            auto found_dnai = dnais.find(dnai);
+            if (found_dnai != dnais.end()) {
+              matched_dnai = dnai;
+              return true;
+            }
           }
+        } else {
+          return true;
         }
-      } else {
-        return true;
       }
     }
   }

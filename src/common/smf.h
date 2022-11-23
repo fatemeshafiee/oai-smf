@@ -420,8 +420,8 @@ typedef struct dnn_upf_info_item_s {
 dnn_upf_info_item_t;
 
 typedef struct snssai_upf_info_item_s {
-  snssai_t snssai;
-  std::unordered_set<dnn_upf_info_item_t, dnn_upf_info_item_t>
+  mutable snssai_t snssai;
+  mutable std::unordered_set<dnn_upf_info_item_t, dnn_upf_info_item_t>
       dnn_upf_info_list;
 
   snssai_upf_info_item_s& operator=(const snssai_upf_info_item_s& s) {
@@ -447,7 +447,7 @@ typedef struct snssai_upf_info_item_s {
       s.append("DNN UPF Info list: {");
 
       for (auto dnn_upf : dnn_upf_info_list) {
-        s.append(dnn_upf.to_string() + ", ");
+        s.append(dnn_upf.to_string());
       }
       s.append("}, ");
     }
