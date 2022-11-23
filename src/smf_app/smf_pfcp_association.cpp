@@ -58,7 +58,8 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
       if (item.snssai == snssai.snssai) {
         // update item
         found = true;
-        item.dnn_upf_info_list.insert(snssai.dnn_upf_info_list);
+        item.dnn_upf_info_list.insert(
+            snssai.dnn_upf_info_list.begin(), snssai.dnn_upf_info_list.end());
         break;
       }
     }
