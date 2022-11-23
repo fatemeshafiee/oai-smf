@@ -431,7 +431,7 @@ typedef struct snssai_upf_info_item_s {
   }
 
   bool operator==(const snssai_upf_info_item_s& s) const {
-    return snssai == s.snssai;
+    return (snssai == s.snssai) and (dnn_upf_info_list == s.dnn_upf_info_list);
   }
 
   size_t operator()(const snssai_upf_info_item_s&) const {
