@@ -1500,7 +1500,8 @@ bool smf_app::handle_nf_status_notification(
                 itti_msg->get_msg_name());
           }
         } else {
-          Logger::smf_app().debug("No IP Addr/FQDN found");
+          Logger::smf_app().debug(
+              "No IP Addr/FQDN found or UPF node already exist");
           return false;
         }
       }

@@ -45,13 +45,22 @@ extern smf_n4* smf_n4_inst;
 extern smf_config smf_cfg;
 
 edge edge::from_upf_info(const upf_info_t& upf_info) {
-  edge e;
-  snssai_upf_info_item_s snssai_item;
+  edge e                             = {};
+  snssai_upf_info_item_s snssai_item = {};
 
   for (const auto& snssai : upf_info.snssai_upf_info_list) {
     snssai_item.snssai            = snssai.snssai;
     snssai_item.dnn_upf_info_list = snssai.dnn_upf_info_list;
-    e.snssai_dnns.insert(snssai);
+    e.snssai_dnns.insert(snssai_item);
+  }
+
+  if (!e.snssai_dnns.empty()) {
+    Logger::smf_app().debug("Edge from UPF info");
+    for (const auto s : e.snssai_dnns) {
+      Logger::smf_app().debug("info: %s", s.to_string().c_str());
+    }
+  } else {
+    Logger::smf_app().debug("Edge from UPF info, empty");
   }
   return e;
 }
@@ -999,11 +1008,9 @@ void upf_graph::add_upf_graph_edge(
 
   std::unique_lock lock_graph(graph_mutex);
   auto it_src = adjacency_list.find(source);
-
   if (it_src == adjacency_list.end()) {
     return;
   }
-
   bool exists = false;
   for (const auto& edge : it_src->second) {
     if (edge == edge_info_src_dst) {
