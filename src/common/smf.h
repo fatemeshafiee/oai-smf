@@ -221,8 +221,8 @@ enum class sm_context_status_e {
   SM_CONTEXT_STATUS_RELEASED = 1
 };
 
-static const std::vector<std::string> sm_context_status_e2str = {
-    "ACTIVE", "RELEASED"};
+static const std::vector<std::string> sm_context_status_e2str = {"ACTIVE",
+                                                                 "RELEASED"};
 
 typedef struct qos_profile_gbr_s {
   gfbr_t gfbr;  // Guaranteed Flow Bit Rate
