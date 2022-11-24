@@ -400,6 +400,9 @@ std::string smf_pdu_session::toString() const {
   if (!is_released) {
     s.append("\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
   }
+  /*
+  // TODO as FTEID is not updated here, it is confusing to have null output
+     We need a complete QoS handling refactor
   if (default_qfi.qfi) {
     s.append("\tDefault ");
     for (auto it : qos_flows) {
@@ -407,7 +410,9 @@ std::string smf_pdu_session::toString() const {
         s.append(it.second.toString());
       }
     }
+
   }
+  */
 
   if (policy_ptr) {
     s.append("\t Policy Decision:").append("\n");
