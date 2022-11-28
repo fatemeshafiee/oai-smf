@@ -331,7 +331,7 @@ struct edge {
     if (!snssai_dnns.empty()) {
       output.append("S-NSSAI UPF info list: { ");
       for (const auto& s : snssai_dnns) {
-        output.append(" " + s.to_string() + ", ");
+        output.append(" ").append(s.to_string()).append(", ");
       }
       output.append("}");
     }

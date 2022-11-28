@@ -97,11 +97,7 @@ bool fqdn::resolve(pfcp::node_id_t& node_id) {
       }
       switch (addr_type) {
         case 0: {
-          if (inet_aton(util::trim(ip_addr_str).c_str(), &ipv4_addr) == 0) {
-            Logger::smf_app().debug("Bad IPv4 Addr format for UPF");
-            return false;
-          }
-          node_id.u1.ipv4_address.s_addr = ipv4_addr.s_addr;
+          node_id.u1.ipv4_address.s_addr = conv::fromString(ip_addr_str).s_addr;
           Logger::smf_app().debug(
               "Resolve FQDN %s, IP Addr %s", node_id.fqdn.c_str(),
               ip_addr_str.c_str());
