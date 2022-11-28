@@ -400,6 +400,9 @@ std::string smf_pdu_session::toString() const {
   if (!is_released) {
     s.append("\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
   }
+  /*
+  // TODO as FTEID is not updated here, it is confusing to have null output
+     We need a complete QoS handling refactor
   if (default_qfi.qfi) {
     s.append("\tDefault ");
     for (auto it : qos_flows) {
@@ -407,7 +410,9 @@ std::string smf_pdu_session::toString() const {
         s.append(it.second.toString());
       }
     }
+
   }
+  */
 
   if (policy_ptr) {
     s.append("\t Policy Decision:").append("\n");
@@ -3782,8 +3787,9 @@ bool smf_context::find_dnn_subscription(
 
   Logger::smf_app().info(
       "Find a DNN Subscription with key: %ld (SST %d, SD %ld (0x%x)), map size "
-      "%d",
-      (uint8_t) snssai.sst, snssai.sd, snssai.sd, dnn_subscriptions.size());
+      "%ld",
+      key, (uint8_t) snssai.sst, snssai.sd, snssai.sd,
+      dnn_subscriptions.size());
 
   std::unique_lock<std::recursive_mutex> lock(m_context);
   if (dnn_subscriptions.count(key) > 0) {

@@ -181,10 +181,14 @@ void conv::plmnToMccMnc(
 //------------------------------------------------------------------------------
 struct in_addr conv::fromString(const std::string addr4) {
   unsigned char buf[sizeof(struct in6_addr)] = {};
-  int s              = inet_pton(AF_INET, addr4.c_str(), buf);
-  struct in_addr* ia = (struct in_addr*) buf;
-  return *ia;
+  struct in_addr ipv4_addr;
+  ipv4_addr.s_addr = INADDR_ANY;
+  if (inet_pton(AF_INET, addr4.c_str(), buf) == 1) {
+    memcpy(&ipv4_addr, buf, sizeof(struct in_addr));
+  }
+  return ipv4_addr;
 }
+
 //------------------------------------------------------------------------------
 std::string conv::toString(const struct in_addr& inaddr) {
   std::string s              = {};
