@@ -355,7 +355,7 @@ typedef struct nf_service_s {
     s.append(service_instance_id);
     s.append(", Service name: ");
     s.append(service_name);
-    for (auto v : versions) {
+    for (const auto& v : versions) {
       s.append(v.to_string());
     }
     s.append(", Scheme: ");
@@ -393,13 +393,13 @@ typedef struct dnn_upf_info_item_s {
   std::string to_string() const {
     std::string s = {};
 
-    s.append("DNN = " + dnn + ", ");
+    s.append("DNN = ").append(dnn).append(", ");
 
     if (dnai_list.size() > 0) {
       s.append("DNAI list: {");
 
-      for (auto dnai : dnai_list) {
-        s.append("DNAI = " + dnai + ", ");
+      for (const auto& dnai : dnai_list) {
+        s.append("DNAI = ").append(dnai).append(", ");
       }
       s.append("}, ");
     }
@@ -407,8 +407,8 @@ typedef struct dnn_upf_info_item_s {
     if (dnai_nw_instance_list.size() > 0) {
       s.append("DNAI NW Instance list: {");
 
-      for (auto dnai_nw : dnai_nw_instance_list) {
-        s.append("(" + dnai_nw.first + ", " + dnai_nw.second + "),");
+      for (const auto& dnai_nw : dnai_nw_instance_list) {
+        s.append("(").append(dnai_nw.first).append(", ").append(dnai_nw.second).append("),");
       }
       s.append("}, ");
     }
