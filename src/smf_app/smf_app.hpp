@@ -114,13 +114,8 @@ class smf_app {
   mutable std::shared_mutex m_scid2smf_context;
   mutable std::shared_mutex m_smf_event_subscriptions;
   // Store promise IDs for Create/Update session
-  mutable std::shared_mutex m_sm_context_create_promises;
   mutable std::shared_mutex m_sbi_server_promises;
 
-  std::map<
-      uint32_t,
-      boost::shared_ptr<boost::promise<pdu_session_create_sm_context_response>>>
-      sm_context_create_promises;
   std::map<uint32_t, boost::shared_ptr<boost::promise<nlohmann::json>>>
       sbi_server_promises;
 

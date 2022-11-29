@@ -332,7 +332,7 @@ smf_app::smf_app(const std::string& config_file)
     : m_seid2smf_context(),
       m_supi2smf_context(),
       m_scid2smf_context(),
-      m_sm_context_create_promises() {
+      m_sbi_server_promises() {
   Logger::smf_app().startup("Starting...");
 
   supi2smf_context  = {};
@@ -734,13 +734,9 @@ void smf_app::handle_itti_msg(
 void smf_app::handle_itti_msg(itti_n11_create_sm_context_response& m) {
   Logger::smf_app().debug(
       "PDU Session Create SM Context: Set promise with ID %d to ready", m.pid);
-  pdu_session_create_sm_context_response sm_context_response = {};
-  std::unique_lock lock(m_sm_context_create_promises);
-  if (sm_context_create_promises.count(m.pid) > 0) {
-    sm_context_create_promises[m.pid]->set_value(m.res);
-    // Remove this promise from list
-    sm_context_create_promises.erase(m.pid);
-  }
+
+  trigger_http_response(
+      m.res.get_http_code(), m.pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
 }
 
 //------------------------------------------------------------------------------
@@ -2036,15 +2032,6 @@ bool smf_app::get_session_management_subscription_data(
   dnn_configuration->session_ambr.downlink = "100Mbps";
   subscription->insert_dnn_configuration(dnn, dnn_configuration);
   return true;
-}
-
-//---------------------------------------------------------------------------------------------
-void smf_app::add_promise(
-    uint32_t id,
-    boost::shared_ptr<boost::promise<pdu_session_create_sm_context_response>>&
-        p) {
-  std::unique_lock lock(m_sm_context_create_promises);
-  sm_context_create_promises.emplace(id, p);
 }
 
 //---------------------------------------------------------------------------------------------
