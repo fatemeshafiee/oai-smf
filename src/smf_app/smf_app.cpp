@@ -332,9 +332,7 @@ smf_app::smf_app(const std::string& config_file)
     : m_seid2smf_context(),
       m_supi2smf_context(),
       m_scid2smf_context(),
-      m_sm_context_create_promises(),
-      m_sm_context_update_promises(),
-      m_sm_context_release_promises() {
+      m_sm_context_create_promises() {
   Logger::smf_app().startup("Starting...");
 
   supi2smf_context  = {};
@@ -749,26 +747,16 @@ void smf_app::handle_itti_msg(itti_n11_create_sm_context_response& m) {
 void smf_app::handle_itti_msg(itti_n11_update_sm_context_response& m) {
   Logger::smf_app().debug(
       "PDU Session Update SM Context: Set promise with ID %d to ready", m.pid);
-  pdu_session_update_sm_context_response sm_context_response = {};
-  std::unique_lock lock(m_sm_context_update_promises);
-  if (sm_context_update_promises.count(m.pid) > 0) {
-    sm_context_update_promises[m.pid]->set_value(m.res);
-    // Remove this promise from list
-    sm_context_update_promises.erase(m.pid);
-  }
+  trigger_http_response(
+      m.res.get_http_code(), m.pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
 }
 
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(itti_n11_release_sm_context_response& m) {
   Logger::smf_app().debug(
       "PDU Session Release SM Context: Set promise with ID %d to ready", m.pid);
-  pdu_session_release_sm_context_response sm_context_response = {};
-  std::unique_lock lock(m_sm_context_release_promises);
-  if (sm_context_release_promises.count(m.pid) > 0) {
-    sm_context_release_promises[m.pid]->set_value(m.res);
-    // Remove this promise from list
-    sm_context_release_promises.erase(m.pid);
-  }
+  trigger_http_response(
+      m.res.get_http_code(), m.pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
 }
 
 //------------------------------------------------------------------------------
@@ -2061,24 +2049,6 @@ void smf_app::add_promise(
 
 //---------------------------------------------------------------------------------------------
 void smf_app::add_promise(
-    uint32_t id,
-    boost::shared_ptr<boost::promise<pdu_session_update_sm_context_response>>&
-        p) {
-  std::unique_lock lock(m_sm_context_update_promises);
-  sm_context_update_promises.emplace(id, p);
-}
-
-//---------------------------------------------------------------------------------------------
-void smf_app::add_promise(
-    uint32_t id,
-    boost::shared_ptr<boost::promise<pdu_session_release_sm_context_response>>&
-        p) {
-  std::unique_lock lock(m_sm_context_release_promises);
-  sm_context_release_promises.emplace(id, p);
-}
-
-//---------------------------------------------------------------------------------------------
-void smf_app::add_promise(
     uint32_t id, boost::shared_ptr<boost::promise<nlohmann::json>>& p) {
   std::unique_lock lock(m_sbi_server_promises);
   sbi_server_promises.emplace(id, p);
@@ -2152,37 +2122,30 @@ void smf_app::trigger_update_context_error_response(
   trigger_session_update_sm_context_response(sm_context_response, promise_id);
 }
 
+//------------------------------------------------------------------------------
+void smf_app::trigger_http_response(
+    const nlohmann::json& response_message_json, uint32_t& pid) {
+  Logger::smf_app().debug(
+      "Trigger the response from SMF: Set promise with ID %ld to ready", pid);
+  std::unique_lock lock(m_sbi_server_promises);
+  if (sbi_server_promises.count(pid) > 0) {
+    sbi_server_promises[pid]->set_value(response_message_json);
+    // Remove this promise from list
+    sbi_server_promises.erase(pid);
+  }
+}
+
 //---------------------------------------------------------------------------------------------
 void smf_app::trigger_http_response(
     const uint32_t& http_code, uint32_t& promise_id, uint8_t msg_type) {
   Logger::smf_app().debug(
       "Send ITTI msg to SMF APP to trigger the response of HTTP Server");
-  switch (msg_type) {
-    case N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE: {
-      pdu_session_release_sm_context_response sm_context_response = {};
-      sm_context_response.set_http_code(http_code);
-      trigger_session_release_sm_context_response(
-          sm_context_response, promise_id);
-    } break;
 
-    case N11_SESSION_CREATE_SM_CONTEXT_RESPONSE: {
-      pdu_session_create_sm_context_response sm_context_response = {};
-      sm_context_response.set_http_code(http_code);
-      trigger_session_create_sm_context_response(
-          sm_context_response, promise_id);
-    } break;
+  nlohmann::json response_message_json = {};
+  response_message_json["http_code"]   = http_code;
 
-    case N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE: {
-      pdu_session_update_sm_context_response sm_context_response = {};
-      sm_context_response.set_http_code(http_code);
-      trigger_session_update_sm_context_response(
-          sm_context_response, promise_id);
-    } break;
-
-    default: {
-      Logger::smf_app().debug("Unknown message type %d", msg_type);
-    }
-  }
+  trigger_http_response(response_message_json, promise_id);
+  return;
 }
 
 //------------------------------------------------------------------------------
@@ -2194,12 +2157,11 @@ void smf_app::trigger_session_create_sm_context_response(
       "%d "
       "to ready",
       pid);
-  std::unique_lock lock(m_sm_context_create_promises);
-  if (sm_context_create_promises.count(pid) > 0) {
-    sm_context_create_promises[pid]->set_value(sm_context_response);
-    // Remove this promise from list
-    sm_context_create_promises.erase(pid);
-  }
+
+  nlohmann::json response_message_json = {};
+  sm_context_response.to_json(response_message_json);
+  trigger_http_response(response_message_json, pid);
+  return;
 }
 
 //------------------------------------------------------------------------------
@@ -2211,29 +2173,10 @@ void smf_app::trigger_session_update_sm_context_response(
       "%d "
       "to ready",
       pid);
-  std::unique_lock lock(m_sm_context_update_promises);
-  if (sm_context_update_promises.count(pid) > 0) {
-    sm_context_update_promises[pid]->set_value(sm_context_response);
-    // Remove this promise from list
-    sm_context_update_promises.erase(pid);
-  }
-}
-
-//------------------------------------------------------------------------------
-void smf_app::trigger_session_release_sm_context_response(
-    pdu_session_release_sm_context_response& sm_context_response,
-    uint32_t& pid) {
-  Logger::smf_app().debug(
-      "Trigger PDU Session Release SM Context Response: Set promise with ID "
-      "%d "
-      "to ready",
-      pid);
-  std::unique_lock lock(m_sm_context_release_promises);
-  if (sm_context_release_promises.count(pid) > 0) {
-    sm_context_release_promises[pid]->set_value(sm_context_response);
-    // Remove this promise from list
-    sm_context_release_promises.erase(pid);
-  }
+  nlohmann::json response_message_json = {};
+  sm_context_response.to_json(response_message_json);
+  trigger_http_response(response_message_json, pid);
+  return;
 }
 
 //---------------------------------------------------------------------------------------------

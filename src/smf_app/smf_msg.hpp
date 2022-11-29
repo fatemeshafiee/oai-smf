@@ -161,6 +161,9 @@ class pdu_session_msg {
   void set_n2_sm_info_type(const std::string& value);
   bool n2_sm_info_type_is_set() const;
 
+  void to_json(nlohmann::json& data) const;
+  void from_json(const nlohmann::json& data);
+
  private:
   pdu_session_msg_type_t m_msg_type;
   std::string m_api_root;
@@ -235,6 +238,9 @@ class pdu_session_sm_context_response : public pdu_session_msg {
   void get_json_data(nlohmann::json& data) const;
   void set_json_format(const std::string& format);
   void get_json_format(std::string& format) const;
+
+  void to_json(nlohmann::json& data) const;
+  void from_json(const nlohmann::json& data);
 
  private:
   uint8_t m_cause;
@@ -322,6 +328,9 @@ class pdu_session_create_sm_context_response
   std::string get_smf_context_uri() const;
   void set_epco(const protocol_configuration_options_t& p);
   void get_epco(protocol_configuration_options_t& p) const;
+
+  void to_json(nlohmann::json& data) const;
+  void from_json(const nlohmann::json& data);
 
  private:
   paa_t m_paa;
@@ -440,6 +449,9 @@ class pdu_session_update_sm_context_response
   void set_smf_context_uri(const std::string& value);
   std::string get_smf_context_uri() const;
 
+  void to_json(nlohmann::json& data) const;
+  void from_json(const nlohmann::json& data);
+
  private:
   std::map<uint8_t, qos_flow_context_updated> qos_flow_context_updateds;
   std::string m_smf_context_uri;
@@ -475,6 +487,9 @@ class pdu_session_release_sm_context_response : public pdu_session_msg {
   uint8_t get_cause();
   void set_http_code(const uint32_t code);
   uint32_t get_http_code() const;
+
+  void to_json(nlohmann::json& data) const;
+  void from_json(const nlohmann::json& data);
 
  private:
   uint8_t m_cause;
