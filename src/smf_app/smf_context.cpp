@@ -3066,7 +3066,15 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
       // UE-triggered PDU Session Release
       pdu_session_release_sm_context_request sm_context_rel_req_msg = {};
 
-      // TODO: check if update message contain N2 SM info
+      sm_context_rel_req_msg.set_supi(sm_context_req_msg.get_supi());
+      sm_context_rel_req_msg.set_supi_prefix(
+          sm_context_req_msg.get_supi_prefix());
+      sm_context_rel_req_msg.set_pdu_session_id(
+          sm_context_req_msg.get_pdu_session_id());
+      sm_context_rel_req_msg.set_snssai(sm_context_req_msg.get_snssai());
+      sm_context_rel_req_msg.set_dnn(sm_context_req_msg.get_dnn());
+
+      // check if update message contain N2 SM info
       if (sm_context_req_msg.n2_sm_info_is_set()) {
         // get necessary information (N2 SM information)
         sm_context_rel_req_msg.set_n2_sm_information(
@@ -3082,28 +3090,26 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
               TASK_SMF_APP, TASK_SMF_APP, smreq->pid, smreq->scid);
       smreq_release->req          = sm_context_rel_req_msg;
       smreq_release->http_version = 1;
-      // handle_pdu_session_release_sm_context_request(smreq_release);
-
-      //        std::shared_ptr<itti_n11_release_sm_context_request>
-      //  smreq_release = {};
 
       std::shared_ptr<itti_n11_release_sm_context_response>
           sm_context_rel_resp_pending =
               std::make_shared<itti_n11_release_sm_context_response>(
-                  TASK_SMF_SBI, TASK_SMF_APP, smreq_release->pid);
+                  TASK_SMF_APP, TASK_SMF_APP, smreq_release->pid);
 
       sm_context_rel_resp_pending->res.set_http_code(
           http_status_code_e::HTTP_STATUS_CODE_200_OK);
-      sm_context_rel_resp_pending->res.set_supi(smreq_release->req.get_supi());
+      sm_context_rel_resp_pending->res.set_supi(
+          sm_context_rel_req_msg.get_supi());
       sm_context_rel_resp_pending->res.set_supi_prefix(
-          smreq_release->req.get_supi_prefix());
+          sm_context_rel_req_msg.get_supi_prefix());
       sm_context_rel_resp_pending->res.set_cause(
           static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
       sm_context_rel_resp_pending->res.set_pdu_session_id(
-          smreq_release->req.get_pdu_session_id());
+          sm_context_rel_req_msg.get_pdu_session_id());
       sm_context_rel_resp_pending->res.set_snssai(
-          smreq_release->req.get_snssai());
-      sm_context_rel_resp_pending->res.set_dnn(smreq_release->req.get_dnn());
+          sm_context_rel_req_msg.get_snssai());
+      sm_context_rel_resp_pending->res.set_dnn(
+          sm_context_rel_req_msg.get_dnn());
 
       auto proc = std::make_shared<session_release_sm_context_procedure>(sp);
       std::shared_ptr<smf_procedure> sproc = proc;

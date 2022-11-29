@@ -1551,8 +1551,8 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
 
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
-  std::shared_ptr<pfcp_association> current_upf;
-  bool continue_n4 = false;
+  std::shared_ptr<pfcp_association> current_upf = {};
+  bool continue_n4                              = false;
   if (get_next_upf(dl_edges, ul_edges, current_upf) ==
       smf_procedure_code::CONTINUE) {
     // If we have to continue, we ignore the PFCP error code, because we should
