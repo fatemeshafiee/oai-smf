@@ -398,7 +398,7 @@ void smf_http2_server::create_sm_contexts_handler(
   nlohmann::json json_data = {};
   std::string json_format  = {};
   bool n1_sm_msg_is_set    = false;
-  int http_code            = 408;  // TODO: Request_Timeout
+  int http_code = http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
 
   if (sm_context_response.find("http_code") != sm_context_response.end()) {
     http_code = sm_context_response["http_code"].get<int>();
@@ -483,7 +483,7 @@ void smf_http2_server::update_sm_context_handler(
   std::string json_format  = {};
   bool n1_sm_msg_is_set    = false;
   bool n2_sm_info_is_set   = false;
-  int http_code            = 408;  // TODO: Request_Timeout
+  int http_code = http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
 
   if (sm_context_response.find("http_code") != sm_context_response.end()) {
     http_code = sm_context_response["http_code"].get<int>();
@@ -585,7 +585,7 @@ void smf_http2_server::release_sm_context_handler(
   nlohmann::json sm_context_response = f.get();
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
-  int http_code = 408;  // TODO: Request_Timeout
+  int http_code = http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
   if (sm_context_response.find("http_code") != sm_context_response.end()) {
     http_code = sm_context_response["http_code"].get<int>();
   }
