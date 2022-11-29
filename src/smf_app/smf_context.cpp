@@ -1754,9 +1754,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     sm_context_response.set_cause(static_cast<uint8_t>(
         cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));  // TODO
 
-    nlohmann::json json_data = {};
-    json_data["cause"]       = 0;
+    nlohmann::json json_data          = {};
+    json_data["smfServiceInstanceId"] = smf_app_inst->get_smf_instance_id();
     sm_context_response.set_json_data(json_data);
+
     sm_context_response.set_http_code(
         http_status_code_e::HTTP_STATUS_CODE_201_CREATED);
 

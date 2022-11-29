@@ -118,9 +118,6 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
     std::string body         = {};
     bool n1_sm_msg_is_set    = false;
 
-    // sm_context_response.get_json_data(json_data);
-    // sm_context_response.get_json_format(json_format);
-
     int http_code = 408;  // TODO: Request_Timeout
     if (sm_context_response.find("http_code") != sm_context_response.end()) {
       http_code = sm_context_response["http_code"].get<int>();
@@ -139,6 +136,15 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
       n1_sm_msg_is_set = true;
     }
 
+    if (http_code == 201) {
+      if (sm_context_response.find("smf_context_uri") !=
+          sm_context_response.end()) {
+        response.headers().add<Pistache::Http::Header::Location>(
+            sm_context_response["smf_context_uri"]
+                .get<std::string>());  // Location header
+      }
+    }
+
     if (n1_sm_msg_is_set) {  // add N1 container if available
       mime_parser::create_multipart_related_content(
           body, json_data.dump(), CURL_MIME_BOUNDARY,
@@ -149,13 +155,6 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
               "multipart/related; boundary=" +
               std::string(CURL_MIME_BOUNDARY)));
     } else if (!json_data.empty()) {  // if not, include json data if available
-      if (sm_context_response.find("smf_context_uri") !=
-          sm_context_response.end()) {
-        response.headers().add<Pistache::Http::Header::Location>(
-            sm_context_response["smf_context_uri"]
-                .get<std::string>());  // Location header
-      }
-
       response.headers().add<Pistache::Http::Header::ContentType>(
           Pistache::Http::Mime::MediaType(json_format));
       body = json_data.dump().c_str();

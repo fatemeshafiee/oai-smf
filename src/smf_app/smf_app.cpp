@@ -2371,3 +2371,8 @@ void smf_app::trigger_upf_status_notification_subscribe() {
         itti_msg->get_msg_name());
   }
 }
+
+//------------------------------------------------------------------------------
+std::string smf_app::get_smf_instance_id() const {
+  return smf_instance_id;
+}
