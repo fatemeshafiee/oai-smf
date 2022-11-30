@@ -847,6 +847,55 @@ bool smf_n2::create_n2_pdu_session_resource_modify_request_transfer(
 
 //------------------------------------------------------------------------------
 bool smf_n2::create_n2_pdu_session_resource_release_command_transfer(
+    const std::shared_ptr<pdu_session_msg>& msg,
+    n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str) {
+  Logger::smf_n2().debug(
+      "Create N2 SM Information: NGAP PDU Session Resource Release Command "
+      "Transfer IE");
+  bool result = false;
+  Ngap_PDUSessionResourceReleaseCommandTransfer_t*
+      ngap_resource_release_command_transfer = nullptr;
+  ngap_resource_release_command_transfer =
+      (Ngap_PDUSessionResourceReleaseCommandTransfer_t*) calloc(
+          1, sizeof(Ngap_PDUSessionResourceReleaseCommandTransfer_t));
+
+  // TODO: To be completed, here's an example
+  ngap_resource_release_command_transfer->cause.present =
+      Ngap_Cause_PR_radioNetwork;
+  ngap_resource_release_command_transfer->cause.choice.radioNetwork = 1;
+
+  // encode
+  size_t buffer_size = BUF_LEN;
+  char* buffer       = (char*) calloc(1, buffer_size);
+
+  ssize_t encoded_size = aper_encode_to_new_buffer(
+      &asn_DEF_Ngap_PDUSessionResourceReleaseCommandTransfer, nullptr,
+      ngap_resource_release_command_transfer, (void**) &buffer);
+  if (encoded_size < 0) {
+    Logger::smf_n2().warn(
+        "NGAP PDU Session Release Command encode failed (encoded size %d)",
+        encoded_size);
+    result = false;
+  } else {
+#if DEBUG_IS_ON
+    Logger::smf_n2().debug("N2 SM buffer data: ");
+    for (int i = 0; i < encoded_size; i++) printf("%02x ", (char) buffer[i]);
+    Logger::smf_n2().debug(" (%d bytes) \n", encoded_size);
+#endif
+
+    std::string ngap_message((char*) buffer, encoded_size);
+    ngap_msg_str = ngap_message;
+    result       = true;
+  }
+
+  // free memory
+  free_wrapper((void**) &ngap_resource_release_command_transfer);
+  free_wrapper((void**) &buffer);
+  return result;
+}
+
+//------------------------------------------------------------------------------
+bool smf_n2::create_n2_pdu_session_resource_release_command_transfer(
     pdu_session_update_sm_context_response& sm_context_res,
     n2_sm_info_type_e ngap_info_type, std::string& ngap_msg_str) {
   Logger::smf_n2().debug(

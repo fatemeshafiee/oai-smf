@@ -1338,7 +1338,10 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param resp
    */
   void send_pdu_session_release_response(
-      const std::shared_ptr<itti_n11_release_sm_context_response>& resp);
+      const std::shared_ptr<itti_n11_release_sm_context_request>& req,
+      const std::shared_ptr<itti_n11_release_sm_context_response>& resp,
+      const session_management_procedures_type_e& session_procedure_type,
+      const std::shared_ptr<smf_pdu_session>& sps);
 
  private:
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;

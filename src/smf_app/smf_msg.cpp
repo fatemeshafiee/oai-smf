@@ -844,46 +844,15 @@ void pdu_session_update_sm_context_response::from_json(
  */
 
 //-----------------------------------------------------------------------------
-void pdu_session_release_sm_context_response::set_cause(uint8_t cause) {
-  m_cause = cause;
-}
-
-//-----------------------------------------------------------------------------
-uint8_t pdu_session_release_sm_context_response::get_cause() {
-  return m_cause;
-}
-
-//-----------------------------------------------------------------------------
-void pdu_session_release_sm_context_response::set_http_code(
-    const uint32_t code) {
-  m_http_code = code;
-}
-
-//-----------------------------------------------------------------------------
-uint32_t pdu_session_release_sm_context_response::get_http_code() const {
-  return m_http_code;
-}
-
-//-----------------------------------------------------------------------------
 void pdu_session_release_sm_context_response::to_json(
     nlohmann::json& data) const {
-  pdu_session_msg::to_json(data);
-  data["cause"]     = m_cause;
-  data["http_code"] = m_http_code;
+  pdu_session_sm_context_response::to_json(data);
 }
 
 //-----------------------------------------------------------------------------
 void pdu_session_release_sm_context_response::from_json(
     const nlohmann::json& data) {
-  pdu_session_msg::from_json(data);
-
-  if (data.find("cause") != data.end()) {
-    m_cause = data["cause"].get<int>();
-  }
-
-  if (data.find("http_code") != data.end()) {
-    m_http_code = data["http_code"].get<int>();
-  }
+  pdu_session_sm_context_response::from_json(data);
 }
 
 /*

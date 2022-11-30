@@ -476,24 +476,17 @@ class pdu_session_release_sm_context_request : public pdu_session_msg {
 };
 
 //---------------------------------------------------------------------------------------
-class pdu_session_release_sm_context_response : public pdu_session_msg {
+class pdu_session_release_sm_context_response
+    : public pdu_session_sm_context_response {
  public:
   pdu_session_release_sm_context_response()
-      : pdu_session_msg(PDU_SESSION_RELEASE_SM_CONTEXT_RESPONSE) {
-    m_cause     = 0;
-    m_http_code = 0;
-  };
-  void set_cause(uint8_t cause);
-  uint8_t get_cause();
-  void set_http_code(const uint32_t code);
-  uint32_t get_http_code() const;
+      : pdu_session_sm_context_response(
+            PDU_SESSION_RELEASE_SM_CONTEXT_RESPONSE){};
 
   void to_json(nlohmann::json& data) const;
   void from_json(const nlohmann::json& data);
 
  private:
-  uint8_t m_cause;
-  uint32_t m_http_code;
 };
 
 //---------------------------------------------------------------------------------------
