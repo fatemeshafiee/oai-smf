@@ -1254,6 +1254,10 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
      allocated (e.g. IP address) and releases the association with PCF, if any.
      see step 18, section 4.3.2.2.1@3GPP TS 23.502)
      */
+    // TODO: should we return here with smf_procedure_code::ERROR;
+  } else {
+    n11_triggered_pending->res.set_cause(
+        static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   }
 
   // list of accepted QFI(s) and AN Tunnel Info corresponding to the PDU Session
@@ -1296,7 +1300,7 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
       n11_trigger->req.get_dl_fteid(n3_dl_fteid);
 
       Logger::smf_app().debug(
-          "AN F-TEID ID"
+          "AN F-TEID ID "
           "0x%" PRIx32 ", IP Addr %s",
           n3_dl_fteid.teid, conv::toString(n3_dl_fteid.ipv4_address).c_str());
 
@@ -1404,11 +1408,6 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
       } else {
         Logger::smf_app().info(
             "PDU Session Update SM Context, rejected by UPF");
-        // trigger to send reply to AMF
-        smf_app_inst->trigger_update_context_error_response(
-            http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-            PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE,
-            n11_triggered_pending->pid);
         return smf_procedure_code::ERROR;
       }
     } break;

@@ -5436,12 +5436,13 @@ void smf_context::send_pdu_session_release_response(
     }
 
   } else {
-    oai::smf_server::model::ProblemDetails problem_details = {};
-    problem_details.setCause(pdu_session_application_error_e2str.at(
-        PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE));
-
+    resp->res.set_http_code(
+        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE);
+    // Trigger response to AMF
+    nlohmann::json response_message_json = {};
+    resp->res.to_json(response_message_json);
     smf_app_inst->trigger_http_response(
-        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE,
-        n11_triggered_pending->pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+        response_message_json, resp->pid,
+        N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
   }
 }
