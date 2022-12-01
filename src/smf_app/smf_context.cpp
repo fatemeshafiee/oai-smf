@@ -2192,11 +2192,6 @@ bool smf_context::handle_pdu_session_release_complete(
   // 5GSM Cause
   // Extended Protocol Configuration Options
 
-  // Update PDU Session status -> INACTIVE
-  sp.get()->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_INACTIVE);
-  // Stop timer T3592
-  itti_inst->timer_remove(sp.get()->timer_T3592);
-
   // TODO: SMF invokes Nsmf_PDUSession_SMContextStatusNotify to notify AMF
   // that the SM context for this PDU Session is released
   scid_t scid = {};
@@ -2214,12 +2209,13 @@ bool smf_context::handle_pdu_session_release_complete(
   event_sub.sm_context_status(
       scid, status, sm_context_request.get()->http_version);
 
-  // Trigger PDU Session Release event notification
-  supi64_t supi64 = smf_supi_to_u64(sm_context_request.get()->req.get_supi());
-  Logger::smf_app().debug("Signal the PDU Session Release Event notification");
-  event_sub.ee_pdu_session_release(
-      supi64, sm_context_request.get()->req.get_pdu_session_id(),
-      sm_context_request.get()->http_version);
+  // TODO: Notify AMF that the SM context for this PDU session is released
+  if (sp.get()->get_pdu_session_status() ==
+      pdu_session_status_e::PDU_SESSION_ACTIVE) {
+    Logger::smf_app().debug(
+        "Signal the PDU Session Release Event notification");
+    trigger_pdu_session_release(scid, 1);
+  }
 
   // SM Policy Association termination
   if (sp->policy_ptr) {
@@ -2242,6 +2238,11 @@ bool smf_context::handle_pdu_session_release_complete(
   }
 
   // TODO: Invoke Nudm_UECM_Deregistration
+
+  // Update PDU Session status -> INACTIVE
+  sp.get()->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_INACTIVE);
+  // Stop timer T3592
+  itti_inst->timer_remove(sp.get()->timer_T3592);
   return true;
 }
 
@@ -2434,7 +2435,8 @@ bool smf_context::handle_pdu_session_resource_modify_response_transfer(
 //-------------------------------------------------------------------------------------
 bool smf_context::handle_pdu_session_resource_release_response_transfer(
     std::string& n2_sm_information,
-    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request) {
+    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+    std::shared_ptr<smf_pdu_session>& sp) {
   std::string n1_sm_msg, n1_sm_msg_hex;
 
   // TODO: SMF does nothing (Step 7, section 4.3.4.2@3GPP TS 23.502)
@@ -2455,6 +2457,22 @@ bool smf_context::handle_pdu_session_resource_release_response_transfer(
         sm_context_request.get()->pid);
 
     return false;
+  }
+
+  scid_t scid = {};
+  try {
+    scid = std::stoi(sm_context_request->scid);
+  } catch (const std::exception& err) {
+    Logger::smf_app().warn(
+        "Couldn't retrieve "
+        "the corresponding SMF context, ignore message!");
+    return false;
+  }
+
+  // Notify AMF that the SM context for this PDU session is released
+  if (sp.get()->get_pdu_session_status() ==
+      pdu_session_status_e::PDU_SESSION_ACTIVE) {
+    trigger_pdu_session_release(scid, 1);
   }
 
   smf_app_inst->trigger_http_response(
@@ -2691,15 +2709,12 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
           return false;
         }
 
-        // Update PDU session status to PDU_SESSION_INACTIVE
-        sp.get()->set_pdu_session_status(
-            pdu_session_status_e::PDU_SESSION_INACTIVE);
-
         // display info
         Logger::smf_app().info("SMF context: \n %s", toString().c_str());
 
         // don't need to create a procedure to update UPF
         pdu_session_release_procedure = true;
+
       } break;
       default: {
         Logger::smf_app().warn("Unknown message type %d", message_type);
@@ -2803,7 +2818,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
             PDU_SESSION_RELEASE_UE_REQUESTED_STEP2;
 
         if (!handle_pdu_session_resource_release_response_transfer(
-                n2_sm_information, smreq)) {
+                n2_sm_information, smreq, sp)) {
           // TODO:
           return false;
         }
@@ -3966,12 +3981,33 @@ void smf_context::handle_sm_context_status_change(
 }
 
 //------------------------------------------------------------------------------
+void smf_context::trigger_pdu_session_release(
+    scid_t scid, uint8_t http_version) {
+  event_sub.ee_pdu_session_release(scid, http_version);
+}
+
+//------------------------------------------------------------------------------
 void smf_context::handle_ee_pdu_session_release(
-    supi64_t supi, pdu_session_id_t pdu_session_id, uint8_t http_version) {
+    scid_t scid, uint8_t http_version) {
   Logger::smf_app().debug(
-      "Send request to N11 to triger PDU Session Release Notification (Event "
-      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
-      supi, pdu_session_id, http_version);
+      "Send request to N11 to triger PDU Session Release Notification, "
+      "SMF Context ID " SCID_FMT " ",
+      scid);
+
+  // get the smf context
+  std::shared_ptr<smf_context_ref> scf = {};
+
+  if (smf_app_inst->is_scid_2_smf_context(scid)) {
+    scf = smf_app_inst->scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "Context associated with this id " SCID_FMT " does not exit!", scid);
+    return;
+  }
+
+  supi_t supi                     = scf.get()->supi;
+  supi64_t supi64                 = smf_supi_to_u64(supi);
+  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -3987,10 +4023,9 @@ void smf_context::handle_ee_pdu_session_release(
 
     for (auto i : subscriptions) {
       event_notification ev_notif = {};
-      ev_notif.set_supi(supi);
+      ev_notif.set_supi(supi64);
       ev_notif.set_pdu_session_id(pdu_session_id);
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_PDU_SES_REL);
-      ev_notif.set_supi(supi);
       ev_notif.set_notif_uri(i.get()->notif_uri);
       ev_notif.set_notif_id(i.get()->notif_id);
       // custom json e.g., for FlexCN
@@ -5442,6 +5477,10 @@ void smf_context::send_pdu_session_release_response(
     resp->res.set_http_code(
         http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE);
   }
+
+  // clear the resources including addresses allocated to this Session and
+  // associated QoS flows
+  sps->deallocate_ressources(resp->res.get_dnn());
 
   // send ITTI message to SMF_APP interface to trigger the response towards AMFs
   Logger::smf_app().info(

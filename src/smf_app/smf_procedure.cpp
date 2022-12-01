@@ -1569,12 +1569,6 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
     n11_triggered_pending->res.set_cause(
         static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
     Logger::smf_app().info("PDU Session Release SM Context accepted by UPFs");
-    // clear the resources including addresses allocated to this Session and
-    // associated QoS flows
-    sps->deallocate_ressources(
-        n11_trigger->req
-            .get_dnn());  // TODO: for IPv6 (only for Ipv4 for the moment)
-    // trigger to send reply to AMF
     return smf_procedure_code::OK;
   } else {
     n11_triggered_pending->res.set_cause(static_cast<uint8_t>(
