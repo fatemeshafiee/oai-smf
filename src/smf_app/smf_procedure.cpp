@@ -1138,74 +1138,75 @@ smf_procedure_code session_update_sm_context_procedure::run(
         n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
       }
     } break;
+      /*
+          case session_management_procedures_type_e::
+              PDU_SESSION_RELEASE_AMF_INITIATED:
+          case session_management_procedures_type_e::
+              PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
+            for (const auto& qfi : list_of_qfis_to_be_modified) {
+              auto flow = dl_edges[0].get_qos_flow(qfi);
+              if (!flow) {  // no QoS flow found
+                Logger::smf_app().error(
+                    "Update SM Context procedure: could not found QoS flow with
+         QFI "
+                    "%d",
+                    qfi.qfi);
+                // Set cause to SYSTEM_FAILURE and send response
+                qos_flow_context_updated qcu = {};
+                qcu.set_cause(static_cast<uint8_t>(
+                    cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
+                qcu.set_qfi(qfi);
+                n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
+                continue;
+              }
 
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_AMF_INITIATED:
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-      for (const auto& qfi : list_of_qfis_to_be_modified) {
-        auto flow = dl_edges[0].get_qos_flow(qfi);
-        if (!flow) {  // no QoS flow found
-          Logger::smf_app().error(
-              "Update SM Context procedure: could not found QoS flow with QFI "
-              "%d",
-              qfi.qfi);
-          // Set cause to SYSTEM_FAILURE and send response
-          qos_flow_context_updated qcu = {};
-          qcu.set_cause(static_cast<uint8_t>(
-              cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
-          qcu.set_qfi(qfi);
-          n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-          continue;
-        }
+              // for DL
+              if (flow->far_id_dl.first) {
+                pfcp::update_far far  = {};
+                pfcp::far_id_t far_id = {};
 
-        // for DL
-        if (flow->far_id_dl.first) {
-          pfcp::update_far far  = {};
-          pfcp::far_id_t far_id = {};
+                far_id.far_id = flow->far_id_dl.second.far_id;
+                // apply_action.buff = 1;
+                pfcp::apply_action_t apply_action = {};
+                apply_action.nocp = 1;  // notify the CP function about the
+         arrival of
+                                        // a first DL packet
 
-          far_id.far_id = flow->far_id_dl.second.far_id;
-          // apply_action.buff = 1;
-          pfcp::apply_action_t apply_action = {};
-          apply_action.nocp = 1;  // notify the CP function about the arrival of
-                                  // a first DL packet
+                far.set(far_id);
+                far.set(apply_action);
+                // Add IEs to message
+                n4_triggered->pfcp_ies.set(far);
 
-          far.set(far_id);
-          far.set(apply_action);
-          // Add IEs to message
-          n4_triggered->pfcp_ies.set(far);
+                send_n4 = true;
 
-          send_n4 = true;
+              } else {
+                Logger::smf_app().info(
+                    "Update SM Context procedure, could not get FAR ID of QoS
+         Flow " "ID %d", flow->qfi.qfi);
+              }
 
-        } else {
-          Logger::smf_app().info(
-              "Update SM Context procedure, could not get FAR ID of QoS Flow "
-              "ID %d",
-              flow->qfi.qfi);
-        }
+              // for UL
+              if (flow->far_id_ul.first) {
+                pfcp::update_far far              = {};
+                pfcp::far_id_t far_id             = {};
+                far_id.far_id                     =
+         flow->far_id_ul.second.far_id; pfcp::apply_action_t apply_action = {};
+                apply_action.drop                 = 1;
 
-        // for UL
-        if (flow->far_id_ul.first) {
-          pfcp::update_far far              = {};
-          pfcp::far_id_t far_id             = {};
-          far_id.far_id                     = flow->far_id_ul.second.far_id;
-          pfcp::apply_action_t apply_action = {};
-          apply_action.drop                 = 1;
+                far.set(far_id);
+                far.set(apply_action);
+                // Add IEs to message
+                n4_triggered->pfcp_ies.set(far);
+                send_n4 = true;
+              }
 
-          far.set(far_id);
-          far.set(apply_action);
-          // Add IEs to message
-          n4_triggered->pfcp_ies.set(far);
-          send_n4 = true;
-        }
-
-        // update in the PDU Session
-        flow->mark_as_released();
-        // TODO can I safely remove that
-        // sps->add_qos_flow(flow);
-      }
-    } break;
-
+              // update in the PDU Session
+              flow->mark_as_released();
+              // TODO can I safely remove that
+              // sps->add_qos_flow(flow);
+            }
+          } break;
+      */
     default: {
       Logger::smf_app().error(
           "Update SM Context procedure: Unknown session management type %d",
@@ -1412,21 +1413,25 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
       }
     } break;
 
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_AMF_INITIATED:
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-      if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
-        Logger::smf_app().info(
-            "PDU Session Update SM Context (PDU Session Release) accepted by "
-            "UPF");
-        // clear the resources including addresses allocated to this Session and
-        // associated QoS flows
-        sps->deallocate_ressources(
-            n11_trigger.get()->req.get_dnn());  // TODO: for IPv6 (only for Ipv4
-                                                // for the moment)
+      /*
+      case session_management_procedures_type_e::
+          PDU_SESSION_RELEASE_AMF_INITIATED:
+      case session_management_procedures_type_e::
+          PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
+        if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
+          Logger::smf_app().info(
+              "PDU Session Update SM Context (PDU Session Release) accepted by "
+              "UPF");
+          // clear the resources including addresses allocated to this Session
+      and
+          // associated QoS flows
+          sps->deallocate_ressources(
+              n11_trigger.get()->req.get_dnn());  // TODO: for IPv6 (only for
+      Ipv4
+                                                  // for the moment)
+        }
       }
-    }
+         */
   }
 
   std::shared_ptr<pfcp_association> next_upf{};
