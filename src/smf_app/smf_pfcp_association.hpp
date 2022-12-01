@@ -235,6 +235,7 @@ class smf_qos_flow {
     precedence  = {};
     far_id_ul   = {};
     far_id_dl   = {};
+    urr_id      = {};
     released    = false;
     qos_profile = {};
     cause_value = 0;
@@ -264,18 +265,18 @@ class smf_qos_flow {
   [[nodiscard]] std::string toString(const std::string& indent) const;
 
   pfcp::qfi_t qfi;           // QoS Flow Identifier
-  pfcp::fteid_t ul_fteid;    // fteid of UPF
-  pfcp::fteid_t dl_fteid;    // fteid of AN
+  pfcp::fteid_t ul_fteid{};  // fteid of UPF
+  pfcp::fteid_t dl_fteid{};  // fteid of AN
   pfcp::pdr_id_t pdr_id_ul;  // Packet Detection Rule ID, UL
   pfcp::pdr_id_t pdr_id_dl;  // Packet Detection Rule ID, DL
-  pfcp::urr_id_t urr_id;     // Usage reporting Rule, use same for UL and DL
-  pfcp::precedence_t precedence;
+  pfcp::urr_id_t urr_id{};   // Usage reporting Rule, use same for UL and DL
+  pfcp::precedence_t precedence{};
   std::pair<bool, pfcp::far_id_t> far_id_ul;  // FAR ID, UL
   std::pair<bool, pfcp::far_id_t> far_id_dl;  // FAR ID, DL
-  bool released;  // finally seems necessary, TODO try to find heuristic ?
-  pdu_session_id_t pdu_session_id;
+  bool released{};  // finally seems necessary, TODO try to find heuristic ?
+  pdu_session_id_t pdu_session_id{};
   qos_profile_t qos_profile;  // QoS profile
-  uint8_t cause_value;        // cause
+  uint8_t cause_value{};      // cause
 };
 
 const std::string DEFAULT_FLOW_DESCRIPTION =

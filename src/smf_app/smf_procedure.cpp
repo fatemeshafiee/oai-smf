@@ -192,8 +192,14 @@ void smf_session_procedure::synch_ul_dl_edges(
       if (dle_flow->pdr_id_dl.rule_id != 0) {
         ule_flow->pdr_id_dl = ule_flow->pdr_id_dl;
       }
+      if (dle_flow->pdr_id_ul.rule_id != 0) {
+        ule_flow->pdr_id_ul = ule_flow->pdr_id_ul;
+      }
       if (ule_flow->pdr_id_ul.rule_id != 0) {
         dle_flow->pdr_id_ul = ule_flow->pdr_id_ul;
+      }
+      if (ule_flow->pdr_id_dl.rule_id != 0) {
+        dle_flow->pdr_id_dl = ule_flow->pdr_id_dl;
       }
       if (dle_flow->urr_id.urr_id != 0) {
         ule_flow->urr_id = dle_flow->urr_id;
