@@ -4915,6 +4915,7 @@ bool smf_context::check_handover_possibility(
   return true;
 }
 
+//------------------------------------------------------------------------------
 void smf_context::send_pdu_session_create_response(
     const std::shared_ptr<itti_n11_create_sm_context_response>& resp) {
   // fill content for N1N2MessageTransfer (including N1, N2 SM)
@@ -5034,6 +5035,7 @@ void smf_context::send_pdu_session_create_response(
   }
 }
 
+//------------------------------------------------------------------------------
 // TODO refactor: Break down this function and split logic (e.g. setting PDU
 // session values) from actual response, we should only need resp here
 void smf_context::send_pdu_session_update_response(
@@ -5050,253 +5052,263 @@ void smf_context::send_pdu_session_update_response(
   // TODO: Optional: send ITTI message to N10 to trigger UDM registration
   // (Nudm_UECM_Registration)  see TS29503_Nudm_UECM.yaml (
   // /{ueId}/registrations/smf-registrations/{pduSessionId}:)
+  if (resp->res.get_cause() !=
+      static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED)) {
+    switch (session_procedure_type) {
+      // PDU Session Establishment UE-Requested
+      case session_management_procedures_type_e::
+          PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
+        // No need to create N1/N2 Container, just Cause
+        Logger::smf_app().info(
+            "PDU Session Establishment Request (UE-Initiated)");
+        nlohmann::json json_data = {};
+        json_data["cause"]       = resp->res.get_cause();
+        resp->res.set_json_data(json_data);
 
-  switch (session_procedure_type) {
-    // PDU Session Establishment UE-Requested
-    case session_management_procedures_type_e::
-        PDU_SESSION_ESTABLISHMENT_UE_REQUESTED: {
-      // No need to create N1/N2 Container, just Cause
-      Logger::smf_app().info(
-          "PDU Session Establishment Request (UE-Initiated)");
-      nlohmann::json json_data = {};
-      json_data["cause"]       = resp->res.get_cause();
-      resp->res.set_json_data(json_data);
+        // Update PDU session status to ACTIVE
+        sps->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_ACTIVE);
 
-      // Update PDU session status to ACTIVE
-      sps->set_pdu_session_status(pdu_session_status_e::PDU_SESSION_ACTIVE);
+        // set UpCnxState to ACTIVATED
+        sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
+        // Display UE Context Info
+        Logger::smf_app().info("SMF context: \n %s", toString().c_str());
 
-      // set UpCnxState to ACTIVATED
-      sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATED);
-      // Display UE Context Info
-      Logger::smf_app().info("SMF context: \n %s", toString().c_str());
+        // Trigger Event_exposure event
+        std::string str_scid = req.get()->scid;
+        // TODO: validate the str_scid
 
-      // Trigger Event_exposure event
-      std::string str_scid = req.get()->scid;
-      // TODO: validate the str_scid
+        scid_t scid = (scid_t) std::stoul(str_scid, nullptr, 0);
+        trigger_ue_ip_change(scid, 1);
+        trigger_plmn_change(scid, 1);
+        trigger_ddds(scid, 1);
+        trigger_pdusesest(scid, 1);
+        trigger_flexcn_event(scid, 1);
+      } break;
 
-      scid_t scid = (scid_t) std::stoul(str_scid, nullptr, 0);
-      trigger_ue_ip_change(scid, 1);
-      trigger_plmn_change(scid, 1);
-      trigger_ddds(scid, 1);
-      trigger_pdusesest(scid, 1);
-      trigger_flexcn_event(scid, 1);
-    } break;
+        // UE-Triggered Service Request Procedure (Step 1)
+      case session_management_procedures_type_e::
+          SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
+        // Create N2 SM Information: PDU Session Resource Setup Request Transfer
+        // IE
 
-      // UE-Triggered Service Request Procedure (Step 1)
-    case session_management_procedures_type_e::
-        SERVICE_REQUEST_UE_TRIGGERED_STEP1: {
-      // Create N2 SM Information: PDU Session Resource Setup Request Transfer
-      // IE
-
-      // N2 SM Information
-      smf_n2::get_instance()
-          .create_n2_pdu_session_resource_setup_request_transfer(
-              resp->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ, n2_sm_info);
-
-      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      resp->res.set_n2_sm_information(n2_sm_info_hex);
-
-      // fill the content of SmContextUpdatedData
-      nlohmann::json json_data                           = {};
-      json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-      json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-          resp->res.get_pdu_session_id();
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-               ["contentId"] = N2_SM_CONTENT_ID;
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PDU_RES_SETUP_REQ";  // NGAP message
-      json_data["upCnxState"] = "ACTIVATING";
-      resp->res.set_json_data(json_data);
-      // TODO: verify whether cause is needed (as in 23.502 but not in 3GPP
-      // TS 29.502)
-
-      // Update upCnxState to ACTIVATING
-      sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATING);
-    } break;
-
-      // UE-triggered Service Request (Step 2)
-    case session_management_procedures_type_e::
-        SERVICE_REQUEST_UE_TRIGGERED_STEP2: {
-      // No need to create N1/N2 Container, just Cause
-      Logger::smf_app().info("UE Triggered Service Request (Step 2)");
-      nlohmann::json json_data = {};
-      json_data["cause"]       = resp->res.get_cause();
-      json_data["upCnxState"]  = "ACTIVATED";
-      resp->res.set_json_data(json_data);
-      resp->res.set_http_code(http_status_code_e::HTTP_STATUS_CODE_200_OK);
-    } break;
-
-      // PDU Session Modification UE-initiated (Step 2)
-    case session_management_procedures_type_e::
-        PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
-      // No need to create N1/N2 Container
-      Logger::smf_app().info("PDU Session Modification UE-initiated (Step 2)");
-    } break;
-
-      // PDU Session Modification UE-initiated (Step 3)
-    case session_management_procedures_type_e::
-        PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3: {
-      // No need to create N1/N2 Container
-      Logger::smf_app().info("PDU Session Modification UE-initiated (Step 3)");
-      // TODO: To be completed
-    } break;
-
-      // PDU Session Release UE-initiated (Step 1)
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-      // N1 SM: PDU Session Release Command​
-      // N2 SM: PDU Session Resource Release Command Transfer
-      Logger::smf_app().info("PDU Session Release UE-initiated (Step 1))");
-
-      // N1 SM
-      smf_n1::get_instance().create_n1_pdu_session_release_command(
-          resp->res, n1_sm_msg,
-          cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);  // TODO: check
-      // Cause
-      conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
-      resp->res.set_n1_sm_message(n1_sm_msg_hex);
-
-      // include N2 SM Resource Release Request only when User Plane connection
-      // is activated
-      if (sps->get_upCnx_state() == upCnx_state_e::UPCNX_STATE_ACTIVATED) {
         // N2 SM Information
         smf_n2::get_instance()
-            .create_n2_pdu_session_resource_release_command_transfer(
-                resp->res, n2_sm_info_type_e::PDU_RES_REL_CMD, n2_sm_info);
+            .create_n2_pdu_session_resource_setup_request_transfer(
+                resp->res, n2_sm_info_type_e::PDU_RES_SETUP_REQ, n2_sm_info);
+
         conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
         resp->res.set_n2_sm_information(n2_sm_info_hex);
 
-        // Prepare response to send to AMF (N1N2MessageTransfer or
-        // PDUSession_UpdateSMContextResponse)
-        nlohmann::json sm_context_updated_data = {};
-        sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
-            N1N2_MESSAGE_CLASS;
-        sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]
-                               ["contentId"] = N1_SM_CONTENT_ID;
-        sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] =
-            N1N2_MESSAGE_CLASS;
-        sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-            resp->res.get_pdu_session_id();
-        sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]
-                               ["ngapData"]["contentId"] = N2_SM_CONTENT_ID;
-        sm_context_updated_data["n2SmInfoType"] =
-            //["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-            "PDU_RES_REL_CMD";  // NGAP message
-        resp->res.set_json_data(sm_context_updated_data);
-      } else {
         // fill the content of SmContextUpdatedData
-        nlohmann::json json_data                          = {};
-        json_data["n1MessageContainer"]["n1MessageClass"] = N1N2_MESSAGE_CLASS;
-        json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
-            N1_SM_CONTENT_ID;
+        nlohmann::json json_data                           = {};
+        json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
+        json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+            resp->res.get_pdu_session_id();
+        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
+                 ["contentId"] = N2_SM_CONTENT_ID;
+        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+            "PDU_RES_SETUP_REQ";  // NGAP message
+        json_data["upCnxState"] = "ACTIVATING";
         resp->res.set_json_data(json_data);
+        // TODO: verify whether cause is needed (as in 23.502 but not in 3GPP
+        // TS 29.502)
+
+        // Update upCnxState to ACTIVATING
+        sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_ACTIVATING);
+      } break;
+
+        // UE-triggered Service Request (Step 2)
+      case session_management_procedures_type_e::
+          SERVICE_REQUEST_UE_TRIGGERED_STEP2: {
+        // No need to create N1/N2 Container, just Cause
+        Logger::smf_app().info("UE Triggered Service Request (Step 2)");
+        nlohmann::json json_data = {};
+        json_data["cause"]       = resp->res.get_cause();
+        json_data["upCnxState"]  = "ACTIVATED";
+        resp->res.set_json_data(json_data);
+        resp->res.set_http_code(http_status_code_e::HTTP_STATUS_CODE_200_OK);
+      } break;
+
+        // PDU Session Modification UE-initiated (Step 2)
+      case session_management_procedures_type_e::
+          PDU_SESSION_MODIFICATION_UE_INITIATED_STEP2: {
+        // No need to create N1/N2 Container
+        Logger::smf_app().info(
+            "PDU Session Modification UE-initiated (Step 2)");
+      } break;
+
+        // PDU Session Modification UE-initiated (Step 3)
+      case session_management_procedures_type_e::
+          PDU_SESSION_MODIFICATION_UE_INITIATED_STEP3: {
+        // No need to create N1/N2 Container
+        Logger::smf_app().info(
+            "PDU Session Modification UE-initiated (Step 3)");
+        // TODO: To be completed
+      } break;
+
+        // PDU Session Release UE-initiated (Step 1)
+      case session_management_procedures_type_e::
+          PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
+        // N1 SM: PDU Session Release Command​
+        // N2 SM: PDU Session Resource Release Command Transfer
+        Logger::smf_app().info("PDU Session Release UE-initiated (Step 1))");
+
+        // N1 SM
+        smf_n1::get_instance().create_n1_pdu_session_release_command(
+            resp->res, n1_sm_msg,
+            cause_value_5gsm_e::CAUSE_26_INSUFFICIENT_RESOURCES);  // TODO:
+                                                                   // check
+        // Cause
+        conv::convert_string_2_hex(n1_sm_msg, n1_sm_msg_hex);
+        resp->res.set_n1_sm_message(n1_sm_msg_hex);
+
+        // include N2 SM Resource Release Request only when User Plane
+        // connection is activated
+        if (sps->get_upCnx_state() == upCnx_state_e::UPCNX_STATE_ACTIVATED) {
+          // N2 SM Information
+          smf_n2::get_instance()
+              .create_n2_pdu_session_resource_release_command_transfer(
+                  resp->res, n2_sm_info_type_e::PDU_RES_REL_CMD, n2_sm_info);
+          conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+          resp->res.set_n2_sm_information(n2_sm_info_hex);
+
+          // Prepare response to send to AMF (N1N2MessageTransfer or
+          // PDUSession_UpdateSMContextResponse)
+          nlohmann::json sm_context_updated_data = {};
+          sm_context_updated_data["n1MessageContainer"]["n1MessageClass"] =
+              N1N2_MESSAGE_CLASS;
+          sm_context_updated_data["n1MessageContainer"]["n1MessageContent"]
+                                 ["contentId"] = N1_SM_CONTENT_ID;
+          sm_context_updated_data["n2InfoContainer"]["n2InformationClass"] =
+              N1N2_MESSAGE_CLASS;
+          sm_context_updated_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+              resp->res.get_pdu_session_id();
+          sm_context_updated_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]
+                                 ["ngapData"]["contentId"] = N2_SM_CONTENT_ID;
+          sm_context_updated_data["n2SmInfoType"] =
+              //["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+              "PDU_RES_REL_CMD";  // NGAP message
+          resp->res.set_json_data(sm_context_updated_data);
+        } else {
+          // fill the content of SmContextUpdatedData
+          nlohmann::json json_data = {};
+          json_data["n1MessageContainer"]["n1MessageClass"] =
+              N1N2_MESSAGE_CLASS;
+          json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
+              N1_SM_CONTENT_ID;
+          resp->res.set_json_data(json_data);
+        }
+
+        // Update PDU session status to PDU_SESSION_INACTIVE_PENDING
+        sps->set_pdu_session_status(
+            pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING);
+
+        // set UpCnxState to DEACTIVATED
+        sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_DEACTIVATED);
+
+        // TODO: To be completed
+        // TODO: start timer T3592 (see Section 6.3.3@3GPP TS 24.501)
+        // get smf_pdu_session and set the corresponding timer
+
+        scid_t scid = {};
+        try {
+          scid = (scid_t) std::stoul(req->scid, nullptr, 10);
+        } catch (const std::exception& e) {
+          Logger::smf_n1().warn(
+              "Error when converting from string to int for SCID, "
+              "error: %s",
+              e.what());
+          // TODO Stefan: I could not find a better response code here
+          smf_app_inst->trigger_update_context_error_response(
+              http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+              PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE, resp->pid);
+          return;
+        }
+
+        // Store the context for the timer handling
+        sps.get()->set_pending_n11_msg(
+            std::dynamic_pointer_cast<itti_n11_msg>(resp));
+
+        sps->timer_T3592 = itti_inst->timer_setup(
+            T3592_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3592,
+            scid);
+
+      } break;
+
+        // PDU Session Release UE-initiated (Step 2)
+      case session_management_procedures_type_e::
+          PDU_SESSION_RELEASE_UE_REQUESTED_STEP2: {
+        // No need to create N1/N2 Container
+        Logger::smf_app().info("PDU Session Release UE-initiated (Step 2)");
+        // TODO: To be completed
+      } break;
+
+        // PDU Session Release UE-initiated (Step 3)
+      case session_management_procedures_type_e::
+          PDU_SESSION_RELEASE_UE_REQUESTED_STEP3: {
+        // No need to create N1/N2 Container
+        Logger::smf_app().info("PDU Session Release UE-initiated (Step 3)");
+        // TODO: To be completed
+      } break;
+      case session_management_procedures_type_e::HO_PATH_SWITCH_REQ: {
+        // Create N2 SM Information: Path Switch Request Acknowledge Transfer IE
+
+        // N2 SM Information
+        smf_n2::get_instance().create_n2_path_switch_request_ack(
+            resp->res, n2_sm_info_type_e::PATH_SWITCH_REQ_ACK, n2_sm_info);
+
+        conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+        resp->res.set_n2_sm_information(n2_sm_info_hex);
+
+        // fill the content of SmContextUpdatedData
+        nlohmann::json json_data                           = {};
+        json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
+        json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+            resp->res.get_pdu_session_id();
+        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
+                 ["contentId"] = N2_SM_CONTENT_ID;
+        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+            "PATH_SWITCH_REQ_ACK";
+        // NGAP message json_data["upCnxState"] ="ACTIVATING";
+        resp->res.set_json_data(json_data);
+
+      } break;
+
+      case session_management_procedures_type_e::
+          N2_HO_PREPARATION_PHASE_STEP2: {
+        // Create N2 SM Information: Handover Command Transfer IE
+
+        // N2 SM Information
+        smf_n2::get_instance().create_n2_handover_command_transfer(
+            resp->res, n2_sm_info_type_e::HANDOVER_CMD, n2_sm_info);
+
+        conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
+        resp->res.set_n2_sm_information(n2_sm_info_hex);
+
+        // fill the content of SmContextUpdatedData
+        nlohmann::json json_data                           = {};
+        json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
+        json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
+            resp->res.get_pdu_session_id();
+        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
+                 ["contentId"] = N2_SM_CONTENT_ID;
+        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
+            "HANDOVER_CMD";
+        json_data["hoState"] = "PREPARED";
+        resp->res.set_json_data(json_data);
+
+        // Set HO State to prepared
+        sps->set_ho_state(ho_state_e::HO_STATE_PREPARED);
+      } break;
+
+      default: {
+        Logger::smf_app().info(
+            "Unknown session procedure type %d", session_procedure_type);
       }
-
-      // Update PDU session status to PDU_SESSION_INACTIVE_PENDING
-      sps->set_pdu_session_status(
-          pdu_session_status_e::PDU_SESSION_INACTIVE_PENDING);
-
-      // set UpCnxState to DEACTIVATED
-      sps->set_upCnx_state(upCnx_state_e::UPCNX_STATE_DEACTIVATED);
-
-      // TODO: To be completed
-      // TODO: start timer T3592 (see Section 6.3.3@3GPP TS 24.501)
-      // get smf_pdu_session and set the corresponding timer
-
-      scid_t scid = {};
-      try {
-        scid = (scid_t) std::stoul(req->scid, nullptr, 10);
-      } catch (const std::exception& e) {
-        Logger::smf_n1().warn(
-            "Error when converting from string to int for SCID, "
-            "error: %s",
-            e.what());
-        // TODO Stefan: I could not find a better response code here
-        smf_app_inst->trigger_update_context_error_response(
-            http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-            PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE, resp->pid);
-        return;
-      }
-
-      // Store the context for the timer handling
-      sps.get()->set_pending_n11_msg(
-          std::dynamic_pointer_cast<itti_n11_msg>(resp));
-
-      sps->timer_T3592 = itti_inst->timer_setup(
-          T3592_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3592,
-          scid);
-
-    } break;
-
-      // PDU Session Release UE-initiated (Step 2)
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP2: {
-      // No need to create N1/N2 Container
-      Logger::smf_app().info("PDU Session Release UE-initiated (Step 2)");
-      // TODO: To be completed
-    } break;
-
-      // PDU Session Release UE-initiated (Step 3)
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP3: {
-      // No need to create N1/N2 Container
-      Logger::smf_app().info("PDU Session Release UE-initiated (Step 3)");
-      // TODO: To be completed
-    } break;
-    case session_management_procedures_type_e::HO_PATH_SWITCH_REQ: {
-      // Create N2 SM Information: Path Switch Request Acknowledge Transfer IE
-
-      // N2 SM Information
-      smf_n2::get_instance().create_n2_path_switch_request_ack(
-          resp->res, n2_sm_info_type_e::PATH_SWITCH_REQ_ACK, n2_sm_info);
-
-      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      resp->res.set_n2_sm_information(n2_sm_info_hex);
-
-      // fill the content of SmContextUpdatedData
-      nlohmann::json json_data                           = {};
-      json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-      json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-          resp->res.get_pdu_session_id();
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-               ["contentId"] = N2_SM_CONTENT_ID;
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "PATH_SWITCH_REQ_ACK";
-      // NGAP message json_data["upCnxState"] ="ACTIVATING";
-      resp->res.set_json_data(json_data);
-
-    } break;
-
-    case session_management_procedures_type_e::N2_HO_PREPARATION_PHASE_STEP2: {
-      // Create N2 SM Information: Handover Command Transfer IE
-
-      // N2 SM Information
-      smf_n2::get_instance().create_n2_handover_command_transfer(
-          resp->res, n2_sm_info_type_e::HANDOVER_CMD, n2_sm_info);
-
-      conv::convert_string_2_hex(n2_sm_info, n2_sm_info_hex);
-      resp->res.set_n2_sm_information(n2_sm_info_hex);
-
-      // fill the content of SmContextUpdatedData
-      nlohmann::json json_data                           = {};
-      json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-      json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-          resp->res.get_pdu_session_id();
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-               ["contentId"] = N2_SM_CONTENT_ID;
-      json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-          "HANDOVER_CMD";
-      json_data["hoState"] = "PREPARED";
-      resp->res.set_json_data(json_data);
-
-      // Set HO State to prepared
-      sps->set_ho_state(ho_state_e::HO_STATE_PREPARED);
-    } break;
-
-    default: {
-      Logger::smf_app().info(
-          "Unknown session procedure type %d", session_procedure_type);
     }
+  } else {
+    resp->res.set_http_code(
+        http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE);
   }
 
   // send ITTI message to SMF_APP interface to trigger
@@ -5320,6 +5332,7 @@ void smf_context::send_pdu_session_update_response(
   // see step 17@section 4.3.2.2.1@3GPP TS 23.502
 }
 
+//------------------------------------------------------------------------------
 void smf_context::send_pdu_session_release_response(
     const std::shared_ptr<itti_n11_release_sm_context_request>& req,
     const std::shared_ptr<itti_n11_release_sm_context_response>& resp,
