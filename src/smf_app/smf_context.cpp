@@ -5420,29 +5420,25 @@ void smf_context::send_pdu_session_release_response(
         sps->timer_T3592 = itti_inst->timer_setup(
             T3592_TIMER_VALUE_SEC, 0, TASK_SMF_APP, TASK_SMF_APP_TRIGGER_T3592,
             scid);
-
-        // Trigger response to AMF
-        nlohmann::json response_message_json = {};
-        resp->res.to_json(response_message_json);
-        smf_app_inst->trigger_http_response(
-            response_message_json, resp->pid,
-            N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
       } break;
       default: {
-        smf_app_inst->trigger_http_response(
-            http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT, resp->pid,
-            N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+        resp->res.set_http_code(
+            http_status_code_e::HTTP_STATUS_CODE_204_NO_CONTENT);
       }
     }
 
   } else {
     resp->res.set_http_code(
         http_status_code_e::HTTP_STATUS_CODE_406_NOT_ACCEPTABLE);
-    // Trigger response to AMF
-    nlohmann::json response_message_json = {};
-    resp->res.to_json(response_message_json);
-    smf_app_inst->trigger_http_response(
-        response_message_json, resp->pid,
-        N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+  }
+
+  // send ITTI message to SMF_APP interface to trigger the response towards AMFs
+  Logger::smf_app().info(
+      "Sending ITTI message %s to task TASK_SMF_APP", resp->get_msg_name());
+  int ret = itti_inst->send_msg(resp);
+  if (RETURNok != ret) {
+    Logger::smf_app().error(
+        "Could not send ITTI message %s to task TASK_SMF_APP",
+        resp->get_msg_name());
   }
 }

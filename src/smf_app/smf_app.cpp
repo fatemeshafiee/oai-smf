@@ -735,24 +735,28 @@ void smf_app::handle_itti_msg(itti_n11_create_sm_context_response& m) {
   Logger::smf_app().debug(
       "PDU Session Create SM Context: Set promise with ID %d to ready", m.pid);
 
-  trigger_http_response(
-      m.res.get_http_code(), m.pid, N11_SESSION_CREATE_SM_CONTEXT_RESPONSE);
+  nlohmann::json response_message_json = {};
+  m.res.to_json(response_message_json);
+
+  trigger_http_response(response_message_json, m.pid);
 }
 
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(itti_n11_update_sm_context_response& m) {
   Logger::smf_app().debug(
       "PDU Session Update SM Context: Set promise with ID %d to ready", m.pid);
-  trigger_http_response(
-      m.res.get_http_code(), m.pid, N11_SESSION_UPDATE_SM_CONTEXT_RESPONSE);
+  nlohmann::json response_message_json = {};
+  m.res.to_json(response_message_json);
+  trigger_http_response(response_message_json, m.pid);
 }
 
 //------------------------------------------------------------------------------
 void smf_app::handle_itti_msg(itti_n11_release_sm_context_response& m) {
   Logger::smf_app().debug(
       "PDU Session Release SM Context: Set promise with ID %d to ready", m.pid);
-  trigger_http_response(
-      m.res.get_http_code(), m.pid, N11_SESSION_RELEASE_SM_CONTEXT_RESPONSE);
+  nlohmann::json response_message_json = {};
+  m.res.to_json(response_message_json);
+  trigger_http_response(response_message_json, m.pid);
 }
 
 //------------------------------------------------------------------------------
