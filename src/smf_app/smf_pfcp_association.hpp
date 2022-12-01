@@ -261,6 +261,8 @@ class smf_qos_flow {
    */
   std::string toString() const;
 
+  [[nodiscard]] std::string toString(const std::string& indent) const;
+
   pfcp::qfi_t qfi;           // QoS Flow Identifier
   pfcp::fteid_t ul_fteid;    // fteid of UPF
   pfcp::fteid_t dl_fteid;    // fteid of AN
@@ -445,6 +447,16 @@ class upf_graph {
    */
   static std::string get_dnai_list(const std::unordered_set<string>& dnais);
 
+  /**
+   * Traverse the graph in BFS from start and generate info
+   * @param start Start node
+   * @param indent Added in the beginning of each line
+   * @return
+   */
+  std::string to_string_from_start_node(
+      const std::string& indent,
+      const std::shared_ptr<pfcp_association>& start) const;
+
  public:
   upf_graph() : adjacency_list(), visited_asynch(){};
 
@@ -582,6 +594,15 @@ class upf_graph {
    * @return
    */
   bool full() const;
+
+  /**
+   * Traverses the graph in BFS starting at the N3 interface and returns graph
+   * information: For each QFI: UL/DL FTEID for each edge
+   * @param indent Added in the beginning of each line
+   * @return string representation of this graph
+   *
+   */
+  [[nodiscard]] std::string to_string(const std::string& indent) const;
 };
 
 #define PFCP_MAX_ASSOCIATIONS 16

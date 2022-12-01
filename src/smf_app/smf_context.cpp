@@ -373,7 +373,7 @@ std::string smf_pdu_session::toString() const {
   if (pdu_session_status == pdu_session_status_e::PDU_SESSION_INACTIVE)
     is_released = true;
   if (!is_released) {
-    s.append("\tPDU Session ID:\t\t")
+    s.append("\tPDU Session ID:\t")
         .append(std::to_string((uint8_t) pdu_session_id))
         .append("\n");
     s.append("\tDNN:\t\t\t").append(dnn).append("\n");
@@ -391,28 +391,19 @@ std::string smf_pdu_session::toString() const {
         .append(conv::toString(ipv6_address))
         .append("\n");
   if (default_qfi.qfi) {
-    s.append("\tDefault QFI:\t\t")
+    s.append("\tDefault QFI:\t")
         .append(std::to_string(default_qfi.qfi))
         .append("\n");
   } else {
-    s.append("\tDefault QFI:\t\t").append("No QFI available").append("\n");
+    s.append("\tDefault QFI:\t").append("No QFI available").append("\n");
   }
   if (!is_released) {
     s.append("\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");
   }
-  /*
-  // TODO as FTEID is not updated here, it is confusing to have null output
-     We need a complete QoS handling refactor
-  if (default_qfi.qfi) {
-    s.append("\tDefault ");
-    for (auto it : qos_flows) {
-      if (it.second.qfi == default_qfi.qfi) {
-        s.append(it.second.toString());
-      }
-    }
 
+  if (sessions_graph) {
+    s.append(sessions_graph->to_string("\t"));
   }
-  */
 
   if (policy_ptr) {
     s.append("\t Policy Decision:").append("\n");

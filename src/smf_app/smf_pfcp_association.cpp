@@ -216,41 +216,58 @@ void smf_qos_flow::mark_as_released() {
   released = true;
 }
 
-//------------------------------------------------------------------------------
-std::string smf_qos_flow::toString() const {
+std::string smf_qos_flow::toString(const std::string& indent) const {
   std::string s = {};
-  s.append("QoS Flow:\n");
-  s.append("\t\tQFI:\t\t")
+  s.append(indent).append("QoS Flow:\n");
+  s.append(indent)
+      .append("\tQFI:\t\t")
       .append(std::to_string((uint8_t) qfi.qfi))
       .append("\n");
-  s.append("\t\tUL FTEID:\t").append(ul_fteid.toString()).append("\n");
-  s.append("\t\tDL FTEID:\t").append(dl_fteid.toString()).append("\n");
-  s.append("\t\tPDR ID UL:\t")
+  s.append(indent)
+      .append("\tUL FTEID:\t")
+      .append(ul_fteid.toString())
+      .append("\n");
+  s.append(indent)
+      .append("\tDL FTEID:\t")
+      .append(dl_fteid.toString())
+      .append("\n");
+  s.append(indent)
+      .append("\tPDR ID UL:\t")
       .append(std::to_string(pdr_id_ul.rule_id))
       .append("\n");
-  s.append("\t\tPDR ID DL:\t")
+  s.append(indent)
+      .append("\tPDR ID DL:\t")
       .append(std::to_string(pdr_id_dl.rule_id))
       .append("\n");
 
-  s.append("\t\tPrecedence:\t")
+  s.append(indent)
+      .append("\tPrecedence:\t")
       .append(std::to_string(precedence.precedence))
       .append("\n");
   if (far_id_ul.first) {
-    s.append("\t\tFAR ID UL:\t")
+    s.append(indent)
+        .append("\tFAR ID UL:\t")
         .append(std::to_string(far_id_ul.second.far_id))
         .append("\n");
   }
   if (far_id_dl.first) {
-    s.append("\t\tFAR ID DL:\t")
+    s.append(indent)
+        .append("\tFAR ID DL:\t")
         .append(std::to_string(far_id_dl.second.far_id))
         .append("\n");
   }
   if (urr_id.urr_id != 0) {
-    s.append("\t\tURR ID:\t")
+    s.append(indent)
+        .append("\tURR ID:\t")
         .append(std::to_string(urr_id.urr_id))
         .append("\n");
   }
   return s;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_qos_flow::toString() const {
+  return toString("\t\t");
 }
 //------------------------------------------------------------------------------
 void smf_qos_flow::deallocate_ressources() {
@@ -1711,4 +1728,82 @@ bool upf_graph::full() const {
   std::shared_lock graph_lock(graph_mutex);
 
   return adjacency_list.size() >= PFCP_MAX_ASSOCIATIONS;
+}
+
+std::string upf_graph::to_string(const std::string& indent) const {
+  std::shared_lock graph_lock(graph_mutex);
+
+  for (const auto& node : adjacency_list) {
+    for (const auto& edge : node.second) {
+      if (edge.type == iface_type::N3) {
+        return to_string_from_start_node(indent, node.first);
+      }
+    }
+  }
+
+  return indent + "Invalid graph";
+}
+
+std::string upf_graph::to_string_from_start_node(
+    const std::string& indent,
+    const std::shared_ptr<pfcp_association>& start) const {
+  std::shared_lock graph_lock(graph_mutex);
+
+  std::unordered_map<
+      std::shared_ptr<pfcp_association>, bool,
+      std::hash<std::shared_ptr<pfcp_association>>>
+      visited;
+  std::list<std::shared_ptr<pfcp_association>> queue;
+
+  std::string output;
+
+  auto node_it = adjacency_list.find(start);
+  if (node_it == adjacency_list.end()) {
+    return output.append(indent)
+        .append("Node ")
+        .append(start->get_printable_name())
+        .append(" does not exist in UPF graph.");
+  }
+
+  visited[start] = true;
+  queue.push_back(start);
+  std::map<std::string, std::string> output_per_iface_type;
+
+  while (!queue.empty()) {
+    auto node_queue = queue.front();
+    node_it         = adjacency_list.find(node_queue);
+    if (node_it == adjacency_list.end()) continue;
+
+    queue.pop_front();
+
+    for (const auto& edge : node_it->second) {
+      // skip N6 output
+      if (edge.type == iface_type::N6) continue;
+
+      std::string iface = pfcp_association::string_from_iface_type(edge.type);
+      if (!edge.nw_instance.empty()) {
+        iface.append(": ").append(edge.nw_instance);
+      }
+
+      for (const auto& flow : edge.qos_flows) {
+        // N3
+        if (!edge.association) {
+          output_per_iface_type[iface].append(flow->toString(indent + "\t"));
+        }
+        // N9
+        else if (!visited[edge.association]) {
+          output_per_iface_type[iface].append(flow->toString(indent + "\t"));
+          visited[edge.association] = true;
+          queue.push_back(edge.association);
+        }
+      }
+    }
+  }
+
+  for (const auto& o : output_per_iface_type) {
+    output.append(indent).append(o.first).append(":\n");
+    output.append(o.second);
+  }
+
+  return output;
 }
