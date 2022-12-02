@@ -3991,6 +3991,28 @@ bool smf_context::get_pdu_session_info(
 }
 
 //------------------------------------------------------------------------------
+bool smf_context::get_pdu_session_info(
+    const scid_t& scid, supi64_t& supi, std::shared_ptr<smf_pdu_session>& sp) {
+  Logger::smf_app().debug(
+      "Get PDU Session information related to SMF Context ID " SCID_FMT " ",
+      scid);
+
+  pdu_session_id_t pdu_session_id = {};
+  if (!get_pdu_session_info(scid, supi, pdu_session_id)) {
+    return false;
+  }
+
+  if (!find_pdu_session(pdu_session_id, sp)) {
+    Logger::smf_app().warn(
+        "Could not retrieve the PDU Session Info with PDU Session ID %d!",
+        pdu_session_id);
+    return false;
+  }
+
+  return true;
+}
+
+//------------------------------------------------------------------------------
 void smf_context::handle_sm_context_status_change(
     scid_t scid, const std::string& status, uint8_t http_version) {
   Logger::smf_app().debug(
@@ -4171,9 +4193,10 @@ void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
       "SMF Context ID " SCID_FMT " ",
       scid);
 
-  supi64_t supi64                 = {};
-  pdu_session_id_t pdu_session_id = {};
-  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
+  supi64_t supi64 = {};
+  // get smf_pdu_session
+  std::shared_ptr<smf_pdu_session> sp = {};
+  if (!get_pdu_session_info(scid, supi64, sp)) {
     Logger::smf_app().debug(
         "Could not retrieve info with "
         "SMF Context ID " SCID_FMT " ",
@@ -4181,18 +4204,10 @@ void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
     return;
   }
 
-  // get smf_pdu_session
-  std::shared_ptr<smf_pdu_session> sp = {};
-  if (!find_pdu_session(pdu_session_id, sp)) {
-    Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF PDU Session context!");
-    return;
-  }
-
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN (Event "
-      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
-      supi, pdu_session_id, http_version);
+      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version %d",
+      supi, sp->get_pdu_session_id(), http_version);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4208,8 +4223,8 @@ void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
 
     for (auto i : subscriptions) {
       event_notification ev_notif = {};
-      ev_notif.set_supi(supi64);                    // SUPI
-      ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
+      ev_notif.set_supi(supi64);                              // SUPI
+      ev_notif.set_pdu_session_id(sp->get_pdu_session_id());  // PDU session ID
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_UE_IP_CH);
       ev_notif.set_notif_uri(i.get()->notif_uri);
       ev_notif.set_notif_id(i.get()->notif_id);
@@ -4264,15 +4279,16 @@ void smf_context::handle_qos_monitoring(
       "SMF Context-related SEID  " SEID_FMT,
       seid);
 
-  supi64_t supi64                 = {};
-  pdu_session_id_t pdu_session_id = {};
-  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
-    Logger::smf_app().debug(
-        "Could not retrieve info with "
-        "SMF Context ID " SCID_FMT " ",
-        scid);
+  // Get the smf context
+  std::shared_ptr<smf_context> pc = {};
+  if (!smf_app_inst->seid_2_smf_context(seid, pc)) {
+    Logger::smf_app().warn(
+        "Context associated with this SEID " SEID_FMT " does not exit!", seid);
     return;
   }
+
+  supi_t supi     = pc.get()->supi;
+  supi64_t supi64 = smf_supi_to_u64(supi);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4332,9 +4348,10 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       "SMF Context ID " SCID_FMT " ",
       scid);
 
-  supi64_t supi64                 = {};
-  pdu_session_id_t pdu_session_id = {};
-  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
+  supi64_t supi64 = {};
+  // get smf_pdu_session
+  std::shared_ptr<smf_pdu_session> sp = {};
+  if (!get_pdu_session_info(scid, supi64, sp)) {
     Logger::smf_app().debug(
         "Could not retrieve info with "
         "SMF Context ID " SCID_FMT " ",
@@ -4342,19 +4359,22 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
     return;
   }
 
-  // get smf_pdu_session
-  std::shared_ptr<smf_pdu_session> sp = {};
-
-  if (!find_pdu_session(pdu_session_id, sp)) {
+  // Get SMF Context
+  std::shared_ptr<smf_context> sc = {};
+  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+    sc = smf_app_inst->supi_2_smf_context(supi64);
+  } else {
     Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF PDU Session context!");
+        "Could not retrieve the corresponding SMF context with "
+        "Supi " SUPI_64_FMT "!",
+        supi64);
     return;
   }
 
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN (Event "
       "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
-      supi, pdu_session_id, http_version);
+      supi, sp->get_pdu_session_id(), http_version);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4370,8 +4390,8 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
 
     for (auto i : subscriptions) {
       event_notification ev_notif = {};
-      ev_notif.set_supi(supi64);                    // SUPI
-      ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
+      ev_notif.set_supi(supi64);                              // SUPI
+      ev_notif.set_pdu_session_id(sp->get_pdu_session_id());  // PDU session ID
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_FLEXCN);
       ev_notif.set_notif_uri(i.get()->notif_uri);
       ev_notif.set_notif_id(i.get()->notif_id);
@@ -4474,9 +4494,10 @@ void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
       "SMF Context ID " SCID_FMT " ",
       scid);
 
-  supi64_t supi64                 = {};
-  pdu_session_id_t pdu_session_id = {};
-  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
+  supi64_t supi64 = {};
+  // get smf_pdu_session
+  std::shared_ptr<smf_pdu_session> sp = {};
+  if (!get_pdu_session_info(scid, supi64, sp)) {
     Logger::smf_app().debug(
         "Could not retrieve info with "
         "SMF Context ID " SCID_FMT " ",
@@ -4484,19 +4505,10 @@ void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
     return;
   }
 
-  // get smf_pdu_session
-  std::shared_ptr<smf_pdu_session> sp = {};
-
-  if (!find_pdu_session(pdu_session_id, sp)) {
-    Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF PDU Session context!");
-    return;
-  }
-
   Logger::smf_app().debug(
       "Send request to N11 to triger PDU_SES_EST (Event "
-      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
-      supi, pdu_session_id, http_version);
+      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version %d",
+      supi, sp->get_pdu_session_id(), http_version);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4512,8 +4524,8 @@ void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
 
     for (auto i : subscriptions) {
       event_notification ev_notif = {};
-      ev_notif.set_supi(supi64);                    // SUPI
-      ev_notif.set_pdu_session_id(pdu_session_id);  // PDU session ID
+      ev_notif.set_supi(supi64);                              // SUPI
+      ev_notif.set_pdu_session_id(sp->get_pdu_session_id());  // PDU session ID
       ev_notif.set_smf_event(smf_event_t::SMF_EVENT_PDUSESEST);
       ev_notif.set_notif_uri(i.get()->notif_uri);
       ev_notif.set_notif_id(i.get()->notif_id);
@@ -4573,6 +4585,7 @@ void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {
       "Send request to N11 to triger FlexCN, "
       "SMF Context ID " SCID_FMT " ",
       scid);
+
   supi64_t supi64                 = {};
   pdu_session_id_t pdu_session_id = {};
   if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
@@ -4580,6 +4593,18 @@ void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {
         "Could not retrieve info with "
         "SMF Context ID " SCID_FMT " ",
         scid);
+    return;
+  }
+
+  // Get SMF Context
+  std::shared_ptr<smf_context> sc = {};
+  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+    sc = smf_app_inst->supi_2_smf_context(supi64);
+  } else {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF context with "
+        "Supi " SUPI_64_FMT "!",
+        supi64);
     return;
   }
 
