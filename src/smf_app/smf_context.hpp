@@ -1174,6 +1174,17 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>& sessions);
 
   /*
+   * Get PDU related information
+   * @param [const scid_t&] scid: SMF Context ID
+   * @param [supi64_t&] supi: SUPI
+   * @param [pdu_session_id_t&] pdu_session_id: PDU Session ID
+   * @return true if this Context ID exist and can get related info, otherwise,
+   * return false
+   */
+  bool get_pdu_session_info(
+      const scid_t& scid, supi64_t& supi, pdu_session_id_t& pdu_session_id);
+
+  /*
    * Handle SM Context Status Change (Send notification AMF)
    * @param [scid_t] scid: SMF Context ID
    * @param [uint32_t] status: Updated status

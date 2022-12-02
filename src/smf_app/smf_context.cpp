@@ -809,13 +809,11 @@ void smf_context::handle_itti_msg(
     if (res != smf_procedure_code::CONTINUE) {
       std::shared_ptr<session_update_sm_context_procedure> proc_session_update =
           std::static_pointer_cast<session_update_sm_context_procedure>(proc);
-
       send_pdu_session_update_response(
           proc_session_update->n11_trigger,
           proc_session_update->n11_triggered_pending,
           proc_session_update->session_procedure_type,
           proc_session_update->sps);
-
       remove_procedure(proc.get());
     }
   } else {
@@ -2929,6 +2927,18 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
         }
       } break;
 
+      case n2_sm_info_type_e::PDU_RES_NTY: {
+        // PDU Session Resource Notify (from AN to AMF/SMF, Section 8.2.4 @3GPP
+        // TS 38.413) PDU Session Resource Notify Transfer
+        // TODO: to be completed
+      } break;
+
+      case n2_sm_info_type_e::PDU_RES_NTY_REL: {
+        // PDU Session Resource Notify (from AN to AMF/SMF, Section 8.2.4 @3GPP
+        // TS 38.413) PDU Session Resource Notify Released Transfer
+        // TODO: to be completed
+      } break;
+
       default: {
         Logger::smf_app().warn("Unknown N2 SM info type %d", n2_sm_info_type);
       }
@@ -3937,6 +3947,50 @@ void smf_context::get_pdu_sessions(
 }
 
 //------------------------------------------------------------------------------
+bool smf_context::get_pdu_session_info(
+    const scid_t& scid, supi64_t& supi, pdu_session_id_t& pdu_session_id) {
+  Logger::smf_app().debug(
+      "Get PDU Session information related to SMF Context ID " SCID_FMT " ",
+      scid);
+  std::shared_ptr<smf_context_ref> scf = {};
+
+  if (smf_app_inst->is_scid_2_smf_context(scid)) {
+    scf = smf_app_inst->scid_2_smf_context(scid);
+  } else {
+    Logger::smf_app().warn(
+        "SM Context associated with this id " SCID_FMT " does not exit!", scid);
+    return false;
+  }
+
+  std::shared_ptr<smf_pdu_session> sp = {};
+  if (!find_pdu_session(scf.get()->pdu_session_id, sp)) {
+    if (sp.get() == nullptr) {
+      Logger::smf_n1().warn("PDU session context does not exist!");
+      return false;
+    }
+  }
+
+  supi64_t supi64 = smf_supi_to_u64(scf.get()->supi);
+
+  // Verify if SMF context exist
+  std::shared_ptr<smf_context> sc = {};
+
+  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
+    sc = smf_app_inst->supi_2_smf_context(supi64);
+  } else {
+    Logger::smf_app().warn(
+        "Could not retrieve the corresponding SMF context with "
+        "Supi " SUPI_64_FMT "!",
+        supi64);
+    return false;
+  }
+
+  supi           = supi64;
+  pdu_session_id = scf.get()->pdu_session_id;
+  return true;
+}
+
+//------------------------------------------------------------------------------
 void smf_context::handle_sm_context_status_change(
     scid_t scid, const std::string& status, uint8_t http_version) {
   Logger::smf_app().debug(
@@ -3994,20 +4048,15 @@ void smf_context::handle_ee_pdu_session_release(
       "SMF Context ID " SCID_FMT " ",
       scid);
 
-  // get the smf context
-  std::shared_ptr<smf_context_ref> scf = {};
-
-  if (smf_app_inst->is_scid_2_smf_context(scid)) {
-    scf = smf_app_inst->scid_2_smf_context(scid);
-  } else {
-    Logger::smf_app().warn(
-        "Context associated with this id " SCID_FMT " does not exit!", scid);
+  supi64_t supi64                 = {};
+  pdu_session_id_t pdu_session_id = {};
+  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
+    Logger::smf_app().debug(
+        "Could not retrieve info with "
+        "SMF Context ID " SCID_FMT " ",
+        scid);
     return;
   }
-
-  supi_t supi                     = scf.get()->supi;
-  supi64_t supi64                 = smf_supi_to_u64(supi);
-  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4060,32 +4109,14 @@ void smf_context::handle_ddds(scid_t scid, uint8_t http_version) {
       "SMF Context ID " SCID_FMT " ",
       scid);
 
-  // get the smf context
-  std::shared_ptr<smf_context_ref> scf = {};
-
-  if (smf_app_inst->is_scid_2_smf_context(scid)) {
-    scf = smf_app_inst->scid_2_smf_context(scid);
-  } else {
-    Logger::smf_app().warn(
-        "Context associated with this id " SCID_FMT " does not exit!", scid);
-    return;
-  }
-
-  supi_t supi     = scf.get()->supi;
-  supi64_t supi64 = smf_supi_to_u64(supi);
-  // pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
-
-  std::shared_ptr<smf_context> sc = {};
-
-  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
-    sc = smf_app_inst->supi_2_smf_context(supi64);
+  supi64_t supi64                 = {};
+  pdu_session_id_t pdu_session_id = {};
+  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
     Logger::smf_app().debug(
-        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
-  } else {
-    Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF context with "
-        "Supi " SUPI_64_FMT "!",
-        supi64);
+        "Could not retrieve info with "
+        "SMF Context ID " SCID_FMT " ",
+        scid);
+    return;
   }
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
@@ -4140,32 +4171,14 @@ void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
       "SMF Context ID " SCID_FMT " ",
       scid);
 
-  // get the smf context
-  std::shared_ptr<smf_context_ref> scf = {};
-
-  if (smf_app_inst->is_scid_2_smf_context(scid)) {
-    scf = smf_app_inst->scid_2_smf_context(scid);
-  } else {
-    Logger::smf_app().warn(
-        "Context associated with this id " SCID_FMT " does not exit!", scid);
-    return;
-  }
-
-  supi_t supi                     = scf.get()->supi;
-  supi64_t supi64                 = smf_supi_to_u64(supi);
-  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
-
-  std::shared_ptr<smf_context> sc = {};
-
-  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
-    sc = smf_app_inst->supi_2_smf_context(supi64);
+  supi64_t supi64                 = {};
+  pdu_session_id_t pdu_session_id = {};
+  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
     Logger::smf_app().debug(
-        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
-  } else {
-    Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF context with "
-        "Supi " SUPI_64_FMT "!",
-        supi64);
+        "Could not retrieve info with "
+        "SMF Context ID " SCID_FMT " ",
+        scid);
+    return;
   }
 
   // get smf_pdu_session
@@ -4251,16 +4264,15 @@ void smf_context::handle_qos_monitoring(
       "SMF Context-related SEID  " SEID_FMT,
       seid);
 
-  // Get the smf context
-  std::shared_ptr<smf_context> pc = {};
-  if (!smf_app_inst->seid_2_smf_context(seid, pc)) {
-    Logger::smf_app().warn(
-        "Context associated with this SEID " SEID_FMT " does not exit!", seid);
+  supi64_t supi64                 = {};
+  pdu_session_id_t pdu_session_id = {};
+  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
+    Logger::smf_app().debug(
+        "Could not retrieve info with "
+        "SMF Context ID " SCID_FMT " ",
+        scid);
     return;
   }
-
-  supi_t supi     = pc.get()->supi;
-  supi64_t supi64 = smf_supi_to_u64(supi);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4320,33 +4332,16 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
       "SMF Context ID " SCID_FMT " ",
       scid);
 
-  // get the smf context
-  std::shared_ptr<smf_context_ref> scf = {};
-
-  if (smf_app_inst->is_scid_2_smf_context(scid)) {
-    scf = smf_app_inst->scid_2_smf_context(scid);
-  } else {
-    Logger::smf_app().warn(
-        "Context associated with this id " SCID_FMT " does not exit!", scid);
+  supi64_t supi64                 = {};
+  pdu_session_id_t pdu_session_id = {};
+  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
+    Logger::smf_app().debug(
+        "Could not retrieve info with "
+        "SMF Context ID " SCID_FMT " ",
+        scid);
     return;
   }
 
-  supi_t supi                     = scf.get()->supi;
-  supi64_t supi64                 = smf_supi_to_u64(supi);
-  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
-
-  std::shared_ptr<smf_context> sc = {};
-
-  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
-    sc = smf_app_inst->supi_2_smf_context(supi64);
-    Logger::smf_app().debug(
-        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
-  } else {
-    Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF context with "
-        "Supi " SUPI_64_FMT "!",
-        supi64);
-  }
   // get smf_pdu_session
   std::shared_ptr<smf_pdu_session> sp = {};
 
@@ -4472,66 +4467,23 @@ void smf_context::trigger_flexcn_event(scid_t scid, uint8_t http_version) {
   event_sub.ee_flexcn(scid, http_version);
 }
 
-////------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-
 void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
   Logger::smf_app().debug(
       "Send request to N11 to triger pdusesest, "
       "SMF Context ID " SCID_FMT " ",
       scid);
 
-  // get the smf context
-  std::shared_ptr<smf_context_ref> scf = {};
-
-  if (smf_app_inst->is_scid_2_smf_context(scid)) {
-    scf = smf_app_inst->scid_2_smf_context(scid);
-  } else {
-    Logger::smf_app().warn(
-        "Context associated with this id " SCID_FMT " does not exit!", scid);
+  supi64_t supi64                 = {};
+  pdu_session_id_t pdu_session_id = {};
+  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
+    Logger::smf_app().debug(
+        "Could not retrieve info with "
+        "SMF Context ID " SCID_FMT " ",
+        scid);
     return;
   }
 
-  supi_t supi                     = scf.get()->supi;
-  supi64_t supi64                 = smf_supi_to_u64(supi);
-  pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
-
-  std::shared_ptr<smf_context> sc = {};
-
-  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
-    sc = smf_app_inst->supi_2_smf_context(supi64);
-    Logger::smf_app().debug(
-        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
-  } else {
-    Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF context with "
-        "Supi " SUPI_64_FMT "!",
-        supi64);
-  }
   // get smf_pdu_session
   std::shared_ptr<smf_pdu_session> sp = {};
 
@@ -4610,36 +4562,6 @@ void smf_context::trigger_pdusesest(scid_t scid, uint8_t http_version) {
   event_sub.ee_pdusesest(scid, http_version);
 }
 
-////------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//-----------
-
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 void smf_context::trigger_plmn_change(scid_t scid, uint8_t http_version) {
   event_sub.ee_plmn_change(scid, http_version);
@@ -4651,33 +4573,14 @@ void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {
       "Send request to N11 to triger FlexCN, "
       "SMF Context ID " SCID_FMT " ",
       scid);
-
-  // get the smf context
-  std::shared_ptr<smf_context_ref> scf = {};
-
-  if (smf_app_inst->is_scid_2_smf_context(scid)) {
-    scf = smf_app_inst->scid_2_smf_context(scid);
-  } else {
-    Logger::smf_app().warn(
-        "Context associated with this id " SCID_FMT " does not exit!", scid);
-    return;
-  }
-
-  supi_t supi     = scf.get()->supi;
-  supi64_t supi64 = smf_supi_to_u64(supi);
-  // pdu_session_id_t pdu_session_id = scf.get()->pdu_session_id;
-
-  std::shared_ptr<smf_context> sc = {};
-
-  if (smf_app_inst->is_supi_2_smf_context(supi64)) {
-    sc = smf_app_inst->supi_2_smf_context(supi64);
+  supi64_t supi64                 = {};
+  pdu_session_id_t pdu_session_id = {};
+  if (!get_pdu_session_info(scid, supi64, pdu_session_id)) {
     Logger::smf_app().debug(
-        "Retrieve SMF context with SUPI " SUPI_64_FMT "", supi64);
-  } else {
-    Logger::smf_app().warn(
-        "Could not retrieve the corresponding SMF context with "
-        "Supi " SUPI_64_FMT "!",
-        supi64);
+        "Could not retrieve info with "
+        "SMF Context ID " SCID_FMT " ",
+        scid);
+    return;
   }
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
