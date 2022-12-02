@@ -1182,7 +1182,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * return false
    */
   bool get_pdu_session_info(
-      const scid_t& scid, supi64_t& supi, pdu_session_id_t& pdu_session_id);
+      const scid_t& scid, supi64_t& supi,
+      pdu_session_id_t& pdu_session_id) const;
 
   /*
    * Get PDU related information
@@ -1194,7 +1195,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * return false
    */
   bool get_pdu_session_info(
-      const scid_t& scid, supi64_t& supi, std::shared_ptr<smf_pdu_session>& sp);
+      const scid_t& scid, supi64_t& supi,
+      std::shared_ptr<smf_pdu_session>& sp) const;
 
   /*
    * Handle SM Context Status Change (Send notification AMF)
@@ -1204,7 +1206,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @return void
    */
   void handle_sm_context_status_change(
-      scid_t scid, const std::string& status, uint8_t http_version);
+      const scid_t& scid, const std::string& status,
+      const uint8_t& http_version) const;
 
   /*
    * Trigger PDU Session Release Notification (Send notification AMF)
@@ -1212,30 +1215,41 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [uint8_t] http_version: HTTP version
    * @return void
    */
-  void trigger_pdu_session_release(scid_t scid, uint8_t http_version);
-  void handle_ee_pdu_session_release(scid_t scid, uint8_t http_version);
+  void trigger_pdu_session_release(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_ee_pdu_session_release(
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_ue_ip_change(scid_t scid, uint8_t http_version);
-  void handle_ue_ip_change(scid_t scid, uint8_t http_version);
+  void trigger_ue_ip_change(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_ue_ip_change(
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_plmn_change(scid_t scid, uint8_t http_version);
-  void handle_plmn_change(scid_t scid, uint8_t http_version);
+  void trigger_plmn_change(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_plmn_change(
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_ddds(scid_t scid, uint8_t http_version);
-  void handle_ddds(scid_t scid, uint8_t http_version);
+  void trigger_ddds(const scid_t& scid, const uint8_t& http_version) const;
+  void handle_ddds(const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_pdusesest(scid_t scid, uint8_t http_version);
-  void handle_pdusesest(scid_t scid, uint8_t http_version);
+  void trigger_pdusesest(const scid_t& scid, const uint8_t& http_version) const;
+  void handle_pdusesest(const scid_t& scid, const uint8_t& http_version) const;
 
   void trigger_qos_monitoring(
-      seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
-      uint8_t http_version);
+      const seid_t& seid,
+      const oai::smf_server::model::EventNotification& ev_notif_model,
+      const uint8_t& http_version) const;
   void handle_qos_monitoring(
-      seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
-      uint8_t http_version);
+      const seid_t& seid,
+      const oai::smf_server::model::EventNotification& ev_notif_model,
+      const uint8_t& http_version) const;
 
-  void trigger_flexcn_event(scid_t scid, uint8_t http_version);
-  void handle_flexcn_event(scid_t scid, uint8_t http_version);
+  void trigger_flexcn_event(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_flexcn_event(
+      const scid_t& scid, const uint8_t& http_version) const;
+
   /*
    * Update QoS information in the Response message according to the content of
    * decoded NAS msg

@@ -3948,7 +3948,8 @@ void smf_context::get_pdu_sessions(
 
 //------------------------------------------------------------------------------
 bool smf_context::get_pdu_session_info(
-    const scid_t& scid, supi64_t& supi, pdu_session_id_t& pdu_session_id) {
+    const scid_t& scid, supi64_t& supi,
+    pdu_session_id_t& pdu_session_id) const {
   Logger::smf_app().debug(
       "Get PDU Session information related to SMF Context ID " SCID_FMT " ",
       scid);
@@ -3992,7 +3993,8 @@ bool smf_context::get_pdu_session_info(
 
 //------------------------------------------------------------------------------
 bool smf_context::get_pdu_session_info(
-    const scid_t& scid, supi64_t& supi, std::shared_ptr<smf_pdu_session>& sp) {
+    const scid_t& scid, supi64_t& supi,
+    std::shared_ptr<smf_pdu_session>& sp) const {
   Logger::smf_app().debug(
       "Get PDU Session information related to SMF Context ID " SCID_FMT " ",
       scid);
@@ -4014,7 +4016,8 @@ bool smf_context::get_pdu_session_info(
 
 //------------------------------------------------------------------------------
 void smf_context::handle_sm_context_status_change(
-    scid_t scid, const std::string& status, uint8_t http_version) {
+    const scid_t& scid, const std::string& status,
+    const uint8_t& http_version) const {
   Logger::smf_app().debug(
       "Send request to N11 to triger SM Context Status Notification to AMF, "
       "SMF Context ID " SCID_FMT " ",
@@ -4058,13 +4061,13 @@ void smf_context::handle_sm_context_status_change(
 
 //------------------------------------------------------------------------------
 void smf_context::trigger_pdu_session_release(
-    scid_t scid, uint8_t http_version) {
+    const scid_t& scid, const uint8_t& http_version) const {
   event_sub.ee_pdu_session_release(scid, http_version);
 }
 
 //------------------------------------------------------------------------------
 void smf_context::handle_ee_pdu_session_release(
-    scid_t scid, uint8_t http_version) {
+    const scid_t& scid, const uint8_t& http_version) const {
   Logger::smf_app().debug(
       "Send request to N11 to triger PDU Session Release Notification, "
       "SMF Context ID " SCID_FMT " ",
@@ -4120,12 +4123,14 @@ void smf_context::handle_ee_pdu_session_release(
 }
 
 //------------------------------------------------------------------------------
-void smf_context::trigger_ddds(scid_t scid, uint8_t http_version) {
+void smf_context::trigger_ddds(
+    const scid_t& scid, const uint8_t& http_version) const {
   event_sub.ee_ddds(scid, http_version);
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_ddds(scid_t scid, uint8_t http_version) {
+void smf_context::handle_ddds(
+    const scid_t& scid, const uint8_t& http_version) const {
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN, "
       "SMF Context ID " SCID_FMT " ",
@@ -4187,7 +4192,8 @@ void smf_context::handle_ddds(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
+void smf_context::handle_ue_ip_change(
+    const scid_t& scid, const uint8_t& http_version) const {
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN, "
       "SMF Context ID " SCID_FMT " ",
@@ -4266,14 +4272,16 @@ void smf_context::handle_ue_ip_change(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::trigger_ue_ip_change(scid_t scid, uint8_t http_version) {
+void smf_context::trigger_ue_ip_change(
+    const scid_t& scid, const uint8_t& http_version) const {
   event_sub.ee_ue_ip_change(scid, http_version);
 }
 
 //------------------------------------------------------------------------------
 void smf_context::handle_qos_monitoring(
-    seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
-    uint8_t http_version) {
+    const seid_t& seid,
+    const oai::smf_server::model::EventNotification& ev_notif_model,
+    const uint8_t& http_version) const {
   Logger::smf_app().debug(
       "Send request to N11 to trigger QoS Monitoring (Usage Report) Event, "
       "SMF Context-related SEID  " SEID_FMT,
@@ -4336,13 +4344,15 @@ void smf_context::handle_qos_monitoring(
 
 //------------------------------------------------------------------------------
 void smf_context::trigger_qos_monitoring(
-    seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
-    uint8_t http_version) {
+    const seid_t& seid,
+    const oai::smf_server::model::EventNotification& ev_notif_model,
+    const uint8_t& http_version) const {
   event_sub.ee_qos_monitoring(seid, ev_notif_model, http_version);
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
+void smf_context::handle_flexcn_event(
+    const scid_t& scid, const uint8_t& http_version) const {
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN, "
       "SMF Context ID " SCID_FMT " ",
@@ -4483,12 +4493,14 @@ void smf_context::handle_flexcn_event(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::trigger_flexcn_event(scid_t scid, uint8_t http_version) {
+void smf_context::trigger_flexcn_event(
+    const scid_t& scid, const uint8_t& http_version) const {
   event_sub.ee_flexcn(scid, http_version);
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
+void smf_context::handle_pdusesest(
+    const scid_t& scid, const uint8_t& http_version) const {
   Logger::smf_app().debug(
       "Send request to N11 to triger pdusesest, "
       "SMF Context ID " SCID_FMT " ",
@@ -4570,17 +4582,20 @@ void smf_context::handle_pdusesest(scid_t scid, uint8_t http_version) {
 }
 
 //------------------------------------------------------------------------------
-void smf_context::trigger_pdusesest(scid_t scid, uint8_t http_version) {
+void smf_context::trigger_pdusesest(
+    const scid_t& scid, const uint8_t& http_version) const {
   event_sub.ee_pdusesest(scid, http_version);
 }
 
 //------------------------------------------------------------------------------
-void smf_context::trigger_plmn_change(scid_t scid, uint8_t http_version) {
+void smf_context::trigger_plmn_change(
+    const scid_t& scid, const uint8_t& http_version) const {
   event_sub.ee_plmn_change(scid, http_version);
 }
 
 //------------------------------------------------------------------------------
-void smf_context::handle_plmn_change(scid_t scid, uint8_t http_version) {
+void smf_context::handle_plmn_change(
+    const scid_t& scid, const uint8_t& http_version) const {
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN, "
       "SMF Context ID " SCID_FMT " ",
