@@ -2032,8 +2032,8 @@ bool smf_app::get_session_management_subscription_data(
   dnn_configuration->_5g_qos_profile.arp.preempt_vuln   = "NOT_PREEMPTABLE";
   dnn_configuration->_5g_qos_profile.priority_level     = 1;
   // Session_ambr
-  dnn_configuration->session_ambr.uplink   = "100Mbps";
-  dnn_configuration->session_ambr.downlink = "100Mbps";
+  dnn_configuration->session_ambr.uplink   = "1000Mbps";
+  dnn_configuration->session_ambr.downlink = "1000Mbps";
   subscription->insert_dnn_configuration(dnn, dnn_configuration);
   return true;
 }
