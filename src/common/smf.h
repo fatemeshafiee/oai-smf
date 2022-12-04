@@ -408,7 +408,11 @@ typedef struct dnn_upf_info_item_s {
       s.append("DNAI NW Instance list: {");
 
       for (const auto& dnai_nw : dnai_nw_instance_list) {
-        s.append("(").append(dnai_nw.first).append(", ").append(dnai_nw.second).append("),");
+        s.append("(")
+            .append(dnai_nw.first)
+            .append(", ")
+            .append(dnai_nw.second)
+            .append("),");
       }
       s.append("}, ");
     }
