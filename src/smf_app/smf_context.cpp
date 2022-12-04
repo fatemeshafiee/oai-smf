@@ -5008,9 +5008,10 @@ void smf_context::send_pdu_session_update_response(
     const std::shared_ptr<itti_n11_update_sm_context_response>& resp,
     const session_management_procedures_type_e& session_procedure_type,
     const std::shared_ptr<smf_pdu_session>& sps) {
-  std::string n1_sm_msg     = {};
-  std::string n1_sm_msg_hex = {};
-  std::string n2_sm_info = {} std::string n2_sm_info_hex = {};
+  std::string n1_sm_msg      = {};
+  std::string n1_sm_msg_hex  = {};
+  std::string n2_sm_info     = {};
+  std::string n2_sm_info_hex = {};
 
   // TODO: check we got all responses vs
   // resp->res.flow_context_modified
