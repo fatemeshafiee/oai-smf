@@ -380,6 +380,7 @@ pfcp::create_urr smf_session_procedure::pfcp_create_urr(
   return create_urr;
 }
 
+//------------------------------------------------------------------------------
 smf_procedure_code smf_session_procedure::get_current_upf(
     std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
     std::shared_ptr<pfcp_association>& current_upf) {
@@ -398,6 +399,7 @@ smf_procedure_code smf_session_procedure::get_current_upf(
   return smf_procedure_code::OK;
 }
 
+//------------------------------------------------------------------------------
 smf_procedure_code smf_session_procedure::get_next_upf(
     std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
     std::shared_ptr<pfcp_association>& next_upf) {
@@ -458,6 +460,7 @@ int n4_session_restore_procedure::run() {
   return RETURNok;
 }
 
+//------------------------------------------------------------------------------
 smf_procedure_code
 session_create_sm_context_procedure::send_n4_session_establishment_request() {
   std::shared_ptr<pfcp_association> current_upf;
@@ -558,10 +561,10 @@ smf_procedure_code session_create_sm_context_procedure::run(
     std::shared_ptr<smf::smf_context> sc) {
   Logger::smf_app().info("Perform a procedure - Create SM Context Request");
   // TODO check if compatible with ongoing procedures if any
-  snssai_t snssai                 = sm_context_req->req.get_snssai();
-  std::string dnn                 = sm_context_req->req.get_dnn();
-  pdu_session_id_t pdu_session_id = sm_context_req->req.get_pdu_session_id();
-  std::shared_ptr<upf_graph> graph;
+  snssai_t snssai                  = sm_context_req->req.get_snssai();
+  std::string dnn                  = sm_context_req->req.get_dnn();
+  pdu_session_id_t pdu_session_id  = sm_context_req->req.get_pdu_session_id();
+  std::shared_ptr<upf_graph> graph = {};
 
   // Find PDU session
   std::shared_ptr<smf_context_ref> scf = {};
@@ -645,7 +648,7 @@ smf_procedure_code session_create_sm_context_procedure::run(
 
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
-  std::shared_ptr<pfcp_association> upf;
+  std::shared_ptr<pfcp_association> upf = {};
   // Get next UPF for the first N4 session establishment
   get_next_upf(dl_edges, ul_edges, upf);
 
@@ -674,7 +677,7 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
     return smf_procedure_code::ERROR;
   }
 
-  std::shared_ptr<pfcp_association> current_upf;
+  std::shared_ptr<pfcp_association> current_upf = {};
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
   if (get_current_upf(dl_edges, ul_edges, current_upf) !=
@@ -720,7 +723,7 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
   while (search_upf) {
     std::vector<edge> next_dl_edges;
     std::vector<edge> next_ul_edges;
-    std::shared_ptr<pfcp_association> next_upf;
+    std::shared_ptr<pfcp_association> next_upf = {};
     send_n4_res = get_next_upf(next_dl_edges, next_ul_edges, next_upf);
     if (send_n4_res != smf_procedure_code::CONTINUE) {
       search_upf = false;
@@ -792,7 +795,7 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
 //------------------------------------------------------------------------------
 smf_procedure_code
 session_update_sm_context_procedure::send_n4_session_modification_request() {
-  std::shared_ptr<pfcp_association> current_upf{};
+  std::shared_ptr<pfcp_association> current_upf = {};
   std::vector<edge> dl_edges{};
   std::vector<edge> ul_edges{};
 
@@ -896,7 +899,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
   smf_qos_flow empty_flow{};
   graph->start_asynch_dfs_procedure(false, empty_flow);
 
-  std::shared_ptr<pfcp_association> current_upf;
+  std::shared_ptr<pfcp_association> current_upf = {};
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
 
@@ -1145,73 +1148,6 @@ smf_procedure_code session_update_sm_context_procedure::run(
       }
     } break;
 
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_AMF_INITIATED:
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-      for (const auto& qfi : list_of_qfis_to_be_modified) {
-        auto flow = dl_edges[0].get_qos_flow(qfi);
-        if (!flow) {  // no QoS flow found
-          Logger::smf_app().error(
-              "Update SM Context procedure: could not found QoS flow with QFI "
-              "%d",
-              qfi.qfi);
-          // Set cause to SYSTEM_FAILURE and send response
-          qos_flow_context_updated qcu = {};
-          qcu.set_cause(static_cast<uint8_t>(
-              cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
-          qcu.set_qfi(qfi);
-          n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-          continue;
-        }
-
-        // for DL
-        if (flow->far_id_dl.first) {
-          pfcp::update_far far  = {};
-          pfcp::far_id_t far_id = {};
-
-          far_id.far_id = flow->far_id_dl.second.far_id;
-          // apply_action.buff = 1;
-          pfcp::apply_action_t apply_action = {};
-          apply_action.nocp = 1;  // notify the CP function about the arrival of
-                                  // a first DL packet
-
-          far.set(far_id);
-          far.set(apply_action);
-          // Add IEs to message
-          n4_triggered->pfcp_ies.set(far);
-
-          send_n4 = true;
-
-        } else {
-          Logger::smf_app().info(
-              "Update SM Context procedure, could not get FAR ID of QoS Flow "
-              "ID %d",
-              flow->qfi.qfi);
-        }
-
-        // for UL
-        if (flow->far_id_ul.first) {
-          pfcp::update_far far              = {};
-          pfcp::far_id_t far_id             = {};
-          far_id.far_id                     = flow->far_id_ul.second.far_id;
-          pfcp::apply_action_t apply_action = {};
-          apply_action.drop                 = 1;
-
-          far.set(far_id);
-          far.set(apply_action);
-          // Add IEs to message
-          n4_triggered->pfcp_ies.set(far);
-          send_n4 = true;
-        }
-
-        // update in the PDU Session
-        flow->mark_as_released();
-        // TODO can I safely remove that
-        // sps->add_qos_flow(flow);
-      }
-    } break;
-
     default: {
       Logger::smf_app().error(
           "Update SM Context procedure: Unknown session management type %d",
@@ -1260,13 +1196,17 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
      allocated (e.g. IP address) and releases the association with PCF, if any.
      see step 18, section 4.3.2.2.1@3GPP TS 23.502)
      */
+    // TODO: should we return here with smf_procedure_code::ERROR;
+  } else {
+    n11_triggered_pending->res.set_cause(
+        static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   }
 
   // list of accepted QFI(s) and AN Tunnel Info corresponding to the PDU Session
   std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified = {};
   n11_trigger->req.get_qfis(list_of_qfis_to_be_modified);
 
-  std::shared_ptr<pfcp_association> current_upf{};
+  std::shared_ptr<pfcp_association> current_upf = {};
   std::vector<edge> dl_edges{};
   std::vector<edge> ul_edges{};
 
@@ -1302,7 +1242,7 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
       n11_trigger->req.get_dl_fteid(n3_dl_fteid);
 
       Logger::smf_app().debug(
-          "AN F-TEID ID"
+          "AN F-TEID ID "
           "0x%" PRIx32 ", IP Addr %s",
           n3_dl_fteid.teid, conv::toString(n3_dl_fteid.ipv4_address).c_str());
 
@@ -1410,33 +1350,12 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
       } else {
         Logger::smf_app().info(
             "PDU Session Update SM Context, rejected by UPF");
-        // trigger to send reply to AMF
-        smf_app_inst->trigger_update_context_error_response(
-            http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
-            PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE,
-            n11_triggered_pending->pid);
         return smf_procedure_code::ERROR;
       }
     } break;
-
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_AMF_INITIATED:
-    case session_management_procedures_type_e::
-        PDU_SESSION_RELEASE_UE_REQUESTED_STEP1: {
-      if (cause.cause_value == CAUSE_VALUE_REQUEST_ACCEPTED) {
-        Logger::smf_app().info(
-            "PDU Session Update SM Context (PDU Session Release) accepted by "
-            "UPF");
-        // clear the resources including addresses allocated to this Session and
-        // associated QoS flows
-        sps->deallocate_ressources(
-            n11_trigger.get()->req.get_dnn());  // TODO: for IPv6 (only for Ipv4
-                                                // for the moment)
-      }
-    }
   }
 
-  std::shared_ptr<pfcp_association> next_upf{};
+  std::shared_ptr<pfcp_association> next_upf = {};
   std::vector<edge> next_dl_edges{};
   std::vector<edge> next_ul_edges{};
 
@@ -1445,7 +1364,7 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
     return send_n4_session_modification_request();
   }
 
-  n11_triggered_pending->res.set_cause(cause.cause_value);
+  // n11_triggered_pending->res.set_cause(cause.cause_value);
   n11_triggered_pending->res.set_http_code(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);
 
@@ -1457,7 +1376,7 @@ smf_procedure_code
 session_release_sm_context_procedure::send_n4_session_deletion_request() {
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
-  std::shared_ptr<pfcp_association> current_upf;
+  std::shared_ptr<pfcp_association> current_upf = {};
 
   if (get_current_upf(dl_edges, ul_edges, current_upf) ==
       smf_procedure_code::ERROR) {
@@ -1530,7 +1449,7 @@ smf_procedure_code session_release_sm_context_procedure::run(
 
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
-  std::shared_ptr<pfcp_association> current_upf;
+  std::shared_ptr<pfcp_association> current_upf = {};
   if (get_next_upf(dl_edges, ul_edges, current_upf) ==
       smf_procedure_code::ERROR) {
     return smf_procedure_code::ERROR;
@@ -1557,8 +1476,8 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
 
   std::vector<edge> dl_edges;
   std::vector<edge> ul_edges;
-  std::shared_ptr<pfcp_association> current_upf;
-  bool continue_n4 = false;
+  std::shared_ptr<pfcp_association> current_upf = {};
+  bool continue_n4                              = false;
   if (get_next_upf(dl_edges, ul_edges, current_upf) ==
       smf_procedure_code::CONTINUE) {
     // If we have to continue, we ignore the PFCP error code, because we should
@@ -1571,12 +1490,6 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
     n11_triggered_pending->res.set_cause(
         static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
     Logger::smf_app().info("PDU Session Release SM Context accepted by UPFs");
-    // clear the resources including addresses allocated to this Session and
-    // associated QoS flows
-    sps->deallocate_ressources(
-        n11_trigger->req
-            .get_dnn());  // TODO: for IPv6 (only for Ipv4 for the moment)
-    // trigger to send reply to AMF
     return smf_procedure_code::OK;
   } else {
     n11_triggered_pending->res.set_cause(static_cast<uint8_t>(

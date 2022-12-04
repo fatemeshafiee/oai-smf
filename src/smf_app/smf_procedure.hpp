@@ -257,7 +257,8 @@ class session_release_sm_context_procedure : public smf_session_procedure {
       : smf_session_procedure(ps),
         n4_triggered(),
         n11_triggered_pending(),
-        n11_trigger() {}
+        n11_trigger(),
+        session_procedure_type() {}
 
   /*
    * Execute N11 Release SM Context Request procedure
@@ -285,6 +286,7 @@ class session_release_sm_context_procedure : public smf_session_procedure {
 
   std::shared_ptr<itti_n11_release_sm_context_request> n11_trigger;
   std::shared_ptr<itti_n11_release_sm_context_response> n11_triggered_pending;
+  session_management_procedures_type_e session_procedure_type;
 
  private:
   smf_procedure_code send_n4_session_deletion_request();

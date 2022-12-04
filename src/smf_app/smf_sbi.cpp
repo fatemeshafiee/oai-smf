@@ -1392,7 +1392,7 @@ uint32_t smf_sbi::get_available_response(boost::shared_future<uint32_t>& f) {
     uint32_t response_code = f.get();
     return response_code;
   } else {
-    return 408;  // timeout, TODO: remove hardcoded value
+    return http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
   }
 }
 

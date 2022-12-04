@@ -614,7 +614,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     // Subscribe to PDU Session Release (event exposure)
     ee_pdu_session_release_connection =
         event_sub.subscribe_ee_pdu_session_release(boost::bind(
-            &smf_context::handle_ee_pdu_session_release, this, _1, _2, _3));
+            &smf_context::handle_ee_pdu_session_release, this, _1, _2));
 
     // Subscribe to UE IP Change Event
     ee_ue_ip_change_connection = event_sub.subscribe_ee_ue_ip_change(
@@ -885,7 +885,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   bool handle_pdu_session_resource_release_response_transfer(
       std::string& n2_sm_information,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<smf_pdu_session>& sp);
 
   /*
    * Handle Xn Handover Patch Switch Request
@@ -1173,14 +1174,29 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>& sessions);
 
   /*
-   * Handle SM Context Status Change (Send notification AMF)
-   * @param [scid_t] scid: SMF Context ID
-   * @param [uint32_t] status: Updated status
-   * @param [uint8_t] http_version: HTTP version
-   * @return void
+   * Get PDU related information
+   * @param [const scid_t&] scid: SMF Context ID
+   * @param [supi64_t&] supi: SUPI
+   * @param [pdu_session_id_t&] pdu_session_id: PDU Session ID
+   * @return true if this Context ID exist and can get related info, otherwise,
+   * return false
    */
-  void handle_sm_context_status_change(
-      scid_t scid, const std::string& status, uint8_t http_version);
+  bool get_pdu_session_info(
+      const scid_t& scid, supi64_t& supi,
+      pdu_session_id_t& pdu_session_id) const;
+
+  /*
+   * Get PDU related information
+   * @param [const scid_t&] scid: SMF Context ID
+   * @param [supi64_t&] supi: SUPI
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: Pointer to the PDU Session
+   * Info
+   * @return true if this Context ID exist and can get related info, otherwise,
+   * return false
+   */
+  bool get_pdu_session_info(
+      const scid_t& scid, supi64_t& supi,
+      std::shared_ptr<smf_pdu_session>& sp) const;
 
   /*
    * Handle SM Context Status Change (Send notification AMF)
@@ -1189,30 +1205,51 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [uint8_t] http_version: HTTP version
    * @return void
    */
+  void handle_sm_context_status_change(
+      const scid_t& scid, const std::string& status,
+      const uint8_t& http_version) const;
+
+  /*
+   * Trigger PDU Session Release Notification (Send notification AMF)
+   * @param [scid_t] scid: SMF Context ID
+   * @param [uint8_t] http_version: HTTP version
+   * @return void
+   */
+  void trigger_pdu_session_release(
+      const scid_t& scid, const uint8_t& http_version) const;
   void handle_ee_pdu_session_release(
-      supi64_t supi, pdu_session_id_t pdu_session_id, uint8_t http_version);
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_ue_ip_change(scid_t scid, uint8_t http_version);
-  void handle_ue_ip_change(scid_t scid, uint8_t http_version);
+  void trigger_ue_ip_change(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_ue_ip_change(
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_plmn_change(scid_t scid, uint8_t http_version);
-  void handle_plmn_change(scid_t scid, uint8_t http_version);
+  void trigger_plmn_change(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_plmn_change(
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_ddds(scid_t scid, uint8_t http_version);
-  void handle_ddds(scid_t scid, uint8_t http_version);
+  void trigger_ddds(const scid_t& scid, const uint8_t& http_version) const;
+  void handle_ddds(const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_pdusesest(scid_t scid, uint8_t http_version);
-  void handle_pdusesest(scid_t scid, uint8_t http_version);
+  void trigger_pdusesest(const scid_t& scid, const uint8_t& http_version) const;
+  void handle_pdusesest(const scid_t& scid, const uint8_t& http_version) const;
 
   void trigger_qos_monitoring(
-      seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
-      uint8_t http_version);
+      const seid_t& seid,
+      const oai::smf_server::model::EventNotification& ev_notif_model,
+      const uint8_t& http_version) const;
   void handle_qos_monitoring(
-      seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
-      uint8_t http_version);
+      const seid_t& seid,
+      const oai::smf_server::model::EventNotification& ev_notif_model,
+      const uint8_t& http_version) const;
 
-  void trigger_flexcn_event(scid_t scid, uint8_t http_version);
-  void handle_flexcn_event(scid_t scid, uint8_t http_version);
+  void trigger_flexcn_event(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_flexcn_event(
+      const scid_t& scid, const uint8_t& http_version) const;
+
   /*
    * Update QoS information in the Response message according to the content of
    * decoded NAS msg
@@ -1338,7 +1375,10 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param resp
    */
   void send_pdu_session_release_response(
-      const std::shared_ptr<itti_n11_release_sm_context_response>& resp);
+      const std::shared_ptr<itti_n11_release_sm_context_request>& req,
+      const std::shared_ptr<itti_n11_release_sm_context_response>& resp,
+      const session_management_procedures_type_e& session_procedure_type,
+      const std::shared_ptr<smf_pdu_session>& sps);
 
  private:
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;
