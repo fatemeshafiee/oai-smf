@@ -760,7 +760,11 @@ bool smf_n1::create_n1_pdu_session_release_command(
   // ExtendedProtocolConfigurationOptions
 
   Logger::smf_n1().debug(
-      "SM message, 5GSM Cause: 0x%x",
+      "SM message, PDU Session ID %d, PTI %d, Message Type %0x%x, 5GSM Cause: "
+      "0x%x",
+      sm_msg->header.pdu_session_identity,
+      sm_msg->header.procedure_transaction_identity,
+      sm_msg->header.message_type,
       sm_msg->pdu_session_release_command._5gsmcause);
 
   // Encode NAS message

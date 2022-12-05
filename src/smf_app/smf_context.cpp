@@ -1171,7 +1171,7 @@ void smf_context::get_default_qos_flow_description(
       (ParametersList*) calloc(3, sizeof(ParametersList));
   qos_flow_description.parameterslist[0].parameteridentifier =
       PARAMETER_IDENTIFIER_5QI;
-  qos_flow_description.parameterslist[0].parametercontents._5qi = qfi.qfi;
+  qos_flow_description.parameterslist[0].parametercontents._5qi = DEFAULT_5QI;
   /*
    qos_flow_description.parameterslist[1].parameteridentifier =
    PARAMETER_IDENTIFIER_GFBR_UPLINK;
@@ -2129,11 +2129,11 @@ bool smf_context::handle_pdu_session_release_request(
     return false;
   }
 
-  Logger::smf_app().info(
-      "PTI %d", nas_msg.plain.sm.header.procedure_transaction_identity);
   procedure_transaction_id_t pti = {
       .procedure_transaction_id =
           nas_msg.plain.sm.header.procedure_transaction_identity};
+
+  Logger::smf_app().info("PTI %d", pti.procedure_transaction_id);
   sm_context_resp.get()->res.set_pti(pti);
 
   // Message Type
@@ -3083,6 +3083,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
           sm_context_req_msg.get_pdu_session_id());
       sm_context_rel_req_msg.set_snssai(sm_context_req_msg.get_snssai());
       sm_context_rel_req_msg.set_dnn(sm_context_req_msg.get_dnn());
+      sm_context_rel_req_msg.set_pti(sm_context_req_msg.get_pti());
 
       // check if update message contain N2 SM info
       if (sm_context_req_msg.n2_sm_info_is_set()) {
