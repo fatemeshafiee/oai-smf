@@ -3083,7 +3083,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
           sm_context_req_msg.get_pdu_session_id());
       sm_context_rel_req_msg.set_snssai(sm_context_req_msg.get_snssai());
       sm_context_rel_req_msg.set_dnn(sm_context_req_msg.get_dnn());
-      sm_context_rel_req_msg.set_pti(sm_context_req_msg.get_pti());
+      sm_context_rel_req_msg.set_pti(sm_context_resp_pending->res.get_pti());
 
       // check if update message contain N2 SM info
       if (sm_context_req_msg.n2_sm_info_is_set()) {
