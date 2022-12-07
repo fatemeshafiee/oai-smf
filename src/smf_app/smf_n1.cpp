@@ -166,7 +166,7 @@ bool smf_n1::create_n1_pdu_session_establishment_accept(
   // PDUAddress
   paa_t paa = sm_context_res.get_paa();
   Logger::smf_n1().debug(
-      "PDU Session Type %s", paa.pdu_session_type.toString().c_str());
+      "PDU Session Type %s", paa.pdu_session_type.to_string().c_str());
   sm_msg->pdu_session_establishment_accept.pduaddress.pdu_session_type_value =
       static_cast<uint8_t>(paa.pdu_session_type.pdu_session_type);
   if (paa.pdu_session_type.pdu_session_type == PDU_SESSION_TYPE_E_IPV4) {

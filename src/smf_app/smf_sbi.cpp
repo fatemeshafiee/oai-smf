@@ -937,6 +937,8 @@ bool smf_sbi::get_sm_data(
 
     // Verify DNN configurations
     if (jsonData.find("dnnConfigurations") == jsonData.end()) return false;
+    Logger::smf_sbi().debug(
+        "DNN Configurations %s", jsonData["dnnConfigurations"].dump().c_str());
 
     // Retrieve SessionManagementSubscription and store in the context
     for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin();

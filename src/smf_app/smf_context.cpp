@@ -379,7 +379,7 @@ std::string smf_pdu_session::toString() const {
     s.append("\tDNN:\t\t\t").append(dnn).append("\n");
     s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
     s.append("\tPDN type:\t\t")
-        .append(pdu_session_type.toString())
+        .append(pdu_session_type.to_string())
         .append("\n");
   }
   if (ipv4)
@@ -3127,6 +3127,8 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
           sm_context_rel_req_msg.get_snssai());
       sm_context_rel_resp_pending->res.set_dnn(
           sm_context_rel_req_msg.get_dnn());
+      sm_context_rel_resp_pending->res.set_pti(
+          sm_context_rel_req_msg.get_pti());
 
       auto proc = std::make_shared<session_release_sm_context_procedure>(sp);
       std::shared_ptr<smf_procedure> sproc = proc;
@@ -4425,7 +4427,7 @@ void smf_context::handle_flexcn_event(
         }
       }
       cj["pdu_session_type"] =
-          sp->pdu_session_type.toString();  // PDU Session Type
+          sp->pdu_session_type.to_string();  // PDU Session Type
       // NSSAI
       cj["snssai"]["sst"] = sp->get_snssai().sst;
       cj["snssai"]["sd"]  = std::to_string(sp->get_snssai().sd);
@@ -4552,7 +4554,7 @@ void smf_context::handle_pdusesest(
         }
       }
       ev_notif.set_pdu_session_type(
-          sp->pdu_session_type.toString());  // PDU Session Type
+          sp->pdu_session_type.to_string());  // PDU Session Type
       ev_notif.set_sst(sp->get_snssai().sst);
       ev_notif.set_sd(std::to_string(sp->get_snssai().sd));
       ev_notif.set_dnn(sp->get_dnn());

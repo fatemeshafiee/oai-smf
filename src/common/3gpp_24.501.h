@@ -32,6 +32,7 @@
 #include <netinet/in.h>
 
 #ifdef __cplusplus
+#include <nlohmann/json.hpp>
 extern "C" {
 #endif
 
@@ -338,8 +339,14 @@ typedef struct pdu_session_type_s {
     return (p == pdu_session_type);
   }
   //------------------------------------------------------------------------------
-  const std::string& toString() const {
+  const std::string& to_string() const {
     return pdu_session_type_e2str.at(pdu_session_type);
+  }
+
+  nlohmann::json to_json() const {
+    nlohmann::json json_data = {};
+    json_data                = to_string();
+    return json_data;
   }
 
 } pdu_session_type_t;
