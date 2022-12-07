@@ -3127,6 +3127,8 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
           sm_context_rel_req_msg.get_snssai());
       sm_context_rel_resp_pending->res.set_dnn(
           sm_context_rel_req_msg.get_dnn());
+      sm_context_rel_resp_pending->res.set_pti(
+          sm_context_rel_req_msg.get_pti());
 
       auto proc = std::make_shared<session_release_sm_context_procedure>(sp);
       std::shared_ptr<smf_procedure> sproc = proc;
