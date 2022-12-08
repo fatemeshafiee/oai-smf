@@ -1020,7 +1020,7 @@ bool smf_sbi::get_sm_data(
               } else {
                 Logger::smf_app().error(
                     "Bad UE IPv6 Addr %s", ue_ip_str.c_str());
-                throw("Bad UE IPv6 Addr %s", ue_ip_str.c_str());
+                ue_ipv6_addr = in6addr_any;
               }
 
               ip_address_t ue_ip = {};
@@ -1047,7 +1047,7 @@ bool smf_sbi::get_sm_data(
               } else {
                 Logger::smf_app().error(
                     "Bad UE IPv6 Addr %s", words.at(0).c_str());
-                throw("Bad UE IPv6 Addr %s", words.at(0).c_str());
+                ipv6_prefix = in6addr_any;
               }
 
               ip_address_t ue_ip           = {};
