@@ -1085,7 +1085,7 @@ void smf_config::display() {
        it++) {
     Logger::smf_app().info(
         "    DNN..........: %s (%s)", it->second.dnn.c_str(),
-        it->second.pdu_session_type.toString().c_str());
+        it->second.pdu_session_type.to_string().c_str());
 
     if ((it->second.pdu_session_type.pdu_session_type ==
          pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4) or

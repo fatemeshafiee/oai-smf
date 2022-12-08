@@ -94,7 +94,7 @@ struct policy_association {
     context.setSupi("imsi-" + supi);
     oai::smf_server::model::PduSessionType pdu_session_type_model;
     // hacky
-    from_json(pdu_session_type.toString(), pdu_session_type_model);
+    from_json(pdu_session_type.to_string(), pdu_session_type_model);
     context.setPduSessionType(pdu_session_type_model);
     context.setDnn(dnn);
     context.setSliceInfo(snssai_model);
