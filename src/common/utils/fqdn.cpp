@@ -34,11 +34,11 @@ bool fqdn::resolve(
     const std::string& host_name, std::string& address, uint32_t& port,
     uint8_t& addr_type, const std::string& protocol) {
   int tries = 0;
-  Logger::smf_app().debug("Resolving a DNS (name %s)", host_name.c_str());
+  // Logger::smf_app().debug("Resolving a DNS (name %s)", host_name.c_str());
   while (tries < MAX_NB_RESOLVE_TRIES) {
     try {
       boost::asio::io_context io_context = {};
-      Logger::smf_app().debug("Resolving DNS Try #%u", tries + 1);
+      // Logger::smf_app().debug("Resolving DNS Try #%u", tries + 1);
 
       boost::asio::ip::tcp::resolver resolver{io_context};
       boost::asio::ip::tcp::resolver::results_type endpoints =

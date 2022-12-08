@@ -373,11 +373,11 @@ std::string smf_pdu_session::toString() const {
   if (pdu_session_status == pdu_session_status_e::PDU_SESSION_INACTIVE)
     is_released = true;
   if (!is_released) {
-    s.append("\tPDU Session ID:\t")
+    s.append("\tPDU Session ID:\t\t\t")
         .append(std::to_string((uint8_t) pdu_session_id))
         .append("\n");
     s.append("\tDNN:\t\t\t").append(dnn).append("\n");
-    s.append("\tSNSSAI:\t\t\t").append(snssai.toString()).append("\n");
+    s.append("\tS-NSSAI:\t\t\t").append(snssai.toString()).append("\n");
     s.append("\tPDN type:\t\t")
         .append(pdu_session_type.toString())
         .append("\n");
@@ -391,11 +391,11 @@ std::string smf_pdu_session::toString() const {
         .append(conv::toString(ipv6_address))
         .append("\n");
   if (default_qfi.qfi) {
-    s.append("\tDefault QFI:\t")
+    s.append("\tDefault QFI:\t\t")
         .append(std::to_string(default_qfi.qfi))
         .append("\n");
   } else {
-    s.append("\tDefault QFI:\t").append("No QFI available").append("\n");
+    s.append("\tDefault QFI:\t\t").append("No QFI available").append("\n");
   }
   if (!is_released) {
     s.append("\tSEID:\t\t\t").append(std::to_string(seid)).append("\n");

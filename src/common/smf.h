@@ -445,10 +445,10 @@ typedef struct snssai_upf_info_item_s {
   std::string to_string() const {
     std::string s = {};
 
-    s.append("SNSSAI Info: " + snssai.toString() + ", ");
+    s.append("{" + snssai.toString() + ", ");
 
     if (dnn_upf_info_list.size() > 0) {
-      s.append("DNN UPF Info list: {");
+      s.append("{");
 
       for (auto dnn_upf : dnn_upf_info_list) {
         s.append(dnn_upf.to_string());
@@ -493,11 +493,11 @@ typedef struct upf_info_s {
     std::string s = {};
     // TODO: Interface UPF Info List
     if (!snssai_upf_info_list.empty()) {
-      s.append("SNSSAI UPF Info: ");
+      s.append("S-NSSAI UPF Info: ");
       for (auto sn : snssai_upf_info_list) {
         s.append("{" + sn.snssai.toString() + ", ");
         for (auto d : sn.dnn_upf_info_list) {
-          s.append("{DNN = " + d.dnn + "}, ");
+          s.append("{DNN = " + d.dnn + "} ");
         }
         s.append("};");
       }

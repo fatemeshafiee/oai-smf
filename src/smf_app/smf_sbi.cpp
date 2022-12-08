@@ -796,12 +796,10 @@ void smf_sbi::subscribe_upf_status_notify(
       "available (HTTP version %d)",
       msg->http_version);
 
-  Logger::smf_sbi().debug(
-      "Send NFStatusNotify to NRF, NRF URL %s", msg->url.c_str());
+  Logger::smf_sbi().debug("NRF's URL: %s", msg->url.c_str());
 
   std::string body = msg->json_data.dump();
-  Logger::smf_sbi().debug(
-      "Send NFStatusNotify to NRF, msg body: %s", body.c_str());
+  Logger::smf_sbi().debug("Message body: %s", body.c_str());
 
   std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle

@@ -1423,7 +1423,7 @@ bool smf_app::handle_nf_status_notification(
           if (!found) {
             // Add a new UPF node
             Logger::smf_app().debug(
-                "Add a new UPF node, FQDN %s", upf_fqdn.c_str());
+                "Add a new UPF node with FQDN: %s", upf_fqdn.c_str());
             // pfcp::node_id_t n = {};
             n.node_id_type = pfcp::NODE_ID_TYPE_FQDN;
             n.fqdn         = upf_fqdn;
@@ -1448,7 +1448,8 @@ bool smf_app::handle_nf_status_notification(
           if (!found) {
             // Add a new UPF node
             Logger::smf_app().debug(
-                "Add a new UPF node, Ipv4 Addr %s", inet_ntoa(ipv4_addrs[0]));
+                "Add a new UPF node with Ipv4 Addr: %s",
+                inet_ntoa(ipv4_addrs[0]));
             if (n.node_id_type == pfcp::NODE_ID_TYPE_UNKNOWN)
               n.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
             n.u1.ipv4_address.s_addr = ipv4_addrs[0].s_addr;
@@ -2287,6 +2288,7 @@ void smf_app::generate_smf_profile() {
 
 //---------------------------------------------------------------------------------------------
 void smf_app::register_to_nrf() {
+  Logger::smf_app().debug("Register SMF with NRF");
   // Create a NF profile to this instance
   generate_smf_profile();
   // Send request to N11 to send NF registration to NRF

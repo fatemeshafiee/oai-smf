@@ -49,8 +49,7 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
   edge e                             = {};
   snssai_upf_info_item_s snssai_item = {};
 
-  Logger::smf_app().debug(
-      "Edge from UPF info, UPF info %s", upf_info.to_string().c_str());
+  Logger::smf_app().debug("UPF info: %s", upf_info.to_string().c_str());
 
   for (auto& snssai : upf_info.snssai_upf_info_list) {
     snssai_item.snssai            = snssai.snssai;
@@ -63,8 +62,8 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
         snssai_item.dnn_upf_info_list.insert(
             item.dnn_upf_info_list.begin(), item.dnn_upf_info_list.end());
         item.dnn_upf_info_list = snssai_item.dnn_upf_info_list;
-        Logger::smf_app().debug(
-            "Updated item info: %s", snssai_item.to_string().c_str());
+        // Logger::smf_app().debug(
+        //    "Updated item info: %s", snssai_item.to_string().c_str());
         break;
       }
     }
@@ -73,12 +72,12 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
   }
 
   if (!e.snssai_dnns.empty()) {
-    Logger::smf_app().debug("Edge from UPF info");
+    Logger::smf_app().debug("Link info:");
     for (const auto s : e.snssai_dnns) {
-      Logger::smf_app().debug("info: %s", s.to_string().c_str());
+      Logger::smf_app().debug("%s", s.to_string().c_str());
     }
   } else {
-    Logger::smf_app().debug("Edge from UPF info, empty");
+    Logger::smf_app().debug("Link info from UPF, empty");
   }
   return e;
 }
@@ -127,18 +126,17 @@ bool edge::serves_network(
     const std::string& dnn, const snssai_t& snssai,
     const std::unordered_set<std::string>& dnais,
     std::string& matched_dnai) const {
-  Logger::smf_app().debug(
-      "Serves Network, DNN %s, S-NSSAI %s", dnn.c_str(),
-      snssai.toString().c_str());
+  // Logger::smf_app().debug(
+  //    "Serves Network, DNN %s, S-NSSAI %s", dnn.c_str(),
+  //    snssai.toString().c_str());
   // just create a snssai_upf_info_item for fast lookup
   snssai_upf_info_item_s snssai_item = {};
   snssai_item.snssai                 = snssai;
   // For debugging purpose
   if (!snssai_dnns.empty()) {
-    Logger::smf_app().debug("S-NSSAI UPF info list");
+    Logger::smf_app().debug("S-NSSAI UPF info list: ");
     for (const auto& s : snssai_dnns) {
-      Logger::smf_app().debug(
-          "S-NSSAI UPF info item %s", s.to_string().c_str());
+      Logger::smf_app().debug("%s", s.to_string().c_str());
     }
   }
 
@@ -366,7 +364,7 @@ bool pfcp_association::find_interface_edge(
   // just guess that this UPF has a N3 or N6 interface
   if (upf_info.interface_upf_info_list.empty()) {
     Logger::smf_app().info(
-        "UPF Interface list ist empty: Assume that the UPF has a N3 and a N6 "
+        "UPF Interface list is empty: Assume that the UPF has a N3 and a N6 "
         "interface.");
     edge e = edge::from_upf_info(upf_info);
     e.type = type_match;
@@ -864,8 +862,8 @@ bool pfcp_associations::add_peer_candidate_node(
       std::make_shared<pfcp_association>(node_id);
   s->set_upf_node_profile(profile);
   pending_associations.push_back(s);
-  Logger::smf_app().info("Added a pending association candidate");
-  s->display();
+  // Logger::smf_app().info("Added a pending association candidate");
+  // s->display();
   return true;
 }
 
