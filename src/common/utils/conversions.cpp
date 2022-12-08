@@ -181,8 +181,13 @@ void conv::plmnToMccMnc(
     }
   } else {
     m_mnc = plmn.mnc_digit3 * 100 + plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
+    mnc   = std::to_string(m_mnc);
+    if ((plmn.mnc_digit2 == 0) and (plmn.mnc_digit1 == 0)) {
+      mnc = "00" + mnc;
+    } else if (plmn.mnc_digit1 == 0) {
+      mnc = "0" + mnc;
+    }
   }
-  mnc = std::to_string(m_mnc);
 
   return;
 }
