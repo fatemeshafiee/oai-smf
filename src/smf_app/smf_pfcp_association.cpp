@@ -72,12 +72,12 @@ edge edge::from_upf_info(const upf_info_t& upf_info) {
   }
 
   if (!e.snssai_dnns.empty()) {
-    Logger::smf_app().debug("Link info:");
+    Logger::smf_app().debug("UPF link info:");
     for (const auto s : e.snssai_dnns) {
       Logger::smf_app().debug("%s", s.to_string().c_str());
     }
   } else {
-    Logger::smf_app().debug("Link info from UPF, empty");
+    Logger::smf_app().debug("UPF link info empty");
   }
   return e;
 }
