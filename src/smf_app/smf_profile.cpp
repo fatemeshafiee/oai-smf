@@ -27,11 +27,12 @@
  \email: Tien-Thinh.Nguyen@eurecom.fr
  */
 
+#include "smf_profile.hpp"
+
+#include "3gpp_conversions.hpp"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-
 #include "logger.hpp"
-#include "smf_profile.hpp"
 #include "string.hpp"
 
 using namespace std;
@@ -282,17 +283,11 @@ void nf_profile::from_json(const nlohmann::json& data) {
   if (data.find("sNssais") != data.end()) {
     for (auto it : data["sNssais"]) {
       snssai_t s = {};
-      s.sst      = it["sst"].get<int>();
-      s.sd       = 0xFFFFFF;
-      try {
-        s.sd = std::stoul(it["sd"].get<std::string>(), nullptr, 10);
-      } catch (const std::exception& e) {
-        Logger::smf_app().warn(
-            "Error when converting from string to int for snssai.SD, error: %s",
-            e.what());
+      s.sd       = SD_NO_VALUE;
+      if (it.find("sst") != it.end()) s.sst = it["sst"].get<int>();
+      if (it.find("sd") != it.end()) {
+        xgpp_conv::sd_string_to_int(it["sd"].get<std::string>(), s.sd);
       }
-
-      // s.sD       = it["sd"].get<std::string>();
       snssais.push_back(s);
     }
   }
@@ -472,20 +467,13 @@ void smf_profile::from_json(const nlohmann::json& data) {
 
       for (auto it : snssai_smf_info_list) {
         snssai_smf_info_item_t smf_info_item = {};
+        smf_info_item.snssai.sd              = SD_NO_VALUE;
         if (it.find("sNssai") != it.end()) {
           if (it["sNssai"].find("sst") != it["sNssai"].end())
             smf_info_item.snssai.sst = it["sNssai"]["sst"].get<int>();
           if (it["sNssai"].find("sd") != it["sNssai"].end()) {
-            smf_info_item.snssai.sd = 0xFFFFFF;
-            try {
-              smf_info_item.snssai.sd = std::stoul(
-                  it["sNssai"]["sd"].get<std::string>(), nullptr, 10);
-            } catch (const std::exception& e) {
-              Logger::smf_app().warn(
-                  "Error when converting from string to int for snssai.SD, "
-                  "error: %s",
-                  e.what());
-            }
+            xgpp_conv::sd_string_to_int(
+                it["sNssai"]["sd"].get<std::string>(), smf_info_item.snssai.sd);
           }
         }
         if (it.find("dnnSmfInfoList") != it.end()) {
@@ -629,20 +617,13 @@ void upf_profile::from_json(const nlohmann::json& data) {
 
       for (auto it : snssai_upf_info_list) {
         snssai_upf_info_item_t upf_info_item = {};
+        upf_info_item.snssai.sd              = SD_NO_VALUE;
         if (it.find("sNssai") != it.end()) {
           if (it["sNssai"].find("sst") != it["sNssai"].end())
             upf_info_item.snssai.sst = it["sNssai"]["sst"].get<int>();
           if (it["sNssai"].find("sd") != it["sNssai"].end()) {
-            upf_info_item.snssai.sd = 0xFFFFFF;
-            try {
-              upf_info_item.snssai.sd = std::stoul(
-                  it["sNssai"]["sd"].get<std::string>(), nullptr, 10);
-            } catch (const std::exception& e) {
-              Logger::smf_app().warn(
-                  "Error when converting from string to int for snssai.SD, "
-                  "error: %s",
-                  e.what());
-            }
+            xgpp_conv::sd_string_to_int(
+                it["sNssai"]["sd"].get<std::string>(), upf_info_item.snssai.sd);
           }
         }
         if (it.find("dnnUpfInfoList") != it.end()) {

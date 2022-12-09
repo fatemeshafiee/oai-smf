@@ -44,21 +44,49 @@ extern itti_mw* itti_inst;
 extern smf_n4* smf_n4_inst;
 extern smf_config smf_cfg;
 
+//---------------------------------------------------------------------------------------------
 edge edge::from_upf_info(const upf_info_t& upf_info) {
-  edge e;
-  snssai_upf_info_item_s snssai_item;
+  edge e                             = {};
+  snssai_upf_info_item_s snssai_item = {};
 
-  for (const auto& snssai : upf_info.snssai_upf_info_list) {
+  Logger::smf_app().debug("UPF info: %s", upf_info.to_string().c_str());
+
+  for (auto& snssai : upf_info.snssai_upf_info_list) {
     snssai_item.snssai            = snssai.snssai;
     snssai_item.dnn_upf_info_list = snssai.dnn_upf_info_list;
-    e.snssai_dnns.insert(snssai);
+    bool found                    = false;
+    for (auto& item : e.snssai_dnns) {
+      if (item.snssai == snssai.snssai) {
+        // Update item if exist
+        found = true;
+        snssai_item.dnn_upf_info_list.insert(
+            item.dnn_upf_info_list.begin(), item.dnn_upf_info_list.end());
+        item.dnn_upf_info_list = snssai_item.dnn_upf_info_list;
+        // Logger::smf_app().debug(
+        //    "Updated item info: %s", snssai_item.to_string().c_str());
+        break;
+      }
+    }
+    // Insert a new item otherwise
+    if (!found) e.snssai_dnns.insert(snssai_item);
+  }
+
+  if (!e.snssai_dnns.empty()) {
+    Logger::smf_app().debug("UPF link info:");
+    for (const auto s : e.snssai_dnns) {
+      Logger::smf_app().debug("%s", s.to_string().c_str());
+    }
+  } else {
+    Logger::smf_app().debug("UPF link info empty");
   }
   return e;
 }
 
+//---------------------------------------------------------------------------------------------
 edge edge::from_upf_info(
     const upf_info_t& upf_info, const interface_upf_info_item_t& interface) {
-  edge e;
+  // TODO: Bring updates from the previous funtion to this one
+  edge e = {};
   e.type = pfcp_association::iface_type_from_string(interface.interface_type);
   e.nw_instance = interface.network_instance;
 
@@ -93,49 +121,163 @@ edge edge::from_upf_info(
   return e;
 }
 
+//---------------------------------------------------------------------------------------------
 bool edge::serves_network(
     const std::string& dnn, const snssai_t& snssai,
     const std::unordered_set<std::string>& dnais,
     std::string& matched_dnai) const {
+  // Logger::smf_app().debug(
+  //    "Serves Network, DNN %s, S-NSSAI %s", dnn.c_str(),
+  //    snssai.toString().c_str());
   // just create a snssai_upf_info_item for fast lookup
-  snssai_upf_info_item_s snssai_item;
-  snssai_item.snssai = snssai;
+  snssai_upf_info_item_s snssai_item = {};
+  snssai_item.snssai                 = snssai;
+  // For debugging purpose
+  if (!snssai_dnns.empty()) {
+    Logger::smf_app().debug("S-NSSAI UPF info list: ");
+    for (const auto& s : snssai_dnns) {
+      Logger::smf_app().debug("%s", s.to_string().c_str());
+    }
+  }
 
-  auto snssai_it = snssai_dnns.find(snssai_item);
-  if (snssai_it != snssai_dnns.end()) {
-    // create temp item for fast lookup
-    dnn_upf_info_item_s dnn_item;
-    dnn_item.dnn = dnn;
-    auto dnn_it  = snssai_it->dnn_upf_info_list.find(dnn_item);
-    if (dnn_it != snssai_it->dnn_upf_info_list.end()) {
-      if (!dnais.empty()) {
-        // should be only 1 DNAI
-        for (const auto& dnai : dnn_it->dnai_list) {
-          // O(1)
-          auto found_dnai = dnais.find(dnai);
-          if (found_dnai != dnais.end()) {
-            matched_dnai = dnai;
-            return true;
+  for (const auto& snssai_it : snssai_dnns) {
+    if (snssai_it.snssai == snssai_item.snssai) {
+      // create temp item for fast lookup
+      dnn_upf_info_item_s dnn_item = {};
+      dnn_item.dnn                 = dnn;
+      auto dnn_it                  = snssai_it.dnn_upf_info_list.find(dnn_item);
+      if (dnn_it != snssai_it.dnn_upf_info_list.end()) {
+        if (!dnais.empty()) {
+          // should be only 1 DNAI
+          for (const auto& dnai : dnn_it->dnai_list) {
+            // O(1)
+            auto found_dnai = dnais.find(dnai);
+            if (found_dnai != dnais.end()) {
+              matched_dnai = dnai;
+              return true;
+            }
           }
+        } else {
+          return true;
         }
-      } else {
-        return true;
       }
     }
   }
+
+  Logger::smf_app().debug("Could not serve network, return false");
   return false;
 }
 
+//---------------------------------------------------------------------------------------------
 bool edge::serves_network(
     const std::string& dnn, const snssai_t& snssai) const {
   std::unordered_set<string> set;
-  std::string s;
+  std::string s = {};
   return serves_network(dnn, snssai, set, s);
+}
+
+//---------------------------------------------------------------------------------------------
+std::shared_ptr<smf_qos_flow> edge::get_qos_flow(const pfcp::pdr_id_t& pdr_id) {
+  // it may happen that 2 qos flows have the same PDR ID e.g. in an
+  // UL CL scenario, but then they will also have the same FTEID
+  for (auto& flow_it : qos_flows) {
+    if (flow_it->pdr_id_ul == pdr_id || flow_it->pdr_id_dl == pdr_id) {
+      return flow_it;
+    }
+  }
+  return {};
+}
+
+//---------------------------------------------------------------------------------------------
+std::shared_ptr<smf_qos_flow> edge::get_qos_flow(const pfcp::qfi_t& qfi) {
+  for (auto& flow_it : qos_flows) {
+    if (flow_it->qfi == qfi) {
+      return flow_it;
+    }
+  }
+  return {};
+}
+
+//---------------------------------------------------------------------------------------------
+std::shared_ptr<smf_qos_flow> edge::get_qos_flow(const pfcp::far_id_t& far_id) {
+  for (auto& flow_it : qos_flows) {
+    if (flow_it->far_id_ul.second == far_id ||
+        flow_it->far_id_dl.second == far_id) {
+      return flow_it;
+    }
+  }
+  return {};
+}
+
+//------------------------------------------------------------------------------
+void smf_qos_flow::mark_as_released() {
+  released = true;
+}
+
+std::string smf_qos_flow::toString(const std::string& indent) const {
+  std::string s = {};
+  s.append(indent).append("QoS Flow:\n");
+  s.append(indent)
+      .append("\tQFI:\t\t")
+      .append(std::to_string((uint8_t) qfi.qfi))
+      .append("\n");
+  s.append(indent)
+      .append("\tUL FTEID:\t")
+      .append(ul_fteid.toString())
+      .append("\n");
+  s.append(indent)
+      .append("\tDL FTEID:\t")
+      .append(dl_fteid.toString())
+      .append("\n");
+  s.append(indent)
+      .append("\tPDR ID UL:\t")
+      .append(std::to_string(pdr_id_ul.rule_id))
+      .append("\n");
+  s.append(indent)
+      .append("\tPDR ID DL:\t")
+      .append(std::to_string(pdr_id_dl.rule_id))
+      .append("\n");
+
+  s.append(indent)
+      .append("\tPrecedence:\t")
+      .append(std::to_string(precedence.precedence))
+      .append("\n");
+  if (far_id_ul.first) {
+    s.append(indent)
+        .append("\tFAR ID UL:\t")
+        .append(std::to_string(far_id_ul.second.far_id))
+        .append("\n");
+  }
+  if (far_id_dl.first) {
+    s.append(indent)
+        .append("\tFAR ID DL:\t")
+        .append(std::to_string(far_id_dl.second.far_id))
+        .append("\n");
+  }
+  if (urr_id.urr_id != 0) {
+    s.append(indent)
+        .append("\tURR ID:\t")
+        .append(std::to_string(urr_id.urr_id))
+        .append("\n");
+  }
+  return s;
+}
+
+//------------------------------------------------------------------------------
+std::string smf_qos_flow::toString() const {
+  return toString("\t\t");
+}
+//------------------------------------------------------------------------------
+void smf_qos_flow::deallocate_ressources() {
+  clear();
+  Logger::smf_app().info(
+      "Resources associated with this QoS Flow (%d) have been released",
+      (uint8_t) qfi.qfi);
 }
 
 //------------------------------------------------------------------------------
 iface_type pfcp_association::iface_type_from_string(const std::string& input) {
-  iface_type type_tmp;
+  iface_type type_tmp = {};
   if (input == "N3") {
     type_tmp = iface_type::N3;
   } else if (input == "N6") {
@@ -150,7 +292,7 @@ iface_type pfcp_association::iface_type_from_string(const std::string& input) {
 }
 //------------------------------------------------------------------------------
 std::string pfcp_association::string_from_iface_type(const iface_type& type) {
-  std::string output;
+  std::string output = {};
   switch (type) {
     case iface_type::N3:
       return "N3";
@@ -203,12 +345,13 @@ void pfcp_association::restore_n4_sessions() {
   }
 }
 
+//---------------------------------------------------------------------------------------------
 bool pfcp_association::find_interface_edge(
     const iface_type& type_match, std::vector<edge>& edges) {
   if (!is_upf_profile_set()) {
     return false;
   }
-  upf_info_t upf_info;
+  upf_info_t upf_info = {};
 
   upf_node_profile.get_upf_info(upf_info);
   for (const auto& iface : upf_info.interface_upf_info_list) {
@@ -221,7 +364,7 @@ bool pfcp_association::find_interface_edge(
   // just guess that this UPF has a N3 or N6 interface
   if (upf_info.interface_upf_info_list.empty()) {
     Logger::smf_app().info(
-        "UPF Interface list ist empty: Assume that the UPF has a N3 and a N6 "
+        "UPF Interface list is empty: Assume that the UPF has a N3 and a N6 "
         "interface.");
     edge e = edge::from_upf_info(upf_info);
     e.type = type_match;
@@ -231,14 +374,16 @@ bool pfcp_association::find_interface_edge(
   return !edges.empty();
 }
 
+//---------------------------------------------------------------------------------------------
 bool pfcp_association::find_n3_edge(std::vector<edge>& edges) {
   return find_interface_edge(iface_type::N3, edges);
 }
 
+//---------------------------------------------------------------------------------------------
 bool pfcp_association::find_n6_edge(std::vector<edge>& edges) {
   bool success = find_interface_edge(iface_type::N6, edges);
   if (success) {
-    for (auto e : edges) {
+    for (auto& e : edges) {
       e.uplink = true;
     }
   }
@@ -296,6 +441,16 @@ std::string pfcp_association::get_printable_name() {
   }
 }
 
+//------------------------------------------------------------------------------
+void pfcp_association::display() {
+  Logger::smf_app().debug("\tUPF Node Id: %s", node_id.toString().c_str());
+
+  if (upf_profile_is_set) {
+    Logger::smf_app().debug("\tUPF Node profile:");
+    upf_node_profile.display();
+  }
+}
+
 /******************************************************************************/
 /***************************** PFCP ASSOCIATIONS ******************************/
 /******************************************************************************/
@@ -304,7 +459,7 @@ std::shared_ptr<pfcp_association> pfcp_associations::check_association_on_add(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
     bool& restore_n4_sessions, const bool use_function_features,
     pfcp::up_function_features_s& function_features) {
-  std::shared_ptr<pfcp_association> sa;
+  std::shared_ptr<pfcp_association> sa = {};
   if (get_association(node_id, sa)) {
     itti_inst->timer_remove(sa->timer_heartbeat);
     if (sa->recovery_time_stamp == recovery_time_stamp) {
@@ -326,6 +481,7 @@ std::shared_ptr<pfcp_association> pfcp_associations::check_association_on_add(
   return {};  // empty ptr
 }
 
+//---------------------------------------------------------------------------------------------
 bool pfcp_associations::resolve_upf_hostname(pfcp::node_id_t& node_id) {
   // TODO why is this even here? We can see in the logs that UPF IP is requested
   // before, at least for NRF scenario
@@ -333,9 +489,9 @@ bool pfcp_associations::resolve_upf_hostname(pfcp::node_id_t& node_id) {
   if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
     Logger::smf_app().info("Node ID Type FQDN: %s", node_id.fqdn.c_str());
 
-    std::string ip_addr;
-    uint32_t port;
-    uint8_t addr_type;
+    std::string ip_addr = {};
+    uint32_t port       = {0};
+    uint8_t addr_type   = {0};
 
     if (!fqdn::resolve(node_id.fqdn, ip_addr, port, addr_type)) {
       Logger::smf_app().warn(
@@ -362,6 +518,7 @@ bool pfcp_associations::resolve_upf_hostname(pfcp::node_id_t& node_id) {
   return true;  // no FQDN so we just continue
 }
 
+//---------------------------------------------------------------------------------------------
 void pfcp_associations::associate_with_upf_profile(
     std::shared_ptr<pfcp_association>& sa, const pfcp::node_id_t& node_id) {
   // TODO wouldn't it be better to use a shared lock? because here we have only
@@ -381,7 +538,7 @@ void pfcp_associations::associate_with_upf_profile(
 bool pfcp_associations::add_association(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
     bool& restore_n4_sessions) {
-  pfcp::up_function_features_s tmp;
+  pfcp::up_function_features_s tmp     = {};
   std::shared_ptr<pfcp_association> sa = check_association_on_add(
       node_id, recovery_time_stamp, restore_n4_sessions, false, tmp);
   if (sa) return true;
@@ -436,6 +593,7 @@ bool pfcp_associations::add_association(
   }
   return true;
 }
+
 //------------------------------------------------------------------------------
 bool pfcp_associations::add_association(
     pfcp::node_id_t& node_id, pfcp::recovery_time_stamp_t& recovery_time_stamp,
@@ -487,40 +645,42 @@ bool pfcp_associations::update_association(
 
 //------------------------------------------------------------------------------
 bool pfcp_associations::get_association(
-    const pfcp::node_id_t& node_id,
-    std::shared_ptr<pfcp_association>& sa) const {
-  std::size_t hash_node_id = std::hash<pfcp::node_id_t>{}(node_id);
-  auto association         = associations_graph.get_association(hash_node_id);
+    const pfcp::node_id_t& node_id, std::shared_ptr<pfcp_association>& sa) {
+  std::shared_ptr<pfcp_association> association = {};
+  std::size_t hash_node_id                      = {};
+  pfcp::node_id_t node_id_tmp                   = node_id;
 
-  if (!association) {
-    // We didn't find association, may be because hash map is made with
-    // node_id_type FQDN
-    if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
-      std::string hostname;
-      std::string ip_str = conv::toString(node_id.u1.ipv4_address);
+  // Resolve FQDN/IP Addr if necessary
+  fqdn::resolve(node_id_tmp);
 
-      if (!fqdn::reverse_resolve(ip_str, hostname)) {
-        Logger::smf_app().warn(
-            "Could not resolve hostname for IP address %s", ip_str.c_str());
-        return false;
-      }
-
-      pfcp::node_id_t node_id_tmp = {};
-      node_id_tmp.node_id_type    = pfcp::NODE_ID_TYPE_FQDN;
-      node_id_tmp.fqdn            = hostname;
-      Logger::smf_app().debug(
-          "Hash lookup for association retry: Associated Hostname -> %s",
-          hostname.c_str());
-      if (get_association(node_id_tmp, sa)) return true;
+  // We suppose that by default hash map is made with node_id_type FQDN
+  if (node_id_tmp.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
+    hash_node_id = std::hash<pfcp::node_id_t>{}(node_id_tmp);
+    association  = associations_graph.get_association(hash_node_id);
+    if (association) {
+      sa = association;
+      return true;
     }
-    // We didn't found association, may be because hash map is made with
-    // node_id_type IP ADDR
-    // ToDo (Might stuck in recursive loop here)
-    return false;
-  } else {
+    node_id_tmp.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+  } else if (node_id_tmp.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
+    hash_node_id = std::hash<pfcp::node_id_t>{}(node_id_tmp);
+    association  = associations_graph.get_association(hash_node_id);
+    if (association) {
+      sa = association;
+      return true;
+    }
+    node_id_tmp.node_id_type = pfcp::NODE_ID_TYPE_FQDN;
+  }
+
+  // We didn't found association, may be because hash map is made with different
+  // node type
+  hash_node_id = std::hash<pfcp::node_id_t>{}(node_id_tmp);
+  association  = associations_graph.get_association(hash_node_id);
+  if (association) {
     sa = association;
     return true;
   }
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -702,6 +862,8 @@ bool pfcp_associations::add_peer_candidate_node(
       std::make_shared<pfcp_association>(node_id);
   s->set_upf_node_profile(profile);
   pending_associations.push_back(s);
+  // Logger::smf_app().info("Added a pending association candidate");
+  // s->display();
   return true;
 }
 
@@ -732,10 +894,10 @@ void upf_graph::insert_into_graph(const std::shared_ptr<pfcp_association>& sa) {
         "just add the node");
     Logger::smf_app().info("Assume that the UPF has a N3 and a N6 interface.");
 
-    edge n3_edge;
+    edge n3_edge   = {};
     n3_edge.type   = iface_type::N3;
     n3_edge.uplink = false;
-    edge n6_edge;
+    edge n6_edge   = {};
     n6_edge.type   = iface_type::N6;
     n6_edge.uplink = true;
 
@@ -872,13 +1034,16 @@ bool upf_graph::remove_association(
   return false;
 }
 
+//---------------------------------------------------------------------------------------------
 void upf_graph::add_upf_graph_edge(
     const std::shared_ptr<pfcp_association>& source, edge& edge_info_src_dst) {
   add_upf_graph_node(source);
 
   std::unique_lock lock_graph(graph_mutex);
-
   auto it_src = adjacency_list.find(source);
+  if (it_src == adjacency_list.end()) {
+    return;
+  }
   bool exists = false;
   for (const auto& edge : it_src->second) {
     if (edge == edge_info_src_dst) {
@@ -957,8 +1122,6 @@ void upf_graph::dfs_next_upf(
     std::shared_ptr<pfcp_association> association = stack_asynch.top();
     stack_asynch.pop();
 
-    visited_asynch[association] = true;
-
     auto node_it = adjacency_list.find(association);
     if (node_it == adjacency_list.end()) {
       // TODO this scenario might happen when in the meantime one of the UPFs
@@ -969,39 +1132,37 @@ void upf_graph::dfs_next_upf(
           "happen");
       return;
     }
-    upf = node_it->first;
 
     // here we need to check if we have more than one unvisited N9_UL edge
     // if yes, we have a UL CL scenario, and we need to finish the other
     // branch first
     Logger::smf_app().debug(
-        "DFS Asynch: Handle UPF %s", upf->get_printable_name().c_str());
-    int unvisited_n9_ul_nodes = 0;
-    bool add_neighbors        = true;
+        "DFS Asynch: Handle UPF %s",
+        node_it->first->get_printable_name().c_str());
+    bool unvisited_n9_node = false;
     // as we have no diamond shape, we only need to care about this in UL
     // direction
     if (uplink_asynch) {
       for (const auto& edge_it : node_it->second) {
         if (edge_it.association) {
           if (!visited_asynch[edge_it.association]) {
-            if (edge_it.type == iface_type::N9) {
-              ++unvisited_n9_ul_nodes;
-              if (unvisited_n9_ul_nodes > 0) {
-                // we continue here, but we need to set visited false because
-                // this node is evaluated late;r also we cannot add the
-                // neighbors of this node (yet)
-                visited_asynch[association] = false;
-                add_neighbors               = false;
-                Logger::smf_app().debug(
-                    "UL CL scenario: We have a node with an unvisited N9_UL "
-                    "node.");
-              }
+            if (edge_it.type == iface_type::N9 && edge_it.uplink) {
+              unvisited_n9_node = true;
+              Logger::smf_app().debug(
+                  "UL CL scenario: We have a node with an unvisited N9_UL "
+                  "node.");
+              break;
             }
           }
         }
       }
     }
-    if (add_neighbors) {
+    // we removed the current UPF from stack, but did not set visited
+    // so it is re-visited again from another branch
+    // we also dont add the neighbors yet
+    if (!unvisited_n9_node) {
+      visited_asynch[association] = true;
+
       for (const auto& edge_it : node_it->second) {
         // first add all neighbors to the stack
         if (edge_it.association) {
@@ -1011,53 +1172,53 @@ void upf_graph::dfs_next_upf(
         }
       }
     }
+    upf = node_it->first;
 
     // set correct edge infos
-    for (auto edge_it = node_it->second.begin();
-         edge_it != node_it->second.end(); ++edge_it) {
+    for (auto& edge_it : node_it->second) {
       // copy QOS Flow for the whole graph
       //  TODO currently only one flow is supported
-      if (edge_it->qos_flows.empty()) {
-        edge_it->qos_flows.emplace_back(qos_flow_asynch);
+      if (edge_it.qos_flows.empty()) {
+        std::shared_ptr<smf_qos_flow> flow =
+            std::make_shared<smf_qos_flow>(qos_flow_asynch);
+        edge_it.qos_flows.emplace_back(flow);
       }
+      // TODO thought for refactor: It would be much nicer if it would be the
+      // same edge object so we dont have to do that
 
       // pointer is not null -> N9 interface
-      if (edge_it->association) {
+      if (edge_it.association) {
         // we add the TEID here for the edge in the other direction
         // direct access is safe as we know the edge exists
-        auto edge_node = adjacency_list[edge_it->association];
+        auto edge_node = adjacency_list[edge_it.association];
         for (auto edge_edge : edge_node) {
           if (edge_edge.qos_flows.empty()) {
-            edge_edge.qos_flows.emplace_back(qos_flow_asynch);
+            edge_edge.qos_flows.emplace_back(
+                std::make_shared<smf_qos_flow>(qos_flow_asynch));
           }
 
           if (edge_edge.association &&
               edge_edge.association == node_it->first) {
             if (edge_edge.type == iface_type::N9 && edge_edge.uplink) {
               // downlink direction
-              edge_it->qos_flows[0].dl_fteid = edge_edge.qos_flows[0].dl_fteid;
+              edge_it.qos_flows[0]->dl_fteid = edge_edge.qos_flows[0]->dl_fteid;
             } else if (edge_edge.type == iface_type::N9) {
-              edge_it->qos_flows[0].ul_fteid = edge_edge.qos_flows[0].ul_fteid;
+              edge_it.qos_flows[0]->ul_fteid = edge_edge.qos_flows[0]->ul_fteid;
             }
           }
         }
-        if (edge_it->type == N9 && edge_it->uplink) {
-          info_ul.push_back(*edge_it);
-        } else if (edge_it->type == N9) {
-          info_dl.push_back(*edge_it);
-        }
-      } else {
-        // N3 or N6 interface
-        if (edge_it->type == iface_type::N6) {
-          info_ul.push_back(*edge_it);
-        } else if (edge_it->type == iface_type::N3) {
-          info_dl.push_back(*edge_it);
-        }
       }
+
+      // set the correct edges to return
+      if (edge_it.uplink) {
+        info_ul.push_back(edge_it);
+      } else {
+        info_dl.push_back(edge_it);
+      }
+      current_upf_asynch      = upf;
+      current_edges_dl_asynch = info_dl;
+      current_edges_ul_asynch = info_ul;
     }
-    current_upf_asynch      = upf;
-    current_edges_dl_asynch = info_dl;
-    current_edges_ul_asynch = info_ul;
   }
 }
 
@@ -1069,31 +1230,6 @@ void upf_graph::dfs_current_upf(
   upf     = current_upf_asynch;
   info_dl = current_edges_dl_asynch;
   info_ul = current_edges_ul_asynch;
-
-  auto it = adjacency_list.find(upf);
-
-  if (it != adjacency_list.end()) {
-    // update edge info
-    info_dl.clear();
-    info_ul.clear();
-    for (const auto& edge_it : it->second) {
-      for (const auto& current_edge : current_edges_dl_asynch) {
-        if (edge_it.nw_instance == current_edge.nw_instance) {
-          info_dl.push_back(edge_it);
-        }
-      }
-      for (const auto& current_edge : current_edges_ul_asynch) {
-        if (edge_it.nw_instance == current_edge.nw_instance) {
-          info_ul.push_back(edge_it);
-        }
-      }
-    }
-
-  } else {
-    Logger::smf_app().error(
-        "We want to get the current UPF in DFS, but it is not in graph "
-        "(anymore");
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -1116,7 +1252,6 @@ void upf_graph::start_asynch_dfs_procedure(
     for (auto& edge : it.second) {
       if ((uplink && edge.type == iface_type::N6) ||
           (!uplink && edge.type == iface_type::N3)) {
-        edge.qos_flows.emplace_back(qos_flow_asynch);
         stack_asynch.push(it.first);
         break;
       }
@@ -1124,6 +1259,7 @@ void upf_graph::start_asynch_dfs_procedure(
   }
 }
 
+//---------------------------------------------------------------------------------------------
 edge upf_graph::get_access_edge() const {
   std::shared_lock graph_lock(graph_mutex);
   edge info;
@@ -1139,9 +1275,9 @@ edge upf_graph::get_access_edge() const {
   return info;
 }
 
+//---------------------------------------------------------------------------------------------
 void upf_graph::update_edge_info(
-    const std::shared_ptr<pfcp_association>& upf,
-    const std::string& nw_instance, const edge& info) {
+    const std::shared_ptr<pfcp_association>& upf, const edge& info) {
   std::unique_lock graph_lock(graph_mutex);
   auto it = adjacency_list.find(upf);
   if (it == adjacency_list.end()) {
@@ -1150,33 +1286,38 @@ void upf_graph::update_edge_info(
   }
 
   for (auto& edge_it : it->second) {
-    if (edge_it.nw_instance == nw_instance) {
+    if (edge_it == info) {
       edge_it = info;
       break;
     }
   }
 }
 
+//---------------------------------------------------------------------------------------------
 std::shared_ptr<upf_graph> upf_graph::select_upf_node(
     const snssai_t& snssai, const std::string& dnn) {
+  Logger::smf_app().info("Select UPF Node");
   std::shared_ptr<upf_graph> upf_graph_ptr = std::make_shared<upf_graph>();
   std::shared_lock graph_lock(graph_mutex);
-  std::shared_ptr<pfcp_association> not_found;
+  std::shared_ptr<pfcp_association> not_found = {};
   if (adjacency_list.empty()) {
     Logger::smf_app().warn("No UPF available");
   }
   // First, only consider UPFs with profile ID set
   for (const auto& it : adjacency_list) {
     std::shared_ptr<pfcp_association> current_upf = it.first;
+    Logger::smf_app().debug("Current UPF info");
+    current_upf->display();
     if (current_upf->is_upf_profile_set()) {
-      upf_info_t upf_info;
+      upf_info_t upf_info           = {};
       std::vector<snssai_t> snssais = {};
       current_upf->get_upf_node_profile().get_upf_info(upf_info);
-      bool has_access = false;
-      bool has_exit   = false;
-      edge access_edge;
-      edge exit_edge;
+      bool has_access  = false;
+      bool has_exit    = false;
+      edge access_edge = {};
+      edge exit_edge   = {};
       for (const auto& edge : it.second) {
+        Logger::smf_app().debug("Verify Slice/DNN support");
         // verify that UPF belongs to the same slice and supports this dnn
         if (edge.serves_network(dnn, snssai)) {
           if (edge.type == iface_type::N3) {
@@ -1220,11 +1361,12 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
   return upf_graph_ptr;
 }
 
+//---------------------------------------------------------------------------------------------
 std::shared_ptr<upf_graph> upf_graph::select_upf_node(
     const int node_selection_criteria) {
   std::shared_lock graph_lock(graph_mutex);
-  std::shared_ptr<pfcp_association> association;
-  std::shared_ptr<upf_graph> upf_graph_ptr = std::make_shared<upf_graph>();
+  std::shared_ptr<pfcp_association> association = {};
+  std::shared_ptr<upf_graph> upf_graph_ptr      = std::make_shared<upf_graph>();
 
   Logger::smf_app().error("Called non-implemented UPF selection function");
 
@@ -1254,6 +1396,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
     }
     return upf_graph_ptr;
   }
+  return upf_graph_ptr;
 }
 
 //------------------------------------------------------------------------------
@@ -1279,7 +1422,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
 
   // std::shared_ptr<upf_graph> correct_sub_graph_ptr;
   std::unordered_set<std::string> dnais_from_all_rules;
-  std::shared_ptr<upf_graph> sub_graph_ptr;
+  std::shared_ptr<upf_graph> sub_graph_ptr = {};
 
   // run DFS for each PCC rule, get different graphs and merge them
 
@@ -1395,6 +1538,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
   return sub_graph_ptr;
 }
 
+//---------------------------------------------------------------------------------------------
 bool upf_graph::verify() {
   int access_count = 0;
   bool has_exit    = false;
@@ -1463,8 +1607,9 @@ bool upf_graph::verify() {
   return false;
 }
 
+//---------------------------------------------------------------------------------------------
 std::string upf_graph::get_dnai_list(const std::unordered_set<string>& dnais) {
-  std::string out;
+  std::string out = {};
 
   for (const auto& dnai : dnais) {
     out.append(dnai).append(", ");
@@ -1475,6 +1620,7 @@ std::string upf_graph::get_dnai_list(const std::unordered_set<string>& dnais) {
   return out;
 }
 
+//---------------------------------------------------------------------------------------------
 void upf_graph::set_dfs_selection_criteria(
     const std::unordered_set<std::string>& all_dnais,
     const std::string& flow_description, uint32_t precedence,
@@ -1486,6 +1632,7 @@ void upf_graph::set_dfs_selection_criteria(
   dfs_dnn              = dnn;
 }
 
+//---------------------------------------------------------------------------------------------
 void upf_graph::create_subgraph_dfs(
     std::shared_ptr<upf_graph>& sub_graph,
     const std::shared_ptr<pfcp_association>& start_node,
@@ -1574,8 +1721,87 @@ void upf_graph::create_subgraph_dfs(
   }
 }
 
+//---------------------------------------------------------------------------------------------
 bool upf_graph::full() const {
   std::shared_lock graph_lock(graph_mutex);
 
   return adjacency_list.size() >= PFCP_MAX_ASSOCIATIONS;
+}
+
+std::string upf_graph::to_string(const std::string& indent) const {
+  std::shared_lock graph_lock(graph_mutex);
+
+  for (const auto& node : adjacency_list) {
+    for (const auto& edge : node.second) {
+      if (edge.type == iface_type::N3) {
+        return to_string_from_start_node(indent, node.first);
+      }
+    }
+  }
+
+  return indent + "Invalid graph";
+}
+
+std::string upf_graph::to_string_from_start_node(
+    const std::string& indent,
+    const std::shared_ptr<pfcp_association>& start) const {
+  std::shared_lock graph_lock(graph_mutex);
+
+  std::unordered_map<
+      std::shared_ptr<pfcp_association>, bool,
+      std::hash<std::shared_ptr<pfcp_association>>>
+      visited;
+  std::list<std::shared_ptr<pfcp_association>> queue;
+
+  std::string output;
+
+  auto node_it = adjacency_list.find(start);
+  if (node_it == adjacency_list.end()) {
+    return output.append(indent)
+        .append("Node ")
+        .append(start->get_printable_name())
+        .append(" does not exist in UPF graph.");
+  }
+
+  visited[start] = true;
+  queue.push_back(start);
+  std::map<std::string, std::string> output_per_iface_type;
+
+  while (!queue.empty()) {
+    auto node_queue = queue.front();
+    node_it         = adjacency_list.find(node_queue);
+    if (node_it == adjacency_list.end()) continue;
+
+    queue.pop_front();
+
+    for (const auto& edge : node_it->second) {
+      // skip N6 output
+      if (edge.type == iface_type::N6) continue;
+
+      std::string iface = pfcp_association::string_from_iface_type(edge.type);
+      if (!edge.nw_instance.empty()) {
+        iface.append(": ").append(edge.nw_instance);
+      }
+
+      for (const auto& flow : edge.qos_flows) {
+        // N3
+        if (!edge.association) {
+          output_per_iface_type[iface].append(flow->toString(indent + "\t"));
+        }
+        // N9
+        else if (!visited[edge.association]) {
+          output_per_iface_type[iface].append(flow->toString(indent + "\t"));
+          visited[edge.association] = true;
+          queue.push_back(edge.association);
+        }
+      }
+    }
+  }
+
+  for (const auto& o : output_per_iface_type) {
+    output.append(indent).append(o.first).append(":\n");
+    output.append(o.second);
+  }
+
+  return output;
 }

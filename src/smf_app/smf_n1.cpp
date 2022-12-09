@@ -719,6 +719,75 @@ bool smf_n1::create_n1_pdu_session_release_reject(
 
 //-----------------------------------------------------------------------------------------------------
 bool smf_n1::create_n1_pdu_session_release_command(
+    const std::shared_ptr<pdu_session_msg>& msg, std::string& nas_msg_str,
+    cause_value_5gsm_e sm_cause) {
+  Logger::smf_n1().info("Create N1 SM Container, PDU Session Release Command");
+
+  int bytes                   = {0};
+  unsigned char data[BUF_LEN] = {'\0'};
+  nas_message_t nas_msg       = {};
+
+  nas_msg.header.extended_protocol_discriminator =
+      EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
+  nas_msg.header.security_header_type = SECURITY_HEADER_TYPE_NOT_PROTECTED;
+
+  SM_msg* sm_msg = &nas_msg.plain.sm;
+
+  // Fill the content of SM header
+  sm_msg->header.extended_protocol_discriminator =
+      EPD_5GS_SESSION_MANAGEMENT_MESSAGES;
+  sm_msg->header.pdu_session_identity = msg->get_pdu_session_id();
+
+  Logger::smf_n1().info("PDU_SESSION_RELEASE_COMMAND, encode starting...");
+  // Fill the content of PDU Session Release Command
+  sm_msg->header.pdu_session_identity = msg->get_pdu_session_id();
+  sm_msg->header.procedure_transaction_identity =
+      msg->get_pti()
+          .procedure_transaction_id;  // TODO: if PDU session release procedure
+                                      // is not triggered by a UE-requested PDU
+                                      // session release set the PTI IE of the
+                                      // PDU SESSION RELEASE COMMAND message
+                                      // to "No procedure transaction identity
+                                      // assigned"
+  sm_msg->header.message_type = PDU_SESSION_RELEASE_COMMAND;
+  sm_msg->pdu_session_release_command._5gsmcause =
+      static_cast<uint8_t>(sm_cause);
+  // TODO: to be updated when adding the following IEs
+  sm_msg->pdu_session_release_command.presence = 0x00;
+  // GPRSTimer3
+  // EAPMessage
+  //_5GSMCongestionReattemptIndicator
+  // ExtendedProtocolConfigurationOptions
+
+  Logger::smf_n1().debug(
+      "SM message, PDU Session ID %d, PTI %d, Message Type %0x%x, 5GSM Cause: "
+      "0x%x",
+      sm_msg->header.pdu_session_identity,
+      sm_msg->header.procedure_transaction_identity,
+      sm_msg->header.message_type,
+      sm_msg->pdu_session_release_command._5gsmcause);
+
+  // Encode NAS message
+  bytes = nas_message_encode(
+      data, &nas_msg, sizeof(data) /*don't know the size*/, nullptr);
+
+#if DEBUG_IS_ON
+  Logger::smf_n1().debug("Buffer Data: ");
+  for (int i = 0; i < bytes; i++) printf("%02x ", data[i]);
+  printf(" (bytes %d)\n", bytes);
+#endif
+
+  if (bytes > 0) {
+    std::string n1Message((char*) data, bytes);
+    nas_msg_str = n1Message;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//-----------------------------------------------------------------------------------------------------
+bool smf_n1::create_n1_pdu_session_release_command(
     pdu_session_update_sm_context_response& sm_context_res,
     std::string& nas_msg_str, cause_value_5gsm_e sm_cause) {
   Logger::smf_n1().info(
@@ -744,7 +813,13 @@ bool smf_n1::create_n1_pdu_session_release_command(
   // Fill the content of PDU Session Release Command
   sm_msg->header.pdu_session_identity = sm_context_res.get_pdu_session_id();
   sm_msg->header.procedure_transaction_identity =
-      sm_context_res.get_pti().procedure_transaction_id;
+      sm_context_res.get_pti()
+          .procedure_transaction_id;  // TODO: if PDU session release procedure
+                                      // is not triggered by a UE-requested PDU
+                                      // session release set the PTI IE of the
+                                      // PDU SESSION RELEASE COMMAND message
+                                      // to "No procedure transaction identity
+                                      // assigned"
   sm_msg->header.message_type = PDU_SESSION_RELEASE_COMMAND;
   sm_msg->pdu_session_release_command._5gsmcause =
       static_cast<uint8_t>(sm_cause);

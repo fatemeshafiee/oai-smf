@@ -796,12 +796,10 @@ void smf_sbi::subscribe_upf_status_notify(
       "available (HTTP version %d)",
       msg->http_version);
 
-  Logger::smf_sbi().debug(
-      "Send NFStatusNotify to NRF, NRF URL %s", msg->url.c_str());
+  Logger::smf_sbi().debug("NRF's URL: %s", msg->url.c_str());
 
   std::string body = msg->json_data.dump();
-  Logger::smf_sbi().debug(
-      "Send NFStatusNotify to NRF, msg body: %s", body.c_str());
+  Logger::smf_sbi().debug("Message body: %s", body.c_str());
 
   std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle
@@ -927,7 +925,7 @@ bool smf_sbi::get_sm_data(
     }
     if (jsonData["singleNssai"].find("sd") != jsonData["singleNssai"].end()) {
       std::string sd_str = jsonData["singleNssai"]["sd"];
-      uint32_t sd        = 0xFFFFFF;
+      uint32_t sd        = SD_NO_VALUE;
       xgpp_conv::sd_string_to_int(
           jsonData["singleNssai"]["sd"].get<std::string>(), sd);
       if (sd != snssai.sd) {
@@ -1392,7 +1390,7 @@ uint32_t smf_sbi::get_available_response(boost::shared_future<uint32_t>& f) {
     uint32_t response_code = f.get();
     return response_code;
   } else {
-    return 408;  // timeout, TODO: remove hardcoded value
+    return http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
   }
 }
 

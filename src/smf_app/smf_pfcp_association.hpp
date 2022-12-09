@@ -92,6 +92,7 @@ class pfcp_association {
     timer_association           = ITTI_INVALID_TIMER_ID;
     timer_graceful_release      = ITTI_INVALID_TIMER_ID;
   }
+
   pfcp_association(
       const pfcp::node_id_t& node_id,
       pfcp::recovery_time_stamp_t& recovery_time_stamp)
@@ -129,6 +130,7 @@ class pfcp_association {
     timer_association           = ITTI_INVALID_TIMER_ID;
     timer_graceful_release      = ITTI_INVALID_TIMER_ID;
   }
+
   pfcp_association(pfcp_association const& p)
       : node_id(p.node_id),
         hash_node_id(p.hash_node_id),
@@ -190,7 +192,20 @@ class pfcp_association {
   bool find_upf_edge(
       const std::shared_ptr<pfcp_association>& other_upf, edge& out_edge);
 
+  /**
+   * @brief Get the readble name of the UPF associated with this association
+   * @param void
+   * @return string representing the name of the UPF associated with this
+   * association
+   */
   std::string get_printable_name();
+
+  /*
+   * Print related-information for this association
+   * @param void
+   * @return void:
+   */
+  void display();
 
  private:
   bool find_interface_edge(
@@ -220,6 +235,7 @@ class smf_qos_flow {
     precedence  = {};
     far_id_ul   = {};
     far_id_dl   = {};
+    urr_id      = {};
     released    = false;
     qos_profile = {};
     cause_value = 0;
@@ -246,18 +262,21 @@ class smf_qos_flow {
    */
   std::string toString() const;
 
+  [[nodiscard]] std::string toString(const std::string& indent) const;
+
   pfcp::qfi_t qfi;           // QoS Flow Identifier
-  pfcp::fteid_t ul_fteid;    // fteid of UPF
-  pfcp::fteid_t dl_fteid;    // fteid of AN
+  pfcp::fteid_t ul_fteid{};  // fteid of UPF
+  pfcp::fteid_t dl_fteid{};  // fteid of AN
   pfcp::pdr_id_t pdr_id_ul;  // Packet Detection Rule ID, UL
   pfcp::pdr_id_t pdr_id_dl;  // Packet Detection Rule ID, DL
-  pfcp::precedence_t precedence;
+  pfcp::urr_id_t urr_id{};   // Usage reporting Rule, use same for UL and DL
+  pfcp::precedence_t precedence{};
   std::pair<bool, pfcp::far_id_t> far_id_ul;  // FAR ID, UL
   std::pair<bool, pfcp::far_id_t> far_id_dl;  // FAR ID, DL
-  bool released;  // finally seems necessary, TODO try to find heuristic ?
-  pdu_session_id_t pdu_session_id;
+  bool released{};  // finally seems necessary, TODO try to find heuristic ?
+  pdu_session_id_t pdu_session_id{};
   qos_profile_t qos_profile;  // QoS profile
-  uint8_t cause_value;        // cause
+  uint8_t cause_value{};      // cause
 };
 
 const std::string DEFAULT_FLOW_DESCRIPTION =
@@ -272,7 +291,7 @@ struct edge {
   std::string nw_instance;
   iface_type type;
   bool uplink = false;
-  std::vector<smf_qos_flow> qos_flows;
+  std::vector<std::shared_ptr<smf_qos_flow>> qos_flows;
   bool n4_sent = false;
   std::shared_ptr<pfcp_association> association;
   // we use parts of the upf_interface here
@@ -293,6 +312,12 @@ struct edge {
       const std::unordered_set<std::string>& dnais,
       std::string& found_dnai) const;
 
+  std::shared_ptr<smf_qos_flow> get_qos_flow(const pfcp::pdr_id_t& pdr_id);
+
+  std::shared_ptr<smf_qos_flow> get_qos_flow(const pfcp::qfi_t& qfi);
+
+  std::shared_ptr<smf_qos_flow> get_qos_flow(const pfcp::far_id_t& far_id);
+
   bool operator==(const edge& other) const {
     return nw_instance == other.nw_instance && type == other.type &&
            uplink == other.uplink && association == other.association;
@@ -304,7 +329,14 @@ struct edge {
     // only print name of UPF when nw instance is empty
     // otherwise output is too long and redundant
     if (association && nw_instance.empty()) {
-      output.append("(").append(association->get_printable_name()).append(")");
+      output.append("(").append(association->get_printable_name()).append(") ");
+    }
+    if (!snssai_dnns.empty()) {
+      output.append(", S-NSSAI UPF info list: { ");
+      for (const auto& s : snssai_dnns) {
+        output.append(" ").append(s.to_string()).append(", ");
+      }
+      output.append("}");
     }
     return output;
   }
@@ -415,6 +447,16 @@ class upf_graph {
    * @return
    */
   static std::string get_dnai_list(const std::unordered_set<string>& dnais);
+
+  /**
+   * Traverse the graph in BFS from start and generate info
+   * @param start Start node
+   * @param indent Added in the beginning of each line
+   * @return
+   */
+  std::string to_string_from_start_node(
+      const std::string& indent,
+      const std::shared_ptr<pfcp_association>& start) const;
 
  public:
   upf_graph() : adjacency_list(), visited_asynch(){};
@@ -539,12 +581,10 @@ class upf_graph {
   /**
    * Update edge information in the graph
    * @param upf UPF for which edge info should be updated
-   * @param nw_instance NW instance of the edge, must be unique for this UPF
    * @param info info to update
    */
   void update_edge_info(
-      const std::shared_ptr<pfcp_association>& upf,
-      const std::string& nw_instance, const edge& info);
+      const std::shared_ptr<pfcp_association>& upf, const edge& info);
 
   /**
    * @brief: Debug-prints the current graph
@@ -555,6 +595,15 @@ class upf_graph {
    * @return
    */
   bool full() const;
+
+  /**
+   * Traverses the graph in BFS starting at the N3 interface and returns graph
+   * information: For each QFI: UL/DL FTEID for each edge
+   * @param indent Added in the beginning of each line
+   * @return string representation of this graph
+   *
+   */
+  [[nodiscard]] std::string to_string(const std::string& indent) const;
 };
 
 #define PFCP_MAX_ASSOCIATIONS 16
@@ -610,8 +659,7 @@ class pfcp_associations {
       pfcp::node_id_t& node_id,
       pfcp::up_function_features_s& function_features);
   bool get_association(
-      const pfcp::node_id_t& node_id,
-      std::shared_ptr<pfcp_association>& sa) const;
+      const pfcp::node_id_t& node_id, std::shared_ptr<pfcp_association>& sa);
   bool get_association(
       const pfcp::fseid_t& cp_fseid,
       std::shared_ptr<pfcp_association>& sa) const;

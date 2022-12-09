@@ -1044,10 +1044,12 @@ void smf_config::display() {
     Logger::smf_app().info("    Secondary DNS v6 ....: %s", str_addr6);
   }
 
+  Logger::smf_app().info("- CSCF:");
   Logger::smf_app().info(
-      "   CSCF .........: %s", inet_ntoa(*((struct in_addr*) &default_cscfv4)));
+      "    CSCF IPv4 ...........: %s",
+      inet_ntoa(*((struct in_addr*) &default_cscfv4)));
   if (inet_ntop(AF_INET6, &default_cscfv6, str_addr6, sizeof(str_addr6))) {
-    Logger::smf_app().info("    CSCF v6 ......: %s", str_addr6);
+    Logger::smf_app().info("    CSCF IPv6 ...........: %s", str_addr6);
   }
 
   Logger::smf_app().info("- Default UE MTU: %d", ue_mtu);

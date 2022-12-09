@@ -197,51 +197,51 @@ int smf_app::process_pco_request_ipcp(
          * returning the IP address of a valid DNS server.
          * By default, no secondary DNS address is provided.
          */
-        Logger::smf_app().debug(
-            "PCO: Protocol identifier IPCP option "
-            "SECONDARY_DNS_SERVER_IP_ADDRESS length %u",
-            ipcp_req_option_length);
+        /* Logger::smf_app().debug(
+             "PCO: Protocol identifier IPCP option "
+             "SECONDARY_DNS_SERVER_IP_ADDRESS length %u",
+             ipcp_req_option_length);
 
-        if (ipcp_req_option_length >= 6) {
-          ipcp_dns_sec_ipv4_addr = htonl(
-              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2))
-               << 24) |
-              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3))
-               << 16) |
-              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4))
-               << 8) |
-              (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 5))));
-          Logger::smf_app().debug(
-              "PCO: Protocol identifier IPCP option "
-              "SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_sec_ipv4_addr 0x%x",
-              ipcp_dns_sec_ipv4_addr);
+         if (ipcp_req_option_length >= 6) {
+           ipcp_dns_sec_ipv4_addr = htonl(
+               (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 2))
+                << 24) |
+               (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 3))
+                << 16) |
+               (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index + 4))
+                << 8) |
+               (((uint32_t) poc_id->protocol_id_contents.at(pco_in_index +
+         5)))); Logger::smf_app().debug( "PCO: Protocol identifier IPCP option "
+               "SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_dns_sec_ipv4_addr 0x%x",
+               ipcp_dns_sec_ipv4_addr);
 
-          if (ipcp_dns_sec_ipv4_addr == INADDR_ANY) {
-            ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
-            ipcp_out_code              = IPCP_CODE_CONFIGURE_NACK;
-          } else if (
-              smf_cfg.default_dns_secv4.s_addr != ipcp_dns_sec_ipv4_addr) {
-            ipcp_out_code              = IPCP_CODE_CONFIGURE_NACK;
-            ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
-          } else {
-            ipcp_out_dns_sec_ipv4_addr = ipcp_dns_sec_ipv4_addr;
-          }
+           if (ipcp_dns_sec_ipv4_addr == INADDR_ANY) {
+             ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
+             ipcp_out_code              = IPCP_CODE_CONFIGURE_NACK;
+           } else if (
+               smf_cfg.default_dns_secv4.s_addr != ipcp_dns_sec_ipv4_addr) {
+             ipcp_out_code              = IPCP_CODE_CONFIGURE_NACK;
+             ipcp_out_dns_sec_ipv4_addr = smf_cfg.default_dns_secv4.s_addr;
+           } else {
+             ipcp_out_dns_sec_ipv4_addr = ipcp_dns_sec_ipv4_addr;
+           }
 
-          Logger::smf_app().debug(
-              "PCO: Protocol identifier IPCP option "
-              "SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_sec_ipv4_addr 0x%x",
-              ipcp_out_dns_sec_ipv4_addr);
-        }
-        uint8_t ids[6] = {0};
-        ids[0]         = IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS;
-        ids[1]         = 6;
-        ids[2]         = (uint8_t)(ipcp_out_dns_sec_ipv4_addr & 0x000000FF);
-        ids[3] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 8) & 0x000000FF);
-        ids[4] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 16) & 0x000000FF);
-        ids[5] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 24) & 0x000000FF);
-        ipcp_out_length += 6;
-        std::string tmp_s((const char*) &ids[0], 6);
-        poc_id_resp.protocol_id_contents.append(tmp_s);
+           Logger::smf_app().debug(
+               "PCO: Protocol identifier IPCP option "
+               "SECONDARY_DNS_SERVER_IP_ADDRESS ipcp_out_dns_sec_ipv4_addr
+         0x%x", ipcp_out_dns_sec_ipv4_addr);
+         }
+         uint8_t ids[6] = {0};
+         ids[0]         = IPCP_OPTION_SECONDARY_DNS_SERVER_IP_ADDRESS;
+         ids[1]         = 6;
+         ids[2]         = (uint8_t)(ipcp_out_dns_sec_ipv4_addr & 0x000000FF);
+         ids[3] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 8) & 0x000000FF);
+         ids[4] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 16) & 0x000000FF);
+         ids[5] = (uint8_t)((ipcp_out_dns_sec_ipv4_addr >> 24) & 0x000000FF);
+         ipcp_out_length += 6;
+         std::string tmp_s((const char*) &ids[0], 6);
+         poc_id_resp.protocol_id_contents.append(tmp_s);
+         */
       } break;
 
       default:

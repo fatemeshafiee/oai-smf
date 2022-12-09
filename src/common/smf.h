@@ -22,14 +22,15 @@
 #ifndef FILE_SMF_SEEN
 #define FILE_SMF_SEEN
 
+#include <boost/algorithm/string.hpp>
+#include <map>
+#include <nlohmann/json.hpp>
+#include <unordered_set>
+#include <vector>
+
+#include "3gpp_24.501.h"
 #include "3gpp_29.274.h"
 #include "3gpp_29.571.h"
-#include "3gpp_24.501.h"
-#include <nlohmann/json.hpp>
-
-#include <map>
-#include <vector>
-#include <unordered_set>
 
 typedef uint64_t supi64_t;
 #define SUPI_64_FMT "%" SCNu64
@@ -85,13 +86,21 @@ typedef struct s_nssai  // section 28.4, TS23.003
   uint32_t sd;
   s_nssai(const uint8_t& m_sst, const uint32_t m_sd) : sst(m_sst), sd(m_sd) {}
   s_nssai(const uint8_t& m_sst, const std::string m_sd) : sst(m_sst) {
-    sd = 0xFFFFFF;
+    sd = SD_NO_VALUE;
+    if (m_sd.empty()) return;
+    uint8_t base = 10;
     try {
-      sd = std::stoul(m_sd, nullptr, 10);
+      if (m_sd.size() > 2) {
+        if (boost::iequals(m_sd.substr(0, 2), "0x")) {
+          base = 16;
+        }
+      }
+      sd = std::stoul(m_sd, nullptr, base);
     } catch (const std::exception& e) {
-      Logger::smf_app().warn(
-          "Error when converting from string to int for snssai.SD, error: %s",
+      Logger::smf_app().error(
+          "Error when converting from string to int for S-NSSAI SD, error: %s",
           e.what());
+      sd = SD_NO_VALUE;
     }
   }
   s_nssai() : sst(), sd() {}
@@ -277,7 +286,8 @@ constexpr uint64_t SECONDS_SINCE_FIRST_EPOCH = 2208988800;
 // 8.22  Fully Qualified TEID (F-TEID) - 3GPP TS 29.274 V16.0.0
 #define TEID_GRE_KEY_LENGTH 4
 
-#define DEFAULT_QFI 6
+#define DEFAULT_QFI 1
+#define DEFAULT_5QI 9  // TODO: from conf file
 
 typedef struct dnn_smf_info_item_s {
   std::string dnn;
@@ -345,7 +355,7 @@ typedef struct nf_service_s {
     s.append(service_instance_id);
     s.append(", Service name: ");
     s.append(service_name);
-    for (auto v : versions) {
+    for (const auto& v : versions) {
       s.append(v.to_string());
     }
     s.append(", Scheme: ");
@@ -380,11 +390,42 @@ typedef struct dnn_upf_info_item_s {
     return std::hash<std::string>()(dnn);
   }
 
-} dnn_upf_info_item_t;
+  std::string to_string() const {
+    std::string s = {};
+
+    s.append("DNN = ").append(dnn).append(", ");
+
+    if (dnai_list.size() > 0) {
+      s.append("DNAI list: {");
+
+      for (const auto& dnai : dnai_list) {
+        s.append("DNAI = ").append(dnai).append(", ");
+      }
+      s.append("}, ");
+    }
+
+    if (dnai_nw_instance_list.size() > 0) {
+      s.append("DNAI NW Instance list: {");
+
+      for (const auto& dnai_nw : dnai_nw_instance_list) {
+        s.append("(")
+            .append(dnai_nw.first)
+            .append(", ")
+            .append(dnai_nw.second)
+            .append("),");
+      }
+      s.append("}, ");
+    }
+    return s;
+  }
+
+}
+
+dnn_upf_info_item_t;
 
 typedef struct snssai_upf_info_item_s {
-  snssai_t snssai;
-  std::unordered_set<dnn_upf_info_item_t, dnn_upf_info_item_t>
+  mutable snssai_t snssai;
+  mutable std::unordered_set<dnn_upf_info_item_t, dnn_upf_info_item_t>
       dnn_upf_info_list;
 
   snssai_upf_info_item_s& operator=(const snssai_upf_info_item_s& s) {
@@ -394,11 +435,27 @@ typedef struct snssai_upf_info_item_s {
   }
 
   bool operator==(const snssai_upf_info_item_s& s) const {
-    return snssai == s.snssai;
+    return (snssai == s.snssai) and (dnn_upf_info_list == s.dnn_upf_info_list);
   }
 
   size_t operator()(const snssai_upf_info_item_s&) const {
     return snssai.operator()(snssai);
+  }
+
+  std::string to_string() const {
+    std::string s = {};
+
+    s.append("{" + snssai.toString() + ", ");
+
+    if (dnn_upf_info_list.size() > 0) {
+      s.append("{");
+
+      for (auto dnn_upf : dnn_upf_info_list) {
+        s.append(dnn_upf.to_string());
+      }
+      s.append("}, ");
+    }
+    return s;
   }
 
 } snssai_upf_info_item_t;
@@ -436,11 +493,11 @@ typedef struct upf_info_s {
     std::string s = {};
     // TODO: Interface UPF Info List
     if (!snssai_upf_info_list.empty()) {
-      s.append("SNSSAI UPF Info: ");
+      s.append("S-NSSAI UPF Info: ");
       for (auto sn : snssai_upf_info_list) {
         s.append("{" + sn.snssai.toString() + ", ");
         for (auto d : sn.dnn_upf_info_list) {
-          s.append("{DNN = " + d.dnn + "}, ");
+          s.append("{DNN = " + d.dnn + "} ");
         }
         s.append("};");
       }
