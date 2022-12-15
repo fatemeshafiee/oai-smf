@@ -164,17 +164,31 @@ bool conv::plmnFromString(
 //------------------------------------------------------------------------------
 void conv::plmnToMccMnc(
     const plmn_t& plmn, std::string& mcc, std::string& mnc) {
-  uint16_t mcc_dec = 0;
-  uint16_t mnc_dec = 0;
-  uint16_t mnc_len = 0;
+  int m_mcc = plmn.mcc_digit1 * 100 + plmn.mcc_digit2 * 10 + plmn.mcc_digit3;
+  mcc       = std::to_string(m_mcc);
+  if ((plmn.mcc_digit2 == 0) and (plmn.mcc_digit1 == 0)) {
+    mcc = "00" + mcc;
+  } else if (plmn.mcc_digit1 == 0) {
+    mcc = "0" + mcc;
+  }
 
-  mcc_dec = plmn.mcc_digit1 * 100 + plmn.mcc_digit2 * 10 + plmn.mcc_digit3;
-  mnc_len = (plmn.mnc_digit3 == 0x0 ? 2 : 3);
-  mnc_dec = plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
-  mnc_dec = (mnc_len == 2 ? mnc_dec : mnc_dec * 10 + plmn.mnc_digit3);
+  int m_mnc = 0;
+  if (plmn.mnc_digit3 == 0xf) {
+    m_mnc = plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
+    if (plmn.mnc_digit1 == 0) {
+      mnc = "0" + std::to_string(m_mnc);
+      return;
+    }
+  } else {
+    m_mnc = plmn.mnc_digit3 * 100 + plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
+    mnc   = std::to_string(m_mnc);
+    if ((plmn.mnc_digit2 == 0) and (plmn.mnc_digit1 == 0)) {
+      mnc = "00" + mnc;
+    } else if (plmn.mnc_digit1 == 0) {
+      mnc = "0" + mnc;
+    }
+  }
 
-  mcc = std::to_string(mcc_dec);
-  mnc = std::to_string(mnc_dec);
   return;
 }
 

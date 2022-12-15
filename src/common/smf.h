@@ -46,6 +46,7 @@ typedef struct {
   char data[SUPI_DIGITS_MAX + 1];
 } supi_t;
 
+// TODO: Move to conversions
 static void smf_string_to_supi(supi_t* const supi, char const* const supi_str) {
   // strncpy(supi->data, supi_str, SUPI_DIGITS_MAX + 1);
   memcpy((void*) supi->data, (void*) supi_str, SUPI_DIGITS_MAX + 1);
@@ -75,6 +76,13 @@ static uint64_t smf_supi_to_u64(supi_t supi) {
   uint64_t uint_supi;
   sscanf(supi.data, "%" SCNu64, &uint_supi);
   return uint_supi;
+}
+
+static std::string smf_supi64_to_string(const supi64_t& supi) {
+  std::string supi_str = std::to_string(supi);
+  uint8_t padded_len   = SUPI_DIGITS_MAX - supi_str.length();
+  for (int i = 0; i < padded_len; i++) supi_str = "0" + supi_str;
+  return supi_str;
 }
 
 typedef struct s_nssai  // section 28.4, TS23.003

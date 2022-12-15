@@ -859,7 +859,8 @@ bool smf_sbi::get_sm_data(
       std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) +
       ":" + std::to_string(smf_cfg.udm_addr.port) + NUDM_SDM_BASE +
       smf_cfg.udm_addr.api_version +
-      fmt::format(NUDM_SDM_GET_SM_DATA_URL, std::to_string(supi)) + query_str;
+      fmt::format(NUDM_SDM_GET_SM_DATA_URL, smf_supi64_to_string(supi)) +
+      query_str;
 
   Logger::smf_sbi().debug("UDM's URL: %s ", url.c_str());
 
@@ -935,136 +936,141 @@ bool smf_sbi::get_sm_data(
 
     // Verify DNN configurations
     if (jsonData.find("dnnConfigurations") == jsonData.end()) return false;
+    Logger::smf_sbi().debug(
+        "DNN Configurations %s", jsonData["dnnConfigurations"].dump().c_str());
 
     // Retrieve SessionManagementSubscription and store in the context
     for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin();
          it != jsonData["dnnConfigurations"].end(); ++it) {
       Logger::smf_sbi().debug("DNN %s", it.key().c_str());
-      if (it.key().compare(dnn) != 0) break;
-
-      try {
-        std::shared_ptr<dnn_configuration_t> dnn_configuration =
-            std::make_shared<dnn_configuration_t>();
-        // PDU Session Type (Mandatory)
-        std::string default_session_type =
-            it.value()["pduSessionTypes"]["defaultSessionType"];
-        Logger::smf_sbi().debug(
-            "Default session type %s", default_session_type.c_str());
-        pdu_session_type_t pdu_session_type(default_session_type);
-        dnn_configuration->pdu_session_types.default_session_type =
-            pdu_session_type;
-
-        // SSC_Mode (Mandatory)
-        std::string default_ssc_mode = it.value()["sscModes"]["defaultSscMode"];
-        Logger::smf_sbi().debug(
-            "Default SSC Mode %s", default_ssc_mode.c_str());
-        ssc_mode_t ssc_mode(default_ssc_mode);
-        dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode;
-
-        // 5gQosProfile (Optional)
-        if (it.value().find("5gQosProfile") != it.value().end()) {
-          dnn_configuration->_5g_qos_profile._5qi =
-              it.value()["5gQosProfile"]["5qi"];
-          dnn_configuration->_5g_qos_profile.arp.priority_level =
-              it.value()["5gQosProfile"]["arp"]["priorityLevel"];
-          dnn_configuration->_5g_qos_profile.arp.preempt_cap =
-              it.value()["5gQosProfile"]["arp"]["preemptCap"];
-          dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
-              it.value()["5gQosProfile"]["arp"]["preemptVuln"];
-          // Optinal
-          if (it.value()["5gQosProfile"].find("") !=
-              it.value()["5gQosProfile"].end()) {
-            dnn_configuration->_5g_qos_profile.priority_level =
-                it.value()["5gQosProfile"]["5QiPriorityLevel"];
-          }
-        }
-
-        // session_ambr (Optional)
-        if (it.value().find("sessionAmbr") != it.value().end()) {
-          dnn_configuration->session_ambr.uplink =
-              it.value()["sessionAmbr"]["uplink"];
-          dnn_configuration->session_ambr.downlink =
-              it.value()["sessionAmbr"]["downlink"];
+      if (it.key().compare(dnn) == 0) {
+        // Get DNN configuration
+        try {
+          std::shared_ptr<dnn_configuration_t> dnn_configuration =
+              std::make_shared<dnn_configuration_t>();
+          // PDU Session Type (Mandatory)
+          std::string default_session_type =
+              it.value()["pduSessionTypes"]["defaultSessionType"];
           Logger::smf_sbi().debug(
-              "Session AMBR Uplink %s, Downlink %s",
-              dnn_configuration->session_ambr.uplink.c_str(),
-              dnn_configuration->session_ambr.downlink.c_str());
-        }
+              "Default session type %s", default_session_type.c_str());
+          pdu_session_type_t pdu_session_type(default_session_type);
+          dnn_configuration->pdu_session_types.default_session_type =
+              pdu_session_type;
 
-        // Static IP Addresses (Optional)
-        if (it.value().find("staticIpAddress") != it.value().end()) {
-          for (const auto& ip_addr : it.value()["staticIpAddress"]) {
-            if (ip_addr.find("ipv4Addr") != ip_addr.end()) {
-              struct in_addr ue_ipv4_addr = {};
-              std::string ue_ip_str = ip_addr["ipv4Addr"].get<std::string>();
-              // ip_addr.at("ipv4Addr").get_to(ue_ip_str);
-              IPV4_STR_ADDR_TO_INADDR(
-                  util::trim(ue_ip_str).c_str(), ue_ipv4_addr,
-                  "BAD IPv4 ADDRESS FORMAT FOR UE IP ADDR !");
-              ip_address_t ue_ip = {};
-              ue_ip              = ue_ipv4_addr;
-              dnn_configuration->static_ip_addresses.push_back(ue_ip);
-            } else if (ip_addr.find("ipv6Addr") != ip_addr.end()) {
-              unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-              struct in6_addr ue_ipv6_addr;
-              std::string ue_ip_str = ip_addr["ipv6Addr"].get<std::string>();
+          // SSC_Mode (Mandatory)
+          std::string default_ssc_mode =
+              it.value()["sscModes"]["defaultSscMode"];
+          Logger::smf_sbi().debug(
+              "Default SSC Mode %s", default_ssc_mode.c_str());
+          ssc_mode_t ssc_mode(default_ssc_mode);
+          dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode;
 
-              if (inet_pton(
-                      AF_INET6, util::trim(ue_ip_str).c_str(), buf_in6_addr) ==
-                  1) {
-                memcpy(&ue_ipv6_addr, buf_in6_addr, sizeof(struct in6_addr));
-              } else {
-                Logger::smf_app().error(
-                    "Bad UE IPv6 Addr %s", ue_ip_str.c_str());
-                throw("Bad UE IPv6 Addr %s", ue_ip_str.c_str());
-              }
-
-              ip_address_t ue_ip = {};
-              ue_ip              = ue_ipv6_addr;
-              dnn_configuration->static_ip_addresses.push_back(ue_ip);
-            } else if (ip_addr.find("ipv6Prefix") != ip_addr.end()) {
-              unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-              struct in6_addr ipv6_prefix;
-              std::string prefix_str = ip_addr["ipv6Prefix"].get<std::string>();
-              std::vector<std::string> words = {};
-              boost::split(
-                  words, prefix_str, boost::is_any_of("/"),
-                  boost::token_compress_on);
-              if (words.size() != 2) {
-                Logger::smf_app().error(
-                    "Bad value for UE IPv6 Prefix %s", prefix_str.c_str());
-                return RETURNerror;
-              }
-
-              if (inet_pton(
-                      AF_INET6, util::trim(words.at(0)).c_str(),
-                      buf_in6_addr) == 1) {
-                memcpy(&ipv6_prefix, buf_in6_addr, sizeof(struct in6_addr));
-              } else {
-                Logger::smf_app().error(
-                    "Bad UE IPv6 Addr %s", words.at(0).c_str());
-                throw("Bad UE IPv6 Addr %s", words.at(0).c_str());
-              }
-
-              ip_address_t ue_ip           = {};
-              ipv6_prefix_t ue_ipv6_prefix = {};
-              ue_ipv6_prefix.prefix_len    = std::stoi(util::trim(words.at(1)));
-              ue_ipv6_prefix.prefix        = ipv6_prefix;
-              ue_ip                        = ue_ipv6_prefix;
-              dnn_configuration->static_ip_addresses.push_back(ue_ip);
+          // 5gQosProfile (Optional)
+          if (it.value().find("5gQosProfile") != it.value().end()) {
+            dnn_configuration->_5g_qos_profile._5qi =
+                it.value()["5gQosProfile"]["5qi"];
+            dnn_configuration->_5g_qos_profile.arp.priority_level =
+                it.value()["5gQosProfile"]["arp"]["priorityLevel"];
+            dnn_configuration->_5g_qos_profile.arp.preempt_cap =
+                it.value()["5gQosProfile"]["arp"]["preemptCap"];
+            dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
+                it.value()["5gQosProfile"]["arp"]["preemptVuln"];
+            // Optinal
+            if (it.value()["5gQosProfile"].find("") !=
+                it.value()["5gQosProfile"].end()) {
+              dnn_configuration->_5g_qos_profile.priority_level =
+                  it.value()["5gQosProfile"]["5QiPriorityLevel"];
             }
           }
-        }
 
-        subscription->insert_dnn_configuration(it.key(), dnn_configuration);
-        return true;
-      } catch (nlohmann::json::exception& e) {
-        Logger::smf_sbi().warn(
-            "Exception message %s, exception id %d ", e.what(), e.id);
-        return false;
-      } catch (std::exception& e) {
-        Logger::smf_sbi().warn("Exception message %s", e.what());
-        return false;
+          // session_ambr (Optional)
+          if (it.value().find("sessionAmbr") != it.value().end()) {
+            dnn_configuration->session_ambr.uplink =
+                it.value()["sessionAmbr"]["uplink"];
+            dnn_configuration->session_ambr.downlink =
+                it.value()["sessionAmbr"]["downlink"];
+            Logger::smf_sbi().debug(
+                "Session AMBR Uplink %s, Downlink %s",
+                dnn_configuration->session_ambr.uplink.c_str(),
+                dnn_configuration->session_ambr.downlink.c_str());
+          }
+
+          // Static IP Addresses (Optional)
+          if (it.value().find("staticIpAddress") != it.value().end()) {
+            for (const auto& ip_addr : it.value()["staticIpAddress"]) {
+              if (ip_addr.find("ipv4Addr") != ip_addr.end()) {
+                struct in_addr ue_ipv4_addr = {};
+                std::string ue_ip_str = ip_addr["ipv4Addr"].get<std::string>();
+                // ip_addr.at("ipv4Addr").get_to(ue_ip_str);
+                IPV4_STR_ADDR_TO_INADDR(
+                    util::trim(ue_ip_str).c_str(), ue_ipv4_addr,
+                    "BAD IPv4 ADDRESS FORMAT FOR UE IP ADDR !");
+                ip_address_t ue_ip = {};
+                ue_ip              = ue_ipv4_addr;
+                dnn_configuration->static_ip_addresses.push_back(ue_ip);
+              } else if (ip_addr.find("ipv6Addr") != ip_addr.end()) {
+                unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+                struct in6_addr ue_ipv6_addr;
+                std::string ue_ip_str = ip_addr["ipv6Addr"].get<std::string>();
+
+                if (inet_pton(
+                        AF_INET6, util::trim(ue_ip_str).c_str(),
+                        buf_in6_addr) == 1) {
+                  memcpy(&ue_ipv6_addr, buf_in6_addr, sizeof(struct in6_addr));
+                } else {
+                  Logger::smf_app().error(
+                      "Bad UE IPv6 Addr %s", ue_ip_str.c_str());
+                  ue_ipv6_addr = in6addr_any;
+                }
+
+                ip_address_t ue_ip = {};
+                ue_ip              = ue_ipv6_addr;
+                dnn_configuration->static_ip_addresses.push_back(ue_ip);
+              } else if (ip_addr.find("ipv6Prefix") != ip_addr.end()) {
+                unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+                struct in6_addr ipv6_prefix;
+                std::string prefix_str =
+                    ip_addr["ipv6Prefix"].get<std::string>();
+                std::vector<std::string> words = {};
+                boost::split(
+                    words, prefix_str, boost::is_any_of("/"),
+                    boost::token_compress_on);
+                if (words.size() != 2) {
+                  Logger::smf_app().error(
+                      "Bad value for UE IPv6 Prefix %s", prefix_str.c_str());
+                  return RETURNerror;
+                }
+
+                if (inet_pton(
+                        AF_INET6, util::trim(words.at(0)).c_str(),
+                        buf_in6_addr) == 1) {
+                  memcpy(&ipv6_prefix, buf_in6_addr, sizeof(struct in6_addr));
+                } else {
+                  Logger::smf_app().error(
+                      "Bad UE IPv6 Addr %s", words.at(0).c_str());
+                  ipv6_prefix = in6addr_any;
+                }
+
+                ip_address_t ue_ip           = {};
+                ipv6_prefix_t ue_ipv6_prefix = {};
+                ue_ipv6_prefix.prefix_len = std::stoi(util::trim(words.at(1)));
+                ue_ipv6_prefix.prefix     = ipv6_prefix;
+                ue_ip                     = ue_ipv6_prefix;
+                dnn_configuration->static_ip_addresses.push_back(ue_ip);
+              }
+            }
+          }
+
+          subscription->insert_dnn_configuration(it.key(), dnn_configuration);
+          return true;
+        } catch (nlohmann::json::exception& e) {
+          Logger::smf_sbi().warn(
+              "Exception message %s, exception id %d ", e.what(), e.id);
+          return false;
+        } catch (std::exception& e) {
+          Logger::smf_sbi().warn("Exception message %s", e.what());
+          return false;
+        }
       }
     }
     return true;
