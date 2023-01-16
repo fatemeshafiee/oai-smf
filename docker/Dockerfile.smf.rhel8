@@ -96,6 +96,8 @@ COPY ./rhsm-ca /etc/rhsm/ca
 RUN rm -f /etc/rhsm-host && \
     microdnf update -y && \
     microdnf install -y \
+      python3 \
+      python3-pip \
       tzdata \
 #      libasan \
       procps-ng \
@@ -106,6 +108,7 @@ RUN rm -f /etc/rhsm-host && \
       libevent \
       findutils \
       libconfig && \
+    pip3 install jinja2 && \
     microdnf clean all -y && \
     rm -rf /var/cache/yum /var/cache/dnf && \
     # Remove entitlements and Subscription Manager configs
@@ -116,7 +119,7 @@ RUN rm -f /etc/rhsm-host && \
 WORKDIR /openair-smf/bin
 COPY --from=oai-smf-builder \
     /openair-smf/build/smf/build/oai_smf \
-    /openair-smf/scripts/entrypoint.sh \
+    /openair-smf/scripts/entrypoint.py \
     /openair-smf/scripts/healthcheck.sh \
     ./
 
@@ -145,5 +148,5 @@ HEALTHCHECK --interval=10s \
             --retries=6 \
     CMD /openair-smf/bin/healthcheck.sh
 
-ENTRYPOINT ["/openair-smf/bin/entrypoint.sh"]
+ENTRYPOINT ["python3", "/openair-smf/bin/entrypoint.py"]
 CMD ["/openair-smf/bin/oai_smf", "-c", "/openair-smf/etc/smf.conf", "-o"]
