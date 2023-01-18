@@ -24,6 +24,7 @@
   * Fix issue when there's no valid reply from UPF for PDU session release
   * Fix Protocol identifier Selected Bearer Control Mode
   * Fix issue for Static UE IP Addr
+  * Fix URR ID in IE Create URR (post UPF graph implementation)
 * Docker image improvements
   * Fixed docker exit by catching SIGTERM
   * release mode does not use libasan anymore --> allocation of 20T virtual memory is no longer done
