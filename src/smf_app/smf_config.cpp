@@ -567,14 +567,6 @@ int smf_config::load(const string& config_file) {
       http_version = httpVersion;
 
       support_features.lookupValue(
-          SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_NETWORK_INSTANCE, opt);
-      if (boost::iequals(opt, "yes")) {
-        use_nwi = true;
-      } else {
-        use_nwi = false;
-      }
-
-      support_features.lookupValue(
           SMF_CONFIG_STRING_SUPPORT_FEATURES_ENABLE_USAGE_REPORTING, opt);
       if (boost::iequals(opt, "yes")) {
         enable_ur = true;
@@ -787,7 +779,7 @@ int smf_config::load(const string& config_file) {
           }
         }
         // Network Instance
-        if (upf_cfg.exists(SMF_CONFIG_STRING_NWI_LIST) & use_nwi) {
+        if (upf_cfg.exists(SMF_CONFIG_STRING_NWI_LIST)) {
           const Setting& nwi_cfg = upf_cfg[SMF_CONFIG_STRING_NWI_LIST];
           count                  = nwi_cfg.getLength();
           // Check if NWI list for given UPF is present
@@ -1076,8 +1068,6 @@ void smf_config::display() {
   Logger::smf_app().info(
       "    Use FQDN ...........................: %s",
       use_fqdn_dns ? "Yes" : "No");
-  Logger::smf_app().info(
-      "    Use NWI  ...........................: %s", use_nwi ? "Yes" : "No");
 
   Logger::smf_app().info("- DNN configurations:");
 
@@ -1239,59 +1229,27 @@ std::string smf_config::get_default_dnn() {
 }
 
 //------------------------------------------------------------------------------
-bool smf_config::get_nwi_list_index(
-    bool nwi_enabled, uint8_t nwi_list_index, pfcp::node_id_t node_id) {
-  if (node_id.node_id_type == pfcp::NODE_ID_TYPE_IPV4_ADDRESS) {
-    for (int i = 0; i < upf_nwi_list.size(); i++) {
-      if (node_id.u1.ipv4_address.s_addr ==
-          upf_nwi_list[i].upf_id.u1.ipv4_address.s_addr) {
-        nwi_list_index = i;
-        nwi_enabled    = true;
-        return true;
-      }
-    }
-    nwi_enabled = false;
-    return false;
-  }
-  if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN) {
-    // Resove FQDN here because, node id type is always IPV4_ADDRESS in
-    // upf_nwi_list
-    unsigned char buf_in_addr[sizeof(struct in_addr) + 1];
-    unsigned int upf_port = {0};
-    uint8_t addr_type     = {0};
-    std::string address   = {};
-    struct in_addr ipv4_Address;
-    fqdn::resolve(node_id.fqdn, address, upf_port, addr_type, "");
-    if (inet_pton(AF_INET, util::trim(address).c_str(), buf_in_addr) == 1) {
-      memcpy(&ipv4_Address, buf_in_addr, sizeof(struct in_addr));
-    } else {
-      Logger::smf_app().error("FQDN resolve failed for get_nwi_list_index");
-    }
-
-    for (int i = 0; i < upf_nwi_list.size(); i++) {
-      if (ipv4_Address.s_addr ==
-          upf_nwi_list[i].upf_id.u1.ipv4_address.s_addr) {
-        nwi_list_index = i;
-        nwi_enabled    = true;
-        return true;
-      }
-    }
-    nwi_enabled = false;
-    return false;
-  }
-  return false;
-}
-
-//------------------------------------------------------------------------------
 std::string smf_config::get_nwi(
-    const std::vector<interface_upf_info_item_t>& int_list,
-    const std::string& int_type) {
-  std::string nwi = {};
-  for (auto ui : int_list) {
-    if (!ui.interface_type.compare(int_type)) nwi = ui.network_instance;
+    const pfcp::node_id_t& node_id, const iface_type& type) {
+  // Note Stefan: In all cases, resolving should happen before this step and the
+  // IP address is set
+  for (const auto& upf_nwi : upf_nwi_list) {
+    if (upf_nwi.upf_id.u1.ipv4_address.s_addr ==
+        node_id.u1.ipv4_address.s_addr) {
+      switch (type) {
+        case iface_type::N3:
+          return upf_nwi.domain_access;
+        case iface_type::N6:
+          return upf_nwi.domain_core;
+        case iface_type::N9:
+          Logger::smf_app().warn(
+              "N9 interface type not supported for locally configured NWI");
+          return "";
+        default:
+          Logger::smf_app().error("Unsupported enum parameter in get_nwi");
+          return "";
+      }
+    }
   }
-  Logger::smf_app().debug(
-      "Interface Type - %s, NWI - %s", int_type.c_str(), nwi.c_str());
-  return nwi;
+  return "";
 }
-//------------------------------------------------------------------------------

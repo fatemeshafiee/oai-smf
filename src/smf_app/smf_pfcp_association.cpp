@@ -894,12 +894,14 @@ void upf_graph::insert_into_graph(const std::shared_ptr<pfcp_association>& sa) {
         "just add the node");
     Logger::smf_app().info("Assume that the UPF has a N3 and a N6 interface.");
 
-    edge n3_edge   = {};
-    n3_edge.type   = iface_type::N3;
-    n3_edge.uplink = false;
-    edge n6_edge   = {};
-    n6_edge.type   = iface_type::N6;
-    n6_edge.uplink = true;
+    edge n3_edge        = {};
+    n3_edge.type        = iface_type::N3;
+    n3_edge.nw_instance = smf_cfg.get_nwi(sa->node_id, iface_type::N3);
+    n3_edge.uplink      = false;
+    edge n6_edge        = {};
+    n6_edge.type        = iface_type::N6;
+    n6_edge.nw_instance = smf_cfg.get_nwi(sa->node_id, iface_type::N6);
+    n6_edge.uplink      = true;
 
     add_upf_graph_edge(sa, n3_edge);
     add_upf_graph_edge(sa, n6_edge);
