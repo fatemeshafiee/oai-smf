@@ -47,8 +47,6 @@ namespace smf {
 #define PFCP_ASSOCIATION_HEARTBEAT_MAX_RETRIES 2
 #define PFCP_ASSOCIATION_GRACEFUL_RELEASE_PERIOD 5
 
-enum iface_type { N9, N6, N3 };
-
 struct edge;
 
 class pfcp_association {

@@ -41,6 +41,7 @@
 #include "3gpp_29.244.h"
 #include "pfcp.hpp"
 #include "smf.h"
+#include "smf_profile.hpp"
 
 #define SMF_CONFIG_STRING_SMF_CONFIG "SMF"
 #define SMF_CONFIG_STRING_PID_DIRECTORY "PID_DIRECTORY"
@@ -157,8 +158,6 @@
   "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS "USE_FQDN_DNS"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION "HTTP_VERSION"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_NETWORK_INSTANCE                \
-  "USE_NETWORK_INSTANCE"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_ENABLE_USAGE_REPORTING              \
   "ENABLE_USAGE_REPORTING"
 
@@ -245,7 +244,6 @@ class smf_config {
   bool use_local_pcc_rules;
   bool use_fqdn_dns;
   unsigned int http_version;
-  bool use_nwi;
   bool enable_ur;
 
   std::vector<pfcp::node_id_t> upfs;
@@ -340,7 +338,6 @@ class smf_config {
     discover_upf                = false;
     discover_pcf                = false;
     use_fqdn_dns                = false;
-    use_nwi                     = false;
   };
   ~smf_config();
   void lock() { m_rw_lock.lock(); };
@@ -352,11 +349,14 @@ class smf_config {
   bool is_dotted_dnn_handled(
       const std::string& dnn, const pdu_session_type_t& pdn_session_type);
   std::string get_default_dnn();
-  bool get_nwi_list_index(
-      bool nwi_enabled, uint8_t nwi_list_index, pfcp::node_id_t node_id);
-  std::string get_nwi(
-      const std::vector<interface_upf_info_item_t>& int_list,
-      const std::string& int_type);
+
+  /**
+   * Returns network instance of iface_type typ. If not found, empty string is
+   * returned
+   * @param node_id IP address or FQDN to match against configuration
+   * @return NWI or empty string
+   */
+  std::string get_nwi(const pfcp::node_id_t& node_id, const iface_type& type);
 };
 
 }  // namespace smf
