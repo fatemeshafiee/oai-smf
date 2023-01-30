@@ -573,6 +573,17 @@ int smf_config::load(const string& config_file) {
       } else {
         enable_ur = false;
       }
+      support_features.lookupValue(
+          SMF_CONFIG_STRING_SUPPORT_FEATURES_enable_dl_pdr_in_pfcp_sess_estab,
+          opt);
+      if (boost::iequals(opt, "yes")) {
+        enable_dl_pdr_in_pfcp_sess_estab = true;
+      } else {
+        enable_dl_pdr_in_pfcp_sess_estab = false;
+      }
+
+      support_features.lookupValue(
+          SMF_CONFIG_STRING_N3_LOCAL_IPV4_ADDRESS, local_n3_addr);
 
     } catch (const SettingNotFoundException& nfex) {
       Logger::smf_app().error(
@@ -1068,6 +1079,11 @@ void smf_config::display() {
   Logger::smf_app().info(
       "    Use FQDN ...........................: %s",
       use_fqdn_dns ? "Yes" : "No");
+  Logger::smf_app().info(
+      "    ENABLE DL PDR IN PFCP SESSION ESTAB.: %s",
+      enable_dl_pdr_in_pfcp_sess_estab ? "Yes" : "No");
+  Logger::smf_app().info(
+      "    UPF N3 LOCAL ADDRESS ...............: %s", local_n3_addr.c_str());
 
   Logger::smf_app().info("- DNN configurations:");
 
