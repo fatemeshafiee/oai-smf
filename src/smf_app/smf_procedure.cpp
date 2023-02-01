@@ -235,7 +235,8 @@ void smf_session_procedure::synch_ul_dl_edges(
 
 //------------------------------------------------------------------------------
 pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
-    edge& edge, const qfi_t& qfi, const pfcp::up_function_features_s up_features) {
+    edge& edge, const qfi_t& qfi,
+    const pfcp::up_function_features_s up_features) {
   // When we have a PDR and edge is uplink we know we are in a downlink
   // procedure, e.g. PDR from N6 to N3 -> N6 is uplink edge, so downlink
   // procedure
