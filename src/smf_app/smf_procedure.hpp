@@ -96,13 +96,11 @@ class smf_session_procedure : public smf_procedure {
 
   pfcp::create_pdr pfcp_create_pdr(
       edge& edge, const pfcp::qfi_t& qfi,
-      pfcp::up_function_features_s up_features);
+      const pfcp::up_function_features_s up_features);
 
   pfcp::create_urr pfcp_create_urr(edge& edge, const pfcp::qfi_t& qfi);
 
   pfcp::create_pdr pfcp_create_pdr_dl(edge& edge, const pfcp::qfi_t& qfi);
-
-  pfcp::create_far pfcp_create_far_dl(edge& edge, const pfcp::qfi_t& qfi);
 
   // TODO eventuell if used more than once
  private:

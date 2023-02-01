@@ -45,7 +45,6 @@
 #include "smf_pfcp_association.hpp"
 #include "ProblemDetails.h"
 #include "3gpp_24.501.h"
-#include "common_defs.h"
 
 using namespace pfcp;
 using namespace smf;
@@ -146,7 +145,15 @@ pfcp::create_far smf_session_procedure::pfcp_create_far(
       flow->far_id_dl.first = true;
     }
     far_id = flow->far_id_dl.second;
+    if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab) {
+      apply_action.forw = 0;
+      apply_action.drop = 1;
+      create_far.set(flow->far_id_dl.second);
+      create_far.set(apply_action);
+      return create_far;
+    }
   }
+
   forwarding_parameters.set(destination_interface);
 
   //-------------------
@@ -227,30 +234,8 @@ void smf_session_procedure::synch_ul_dl_edges(
 }
 
 //------------------------------------------------------------------------------
-pfcp::create_far smf_session_procedure::pfcp_create_far_dl(
-    edge& edge, const pfcp::qfi_t& qfi) {
-  pfcp::create_far create_far       = {};
-  pfcp::apply_action_t apply_action = {};
-
-  apply_action.drop = 1;  // forward the packets
-
-  auto flow = edge.get_qos_flow(qfi);
-  if (!flow) {
-    Logger::smf_app().error("Could not find QOS flow for this QFI.");
-    return create_far;
-  }
-
-  sps->generate_far_id((flow->far_id_dl.second));
-  flow->far_id_dl.first = true;
-
-  create_far.set(flow->far_id_dl.second);
-  create_far.set(apply_action);
-  return create_far;
-}
-
-//------------------------------------------------------------------------------
 pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
-    edge& edge, const qfi_t& qfi, pfcp::up_function_features_s up_features) {
+    edge& edge, const qfi_t& qfi, const pfcp::up_function_features_s up_features) {
   // When we have a PDR and edge is uplink we know we are in a downlink
   // procedure, e.g. PDR from N6 to N3 -> N6 is uplink edge, so downlink
   // procedure
@@ -620,7 +605,7 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
 
     if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab) {
       pfcp::create_far create_far_dl =
-          pfcp_create_far_dl(dl_edge, current_flow.qfi);
+          pfcp_create_far(dl_edge, current_flow.qfi);
       pfcp::create_pdr create_pdr_dl =
           pfcp_create_pdr_dl(dl_edge, current_flow.qfi);
       n4_triggered->pfcp_ies.set(create_pdr_dl);
