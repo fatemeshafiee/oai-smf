@@ -78,10 +78,22 @@ pfcp::ue_ip_address_t smf_session_procedure::pfcp_ue_ip_address(
 
 //------------------------------------------------------------------------------
 pfcp::fteid_t smf_session_procedure::pfcp_prepare_fteid(
-    const pfcp::fteid_t& fteid) {
+    pfcp::fteid_t& fteid, const bool& ftup_supported) {
   pfcp::fteid_t local_fteid;
-
-  if (fteid.is_zero()) {
+  if (!ftup_supported) {
+    Logger::smf_app().info(
+        "Generating N3-UL TEID since current UPF does not support TEID "
+        "Creation");
+    local_fteid.ch           = 0;
+    local_fteid.v4           = 1;
+    local_fteid.chid         = 0;
+    local_fteid.ipv4_address = conv::fromString(smf_cfg.local_n3_addr);
+    sps->generate_teid(local_fteid);
+    fteid = local_fteid;
+    Logger::smf_app().info(
+        "    UL F-TEID 0x%" PRIx32 " allocated for N3 IPv4 Addr : %s",
+        local_fteid.teid, conv::toString(local_fteid.ipv4_address).c_str());
+  } else if (fteid.is_zero()) {
     local_fteid.ch   = 1;
     local_fteid.v4   = 1;
     local_fteid.chid = 1;
@@ -133,7 +145,15 @@ pfcp::create_far smf_session_procedure::pfcp_create_far(
       flow->far_id_dl.first = true;
     }
     far_id = flow->far_id_dl.second;
+    if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab) {
+      apply_action.forw = 0;
+      apply_action.drop = 1;
+      create_far.set(flow->far_id_dl.second);
+      create_far.set(apply_action);
+      return create_far;
+    }
   }
+
   forwarding_parameters.set(destination_interface);
 
   //-------------------
@@ -215,7 +235,8 @@ void smf_session_procedure::synch_ul_dl_edges(
 
 //------------------------------------------------------------------------------
 pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
-    edge& edge, const qfi_t& qfi) {
+    edge& edge, const qfi_t& qfi,
+    const pfcp::up_function_features_s up_features) {
   // When we have a PDR and edge is uplink we know we are in a downlink
   // procedure, e.g. PDR from N6 to N3 -> N6 is uplink edge, so downlink
   // procedure
@@ -279,10 +300,10 @@ pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
   if (edge.type != iface_type::N6) {
     // in UPLINK always choose ID
     if (edge.uplink) {
-      local_fteid      = pfcp_prepare_fteid(flow->dl_fteid);
+      local_fteid      = pfcp_prepare_fteid(flow->dl_fteid, up_features.ftup);
       local_fteid.chid = 0;
     } else {
-      local_fteid = pfcp_prepare_fteid(flow->ul_fteid);
+      local_fteid = pfcp_prepare_fteid(flow->ul_fteid, up_features.ftup);
     }
     pdi.set(local_fteid);
   }
@@ -335,7 +356,52 @@ pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
 
   return create_pdr;
 }
+//------------------------------------------------------------------------------
+pfcp::create_pdr smf_session_procedure::pfcp_create_pdr_dl(
+    edge& edge, const qfi_t& qfi) {
+  //-------------------
+  // IE create_pdr (section 5.8.2.11.3@TS 23.501)
+  //-------------------
+  pfcp::create_pdr create_pdr   = {};
+  pfcp::precedence_t precedence = {};
+  pfcp::pdi pdi                 = {};  // packet detection information
+  pfcp::outer_header_removal_t outer_header_removal = {};
+  // pdi IEs
+  pfcp::source_interface_t source_interface          = {};
+  pfcp::sdf_filter_t sdf_filter                      = {};
+  pfcp::application_id_t application_id              = {};
+  pfcp::_3gpp_interface_type_t source_interface_type = {};
+  // pfcp::pdr_id_t pdr_id;
+  pfcp::far_id_t far_id;
 
+  auto flow = edge.get_qos_flow(qfi);
+
+  if (!flow) {
+    Logger::smf_app().error("Could not find QOS flow for this QFI.");
+    return create_pdr;
+  }
+  far_id = flow->far_id_dl.second;
+
+  sps->generate_pdr_id(flow->pdr_id_dl);
+
+  source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
+  pdi.set(source_interface);
+  pfcp::ue_ip_address_t ue_ip_addr = pfcp_ue_ip_address(edge);
+  ue_ip_addr.sd                    = 1;
+  pdi.set(ue_ip_addr);
+
+  source_interface_type.interface_type_value = pfcp::_3GPP_INTERFACE_TYPE_N3;
+  pdi.set(source_interface_type);
+
+  precedence.precedence = 0;
+
+  create_pdr.set(flow->pdr_id_dl);
+  create_pdr.set(precedence);
+  create_pdr.set(pdi);
+  create_pdr.set(far_id);
+
+  return create_pdr;
+}
 //------------------------------------------------------------------------------
 pfcp::create_urr smf_session_procedure::pfcp_create_urr(
     edge& edge, const qfi_t& qfi) {
@@ -529,14 +595,27 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
     //-------------------
     // IE CREATE_PDR
     //-------------------
-    pfcp::create_pdr create_pdr = pfcp_create_pdr(dl_edge, current_flow.qfi);
+    pfcp::create_pdr create_pdr = pfcp_create_pdr(
+        dl_edge, current_flow.qfi, current_upf->function_features.second);
     synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
 
-    //-------------------
     // ADD IEs to message
     //-------------------
     n4_triggered->pfcp_ies.set(create_pdr);
     n4_triggered->pfcp_ies.set(create_far);
+
+    if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab) {
+      pfcp::create_far create_far_dl =
+          pfcp_create_far(dl_edge, current_flow.qfi);
+      pfcp::create_pdr create_pdr_dl =
+          pfcp_create_pdr_dl(dl_edge, current_flow.qfi);
+      n4_triggered->pfcp_ies.set(create_pdr_dl);
+      n4_triggered->pfcp_ies.set(create_far_dl);
+    }
+    // Handle PDR and FAR for downlink if thid feature is enabled
+    if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab) {
+      Logger::smf_app().info("Adding DL PDR and FAR start");
+    }
   }
 
   // TODO: verify whether N4 SessionID should be included in PDR and FAR
@@ -687,6 +766,18 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
   }
 
   std::shared_ptr<smf_qos_flow> default_qos_flow = {};
+  if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab &&
+      resp.pfcp_ies.created_pdrs.empty()) {
+    pfcp::pdr_id_t pdr_id_tmp;
+    // we use qos flow for 1st PDR for the moment
+    // TODO: remove this hardcoding of qos flow
+    pdr_id_tmp.rule_id = 1;
+    auto flow          = dl_edges[0].get_qos_flow(pdr_id_tmp);
+    if (flow) {
+      default_qos_flow = flow;
+    }
+  }
+
   for (const auto& it : resp.pfcp_ies.created_pdrs) {
     pfcp::pdr_id_t pdr_id = {};
     pfcp::far_id_t far_id = {};
@@ -702,7 +793,8 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
           default_qos_flow = flow;
         }
       } else {
-        // This may happen in UL CL, when we have 2 PDR IDs but only one DL edge
+        // This may happen in UL CL, when we have 2 PDR IDs but only one DL
+        // edge
         Logger::smf_app().debug(
             "Could not get QoS Flow for created_pdr %d", pdr_id.rule_id);
       }
@@ -827,7 +919,8 @@ session_update_sm_context_procedure::send_n4_session_modification_request() {
 
     ul_flow->far_id_dl = create_far.far_id;
 
-    pfcp::create_pdr create_pdr = pfcp_create_pdr(ul_edge, current_flow.qfi);
+    pfcp::create_pdr create_pdr = pfcp_create_pdr(
+        ul_edge, current_flow.qfi, current_upf->function_features.second);
 
     // Add IEs to message
     n4_triggered->pfcp_ies.set(create_far);
@@ -1047,7 +1140,8 @@ smf_procedure_code session_update_sm_context_procedure::run(
           //-------------------
           // for each UL edge we need a PDR
           for (auto& ul_edge : ul_edges) {
-            pfcp::create_pdr create_pdr = pfcp_create_pdr(ul_edge, flow->qfi);
+            pfcp::create_pdr create_pdr = pfcp_create_pdr(
+                ul_edge, flow->qfi, current_upf->function_features.second);
             n4_triggered->pfcp_ies.set(create_pdr);
             synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
           }
@@ -1089,9 +1183,9 @@ smf_procedure_code session_update_sm_context_procedure::run(
 
           if (sps->ipv4) {
             ue_ip_address.v4 = 1;
-            // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit is
-            // set to "0", this indicates a Source IP address; if this bit is
-            // set to "1", this indicates a Destination IP address.
+            // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit
+            // is set to "0", this indicates a Source IP address; if this bit
+            // is set to "1", this indicates a Destination IP address.
             ue_ip_address.sd                  = 1;
             ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
           }
@@ -1191,11 +1285,11 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
 
   if (cause.cause_value != CAUSE_VALUE_REQUEST_ACCEPTED) {
     // TODO: Nsmf_PDUSession_SMContextStatusNotify
-    /*  If the PDU Session establishment is not successful, the SMF informs the
-     AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The SMF
-     also releases any N4 session(s) created, any PDU Session address if
-     allocated (e.g. IP address) and releases the association with PCF, if any.
-     see step 18, section 4.3.2.2.1@3GPP TS 23.502)
+    /*  If the PDU Session establishment is not successful, the SMF informs
+     the AMF by invoking Nsmf_PDUSession_SMContextStatusNotify (Release). The
+     SMF also releases any N4 session(s) created, any PDU Session address if
+     allocated (e.g. IP address) and releases the association with PCF, if
+     any. see step 18, section 4.3.2.2.1@3GPP TS 23.502)
      */
     // TODO: should we return here with smf_procedure_code::ERROR;
   } else {
@@ -1203,7 +1297,8 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
         static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
   }
 
-  // list of accepted QFI(s) and AN Tunnel Info corresponding to the PDU Session
+  // list of accepted QFI(s) and AN Tunnel Info corresponding to the PDU
+  // Session
   std::vector<pfcp::qfi_t> list_of_qfis_to_be_modified = {};
   n11_trigger->req.get_qfis(list_of_qfis_to_be_modified);
 
@@ -1214,7 +1309,8 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
   if (get_current_upf(dl_edges, ul_edges, current_upf) ==
       smf_procedure_code::ERROR) {
     Logger::smf_app().error("SMF DL procedure: Could not get current UPF");
-    // TODO is this enough as an error message? We have cause 31 but not values
+    // TODO is this enough as an error message? We have cause 31 but not
+    // values
     return smf_procedure_code::ERROR;
   }
 
@@ -1468,7 +1564,8 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
     itti_n4_session_deletion_response& resp,
     std::shared_ptr<smf::smf_context> sc) {
   Logger::smf_app().info(
-      "Handle itti_n4_session_deletion_response (Release SM Context Request): "
+      "Handle itti_n4_session_deletion_response (Release SM Context "
+      "Request): "
       "pdu-session-id %d",
       n11_trigger.get()->req.get_pdu_session_id());
 
@@ -1481,8 +1578,8 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
   bool continue_n4                              = false;
   if (get_next_upf(dl_edges, ul_edges, current_upf) ==
       smf_procedure_code::CONTINUE) {
-    // If we have to continue, we ignore the PFCP error code, because we should
-    // at least remove other UPF sessions
+    // If we have to continue, we ignore the PFCP error code, because we
+    // should at least remove other UPF sessions
     return send_n4_session_deletion_request();
     continue_n4 = false;
   }
@@ -1505,7 +1602,7 @@ smf_procedure_code session_release_sm_context_procedure::handle_itti_msg(
    Subscription data changes notification with the UDM by means of the
    Nudm_SDM_Unsubscribe service operation. The SMF invokes the
    Nudm_UECM_Deregistration service operation so that the UDM removes the
-   association it had stored between the SMF identity and the associated DNN and
-   PDU Session Id
+   association it had stored between the SMF identity and the associated DNN
+   and PDU Session Id
    */
 }

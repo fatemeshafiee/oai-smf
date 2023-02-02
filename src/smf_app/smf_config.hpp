@@ -160,6 +160,9 @@
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION "HTTP_VERSION"
 #define SMF_CONFIG_STRING_SUPPORT_FEATURES_ENABLE_USAGE_REPORTING              \
   "ENABLE_USAGE_REPORTING"
+#define SMF_CONFIG_STRING_SUPPORT_FEATURES_enable_dl_pdr_in_pfcp_sess_estab    \
+  "ENABLE_DL_PDR_IN_PFCP_SESS_ESTAB"
+#define SMF_CONFIG_STRING_N3_LOCAL_IPV4_ADDRESS "N3_LOCAL_IPV4_ADDRESS"
 
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
@@ -245,6 +248,8 @@ class smf_config {
   bool use_fqdn_dns;
   unsigned int http_version;
   bool enable_ur;
+  bool enable_dl_pdr_in_pfcp_sess_estab;
+  std::string local_n3_addr;
 
   std::vector<pfcp::node_id_t> upfs;
 
@@ -332,12 +337,14 @@ class smf_config {
     sbi_api_version = "v1";
     http_version    = 1;
 
-    use_local_subscription_info = false;
-    use_local_pcc_rules         = false;
-    register_nrf                = false;
-    discover_upf                = false;
-    discover_pcf                = false;
-    use_fqdn_dns                = false;
+    use_local_subscription_info      = false;
+    use_local_pcc_rules              = false;
+    register_nrf                     = false;
+    discover_upf                     = false;
+    discover_pcf                     = false;
+    use_fqdn_dns                     = false;
+    enable_ur                        = false;
+    enable_dl_pdr_in_pfcp_sess_estab = false;
   };
   ~smf_config();
   void lock() { m_rw_lock.lock(); };

@@ -9373,6 +9373,11 @@ class pfcp_update_pdr_ie : public pfcp_grouped_ie {
       std::shared_ptr<pfcp_pdi_ie> sie(new pfcp_pdi_ie(b.pdi.second));
       add_ie(sie);
     }
+    if (b.precedence.first) {
+      std::shared_ptr<pfcp_precedence_ie> sie(
+          new pfcp_precedence_ie(b.precedence.second));
+      add_ie(sie);
+    }
   }
   //--------
   pfcp_update_pdr_ie() : pfcp_grouped_ie(PFCP_IE_UPDATE_PDR) {}
