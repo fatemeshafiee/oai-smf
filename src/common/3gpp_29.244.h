@@ -1417,8 +1417,8 @@ typedef struct dl_flow_level_marking_s {
   uint8_t spare : 6;
   uint8_t sci : 1;
   uint8_t ttc : 1;
-  uint16_t tos_traffic_class;
-  uint16_t service_class_indicator;
+  std::string tos_traffic_class;
+  std::string service_class_indicator;
 } dl_flow_level_marking_t;
 
 //-------------------------------------
