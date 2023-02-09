@@ -141,10 +141,9 @@ pipeline {
             shortenShaOne = shortenShaOne.trim()
             sh "./ci-scripts/doGitLabMerge.sh --src-branch ${env.gitlabSourceBranch} --src-commit ${env.gitlabMergeRequestLastCommit} --target-branch ${env.gitlabTargetBranch} --target-commit ${GIT_COMMIT}"
             sh "sleep 10"
-            smf_tag = "ci-tmp"
-            rhel_smf_tag = 'ci-tmp-pr-' + env.gitlabMergeRequestIid + '-' + shortenShaOne
+            smf_tag = 'ci-tmp-pr-' + env.gitlabMergeRequestIid + '-' + shortenShaOne
             smf_branch = env.gitlabSourceBranch
-            echo "MR TAG      is ${rhel_smf_tag}"
+            echo "MR TAG      is ${smf_tag}"
           } else {
             echo "======== THIS IS A PUSH REQUEST ========"
             echo "Git Branch      is ${GIT_BRANCH}"
@@ -207,10 +206,6 @@ pipeline {
                 // If not satisfactory, we can remove it.
                 myShCmd('python3 ./ci-scripts/flatten_image.py --tag oai-smf:' + smf_tag, rem_u18_host_flag, rem_u18_host_user, rem_u18_host)
                 myShCmd('docker image ls >> archives/smf_docker_image_build.log', rem_u18_host_flag, rem_u18_host_user, rem_u18_host)
-                // We will keep also the TMP image in U18 case.
-                if ("MERGE".equals(env.gitlabActionType)) {
-                  myShCmd('docker image tag oai-smf:' + smf_tag + ' oai-smf:' + rhel_smf_tag, rem_u18_host_flag, rem_u18_host_user, rem_u18_host)
-                }
               }
             }
           }
@@ -258,9 +253,6 @@ pipeline {
                   myShCmd('sudo cp /etc/rhsm/ca/*pem ./rhsm-ca', rem_rhel_host_flag, rem_rhel_host_user, rem_rhel_host)
                   myShCmd('sudo podman build --no-cache --squash --target oai-smf --tag oai-smf:' + smf_tag + ' --file docker/Dockerfile.smf.rhel8 --format docker . > archives/smf_podman_image_build.log 2>&1', rem_rhel_host_flag, rem_rhel_host_user, rem_rhel_host)
                   myShCmd('sudo podman image ls >> archives/smf_podman_image_build.log', rem_rhel_host_flag, rem_rhel_host_user, rem_rhel_host)
-                  if ("MERGE".equals(env.gitlabActionType)) {
-                    myShCmd('sudo podman image tag oai-smf:' + smf_tag + ' oai-smf:' + rhel_smf_tag, rem_rhel_host_flag, rem_rhel_host_user, rem_rhel_host)
-                  }
                 }
               }
             }
@@ -477,7 +469,7 @@ pipeline {
             always {
               script {
                 copyArtifacts(projectName: params.CN5G_COTS_UE_PipelineName,
-                              filter: '*_test_results_cn5g_*.html',
+                              filter: '*_results_cn5g_*.html',
                               selector: lastCompleted())
               }
             }
@@ -530,21 +522,6 @@ pipeline {
           // Remove CI Base image tag
           myShCmd('docker rmi oai-smf-base:latest', rem_u18_host_flag, rem_u18_host_user, rem_u18_host)
         }
-        // Removing temporary / intermediate images
-        try {
-          if ("MERGE".equals(env.gitlabActionType)) {
-            myShCmd('docker image rm --force oai-smf:ci-tmp', rem_u18_host_flag, rem_u18_host_user, rem_u18_host)
-          }
-        } catch (Exception e) {
-          echo "We failed to delete the OAI-SMF temp image"
-        }
-        try {
-          if ("MERGE".equals(env.gitlabActionType)) {
-            myShCmd('sudo podman image rm oai-smf:ci-tmp', rem_rhel_host_flag, rem_rhel_host_user, rem_rhel_host)
-          }
-        } catch (Exception e) {
-          echo "We failed to delete the OAI-SMF temp image"
-        }
         try {
           myShCmd('docker image prune --force', rem_u18_host_flag, rem_u18_host_user, rem_u18_host)
         } catch (Exception e) {
@@ -564,7 +541,7 @@ pipeline {
           archiveArtifacts artifacts: 'docker_logs.zip'
         }
 
-        // Generating the HTML report
+        // Generating the HTML report(s)
         if ("MERGE".equals(env.gitlabActionType)) {
           sh "python3 ci-scripts/generateHtmlReport.py --job_name=${JOB_NAME} --job_id=${BUILD_ID} --job_url=${BUILD_URL} --git_url=${GIT_URL} --git_src_branch=${env.gitlabSourceBranch} --git_src_commit=${env.gitlabMergeRequestLastCommit} --git_pull_request=True --git_target_branch=${env.gitlabTargetBranch} --git_target_commit=${GIT_COMMIT}"
         } else {
