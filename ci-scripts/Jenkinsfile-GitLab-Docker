@@ -453,6 +453,36 @@ pipeline {
             }
           }
         }
+        stage ('Testing COTS-UE') {
+          steps {
+            script {
+              gitlabCommitStatus(name: "Test with COTS-UE") {
+                localStatus = build job: params.CN5G_COTS_UE_PipelineName,
+                  parameters: [
+                    string(name: 'SMF_TAG', value: String.valueOf(smf_tag)),
+                    string(name: 'SMF_BRANCH', value: String.valueOf(smf_branch))
+                  ], propagate: false
+                localResult = localStatus.getResult()
+
+                if (localStatus.resultIsBetterOrEqualTo('SUCCESS')) {
+                  echo "Test Job with COTS-UE is OK"
+                } else {
+                  echo "Test Job with COTS-UE is is KO"
+                  sh "ci-scripts/fail.sh"
+                }
+              }
+            }
+          }
+          post {
+            always {
+              script {
+                copyArtifacts(projectName: params.CN5G_COTS_UE_PipelineName,
+                              filter: '*_test_results_cn5g_*.html',
+                              selector: lastCompleted())
+              }
+            }
+          }
+        }
       }
     }
     // For the moment it is Docker-Hub, but we might have a new one internally.
