@@ -64,11 +64,15 @@ RUN git config --global https.postBuffer 123289600 && \
 
 # Copying source code
 WORKDIR /openair-smf
-COPY . /openair-smf
+COPY ./build/scripts /openair-smf/build/scripts
+COPY ./build/smf/CMakeLists.txt /openair-smf/build/smf/CMakeLists.txt
+COPY ./build/cmake_modules /openair-smf/cmake_modules
 
 # Installing all the needed libraries/packages to build and run SMF
 WORKDIR /openair-smf/build/scripts
 RUN ./build_smf --install-deps --force
+
+COPY . /openair-smf
 
 # Building SMF
 WORKDIR /openair-smf/build/scripts
