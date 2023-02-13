@@ -786,7 +786,7 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
       auto flow = dl_edges[0].get_qos_flow(pdr_id);
       if (flow) {
         // pfcp::fteid_t local_up_fteid = { };
-        if (it.get(flow->ul_fteid)) {
+        if (flow->pdr_id_ul == pdr_id && it.get(flow->ul_fteid)) {
           // Update Qos Flow
           // TODO can i safely remove that?
           // sps->add_qos_flow(flow);
