@@ -209,7 +209,7 @@ std::string conv::toString(const struct in_addr& inaddr) {
   char str[INET6_ADDRSTRLEN] = {};
   if (inet_ntop(AF_INET, (const void*) &inaddr, str, INET6_ADDRSTRLEN) ==
       NULL) {
-    s.append("Error in_addr");
+    s.append("");
   } else {
     s.append(str);
   }
@@ -221,7 +221,7 @@ std::string conv::toString(const struct in6_addr& in6addr) {
   char str[INET6_ADDRSTRLEN] = {};
   if (inet_ntop(AF_INET6, (const void*) &in6addr, str, INET6_ADDRSTRLEN) ==
       nullptr) {
-    s.append("Error in6_addr");
+    s.append("");
   } else {
     s.append(str);
   }

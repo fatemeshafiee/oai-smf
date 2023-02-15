@@ -303,7 +303,12 @@ pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
       local_fteid      = pfcp_prepare_fteid(flow->dl_fteid, up_features.ftup);
       local_fteid.chid = 0;
     } else {
-      local_fteid = pfcp_prepare_fteid(flow->ul_fteid, up_features.ftup);
+      local_fteid      = pfcp_prepare_fteid(flow->ul_fteid, up_features.ftup);
+      std::string ipv4 = conv::toString(edge.ip_addr);
+      if (!ipv4.empty() && !up_features.ftup) {
+        local_fteid.ipv4_address    = edge.ip_addr;
+        flow->dl_fteid.ipv4_address = edge.ip_addr;
+      }
     }
     pdi.set(local_fteid);
   }
@@ -1089,6 +1094,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
           pfcp::apply_action_t apply_action                               = {};
           pfcp::outer_header_creation_t outer_header_creation             = {};
           pfcp::update_forwarding_parameters update_forwarding_parameters = {};
+          pfcp::destination_interface_t destination_interface             = {};
 
           update_far.set(flow->far_id_dl.second);
           outer_header_creation.outer_header_creation_description =
@@ -1097,12 +1103,13 @@ smf_procedure_code session_update_sm_context_procedure::run(
           outer_header_creation.ipv4_address.s_addr =
               dl_fteid.ipv4_address.s_addr;
           update_forwarding_parameters.set(outer_header_creation);
+          destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
+          update_forwarding_parameters.set(destination_interface);
           update_far.set(update_forwarding_parameters);
           apply_action.forw = 1;  // forward the packets
           // apply_action.nocp = 1; //notify the CP function about the arrival
           // of a first DL packet
           update_far.set(apply_action);
-
           n4_triggered->pfcp_ies.set(update_far);
 
           send_n4               = true;
