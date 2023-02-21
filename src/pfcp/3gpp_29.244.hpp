@@ -2036,59 +2036,87 @@ class pfcp_reporting_triggers_ie : public pfcp_ie {
     s.set(v);
   }
 };
-////-------------------------------------
-//// IE REDIRECT_INFORMATION
-// class pfcp_redirect_information_ie : public pfcp_ie {
-// public:
-//  union {
-//    struct {
-//      uint8_t redirect_address_type:4;
-//      uint8_t spare:4;
-//   } bf;
-//   uint8_t b;
-//  } u1;
-//  uint16_t redirect_server_address_length;
-//  std::string
-//  //--------
-//  pfcp_redirect_information_ie(const pfcp::redirect_information_t& b) :
-//  pfcp_ie(PFCP_IE_REDIRECT_INFORMATION){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_redirect_information_ie() : pfcp_ie(PFCP_IE_REDIRECT_INFORMATION){
-//    todo = 0;
-//    tlv.set_length(1);
-//  }
-//  //--------
-//  pfcp_redirect_information_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-//    todo = 0;
-//  };
-//  //--------
-//  void to_core_type(pfcp::redirect_information_t& b) {
-//    b.todo = todo;
-//  }
-//  //--------
-//  void dump_to(std::ostream& os) {
-//    tlv.dump_to(os);
-//    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void load_from(std::istream& is) {
-//    //tlv.load_from(is);
-//    if (tlv.get_length() != 1) {
-//      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-//      __FILE__, __LINE__);
-//    }
-//    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-//  }
-//  //--------
-//  void to_core_type(pfcp_ies_container& s) {
-//      pfcp::redirect_information_t redirect_information = {};
-//      to_core_type(redirect_information);
-//      s.set(redirect_information);
-//  }
-//};
+//-------------------------------------
+// IE REDIRECT_INFORMATION
+// ToDo Verify UTF-8 encoding of redirect_server_address
+class pfcp_redirect_information_ie : public pfcp_ie {
+ public:
+  union {
+    struct {
+      uint8_t redirect_address_type : 4;
+      uint8_t spare : 4;
+    } bf;
+    uint8_t b;
+  } u1;
+  uint16_t redirect_server_address_length;
+  std::string redirect_server_address;
+  //--------
+  explicit pfcp_redirect_information_ie(const pfcp::redirect_information_t& b)
+      : pfcp_ie(PFCP_IE_REDIRECT_INFORMATION) {
+    u1.b                           = 0;
+    redirect_server_address_length = 0;
+    redirect_server_address        = {};
+    tlv.set_length(3);
+
+    u1.bf.redirect_address_type    = b.redirect_address_type;
+    redirect_server_address_length = b.redirect_server_address_length;
+    redirect_server_address        = b.redirect_server_address;
+    tlv.add_length(redirect_server_address.size());
+  }
+  //--------
+  pfcp_redirect_information_ie() : pfcp_ie(PFCP_IE_REDIRECT_INFORMATION) {
+    u1.b                           = 0;
+    redirect_server_address_length = 0;
+    redirect_server_address        = {};
+    tlv.set_length(3);
+  }
+  //--------
+  explicit pfcp_redirect_information_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    u1.b                           = 0;
+    redirect_server_address_length = 0;
+    redirect_server_address        = {};
+  };
+  //--------
+  void to_core_type(pfcp::redirect_information_t& b) {
+    b                                = {};
+    b.redirect_server_address_length = redirect_server_address_length;
+    b.redirect_server_address        = redirect_server_address;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    os.write(reinterpret_cast<const char*>(&u1.b), sizeof(u1.b));
+    auto be_redirect_server_address_length =
+        htobe16(redirect_server_address_length);
+    os.write(
+        reinterpret_cast<const char*>(&be_redirect_server_address_length),
+        sizeof(be_redirect_server_address_length));
+    os << redirect_server_address;
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() < 3) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&u1.b), sizeof(u1.b));
+    is.read(
+        reinterpret_cast<char*>(&redirect_server_address_length),
+        sizeof(redirect_server_address_length));
+    redirect_server_address_length = be16toh(redirect_server_address_length);
+
+    char e[redirect_server_address_length];
+    is.read(e, redirect_server_address_length);
+    redirect_server_address.assign(e, redirect_server_address_length);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::redirect_information_t redirect_information = {};
+    to_core_type(redirect_information);
+    s.set(redirect_information);
+  }
+};
 //-------------------------------------
 // IE REPORT_TYPE
 class pfcp_report_type_ie : public pfcp_ie {
@@ -9172,33 +9200,38 @@ class pfcp_forwarding_parameters_ie : public pfcp_grouped_ie {
       : pfcp_grouped_ie(PFCP_IE_FORWARDING_PARAMETERS) {
     tlv.set_length(0);
     if (b.destination_interface.first) {
-      std::shared_ptr<pfcp_destination_interface_ie> sie(
-          new pfcp_destination_interface_ie(b.destination_interface.second));
+      std::shared_ptr<pfcp_destination_interface_ie> sie =
+          std::make_shared<pfcp_destination_interface_ie>(
+              b.destination_interface.second);
       add_ie(sie);
     }
     if (b.network_instance.first) {
-      std::shared_ptr<pfcp_network_instance_ie> sie(
-          new pfcp_network_instance_ie(b.network_instance.second));
+      std::shared_ptr<pfcp_network_instance_ie> sie =
+          std::make_shared<pfcp_network_instance_ie>(b.network_instance.second);
       add_ie(sie);
     }
-    // if (b.redirect_information.first)
-    // {std::shared_ptr<pfcp_redirect_information_ie> sie(new
-    // pfcp_redirect_information_ie(b.redirect_information.second));
-    // add_ie(sie);}
+    if (b.redirect_information.first) {
+      std::shared_ptr<pfcp_redirect_information_ie> sie =
+          std::make_shared<pfcp_redirect_information_ie>(
+              b.redirect_information.second);
+      add_ie(sie);
+    }
     if (b.outer_header_creation.first) {
-      std::shared_ptr<pfcp_outer_header_creation_ie> sie(
-          new pfcp_outer_header_creation_ie(b.outer_header_creation.second));
+      std::shared_ptr<pfcp_outer_header_creation_ie> sie =
+          std::make_shared<pfcp_outer_header_creation_ie>(
+              b.outer_header_creation.second);
       add_ie(sie);
     }
     if (b.transport_level_marking.first) {
-      std::shared_ptr<pfcp_transport_level_marking_ie> sie(
-          new pfcp_transport_level_marking_ie(
-              b.transport_level_marking.second));
+      std::shared_ptr<pfcp_transport_level_marking_ie> sie =
+          std::make_shared<pfcp_transport_level_marking_ie>(
+              b.transport_level_marking.second);
       add_ie(sie);
     }
     if (b.forwarding_policy.first) {
-      std::shared_ptr<pfcp_forwarding_policy_ie> sie(
-          new pfcp_forwarding_policy_ie(b.forwarding_policy.second));
+      std::shared_ptr<pfcp_forwarding_policy_ie> sie =
+          std::make_shared<pfcp_forwarding_policy_ie>(
+              b.forwarding_policy.second);
       add_ie(sie);
     }
     // if (b.header_enrichment.first)

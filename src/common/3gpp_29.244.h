@@ -642,13 +642,15 @@ typedef struct redirect_information_s {
   uint8_t redirect_address_type : 4;
   uint8_t spare : 4;
   uint16_t redirect_server_address_length;
+  std::string redirect_server_address;
 } redirect_information_t;
 
 enum redirect_address_type_e {
-  IPV4_ADDRESS = 0,
-  IPV6_ADDRESS = 1,
-  URL          = 2,
-  SIP_URI      = 3
+  IPV4_ADDRESS            = 0,
+  IPV6_ADDRESS            = 1,
+  URL                     = 2,
+  SIP_URI                 = 3,
+  IPV4_AND_IPV6_ADDRESSES = 4
 };
 
 //-------------------------------------
