@@ -528,7 +528,9 @@ void pfcp_associations::associate_with_upf_profile(
   std::lock_guard<std::mutex> lck(m_mutex);
   // Associate with UPF profile if exist
   for (const auto& it : pending_associations) {
-    if ((it->node_id == node_id) and (it->is_upf_profile_set())) {
+    if (it->is_upf_profile_set() && ((it->node_id.fqdn == node_id.fqdn) ||
+                                     (it->node_id.u1.ipv4_address.s_addr ==
+                                      node_id.u1.ipv4_address.s_addr))) {
       Logger::smf_app().info("Associate with UPF profile");
       sa->set_upf_node_profile(it->get_upf_node_profile());
       return;
