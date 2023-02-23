@@ -490,9 +490,18 @@ class HtmlReport():
 				nghttp2_build_start = False
 				nghttp2_build_status = False
 				base_image = False
+				build_stage_id = 'NotAcorrectBuildStageId'
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
 					for line in logfile:
+						# old method
 						result = re.search('FROM oai-smf-base:latest', line)
+						if result is not None:
+							base_image = True
+						# new method --> buildx may cache this stage
+						result = re.search('^#([0-9]+).* RUN ./build_smf --install-deps', line)
+						if result is not None:
+							build_stage_id = result.group(1)
+						result = re.search(f'^#{build_stage_id} CACHED', line)
 						if result is not None:
 							base_image = True
 						result = re.search(section_start_pattern, line)
@@ -719,7 +728,7 @@ class HtmlReport():
 		for variant in variants:
 			logFileName = 'smf_' + variant + '_image_build.log'
 			if os.path.isfile(cwd + '/archives/' + logFileName):
-				section_start_pattern = 'FROM .* as oai-smf$'
+				section_start_pattern = 'COPY --from=oai-smf-builder */openair-smf/build/smf/build/oai_smf'
 				section_end_pattern = 'WORKDIR /openair-smf/etc'
 				section_status = False
 				status = False
@@ -767,7 +776,7 @@ class HtmlReport():
 			if os.path.isfile(cwd + '/archives/' + logFileName):
 				section_start_pattern = 'WORKDIR /openair-smf/etc'
 				if variant == 'docker':
-					section_end_pattern = 'Successfully tagged oai-smf'
+					section_end_pattern = 'naming to docker.io/library/oai-smf:'
 				else:
 					section_end_pattern = 'COMMIT oai-smf:'
 				section_status = False
@@ -818,27 +827,26 @@ class HtmlReport():
 			if os.path.isfile(cwd + '/archives/' + logFileName):
 				if nfType == 'SMF':
 					if variant == 'docker':
-						section_start_pattern = 'Successfully tagged oai-smf'
+						section_start_pattern = 'naming to docker.io/library/oai-smf:'
 						section_end_pattern = 'OAI-SMF DOCKER IMAGE BUILD'
 					else:
 						section_start_pattern = 'COMMIT oai-smf:'
 						section_end_pattern = 'OAI-SMF PODMAN RHEL8 IMAGE BUILD'
 				section_status = False
 				status = False
+				imageTag = 'notAcorrectTagForTheMoment'
 				with open(cwd + '/archives/' + logFileName, 'r') as logfile:
 					for line in logfile:
-						result = re.search(section_start_pattern, line)
+						result = re.search(f'{section_start_pattern}([0-9a-zA-Z\-\_\.]+)', line)
 						if result is not None:
 							section_status = True
+							imageTag = result.group(1)
 						result = re.search(section_end_pattern, line)
 						if result is not None:
 							section_status = False
 						if section_status:
 							if nfType == 'SMF':
-								if self.git_pull_request:
-									result = re.search('oai-smf *ci-tmp', line)
-								else:
-									result = re.search('oai-smf *develop', line)
+								result = re.search(f'oai-smf *{imageTag}', line)
 							if result is not None and not status:
 								result = re.search('ago  *([0-9A-Z ]+)', line)
 								if result is not None:
