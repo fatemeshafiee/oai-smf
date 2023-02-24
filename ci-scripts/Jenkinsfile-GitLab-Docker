@@ -332,7 +332,7 @@ pipeline {
             }
           }
         }
-        stage ('Testing COTS-UE') {
+        stage ('Testing with COTS-UE') {
           steps {
             script {
               gitlabCommitStatus(name: "Test with COTS-UE") {
@@ -362,9 +362,41 @@ pipeline {
             }
           }
         }
+        stage ('Load Testing') {
+          steps {
+            script {
+              gitlabCommitStatus(name: "Load Testing") {
+                localStatus = build job: 'OAI-CN5G-Load-Test',
+                  parameters: [
+                    string(name: 'SMF_TAG', value: String.valueOf(smf_tag)),
+                    string(name: 'SMF_BRANCH', value: String.valueOf(smf_branch))
+                  ], propagate: false
+                localResult = localStatus.getResult()
+
+                if (localStatus.resultIsBetterOrEqualTo('SUCCESS')) {
+                  echo "Load Testing is OK"
+                } else {
+                  echo "Load Testing is is KO"
+                  sh "ci-scripts/fail.sh"
+                }
+              }
+            }
+          }
+          post {
+            always {
+              script {
+                copyArtifacts(projectName: 'OAI-CN5G-Load-Test',
+                              filter: '*_results_oai_cn5g*.html',
+                              selector: lastCompleted())
+              }
+            }
+          }
+        }
       }
     }
-    // For the moment it is Docker-Hub, but we might have a new one internally.
+    // We are only publishing the Ubuntu image to Docker-Hub
+    // For Post-Merge events.
+    // Temporary Images from Merge-Request Runs are kept in local private registry
     stage ('Pushing Image to Official Registry') {
       steps {
         script {
