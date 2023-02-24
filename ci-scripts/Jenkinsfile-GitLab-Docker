@@ -157,7 +157,7 @@ pipeline {
                   // If not satisfactory, we can remove it.
                   sh "python3 ./ci-scripts/flatten_image.py --tag oai-smf:${smf_tag}"
                   sh "docker image prune --force"
-                  sh "docker image ls >> archives/smf_docker_image_build.log"
+                  sh "docker image ls | egrep --color=never 'smf|REPOSITORY' >> archives/smf_docker_image_build.log"
                   // Pushing to local private registry for testing purpose
                   sh "docker login -u oaicicd -p oaicicd ${PrivateRegistryURL}"
                   sh "docker image tag oai-smf:${smf_tag} ${PrivateRegistryURL}/oai-smf:${smf_tag}"
@@ -196,7 +196,7 @@ pipeline {
                   // Building
                   sh "sudo podman build --no-cache --squash --target oai-smf --tag oai-smf:${smf_tag} --file docker/Dockerfile.smf.rhel8 --format docker . > archives/smf_podman_image_build.log 2>&1"
                   sh "sudo podman image prune --force"
-                  sh "sudo podman image ls >> archives/smf_podman_image_build.log"
+                  sh "sudo podman image ls | egrep --color=never 'smf|REPOSITORY' >> archives/smf_podman_image_build.log"
                 }
               }
             }
