@@ -58,12 +58,12 @@ WORKDIR /openair-smf/build/scripts
 RUN ./build_smf --install-deps --force && \
     cp -Rf /openair-smf/build/ext /openair-smf-ext-ref
 
-COPY . /openair-smf
-
 #---------------------------------------------------------------------
 # BUILDER IMAGE
 #---------------------------------------------------------------------
 FROM oai-smf-base as oai-smf-builder
+# Copying source code
+COPY . /openair-smf
 # Building SMF
 WORKDIR /openair-smf/build/scripts
 RUN ldconfig && \
