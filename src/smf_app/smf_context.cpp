@@ -1464,9 +1464,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   xgpp_conv::create_sm_context_response_from_ctx_request(
       smreq, sm_context_resp_pending);
 
-  // Update AMF ID
-  set_amf_addr(smreq->req.get_serving_nf_id());  // amf id
-
   // Step 3.2. Create PDU session if not exist
   std::shared_ptr<smf_pdu_session> sp = {};
   bool find_pdu                       = find_pdu_session(pdu_session_id, sp);
@@ -1689,6 +1686,40 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     }
   }
 
+  // Store AMF callback URI and subscribe to the status notification: AMF will
+  // be notified when SM context changes
+  std::string amf_status_uri = smreq->req.get_sm_context_status_uri();
+  set_amf_status_uri(amf_status_uri);
+
+  // Get and Store AMF Addr if available
+  std::vector<std::string> split_result;
+  std::string amf_addr_str = conv::toString(smf_cfg.amf_addr.ipv4_addr)
+                                 .append(":")
+                                 .append(std::to_string(smf_cfg.amf_addr.port));
+
+  boost::split(split_result, amf_status_uri, boost::is_any_of("/"));
+  if (split_result.size() >= 3) {
+    std::string full_addr = split_result[2];
+    // Check if the AMF addr is valid
+    std::size_t found_port = full_addr.find(":");
+
+    std::string addr = {};  // Addr without port
+    if (found_port != std::string::npos) {
+      addr = full_addr.substr(0, found_port);
+    } else {
+      addr = full_addr;
+    }
+    struct in_addr amf_ipv4_addr;
+    if (inet_pton(AF_INET, util::trim(addr).c_str(), &amf_ipv4_addr) == 0) {
+      Logger::smf_api_server().warn("Bad IPv4 for AMF");
+    } else {
+      amf_addr_str = full_addr;
+      Logger::smf_api_server().debug("AMF IP Addr %s", amf_addr_str.c_str());
+    }
+  }
+
+  set_amf_addr(amf_addr_str);
+
   // TODO: Step 8. SMF-initiated SM Policy Modification (with PCF)
 
   // Step 9. Create session establishment procedure and run the procedure
@@ -1701,41 +1732,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       // TODO:
     }
 
-    // Store AMF callback URI and subscribe to the status notification: AMF will
-    // be notified when SM context changes
-    std::string amf_status_uri = smreq->req.get_sm_context_status_uri();
-    set_amf_status_uri(amf_status_uri);
-
-    // Get and Store AMF Addr if available
-    std::vector<std::string> split_result;
-    std::string amf_addr_str = {};
-    amf_addr_str             = std::string(inet_ntoa(
-                       *((struct in_addr*) &smf_cfg.amf_addr.ipv4_addr))) +
-                   ":" + std::to_string(smf_cfg.amf_addr.port);
-
-    boost::split(split_result, amf_status_uri, boost::is_any_of("/"));
-    if (split_result.size() >= 3) {
-      std::string full_addr = split_result[2];
-      // Check if the AMF addr is valid
-      std::size_t found_port = full_addr.find(":");
-
-      std::string addr = {};  // Addr without port
-      if (found_port != std::string::npos) {
-        addr = full_addr.substr(0, found_port);
-      } else {
-        addr = full_addr;
-      }
-      struct in_addr amf_ipv4_addr;
-      if (inet_aton(util::trim(addr).c_str(), &amf_ipv4_addr) == 0) {
-        Logger::smf_api_server().warn("Bad IPv4 for AMF");
-      } else {
-        amf_addr_str = full_addr;
-        Logger::smf_api_server().debug("AMF IP Addr %s", amf_addr_str.c_str());
-      }
-    }
-
-    set_amf_addr(amf_addr_str);
-
     // Trigger SMF APP to send response to SMF-HTTP-API-SERVER (Step
     // 5, 4.3.2.2.1 TS 23.502)
     Logger::smf_app().debug(
@@ -1746,7 +1742,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // according to the structure:
     // {apiRoot}/nsmf-pdusession/{apiVersion}/sm-contexts/{smContextRef}
     std::string smf_context_uri =
-        smreq->req.get_api_root() + "/" + smContextRef.c_str();
+        smreq->req.get_api_root() + "/" + smContextRef;
     sm_context_response.set_smf_context_uri(smf_context_uri);
     sm_context_response.set_cause(static_cast<uint8_t>(
         cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));  // TODO
@@ -1815,6 +1811,16 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     }
     // clear the created context??
     // TODO:
+
+    // Send HTTP reply to PDU Session Establishment Request
+    // TODO Stefan: I believe this is not standard-compliant, we should just
+    // send an error code here (see 29.502 Table 6.1.3.2.3.1-3)
+
+    pdu_session_create_sm_context_response sm_context_response = {};
+    sm_context_response.set_http_code(
+        http_status_code_e::HTTP_STATUS_CODE_201_CREATED);
+    smf_app_inst->trigger_session_create_sm_context_response(
+        sm_context_response, smreq->pid);
 
     // Create PDU Session Establishment Reject and embedded in
     // Namf_Communication_N1N2MessageTransfer Request
