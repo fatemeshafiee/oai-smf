@@ -500,66 +500,77 @@ int smf_config::load(const string& config_file) {
           smf_cfg[SMF_CONFIG_STRING_SUPPORT_FEATURES];
       string opt;
       unsigned int httpVersion = {0};
-      support_features.lookupValue(
-          SMF_CONFIG_STRING_SUPPORT_FEATURES_REGISTER_NRF, opt);
-      if (boost::iequals(opt, "yes")) {
-        register_nrf = true;
-      } else {
-        register_nrf = false;
+      if (support_features.lookupValue(
+              SMF_CONFIG_STRING_SUPPORT_FEATURES_REGISTER_NRF, opt)) {
+        if (boost::iequals(opt, "yes")) {
+          register_nrf = true;
+        } else {
+          register_nrf = false;
+        }
       }
 
-      support_features.lookupValue(
-          SMF_CONFIG_STRING_SUPPORT_FEATURES_DISCOVER_UPF, opt);
-      if (boost::iequals(opt, "yes")) {
-        discover_upf = true;
-      } else {
-        discover_upf = false;
+      if (support_features.lookupValue(
+              SMF_CONFIG_STRING_SUPPORT_FEATURES_DISCOVER_UPF, opt)) {
+        if (boost::iequals(opt, "yes")) {
+          discover_upf = true;
+        } else {
+          discover_upf = false;
+        }
       }
 
-      support_features.lookupValue(
-          SMF_CONFIG_STRING_SUPPORT_FEATURES_DISCOVER_PCF, opt);
-      if (boost::iequals(opt, "yes")) {
-        Logger::smf_app().warn(
-            "Discover PCF feature is not supported, you need to configure the "
-            "PCF in the config file. This feature is set to false.");
-        discover_pcf = false;  // set to false as not yet supported
-      } else {
-        discover_pcf = false;
+      if (support_features.lookupValue(
+              SMF_CONFIG_STRING_SUPPORT_FEATURES_DISCOVER_PCF, opt)) {
+        if (boost::iequals(opt, "yes")) {
+          Logger::smf_app().warn(
+              "Discover PCF feature is not supported, you need to configure "
+              "the "
+              "PCF in the config file. This feature is set to false.");
+          discover_pcf = false;  // set to false as not yet supported
+        } else {
+          discover_pcf = false;
+        }
       }
 
-      support_features.lookupValue(
-          SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_LOCAL_PCC_RULES, opt);
-      if (boost::iequals(opt, "yes")) {
-        Logger::smf_app().warn(
-            "Local PCC rules feature is not yet supported, the default values "
-            "from the config file are used.");
-        use_local_pcc_rules = true;
-        // discover_pcf        = false;
-      } else {
-        use_local_pcc_rules = false;
+      if (support_features.lookupValue(
+              SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_LOCAL_PCC_RULES, opt)) {
+        if (boost::iequals(opt, "yes")) {
+          Logger::smf_app().warn(
+              "Local PCC rules feature is not yet supported, the default "
+              "values "
+              "from the config file are used.");
+          use_local_pcc_rules = true;
+          // discover_pcf        = false;
+        } else {
+          use_local_pcc_rules = false;
+        }
       }
 
-      support_features.lookupValue(
-          SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_LOCAL_SUBSCRIPTION_INFO, opt);
-      if (boost::iequals(opt, "yes")) {
-        use_local_subscription_info = true;
-      } else {
-        use_local_subscription_info = false;
+      if (support_features.lookupValue(
+              SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_LOCAL_SUBSCRIPTION_INFO,
+              opt)) {
+        if (boost::iequals(opt, "yes")) {
+          use_local_subscription_info = true;
+        } else {
+          use_local_subscription_info = false;
+        }
       }
 
-      support_features.lookupValue(SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO, opt);
-      if (boost::iequals(opt, "yes")) {
-        force_push_pco = true;
-      } else {
-        force_push_pco = false;
+      if (support_features.lookupValue(
+              SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO, opt)) {
+        if (boost::iequals(opt, "yes")) {
+          force_push_pco = true;
+        } else {
+          force_push_pco = false;
+        }
       }
 
-      support_features.lookupValue(
-          SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS, opt);
-      if (boost::iequals(opt, "yes")) {
-        use_fqdn_dns = true;
-      } else {
-        use_fqdn_dns = false;
+      if (support_features.lookupValue(
+              SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS, opt)) {
+        if (boost::iequals(opt, "yes")) {
+          use_fqdn_dns = true;
+        } else {
+          use_fqdn_dns = false;
+        }
       }
 
       support_features.lookupValue(
@@ -1079,6 +1090,8 @@ void smf_config::display() {
   Logger::smf_app().info(
       "    Use FQDN ...........................: %s",
       use_fqdn_dns ? "Yes" : "No");
+  Logger::smf_app().info(
+      "    ENABLE USAGE REPORTING..............: %s", enable_ur ? "Yes" : "No");
   Logger::smf_app().info(
       "    ENABLE DL PDR IN PFCP SESSION ESTAB.: %s",
       enable_dl_pdr_in_pfcp_sess_estab ? "Yes" : "No");
