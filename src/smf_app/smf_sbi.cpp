@@ -164,8 +164,8 @@ smf_sbi::smf_sbi() {
   handles       = {};
   headers       = nullptr;
   headers       = curl_slist_append(headers, "Accept: application/json");
-  headers       = curl_slist_append(headers, "Content-Type: application/json");
   headers       = curl_slist_append(headers, "charsets: utf-8");
+  headers       = curl_slist_append(headers, "Content-Type: application/json");
 
   if ((code < 0) or (curl_multi == nullptr) or (headers == nullptr)) {
     Logger::smf_sbi().error("Cannot initialize Curl Multi Interface");
@@ -1092,10 +1092,16 @@ bool smf_sbi::curl_create_handle(
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
+  curl_slist_free_all(slist);
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "charsets: utf-8");
+
   if (is_multipart) {
     std::string content_type = "content-type: multipart/related; boundary=" +
                                std::string(CURL_MIME_BOUNDARY);
     headers = curl_slist_append(headers, content_type.c_str());
+  } else {
+    headers = curl_slist_append(headers, "Content-Type: application/json");
   }
 
   if ((curl == nullptr) or (headers == nullptr)) {
@@ -1152,6 +1158,11 @@ bool smf_sbi::curl_create_handle(
     uint32_t* promise_id, const std::string& method, uint8_t http_version) {
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
+
+  curl_slist_free_all(slist);
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "charsets: utf-8");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
 
   if ((curl == nullptr) or (headers == nullptr)) {
     Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
@@ -1211,6 +1222,11 @@ bool smf_sbi::curl_create_handle(
     const std::string& method, uint8_t http_version) {
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
+
+  curl_slist_free_all(slist);
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "charsets: utf-8");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
 
   if ((curl == nullptr) or (headers == nullptr)) {
     Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
