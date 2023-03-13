@@ -1092,7 +1092,7 @@ bool smf_sbi::curl_create_handle(
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
-  curl_slist_free_all(headers);
+  headers = nullptr;
   headers = curl_slist_append(headers, "Accept: application/json");
   headers = curl_slist_append(headers, "charsets: utf-8");
 
@@ -1159,7 +1159,7 @@ bool smf_sbi::curl_create_handle(
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
-  curl_slist_free_all(headers);
+  headers = nullptr;
   headers = curl_slist_append(headers, "Accept: application/json");
   headers = curl_slist_append(headers, "charsets: utf-8");
   headers = curl_slist_append(headers, "Content-Type: application/json");
@@ -1223,7 +1223,7 @@ bool smf_sbi::curl_create_handle(
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
-  curl_slist_free_all(headers);
+  headers = nullptr;
   headers = curl_slist_append(headers, "Accept: application/json");
   headers = curl_slist_append(headers, "charsets: utf-8");
   headers = curl_slist_append(headers, "Content-Type: application/json");
