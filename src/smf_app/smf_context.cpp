@@ -895,8 +895,9 @@ void smf_context::handle_itti_msg(
             // get supi and put into URL
             std::string supi_prefix = {};
             get_supi_prefix(supi_prefix);
-            std::string supi_str = supi_prefix + "-" + smf_supi_to_string(supi);
-            std::string url      = "http://" + get_amf_addr() +
+            std::string supi_str =
+                smf_get_supi_with_prefix(supi_prefix, smf_supi_to_string(supi));
+            std::string url = "http://" + get_amf_addr() +
                               NAMF_COMMUNICATION_BASE +
                               smf_cfg.amf_addr.api_version +
                               fmt::format(
@@ -1815,8 +1816,9 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // Get SUPI and put into URL
     std::string supi_str = {};
     supi_t supi          = sm_context_resp_pending->res.get_supi();
-    supi_str = sm_context_resp_pending->res.get_supi_prefix() + "-" +
-               smf_supi_to_string(supi);
+    supi_str             = smf_get_supi_with_prefix(
+        sm_context_resp_pending->res.get_supi_prefix(),
+        smf_supi_to_string(supi));
     std::string url =
         "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
         smf_cfg.amf_addr.api_version +
@@ -3300,9 +3302,9 @@ void smf_context::handle_pdu_session_modification_network_requested(
 
   // Fill N1N2MesasgeTransferRequestData
   // get supi and put into URL
-  supi_t supi = itti_msg->msg.get_supi();
-  std::string supi_str =
-      itti_msg->msg.get_supi_prefix() + "-" + smf_supi_to_string(supi);
+  supi_t supi          = itti_msg->msg.get_supi();
+  std::string supi_str = smf_get_supi_with_prefix(
+      itti_msg->msg.get_supi_prefix(), smf_supi_to_string(supi));
   std::string url =
       "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
@@ -4943,9 +4945,9 @@ void smf_context::send_pdu_session_create_response(
 
   // Fill N1N2MesasgeTransferRequestData
   // get SUPI and put into URL
-  supi_t supi = resp->res.get_supi();
-  std::string supi_str =
-      resp->res.get_supi_prefix() + "-" + smf_supi_to_string(supi);
+  supi_t supi          = resp->res.get_supi();
+  std::string supi_str = smf_get_supi_with_prefix(
+      resp->res.get_supi_prefix(), smf_supi_to_string(supi));
   std::string url =
       "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
       smf_cfg.amf_addr.api_version +
