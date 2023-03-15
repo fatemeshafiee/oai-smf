@@ -1781,6 +1781,17 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     // TODO:
     // un-subscribe to the modifications of Session Management Subscription data
     // for (SUPI, DNN, S-NSSAI)
+
+    // Send HTTP reply to PDU Session Establishment Request
+    // TODO Stefan: I believe this is not standard-compliant, we should just
+    // send an error code here (see 29.502 Table 6.1.3.2.3.1-3)
+
+    pdu_session_create_sm_context_response sm_context_response = {};
+    sm_context_response.set_http_code(
+        http_status_code_e::HTTP_STATUS_CODE_201_CREATED);
+    smf_app_inst->trigger_session_create_sm_context_response(
+        sm_context_response, smreq->pid);
+
   }
 
   // Step 10. if error when establishing the pdu session,
@@ -1811,16 +1822,6 @@ void smf_context::handle_pdu_session_create_sm_context_request(
     }
     // clear the created context??
     // TODO:
-
-    // Send HTTP reply to PDU Session Establishment Request
-    // TODO Stefan: I believe this is not standard-compliant, we should just
-    // send an error code here (see 29.502 Table 6.1.3.2.3.1-3)
-
-    pdu_session_create_sm_context_response sm_context_response = {};
-    sm_context_response.set_http_code(
-        http_status_code_e::HTTP_STATUS_CODE_201_CREATED);
-    smf_app_inst->trigger_session_create_sm_context_response(
-        sm_context_response, smreq->pid);
 
     // Create PDU Session Establishment Reject and embedded in
     // Namf_Communication_N1N2MessageTransfer Request
