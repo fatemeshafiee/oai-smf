@@ -1484,8 +1484,8 @@ void smf_context::handle_pdu_session_create_sm_context_request(
   bool use_pcf_policy      = false;
   sp.get()->policy_ptr->set_context(
       smf_supi_to_string_without_nulls(smreq->req.get_supi()),
-      smreq->req.get_dnn(), snssai, plmn, smreq->req.get_pdu_session_id(),
-      smreq->req.get_pdu_session_type());
+      smreq->req.get_supi_prefix(), smreq->req.get_dnn(), snssai, plmn,
+      smreq->req.get_pdu_session_id(), smreq->req.get_pdu_session_type());
 
   // TODO what is the exact meaning of SCID? Is this unique per registration
   // or unique per PDU session?
