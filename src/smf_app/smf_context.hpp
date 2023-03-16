@@ -1360,6 +1360,19 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       const pdu_session_id_t& pdu_session_id) const;
 
   /**
+   * Send a PDU Session Establishment response with a reject
+   * @param smreq Original request
+   * @param cause NAS cause value for PDU session establishment reject
+   * @param application_error PDU session establishment application error
+   * @param http_status
+   */
+  void send_pdu_session_establishment_response_reject(
+      const std::shared_ptr<itti_n11_create_sm_context_request> smreq,
+      cause_value_5gsm_e cause,
+      pdu_session_application_error_e application_error,
+      http_status_code_e http_status);
+
+  /**
    * Send a PDU session Create Response, based on the content of resp.
    * @param resp
    */
