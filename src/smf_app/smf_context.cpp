@@ -2936,7 +2936,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
       } break;
 
       default: {
-        Logger::smf_app().warn("Unknown N2 SM info type %d", n2_sm_info_type);
+        Logger::smf_app().warn("Unknown N2 SM info type %d", (int) n2_sm_info_type);
       }
 
     }  // end switch
@@ -4211,8 +4211,8 @@ void smf_context::handle_ue_ip_change(
 
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN (Event "
-      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version %d",
-      supi, sp->get_pdu_session_id(), http_version);
+      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %u, HTTP version %u",
+      supi64, sp->get_pdu_session_id(), http_version);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4382,8 +4382,8 @@ void smf_context::handle_flexcn_event(
 
   Logger::smf_app().debug(
       "Send request to N11 to triger FlexCN (Event "
-      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version  %d",
-      supi, sp->get_pdu_session_id(), http_version);
+      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %u, HTTP version  %u",
+      supi64, sp->get_pdu_session_id(), http_version);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -4518,8 +4518,8 @@ void smf_context::handle_pdusesest(
 
   Logger::smf_app().debug(
       "Send request to N11 to triger PDU_SES_EST (Event "
-      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %d, HTTP version %d",
-      supi, sp->get_pdu_session_id(), http_version);
+      "Exposure), SUPI " SUPI_64_FMT " , PDU Session ID %u, HTTP version %u",
+      supi64, sp->get_pdu_session_id(), http_version);
 
   std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
   smf_app_inst->get_ee_subscriptions(
@@ -5165,7 +5165,7 @@ void smf_context::send_pdu_session_update_response(
 
       default: {
         Logger::smf_app().info(
-            "Unknown session procedure type %d", session_procedure_type);
+            "Unknown session procedure type %d", (int) session_procedure_type);
       }
     }
   } else {
