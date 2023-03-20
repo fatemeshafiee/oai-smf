@@ -1253,7 +1253,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
     default: {
       Logger::smf_app().error(
           "Update SM Context procedure: Unknown session management type %d",
-          session_procedure_type);
+          (int) session_procedure_type);
     }
   }
 
