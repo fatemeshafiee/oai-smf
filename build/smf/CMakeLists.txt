@@ -31,11 +31,9 @@ set (OPENAIRCN_DIR   $ENV{OPENAIRCN_DIR})
 set (BUILD_TOP_DIR   ${OPENAIRCN_DIR}/build)
 set (SRC_TOP_DIR     $ENV{OPENAIRCN_DIR}/src)
 
-set (NF_TARGET_LIB       SMF)
-set (NF_TARGET           smf)
-set (NF_TARGET_API_LIB   SMF_API)
+set (NF_TARGET       smf)
 
-set (MOUNTED_COMMON      ${SOURCE_TOP_DIR}/oai-cn5g-common-src)
+set (MOUNTED_COMMON      oai-cn5g-common-src)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../src/oai_smf/CMakeLists.txt)
 

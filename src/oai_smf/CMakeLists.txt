@@ -311,7 +311,7 @@ add_executable(smf
   ${SRC_TOP_DIR}/itti/itti_msg.cpp
   )
 
-include(${SRC_TOP_DIR}/oai-cn5g-common-src/logger/logger.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger/logger.cmake)
 
 IF(STATIC_LINKING)
     SET(CMAKE_EXE_LINKER_FLAGS "-static")
