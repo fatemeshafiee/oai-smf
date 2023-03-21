@@ -1111,7 +1111,6 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
   if (method.compare("POST") == 0)
     curl_easy_setopt(curl, CURLOPT_POST, 1);
@@ -1126,7 +1125,8 @@ bool smf_sbi::curl_create_handle(
   curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
   if (http_version == 2) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if (Logger::should_log(spdlog::level::debug))
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     // We use a self-signed test server, skip verification during debugging
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -1171,7 +1171,6 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
 
   if (method.compare("POST") == 0)
@@ -1187,7 +1186,8 @@ bool smf_sbi::curl_create_handle(
   curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
   if (http_version == 2) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if (Logger::should_log(spdlog::level::debug))
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     // We use a self-signed test server, skip verification during debugging
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -1235,7 +1235,6 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
 
   if (method.compare("POST") == 0)
@@ -1251,7 +1250,8 @@ bool smf_sbi::curl_create_handle(
   curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
   if (http_version == 2) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if (Logger::should_log(spdlog::level::debug))
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     // We use a self-signed test server, skip verification during debugging
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -1297,7 +1297,6 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
 
   if (method.compare("DELETE") == 0)
@@ -1309,7 +1308,8 @@ bool smf_sbi::curl_create_handle(
   curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
 
   if (http_version == 2) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if (Logger::should_log(spdlog::level::debug))
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     // We use a self-signed test server, skip verification during debugging
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);

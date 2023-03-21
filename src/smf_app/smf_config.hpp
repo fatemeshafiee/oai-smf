@@ -166,6 +166,8 @@
 
 #define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
 
+#define SMF_CONFIG_STRING_LOG_LEVEL "LOG_LEVEL"
+
 namespace smf {
 
 typedef struct interface_cfg_s {
@@ -220,6 +222,7 @@ class smf_config {
   /* Reader/writer lock for this configuration */
   std::mutex m_rw_lock;
   std::string pid_dir;
+  spdlog::level::level_enum log_level;
   unsigned int instance = 0;
   std::string fqdn      = {};
 

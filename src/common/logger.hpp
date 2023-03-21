@@ -73,6 +73,12 @@ class Logger {
     oai::logger::logger_registry::register_logger(
         name, ASYNC, log_stdout, log_rot_file);
   }
+  static void set_level(spdlog::level::level_enum level) {
+    oai::logger::logger_registry::set_level(level);
+  }
+  static bool should_log(spdlog::level::level_enum level) {
+    return oai::logger::logger_registry::should_log(level);
+  }
 
   static const oai::logger::printf_logger& smf_app() {
     return oai::logger::logger_registry::get_logger(SMF_APP);
@@ -120,5 +126,4 @@ class Logger {
   static const oai::logger::printf_logger& async_cmd() {
     return oai::logger::logger_registry::get_logger(ASYNC);
   }
-
 };
