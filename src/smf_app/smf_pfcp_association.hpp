@@ -314,6 +314,9 @@ struct edge {
       const std::unordered_set<std::string>& dnais,
       std::string& found_dnai) const;
 
+  bool get_qos_flows(std::vector<std::shared_ptr<smf_qos_flow>>& flows);
+  bool get_qos_flows(pdu_session_id_t pid, std::vector<std::shared_ptr<smf_qos_flow>>& flows);
+
   std::shared_ptr<smf_qos_flow> get_qos_flow(const pfcp::pdr_id_t& pdr_id);
 
   std::shared_ptr<smf_qos_flow> get_qos_flow(const pfcp::qfi_t& qfi);

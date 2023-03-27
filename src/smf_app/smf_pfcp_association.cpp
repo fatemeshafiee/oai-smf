@@ -178,6 +178,27 @@ bool edge::serves_network(
   return serves_network(dnn, snssai, set, s);
 }
 
+
+//---------------------------------------------------------------------------------------------
+bool edge::get_qos_flows(std::vector<std::shared_ptr<smf_qos_flow>>& flows){
+  flows.clear();
+  for(const auto& flow : this->qos_flows){
+    flows.push_back(flow);
+  }
+  return flows.size() > 0;
+}
+
+
+//---------------------------------------------------------------------------------------------
+bool edge::get_qos_flows(pdu_session_id_t pid, std::vector<std::shared_ptr<smf_qos_flow>>& flows){
+  flows.clear();
+  for(const auto& flow : this->qos_flows){
+    if(flow->pdu_session_id == pid)
+      flows.push_back(flow);
+  }
+  return flows.size() > 0;
+}
+
 //---------------------------------------------------------------------------------------------
 std::shared_ptr<smf_qos_flow> edge::get_qos_flow(const pfcp::pdr_id_t& pdr_id) {
   // it may happen that 2 qos flows have the same PDR ID e.g. in an
