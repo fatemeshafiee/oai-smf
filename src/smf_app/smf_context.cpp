@@ -3493,15 +3493,31 @@ bool smf_context::handle_ho_preparation_request(
     return false;
   }
 
-  std::vector<smf_qos_flow> flows = {};
-  sp.get()->get_qos_flows(
-      flows);  // get all flows associated with this session for now
-  for (auto flow : flows) {
+  if(!sp->get_sessions_graph()){
+    //abnormal condition when the PDU Session has no associate graph
+      //TODO: Check correct return code/error
+    smf_app_inst->trigger_update_context_error_response(
+        http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+        PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE,
+        sm_context_request.get()->pid);
+    return false; 
+  }
+
+  edge access_upf = 
+      sp->get_sessions_graph()->get_access_edge();
+      
+  // Retrieve QoS Flows from the access UPF
+  //TODO: Check PDU Session id cast (uint32 -> uint8)
+  std::vector<std::shared_ptr<smf_qos_flow>> flows = {};
+  access_upf.get_qos_flows(
+      sp->pdu_session_id, flows);  
+
+  for (const auto& flow : flows) { 
     qos_flow_context_updated qos_flow = {};
-    qos_flow.qfi                      = flow.qfi;
-    qos_flow.ul_fteid                 = flow.ul_fteid;
-    qos_flow.dl_fteid                 = flow.dl_fteid;
-    qos_flow.qos_profile              = flow.qos_profile;
+    qos_flow.set_qfi(flow->qfi);
+    qos_flow.set_ul_fteid(flow->ul_fteid);
+    qos_flow.set_dl_fteid(flow->dl_fteid);
+    qos_flow.set_qos_profile(flow->qos_profile);
     sm_context_resp->res.add_qos_flow_context_updated(qos_flow);
   }
 
