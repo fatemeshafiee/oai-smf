@@ -3492,10 +3492,20 @@ bool smf_context::handle_ho_preparation_request(
     // TODO:
     return false;
   }
-  
+
+  if(!sp->get_sessions_graph()){
+    //abnormal condition when the PDU Session has no associate graph
+      //TODO: Check correct return code/error
+    smf_app_inst->trigger_update_context_error_response(
+        http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
+        PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE,
+        sm_context_request.get()->pid);
+    return false; 
+  }
+
   edge access_upf = 
       sp->get_sessions_graph()->get_access_edge();
-
+      
   // Retrieve QoS Flows from the access UPF
   //TODO: Check PDU Session id cast (uint32 -> uint8)
   std::vector<std::shared_ptr<smf_qos_flow>> flows = {};
