@@ -366,6 +366,7 @@ static int _nas_message_header_encode(
       ENCODE_U8(buffer + size, header->sequence_number, size);
     }
   }
+  return size;
 }
 
 static int _nas_message_protected_encode(
