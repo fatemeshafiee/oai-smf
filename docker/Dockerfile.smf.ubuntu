@@ -50,8 +50,8 @@ RUN git config --global https.postBuffer 123289600 && \
 # Copying source code
 WORKDIR /openair-smf
 COPY ./build/scripts /openair-smf/build/scripts
+COPY ./build/common-build /openair-smf/build/common-build
 COPY ./build/smf/CMakeLists.txt /openair-smf/build/smf/CMakeLists.txt
-COPY ./build/cmake_modules /openair-smf/cmake_modules
 
 # Installing all the needed libraries/packages to build and run SMF
 WORKDIR /openair-smf/build/scripts
@@ -68,7 +68,9 @@ WORKDIR /openair-smf/build/scripts
 RUN ldconfig && \
     ./build_smf --clean --Verbose --build-type Release --jobs && \
     ldd /openair-smf/build/smf/build/smf && \
-    mv /openair-smf/build/smf/build/smf /openair-smf/build/smf/build/oai_smf
+    mv /openair-smf/build/smf/build/smf /openair-smf/build/smf/build/oai_smf && \
+    sed -i -e "s@nf-root-folder@smf@" -e "s@nf-config-file@smf.conf@" \
+      ../common-build/docker-scripts/entrypoint.py
 
 #---------------------------------------------------------------------
 # TARGET IMAGE
@@ -116,7 +118,7 @@ RUN apt-get update && \
 WORKDIR /openair-smf/bin
 COPY --from=oai-smf-builder \
     /openair-smf/build/smf/build/oai_smf \
-    /openair-smf/scripts/entrypoint.py \
+    /openair-smf/build/common-build/docker-scripts/entrypoint.py \
     /openair-smf/scripts/healthcheck.sh \
     ./
 
