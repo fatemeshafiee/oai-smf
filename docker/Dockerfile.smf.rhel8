@@ -124,7 +124,7 @@ RUN rm -f /etc/rhsm-host && \
 WORKDIR /openair-smf/bin
 COPY --from=oai-smf-builder \
     /openair-smf/build/smf/build/oai_smf \
-    /openair-smf/scripts/entrypoint.py \
+    /openair-smf/build/common-build/docker-scripts/entrypoint.py \
     /openair-smf/scripts/healthcheck.sh \
     ./
 
