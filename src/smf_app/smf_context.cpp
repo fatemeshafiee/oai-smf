@@ -2923,7 +2923,8 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
       } break;
 
       default: {
-        Logger::smf_app().warn("Unknown N2 SM info type %d", (int) n2_sm_info_type);
+        Logger::smf_app().warn(
+            "Unknown N2 SM info type %d", (int) n2_sm_info_type);
       }
 
     }  // end switch
@@ -3333,8 +3334,6 @@ void smf_context::handle_pdu_session_modification_network_requested(
       itti_msg->msg.get_snssai().sst;
   json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
       std::to_string(itti_msg->msg.get_snssai().sd);
-  json_data["n2InfoContainer"]["ranInfo"] = "SM";
-
   json_data["pduSessionId"] = itti_msg->msg.get_pdu_session_id();
   itti_msg->msg.set_json_data(json_data);
 
@@ -3493,26 +3492,24 @@ bool smf_context::handle_ho_preparation_request(
     return false;
   }
 
-  if(!sp->get_sessions_graph()){
-    //abnormal condition when the PDU Session has no associate graph
-      //TODO: Check correct return code/error
+  if (!sp->get_sessions_graph()) {
+    // abnormal condition when the PDU Session has no associate graph
+    // TODO: Check correct return code/error
     smf_app_inst->trigger_update_context_error_response(
         http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
         PDU_SESSION_APPLICATION_ERROR_NETWORK_FAILURE,
         sm_context_request.get()->pid);
-    return false; 
+    return false;
   }
 
-  edge access_upf = 
-      sp->get_sessions_graph()->get_access_edge();
-      
-  // Retrieve QoS Flows from the access UPF
-  //TODO: Check PDU Session id cast (uint32 -> uint8)
-  std::vector<std::shared_ptr<smf_qos_flow>> flows = {};
-  access_upf.get_qos_flows(
-      sp->pdu_session_id, flows);  
+  edge access_upf = sp->get_sessions_graph()->get_access_edge();
 
-  for (const auto& flow : flows) { 
+  // Retrieve QoS Flows from the access UPF
+  // TODO: Check PDU Session id cast (uint32 -> uint8)
+  std::vector<std::shared_ptr<smf_qos_flow>> flows = {};
+  access_upf.get_qos_flows(sp->pdu_session_id, flows);
+
+  for (const auto& flow : flows) {
     qos_flow_context_updated qos_flow = {};
     qos_flow.set_qfi(flow->qfi);
     qos_flow.set_ul_fteid(flow->ul_fteid);
@@ -4997,8 +4994,6 @@ void smf_context::send_pdu_session_create_response(
         resp->res.get_snssai().sst;
     json_data["n2InfoContainer"]["smInfo"]["sNssai"]["sd"] =
         std::to_string(resp->res.get_snssai().sd);
-    json_data["n2InfoContainer"]["ranInfo"] = "SM";
-
     // N1N2MsgTxfrFailureNotification
     std::string callback_uri =
         get_amf_addr() + NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version +
