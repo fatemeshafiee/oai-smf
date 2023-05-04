@@ -1950,19 +1950,11 @@ bool smf_context::handle_pdu_session_modification_request(
       n2_sm_info_hex_to_be_created);
   sm_context_resp.get()->res.set_n2_sm_info_type("PDU_RES_MOD_REQ");
 
-  // Fill the json part
-  nlohmann::json json_data = {};
-  // N1SM
-  json_data["n1MessageContainer"]["n1MessageClass"] = N1N2_MESSAGE_CLASS;
-  json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
-      N1_SM_CONTENT_ID;
-  json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-      "PDU_RES_MOD_REQ";  // NGAP message
-  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-           ["contentId"] = N2_SM_CONTENT_ID;
-  json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-      sm_context_resp.get()->res.get_pdu_session_id();
+  // Fill the json part with SmContextUpdatedData
+  nlohmann::json json_data           = {};
+  json_data["n1SmMsg"]["contentId"]  = N1_SM_CONTENT_ID;
+  json_data["n2SmInfo"]["contentId"] = N2_SM_CONTENT_ID;
+  json_data["n2SmInfoType"]          = "PDU_RES_MOD_REQ";  // NGAP message
 
   sm_context_resp.get()->res.set_json_data(json_data);
   // Update PDU Session status
@@ -2502,15 +2494,11 @@ bool smf_context::handle_service_request(
   sm_context_resp.get()->res.set_n2_sm_information(n2_sm_info_hex);
 
   // fill the content of SmContextUpdatedData
-  nlohmann::json json_data                           = {};
-  json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-  json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-      sm_context_resp.get()->res.get_pdu_session_id();
-  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-           ["contentId"] = N2_SM_CONTENT_ID;
-  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-      "PDU_RES_SETUP_REQ";  // NGAP message
-  json_data["upCnxState"] = "ACTIVATING";
+  nlohmann::json json_data = {};
+
+  json_data["n2SmInfo"]["contentId"] = N2_SM_CONTENT_ID;
+  json_data["n2SmInfoType"]          = "PDU_RES_SETUP_REQ";  // NGAP message
+  json_data["upCnxState"]            = "ACTIVATING";
   sm_context_resp.get()->res.set_json_data(json_data);
 
   // Update upCnxState to ACTIVATING
@@ -3525,13 +3513,10 @@ bool smf_context::handle_ho_preparation_request(
   sm_context_resp.get()->res.set_n2_sm_information(n2_sm_info_hex);
 
   // Fill the content of SmContextUpdatedData
-  nlohmann::json json_data                           = {};
-  json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-           ["contentId"] = N2_SM_CONTENT_ID;
-  json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-      "PDU_RES_SETUP_REQ";  // NGAP message
-  json_data["hoState"] = "PREPARING";
+  nlohmann::json json_data           = {};
+  json_data["n2SmInfo"]["contentId"] = N2_SM_CONTENT_ID;
+  json_data["n2SmInfoType"]          = "PDU_RES_SETUP_REQ";  // NGAP message
+  json_data["hoState"]               = "PREPARING";
   sm_context_resp.get()->res.set_json_data(json_data);
   sm_context_resp.get()->res.set_http_code(
       http_status_code_e::HTTP_STATUS_CODE_200_OK);
@@ -5087,15 +5072,11 @@ void smf_context::send_pdu_session_update_response(
         resp->res.set_n2_sm_information(n2_sm_info_hex);
 
         // fill the content of SmContextUpdatedData
-        nlohmann::json json_data                           = {};
-        json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-        json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-            resp->res.get_pdu_session_id();
-        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-                 ["contentId"] = N2_SM_CONTENT_ID;
-        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-            "PDU_RES_SETUP_REQ";  // NGAP message
-        json_data["upCnxState"] = "ACTIVATING";
+        nlohmann::json json_data = {};
+
+        json_data["n2SmInfo"]["contentId"] = N2_SM_CONTENT_ID;
+        json_data["n2SmInfoType"] = "PDU_RES_SETUP_REQ";  // NGAP message
+        json_data["upCnxState"]   = "ACTIVATING";
         resp->res.set_json_data(json_data);
         // TODO: verify whether cause is needed (as in 23.502 but not in 3GPP
         // TS 29.502)
@@ -5145,14 +5126,9 @@ void smf_context::send_pdu_session_update_response(
         resp->res.set_n2_sm_information(n2_sm_info_hex);
 
         // fill the content of SmContextUpdatedData
-        nlohmann::json json_data                           = {};
-        json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-        json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-            resp->res.get_pdu_session_id();
-        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-                 ["contentId"] = N2_SM_CONTENT_ID;
-        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-            "PATH_SWITCH_REQ_ACK";
+        nlohmann::json json_data           = {};
+        json_data["n2SmInfo"]["contentId"] = N2_SM_CONTENT_ID;
+        json_data["n2SmInfoType"] = "PATH_SWITCH_REQ_ACK";  // NGAP message
         // NGAP message json_data["upCnxState"] ="ACTIVATING";
         resp->res.set_json_data(json_data);
 
@@ -5170,15 +5146,11 @@ void smf_context::send_pdu_session_update_response(
         resp->res.set_n2_sm_information(n2_sm_info_hex);
 
         // fill the content of SmContextUpdatedData
-        nlohmann::json json_data                           = {};
-        json_data["n2InfoContainer"]["n2InformationClass"] = N1N2_MESSAGE_CLASS;
-        json_data["n2InfoContainer"]["smInfo"]["PduSessionId"] =
-            resp->res.get_pdu_session_id();
-        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapData"]
-                 ["contentId"] = N2_SM_CONTENT_ID;
-        json_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]["ngapIeType"] =
-            "HANDOVER_CMD";
-        json_data["hoState"] = "PREPARED";
+        nlohmann::json json_data = {};
+
+        json_data["n2SmInfo"]["contentId"] = N2_SM_CONTENT_ID;
+        json_data["n2SmInfoType"]          = "HANDOVER_CMD";  // NGAP message
+        json_data["hoState"]               = "PREPARED";
         resp->res.set_json_data(json_data);
 
         // Set HO State to prepared
@@ -5260,28 +5232,17 @@ void smf_context::send_pdu_session_release_response(
 
           // Prepare response to send to AMF
           // (PDUSession_UpdateSMContextResponse)
-          nlohmann::json sm_context_response_data = {};
-          sm_context_response_data["n1MessageContainer"]["n1MessageClass"] =
-              N1N2_MESSAGE_CLASS;
-          sm_context_response_data["n1MessageContainer"]["n1MessageContent"]
-                                  ["contentId"] = N1_SM_CONTENT_ID;
-          sm_context_response_data["n2InfoContainer"]["n2InformationClass"] =
-              N1N2_MESSAGE_CLASS;
-          sm_context_response_data["n2InfoContainer"]["smInfo"]
-                                  ["PduSessionId"] =
-                                      resp->res.get_pdu_session_id();
-          sm_context_response_data["n2InfoContainer"]["smInfo"]["n2InfoContent"]
-                                  ["ngapData"]["contentId"] = N2_SM_CONTENT_ID;
+          nlohmann::json sm_context_response_data           = {};
+          sm_context_response_data["n1SmMsg"]["contentId"]  = N1_SM_CONTENT_ID;
+          sm_context_response_data["n2SmInfo"]["contentId"] = N2_SM_CONTENT_ID;
           sm_context_response_data["n2SmInfoType"] =
               "PDU_RES_REL_CMD";  // NGAP message
+
           resp->res.set_json_data(sm_context_response_data);
         } else {
           // fill the content of SmContextUpdatedData
-          nlohmann::json json_data = {};
-          json_data["n1MessageContainer"]["n1MessageClass"] =
-              N1N2_MESSAGE_CLASS;
-          json_data["n1MessageContainer"]["n1MessageContent"]["contentId"] =
-              N1_SM_CONTENT_ID;
+          nlohmann::json json_data          = {};
+          json_data["n1SmMsg"]["contentId"] = N1_SM_CONTENT_ID;
           resp->res.set_json_data(json_data);
         }
 
