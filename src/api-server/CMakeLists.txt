@@ -43,6 +43,7 @@ include_directories(${SRC_TOP_DIR}/ngap/asn1c)
 include_directories(${SRC_TOP_DIR}/ngap/ies)
 include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/config/config.cmake)
 
 file(GLOB SMF_API_SERVER_src_files
     ${SMF_API_SERVER_DIR}/smf-http2-server.cpp
