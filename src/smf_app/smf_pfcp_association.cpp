@@ -42,7 +42,7 @@ using namespace oai::smf_server::model;
 
 extern itti_mw* itti_inst;
 extern smf_n4* smf_n4_inst;
-extern smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 //---------------------------------------------------------------------------------------------
 edge edge::from_upf_info(const upf_info_t& upf_info) {
@@ -919,11 +919,11 @@ void upf_graph::insert_into_graph(const std::shared_ptr<pfcp_association>& sa) {
 
     edge n3_edge        = {};
     n3_edge.type        = iface_type::N3;
-    n3_edge.nw_instance = smf_cfg.get_nwi(sa->node_id, iface_type::N3);
+    n3_edge.nw_instance = smf_cfg->get_nwi(sa->node_id, iface_type::N3);
     n3_edge.uplink      = false;
     edge n6_edge        = {};
     n6_edge.type        = iface_type::N6;
-    n6_edge.nw_instance = smf_cfg.get_nwi(sa->node_id, iface_type::N6);
+    n6_edge.nw_instance = smf_cfg->get_nwi(sa->node_id, iface_type::N6);
     n6_edge.uplink      = true;
 
     add_upf_graph_edge(sa, n3_edge);

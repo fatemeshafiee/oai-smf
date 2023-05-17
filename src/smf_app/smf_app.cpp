@@ -71,13 +71,14 @@ extern "C" {
 }
 
 using namespace smf;
+using namespace oai::config::smf;
 
 #define PFCP_ASSOC_RETRY_COUNT 10
 #define PFCP_ASSOC_RESP_WAIT 2
 
 extern util::async_shell_cmd* async_shell_cmd_inst;
 extern smf_app* smf_app_inst;
-extern smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 smf_n4* smf_n4_inst   = nullptr;
 smf_sbi* smf_sbi_inst = nullptr;
 extern itti_mw* itti_inst;
@@ -85,13 +86,13 @@ extern itti_mw* itti_inst;
 void smf_app_task(void*);
 
 //------------------------------------------------------------------------------
-int smf_app::apply_config(const smf_config& cfg) {
+int smf_app::apply_config() {
   Logger::smf_app().info("Apply config...");
 
   paa_t paa   = {};
   int pool_id = 0;
-  for (std::map<std::string, dnn_t>::const_iterator it = cfg.dnns.begin();
-       it != cfg.dnns.end(); it++) {
+  for (std::map<std::string, dnn_t>::const_iterator it = smf_cfg->dnns.begin();
+       it != smf_cfg->dnns.end(); it++) {
     if ((it->second.pdu_session_type.pdu_session_type ==
          PDU_SESSION_TYPE_E_IPV4) or
         (it->second.pdu_session_type.pdu_session_type ==
@@ -339,7 +340,7 @@ smf_app::smf_app(const std::string& config_file)
   set_seid_n4       = {};
   seid_n4_generator = 0;
 
-  apply_config(smf_cfg);
+  apply_config();
 
   if (itti_inst->create_task(TASK_SMF_APP, smf_app_task, nullptr)) {
     Logger::smf_app().error("Cannot create task TASK_SMF_APP");
@@ -367,13 +368,13 @@ smf_app::~smf_app() {
 
 //------------------------------------------------------------------------------
 void smf_app::start_nf_registration_discovery() {
-  if (smf_cfg.discover_upf) {
+  if (smf_cfg->discover_upf) {
     trigger_upf_status_notification_subscribe();
   } else {
     // TODO: should be done when SMF select UPF for a particular UE (should be
     // verified)
-    for (std::vector<pfcp::node_id_t>::const_iterator it = smf_cfg.upfs.begin();
-         it != smf_cfg.upfs.end(); ++it) {
+    for (std::vector<pfcp::node_id_t>::const_iterator it = smf_cfg->upfs.begin();
+         it != smf_cfg->upfs.end(); ++it) {
       for (int i = 0; i < PFCP_ASSOC_RETRY_COUNT; i++) {
         start_upf_association(*it);
         sleep(PFCP_ASSOC_RESP_WAIT);
@@ -388,7 +389,7 @@ void smf_app::start_nf_registration_discovery() {
   }
 
   // Register to NRF (if this option is enabled)
-  if (smf_cfg.register_nrf) {
+  if (smf_cfg->register_nrf) {
     unsigned int microsecond = 10000;  // 10ms
     usleep(microsecond);
     register_to_nrf();
@@ -415,7 +416,7 @@ void smf_app::start_upf_association(const pfcp::node_id_t& node_id) {
   cp_function_features.ovrl = 1;
 
   pfcp::node_id_t this_node_id = {};
-  if (smf_cfg.get_pfcp_node_id(this_node_id) == RETURNok) {
+  if (smf_cfg->get_pfcp_node_id(this_node_id) == RETURNok) {
     n4_asc->pfcp_ies.set(this_node_id);
     pfcp::recovery_time_stamp_t r = {.recovery_time_stamp = (uint32_t) tv_ntp};
     n4_asc->pfcp_ies.set(r);
@@ -457,7 +458,7 @@ void smf_app::start_upf_association(
   cp_function_features.ovrl = 1;
 
   pfcp::node_id_t this_node_id = {};
-  if (smf_cfg.get_pfcp_node_id(this_node_id) == RETURNok) {
+  if (smf_cfg->get_pfcp_node_id(this_node_id) == RETURNok) {
     n4_asc->pfcp_ies.set(this_node_id);
     pfcp::recovery_time_stamp_t r = {.recovery_time_stamp = (uint32_t) tv_ntp};
     n4_asc->pfcp_ies.set(r);
@@ -962,7 +963,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   // If no DNN information from UE, set to default value
   std::string dnn = smreq->req.get_dnn();
   if (dnn.length() == 0) {
-    dnn = smf_cfg.get_default_dnn();
+    dnn = smf_cfg->get_default_dnn();
   }
 
   // TODO: For the moment, not support PDU session authentication and
@@ -974,7 +975,7 @@ void smf_app::handle_pdu_session_create_sm_context_request(
   dnn = nd_dnn;
   // Update DNN
   smreq->req.set_dnn(dnn);
-  if (not smf_cfg.is_dotted_dnn_handled(dnn, pdu_session_type)) {
+  if (not smf_cfg->is_dotted_dnn_handled(dnn, pdu_session_type)) {
     // Not a valid request...
     Logger::smf_app().warn(
         "Received a PDU Session Create SM Context Request: unknown requested "
@@ -1414,7 +1415,7 @@ bool smf_app::handle_nf_status_notification(
             }
           }
           bool found = false;
-          for (auto node : smf_cfg.upfs) {
+          for (auto node : smf_cfg->upfs) {
             if ((node.u1.ipv4_address.s_addr == upf_ipv4_addr.s_addr) or
                 (upf_fqdn.compare(node.fqdn) == 0)) {
               found = true;
@@ -1440,7 +1441,7 @@ bool smf_app::handle_nf_status_notification(
 
         if (ipv4_addrs.size() >= 1) {  // Use IP address if it's available
           bool found = false;
-          for (auto node : smf_cfg.upfs) {
+          for (auto node : smf_cfg->upfs) {
             if (node.u1.ipv4_address.s_addr == ipv4_addrs[0].s_addr) {
               found = true;
               break;
@@ -1473,7 +1474,7 @@ bool smf_app::handle_nf_status_notification(
         }
 
         if (n.node_id_type != pfcp::NODE_ID_TYPE_UNKNOWN) {
-          smf_cfg.upfs.push_back(n);
+          smf_cfg->upfs.push_back(n);
           upf_profile* upf_node_profile =
               dynamic_cast<upf_profile*>(profile.get());
 
@@ -1627,7 +1628,7 @@ bool smf_app::find_pdu_session(
 bool smf_app::use_local_configuration_subscription_data(
     const std::string& dnn_selection_mode) {
   // TODO: should be implemented
-  return smf_cfg.use_local_subscription_info;
+  return smf_cfg->use_local_subscription_info;
 }
 
 //------------------------------------------------------------------------------
@@ -1858,7 +1859,7 @@ void smf_app::timer_nrf_heartbeat_timeout(
   patch_item.setValue("REGISTERED");
   itti_msg->patch_items.push_back(patch_item);
   itti_msg->smf_instance_id = smf_instance_id;
-  itti_msg->http_version    = smf_cfg.http_version;
+  itti_msg->http_version    = smf_cfg->http_version;
 
   int ret = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
@@ -1906,7 +1907,7 @@ bool smf_app::get_session_management_subscription_data(
   std::shared_ptr<dnn_configuration_t> dnn_configuration =
       std::make_shared<dnn_configuration_t>();
 
-  for (auto sub : smf_cfg.session_management_subscriptions) {
+  for (auto sub : smf_cfg->session_management_subscriptions) {
     if ((0 == dnn.compare(sub.dnn)) and (snssai.sst == sub.single_nssai.sst) and
         (snssai.sd == sub.single_nssai.sd)) {
       // PDU Session Type
@@ -1958,22 +1959,22 @@ bool smf_app::get_session_management_subscription_data(
   }
 
   /*
-    for (int i = 0; i < smf_cfg.num_session_management_subscription; i++) {
-      if ((0 == dnn.compare(smf_cfg.session_management_subscription[i].dnn))
+    for (int i = 0; i < smf_cfg->num_session_management_subscription; i++) {
+      if ((0 == dnn.compare(smf_cfg->session_management_subscription[i].dnn))
     and (snssai.sST ==
-           smf_cfg.session_management_subscription[i].single_nssai.sST) and
+           smf_cfg->session_management_subscription[i].single_nssai.sST) and
           (0 ==
            snssai.sD.compare(
-               smf_cfg.session_management_subscription[i].single_nssai.sD))) {
+               smf_cfg->session_management_subscription[i].single_nssai.sD))) {
         // PDU Session Type
         pdu_session_type_t pdu_session_type(
             pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
         Logger::smf_app().debug(
             "Default session type %s",
-            smf_cfg.session_management_subscription[i].session_type.c_str());
+            smf_cfg->session_management_subscription[i].session_type.c_str());
 
         std::string session_type =
-            smf_cfg.session_management_subscription[i].session_type;
+            smf_cfg->session_management_subscription[i].session_type;
         if (boost::iequals(session_type, "IPv4")) {
           pdu_session_type.pdu_session_type =
               pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
@@ -1990,28 +1991,28 @@ bool smf_app::get_session_management_subscription_data(
 
         // SSC_Mode
         dnn_configuration->ssc_modes.default_ssc_mode.ssc_mode =
-            smf_cfg.session_management_subscription[i].ssc_mode;
+            smf_cfg->session_management_subscription[i].ssc_mode;
 
         // 5gQosProfile
         dnn_configuration->_5g_qos_profile._5qi =
-            smf_cfg.session_management_subscription[i].default_qos._5qi;
+            smf_cfg->session_management_subscription[i].default_qos._5qi;
         dnn_configuration->_5g_qos_profile.arp.priority_level =
-            smf_cfg.session_management_subscription[i]
+            smf_cfg->session_management_subscription[i]
                 .default_qos.arp.priority_level;
         dnn_configuration->_5g_qos_profile.arp.preempt_cap =
-            smf_cfg.session_management_subscription[i]
+            smf_cfg->session_management_subscription[i]
                 .default_qos.arp.preempt_cap;
         dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
-            smf_cfg.session_management_subscription[i]
+            smf_cfg->session_management_subscription[i]
                 .default_qos.arp.preempt_vuln;
         dnn_configuration->_5g_qos_profile.priority_level =
-            smf_cfg.session_management_subscription[i].default_qos.priority_level;
+            smf_cfg->session_management_subscription[i].default_qos.priority_level;
 
         // Session_ambr
         dnn_configuration->session_ambr.uplink =
-            smf_cfg.session_management_subscription[i].session_ambr.uplink;
+            smf_cfg->session_management_subscription[i].session_ambr.uplink;
         dnn_configuration->session_ambr.downlink =
-            smf_cfg.session_management_subscription[i].session_ambr.downlink;
+            smf_cfg->session_management_subscription[i].session_ambr.downlink;
         Logger::smf_app().debug(
             "Session AMBR Uplink %s, Downlink %s",
             dnn_configuration->session_ambr.uplink.c_str(),
@@ -2230,7 +2231,7 @@ void smf_app::generate_smf_profile() {
   nf_instance_profile.set_nf_heartBeat_timer(50);
   nf_instance_profile.set_nf_priority(1);
   nf_instance_profile.set_nf_capacity(100);
-  nf_instance_profile.add_nf_ipv4_addresses(smf_cfg.sbi.addr4);
+  nf_instance_profile.add_nf_ipv4_addresses(smf_cfg->sbi.addr4);
 
   // NF services
   nf_service_t nf_service        = {};
@@ -2248,8 +2249,8 @@ void smf_app::generate_smf_profile() {
   nf_instance_profile.get_nf_ipv4_addresses(addrs);
   endpoint.ipv4_address = addrs[0];  // TODO: use first IP ADDR for now
   endpoint.transport    = "TCP";
-  endpoint.port         = smf_cfg.sbi.port;
-  if (smf_cfg.http_version == 2) endpoint.port = smf_cfg.sbi_http2_port;
+  endpoint.port         = smf_cfg->sbi.port;
+  if (smf_cfg->http_version == 2) endpoint.port = smf_cfg->sbi_http2_port;
   nf_service.ip_endpoints.push_back(endpoint);
 
   nf_instance_profile.add_nf_service(nf_service);
@@ -2257,7 +2258,7 @@ void smf_app::generate_smf_profile() {
   // TODO: custom info
 
   int i = 0;
-  for (auto sms : smf_cfg.session_management_subscriptions) {
+  for (auto sms : smf_cfg->session_management_subscriptions) {
     // SNSSAIS
     snssai_t snssai = {};
     snssai.sd       = sms.single_nssai.sd;
@@ -2310,7 +2311,7 @@ void smf_app::trigger_nf_registration_request() {
       std::make_shared<itti_n11_register_nf_instance_request>(
           TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->profile      = nf_instance_profile;
-  itti_msg->http_version = smf_cfg.http_version;
+  itti_msg->http_version = smf_cfg->http_version;
   int ret                = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
@@ -2329,7 +2330,7 @@ void smf_app::trigger_nf_deregistration() {
       std::make_shared<itti_n11_deregister_nf_instance>(
           TASK_SMF_APP, TASK_SMF_SBI);
   itti_msg->smf_instance_id = smf_instance_id;
-  itti_msg->http_version    = smf_cfg.http_version;
+  itti_msg->http_version    = smf_cfg->http_version;
   int ret                   = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(
@@ -2349,13 +2350,13 @@ void smf_app::trigger_upf_status_notification_subscribe() {
           TASK_SMF_APP, TASK_SMF_SBI);
 
   nlohmann::json json_data = {};
-  unsigned int port        = smf_cfg.sbi.port;
-  if (smf_cfg.http_version == 2) port = smf_cfg.sbi_http2_port;
+  unsigned int port        = smf_cfg->sbi.port;
+  if (smf_cfg->http_version == 2) port = smf_cfg->sbi_http2_port;
   // TODO: remove hardcoded values
   json_data["nfStatusNotificationUri"] =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))) + ":" +
+      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->sbi.addr4))) + ":" +
       std::to_string(port) + "/nsmf-nfstatus-notify/" +
-      smf_cfg.sbi_api_version + "/subscriptions";
+      smf_cfg->sbi_api_version + "/subscriptions";
 
   json_data["subscrCond"]["NfTypeCond"]["nfType"] = "UPF";
   json_data["reqNotifEvents"]                     = nlohmann::json::array();
@@ -2364,13 +2365,13 @@ void smf_app::trigger_upf_status_notification_subscribe() {
   json_data["validityTime"] = "20390531T235959";
 
   std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg.nrf_addr.api_version + NNRF_NF_STATUS_SUBSCRIBE_URL;
+      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
+      ":" + std::to_string(smf_cfg->nrf_addr.port) + NNRF_NFM_BASE +
+      smf_cfg->nrf_addr.api_version + NNRF_NF_STATUS_SUBSCRIBE_URL;
 
   itti_msg->url          = url;
   itti_msg->json_data    = json_data;
-  itti_msg->http_version = smf_cfg.http_version;
+  itti_msg->http_version = smf_cfg->http_version;
   int ret                = itti_inst->send_msg(itti_msg);
   if (RETURNok != ret) {
     Logger::smf_app().error(

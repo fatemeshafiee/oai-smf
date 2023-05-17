@@ -48,7 +48,7 @@
 #include <boost/chrono/duration.hpp>
 #include <boost/chrono/system_clocks.hpp>
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -81,7 +81,7 @@ void SMContextsCollectionApiImpl::post_sm_contexts(
 
   // Set API Root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
-      m_address + base + smf_cfg.sbi_api_version +
+      m_address + base + smf_cfg->sbi_api_version +
       NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL);
 
   boost::shared_ptr<boost::promise<nlohmann::json> > p =

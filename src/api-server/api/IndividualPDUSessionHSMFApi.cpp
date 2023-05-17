@@ -15,7 +15,7 @@
 #include "Helpers.h"
 #include "smf_config.hpp"
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -38,12 +38,12 @@ void IndividualPDUSessionHSMFApi::setupRoutes() {
 
   Routes::Post(
       *router,
-      base + smf_cfg.sbi_api_version + "/pdu-sessions/:pduSessionRef/release",
+      base + smf_cfg->sbi_api_version + "/pdu-sessions/:pduSessionRef/release",
       Routes::bind(
           &IndividualPDUSessionHSMFApi::release_pdu_session_handler, this));
   Routes::Post(
       *router,
-      base + smf_cfg.sbi_api_version + "/pdu-sessions/:pduSessionRef/modify",
+      base + smf_cfg->sbi_api_version + "/pdu-sessions/:pduSessionRef/modify",
       Routes::bind(
           &IndividualPDUSessionHSMFApi::update_pdu_session_handler, this));
 

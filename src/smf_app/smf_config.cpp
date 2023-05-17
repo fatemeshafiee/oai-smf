@@ -55,8 +55,7 @@
 using namespace std;
 using namespace libconfig;
 using namespace smf;
-
-extern smf_config smf_cfg;
+using namespace oai::config::smf;
 
 //------------------------------------------------------------------------------
 int smf_config::load_thread_sched_params(

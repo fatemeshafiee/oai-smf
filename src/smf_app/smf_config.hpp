@@ -42,6 +42,7 @@
 #include "pfcp.hpp"
 #include "smf.h"
 #include "smf_profile.hpp"
+#include "config.hpp"
 
 #define SMF_CONFIG_STRING_SMF_CONFIG "SMF"
 #define SMF_CONFIG_STRING_PID_DIRECTORY "PID_DIRECTORY"
@@ -168,7 +169,13 @@
 
 #define SMF_CONFIG_STRING_LOG_LEVEL "LOG_LEVEL"
 
-namespace smf {
+namespace oai::config::smf {
+
+const std::string USE_LOCAL_PCC_RULES_CONFIG_VALUE = "use_local_pcc_rules";
+const std::string USE_LOCAL_SUBSCRIPTION_INFOS_CONFIG_VALUE = "use_local_subscription_infos";
+const std::string USE_EXTERNAL_AUSF_CONFIG_VALUE = "use_external_ausf";
+const std::string USE_EXTERNAL_UDM_CONFIG_VALUE = "use_external_udm";
+const std::string USE_EXTERNAL_NSSF_CONFIG_VALUE = "use_external_nssf";
 
 typedef struct interface_cfg_s {
   std::string if_name;
@@ -210,7 +217,7 @@ typedef struct session_management_subscription_s {
   session_ambr_t session_ambr;
 } session_management_subscription_t;
 
-class smf_config {
+class smf_config : config {
  private:
   int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
   int load_interface(const libconfig::Setting& if_cfg, interface_cfg_t& cfg);
@@ -295,8 +302,16 @@ class smf_config {
   std::vector<session_management_subscription_t>
       session_management_subscriptions;
 
-  smf_config()
-      : m_rw_lock(), pid_dir(), instance(0), n4(), sbi(), itti(), upfs() {
+  smf_config(
+      const std::string& configPath, bool logStdout, bool logRotFile)
+      : config(configPath, oai::config::SMF_CONFIG_NAME, logStdout, logRotFile),
+        m_rw_lock(),
+        pid_dir(),
+        instance(0),
+        n4(),
+        sbi(),
+        itti(),
+        upfs() {
     default_dnsv4.s_addr     = INADDR_ANY;
     default_dns_secv4.s_addr = INADDR_ANY;
     default_dnsv6            = in6addr_any;
@@ -366,7 +381,7 @@ class smf_config {
    * @param node_id IP address or FQDN to match against configuration
    * @return NWI or empty string
    */
-  std::string get_nwi(const pfcp::node_id_t& node_id, const iface_type& type);
+  std::string get_nwi(const pfcp::node_id_t& node_id, const ::smf::iface_type& type);
 };
 
 }  // namespace smf

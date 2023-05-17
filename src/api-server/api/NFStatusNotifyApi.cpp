@@ -24,7 +24,7 @@
 #include "logger.hpp"
 #include "smf_config.hpp"
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -46,7 +46,7 @@ void NFStatusNotifyApi::setupRoutes() {
   using namespace Pistache::Rest;
 
   Routes::Post(
-      *router, base + smf_cfg.sbi_api_version + "/subscriptions",
+      *router, base + smf_cfg->sbi_api_version + "/subscriptions",
       Routes::bind(&NFStatusNotifyApi::notify_nf_status_handler, this));
 
   // Default handler, called when a route is not found

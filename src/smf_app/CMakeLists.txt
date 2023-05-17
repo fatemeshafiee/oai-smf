@@ -62,5 +62,6 @@ add_library (SMF STATIC
   smf_profile.cpp
   smf_subscription.cpp
   smf_msg.cpp
+  smf_config_types.cpp
 )
 

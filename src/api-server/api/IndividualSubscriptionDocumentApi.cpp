@@ -15,7 +15,7 @@
 #include "Helpers.h"
 #include "smf_config.hpp"
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -37,19 +37,19 @@ void IndividualSubscriptionDocumentApi::setupRoutes() {
   using namespace Pistache::Rest;
 
   Routes::Delete(
-      *router, base + smf_cfg.sbi_api_version + "/subscriptions/:subId",
+      *router, base + smf_cfg->sbi_api_version + "/subscriptions/:subId",
       Routes::bind(
           &IndividualSubscriptionDocumentApi::
               delete_individual_subcription_handler,
           this));
   Routes::Get(
-      *router, base + smf_cfg.sbi_api_version + "/subscriptions/:subId",
+      *router, base + smf_cfg->sbi_api_version + "/subscriptions/:subId",
       Routes::bind(
           &IndividualSubscriptionDocumentApi::
               get_individual_subcription_handler,
           this));
   Routes::Put(
-      *router, base + smf_cfg.sbi_api_version + "/subscriptions/:subId",
+      *router, base + smf_cfg->sbi_api_version + "/subscriptions/:subId",
       Routes::bind(
           &IndividualSubscriptionDocumentApi::
               replace_individual_subcription_handler,
