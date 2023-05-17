@@ -1056,65 +1056,65 @@ smf_procedure_code session_update_sm_context_procedure::run(
       sm_context_req_msg.get_dl_fteid(dl_fteid);  // eNB's fteid
       // we use the first dl_edge as we can only have one N3 interface
       for (const auto& qfi : list_of_qfis_to_be_modified) {
-          auto flow = dl_edges[0].get_qos_flow(qfi);
-          if (!flow) {  // no QoS flow found
-            Logger::smf_app().error(
-                "could not find any QoS flow with QFI %d", qfi.qfi);
-            // Set cause to SYSTEM_FAILURE and send response
-            qos_flow_context_updated qcu = {};
-            qcu.set_cause(static_cast<uint8_t>(
-                cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
-            qcu.set_qfi(qfi);
-            n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-            continue;
-          }
+        auto flow = dl_edges[0].get_qos_flow(qfi);
+        if (!flow) {  // no QoS flow found
+          Logger::smf_app().error(
+              "could not find any QoS flow with QFI %d", qfi.qfi);
+          // Set cause to SYSTEM_FAILURE and send response
+          qos_flow_context_updated qcu = {};
+          qcu.set_cause(static_cast<uint8_t>(
+              cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
+          qcu.set_qfi(qfi);
+          n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
+          continue;
+        }
 
+        Logger::smf_app().debug(
+            "FAR ID DL first %d,  FAR DL ID second "
+            "0x%" PRIx32 " ",
+            flow->far_id_dl.first, flow->far_id_dl.second.far_id);
+
+        if ((dl_fteid == flow->dl_fteid) and (not flow->released)) {
+          Logger::smf_app().debug("QFI %d dl_fteid unchanged", qfi.qfi);
+          qos_flow_context_updated qcu = {};
+          qcu.set_cause(static_cast<uint8_t>(
+              cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
+          qcu.set_qfi(qfi);
+          n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
+          continue;
+          // TODO when does this happen?
+        } else if ((flow->far_id_dl.first) && (flow->far_id_dl.second.far_id)) {
+          // TODO also refactor update
           Logger::smf_app().debug(
-              "FAR ID DL first %d,  FAR DL ID second "
+              "Update FAR DL "
               "0x%" PRIx32 " ",
-              flow->far_id_dl.first, flow->far_id_dl.second.far_id);
+              flow->far_id_dl.second.far_id);
+          // Update FAR
+          pfcp::update_far update_far                                     = {};
+          pfcp::apply_action_t apply_action                               = {};
+          pfcp::outer_header_creation_t outer_header_creation             = {};
+          pfcp::update_forwarding_parameters update_forwarding_parameters = {};
+          pfcp::destination_interface_t destination_interface             = {};
 
-          if ((dl_fteid == flow->dl_fteid) and (not flow->released)) {
-            Logger::smf_app().debug("QFI %d dl_fteid unchanged", qfi.qfi);
-            qos_flow_context_updated qcu = {};
-            qcu.set_cause(static_cast<uint8_t>(
-                cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
-            qcu.set_qfi(qfi);
-            n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-            continue;
-            // TODO when does this happen?
-          } else if ((flow->far_id_dl.first) && (flow->far_id_dl.second.far_id)) {
-            // TODO also refactor update
-            Logger::smf_app().debug(
-                "Update FAR DL "
-                "0x%" PRIx32 " ",
-                flow->far_id_dl.second.far_id);
-            // Update FAR
-            pfcp::update_far update_far                                     = {};
-            pfcp::apply_action_t apply_action                               = {};
-            pfcp::outer_header_creation_t outer_header_creation             = {};
-            pfcp::update_forwarding_parameters update_forwarding_parameters = {};
-            pfcp::destination_interface_t destination_interface             = {};
+          update_far.set(flow->far_id_dl.second);
+          outer_header_creation.outer_header_creation_description =
+              OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
+          outer_header_creation.teid = dl_fteid.teid;
+          outer_header_creation.ipv4_address.s_addr =
+              dl_fteid.ipv4_address.s_addr;
+          update_forwarding_parameters.set(outer_header_creation);
+          destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
+          update_forwarding_parameters.set(destination_interface);
+          update_far.set(update_forwarding_parameters);
+          apply_action.forw = 1;  // forward the packets
+          // apply_action.nocp = 1; //notify the CP function about the arrival
+          // of a first DL packet
+          update_far.set(apply_action);
+          n4_triggered->pfcp_ies.set(update_far);
 
-            update_far.set(flow->far_id_dl.second);
-            outer_header_creation.outer_header_creation_description =
-                OUTER_HEADER_CREATION_GTPU_UDP_IPV4;
-            outer_header_creation.teid = dl_fteid.teid;
-            outer_header_creation.ipv4_address.s_addr =
-                dl_fteid.ipv4_address.s_addr;
-            update_forwarding_parameters.set(outer_header_creation);
-            destination_interface.interface_value = pfcp::INTERFACE_VALUE_ACCESS;
-            update_forwarding_parameters.set(destination_interface);
-            update_far.set(update_forwarding_parameters);
-            apply_action.forw = 1;  // forward the packets
-            // apply_action.nocp = 1; //notify the CP function about the arrival
-            // of a first DL packet
-            update_far.set(apply_action);
-            n4_triggered->pfcp_ies.set(update_far);
-
-            send_n4               = true;
-            flow->far_id_dl.first = true;
-            flow->dl_fteid        = dl_fteid;
+          send_n4               = true;
+          flow->far_id_dl.first = true;
+          flow->dl_fteid        = dl_fteid;
 
         } else {
           flow->dl_fteid = dl_fteid;
@@ -1126,129 +1126,129 @@ smf_procedure_code session_update_sm_context_procedure::run(
             auto flow_dl       = dl_edge.get_qos_flow(flow->qfi);
             flow_dl->pdr_id_dl = 0;
 
-              pfcp::create_far create_far = pfcp_create_far(dl_edge, flow->qfi);
+            pfcp::create_far create_far = pfcp_create_far(dl_edge, flow->qfi);
 
-              synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
-              // Add IEs to message
-              n4_triggered->pfcp_ies.set(create_far);
-            }
+            synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+            // Add IEs to message
+            n4_triggered->pfcp_ies.set(create_far);
+          }
+
+          send_n4 = true;
+          Logger::smf_app().debug(
+              "FAR DL ID "
+              "0x%" PRIx32 " ",
+              flow->far_id_dl.second.far_id);
+        }
+        // TODO refactor update
+
+        // for each UL edge we need to update or create the PDR
+        for (auto& ul_edge : ul_edges) {
+          auto ul_flow = ul_edge.get_qos_flow(qfi);
+          if (not ul_flow->pdr_id_dl.rule_id) {
+            Logger::smf_app().debug("Create PDR DL");
+            //-------------------
+            // IE create_pdr
+            //-------------------
+            pfcp::create_pdr create_pdr = pfcp_create_pdr(
+                ul_edge, ul_flow->qfi, current_upf->function_features.second);
+            n4_triggered->pfcp_ies.set(create_pdr);
+            synch_ul_dl_edges(dl_edges, ul_edges, ul_flow->qfi);
+            Logger::smf_app().debug(
+                "PDR DL ID "
+                "0x%" PRIx16 " ",
+                ul_flow->pdr_id_dl.rule_id);
+          } else {
+            uint16_t rule_id = ul_flow->pdr_id_dl.rule_id;
+
+            Logger::smf_app().debug(
+                "Update FAR, PDR DL Rule Id "
+                "0x%" PRIx16 ", FAR ID 0x%" PRIx32 " ",
+                rule_id, flow->far_id_dl.second.far_id);
+            /*
+            // Update FAR
+            far_id.far_id = flow->far_id_ul.second.far_id;
+            pfcp::update_far update_far = { };
+            pfcp::apply_action_t apply_action = { };
+
+            update_far.set(flow->far_id_ul.second);
+            apply_action.forw = 1;
+            update_far.set(apply_action);
+
+            n4_triggered->pfcp_ies.set(update_far);
 
             send_n4 = true;
+
+            flow->far_id_dl.first = true;
+            */
+
+            pfcp::update_pdr update_pdr                       = {};
+            pfcp::precedence_t precedence                     = {};
+            pfcp::pdi pdi                                     = {};
+            pfcp::ue_ip_address_t ue_ip_address               = {};
+            pfcp::source_interface_t source_interface         = {};
+            pfcp::outer_header_removal_t outer_header_removal = {};
+
+            if (sps->ipv4) {
+              ue_ip_address.v4 = 1;
+              // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit
+              // is set to "0", this indicates a Source IP address; if this bit
+              // is set to "1", this indicates a Destination IP address.
+              ue_ip_address.sd                  = 1;
+              ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
+            }
+            if (sps->ipv6) {
+              ue_ip_address.v6           = 1;
+              ue_ip_address.ipv6_address = sps->ipv6_address;
+            }
+            precedence.precedence = ul_flow->precedence.precedence;
+
+            source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
+            if (!ul_edge.nw_instance.empty()) {
+              // mandatory for travelping
+              pfcp::network_instance_t network_instance = {};
+              network_instance.network_instance         = ul_edge.nw_instance;
+              pdi.set(network_instance);
+            }
+
+            pdi.set(source_interface);
+            pdi.set(ue_ip_address);
+
+            if (smf_cfg.enable_ur) {
+              pfcp::urr_id_t urr_Id = ul_flow->urr_id;
+              update_pdr.set(urr_Id);
+            }
+
+            if (ul_edge.type != iface_type::N6) {
+              outer_header_removal.outer_header_removal_description =
+                  OUTER_HEADER_REMOVAL_GTPU_UDP_IPV4;
+              update_pdr.set(outer_header_removal);
+            }
+
+            update_pdr.set(ul_flow->pdr_id_dl);
+            update_pdr.set(precedence);
+            update_pdr.set(pdi);
+            update_pdr.set(ul_flow->far_id_dl.second);
+
+            // Add IEs to message
+            n4_triggered->pfcp_ies.set(update_pdr);
+
             Logger::smf_app().debug(
-                "FAR DL ID "
-                "0x%" PRIx32 " ",
-                flow->far_id_dl.second.far_id);
-          }
-            // TODO refactor update
-
-          // for each UL edge we need to update or create the PDR
-          for (auto& ul_edge : ul_edges) {
-            auto ul_flow = ul_edge.get_qos_flow(qfi);
-            if (not ul_flow->pdr_id_dl.rule_id) {
-                Logger::smf_app().debug("Create PDR DL");
-                //-------------------
-                // IE create_pdr
-                //-------------------
-                pfcp::create_pdr create_pdr = pfcp_create_pdr(
-                      ul_edge, ul_flow->qfi, current_upf->function_features.second);
-                n4_triggered->pfcp_ies.set(create_pdr);
-                synch_ul_dl_edges(dl_edges, ul_edges, ul_flow->qfi);
-                Logger::smf_app().debug(
-                    "PDR DL ID "
-                    "0x%" PRIx16 " ",
-                    ul_flow->pdr_id_dl.rule_id);
-            } else {        
-                uint16_t rule_id = ul_flow->pdr_id_dl.rule_id;
-
-                Logger::smf_app().debug(
-                    "Update FAR, PDR DL Rule Id "
-                    "0x%" PRIx16 ", FAR ID 0x%" PRIx32 " ",
-                    rule_id, flow->far_id_dl.second.far_id);
-                /*
-                // Update FAR
-                far_id.far_id = flow->far_id_ul.second.far_id;
-                pfcp::update_far update_far = { };
-                pfcp::apply_action_t apply_action = { };
-
-                update_far.set(flow->far_id_ul.second);
-                apply_action.forw = 1;
-                update_far.set(apply_action);
-
-                n4_triggered->pfcp_ies.set(update_far);
-
-                send_n4 = true;
-
-                flow->far_id_dl.first = true;
-                */
-
-                pfcp::update_pdr update_pdr               = {};
-                pfcp::precedence_t precedence             = {};
-                pfcp::pdi pdi                             = {};
-                pfcp::ue_ip_address_t ue_ip_address       = {};
-                pfcp::source_interface_t source_interface = {};
-                pfcp::outer_header_removal_t outer_header_removal = {};
-
-                if (sps->ipv4) {
-                  ue_ip_address.v4 = 1;
-                  // Bit 3 – S/D: TS 29.244 R16, 8.2.62 In the PDI IE, if this bit
-                  // is set to "0", this indicates a Source IP address; if this bit
-                  // is set to "1", this indicates a Destination IP address.
-                  ue_ip_address.sd                  = 1;
-                  ue_ip_address.ipv4_address.s_addr = sps->ipv4_address.s_addr;
-                }
-                if (sps->ipv6) {
-                  ue_ip_address.v6           = 1;
-                  ue_ip_address.ipv6_address = sps->ipv6_address;
-                }
-                precedence.precedence = ul_flow->precedence.precedence;
-
-                source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
-                if (!ul_edge.nw_instance.empty()) {
-                  // mandatory for travelping
-                  pfcp::network_instance_t network_instance = {};
-                  network_instance.network_instance         = ul_edge.nw_instance;
-                  pdi.set(network_instance);
-                }
-
-                pdi.set(source_interface);
-                pdi.set(ue_ip_address);
-
-                if (smf_cfg.enable_ur) {
-                  pfcp::urr_id_t urr_Id = ul_flow->urr_id;
-                  update_pdr.set(urr_Id);
-                }
-
-                if (ul_edge.type != iface_type::N6) {
-                  outer_header_removal.outer_header_removal_description =
-                    OUTER_HEADER_REMOVAL_GTPU_UDP_IPV4;
-                  update_pdr.set(outer_header_removal);
-                }
-
-                update_pdr.set(ul_flow->pdr_id_dl);
-                update_pdr.set(precedence);
-                update_pdr.set(pdi);
-                update_pdr.set(ul_flow->far_id_dl.second);
-
-                // Add IEs to message
-                n4_triggered->pfcp_ies.set(update_pdr);
-
-                Logger::smf_app().debug(
                 "PDR DL ID  "
                 "0x%" PRIx16 " updated",
                 ul_flow->pdr_id_dl.rule_id);
-              }
-            send_n4 = true;
           }
-          // after a release flows
-          if (not flow->ul_fteid.is_zero()) {
-          }
+          send_n4 = true;
+        }
+        // after a release flows
+        if (not flow->ul_fteid.is_zero()) {
+        }
 
-          if (not flow->dl_fteid.is_zero()) {
-          }
-          // may be modified
-          // TODO can I safely remove that?
-          // sps->add_qos_flow(flow);
-        
+        if (not flow->dl_fteid.is_zero()) {
+        }
+        // may be modified
+        // TODO can I safely remove that?
+        // sps->add_qos_flow(flow);
+
         qos_flow_context_updated qcu = {};
         qcu.set_cause(static_cast<uint8_t>(
             cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
