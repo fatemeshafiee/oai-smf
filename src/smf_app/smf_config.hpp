@@ -43,6 +43,8 @@
 #include "smf.h"
 #include "smf_profile.hpp"
 #include "config.hpp"
+#include "logger_base.hpp"
+#include "smf_config_types.hpp"
 
 #define SMF_CONFIG_STRING_SMF_CONFIG "SMF"
 #define SMF_CONFIG_STRING_PID_DIRECTORY "PID_DIRECTORY"
@@ -172,9 +174,10 @@
 namespace oai::config::smf {
 
 const std::string USE_LOCAL_PCC_RULES_CONFIG_VALUE = "use_local_pcc_rules";
-const std::string USE_LOCAL_SUBSCRIPTION_INFOS_CONFIG_VALUE = "use_local_subscription_infos";
+const std::string USE_LOCAL_SUBSCRIPTION_INFOS_CONFIG_VALUE =
+    "use_local_subscription_infos";
 const std::string USE_EXTERNAL_AUSF_CONFIG_VALUE = "use_external_ausf";
-const std::string USE_EXTERNAL_UDM_CONFIG_VALUE = "use_external_udm";
+const std::string USE_EXTERNAL_UDM_CONFIG_VALUE  = "use_external_udm";
 const std::string USE_EXTERNAL_NSSF_CONFIG_VALUE = "use_external_nssf";
 
 typedef struct interface_cfg_s {
@@ -217,13 +220,20 @@ typedef struct session_management_subscription_s {
   session_ambr_t session_ambr;
 } session_management_subscription_t;
 
-class smf_config : config {
+class smf_config : public config {
  private:
   int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
   int load_interface(const libconfig::Setting& if_cfg, interface_cfg_t& cfg);
   int load_thread_sched_params(
       const libconfig::Setting& thread_sched_params_cfg,
       util::thread_sched_params& cfg);
+
+  // TODO only temporary, to avoid changing all the references to the config in
+  // all the calling classes
+  void to_smf_config();
+
+  // TODO only temporary, we should not resolve on startup in the config
+  static in_addr resolve_nf(const std::string& host);
 
  public:
   /* Reader/writer lock for this configuration */
@@ -280,6 +290,16 @@ class smf_config : config {
       if (_use_fqdn_dns)
         Logger::smf_app().info("    FQDN ................: %s", fqdn.c_str());
     }
+
+    // TODO delete, just for now until we refactor the calling classes as well
+    void from_sbi_config_type(const sbi_interface& sbi_val) {
+      ipv4_addr = resolve_nf(sbi_val.get_host());
+      port      = sbi_val.use_http2() ? sbi_val.get_port_http2() :
+                                   sbi_val.get_port_http1();
+      http_version = sbi_val.use_http2() ? 2 : 1;
+      api_version  = sbi_val.get_api_version();
+      fqdn         = sbi_val.get_host();
+    }
   };
 
   sbi_addr nrf_addr;
@@ -302,68 +322,7 @@ class smf_config : config {
   std::vector<session_management_subscription_t>
       session_management_subscriptions;
 
-  smf_config(
-      const std::string& configPath, bool logStdout, bool logRotFile)
-      : config(configPath, oai::config::SMF_CONFIG_NAME, logStdout, logRotFile),
-        m_rw_lock(),
-        pid_dir(),
-        instance(0),
-        n4(),
-        sbi(),
-        itti(),
-        upfs() {
-    default_dnsv4.s_addr     = INADDR_ANY;
-    default_dns_secv4.s_addr = INADDR_ANY;
-    default_dnsv6            = in6addr_any;
-    default_dns_secv6        = in6addr_any;
-
-    force_push_pco = true;
-    ue_mtu         = 1358;
-
-    itti.itti_timer_sched_params.sched_priority = 85;
-    itti.n4_sched_params.sched_priority         = 84;
-    itti.smf_app_sched_params.sched_priority    = 84;
-    itti.async_cmd_sched_params.sched_priority  = 84;
-
-    n4.thread_rd_sched_params.sched_priority = 90;
-    n4.port                                  = pfcp::default_port;
-
-    sbi.thread_rd_sched_params.sched_priority = 90;
-    sbi.port                                  = 80;
-
-    amf_addr.ipv4_addr.s_addr = INADDR_ANY;
-    amf_addr.port             = 80;
-    amf_addr.api_version      = "v1";
-    amf_addr.fqdn             = {};
-
-    udm_addr.ipv4_addr.s_addr = INADDR_ANY;
-    udm_addr.port             = 80;
-    udm_addr.api_version      = "v1";
-    udm_addr.fqdn             = {};
-
-    nrf_addr.ipv4_addr.s_addr = INADDR_ANY;
-    nrf_addr.port             = 80;
-    nrf_addr.api_version      = "v1";
-    nrf_addr.fqdn             = {};
-
-    pcf_addr.ipv4_addr.s_addr = INADDR_ANY;
-    nrf_addr.port             = 80;
-    nrf_addr.api_version      = "v1";
-    nrf_addr.fqdn             = {};
-
-    sbi_http2_port  = 8080;
-    sbi_api_version = "v1";
-    http_version    = 1;
-
-    use_local_subscription_info      = false;
-    use_local_pcc_rules              = false;
-    register_nrf                     = false;
-    discover_upf                     = false;
-    discover_pcf                     = false;
-    use_fqdn_dns                     = false;
-    enable_ur                        = false;
-    enable_dl_pdr_in_pfcp_sess_estab = false;
-  };
+  smf_config(const std::string& configPath, bool logStdout, bool logRotFile);
   ~smf_config();
   void lock() { m_rw_lock.lock(); };
   void unlock() { m_rw_lock.unlock(); };
@@ -381,9 +340,23 @@ class smf_config : config {
    * @param node_id IP address or FQDN to match against configuration
    * @return NWI or empty string
    */
-  std::string get_nwi(const pfcp::node_id_t& node_id, const ::smf::iface_type& type);
+  std::string get_nwi(
+      const pfcp::node_id_t& node_id, const ::smf::iface_type& type);
+
+  /**
+   * Returns configured UPF based on node_id.
+   * Compares UPF host config value with node_id FQDN and IPv4 address in this
+   * order
+   * @param node_id PFCP node id, FQDN, IPv4 address must be set
+   * @throws std::invalid_argument  in case UPF is not to be found or type is
+   * IPv6
+   * @return upf
+   */
+  const oai::config::smf::upf& get_upf(const pfcp::node_id_t& node_id) const;
+
+  bool init() override;
 };
 
-}  // namespace smf
+}  // namespace oai::config::smf
 
 #endif /* FILE_SMF_CONFIG_HPP_SEEN */

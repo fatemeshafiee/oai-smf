@@ -47,13 +47,15 @@ class smf_support_features : public config_type {
   option_config_value m_external_nssf{};
 
  public:
-  explicit smf_support_features(bool local_subscription_info, bool local_pcc_rules);
+  explicit smf_support_features(
+      bool local_subscription_info, bool local_pcc_rules);
   explicit smf_support_features(
       bool external_ausf, bool external_udm, bool external_nssf);
 
   void from_yaml(const YAML::Node& node) override;
 
-  // TODO can we unify SMF-style use_local_subscription_infos and AMF use_external_UDM?
+  // TODO can we unify SMF-style use_local_subscription_infos and AMF
+  // use_external_UDM?
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
   [[nodiscard]] bool use_local_subscription_info() const;
   [[nodiscard]] bool use_local_pcc_rules() const;
@@ -81,7 +83,8 @@ class upf_info_config_value : public config_type {
   [[nodiscard]] const std::string& get_n6_nwi() const;
 };
 
-// TODO again, we should just use the DnnConfiguration data structure, but that requires a lot of changes in the using classes
+// TODO again, we should just use the DnnConfiguration data structure, but that
+// requires a lot of changes in the using classes
 
 class dnn_config : public config_type {
  private:
@@ -128,7 +131,10 @@ class upf : public config_type {
   // TODO this is just stupid
   // We have to refactor as follows:
   // 1) Use the UPF info from the model here
-  // Write a small parser that converts YAML to JSON and then call the from_json method Like I did on the PCF for the PCC rules Now we have 3(!!!!) UPF info DTOs, but I can't / don't want to just easily move the smf_profile in the common src submodule
+  // Write a small parser that converts YAML to JSON and then call the from_json
+  // method Like I did on the PCF for the PCC rules Now we have 3(!!!!) UPF info
+  // DTOs, but I can't / don't want to just easily move the smf_profile in the
+  // common src submodule
   upf_info_config_value m_upf_config_value;
 
  public:
@@ -207,7 +213,7 @@ class ims_config : public config_type {
 
 class subscription_info : public config_type {};
 
-class smf_config_type : public config_type {
+class smf_config_type : public nf {
  private:
   smf_support_features m_support_feature;
   ue_dns m_ue_dns;
@@ -217,8 +223,9 @@ class smf_config_type : public config_type {
   int_config_value m_ue_mtu;
 
  public:
-  explicit smf_config_type();
-
+  explicit smf_config_type(
+      const std::string& name, const std::string& host,
+      const sbi_interface& sbi, const local_interface& n4);
   void from_yaml(const YAML::Node& node) override;
 
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
@@ -234,4 +241,4 @@ class smf_config_type : public config_type {
   [[nodiscard]] const std::vector<upf>& get_upfs() const;
 };
 
-}
+}  // namespace oai::config::smf

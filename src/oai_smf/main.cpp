@@ -110,12 +110,10 @@ int main(int argc, char** argv) {
 
   // Config
   smf_cfg = std::make_unique<smf_config>(
-      Options::getlibconfigConfig(),
-      Options::getlogStdout(),
+      Options::getlibconfigConfig(), Options::getlogStdout(),
       Options::getlogRotFilelog());
 
-  //TODO remove just for loading libconfig
-  smf_cfg->load(Options::getlibconfigConfig());
+  smf_cfg->init();
   smf_cfg->display();
   Logger::set_level(smf_cfg->log_level);
 
@@ -148,7 +146,8 @@ int main(int argc, char** argv) {
   std::thread smf_http1_manager(&SMFApiServer::start, smf_api_server_1);
   // SMF NGHTTP API server (HTTP2)
   smf_api_server_2 = new smf_http2_server(
-      conv::toString(smf_cfg->sbi.addr4), smf_cfg->sbi_http2_port, smf_app_inst);
+      conv::toString(smf_cfg->sbi.addr4), smf_cfg->sbi_http2_port,
+      smf_app_inst);
   // smf_api_server_2->start();
   std::thread smf_http2_manager(&smf_http2_server::start, smf_api_server_2);
 
