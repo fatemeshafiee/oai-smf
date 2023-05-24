@@ -34,8 +34,6 @@
 #include "3gpp_24.501.h"
 #include "smf.h"
 
-const std::string PDU_SESSION_TYPE_REGEX = "IPV4|IPV6|IPV4V6";
-
 namespace oai::config::smf {
 
 class smf_support_features : public config_type {
@@ -81,44 +79,6 @@ class upf_info_config_value : public config_type {
   [[nodiscard]] const std::string& get_n3_nwi() const;
 
   [[nodiscard]] const std::string& get_n6_nwi() const;
-};
-
-// TODO again, we should just use the DnnConfiguration data structure, but that
-// requires a lot of changes in the using classes
-
-class dnn_config : public config_type {
- private:
-  string_config_value m_dnn;
-  string_config_value m_pdu_session_type;
-  string_config_value m_ipv4_pool;
-  string_config_value m_ipv6_prefix;
-
-  // generated
-  in_addr m_ipv4_pool_start_ip;
-  in_addr m_ipv4_pool_end_ip;
-  in6_addr m_ipv6_prefix_ip;
-
- private:
-  uint8_t m_ipv6_prefix_length;
-  pdu_session_type_t m_pdu_session_type_generated;
-
- public:
-  explicit dnn_config(
-      const std::string& dnn, const std::string& pdu_type,
-      const std::string& ipv4_pool, const std::string& ipv6_prefix);
-
-  void from_yaml(const YAML::Node& node) override;
-
-  [[nodiscard]] std::string to_string(const std::string& indent) const override;
-
-  void validate() override;
-
-  [[nodiscard]] const in_addr& get_ipv4_pool_start() const;
-  [[nodiscard]] const in_addr& get_ipv4_pool_end() const;
-  [[nodiscard]] const in6_addr& get_ipv6_prefix() const;
-  [[nodiscard]] uint8_t get_ipv6_prefix_length() const;
-  [[nodiscard]] const pdu_session_type_t& get_pdu_session_type() const;
-  [[nodiscard]] const std::string& get_dnn() const;
 };
 
 class upf : public config_type {

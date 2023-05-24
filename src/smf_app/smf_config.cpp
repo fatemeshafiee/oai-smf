@@ -71,7 +71,8 @@ smf_config::smf_config(
       itti(),
       upfs() {
   m_used_config_values = {LOG_LEVEL_CONFIG_NAME, REGISTER_NF_CONFIG_NAME,
-                          NF_LIST_CONFIG_NAME, SMF_CONFIG_NAME};
+                          NF_LIST_CONFIG_NAME, SMF_CONFIG_NAME,
+                          DNNS_CONFIG_NAME};
 
   m_used_sbi_values = {SMF_CONFIG_NAME, PCF_CONFIG_NAME, NRF_CONFIG_NAME,
                        AMF_CONFIG_NAME, UDM_CONFIG_NAME};
@@ -1390,10 +1391,6 @@ void smf_config::to_smf_config() {
   discover_pcf = false;
   discover_upf = config::register_nrf();
 
-  // TODO refactor as well
-  enable_ur                        = false;
-  enable_dl_pdr_in_pfcp_sess_estab = false;
-
   // UPF configuration
   // NWI is handled in get_nwi function directly from new configuration
   for (const auto& upf : smf_cfg->get_upfs()) {
@@ -1403,6 +1400,29 @@ void smf_config::to_smf_config() {
     node_id.u1.ipv4_address = ip;
     node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
     upfs.push_back(node_id);
+
+    // TODO here we just take the enable UR and enable DL in PFCP session
+    // establishment from the last UPF we have to refactor PFCP association to
+    // fix this
+    enable_ur = upf.enable_usage_reporting();
+    enable_dl_pdr_in_pfcp_sess_estab =
+        upf.enable_dl_pdr_in_session_establishment();
+  }
+  logger::logger_registry::get_logger(LOGGER_NAME)
+      .warn(
+          "Enable UR and enable DL PDR in PFCP Session Establishment per UPF "
+          "is not supported currently, we use the same values for all UPFs.");
+
+  // DNNs
+  for (const auto& cfg_dnn : get_dnns()) {
+    dnn_t dnn;
+    dnn.pdu_session_type     = cfg_dnn.get_pdu_session_type();
+    dnn.dnn                  = cfg_dnn.get_dnn();
+    dnn.ue_pool_range_low    = cfg_dnn.get_ipv4_pool_start();
+    dnn.ue_pool_range_high   = cfg_dnn.get_ipv4_pool_end();
+    dnn.paa_pool6_prefix     = cfg_dnn.get_ipv6_prefix();
+    dnn.paa_pool6_prefix_len = cfg_dnn.get_ipv6_prefix_length();
+    dnns[dnn.dnn]            = dnn;
   }
 }
 

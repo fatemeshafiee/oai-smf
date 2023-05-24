@@ -397,8 +397,8 @@ void ims_config::validate() {
   m_pcscf_v4.validate();
   m_pcscf_v6.validate();
 
-  // TODO v6 IP
   m_pcscf_v4_ip = safe_convert_ip(m_pcscf_v4.get_value());
+  m_pcscf_v6_ip = safe_convert_ip6(m_pcscf_v6.get_value());
 }
 
 const in_addr& ims_config::get_pcscf_v4() const {
@@ -490,102 +490,4 @@ uint16_t smf_config_type::get_ue_mtu() const {
 
 const std::vector<upf>& smf_config_type::get_upfs() const {
   return m_upfs;
-}
-
-dnn_config::dnn_config(
-    const std::string& dnn, const std::string& pdu_type,
-    const std::string& ipv4_pool, const std::string& ipv6_prefix) {
-  m_dnn              = string_config_value("DNN", dnn);
-  m_pdu_session_type = string_config_value("PDU session type", pdu_type);
-  m_ipv4_pool        = string_config_value("IPv4 pool", ipv4_pool);
-  m_ipv6_prefix      = string_config_value("IPv6 prefix", ipv6_prefix);
-
-  m_pdu_session_type.set_validation_regex(PDU_SESSION_TYPE_REGEX);
-  m_ipv4_pool.set_validation_regex(
-      IPV4_ADDRESS_VALIDATOR_REGEX + "( )*-( )*" +
-      IPV4_ADDRESS_VALIDATOR_REGEX);
-  m_ipv6_prefix.set_validation_regex(IPV6_ADDRESS_VALIDATOR_REGEX);
-}
-
-void dnn_config::from_yaml(const YAML::Node& node) {
-  if (node["dnn"]) {
-    m_dnn.from_yaml(node["dnn"]);
-  }
-  if (node["pdu_session_type"]) {
-    m_pdu_session_type.from_yaml(node["pdu_session_type"]);
-  }
-  if (node["ipv4_pool"]) {
-    m_ipv4_pool.from_yaml(node["ipv4_pool"]);
-  }
-  if (node["ipv6_prefix"]) {
-    m_ipv6_prefix.from_yaml(node["ipv6_prefix"]);
-  }
-}
-
-[[nodiscard]] std::string dnn_config::to_string(
-    const std::string& indent) const {
-  unsigned int inner_width = get_inner_width(indent.length());
-  std::string out;
-
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_dnn.get_config_name(), inner_width,
-      m_dnn.to_string("")));
-
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_pdu_session_type.get_config_name(),
-      inner_width, m_pdu_session_type.to_string("")));
-  if (m_ipv6_prefix.get_value().empty()) {
-    out.append(indent).append(fmt::format(
-        BASE_FORMATTER, OUTER_LIST_ELEM, m_ipv6_prefix.get_config_name(),
-        inner_width, m_ipv6_prefix.to_string("")));
-  } else {
-    out.append(indent).append(fmt::format(
-        BASE_FORMATTER, OUTER_LIST_ELEM, m_ipv4_pool.get_config_name(),
-        inner_width, m_ipv4_pool.to_string("")));
-  }
-  return out;
-}
-
-void dnn_config::validate() {
-  m_pdu_session_type_generated =
-      pdu_session_type_t(m_pdu_session_type.get_value());
-
-  std::vector<std::string> ips;
-  boost::split(
-      ips, m_ipv4_pool.get_value(), boost::is_any_of("-"),
-      boost::token_compress_on);
-
-  if (ips.size() != 2) {
-    throw std::runtime_error(fmt::format(
-        "The IP address pool {} is not valid", m_ipv4_pool.get_value()));
-  }
-
-  m_ipv4_pool_start_ip = safe_convert_ip(ips[0]);
-  m_ipv4_pool_end_ip   = safe_convert_ip(ips[1]);
-  // TODO IPv6 prefix
-}
-
-[[nodiscard]] const in_addr& dnn_config::get_ipv4_pool_start() const {
-  return m_ipv4_pool_start_ip;
-}
-
-[[nodiscard]] const in_addr& dnn_config::get_ipv4_pool_end() const {
-  return m_ipv4_pool_end_ip;
-}
-
-[[nodiscard]] const in6_addr& dnn_config::get_ipv6_prefix() const {
-  return m_ipv6_prefix_ip;
-}
-
-[[nodiscard]] uint8_t dnn_config::get_ipv6_prefix_length() const {
-  return m_ipv6_prefix_length;
-}
-
-[[nodiscard]] const pdu_session_type_t& dnn_config::get_pdu_session_type()
-    const {
-  return m_pdu_session_type_generated;
-}
-
-const std::string& dnn_config::get_dnn() const {
-  return m_dnn.get_value();
 }
