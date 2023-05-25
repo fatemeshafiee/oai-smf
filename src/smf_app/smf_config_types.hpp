@@ -172,7 +172,8 @@ class ims_config : public config_type {
 };
 
 class qos_profile_config_value : public config_type {
-  // TODO this is not ideal we should merge this ( and also the validation) with the QosProfile from the UDM API
+  // TODO this is not ideal we should merge this ( and also the validation) with
+  // the QosProfile from the UDM API
  private:
   int_config_value m_5qi;
   int_config_value m_priority;
@@ -187,7 +188,8 @@ class qos_profile_config_value : public config_type {
   session_ambr_t m_ambr;
 
  public:
-  explicit qos_profile_config_value(const subscribed_default_qos_t& qos, const session_ambr_t& ambr);
+  explicit qos_profile_config_value(
+      const subscribed_default_qos_t& qos, const session_ambr_t& ambr);
 
   void from_yaml(const YAML::Node& node) override;
 
@@ -196,7 +198,7 @@ class qos_profile_config_value : public config_type {
   void validate() override;
 
   [[nodiscard]] const subscribed_default_qos_t& get_default_qos() const;
-  [[nodiscard]] const session_ambr_t & get_session_ambr() const;
+  [[nodiscard]] const session_ambr_t& get_session_ambr() const;
 };
 
 class snssai_config_value : public config_type {
@@ -204,6 +206,7 @@ class snssai_config_value : public config_type {
   int_config_value m_sd;
   int_config_value m_sst;
   snssai_t m_snssai;
+
  public:
   explicit snssai_config_value(const snssai_t& snssai);
 
@@ -224,7 +227,10 @@ class subscription_info_config : public config_type {
   snssai_config_value m_snssai;
 
  public:
-  explicit subscription_info_config(const std::string& dnn, uint8_t ssc_mode, const subscribed_default_qos_t& qos, const session_ambr_t& session_ambr, const snssai_t& snssai);
+  explicit subscription_info_config(
+      const std::string& dnn, uint8_t ssc_mode,
+      const subscribed_default_qos_t& qos, const session_ambr_t& session_ambr,
+      const snssai_t& snssai);
 
   void from_yaml(const YAML::Node& node) override;
 
@@ -237,8 +243,6 @@ class subscription_info_config : public config_type {
   [[nodiscard]] const subscribed_default_qos_t& get_default_qos() const;
   [[nodiscard]] const session_ambr_t& get_session_ambr() const;
   [[nodiscard]] const snssai_t& get_single_nssai() const;
-
-
 };
 
 class smf_config_type : public nf {
@@ -268,6 +272,8 @@ class smf_config_type : public nf {
   [[nodiscard]] uint16_t get_ue_mtu() const;
 
   [[nodiscard]] const std::vector<upf>& get_upfs() const;
+  [[nodiscard]] const std::vector<subscription_info_config>&
+  get_subscription_info() const;
 };
 
 }  // namespace oai::config::smf

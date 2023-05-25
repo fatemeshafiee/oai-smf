@@ -1907,47 +1907,39 @@ bool smf_app::get_session_management_subscription_data(
   std::shared_ptr<dnn_configuration_t> dnn_configuration =
       std::make_shared<dnn_configuration_t>();
 
-  for (auto sub : smf_cfg->session_management_subscriptions) {
-    if ((0 == dnn.compare(sub.dnn)) and (snssai.sst == sub.single_nssai.sst) and
-        (snssai.sd == sub.single_nssai.sd)) {
+  for (const auto& sub : smf_cfg->smf()->get_subscription_info()) {
+    if (dnn == sub.get_dnn() && snssai == sub.get_single_nssai()) {
       // PDU Session Type
       pdu_session_type_t pdu_session_type(
           pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
-      Logger::smf_app().debug(
-          "Default session type %s", sub.session_type.c_str());
-
-      std::string session_type = sub.session_type;
-      if (boost::iequals(session_type, "IPv4")) {
-        pdu_session_type.pdu_session_type =
-            pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
-      } else if (boost::iequals(session_type, "IPv6")) {
-        pdu_session_type.pdu_session_type =
-            pdu_session_type_e::PDU_SESSION_TYPE_E_IPV6;
-      } else if (boost::iequals(session_type, "IPv4v6")) {
-        pdu_session_type.pdu_session_type =
-            pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
+      for (const auto& cfg_dnn : smf_cfg->get_dnns()) {
+        if (cfg_dnn.get_dnn() == sub.get_dnn()) {
+          pdu_session_type = cfg_dnn.get_pdu_session_type();
+        }
       }
+      Logger::smf_app().debug(
+          "Default session type %s", pdu_session_type.to_string());
 
       dnn_configuration->pdu_session_types.default_session_type =
           pdu_session_type;
 
       // SSC_Mode
-      dnn_configuration->ssc_modes.default_ssc_mode.ssc_mode = sub.ssc_mode;
+      dnn_configuration->ssc_modes.default_ssc_mode.ssc_mode = sub.get_ssc_mode();
 
       // 5gQosProfile
-      dnn_configuration->_5g_qos_profile._5qi = sub.default_qos._5qi;
+      dnn_configuration->_5g_qos_profile._5qi = sub.get_default_qos()._5qi;
       dnn_configuration->_5g_qos_profile.arp.priority_level =
-          sub.default_qos.arp.priority_level;
+          sub.get_default_qos().arp.priority_level;
       dnn_configuration->_5g_qos_profile.arp.preempt_cap =
-          sub.default_qos.arp.preempt_cap;
+          sub.get_default_qos().arp.preempt_cap;
       dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
-          sub.default_qos.arp.preempt_vuln;
+          sub.get_default_qos().arp.preempt_vuln;
       dnn_configuration->_5g_qos_profile.priority_level =
-          sub.default_qos.priority_level;
+          sub.get_default_qos().priority_level;
 
       // Session_ambr
-      dnn_configuration->session_ambr.uplink   = sub.session_ambr.uplink;
-      dnn_configuration->session_ambr.downlink = sub.session_ambr.downlink;
+      dnn_configuration->session_ambr.uplink   = sub.get_session_ambr().uplink;
+      dnn_configuration->session_ambr.downlink = sub.get_session_ambr().downlink;
       Logger::smf_app().debug(
           "Session AMBR Uplink %s, Downlink %s",
           dnn_configuration->session_ambr.uplink.c_str(),
@@ -2258,16 +2250,15 @@ void smf_app::generate_smf_profile() {
   // TODO: custom info
 
   int i = 0;
-  for (auto sms : smf_cfg->session_management_subscriptions) {
+  for (const auto& sub : smf_cfg->smf()->get_subscription_info())
+  {
     // SNSSAIS
-    snssai_t snssai = {};
-    snssai.sd       = sms.single_nssai.sd;
-    snssai.sst      = sms.single_nssai.sst;
+    snssai_t snssai = sub.get_single_nssai();
     // Verify if this SNSSAI exist
     std::vector<snssai_t> ss = {};
     nf_instance_profile.get_nf_snssais(ss);
     bool found = false;
-    for (auto it : ss) {
+    for (const auto& it : ss) {
       if ((it.sd == snssai.sd) and (it.sst == snssai.sst)) {
         found = true;
         break;
@@ -2276,11 +2267,10 @@ void smf_app::generate_smf_profile() {
     if (!found) nf_instance_profile.add_snssai(snssai);
 
     // SMF info
-    dnn_smf_info_item_t dnn_item         = {.dnn = sms.dnn};
+    dnn_smf_info_item_t dnn_item         = {.dnn = sub.get_dnn()};
     snssai_smf_info_item_t smf_info_item = {};
     smf_info_item.dnn_smf_info_list.push_back(dnn_item);
-    smf_info_item.snssai.sd  = sms.single_nssai.sd;
-    smf_info_item.snssai.sst = sms.single_nssai.sst;
+    smf_info_item.snssai = sub.get_single_nssai();
     nf_instance_profile.add_smf_info_item(smf_info_item);
   }
 

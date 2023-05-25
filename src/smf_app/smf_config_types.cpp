@@ -441,12 +441,13 @@ void smf_config_type::from_yaml(const YAML::Node& node) {
       m_upfs.push_back(u);
     }
   }
-  if (node["local_subscription_infos"])
-  {
+  if (node["local_subscription_infos"]) {
     // any default subscription is deleted if people configure it
     m_subscription_infos.clear();
     for (const auto& yaml_sub : node["local_subscription_infos"]) {
-      subscription_info_config subcfg(DEFAULT_DNN, DEFAULT_SSC_MODE, DEFAULT_QOS, DEFAULT_S_AMBR, DEFAULT_SNSSAI);
+      subscription_info_config subcfg(
+          DEFAULT_DNN, DEFAULT_SSC_MODE, DEFAULT_QOS, DEFAULT_S_AMBR,
+          DEFAULT_SNSSAI);
       subcfg.from_yaml(yaml_sub);
       m_subscription_infos.push_back(subcfg);
     }
@@ -503,6 +504,11 @@ uint16_t smf_config_type::get_ue_mtu() const {
 
 const std::vector<upf>& smf_config_type::get_upfs() const {
   return m_upfs;
+}
+
+const std::vector<subscription_info_config>&
+smf_config_type::get_subscription_info() const {
+  return m_subscription_infos;
 }
 
 subscription_info_config::subscription_info_config(

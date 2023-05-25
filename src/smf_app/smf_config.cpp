@@ -1336,11 +1336,28 @@ std::string smf_config::get_nwi(
 }
 
 void smf_config::to_smf_config() {
-  log_level = spdlog::level::from_str(config::log_level());
+  log_level    = spdlog::level::from_str(config::log_level());
+  auto smf_cfg = smf();
 
-  nrf_addr.from_sbi_config_type(get_nf(NRF_CONFIG_NAME)->get_sbi());
-  pcf_addr.from_sbi_config_type(get_nf(PCF_CONFIG_NAME)->get_sbi());
-  udm_addr.from_sbi_config_type(get_nf(UDM_CONFIG_NAME)->get_sbi());
+  use_local_subscription_info =
+      smf_cfg->get_smf_support_features().use_local_subscription_info();
+  use_local_pcc_rules =
+      smf_cfg->get_smf_support_features().use_local_pcc_rules();
+
+  register_nrf = config::register_nrf();
+  // TODO discover PCF is not implemented
+  discover_pcf = false;
+  discover_upf = config::register_nrf();
+
+  if (register_nrf) {
+    nrf_addr.from_sbi_config_type(get_nf(NRF_CONFIG_NAME)->get_sbi());
+  }
+  if (!use_local_pcc_rules) {
+    pcf_addr.from_sbi_config_type(get_nf(PCF_CONFIG_NAME)->get_sbi());
+  }
+  if (!use_local_subscription_info) {
+    udm_addr.from_sbi_config_type(get_nf(UDM_CONFIG_NAME)->get_sbi());
+  }
   amf_addr.from_sbi_config_type(get_nf(AMF_CONFIG_NAME)->get_sbi());
 
   local_interface _n4 = local().get_nx();
@@ -1350,8 +1367,6 @@ void smf_config::to_smf_config() {
   n4.addr6   = local().get_nx().get_addr6();
   n4.if_name = local().get_nx().get_if_name();
   n4.mtu     = local().get_nx().get_mtu();
-
-  auto smf_cfg = std::dynamic_pointer_cast<smf_config_type>(get_local());
 
   // TODO these values are not configurable anymore
   sbi.thread_rd_sched_params.sched_priority   = 90;
@@ -1380,16 +1395,6 @@ void smf_config::to_smf_config() {
   default_cscfv6 = smf_cfg->get_ims_config().get_pcscf_v6();
 
   ue_mtu = smf_cfg->get_ue_mtu();
-
-  use_local_subscription_info =
-      smf_cfg->get_smf_support_features().use_local_subscription_info();
-  use_local_pcc_rules =
-      smf_cfg->get_smf_support_features().use_local_pcc_rules();
-
-  register_nrf = config::register_nrf();
-  // TODO discover PCF is not implemented
-  discover_pcf = false;
-  discover_upf = config::register_nrf();
 
   // UPF configuration
   // NWI is handled in get_nwi function directly from new configuration
@@ -1450,7 +1455,7 @@ in_addr smf_config::resolve_nf(const std::string& host) {
 }
 
 const upf& smf_config::get_upf(const pfcp::node_id_t& node_id) const {
-  auto smf_cfg = std::dynamic_pointer_cast<smf_config_type>(get_local());
+  auto smf_cfg = smf();
 
   for (const auto& upf : smf_cfg->get_upfs()) {
     if (node_id.node_id_type == pfcp::NODE_ID_TYPE_FQDN &&
@@ -1476,4 +1481,8 @@ bool smf_config::init() {
   bool success = config::init();
   to_smf_config();
   return success;
+}
+
+std::shared_ptr<smf_config_type> smf_config::smf() const {
+  return std::dynamic_pointer_cast<smf_config_type>(get_local());
 }

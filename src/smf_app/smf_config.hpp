@@ -175,17 +175,19 @@ namespace oai::config::smf {
 
 const std::string USE_LOCAL_PCC_RULES_CONFIG_VALUE = "use_local_pcc_rules";
 const std::string USE_LOCAL_SUBSCRIPTION_INFOS_CONFIG_VALUE =
-    "use_local_subscription_infos";
+    "use_local_subscription_info";
 const std::string USE_EXTERNAL_AUSF_CONFIG_VALUE = "use_external_ausf";
 const std::string USE_EXTERNAL_UDM_CONFIG_VALUE  = "use_external_udm";
 const std::string USE_EXTERNAL_NSSF_CONFIG_VALUE = "use_external_nssf";
 
-const snssai_t DEFAULT_SNSSAI{1,0};
+const snssai_t DEFAULT_SNSSAI{1, 0};
 const session_ambr_t DEFAULT_S_AMBR{"1000Mbps", "1000Mbps"};
-const std::string DEFAULT_DNN = "default";
+const std::string DEFAULT_DNN  = "default";
 const uint8_t DEFAULT_SSC_MODE = 1;
-const subscribed_default_qos_t DEFAULT_QOS{9, {1, "NOT_PREEMPT", "NOT_PREEMPTABLE"}, 1};
-
+const subscribed_default_qos_t DEFAULT_QOS{
+    9,
+    {1, "NOT_PREEMPT", "NOT_PREEMPTABLE"},
+    1};
 
 typedef struct interface_cfg_s {
   std::string if_name;
@@ -360,6 +362,12 @@ class smf_config : public config {
    * @return upf
    */
   const oai::config::smf::upf& get_upf(const pfcp::node_id_t& node_id) const;
+
+  /**
+   * Returns SMF configuration pointer which stores SMF-specific configuration
+   * @return SMF configuration
+   */
+  std::shared_ptr<smf_config_type> smf() const;
 
   bool init() override;
 };
