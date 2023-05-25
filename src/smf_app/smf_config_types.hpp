@@ -171,7 +171,75 @@ class ims_config : public config_type {
   [[nodiscard]] const in6_addr& get_pcscf_v6() const;
 };
 
-class subscription_info : public config_type {};
+class qos_profile_config_value : public config_type {
+  // TODO this is not ideal we should merge this ( and also the validation) with the QosProfile from the UDM API
+ private:
+  int_config_value m_5qi;
+  int_config_value m_priority;
+  int_config_value m_arp_priority;
+  string_config_value m_arp_preempt_capability;
+  string_config_value m_arp_preempt_vulnerability;
+  string_config_value m_session_ambr_dl;
+  string_config_value m_session_ambr_ul;
+
+  // generated values
+  subscribed_default_qos_t m_qos;
+  session_ambr_t m_ambr;
+
+ public:
+  explicit qos_profile_config_value(const subscribed_default_qos_t& qos, const session_ambr_t& ambr);
+
+  void from_yaml(const YAML::Node& node) override;
+
+  [[nodiscard]] std::string to_string(const std::string& indent) const override;
+
+  void validate() override;
+
+  [[nodiscard]] const subscribed_default_qos_t& get_default_qos() const;
+  [[nodiscard]] const session_ambr_t & get_session_ambr() const;
+};
+
+class snssai_config_value : public config_type {
+ private:
+  int_config_value m_sd;
+  int_config_value m_sst;
+  snssai_t m_snssai;
+ public:
+  explicit snssai_config_value(const snssai_t& snssai);
+
+  void from_yaml(const YAML::Node& node) override;
+
+  [[nodiscard]] std::string to_string(const std::string& indent) const override;
+
+  void validate() override;
+
+  [[nodiscard]] const snssai_t& get_snssai() const;
+};
+
+class subscription_info_config : public config_type {
+ private:
+  string_config_value m_dnn;
+  int_config_value m_ssc_mode;
+  qos_profile_config_value m_qos_profile;
+  snssai_config_value m_snssai;
+
+ public:
+  explicit subscription_info_config(const std::string& dnn, uint8_t ssc_mode, const subscribed_default_qos_t& qos, const session_ambr_t& session_ambr, const snssai_t& snssai);
+
+  void from_yaml(const YAML::Node& node) override;
+
+  [[nodiscard]] std::string to_string(const std::string& indent) const override;
+
+  void validate() override;
+
+  [[nodiscard]] const std::string& get_dnn() const;
+  [[nodiscard]] uint8_t get_ssc_mode() const;
+  [[nodiscard]] const subscribed_default_qos_t& get_default_qos() const;
+  [[nodiscard]] const session_ambr_t& get_session_ambr() const;
+  [[nodiscard]] const snssai_t& get_single_nssai() const;
+
+
+};
 
 class smf_config_type : public nf {
  private:
@@ -179,6 +247,7 @@ class smf_config_type : public nf {
   ue_dns m_ue_dns;
   ims_config m_ims_config;
   std::vector<upf> m_upfs;
+  std::vector<subscription_info_config> m_subscription_infos;
 
   int_config_value m_ue_mtu;
 

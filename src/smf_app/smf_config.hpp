@@ -180,6 +180,13 @@ const std::string USE_EXTERNAL_AUSF_CONFIG_VALUE = "use_external_ausf";
 const std::string USE_EXTERNAL_UDM_CONFIG_VALUE  = "use_external_udm";
 const std::string USE_EXTERNAL_NSSF_CONFIG_VALUE = "use_external_nssf";
 
+const snssai_t DEFAULT_SNSSAI{1,0};
+const session_ambr_t DEFAULT_S_AMBR{"1000Mbps", "1000Mbps"};
+const std::string DEFAULT_DNN = "default";
+const uint8_t DEFAULT_SSC_MODE = 1;
+const subscribed_default_qos_t DEFAULT_QOS{9, {1, "NOT_PREEMPT", "NOT_PREEMPTABLE"}, 1};
+
+
 typedef struct interface_cfg_s {
   std::string if_name;
   struct in_addr addr4;

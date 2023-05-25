@@ -181,6 +181,33 @@ smf:
   ims:
     pcscf_ipv4: "127.0.0.1"
     pcscf_ipv6: "fe80::7915:f408:1787:db8b"
+  # the DNN you configure here should be configured in "dnns"
+  local_subscription_infos:
+    - single_nssai:
+        sst: 1
+      dnn: "oai"
+      ssc_mode: 1
+      qos_profile:
+        5qi: 6
+        priority: 1
+        arp_priority: 1
+        arp_preempt_capability: "NOT_PREEMPT"
+        arp_preempt_vulnerability: "NOT_PREEMPTABLE"
+        session_ambr_ul: "1000Mbps"
+        session_ambr_dl: "1000Mbps"
+    - single_nssai:
+        sst: 1
+        sd: 1
+      dnn: "oai.ipv4"
+      ssc_mode: 1
+      qos_profile:
+        5qi: 7
+        priority: 1
+        arp_priority: 1
+        arp_preempt_capability: "NOT_PREEMPT"
+        arp_preempt_vulnerability: "NOT_PREEMPTABLE"
+        session_ambr_ul: "1000Mbps"
+        session_ambr_dl: "1000Mbps"
 
 ## DNN configuration
 dnns:
@@ -193,32 +220,7 @@ dnns:
     ipv4_pool: "12.1.1.51 - 12.1.1.150"
     ipv6_prefix: "2001:1:2::/64"
 
-local_subscription_infos:
-  - nssai:
-      sst: 1
-    dnn: "oai"
-    scc_mode: 1
-    qos_profile:
-      5qi: 6
-      priority: 1
-      arp_priority: 1
-      arp_preempt_capability: "NOT_PREEMPT"
-      arp_preempt_vulnerability: "NOT_PREEMPTABLE"
-      session_ambr_ul: "1000Mbps"
-      session_ambr_dl: "1000Mbps"
-  - nssai:
-      sst: 1
-      sd: 1
-    dnn: "oai.ipv4"
-    scc_mode: 1
-    qos_profile:
-      5qi: 7
-      priority: 1
-      arp_priority: 1
-      arp_preempt_capability: "NOT_PREEMPT"
-      arp_preempt_vulnerability: "NOT_PREEMPTABLE"
-      session_ambr_ul: "1000Mbps"
-      session_ambr_dl: "1000Mbps"
+
 
 pcf:
   local_policy:
