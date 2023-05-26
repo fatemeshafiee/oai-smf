@@ -46,131 +46,6 @@
 #include "logger_base.hpp"
 #include "smf_config_types.hpp"
 
-#define SMF_CONFIG_STRING_SMF_CONFIG "SMF"
-#define SMF_CONFIG_STRING_PID_DIRECTORY "PID_DIRECTORY"
-#define SMF_CONFIG_STRING_INSTANCE "INSTANCE"
-#define SMF_CONFIG_STRING_FQDN_DNS "FQDN"
-#define SMF_CONFIG_STRING_INTERFACES "INTERFACES"
-#define SMF_CONFIG_STRING_INTERFACE_NAME "INTERFACE_NAME"
-#define SMF_CONFIG_STRING_IPV4_ADDRESS "IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_PORT "PORT"
-#define SMF_CONFIG_STRING_INTERFACE_N4 "N4"
-#define SMF_CONFIG_STRING_INTERFACE_SBI "SBI"
-#define SMF_CONFIG_STRING_SBI_HTTP2_PORT "HTTP2_PORT"
-#define SMF_CONFIG_STRING_API_VERSION "API_VERSION"
-
-#define SMF_CONFIG_STRING_IP_ADDRESS_POOL "IP_ADDRESS_POOL"
-#define SMF_CONFIG_STRING_ARP_UE "ARP_UE"
-#define SMF_CONFIG_STRING_ARP_UE_CHOICE_NO "NO"
-#define SMF_CONFIG_STRING_ARP_UE_CHOICE_LINUX "LINUX"
-#define SMF_CONFIG_STRING_ARP_UE_CHOICE_OAI "OAI"
-#define SMF_CONFIG_STRING_IPV4_ADDRESS_LIST "IPV4_LIST"
-#define SMF_CONFIG_STRING_IPV6_ADDRESS_LIST "IPV6_LIST"
-#define SMF_CONFIG_STRING_RANGE "RANGE"
-#define SMF_CONFIG_STRING_PREFIX "PREFIX"
-#define SMF_CONFIG_STRING_IPV4_ADDRESS_RANGE_DELIMITER "-"
-#define SMF_CONFIG_STRING_IPV6_ADDRESS_PREFIX_DELIMITER "/"
-#define SMF_CONFIG_STRING_DEFAULT_DNS_IPV4_ADDRESS "DEFAULT_DNS_IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_DEFAULT_CSCF_IPV4_ADDRESS "DEFAULT_CSCF_IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_DEFAULT_CSCF_IPV6_ADDRESS "DEFAULT_CSCF_IPV6_ADDRESS"
-
-#define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV4_ADDRESS                         \
-  "DEFAULT_DNS_SEC_IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_DEFAULT_DNS_IPV6_ADDRESS "DEFAULT_DNS_IPV6_ADDRESS"
-#define SMF_CONFIG_STRING_DEFAULT_DNS_SEC_IPV6_ADDRESS                         \
-  "DEFAULT_DNS_SEC_IPV6_ADDRESS"
-#define SMF_CONFIG_STRING_UE_MTU "UE_MTU"
-
-#define SMF_CONFIG_STRING_INTERFACE_DISABLED "none"
-
-#define SMF_CONFIG_STRING_DNN_LIST "DNN_LIST"
-#define SMF_CONFIG_STRING_DNN_NI "DNN_NI"
-#define SMF_CONFIG_STRING_PDU_SESSION_TYPE "PDU_SESSION_TYPE"
-#define SMF_CONFIG_STRING_IPV4_POOL "IPV4_POOL"
-#define SMF_CONFIG_STRING_IPV6_POOL "IPV6_POOL"
-#define SMF_CONFIG_STRING_IPV4_RANGE "IPV4_RANGE"
-#define SMF_CONFIG_STRING_IPV6_PREFIX "IPV6_PREFIX"
-
-#define SMF_ABORT_ON_ERROR true
-#define SMF_WARN_ON_ERROR false
-
-#define SMF_CONFIG_STRING_SCHED_PARAMS "SCHED_PARAMS"
-#define SMF_CONFIG_STRING_THREAD_RD_CPU_ID "CPU_ID"
-#define SMF_CONFIG_STRING_THREAD_RD_SCHED_POLICY "SCHED_POLICY"
-#define SMF_CONFIG_STRING_THREAD_RD_SCHED_PRIORITY "SCHED_PRIORITY"
-
-#define SMF_CONFIG_STRING_ITTI_TASKS "ITTI_TASKS"
-#define SMF_CONFIG_STRING_ITTI_TIMER_SCHED_PARAMS "ITTI_TIMER_SCHED_PARAMS"
-#define SMF_CONFIG_STRING_S11_SCHED_PARAMS "S11_SCHED_PARAMS"
-#define SMF_CONFIG_STRING_N4_SCHED_PARAMS "N4_SCHED_PARAMS"
-#define SMF_CONFIG_STRING_SMF_APP_SCHED_PARAMS "SMF_APP_SCHED_PARAMS"
-#define SMF_CONFIG_STRING_ASYNC_CMD_SCHED_PARAMS "ASYNC_CMD_SCHED_PARAMS"
-
-#define SMF_CONFIG_STRING_AMF "AMF"
-#define SMF_CONFIG_STRING_AMF_IPV4_ADDRESS "IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_AMF_PORT "PORT"
-#define SMF_CONFIG_STRING_UDM "UDM"
-#define SMF_CONFIG_STRING_UDM_IPV4_ADDRESS "IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_UDM_PORT "PORT"
-
-#define SMF_CONFIG_STRING_PCF "PCF"
-#define SMF_CONFIG_STRING_PCF_IPV4_ADDRESS "IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_PCF_PORT "PORT"
-
-#define SMF_CONFIG_STRING_UPF_LIST "UPF_LIST"
-#define SMF_CONFIG_STRING_UPF_IPV4_ADDRESS "IPV4_ADDRESS"
-
-#define SMF_CONFIG_STRING_NRF "NRF"
-#define SMF_CONFIG_STRING_NRF_IPV4_ADDRESS "IPV4_ADDRESS"
-#define SMF_CONFIG_STRING_NRF_PORT "PORT"
-
-#define SMF_CONFIG_STRING_NWI_LIST "NWI_LIST"
-#define SMF_CONFIG_STRING_DOMAIN_ACCESS "DOMAIN_ACCESS"
-#define SMF_CONFIG_STRING_DOMAIN_CORE "DOMAIN_CORE"
-#define SMF_CONFIG_STRING_DOMAIN_SGI_LAN "DOMAIN_SGI_LAN"
-
-#define SMF_CONFIG_STRING_LOCAL_CONFIGURATION "LOCAL_CONFIGURATION"
-#define SMF_CONFIG_STRING_SESSION_MANAGEMENT_SUBSCRIPTION_LIST                 \
-  "SESSION_MANAGEMENT_SUBSCRIPTION_LIST"
-#define SMF_CONFIG_STRING_NSSAI_SST "NSSAI_SST"
-#define SMF_CONFIG_STRING_NSSAI_SD "NSSAI_SD"
-#define SMF_CONFIG_STRING_DNN "DNN"
-#define SMF_CONFIG_STRING_DEFAULT_SESSION_TYPE "DEFAULT_SESSION_TYPE"
-#define SMF_CONFIG_STRING_DEFAULT_SSC_MODE "DEFAULT_SSC_MODE"
-#define SMF_CONFIG_STRING_QOS_PROFILE_5QI "QOS_PROFILE_5QI"
-#define SMF_CONFIG_STRING_QOS_PROFILE_PRIORITY_LEVEL                           \
-  "QOS_PROFILE_PRIORITY_LEVEL"
-#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PRIORITY_LEVEL                       \
-  "QOS_PROFILE_ARP_PRIORITY_LEVEL"
-#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTCAP                           \
-  "QOS_PROFILE_ARP_PREEMPTCAP"
-#define SMF_CONFIG_STRING_QOS_PROFILE_ARP_PREEMPTVULN                          \
-  "QOS_PROFILE_ARP_PREEMPTVULN"
-#define SMF_CONFIG_STRING_SESSION_AMBR_UL "SESSION_AMBR_UL"
-#define SMF_CONFIG_STRING_SESSION_AMBR_DL "SESSION_AMBR_DL"
-
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES "SUPPORT_FEATURES"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_REGISTER_NRF "REGISTER_NRF"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_DISCOVER_UPF "DISCOVER_UPF"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_DISCOVER_PCF "DISCOVER_PCF"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_LOCAL_PCC_RULES                 \
-  "USE_LOCAL_PCC_RULES"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_LOCAL_SUBSCRIPTION_INFO         \
-  "USE_LOCAL_SUBSCRIPTION_INFO"
-#define SMF_CONFIG_STRING_NAS_FORCE_PUSH_PCO                                   \
-  "FORCE_PUSH_PROTOCOL_CONFIGURATION_OPTIONS"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_USE_FQDN_DNS "USE_FQDN_DNS"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_SBI_HTTP_VERSION "HTTP_VERSION"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_ENABLE_USAGE_REPORTING              \
-  "ENABLE_USAGE_REPORTING"
-#define SMF_CONFIG_STRING_SUPPORT_FEATURES_enable_dl_pdr_in_pfcp_sess_estab    \
-  "ENABLE_DL_PDR_IN_PFCP_SESS_ESTAB"
-#define SMF_CONFIG_STRING_N3_LOCAL_IPV4_ADDRESS "N3_LOCAL_IPV4_ADDRESS"
-
-#define SMF_MAX_ALLOCATED_PDN_ADDRESSES 1024
-
-#define SMF_CONFIG_STRING_LOG_LEVEL "LOG_LEVEL"
-
 namespace oai::config::smf {
 
 const std::string USE_LOCAL_PCC_RULES_CONFIG_VALUE = "use_local_pcc_rules";
@@ -231,12 +106,6 @@ typedef struct session_management_subscription_s {
 
 class smf_config : public config {
  private:
-  int load_itti(const libconfig::Setting& itti_cfg, itti_cfg_t& cfg);
-  int load_interface(const libconfig::Setting& if_cfg, interface_cfg_t& cfg);
-  int load_thread_sched_params(
-      const libconfig::Setting& thread_sched_params_cfg,
-      util::thread_sched_params& cfg);
-
   // TODO only temporary, to avoid changing all the references to the config in
   // all the calling classes
   void to_smf_config();
@@ -289,17 +158,6 @@ class smf_config : public config {
     std::string api_version;
     std::string fqdn;
 
-    void log_infos(bool _use_fqdn_dns) {
-      Logger::smf_app().info(
-          "    IPv4 Addr ...........: %s",
-          inet_ntoa(*((struct in_addr*) &ipv4_addr)));
-      Logger::smf_app().info("    Port ................: %lu  ", port);
-      Logger::smf_app().info(
-          "    API version .........: %s", api_version.c_str());
-      if (_use_fqdn_dns)
-        Logger::smf_app().info("    FQDN ................: %s", fqdn.c_str());
-    }
-
     // TODO delete, just for now until we refactor the calling classes as well
     void from_sbi_config_type(const sbi_interface& sbi_val) {
       ipv4_addr = resolve_nf(sbi_val.get_host());
@@ -332,11 +190,7 @@ class smf_config : public config {
       session_management_subscriptions;
 
   smf_config(const std::string& configPath, bool logStdout, bool logRotFile);
-  ~smf_config();
-  void lock() { m_rw_lock.lock(); };
-  void unlock() { m_rw_lock.unlock(); };
-  int load(const std::string& config_file);
-  void display();
+
   int get_pfcp_node_id(pfcp::node_id_t& node_id);
   int get_pfcp_fseid(pfcp::fseid_t& fseid);
   bool is_dotted_dnn_handled(

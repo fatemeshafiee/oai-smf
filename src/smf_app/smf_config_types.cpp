@@ -36,17 +36,18 @@ smf_support_features::smf_support_features(
     bool local_subscription_info, bool local_pcc_rules) {
   m_config_name              = "Supported Features";
   m_local_subscription_infos = option_config_value(
-      "Use local subscription info", local_subscription_info);
+      "Use Local Subscription Info", local_subscription_info);
   m_local_pcc_rules =
-      option_config_value("Use local PCC rules", local_pcc_rules);
+      option_config_value("Use Local PCC Rules", local_pcc_rules);
 }
 
+// TODO we should move this to common and use it together with AMF and other NFs
 smf_support_features::smf_support_features(
     bool external_ausf, bool external_udm, bool external_nssf) {
   m_config_name   = "Supported Features";
-  m_external_ausf = option_config_value("Use external AUSF", external_ausf);
-  m_external_udm  = option_config_value("Use external UDM", external_udm);
-  m_external_nssf = option_config_value("Use external NSSF", external_nssf);
+  m_external_ausf = option_config_value("Use External AUSF", external_ausf);
+  m_external_udm  = option_config_value("Use External UDM", external_udm);
+  m_external_nssf = option_config_value("Use External NSSF", external_nssf);
 }
 
 void smf_support_features::from_yaml(const YAML::Node& node) {
@@ -72,12 +73,12 @@ std::string smf_support_features::to_string(const std::string& indent) const {
   std::string out;
   std::string inner_indent = indent + indent;
   unsigned int inner_width = get_inner_width(inner_indent.length());
-  out.append(indent).append(m_config_name).append("\n");
+  out.append(indent).append(m_config_name).append(":\n");
 
   if (!m_local_subscription_infos.get_config_name().empty()) {
     out.append(inner_indent)
         .append(fmt::format(
-            BASE_FORMATTER, OUTER_LIST_ELEM,
+            BASE_FORMATTER, INNER_LIST_ELEM,
             m_local_subscription_infos.get_config_name(), inner_width,
             m_local_subscription_infos.to_string("")));
   }
@@ -85,7 +86,7 @@ std::string smf_support_features::to_string(const std::string& indent) const {
   if (!m_local_pcc_rules.get_config_name().empty()) {
     out.append(inner_indent)
         .append(fmt::format(
-            BASE_FORMATTER, OUTER_LIST_ELEM,
+            BASE_FORMATTER, INNER_LIST_ELEM,
             m_local_pcc_rules.get_config_name(), inner_width,
             m_local_pcc_rules.to_string("")));
   }
@@ -93,21 +94,21 @@ std::string smf_support_features::to_string(const std::string& indent) const {
   if (!m_external_ausf.get_config_name().empty()) {
     out.append(inner_indent)
         .append(fmt::format(
-            BASE_FORMATTER, OUTER_LIST_ELEM, m_external_ausf.get_config_name(),
+            BASE_FORMATTER, INNER_LIST_ELEM, m_external_ausf.get_config_name(),
             inner_width, m_external_ausf.to_string("")));
   }
 
   if (!m_external_udm.get_config_name().empty()) {
     out.append(inner_indent)
         .append(fmt::format(
-            BASE_FORMATTER, OUTER_LIST_ELEM, m_external_udm.get_config_name(),
+            BASE_FORMATTER, INNER_LIST_ELEM, m_external_udm.get_config_name(),
             inner_width, m_external_udm.to_string("")));
   }
 
   if (!m_external_nssf.get_config_name().empty()) {
     out.append(inner_indent)
         .append(fmt::format(
-            BASE_FORMATTER, OUTER_LIST_ELEM, m_external_nssf.get_config_name(),
+            BASE_FORMATTER, INNER_LIST_ELEM, m_external_nssf.get_config_name(),
             inner_width, m_external_nssf.to_string("")));
   }
 
@@ -157,15 +158,22 @@ void upf_info_config_value::from_yaml(const YAML::Node& node) {
 
 std::string upf_info_config_value::to_string(const std::string& indent) const {
   std::string out;
-  unsigned int inner_width = get_inner_width(indent.length());
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, INNER_LIST_ELEM, m_n3_nwi.get_config_name(), inner_width,
-      m_n3_nwi.to_string("")));
+  std::string inner_indent = add_indent(indent);
+  unsigned int inner_width = get_inner_width(inner_indent.length());
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, INNER_LIST_ELEM, m_n6_nwi.get_config_name(), inner_width,
-      m_n6_nwi.to_string("")));
+  out.append(indent).append(
+      fmt::format("{} Interface Configuration:\n", INNER_LIST_ELEM));
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_n3_nwi.get_config_name(),
+          inner_width, m_n3_nwi.to_string("")));
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_n6_nwi.get_config_name(),
+          inner_width, m_n6_nwi.to_string("")));
   return out;
 }
 
@@ -184,9 +192,9 @@ upf::upf(
   m_host = string_config_value("Host", host);
   m_port = int_config_value("Port", port);
   m_usage_reporting =
-      option_config_value("Enable usage reporting", enable_usage_reporting);
+      option_config_value("Enable Usage Reporting", enable_usage_reporting);
   m_dl_pdr_in_session_establishment = option_config_value(
-      "Enable DL PDR in session establishment",
+      "Enable DL PDR In Session Establishment",
       enable_dl_pdr_in_session_establishment);
   m_local_n3_ipv4 = string_config_value("Local N3 IPv4", local_n3_ip);
 
@@ -221,27 +229,34 @@ void upf::from_yaml(const YAML::Node& node) {
 
 std::string upf::to_string(const std::string& indent) const {
   std::string out;
-  unsigned int inner_width = get_inner_width(indent.length());
-  out.append(indent).append("Local UPF Configuration\n");
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, INNER_LIST_ELEM, m_host.get_config_name(),
-      m_host.to_string("")));
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, INNER_LIST_ELEM, m_port.get_config_name(),
-      m_port.to_string("")));
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, INNER_LIST_ELEM, m_usage_reporting.get_config_name(),
-      m_usage_reporting.to_string("")));
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, INNER_LIST_ELEM,
-      m_dl_pdr_in_session_establishment.get_config_name(),
-      m_dl_pdr_in_session_establishment.to_string("")));
+  std::string inner_indent = add_indent(indent);
+  unsigned int inner_width = get_inner_width(inner_indent.length());
+  out.append(indent).append(
+      fmt::format("{} {}\n", OUTER_LIST_ELEM, m_host.get_value()));
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, INNER_LIST_ELEM, m_host.get_config_name(),
+          inner_width, m_host.to_string("")));
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, INNER_LIST_ELEM, m_port.get_config_name(),
+          inner_width, m_port.to_string("")));
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, INNER_LIST_ELEM, m_usage_reporting.get_config_name(),
+          inner_width, m_usage_reporting.to_string("")));
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, INNER_LIST_ELEM,
+          m_dl_pdr_in_session_establishment.get_config_name(), inner_width,
+          m_dl_pdr_in_session_establishment.to_string("")));
   if (m_local_n3_ipv4.is_set()) {
-    out.append(indent).append(fmt::format(
-        BASE_FORMATTER, INNER_LIST_ELEM, m_local_n3_ipv4.get_config_name(),
-        m_local_n3_ipv4.to_string("")));
+    out.append(inner_indent)
+        .append(fmt::format(
+            BASE_FORMATTER, INNER_LIST_ELEM, m_local_n3_ipv4.get_config_name(),
+            inner_width, m_local_n3_ipv4.to_string("")));
   }
-  std::string inner_indent = indent + indent;
   out.append(m_upf_config_value.to_string(inner_indent));
   return out;
 }
@@ -455,21 +470,25 @@ void smf_config_type::from_yaml(const YAML::Node& node) {
 }
 
 std::string smf_config_type::to_string(const std::string& indent) const {
-  std::string out;
+  std::string out = nf::to_string("");
 
   unsigned int inner_width = get_inner_width(indent.length());
-  out.append(m_config_name).append("\n");
   out.append(m_support_feature.to_string(indent));
   out.append(indent).append(fmt::format(
       BASE_FORMATTER, OUTER_LIST_ELEM, m_ue_mtu.get_config_name(), inner_width,
       m_ue_mtu.to_string("")));
   out.append(m_ue_dns.to_string(indent));
   out.append(m_ims_config.to_string(indent));
-  out.append(indent).append("UPF List");
+  out.append(indent).append("UPF List:\n");
   std::string inner_indent = indent + indent;
   for (const auto& upf : m_upfs) {
     out.append(upf.to_string(inner_indent));
   }
+  out.append(indent).append("Local Subscription Infos:\n");
+  for (const auto& sub : m_subscription_infos) {
+    out.append(sub.to_string(inner_indent));
+  }
+
   return out;
 }
 
@@ -516,8 +535,9 @@ subscription_info_config::subscription_info_config(
     const subscribed_default_qos_t& qos, const session_ambr_t& session_ambr,
     const snssai_t& snssai)
     : m_snssai(snssai), m_qos_profile(qos, session_ambr) {
-  m_dnn      = string_config_value("DNN", dnn);
-  m_ssc_mode = int_config_value("SSC Mode", ssc_mode);
+  m_dnn         = string_config_value("DNN", dnn);
+  m_ssc_mode    = int_config_value("SSC Mode", ssc_mode);
+  m_config_name = "Local Subscription Info";
 
   // TODO do we need a validation regex for DNN?
   m_ssc_mode.set_validation_interval(1, 3);
@@ -540,8 +560,26 @@ void subscription_info_config::from_yaml(const YAML::Node& node) {
 
 std::string subscription_info_config::to_string(
     const std::string& indent) const {
-  // TODO
-  return "TODO";
+  std::string out;
+  out.append(indent).append(
+      fmt::format("{} {}\n", OUTER_LIST_ELEM, m_config_name));
+  std::string inner_indent = add_indent(indent);
+  unsigned int inner_width = get_inner_width(inner_indent.length());
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, INNER_LIST_ELEM, m_dnn.get_config_name(), inner_width,
+          m_dnn.to_string("")));
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, INNER_LIST_ELEM, m_ssc_mode.get_config_name(),
+          inner_width, m_ssc_mode.to_string("")));
+
+  out.append(m_snssai.to_string(inner_indent));
+  out.append(m_qos_profile.to_string(inner_indent));
+
+  return out;
 }
 
 void subscription_info_config::validate() {
@@ -580,28 +618,39 @@ snssai_config_value::snssai_config_value(const snssai_t& snssai) {
 
   m_sd.set_validation_interval(0, 16777215);
   m_sst.set_validation_interval(0, 255);
+
+  m_config_name = "Single NSSAI";
 }
 
 void snssai_config_value::from_yaml(const YAML::Node& node) {
   if (node["sd"]) {
     m_sd.from_yaml(node["sd"]);
+    m_snssai.sd = m_sd.get_value();
   }
   if (node["sst"]) {
     m_sst.from_yaml(node["sst"]);
+    m_snssai.sst = m_sst.get_value();
   }
 }
 
 std::string snssai_config_value::to_string(const std::string& indent) const {
   std::string out;
-  unsigned int inner_width = get_inner_width(indent.length());
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_sst.get_config_name(), inner_width,
-      m_sst.to_string("")));
+  out.append(indent).append(
+      fmt::format("{} {}:\n", INNER_LIST_ELEM, m_config_name));
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_sd.get_config_name(), inner_width,
-      m_sd.to_string("")));
+  std::string inner_indent = add_indent(indent);
+
+  unsigned int inner_width = get_inner_width(inner_indent.length());
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_sst.get_config_name(), inner_width,
+          m_sst.to_string("")));
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_sd.get_config_name(), inner_width,
+          m_sd.to_string("")));
 
   return out;
 }
@@ -631,6 +680,8 @@ qos_profile_config_value::qos_profile_config_value(
   m_5qi.set_validation_interval(1, 254);
   m_priority.set_validation_interval(1, 127);
   m_arp_priority.set_validation_interval(1, 15);
+
+  m_config_name = "QoS Profile";
 
   // TODO ARP Preempt and session AMBR String regex validators
 }
@@ -669,32 +720,49 @@ void qos_profile_config_value::from_yaml(const YAML::Node& node) {
 std::string qos_profile_config_value::to_string(
     const std::string& indent) const {
   std::string out;
-  unsigned int inner_width = get_inner_width(indent.length());
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_5qi.get_config_name(), inner_width,
-      m_5qi.to_string("")));
+  out.append(indent).append(
+      fmt::format("{} {}:\n", INNER_LIST_ELEM, m_config_name));
+  std::string inner_indent = add_indent(indent);
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_priority.get_config_name(),
-      inner_width, m_priority.to_string("")));
+  unsigned int inner_width = get_inner_width(inner_indent.length());
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_arp_priority.get_config_name(),
-      inner_width, m_arp_priority.to_string("")));
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_5qi.get_config_name(), inner_width,
+          m_5qi.to_string("")));
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM,
-      m_arp_preempt_vulnerability.get_config_name(), inner_width,
-      m_arp_preempt_capability.to_string("")));
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_priority.get_config_name(),
+          inner_width, m_priority.to_string("")));
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_session_ambr_dl.get_config_name(),
-      inner_width, m_session_ambr_dl.to_string("")));
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_arp_priority.get_config_name(),
+          inner_width, m_arp_priority.to_string("")));
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_session_ambr_ul.get_config_name(),
-      inner_width, m_session_ambr_ul.to_string("")));
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM,
+          m_arp_preempt_vulnerability.get_config_name(), inner_width,
+          m_arp_preempt_vulnerability.to_string("")));
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM,
+          m_arp_preempt_capability.get_config_name(), inner_width,
+          m_arp_preempt_capability.to_string("")));
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_session_ambr_dl.get_config_name(),
+          inner_width, m_session_ambr_dl.to_string("")));
+
+  out.append(inner_indent)
+      .append(fmt::format(
+          BASE_FORMATTER, OUTER_LIST_ELEM, m_session_ambr_ul.get_config_name(),
+          inner_width, m_session_ambr_ul.to_string("")));
 
   return out;
 }
