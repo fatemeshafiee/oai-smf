@@ -310,6 +310,11 @@ ue_dns::ue_dns(
   m_primary_dns_v6.set_validation_regex(IPV6_ADDRESS_VALIDATOR_REGEX);
   m_secondary_dns_v4.set_validation_regex(IPV4_ADDRESS_VALIDATOR_REGEX);
   m_secondary_dns_v6.set_validation_regex(IPV6_ADDRESS_VALIDATOR_REGEX);
+
+  // only Primary IPv4 is mandatory
+  m_primary_dns_v6.set(!primary_dns_v6.empty());
+  m_secondary_dns_v4.set(!secondary_dns_v4.empty());
+  m_secondary_dns_v6.set(!secondary_dns_v6.empty());
 }
 
 void ue_dns::from_yaml(const YAML::Node& node) {
@@ -335,17 +340,23 @@ std::string ue_dns::to_string(const std::string& indent) const {
       BASE_FORMATTER, OUTER_LIST_ELEM, m_primary_dns_v4.get_config_name(),
       inner_width, m_primary_dns_v4.to_string("")));
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_primary_dns_v6.get_config_name(),
-      inner_width, m_primary_dns_v6.to_string("")));
+  if (m_primary_dns_v6.is_set()) {
+    out.append(indent).append(fmt::format(
+        BASE_FORMATTER, OUTER_LIST_ELEM, m_primary_dns_v6.get_config_name(),
+        inner_width, m_primary_dns_v6.to_string("")));
+  }
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_secondary_dns_v4.get_config_name(),
-      inner_width, m_secondary_dns_v4.to_string("")));
+  if (m_secondary_dns_v4.is_set()) {
+    out.append(indent).append(fmt::format(
+        BASE_FORMATTER, OUTER_LIST_ELEM, m_secondary_dns_v4.get_config_name(),
+        inner_width, m_secondary_dns_v4.to_string("")));
+  }
 
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_secondary_dns_v6.get_config_name(),
-      inner_width, m_secondary_dns_v6.to_string("")));
+  if (m_secondary_dns_v6.is_set()) {
+    out.append(indent).append(fmt::format(
+        BASE_FORMATTER, OUTER_LIST_ELEM, m_secondary_dns_v6.get_config_name(),
+        inner_width, m_secondary_dns_v6.to_string("")));
+  }
 
   return out;
 }
@@ -356,10 +367,16 @@ void ue_dns::validate() {
   m_primary_dns_v6.validate();
   m_secondary_dns_v6.validate();
 
-  m_primary_dns_v4_ip   = safe_convert_ip(m_primary_dns_v4.get_value());
-  m_secondary_dns_v4_ip = safe_convert_ip(m_secondary_dns_v4.get_value());
-  m_primary_dns_v6_ip   = safe_convert_ip6(m_primary_dns_v6.get_value());
-  m_secondary_dns_v6_ip = safe_convert_ip6(m_secondary_dns_v6.get_value());
+  m_primary_dns_v4_ip = safe_convert_ip(m_primary_dns_v4.get_value());
+  if (m_secondary_dns_v4.is_set()) {
+    m_secondary_dns_v4_ip = safe_convert_ip(m_secondary_dns_v4.get_value());
+  }
+  if (m_primary_dns_v6.is_set()) {
+    m_primary_dns_v6_ip = safe_convert_ip6(m_primary_dns_v6.get_value());
+  }
+  if (m_secondary_dns_v6.is_set()) {
+    m_secondary_dns_v6_ip = safe_convert_ip6(m_secondary_dns_v6.get_value());
+  }
 }
 
 const in_addr& ue_dns::get_primary_dns_v4() const {
@@ -385,6 +402,9 @@ ims_config::ims_config(
 
   m_pcscf_v4.set_validation_regex(IPV4_ADDRESS_VALIDATOR_REGEX);
   m_pcscf_v6.set_validation_regex(IPV6_ADDRESS_VALIDATOR_REGEX);
+  if (pcscf_ip_v6.empty()) {
+    m_pcscf_v6.set(false);
+  }
 }
 
 void ims_config::from_yaml(const YAML::Node& node) {
@@ -403,11 +423,11 @@ std::string ims_config::to_string(const std::string& indent) const {
   out.append(indent).append(fmt::format(
       BASE_FORMATTER, OUTER_LIST_ELEM, m_pcscf_v4.get_config_name(),
       inner_width, m_pcscf_v4.to_string("")));
-
-  out.append(indent).append(fmt::format(
-      BASE_FORMATTER, OUTER_LIST_ELEM, m_pcscf_v6.get_config_name(),
-      inner_width, m_pcscf_v6.to_string("")));
-
+  if (m_pcscf_v6.is_set()) {
+    out.append(indent).append(fmt::format(
+        BASE_FORMATTER, OUTER_LIST_ELEM, m_pcscf_v6.get_config_name(),
+        inner_width, m_pcscf_v6.to_string("")));
+  }
   return out;
 }
 
@@ -415,8 +435,14 @@ void ims_config::validate() {
   m_pcscf_v4.validate();
   m_pcscf_v6.validate();
 
-  m_pcscf_v4_ip = safe_convert_ip(m_pcscf_v4.get_value());
-  m_pcscf_v6_ip = safe_convert_ip6(m_pcscf_v6.get_value());
+  if (m_pcscf_v4.is_set()) {
+    m_pcscf_v4_ip = safe_convert_ip(m_pcscf_v4.get_value());
+  } else if (m_pcscf_v6.is_set()) {
+    m_pcscf_v6_ip = safe_convert_ip6(m_pcscf_v6.get_value());
+  } else {
+    throw std::runtime_error(
+        fmt::format("You need to specify either a valid IPv4 or IPv6 address"));
+  }
 }
 
 const in_addr& ims_config::get_pcscf_v4() const {

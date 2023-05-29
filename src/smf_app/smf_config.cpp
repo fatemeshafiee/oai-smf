@@ -98,6 +98,15 @@ smf_config::smf_config(
   auto nrf = std::make_shared<nf>(
       "nrf", "oai-nrf", sbi_interface("SBI", "oai-nrf", 80, 0, "v1", ""));
   add_nf("nrf", nrf);
+
+  // DNN default values
+  dnn_config dnn("default", "IPV4", "12.2.0.1 - 12.2.0.255", "");
+  m_dnns.push_back(dnn);
+
+  // Local subscription default values
+  subscription_info_config info(
+      "default", 1, DEFAULT_QOS, DEFAULT_S_AMBR, DEFAULT_SNSSAI);
+  smf->get_subscription_info().push_back(info);
 };
 
 //------------------------------------------------------------------------------
