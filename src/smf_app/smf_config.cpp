@@ -221,14 +221,21 @@ void smf_config::to_smf_config() {
   discover_pcf = false;
   discover_upf = config::register_nrf();
 
+  // we need to set some things (e.g. API version even if we do NRF
+  // discovery...)
+  amf_addr.from_sbi_config_type_no_resolving(
+      get_nf(AMF_CONFIG_NAME)->get_sbi());
+  udm_addr.from_sbi_config_type_no_resolving(
+      get_nf(UDM_CONFIG_NAME)->get_sbi());
+
   if (get_nf(NRF_CONFIG_NAME)->is_set()) {
     nrf_addr.from_sbi_config_type(get_nf(NRF_CONFIG_NAME)->get_sbi());
   }
   if (get_nf(AMF_CONFIG_NAME)->is_set()) {
-    nrf_addr.from_sbi_config_type(get_nf(AMF_CONFIG_NAME)->get_sbi());
+    amf_addr.from_sbi_config_type(get_nf(AMF_CONFIG_NAME)->get_sbi());
   }
   if (get_nf(UDM_CONFIG_NAME)->is_set()) {
-    nrf_addr.from_sbi_config_type(get_nf(UDM_CONFIG_NAME)->get_sbi());
+    udm_addr.from_sbi_config_type(get_nf(UDM_CONFIG_NAME)->get_sbi());
   }
   if (get_nf(PCF_CONFIG_NAME)->is_set()) {
     pcf_addr.from_sbi_config_type(get_nf(PCF_CONFIG_NAME)->get_sbi());
@@ -278,7 +285,12 @@ void smf_config::to_smf_config() {
     in_addr ip              = resolve_nf(upf.get_host());
     node_id.u1.ipv4_address = ip;
     node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-    upfs.push_back(node_id);
+    // Stefan: smf_app already checks if the UPF is present in configuration and
+    // does not start association when receiving an NRF notification. WHY?
+    // that should better be handled by the PFCP associations
+    if (!discover_upf) {
+      upfs.push_back(node_id);
+    }
 
     // TODO here we just take the enable UR and enable DL in PFCP session
     // establishment from the last UPF we have to refactor PFCP association to

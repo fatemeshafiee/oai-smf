@@ -168,6 +168,14 @@ class smf_config : public config {
       api_version  = sbi_val.get_api_version();
       fqdn         = sbi_val.get_host();
     }
+
+    void from_sbi_config_type_no_resolving(const sbi_interface& sbi_val) {
+      fqdn        = sbi_val.get_host();
+      api_version = sbi_val.get_api_version();
+      port        = sbi_val.use_http2() ? sbi_val.get_port_http2() :
+                                   sbi_val.get_port_http1();
+      http_version = sbi_val.use_http2() ? 2 : 1;
+    }
   };
 
   sbi_addr nrf_addr;

@@ -186,39 +186,11 @@ bool smf_pcf_client::discover_pcf_from_config_file(
   // TODO ignore snssai, plmn_id and dnn, because it is not part of
   // configuration
   Logger::smf_n7().debug("Discover PCF from config file");
-  api_version = smf_cfg->pcf_addr.api_version;
-  if (!smf_cfg->use_fqdn_dns) {
-    // read config from config file
-    addr = std::string(
-        inet_ntoa(*((struct in_addr*) &smf_cfg->pcf_addr.ipv4_addr)));
-    addr += ":" + std::to_string(smf_cfg->pcf_addr.port);
-    return true;
-  } else {
-    Logger::smf_n7().debug(
-        "Resolving %s with DNS", smf_cfg->pcf_addr.fqdn.c_str());
-    // resolve IP address
-    uint8_t addr_type = 0;
-    uint32_t pcf_port = 0;
-    std::string addr_temp;
-    if (!fqdn::resolve(smf_cfg->fqdn, addr_temp, pcf_port, addr_type)) {
-      Logger::smf_n7().warn("Could not resolve FQDN %s", smf_cfg->fqdn.c_str());
-      return false;
-    }
-
-    if (addr_type != 0) {
-      // TODO IPv6
-      Logger::smf_n7().warn("IPv6 not supported for PCF address");
-      return false;
-    } else {
-      if (smf_cfg->http_version == 2) {
-        pcf_port = 8080;  // TODO this is not good to hardcode it here.
-        // Shouldnt we be able to get this from the DNS query based on the
-        // service?
-      }
-      addr = addr_temp + ":" + std::to_string(pcf_port);
-      return true;
-    }
-  }
+  api_version = smf_cfg->get_nf(oai::config::PCF_CONFIG_NAME)
+                    ->get_sbi()
+                    .get_api_version();
+  addr = smf_cfg->get_nf(oai::config::PCF_CONFIG_NAME)->get_sbi().get_url();
+  return true;
 }
 
 http_status_code_e smf_pcf_client::send_request(
