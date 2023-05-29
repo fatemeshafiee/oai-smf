@@ -33,7 +33,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <libconfig.h++>
 #include <mutex>
 #include <vector>
 #include "thread_sched.hpp"

@@ -55,7 +55,6 @@
 #include "smf_config_types.hpp"
 
 using namespace std;
-using namespace libconfig;
 using namespace smf;
 using namespace oai::config::smf;
 using namespace oai::config;
