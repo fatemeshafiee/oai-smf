@@ -113,7 +113,11 @@ int main(int argc, char** argv) {
       Options::getlibconfigConfig(), Options::getlogStdout(),
       Options::getlogRotFilelog());
 
-  smf_cfg->init();
+  if (!smf_cfg->init()) {
+    smf_cfg->display();
+    Logger::system().error("Reading the configuration failed. Exiting.");
+    return 1;
+  }
   smf_cfg->display();
   Logger::set_level(smf_cfg->log_level);
 

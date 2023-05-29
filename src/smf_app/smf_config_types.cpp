@@ -56,7 +56,7 @@ void smf_support_features::from_yaml(const YAML::Node& node) {
   }
   if (node[USE_LOCAL_SUBSCRIPTION_INFOS_CONFIG_VALUE]) {
     m_local_subscription_infos.from_yaml(
-        node[USE_LOCAL_PCC_RULES_CONFIG_VALUE]);
+        node[USE_LOCAL_SUBSCRIPTION_INFOS_CONFIG_VALUE]);
   }
   if (node[USE_EXTERNAL_AUSF_CONFIG_VALUE]) {
     m_external_ausf.from_yaml(node[USE_EXTERNAL_AUSF_CONFIG_VALUE]);
@@ -201,6 +201,9 @@ upf::upf(
   m_host.set_validation_regex(HOST_VALIDATOR_REGEX);
   m_port.set_validation_interval(PORT_MIN_VALUE, PORT_MAX_VALUE);
   m_local_n3_ipv4.set_validation_regex(IPV4_ADDRESS_VALIDATOR_REGEX);
+  if (local_n3_ip.empty()) {
+    m_local_n3_ipv4.set(false);
+  }
 }
 
 void upf::from_yaml(const YAML::Node& node) {
@@ -479,14 +482,18 @@ std::string smf_config_type::to_string(const std::string& indent) const {
       m_ue_mtu.to_string("")));
   out.append(m_ue_dns.to_string(indent));
   out.append(m_ims_config.to_string(indent));
-  out.append(indent).append("UPF List:\n");
   std::string inner_indent = indent + indent;
-  for (const auto& upf : m_upfs) {
-    out.append(upf.to_string(inner_indent));
+  if (!m_upfs.empty()) {
+    out.append(indent).append("UPF List:\n");
+    for (const auto& upf : m_upfs) {
+      out.append(upf.to_string(inner_indent));
+    }
   }
-  out.append(indent).append("Local Subscription Infos:\n");
-  for (const auto& sub : m_subscription_infos) {
-    out.append(sub.to_string(inner_indent));
+  if (!m_subscription_infos.empty()) {
+    out.append(indent).append("Local Subscription Infos:\n");
+    for (const auto& sub : m_subscription_infos) {
+      out.append(sub.to_string(inner_indent));
+    }
   }
 
   return out;
@@ -525,8 +532,8 @@ const std::vector<upf>& smf_config_type::get_upfs() const {
   return m_upfs;
 }
 
-const std::vector<subscription_info_config>&
-smf_config_type::get_subscription_info() const {
+std::vector<subscription_info_config>&
+smf_config_type::get_subscription_info() {
   return m_subscription_infos;
 }
 
@@ -647,16 +654,19 @@ std::string snssai_config_value::to_string(const std::string& indent) const {
           BASE_FORMATTER, OUTER_LIST_ELEM, m_sst.get_config_name(), inner_width,
           m_sst.to_string("")));
 
+  std::string sd_value =
+      fmt::format("{:#X} ({})", m_sd.get_value(), m_sd.get_value());
   out.append(inner_indent)
       .append(fmt::format(
           BASE_FORMATTER, OUTER_LIST_ELEM, m_sd.get_config_name(), inner_width,
-          m_sd.to_string("")));
+          sd_value));
 
   return out;
 }
 
 void snssai_config_value::validate() {
-  config_type::validate();
+  m_sst.validate();
+  m_sd.validate();
 }
 
 const snssai_t& snssai_config_value::get_snssai() const {

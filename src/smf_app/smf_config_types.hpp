@@ -272,8 +272,7 @@ class smf_config_type : public nf {
   [[nodiscard]] uint16_t get_ue_mtu() const;
 
   [[nodiscard]] const std::vector<upf>& get_upfs() const;
-  [[nodiscard]] const std::vector<subscription_info_config>&
-  get_subscription_info() const;
+  [[nodiscard]] std::vector<subscription_info_config>& get_subscription_info();
 };
 
 }  // namespace oai::config::smf

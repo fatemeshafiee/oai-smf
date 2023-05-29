@@ -113,6 +113,8 @@ class smf_config : public config {
   // TODO only temporary, we should not resolve on startup in the config
   static in_addr resolve_nf(const std::string& host);
 
+  void update_used_nfs() override;
+
  public:
   /* Reader/writer lock for this configuration */
   std::mutex m_rw_lock;

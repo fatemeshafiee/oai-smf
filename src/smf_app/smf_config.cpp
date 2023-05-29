@@ -213,16 +213,18 @@ void smf_config::to_smf_config() {
   discover_pcf = false;
   discover_upf = config::register_nrf();
 
-  if (register_nrf) {
+  if (get_nf(NRF_CONFIG_NAME)->is_set()) {
     nrf_addr.from_sbi_config_type(get_nf(NRF_CONFIG_NAME)->get_sbi());
   }
-  if (!use_local_pcc_rules) {
+  if (get_nf(AMF_CONFIG_NAME)->is_set()) {
+    nrf_addr.from_sbi_config_type(get_nf(AMF_CONFIG_NAME)->get_sbi());
+  }
+  if (get_nf(UDM_CONFIG_NAME)->is_set()) {
+    nrf_addr.from_sbi_config_type(get_nf(UDM_CONFIG_NAME)->get_sbi());
+  }
+  if (get_nf(PCF_CONFIG_NAME)->is_set()) {
     pcf_addr.from_sbi_config_type(get_nf(PCF_CONFIG_NAME)->get_sbi());
   }
-  if (!use_local_subscription_info) {
-    udm_addr.from_sbi_config_type(get_nf(UDM_CONFIG_NAME)->get_sbi());
-  }
-  amf_addr.from_sbi_config_type(get_nf(AMF_CONFIG_NAME)->get_sbi());
 
   local_interface _n4 = local().get_nx();
 
@@ -356,4 +358,25 @@ bool smf_config::init() {
 
 std::shared_ptr<smf_config_type> smf_config::smf() const {
   return std::dynamic_pointer_cast<smf_config_type>(get_local());
+}
+
+void smf_config::update_used_nfs() {
+  config::update_used_nfs();
+  if (config::register_nrf()) {
+    if (!smf()->get_smf_support_features().use_local_pcc_rules()) {
+      logger::logger_registry::get_logger(LOGGER_NAME)
+          .warn("PCF NRF discovery not supported. Using the provided values");
+      get_nf(PCF_CONFIG_NAME)->set(true);
+    }
+  }
+  if (!smf()->get_smf_support_features().use_local_subscription_info()) {
+    // here we remove the local subscription info
+    smf()->get_subscription_info().clear();
+    // TODO check if DNN from configuration is still used
+  } else {
+    get_nf(UDM_CONFIG_NAME)->set(false);
+  }
+  if (smf()->get_smf_support_features().use_local_pcc_rules()) {
+    get_nf(PCF_CONFIG_NAME)->set(false);
+  }
 }
