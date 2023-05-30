@@ -21,14 +21,14 @@
 
 /*! \file smf_config.hpp
  * \brief
- \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
- \company Eurecom
- \date 2019
- \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
+ \author  Lionel GAUTHIER, Tien-Thinh NGUYEN, Stefan Spettel
+ \company Eurecom, phine.tech
+ \date 2023
+ \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr,
+ stefan.spettel@phine.tech
  */
 
-#ifndef FILE_SMF_CONFIG_HPP_SEEN
-#define FILE_SMF_CONFIG_HPP_SEEN
+#pragma once
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -66,7 +66,6 @@ const subscribed_default_qos_t DEFAULT_QOS{
 typedef struct interface_cfg_s {
   std::string if_name;
   struct in_addr addr4;
-  struct in_addr network4;
   struct in6_addr addr6;
   unsigned int mtu;
   unsigned int port;
@@ -83,25 +82,12 @@ typedef struct itti_cfg_s {
 typedef struct dnn_s {
   std::string dnn;
   std::string dnn_label;
-  bool is_ipv4;
-  bool is_ipv6;
-  int pool_id_iv4;
-  int pool_id_iv6;
   struct in_addr ue_pool_range_low;
   struct in_addr ue_pool_range_high;
   struct in6_addr paa_pool6_prefix;
   uint8_t paa_pool6_prefix_len;
   pdu_session_type_t pdu_session_type;
 } dnn_t;
-
-typedef struct session_management_subscription_s {
-  snssai_t single_nssai;
-  std::string session_type;
-  std::string dnn;
-  uint8_t ssc_mode;
-  subscribed_default_qos_t default_qos;
-  session_ambr_t session_ambr;
-} session_management_subscription_t;
 
 class smf_config : public config {
  private:
@@ -115,13 +101,8 @@ class smf_config : public config {
   void update_used_nfs() override;
 
  public:
-  /* Reader/writer lock for this configuration */
-  std::mutex m_rw_lock;
-  std::string pid_dir;
   spdlog::level::level_enum log_level;
   unsigned int instance = 0;
-  std::string fqdn      = {};
-
   interface_cfg_t n4;
   interface_cfg_t sbi;
   unsigned int sbi_http2_port;
@@ -194,9 +175,6 @@ class smf_config : public config {
 
   std::vector<upf_nwi_list_t> upf_nwi_list;
 
-  std::vector<session_management_subscription_t>
-      session_management_subscriptions;
-
   smf_config(const std::string& configPath, bool logStdout, bool logRotFile);
 
   int get_pfcp_node_id(pfcp::node_id_t& node_id);
@@ -212,7 +190,7 @@ class smf_config : public config {
    * @return NWI or empty string
    */
   std::string get_nwi(
-      const pfcp::node_id_t& node_id, const ::smf::iface_type& type);
+      const pfcp::node_id_t& node_id, const ::smf::iface_type& type) const;
 
   /**
    * Returns configured UPF based on node_id.
@@ -235,5 +213,3 @@ class smf_config : public config {
 };
 
 }  // namespace oai::config::smf
-
-#endif /* FILE_SMF_CONFIG_HPP_SEEN */

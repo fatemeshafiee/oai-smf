@@ -21,37 +21,24 @@
 
 /*! \file smf_config.cpp
  \brief
- \author  Lionel GAUTHIER, Tien-Thinh NGUYEN
- \company Eurecom
- \date 2019
- \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
+ \author  Lionel GAUTHIER, Tien-Thinh NGUYEN, Stefan Spettel
+ \company Eurecom, phine.tech
+ \date 2023
+ \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr,
+ stefan.spettel@phine.tech
  */
 
 #include "smf_config.hpp"
 
-#include <cstdlib>
-#include <iomanip>
 #include <iostream>
-#include "string.hpp"
 
 #include <arpa/inet.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <regex>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
 #include "common_defs.h"
-#include "epc.h"
 #include "if.hpp"
 #include "logger.hpp"
 #include "fqdn.hpp"
-#include "smf_app.hpp"
-#include "3gpp_conversions.hpp"
 #include "smf_config_types.hpp"
 
 using namespace std;
@@ -62,9 +49,6 @@ using namespace oai::config;
 smf_config::smf_config(
     const std::string& configPath, bool logStdout, bool logRotFile)
     : config(configPath, oai::config::SMF_CONFIG_NAME, logStdout, logRotFile),
-      m_rw_lock(),
-      pid_dir(),
-      instance(0),
       n4(),
       sbi(),
       itti(),
@@ -106,7 +90,7 @@ smf_config::smf_config(
   subscription_info_config info(
       "default", 1, DEFAULT_QOS, DEFAULT_S_AMBR, DEFAULT_SNSSAI);
   smf->get_subscription_info().push_back(info);
-};
+}
 
 //------------------------------------------------------------------------------
 int smf_config::get_pfcp_node_id(pfcp::node_id_t& node_id) {
@@ -151,18 +135,17 @@ bool smf_config::is_dotted_dnn_handled(
     const std::string& dnn, const pdu_session_type_t& pdn_session_type) {
   Logger::smf_app().debug("Requested DNN: %s", dnn.c_str());
 
-  for (std::map<std::string, dnn_t>::iterator it = dnns.begin();
-       it != dnns.end(); it++) {
+  for (const auto& it : dnns) {
     Logger::smf_app().debug(
-        "DNN label: %s, dnn: %s", it->second.dnn_label.c_str(),
-        it->second.dnn.c_str());
-    if (0 == dnn.compare(it->second.dnn)) {
+        "DNN label: %s, dnn: %s", it.second.dnn_label.c_str(),
+        it.second.dnn.c_str());
+    if (dnn == it.second.dnn) {
       Logger::smf_app().debug("DNN matched!");
       Logger::smf_app().debug(
           "PDU Session Type %d, PDN Type %d", pdn_session_type.pdu_session_type,
-          it->second.pdu_session_type.pdu_session_type);
+          it.second.pdu_session_type.pdu_session_type);
       if (pdn_session_type.pdu_session_type ==
-          it->second.pdu_session_type.pdu_session_type) {
+          it.second.pdu_session_type.pdu_session_type) {
         return true;
       }
     }
@@ -173,17 +156,16 @@ bool smf_config::is_dotted_dnn_handled(
 
 //------------------------------------------------------------------------------
 std::string smf_config::get_default_dnn() {
-  for (std::map<std::string, dnn_t>::iterator it = dnns.begin();
-       it != dnns.end(); it++) {
-    Logger::smf_app().debug("Default DNN: %s", it->second.dnn.c_str());
-    return it->second.dnn;
+  for (const auto& it : dnns) {
+    Logger::smf_app().debug("Default DNN: %s", it.second.dnn.c_str());
+    return it.second.dnn;
   }
   return "default";  // default DNN
 }
 
 //------------------------------------------------------------------------------
 std::string smf_config::get_nwi(
-    const pfcp::node_id_t& node_id, const iface_type& type) {
+    const pfcp::node_id_t& node_id, const iface_type& type) const {
   try {
     upf used_upf = get_upf(node_id);
     switch (type) {
