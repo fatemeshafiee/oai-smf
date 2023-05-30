@@ -365,7 +365,7 @@ void smf_config::update_used_nfs() {
     if (!smf()->get_smf_support_features().use_local_pcc_rules()) {
       logger::logger_registry::get_logger(LOGGER_NAME)
           .warn("PCF NRF discovery not supported. Using the provided values");
-      get_nf(PCF_CONFIG_NAME)->set(true);
+      get_nf(PCF_CONFIG_NAME)->set_config();
     }
   }
   if (!smf()->get_smf_support_features().use_local_subscription_info()) {
@@ -373,9 +373,9 @@ void smf_config::update_used_nfs() {
     smf()->get_subscription_info().clear();
     // TODO check if DNN from configuration is still used
   } else {
-    get_nf(UDM_CONFIG_NAME)->set(false);
+    get_nf(UDM_CONFIG_NAME)->unset_config();
   }
   if (smf()->get_smf_support_features().use_local_pcc_rules()) {
-    get_nf(PCF_CONFIG_NAME)->set(false);
+    get_nf(PCF_CONFIG_NAME)->unset_config();
   }
 }

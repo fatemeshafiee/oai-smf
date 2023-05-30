@@ -202,7 +202,7 @@ upf::upf(
   m_port.set_validation_interval(PORT_MIN_VALUE, PORT_MAX_VALUE);
   m_local_n3_ipv4.set_validation_regex(IPV4_ADDRESS_VALIDATOR_REGEX);
   if (local_n3_ip.empty()) {
-    m_local_n3_ipv4.set(false);
+    m_local_n3_ipv4.unset_config();
   }
 }
 
@@ -312,9 +312,15 @@ ue_dns::ue_dns(
   m_secondary_dns_v6.set_validation_regex(IPV6_ADDRESS_VALIDATOR_REGEX);
 
   // only Primary IPv4 is mandatory
-  m_primary_dns_v6.set(!primary_dns_v6.empty());
-  m_secondary_dns_v4.set(!secondary_dns_v4.empty());
-  m_secondary_dns_v6.set(!secondary_dns_v6.empty());
+  if (primary_dns_v6.empty()) {
+    m_primary_dns_v6.unset_config();
+  }
+  if (secondary_dns_v6.empty()) {
+    m_secondary_dns_v6.unset_config();
+  }
+  if (secondary_dns_v4.empty()) {
+    m_secondary_dns_v4.unset_config();
+  }
 }
 
 void ue_dns::from_yaml(const YAML::Node& node) {
@@ -403,7 +409,7 @@ ims_config::ims_config(
   m_pcscf_v4.set_validation_regex(IPV4_ADDRESS_VALIDATOR_REGEX);
   m_pcscf_v6.set_validation_regex(IPV6_ADDRESS_VALIDATOR_REGEX);
   if (pcscf_ip_v6.empty()) {
-    m_pcscf_v6.set(false);
+    m_pcscf_v6.unset_config();
   }
 }
 
