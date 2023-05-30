@@ -110,43 +110,40 @@ smf_config::smf_config(
 
 //------------------------------------------------------------------------------
 int smf_config::get_pfcp_node_id(pfcp::node_id_t& node_id) {
-  node_id = {};
-  // TODO: support QFDN
-  if (!fqdn.empty() and use_fqdn_dns) {
+  oai::config::local_interface _n4 = local().get_nx();
+  // if we give a FQDN here, the IP address will be empty
+  if (!conv::fromString(local().get_host()).s_addr) {
     node_id.node_id_type = pfcp::NODE_ID_TYPE_FQDN;
-    node_id.fqdn         = fqdn;
+    node_id.fqdn         = local().get_host();
     return RETURNok;
-  }
-
-  if (n4.addr4.s_addr) {
-    node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-    node_id.u1.ipv4_address = n4.addr4;
-    return RETURNok;
-  }
-  if (n4.addr6.s6_addr32[0] | n4.addr6.s6_addr32[1] | n4.addr6.s6_addr32[2] |
-      n4.addr6.s6_addr32[3]) {
-    node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV6_ADDRESS;
-    node_id.u1.ipv6_address = n4.addr6;
-    return RETURNok;
+  } else {
+    if (_n4.get_addr4().s_addr) {
+      node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+      node_id.u1.ipv4_address = _n4.get_addr4();
+      return RETURNok;
+    }
+    if (!IN6_IS_ADDR_UNSPECIFIED(&_n4.get_addr6())) {
+      node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV6_ADDRESS;
+      node_id.u1.ipv6_address = _n4.get_addr6();
+      return RETURNok;
+    }
   }
   return RETURNerror;
 }
-//------------------------------------------------------------------------------
+
 int smf_config::get_pfcp_fseid(pfcp::fseid_t& fseid) {
-  int rc = RETURNerror;
-  fseid  = {};
-  if (n4.addr4.s_addr) {
+  oai::config::local_interface _n4 = local().get_nx();
+  if (_n4.get_addr4().s_addr) {
     fseid.v4           = 1;
-    fseid.ipv4_address = n4.addr4;
-    rc                 = RETURNok;
+    fseid.ipv4_address = _n4.get_addr4();
+    return RETURNok;
   }
-  if (n4.addr6.s6_addr32[0] | n4.addr6.s6_addr32[1] | n4.addr6.s6_addr32[2] |
-      n4.addr6.s6_addr32[3]) {
+  if (!IN6_IS_ADDR_UNSPECIFIED(&_n4.get_addr6())) {
     fseid.v6           = 1;
-    fseid.ipv6_address = n4.addr6;
-    rc                 = RETURNok;
+    fseid.ipv6_address = _n4.get_addr6();
+    return RETURNok;
   }
-  return rc;
+  return RETURNerror;
 }
 
 //------------------------------------------------------------------------------
@@ -280,15 +277,15 @@ void smf_config::to_smf_config() {
   // UPF configuration
   // NWI is handled in get_nwi function directly from new configuration
   for (const auto& upf : smf_cfg->get_upfs()) {
-    pfcp::node_id_t node_id;
-    // Here we resolve the IP so that the Node ID Type is always V4
-    in_addr ip              = resolve_nf(upf.get_host());
-    node_id.u1.ipv4_address = ip;
-    node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-    // Stefan: smf_app already checks if the UPF is present in configuration and
-    // does not start association when receiving an NRF notification. WHY?
-    // that should better be handled by the PFCP associations
     if (!discover_upf) {
+      pfcp::node_id_t node_id;
+      // Here we resolve the IP so that the Node ID Type is always V4
+      in_addr ip              = resolve_nf(upf.get_host());
+      node_id.u1.ipv4_address = ip;
+      node_id.node_id_type    = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
+      // Stefan: smf_app already checks if the UPF is present in configuration
+      // and does not start association when receiving an NRF notification. WHY?
+      // that should better be handled by the PFCP associations
       upfs.push_back(node_id);
     }
 

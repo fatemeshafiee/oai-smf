@@ -144,7 +144,6 @@ class smf_config : public config {
   bool discover_pcf;
   bool use_local_subscription_info;
   bool use_local_pcc_rules;
-  bool use_fqdn_dns;
   unsigned int http_version;
   bool enable_ur;
   bool enable_dl_pdr_in_pfcp_sess_estab;
