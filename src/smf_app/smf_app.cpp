@@ -373,7 +373,8 @@ void smf_app::start_nf_registration_discovery() {
   } else {
     // TODO: should be done when SMF select UPF for a particular UE (should be
     // verified)
-    for (std::vector<pfcp::node_id_t>::const_iterator it = smf_cfg->upfs.begin();
+    for (std::vector<pfcp::node_id_t>::const_iterator it =
+             smf_cfg->upfs.begin();
          it != smf_cfg->upfs.end(); ++it) {
       for (int i = 0; i < PFCP_ASSOC_RETRY_COUNT; i++) {
         start_upf_association(*it);
@@ -1924,7 +1925,8 @@ bool smf_app::get_session_management_subscription_data(
           pdu_session_type;
 
       // SSC_Mode
-      dnn_configuration->ssc_modes.default_ssc_mode.ssc_mode = sub.get_ssc_mode();
+      dnn_configuration->ssc_modes.default_ssc_mode.ssc_mode =
+          sub.get_ssc_mode();
 
       // 5gQosProfile
       dnn_configuration->_5g_qos_profile._5qi = sub.get_default_qos()._5qi;
@@ -1938,8 +1940,9 @@ bool smf_app::get_session_management_subscription_data(
           sub.get_default_qos().priority_level;
 
       // Session_ambr
-      dnn_configuration->session_ambr.uplink   = sub.get_session_ambr().uplink;
-      dnn_configuration->session_ambr.downlink = sub.get_session_ambr().downlink;
+      dnn_configuration->session_ambr.uplink = sub.get_session_ambr().uplink;
+      dnn_configuration->session_ambr.downlink =
+          sub.get_session_ambr().downlink;
       Logger::smf_app().debug(
           "Session AMBR Uplink %s, Downlink %s",
           dnn_configuration->session_ambr.uplink.c_str(),
@@ -2250,8 +2253,7 @@ void smf_app::generate_smf_profile() {
   // TODO: custom info
 
   int i = 0;
-  for (const auto& sub : smf_cfg->smf()->get_subscription_info())
-  {
+  for (const auto& sub : smf_cfg->smf()->get_subscription_info()) {
     // SNSSAIS
     snssai_t snssai = sub.get_single_nssai();
     // Verify if this SNSSAI exist
@@ -2355,7 +2357,8 @@ void smf_app::trigger_upf_status_notification_subscribe() {
   json_data["validityTime"] = "20390531T235959";
 
   std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
+      std::string(
+          inet_ntoa(*((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
       ":" + std::to_string(smf_cfg->nrf_addr.port) + NNRF_NFM_BASE +
       smf_cfg->nrf_addr.api_version + NNRF_NF_STATUS_SUBSCRIBE_URL;
 

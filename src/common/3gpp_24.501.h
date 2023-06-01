@@ -296,7 +296,6 @@ typedef struct mfbr_s {
 // Notification control
 enum notification_control_e { REQUESTED = 1, NOT_REQUESTED = 2 };
 
-
 //-------------------------------------
 // 8.14 PDU Session (UE IP) Address Allocation (PAA)
 struct paa_s {

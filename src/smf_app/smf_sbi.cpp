@@ -584,11 +584,11 @@ void smf_sbi::register_nf_instance(
   nlohmann::json json_data = {};
   msg->profile.to_json(json_data);
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg->nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg->nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->profile.get_nf_instance_id();
+  std::string url = std::string(inet_ntoa(
+                        *((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
+                    ":" + std::to_string(smf_cfg->nrf_addr.port) +
+                    NNRF_NFM_BASE + smf_cfg->nrf_addr.api_version +
+                    NNRF_NF_REGISTER_URL + msg->profile.get_nf_instance_id();
 
   Logger::smf_sbi().debug(
       "Send NF Instance Registration to NRF, NRF URL %s", url.c_str());
@@ -674,11 +674,11 @@ void smf_sbi::update_nf_instance(
   std::string body = json_data.dump();
   Logger::smf_sbi().debug("Send NF Update to NRF, Msg body %s", body.c_str());
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg->nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg->nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->smf_instance_id;
+  std::string url = std::string(inet_ntoa(
+                        *((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
+                    ":" + std::to_string(smf_cfg->nrf_addr.port) +
+                    NNRF_NFM_BASE + smf_cfg->nrf_addr.api_version +
+                    NNRF_NF_REGISTER_URL + msg->smf_instance_id;
 
   Logger::smf_sbi().debug("Send NF Update to NRF, NRF URL %s", url.c_str());
 
@@ -741,11 +741,11 @@ void smf_sbi::deregister_nf_instance(
   Logger::smf_sbi().debug(
       "Send NF De-register to NRF (HTTP version %d)", msg->http_version);
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg->nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg->nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->smf_instance_id;
+  std::string url = std::string(inet_ntoa(
+                        *((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
+                    ":" + std::to_string(smf_cfg->nrf_addr.port) +
+                    NNRF_NFM_BASE + smf_cfg->nrf_addr.api_version +
+                    NNRF_NF_REGISTER_URL + msg->smf_instance_id;
 
   Logger::smf_sbi().debug(
       "Send NF De-register to NRF (NRF URL %s)", url.c_str());
@@ -855,10 +855,16 @@ bool smf_sbi::get_sm_data(
   query_str = "?single-nssai={\"sst\":" + std::to_string(snssai.sst) +
               ",\"sd\":\"" + std::to_string(snssai.sd) + "\"}&dnn=" + dnn +
               "&plmn-id={\"mcc\":\"" + mcc + "\",\"mnc\":\"" + mnc + "\"}";
+  // TODO we hardcode HTTP/1 here, but HTTP/2 is not working on UDM?
+  // TODO should just use get_url() method
   std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->udm_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg->udm_addr.port) + NUDM_SDM_BASE +
-      smf_cfg->udm_addr.api_version +
+      std::string(
+          inet_ntoa(*((struct in_addr*) &smf_cfg->udm_addr.ipv4_addr))) +
+      ":" +
+      std::to_string(smf_cfg->get_nf(oai::config::UDM_CONFIG_NAME)
+                         ->get_sbi()
+                         .get_port_http1()) +
+      NUDM_SDM_BASE + smf_cfg->udm_addr.api_version +
       fmt::format(NUDM_SDM_GET_SM_DATA_URL, smf_supi64_to_string(supi)) +
       query_str;
 

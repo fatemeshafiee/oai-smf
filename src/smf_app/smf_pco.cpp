@@ -328,7 +328,7 @@ int smf_app::process_pco_link_mtu_request(
   poc_id_resp.protocol_id = PCO_CONTAINER_IDENTIFIER_IPV4_LINK_MTU;
   poc_id_resp.length_of_protocol_id_contents = 2;
   mtu_array[0]                               = (uint8_t)(smf_cfg->ue_mtu >> 8);
-  mtu_array[1]                               = (uint8_t)(smf_cfg->ue_mtu & 0xFF);
+  mtu_array[1] = (uint8_t)(smf_cfg->ue_mtu & 0xFF);
   std::string tmp_s((const char*) &mtu_array[0], 2);
   poc_id_resp.protocol_id_contents = tmp_s;
 

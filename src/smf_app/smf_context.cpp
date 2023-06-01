@@ -1692,9 +1692,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
   // Get and Store AMF Addr if available
   std::vector<std::string> split_result;
-  std::string amf_addr_str = conv::toString(smf_cfg->amf_addr.ipv4_addr)
-                                 .append(":")
-                                 .append(std::to_string(smf_cfg->amf_addr.port));
+  std::string amf_addr_str =
+      conv::toString(smf_cfg->amf_addr.ipv4_addr)
+          .append(":")
+          .append(std::to_string(smf_cfg->amf_addr.port));
 
   boost::split(split_result, amf_status_uri, boost::is_any_of("/"));
   if (split_result.size() >= 3) {
