@@ -9594,6 +9594,11 @@ class pfcp_update_pdr_ie : public pfcp_grouped_ie {
       std::shared_ptr<pfcp_pdi_ie> sie(new pfcp_pdi_ie(b.pdi.second));
       add_ie(sie);
     }
+    if (b.outer_header_removal.first) {
+      std::shared_ptr<pfcp_outer_header_removal_ie> sie(
+          new pfcp_outer_header_removal_ie(b.outer_header_removal.second));
+      add_ie(sie);
+    }
     if (b.precedence.first) {
       std::shared_ptr<pfcp_precedence_ie> sie(
           new pfcp_precedence_ie(b.precedence.second));
