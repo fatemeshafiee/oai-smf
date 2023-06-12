@@ -62,28 +62,28 @@ smf_config::smf_config(
 
   // Define default values in YAML
   auto smf = std::make_shared<smf_config_type>(
-      "smf", "oai-smf", sbi_interface("SBI", "oai-smf", 80, 0, "v1", "eth0"),
+      "smf", "oai-smf", sbi_interface("SBI", "oai-smf", 80, "v1", "eth0"),
       local_interface("N4", "oai-smf", 8805, "eth0"));
   add_nf("smf", smf);
 
   auto amf = std::make_shared<nf>(
-      "amf", "oai-amf", sbi_interface("SBI", "oai-amf", 80, 0, "v1", ""));
+      "amf", "oai-amf", sbi_interface("SBI", "oai-amf", 80, "v1", ""));
   add_nf("amf", amf);
 
   auto udm = std::make_shared<nf>(
-      "udm", "oai-udm", sbi_interface("SBI", "oai-udm", 80, 0, "v1", ""));
+      "udm", "oai-udm", sbi_interface("SBI", "oai-udm", 80, "v1", ""));
   add_nf("udm", udm);
 
   auto pcf = std::make_shared<nf>(
-      "pcf", "oai-pcf", sbi_interface("SBI", "oai-pcf", 80, 0, "v1", ""));
+      "pcf", "oai-pcf", sbi_interface("SBI", "oai-pcf", 80, "v1", ""));
   add_nf("pcf", pcf);
 
   auto nrf = std::make_shared<nf>(
-      "nrf", "oai-nrf", sbi_interface("SBI", "oai-nrf", 80, 0, "v1", ""));
+      "nrf", "oai-nrf", sbi_interface("SBI", "oai-nrf", 80, "v1", ""));
   add_nf("nrf", nrf);
 
   // DNN default values
-  dnn_config dnn("default", "IPV4", "12.2.0.1 - 12.2.0.255", "");
+  dnn_config dnn("default", "IPV4", "12.1.1.0 - 12.1.1.255", "");
   m_dnns.push_back(dnn);
 
   // Local subscription default values
@@ -203,21 +203,25 @@ void smf_config::to_smf_config() {
   // we need to set some things (e.g. API version even if we do NRF
   // discovery...)
   amf_addr.from_sbi_config_type_no_resolving(
-      get_nf(AMF_CONFIG_NAME)->get_sbi());
+      get_nf(AMF_CONFIG_NAME)->get_sbi(), http_version);
   udm_addr.from_sbi_config_type_no_resolving(
-      get_nf(UDM_CONFIG_NAME)->get_sbi());
+      get_nf(UDM_CONFIG_NAME)->get_sbi(), http_version);
 
   if (get_nf(NRF_CONFIG_NAME)->is_set()) {
-    nrf_addr.from_sbi_config_type(get_nf(NRF_CONFIG_NAME)->get_sbi());
+    nrf_addr.from_sbi_config_type(
+        get_nf(NRF_CONFIG_NAME)->get_sbi(), http_version);
   }
   if (get_nf(AMF_CONFIG_NAME)->is_set()) {
-    amf_addr.from_sbi_config_type(get_nf(AMF_CONFIG_NAME)->get_sbi());
+    amf_addr.from_sbi_config_type(
+        get_nf(AMF_CONFIG_NAME)->get_sbi(), http_version);
   }
   if (get_nf(UDM_CONFIG_NAME)->is_set()) {
-    udm_addr.from_sbi_config_type(get_nf(UDM_CONFIG_NAME)->get_sbi());
+    udm_addr.from_sbi_config_type(
+        get_nf(UDM_CONFIG_NAME)->get_sbi(), http_version);
   }
   if (get_nf(PCF_CONFIG_NAME)->is_set()) {
-    pcf_addr.from_sbi_config_type(get_nf(PCF_CONFIG_NAME)->get_sbi());
+    pcf_addr.from_sbi_config_type(
+        get_nf(PCF_CONFIG_NAME)->get_sbi(), http_version);
   }
 
   local_interface _n4 = local().get_nx();
@@ -238,13 +242,13 @@ void smf_config::to_smf_config() {
 
   force_push_pco = true;
 
-  sbi.port        = smf_cfg->get_sbi().get_port_http1();
+  sbi.port        = smf_cfg->get_sbi().get_port();
   sbi.addr4       = smf_cfg->get_sbi().get_addr4();
   sbi.addr6       = smf_cfg->get_sbi().get_addr6();
   sbi.if_name     = smf_cfg->get_sbi().get_if_name();
-  sbi_http2_port  = smf_cfg->get_sbi().get_port_http2();
+  sbi_http2_port  = smf_cfg->get_sbi().get_port();
   sbi_api_version = smf_cfg->get_sbi().get_api_version();
-  http_version    = smf_cfg->get_sbi().use_http2() ? 2 : 1;
+  http_version    = get_http_version();
 
   default_dnsv4     = smf_cfg->get_ue_dns().get_primary_dns_v4();
   default_dns_secv4 = smf_cfg->get_ue_dns().get_secondary_dns_v4();

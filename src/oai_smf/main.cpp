@@ -140,26 +140,27 @@ int main(int argc, char** argv) {
     exit(-EDEADLK);
   }
 
-  // SMF Pistache API server (HTTP1)
-  Pistache::Address addr(
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->sbi.addr4))),
-      Pistache::Port(smf_cfg->sbi.port));
-  smf_api_server_1 = new SMFApiServer(addr, smf_app_inst);
-  smf_api_server_1->init(2);
-  // smf_api_server_1->start();
-  std::thread smf_http1_manager(&SMFApiServer::start, smf_api_server_1);
-  // SMF NGHTTP API server (HTTP2)
-  smf_api_server_2 = new smf_http2_server(
-      conv::toString(smf_cfg->sbi.addr4), smf_cfg->sbi_http2_port,
-      smf_app_inst);
-  // smf_api_server_2->start();
-  std::thread smf_http2_manager(&smf_http2_server::start, smf_api_server_2);
-
+  if (smf_cfg->get_http_version() == 1) {
+    // SMF Pistache API server (HTTP1)
+    Pistache::Address addr(
+        std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->sbi.addr4))),
+        Pistache::Port(smf_cfg->sbi.port));
+    smf_api_server_1 = new SMFApiServer(addr, smf_app_inst);
+    smf_api_server_1->init(2);
+    // smf_api_server_1->start();
+    std::thread smf_http1_manager(&SMFApiServer::start, smf_api_server_1);
+    smf_http1_manager.join();
+  } else if (smf_cfg->get_http_version() == 2) {
+    // SMF NGHTTP API server (HTTP2)
+    smf_api_server_2 = new smf_http2_server(
+        conv::toString(smf_cfg->sbi.addr4), smf_cfg->sbi_http2_port,
+        smf_app_inst);
+    // smf_api_server_2->start();
+    std::thread smf_http2_manager(&smf_http2_server::start, smf_api_server_2);
+    smf_http2_manager.join();
+  }
   // Register to NRF and discover appropriate UPFs
   smf_app_inst->start_nf_registration_discovery();
-
-  smf_http1_manager.join();
-  smf_http2_manager.join();
 
   FILE* fp             = NULL;
   std::string filename = fmt::format("/tmp/smf_{}.status", getpid());

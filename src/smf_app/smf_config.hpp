@@ -140,21 +140,20 @@ class smf_config : public config {
     std::string fqdn;
 
     // TODO delete, just for now until we refactor the calling classes as well
-    void from_sbi_config_type(const sbi_interface& sbi_val) {
-      ipv4_addr = resolve_nf(sbi_val.get_host());
-      port      = sbi_val.use_http2() ? sbi_val.get_port_http2() :
-                                   sbi_val.get_port_http1();
-      http_version = sbi_val.use_http2() ? 2 : 1;
+    void from_sbi_config_type(const sbi_interface& sbi_val, int http_vers) {
+      ipv4_addr    = resolve_nf(sbi_val.get_host());
+      port         = sbi_val.get_port();
+      http_version = http_vers;
       api_version  = sbi_val.get_api_version();
       fqdn         = sbi_val.get_host();
     }
 
-    void from_sbi_config_type_no_resolving(const sbi_interface& sbi_val) {
-      fqdn        = sbi_val.get_host();
-      api_version = sbi_val.get_api_version();
-      port        = sbi_val.use_http2() ? sbi_val.get_port_http2() :
-                                   sbi_val.get_port_http1();
-      http_version = sbi_val.use_http2() ? 2 : 1;
+    void from_sbi_config_type_no_resolving(
+        const sbi_interface& sbi_val, int http_vers) {
+      fqdn         = sbi_val.get_host();
+      api_version  = sbi_val.get_api_version();
+      port         = sbi_val.get_port();
+      http_version = http_vers;
     }
   };
 

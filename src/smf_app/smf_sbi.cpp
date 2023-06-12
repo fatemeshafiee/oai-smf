@@ -858,13 +858,8 @@ bool smf_sbi::get_sm_data(
   // TODO we hardcode HTTP/1 here, but HTTP/2 is not working on UDM?
   // TODO should just use get_url() method
   std::string url =
-      std::string(
-          inet_ntoa(*((struct in_addr*) &smf_cfg->udm_addr.ipv4_addr))) +
-      ":" +
-      std::to_string(smf_cfg->get_nf(oai::config::UDM_CONFIG_NAME)
-                         ->get_sbi()
-                         .get_port_http1()) +
-      NUDM_SDM_BASE + smf_cfg->udm_addr.api_version +
+      smf_cfg->get_nf(oai::config::UDM_CONFIG_NAME)->get_url() + NUDM_SDM_BASE +
+      smf_cfg->udm_addr.api_version +
       fmt::format(NUDM_SDM_GET_SM_DATA_URL, smf_supi64_to_string(supi)) +
       query_str;
 
