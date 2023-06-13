@@ -54,8 +54,8 @@ smf_config::smf_config(
       itti(),
       upfs() {
   m_used_config_values = {LOG_LEVEL_CONFIG_NAME, REGISTER_NF_CONFIG_NAME,
-                          NF_LIST_CONFIG_NAME, SMF_CONFIG_NAME,
-                          DNNS_CONFIG_NAME};
+                          NF_LIST_CONFIG_NAME,   SMF_CONFIG_NAME,
+                          DNNS_CONFIG_NAME,      NF_CONFIG_HTTP_NAME};
 
   m_used_sbi_values = {SMF_CONFIG_NAME, PCF_CONFIG_NAME, NRF_CONFIG_NAME,
                        AMF_CONFIG_NAME, UDM_CONFIG_NAME};

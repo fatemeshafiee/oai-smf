@@ -855,8 +855,6 @@ bool smf_sbi::get_sm_data(
   query_str = "?single-nssai={\"sst\":" + std::to_string(snssai.sst) +
               ",\"sd\":\"" + std::to_string(snssai.sd) + "\"}&dnn=" + dnn +
               "&plmn-id={\"mcc\":\"" + mcc + "\",\"mnc\":\"" + mnc + "\"}";
-  // TODO we hardcode HTTP/1 here, but HTTP/2 is not working on UDM?
-  // TODO should just use get_url() method
   std::string url =
       smf_cfg->get_nf(oai::config::UDM_CONFIG_NAME)->get_url() + NUDM_SDM_BASE +
       smf_cfg->udm_addr.api_version +
@@ -877,7 +875,8 @@ bool smf_sbi::get_sm_data(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  if (!curl_create_handle(url, response_data, pid_ptr, "GET")) {
+  if (!curl_create_handle(
+          url, response_data, pid_ptr, "GET", smf_cfg->get_http_version())) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return false;
