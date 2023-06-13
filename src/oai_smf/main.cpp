@@ -149,6 +149,8 @@ int main(int argc, char** argv) {
     smf_api_server_1->init(2);
     // smf_api_server_1->start();
     std::thread smf_http1_manager(&SMFApiServer::start, smf_api_server_1);
+    // Register to NRF and discover appropriate UPFs
+    smf_app_inst->start_nf_registration_discovery();
     smf_http1_manager.join();
   } else if (smf_cfg->get_http_version() == 2) {
     // SMF NGHTTP API server (HTTP2)
@@ -157,10 +159,10 @@ int main(int argc, char** argv) {
         smf_app_inst);
     // smf_api_server_2->start();
     std::thread smf_http2_manager(&smf_http2_server::start, smf_api_server_2);
+    // Register to NRF and discover appropriate UPFs
+    smf_app_inst->start_nf_registration_discovery();
     smf_http2_manager.join();
   }
-  // Register to NRF and discover appropriate UPFs
-  smf_app_inst->start_nf_registration_discovery();
 
   FILE* fp             = NULL;
   std::string filename = fmt::format("/tmp/smf_{}.status", getpid());
