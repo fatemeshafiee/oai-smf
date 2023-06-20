@@ -84,6 +84,8 @@ RUN ldconfig && \
     rm -rf /etc/pki/entitlement && \
     rm -rf /etc/rhsm
 
+FROM mikefarah/yq:latest as yq-source
+
 #---------------------------------------------------------------------
 # TARGET IMAGE
 #---------------------------------------------------------------------
@@ -124,6 +126,7 @@ COPY --from=oai-smf-builder \
     /openair-smf/build/smf/build/oai_smf \
     /openair-smf/scripts/healthcheck.sh \
     ./
+COPY --from=yq-source /usr/bin/yq /usr/bin
 
 COPY --from=oai-smf-builder \
     /usr/local/lib64/libpistache.so.0 \

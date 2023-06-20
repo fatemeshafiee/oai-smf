@@ -69,6 +69,8 @@ RUN ldconfig && \
     ldd /openair-smf/build/smf/build/smf && \
     mv /openair-smf/build/smf/build/smf /openair-smf/build/smf/build/oai_smf
 
+FROM mikefarah/yq:latest as yq-source
+
 #---------------------------------------------------------------------
 # TARGET IMAGE
 #---------------------------------------------------------------------
@@ -111,6 +113,7 @@ COPY --from=oai-smf-builder \
     /openair-smf/build/smf/build/oai_smf \
     /openair-smf/scripts/healthcheck.sh \
     ./
+COPY --from=yq-source /usr/bin/yq /usr/bin
 
 WORKDIR /usr/local/lib/
 COPY --from=oai-smf-builder \
