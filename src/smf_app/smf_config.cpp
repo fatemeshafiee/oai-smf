@@ -348,6 +348,13 @@ const upf& smf_config::get_upf(const pfcp::node_id_t& node_id) const {
 
 bool smf_config::init() {
   bool success = config::init();
+  // we update DNS settings per DNN if user did not set it
+  for (auto& dnn : m_dnns) {
+    if (!dnn.get_ue_dns().is_set()) {
+      dnn.set_ue_dns(smf()->get_ue_dns());
+    }
+  }
+
   // if there is an error here, we print the configuration before throwing
   try {
     to_smf_config();
