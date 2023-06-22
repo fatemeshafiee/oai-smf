@@ -193,8 +193,8 @@ class smf_pcf_client : public policy_storage {
 
   explicit smf_pcf_client(
       const std::string& pcf_addr, const std::string& pcf_api_version) {
-    root_uri = "http://" + pcf_addr + "/" + sm_api_name + "/" +
-               pcf_api_version + "/" + sm_api_policy_resource_part;
+    root_uri = pcf_addr + "/" + sm_api_name + "/" + pcf_api_version + "/" +
+               sm_api_policy_resource_part;
   }
 
   virtual ~smf_pcf_client();

@@ -60,7 +60,7 @@ using json = nlohmann::json;
 
 extern itti_mw* itti_inst;
 extern smf_sbi* smf_sbi_inst;
-extern smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 void smf_sbi_task(void*);
 
 // To read content of the response from AMF
@@ -584,11 +584,11 @@ void smf_sbi::register_nf_instance(
   nlohmann::json json_data = {};
   msg->profile.to_json(json_data);
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->profile.get_nf_instance_id();
+  std::string url = std::string(inet_ntoa(
+                        *((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
+                    ":" + std::to_string(smf_cfg->nrf_addr.port) +
+                    NNRF_NFM_BASE + smf_cfg->nrf_addr.api_version +
+                    NNRF_NF_REGISTER_URL + msg->profile.get_nf_instance_id();
 
   Logger::smf_sbi().debug(
       "Send NF Instance Registration to NRF, NRF URL %s", url.c_str());
@@ -674,11 +674,11 @@ void smf_sbi::update_nf_instance(
   std::string body = json_data.dump();
   Logger::smf_sbi().debug("Send NF Update to NRF, Msg body %s", body.c_str());
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->smf_instance_id;
+  std::string url = std::string(inet_ntoa(
+                        *((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
+                    ":" + std::to_string(smf_cfg->nrf_addr.port) +
+                    NNRF_NFM_BASE + smf_cfg->nrf_addr.api_version +
+                    NNRF_NF_REGISTER_URL + msg->smf_instance_id;
 
   Logger::smf_sbi().debug("Send NF Update to NRF, NRF URL %s", url.c_str());
 
@@ -741,11 +741,11 @@ void smf_sbi::deregister_nf_instance(
   Logger::smf_sbi().debug(
       "Send NF De-register to NRF (HTTP version %d)", msg->http_version);
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->smf_instance_id;
+  std::string url = std::string(inet_ntoa(
+                        *((struct in_addr*) &smf_cfg->nrf_addr.ipv4_addr))) +
+                    ":" + std::to_string(smf_cfg->nrf_addr.port) +
+                    NNRF_NFM_BASE + smf_cfg->nrf_addr.api_version +
+                    NNRF_NF_REGISTER_URL + msg->smf_instance_id;
 
   Logger::smf_sbi().debug(
       "Send NF De-register to NRF (NRF URL %s)", url.c_str());
@@ -856,9 +856,8 @@ bool smf_sbi::get_sm_data(
               ",\"sd\":\"" + std::to_string(snssai.sd) + "\"}&dnn=" + dnn +
               "&plmn-id={\"mcc\":\"" + mcc + "\",\"mnc\":\"" + mnc + "\"}";
   std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.udm_addr.port) + NUDM_SDM_BASE +
-      smf_cfg.udm_addr.api_version +
+      smf_cfg->get_nf(oai::config::UDM_CONFIG_NAME)->get_url() + NUDM_SDM_BASE +
+      smf_cfg->udm_addr.api_version +
       fmt::format(NUDM_SDM_GET_SM_DATA_URL, smf_supi64_to_string(supi)) +
       query_str;
 
@@ -876,7 +875,8 @@ bool smf_sbi::get_sm_data(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  if (!curl_create_handle(url, response_data, pid_ptr, "GET")) {
+  if (!curl_create_handle(
+          url, response_data, pid_ptr, "GET", smf_cfg->get_http_version())) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return false;
@@ -1122,7 +1122,7 @@ bool smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg->sbi.if_name.c_str());
 
   if (http_version == 2) {
     if (Logger::should_log(spdlog::level::debug))
@@ -1183,7 +1183,7 @@ bool smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg->sbi.if_name.c_str());
 
   if (http_version == 2) {
     if (Logger::should_log(spdlog::level::debug))
@@ -1247,7 +1247,7 @@ bool smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg->sbi.if_name.c_str());
 
   if (http_version == 2) {
     if (Logger::should_log(spdlog::level::debug))
@@ -1305,7 +1305,7 @@ bool smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg->sbi.if_name.c_str());
 
   if (http_version == 2) {
     if (Logger::should_log(spdlog::level::debug))

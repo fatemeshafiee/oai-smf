@@ -72,8 +72,6 @@ typedef enum {
   PDU_SESSION_RELEASE       = 3
 } pdu_session_procedure_t;
 
-class smf_config;
-
 class smf_context_ref {
  public:
   smf_context_ref() { clear(); }
@@ -125,10 +123,9 @@ class smf_app {
 
   /*
    * Apply the config from the configuration file for DNN pools
-   * @param [const smf_config &cfg] cfg
    * @return
    */
-  int apply_config(const smf_config& cfg);
+  int apply_config();
 
   /*
    * pco_push_protocol_or_container_id

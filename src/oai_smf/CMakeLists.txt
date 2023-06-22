@@ -255,7 +255,6 @@ add_boolean_option( LOG_OAI                         False    "Thread safe loggin
 # or cmake provide a generic interface to pkg-config that widely used
 ###################################
 
-pkg_search_module(CONFIG REQUIRED libconfig++)
 include_directories(${CONFIG_INCLUDE_DIRS})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -317,6 +316,7 @@ add_executable(smf
   )
 
 include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger/logger.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/config/config.cmake)
 
 IF(STATIC_LINKING)
     SET(CMAKE_EXE_LINKER_FLAGS "-static")
@@ -326,4 +326,4 @@ IF(STATIC_LINKING)
 ENDIF(STATIC_LINKING)   
 
 target_link_libraries (smf ${ASAN} 
-    -Wl,--start-group CN_UTILS SMF UDP PFCP SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} -lnghttp2_asio -lboost_system -lboost_thread -lssl -lcrypto -lfmt -lspdlog NAS dl -Wl,--end-group pthread m rt config++ event boost_system boost_chrono pistache curl)
+    -Wl,--start-group CN_UTILS SMF UDP PFCP SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} -lnghttp2_asio -lboost_system -lboost_thread -lssl -lcrypto -lfmt -lspdlog NAS dl -Wl,--end-group pthread m rt event boost_system boost_chrono pistache curl -lyaml-cpp)

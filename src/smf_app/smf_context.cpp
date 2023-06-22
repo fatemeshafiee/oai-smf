@@ -84,7 +84,7 @@ using namespace smf;
 
 extern itti_mw* itti_inst;
 extern smf::smf_app* smf_app_inst;
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 //------------------------------------------------------------------------------
 void smf_pdu_session::get_pdu_session_id(uint32_t& psi) const {
@@ -899,7 +899,7 @@ void smf_context::handle_itti_msg(
                 smf_get_supi_with_prefix(supi_prefix, smf_supi_to_string(supi));
             std::string url = "http://" + get_amf_addr() +
                               NAMF_COMMUNICATION_BASE +
-                              smf_cfg.amf_addr.api_version +
+                              smf_cfg->amf_addr.api_version +
                               fmt::format(
                                   NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL,
                                   supi_str.c_str());
@@ -1692,9 +1692,10 @@ void smf_context::handle_pdu_session_create_sm_context_request(
 
   // Get and Store AMF Addr if available
   std::vector<std::string> split_result;
-  std::string amf_addr_str = conv::toString(smf_cfg.amf_addr.ipv4_addr)
-                                 .append(":")
-                                 .append(std::to_string(smf_cfg.amf_addr.port));
+  std::string amf_addr_str =
+      conv::toString(smf_cfg->amf_addr.ipv4_addr)
+          .append(":")
+          .append(std::to_string(smf_cfg->amf_addr.port));
 
   boost::split(split_result, amf_status_uri, boost::is_any_of("/"));
   if (split_result.size() >= 3) {
@@ -1821,7 +1822,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
         smf_supi_to_string(supi));
     std::string url =
         "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
-        smf_cfg.amf_addr.api_version +
+        smf_cfg->amf_addr.api_version +
         fmt::format(
             NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
     sm_context_resp_pending->res.set_amf_url(url);
@@ -3296,7 +3297,7 @@ void smf_context::handle_pdu_session_modification_network_requested(
       itti_msg->msg.get_supi_prefix(), smf_supi_to_string(supi));
   std::string url =
       "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
-      smf_cfg.amf_addr.api_version +
+      smf_cfg->amf_addr.api_version +
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
   itti_msg->msg.set_amf_url(url);
@@ -4948,7 +4949,7 @@ void smf_context::send_pdu_session_create_response(
       resp->res.get_supi_prefix(), smf_supi_to_string(supi));
   std::string url =
       "http://" + get_amf_addr() + NAMF_COMMUNICATION_BASE +
-      smf_cfg.amf_addr.api_version +
+      smf_cfg->amf_addr.api_version +
       fmt::format(
           NAMF_COMMUNICATION_N1N2_MESSAGE_TRANSFER_URL, supi_str.c_str());
   resp->res.set_amf_url(url);
@@ -4956,7 +4957,7 @@ void smf_context::send_pdu_session_create_response(
       "N1N2MessageTransfer will be sent to AMF with URL: %s", url.c_str());
 
   // HTTP version
-  resp->http_version = smf_cfg.http_version;
+  resp->http_version = smf_cfg->http_version;
 
   // Fill the json part
   nlohmann::json json_data = {};
@@ -4981,7 +4982,7 @@ void smf_context::send_pdu_session_create_response(
         std::to_string(resp->res.get_snssai().sd);
     // N1N2MsgTxfrFailureNotification
     std::string callback_uri =
-        get_amf_addr() + NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version +
+        get_amf_addr() + NSMF_PDU_SESSION_BASE + smf_cfg->sbi_api_version +
         fmt::format(
             NSMF_CALLBACK_N1N2_MESSAGE_TRANSFER_FAILURE, supi_str.c_str());
     json_data["n1n2FailureTxfNotifURI"] = callback_uri.c_str();

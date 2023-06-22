@@ -52,7 +52,7 @@ using namespace std;
 
 extern itti_mw* itti_inst;
 extern smf::smf_app* smf_app_inst;
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 pfcp::ue_ip_address_t smf_session_procedure::pfcp_ue_ip_address(
     const edge& edge) {
@@ -87,7 +87,7 @@ pfcp::fteid_t smf_session_procedure::pfcp_prepare_fteid(
     local_fteid.ch           = 0;
     local_fteid.v4           = 1;
     local_fteid.chid         = 0;
-    local_fteid.ipv4_address = conv::fromString(smf_cfg.local_n3_addr);
+    local_fteid.ipv4_address = conv::fromString(smf_cfg->local_n3_addr);
     sps->generate_teid(local_fteid);
     fteid = local_fteid;
     Logger::smf_app().info(
@@ -145,7 +145,7 @@ pfcp::create_far smf_session_procedure::pfcp_create_far(
       flow->far_id_dl.first = true;
     }
     far_id = flow->far_id_dl.second;
-    if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab) {
+    if (smf_cfg->enable_dl_pdr_in_pfcp_sess_estab) {
       apply_action.forw = 0;
       apply_action.drop = 1;
       create_far.set(flow->far_id_dl.second);
@@ -355,7 +355,7 @@ pfcp::create_pdr smf_session_procedure::pfcp_create_pdr(
 
   create_pdr.set(far_id);
 
-  if (smf_cfg.enable_ur) {
+  if (smf_cfg->enable_ur) {
     create_pdr.set(flow->urr_id);
   }
 
@@ -554,14 +554,14 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
   // IE node_id_t
   //-------------------
   pfcp::node_id_t node_id = {};
-  smf_cfg.get_pfcp_node_id(node_id);
+  smf_cfg->get_pfcp_node_id(node_id);
   n4_triggered->pfcp_ies.set(node_id);
 
   //-------------------
   // IE fseid_t
   //-------------------
   pfcp::fseid_t cp_fseid = {};
-  smf_cfg.get_pfcp_fseid(cp_fseid);
+  smf_cfg->get_pfcp_fseid(cp_fseid);
   cp_fseid.seid = sps->seid;
   n4_triggered->pfcp_ies.set(cp_fseid);
 
@@ -570,7 +570,7 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
   //-------------------
   // IE CREATE_URR ( Usage Reporting Rules)
   //-------------------
-  if (smf_cfg.enable_ur) {
+  if (smf_cfg->enable_ur) {
     pfcp::create_urr create_urr = pfcp_create_urr(dl_edge, current_flow.qfi);
     n4_triggered->pfcp_ies.set(create_urr);
 
@@ -609,7 +609,7 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
     n4_triggered->pfcp_ies.set(create_pdr);
     n4_triggered->pfcp_ies.set(create_far);
 
-    if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab) {
+    if (smf_cfg->enable_dl_pdr_in_pfcp_sess_estab) {
       pfcp::create_far create_far_dl =
           pfcp_create_far(dl_edge, current_flow.qfi);
       pfcp::create_pdr create_pdr_dl =
@@ -618,7 +618,7 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
       n4_triggered->pfcp_ies.set(create_far_dl);
     }
     // Handle PDR and FAR for downlink if thid feature is enabled
-    if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab) {
+    if (smf_cfg->enable_dl_pdr_in_pfcp_sess_estab) {
       Logger::smf_app().info("Adding DL PDR and FAR start");
     }
   }
@@ -771,7 +771,7 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
   }
 
   std::shared_ptr<smf_qos_flow> default_qos_flow = {};
-  if (smf_cfg.enable_dl_pdr_in_pfcp_sess_estab &&
+  if (smf_cfg->enable_dl_pdr_in_pfcp_sess_estab &&
       resp.pfcp_ies.created_pdrs.empty()) {
     pfcp::pdr_id_t pdr_id_tmp;
     // we use qos flow for 1st PDR for the moment
@@ -1213,7 +1213,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
             pdi.set(source_interface);
             pdi.set(ue_ip_address);
 
-            if (smf_cfg.enable_ur) {
+            if (smf_cfg->enable_ur) {
               pfcp::urr_id_t urr_Id = ul_flow->urr_id;
               update_pdr.set(urr_Id);
             }

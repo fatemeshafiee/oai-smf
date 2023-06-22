@@ -33,6 +33,7 @@
 
 #ifdef __cplusplus
 #include <nlohmann/json.hpp>
+#include "pdu_session_type.hpp"
 extern "C" {
 #endif
 
@@ -294,62 +295,6 @@ typedef struct mfbr_s {
 
 // Notification control
 enum notification_control_e { REQUESTED = 1, NOT_REQUESTED = 2 };
-
-static const std::vector<std::string> notification_control_e2str = {
-    "ERROR", "REQUESTED", "NOT_REQUESTED"};
-
-// PDU Session Type value
-enum pdu_session_type_e {
-  PDU_SESSION_TYPE_E_UNKNOWN      = 0,
-  PDU_SESSION_TYPE_E_IPV4         = 1,
-  PDU_SESSION_TYPE_E_IPV6         = 2,
-  PDU_SESSION_TYPE_E_IPV4V6       = 3,
-  PDU_SESSION_TYPE_E_UNSTRUCTURED = 4,
-  PDU_SESSION_TYPE_E_ETHERNET     = 5,
-  PDU_SESSION_TYPE_E_RESERVED     = 7,
-};
-
-static const std::vector<std::string> pdu_session_type_e2str = {
-    "Error",        "IPV4",     "IPV6",   "IPV4V6",
-    "UNSTRUCTURED", "ETHERNET", "IPV4V6", "RESERVED"};
-
-typedef struct pdu_session_type_s {
-  uint8_t pdu_session_type;
-  pdu_session_type_s() : pdu_session_type(PDU_SESSION_TYPE_E_IPV4) {}
-  pdu_session_type_s(const uint8_t& p) : pdu_session_type(p) {}
-  pdu_session_type_s(const struct pdu_session_type_s& p)
-      : pdu_session_type(p.pdu_session_type) {}
-  pdu_session_type_s(const std::string& s) {
-    if (s.compare("IPV4") == 0) {
-      pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;
-    } else if (s.compare("IPV6") == 0) {
-      pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV6;
-    } else if (s.compare("IPV4V6") == 0) {
-      pdu_session_type = pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4V6;
-    } else {
-      pdu_session_type =
-          pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4;  // Default value
-    }
-  }
-  bool operator==(const struct pdu_session_type_s& p) const {
-    return (p.pdu_session_type == pdu_session_type);
-  }
-  //------------------------------------------------------------------------------
-  bool operator==(const pdu_session_type_e& p) const {
-    return (p == pdu_session_type);
-  }
-  //------------------------------------------------------------------------------
-  const std::string& to_string() const {
-    return pdu_session_type_e2str.at(pdu_session_type);
-  }
-
-  nlohmann::json to_json() const {
-    nlohmann::json json_data = {};
-    json_data                = to_string();
-    return json_data;
-  }
-
-} pdu_session_type_t;
 
 //-------------------------------------
 // 8.14 PDU Session (UE IP) Address Allocation (PAA)
