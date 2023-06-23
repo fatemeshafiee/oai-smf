@@ -2520,6 +2520,34 @@ bool smf_context::handle_service_request(
 }
 
 //-------------------------------------------------------------------------------------
+bool smf_context::handle_an_release(
+    std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+    std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+    std::shared_ptr<smf_pdu_session>& sp) {
+  // Get QFIs associated with PDU session ID
+  std::vector<smf_qos_flow> qos_flows = {};
+  sp.get()->get_qos_flows(qos_flows);
+  for (auto i : qos_flows) {
+    sm_context_request.get()->req.add_qfi(i.qfi.qfi);
+
+    qos_flow_context_updated qcu = {};
+    qcu.set_cause(
+        static_cast<uint8_t>(cause_value_5gsm_e::CAUSE_255_REQUEST_ACCEPTED));
+    qcu.set_qfi(i.qfi);
+    qcu.set_ul_fteid(i.ul_fteid);
+    qcu.set_qos_profile(i.qos_profile);
+    sm_context_resp.get()->res.add_qos_flow_context_updated(qcu);
+  }
+
+  sm_context_resp.get()->session_procedure_type =
+      session_management_procedures_type_e::PDU_SESSION_RELEASE_AN_INITIATED;
+
+  // Update upCnxState
+  sp.get()->set_upCnx_state(upCnx_state_e::UPCNX_STATE_DEACTIVATED);
+  return true;
+}
+
+//-------------------------------------------------------------------------------------
 bool smf_context::handle_pdu_session_update_sm_context_request(
     std::shared_ptr<itti_n11_update_sm_context_request> smreq) {
   Logger::smf_app().info(
@@ -2720,8 +2748,7 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
           return false;
         }
 
-        if (sm_context_req_msg.rat_type_is_set() and
-            sm_context_req_msg.an_type_is_set()) {
+        if (sp->get_upCnx_state() == upCnx_state_e::UPCNX_STATE_ACTIVATING) {
           procedure_type = session_management_procedures_type_e::
               SERVICE_REQUEST_UE_TRIGGERED_STEP2;
           Logger::smf_app().info(
@@ -2923,18 +2950,36 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
   if (!sm_context_req_msg.n1_sm_msg_is_set() and
       !sm_context_req_msg.n2_sm_info_is_set() and
       sm_context_req_msg.upCnx_state_is_set()) {
-    Logger::smf_app().info("Service Request (UE-triggered, step 1)");
-    procedure_type = session_management_procedures_type_e::
-        SERVICE_REQUEST_UE_TRIGGERED_STEP1;
+    std::string up_cnx_state = {};
+    sm_context_req_msg.get_upCnx_state(up_cnx_state);
 
-    if (!handle_service_request(
-            n2_sm_info, smreq, sm_context_resp_pending, sp)) {
+    if (boost::iequals(up_cnx_state, "DEACTIVATED")) {
+      Logger::smf_app().info(
+          "Deactivation of User Plane connectivity of a PDU session");
+      procedure_type = session_management_procedures_type_e::
+          PDU_SESSION_RELEASE_AN_INITIATED;
+      if (!handle_an_release(smreq, sm_context_resp_pending, sp)) {
+        // TODO:
+        return false;
+      }
+    } else if (boost::iequals(up_cnx_state, "ACTIVATING")) {
+      Logger::smf_app().info("Service Request (UE-triggered, step 1)");
+      procedure_type = session_management_procedures_type_e::
+          SERVICE_REQUEST_UE_TRIGGERED_STEP1;
+      if (!handle_service_request(
+              n2_sm_info, smreq, sm_context_resp_pending, sp)) {
+        // TODO:
+        return false;
+      }
+    } else {
       // TODO:
+      Logger::smf_app().warn(
+          "Invalid value for UpCnxState %s", up_cnx_state.c_str());
       return false;
     }
 
     // do not need update UPF
-    update_upf = false;
+    update_upf = true;
   }
 
   // Step 4. For AMF-initiated Session Release (with release indication)
@@ -3482,7 +3527,7 @@ bool smf_context::handle_ho_preparation_request(
   }
 
   if (!sp->get_sessions_graph()) {
-    // abnormal condition when the PDU Session has no associate graph
+    // Abnormal condition when the PDU Session has no associate graph
     // TODO: Check correct return code/error
     smf_app_inst->trigger_update_context_error_response(
         http_status_code_e::HTTP_STATUS_CODE_403_FORBIDDEN,
