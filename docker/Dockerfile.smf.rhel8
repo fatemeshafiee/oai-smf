@@ -102,8 +102,6 @@ COPY ./rhsm-ca /etc/rhsm/ca
 RUN rm -f /etc/rhsm-host && \
     microdnf update -y && \
     microdnf install -y \
-      python3 \
-      python3-pip \
       tzdata \
 #      libasan \
       procps-ng \
@@ -113,7 +111,6 @@ RUN rm -f /etc/rhsm-host && \
       boost \
       libevent \
       findutils && \
-    pip3 install jinja2 && \
     microdnf clean all -y && \
     rm -rf /var/cache/yum /var/cache/dnf && \
     # Remove entitlements and Subscription Manager configs

@@ -73,9 +73,7 @@ COPY . /openair-smf
 RUN ldconfig && \
     ./build_smf --clean --Verbose --build-type Release --jobs && \
     ldd /openair-smf/build/smf/build/smf && \
-    mv /openair-smf/build/smf/build/smf /openair-smf/build/smf/build/oai_smf && \
-    sed -i -e "s@nf-root-folder@smf@" -e "s@nf-config-file@smf.conf@" \
-      ../common-build/docker-scripts/entrypoint.py
+    mv /openair-smf/build/smf/build/smf /openair-smf/build/smf/build/oai_smf
 
 FROM mikefarah/yq:latest as yq-source
 
@@ -87,8 +85,6 @@ ENV TZ=Europe/Paris
 
 RUN microdnf update -y && \
     microdnf install -y \
-      python3 \
-      python3-pip \
       tzdata \
 #      libasan \
       procps-ng \
@@ -99,7 +95,6 @@ RUN microdnf update -y && \
       libevent \
       findutils \
       libconfig && \
-    pip3 install jinja2 && \
     microdnf clean all -y && \
     rm -rf /var/cache/yum /var/cache/dnf 
 
@@ -107,7 +102,6 @@ RUN microdnf update -y && \
 WORKDIR /openair-smf/bin
 COPY --from=oai-smf-builder \
     /openair-smf/build/smf/build/oai_smf \
-    /openair-smf/build/common-build/docker-scripts/entrypoint.py \
     /openair-smf/scripts/healthcheck.sh \
     ./
 COPY --from=yq-source /usr/bin/yq /usr/bin
@@ -139,5 +133,4 @@ HEALTHCHECK --interval=10s \
             --retries=6 \
     CMD /openair-smf/bin/healthcheck.sh
 
-ENTRYPOINT ["python3", "/openair-smf/bin/entrypoint.py"]
-CMD ["/openair-smf/bin/oai_smf", "-c", "/openair-smf/etc/smf.conf", "-o"]
+CMD ["/openair-smf/bin/oai_smf", "-c", "/openair-smf/etc/config.yaml", "-o"]
