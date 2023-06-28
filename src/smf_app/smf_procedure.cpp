@@ -195,7 +195,7 @@ pfcp::create_far smf_session_procedure::pfcp_create_far(
 
 void smf_session_procedure::synch_ul_dl_edges(
     const vector<edge>& dl_edges, const vector<edge>& ul_edges,
-    const qfi_t& qfi) {
+    const qfi_t& qfi, bool synch_pdr_for_uplink) {
   // O(n2), but always very small elements in arrays (<10)
   for (auto dle : dl_edges) {
     auto dle_flow = dle.get_qos_flow(qfi);
@@ -211,10 +211,10 @@ void smf_session_procedure::synch_ul_dl_edges(
       if (dle_flow->far_id_dl.first) {
         ule_flow->far_id_dl = dle_flow->far_id_dl;
       }
-      if (dle_flow->pdr_id_dl.rule_id != 0) {
+      if (synch_pdr_for_uplink && dle_flow->pdr_id_dl.rule_id != 0) {
         ule_flow->pdr_id_dl = dle_flow->pdr_id_dl;
       }
-      if (dle_flow->pdr_id_ul.rule_id != 0) {
+      if (synch_pdr_for_uplink && dle_flow->pdr_id_ul.rule_id != 0) {
         ule_flow->pdr_id_ul = dle_flow->pdr_id_ul;
       }
       if (ule_flow->pdr_id_ul.rule_id != 0) {
@@ -576,7 +576,7 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
     n4_triggered->pfcp_ies.set(create_urr);
 
     // set URR ID also for other edge
-    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi, false);
   }
 
   // Here, we only consider an UL CL, so we create PDRs based on how many
@@ -590,7 +590,7 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
     //-------------------
     pfcp::create_far create_far = pfcp_create_far(ul_edge, current_flow.qfi);
     // copy created FAR ID to DL edge for PDR
-    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi, false);
 
     // copy values from UL edge, so we simulate two downlink edges for PFCP
     auto flow                = dl_edge.get_qos_flow(current_flow.qfi);
@@ -603,7 +603,7 @@ session_create_sm_context_procedure::send_n4_session_establishment_request() {
     //-------------------
     pfcp::create_pdr create_pdr = pfcp_create_pdr(
         dl_edge, current_flow.qfi, current_upf->function_features.second);
-    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+    synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi, false);
 
     // ADD IEs to message
     //-------------------
@@ -811,7 +811,7 @@ smf_procedure_code session_create_sm_context_procedure::handle_itti_msg(
     }
   }
 
-  synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+  synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi, false);
 
   // covers the case that UL CL is returned from algorithm, but not all TEIDs
   // have been set (not all paths explored yet)
@@ -934,7 +934,7 @@ session_update_sm_context_procedure::send_n4_session_modification_request() {
     n4_triggered->pfcp_ies.set(create_far);
     n4_triggered->pfcp_ies.set(create_pdr);
   }
-  synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi);
+  synch_ul_dl_edges(dl_edges, ul_edges, current_flow.qfi, false);
 
   Logger::smf_app().info(
       "Sending ITTI message %s to task TASK_SMF_N4",
@@ -1129,7 +1129,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
 
             pfcp::create_far create_far = pfcp_create_far(dl_edge, flow->qfi);
 
-            synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+            synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi, false);
             // Add IEs to message
             n4_triggered->pfcp_ies.set(create_far);
           }
@@ -1153,7 +1153,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
             pfcp::create_pdr create_pdr = pfcp_create_pdr(
                 ul_edge, ul_flow->qfi, current_upf->function_features.second);
             n4_triggered->pfcp_ies.set(create_pdr);
-            synch_ul_dl_edges(dl_edges, ul_edges, ul_flow->qfi);
+            synch_ul_dl_edges(dl_edges, ul_edges, ul_flow->qfi, false);
             Logger::smf_app().debug(
                 "PDR DL ID "
                 "0x%" PRIx16 " ",
@@ -1293,7 +1293,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
           flow_dl->pdr_id_dl.rule_id  = 0;
           flow_dl->far_id_dl          = {};
           pfcp::create_far create_far = pfcp_create_far(dl_edge, flow->qfi);
-          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi, true);
           // Add IEs to message
           n4_triggered->pfcp_ies.set(create_far);
         }
@@ -1315,7 +1315,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
           flow->precedence.precedence += 1;
           create_pdr.precedence.second.precedence = flow->precedence.precedence;
           n4_triggered->pfcp_ies.set(create_pdr);
-          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi, true);
         }
 
         send_n4 = true;
@@ -1352,7 +1352,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
 
           pfcp::create_far create_far = pfcp_create_far(ul_edge, flow->qfi);
           // Copy created FAR ID to DL edge for PDR
-          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi, true);
 
           // Copy values from UL edge, so we simulate two downlink edges for
           // PFCP
@@ -1365,7 +1365,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
           // CREATE_PDR
           pfcp::create_pdr create_pdr = pfcp_create_pdr(
               dl_edge, flow->qfi, current_upf->function_features.second);
-          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi);
+          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi, true);
 
           // ADD IEs to message
           //-------------------
