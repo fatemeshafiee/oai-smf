@@ -226,18 +226,30 @@ class smf_qos_flow {
   smf_qos_flow() { clear(); }
 
   void clear() {
-    ul_fteid  = {};
-    dl_fteid  = {};
-    pdr_id_ul = {};
-    pdr_id_dl = {};
-    //    precedence  = {}; //Keep the value of precedence to make sure the new
-    //    rule should be applied
+    ul_fteid    = {};
+    dl_fteid    = {};
+    pdr_id_ul   = {};
+    pdr_id_dl   = {};
+    precedence  = {};
     far_id_ul   = {};
     far_id_dl   = {};
     urr_id      = {};
     released    = false;
     qos_profile = {};
     cause_value = 0;
+  }
+
+  /**
+   * Remove all values associated with a PFCP session, but keep QoS profile
+   */
+  void clear_session() {
+    ul_fteid  = {};
+    dl_fteid  = {};
+    pdr_id_dl = {};
+    pdr_id_ul = {};
+    far_id_dl = {};
+    far_id_ul = {};
+    urr_id    = {};
   }
 
   /*

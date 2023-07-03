@@ -1262,68 +1262,23 @@ smf_procedure_code session_update_sm_context_procedure::run(
         SERVICE_REQUEST_UE_TRIGGERED_STEP2: {
       pfcp::fteid_t dl_fteid = {};
       sm_context_req_msg.get_dl_fteid(dl_fteid);  // eNB's f-teid
+      edge dl_edge = dl_edges[0];
 
       // we use the first dl_edge as we can only have one N3 interface
+      // Stefan: TODO currently we only support one QoS flow here
+      // but also at other places, so we have to test and fix multiple QoS flows
+      // everywhere
       for (const auto& qfi : list_of_qfis_to_be_modified) {
-        auto flow = dl_edges[0].get_qos_flow(qfi);
-
-        if (!flow) {  // no QoS flow found
-          Logger::smf_app().error(
-              "Could not find any QoS flow with QFI %d", qfi.qfi);
-          // TODO: Check the appropriate value of cause
-          qos_flow_context_updated qcu = {};
-          qcu.set_cause(static_cast<uint8_t>(
-              cause_value_5gsm_e::CAUSE_31_REQUEST_REJECTED_UNSPECIFIED));
-          qcu.set_qfi(qfi);
-          n11_triggered_pending->res.add_qos_flow_context_updated(qcu);
-          continue;
-        }
+        auto flow      = dl_edge.get_qos_flow(qfi);
         flow->dl_fteid = dl_fteid;
-        Logger::smf_app().debug(
-            "FAR ID DL first %d,  FAR DL ID second "
-            "0x%" PRIx32 " ",
-            flow->far_id_dl.first, flow->far_id_dl.second.far_id);
-
-        Logger::smf_app().debug("Create FAR DL");
-        // for each UL edge we need a FAR, because of UL CL
-        edge dl_edge = dl_edges[0];
-        for (auto& edge : ul_edges) {
-          // we set PDR ID UL to 0, so we create new ones
-          auto flow_dl                = dl_edge.get_qos_flow(flow->qfi);
-          flow_dl->pdr_id_dl.rule_id  = 0;
-          flow_dl->far_id_dl          = {};
-          pfcp::create_far create_far = pfcp_create_far(dl_edge, flow->qfi);
-          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi, true);
-          // Add IEs to message
-          n4_triggered->pfcp_ies.set(create_far);
-        }
-
-        send_n4 = true;
-        Logger::smf_app().debug(
-            "FAR DL ID "
-            "0x%" PRIx32 " ",
-            flow->far_id_dl.second.far_id);
-
-        Logger::smf_app().debug("Create PDR DL");
-        // for each UL edge we need a PDR
-        for (auto& ul_edge : ul_edges) {
-          // we set PDR ID UL to 0, so we create new ones
-          auto flow_dl                = dl_edge.get_qos_flow(flow->qfi);
-          flow_dl->pdr_id_dl.rule_id  = 0;
-          pfcp::create_pdr create_pdr = pfcp_create_pdr(
-              ul_edge, flow->qfi, current_upf->function_features.second);
-          flow->precedence.precedence += 1;
-          create_pdr.precedence.second.precedence = flow->precedence.precedence;
-          n4_triggered->pfcp_ies.set(create_pdr);
-          synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi, true);
-        }
-
-        send_n4 = true;
-        Logger::smf_app().debug(
-            "PDR DL ID "
-            "0x%" PRIx16 " ",
-            flow->pdr_id_dl.rule_id);
       }
+      send_n4_session_modification_request();
+      for (const auto& qfi : list_of_qfis_to_be_modified) {
+        synch_ul_dl_edges(dl_edges, ul_edges, qfi, true);
+      }
+      // as we use the function to send N4 and do not construct it, we can stop
+      // at this point
+      return smf_procedure_code::OK;
     } break;
 
     case session_management_procedures_type_e::
@@ -1343,15 +1298,15 @@ smf_procedure_code session_update_sm_context_procedure::run(
           continue;
         }
 
+        edge dl_edge = dl_edges[0];
+        // CREATE_FAR
+        auto flow_ul = dl_edge.get_qos_flow(flow->qfi);
         for (auto ul_edge : ul_edges) {
-          edge dl_edge = dl_edges[0];
-          // CREATE_FAR
-          auto flow_ul               = dl_edge.get_qos_flow(flow->qfi);
-          flow_ul->pdr_id_ul.rule_id = 0;
-          flow_ul->far_id_ul         = {};
-
+          //-------------------
+          // IE CREATE_FAR
+          //-------------------
           pfcp::create_far create_far = pfcp_create_far(ul_edge, flow->qfi);
-          // Copy created FAR ID to DL edge for PDR
+          // copy created FAR ID to DL edge for PDR
           synch_ul_dl_edges(dl_edges, ul_edges, flow->qfi, true);
 
           // Copy values from UL edge, so we simulate two downlink edges for
@@ -1413,10 +1368,20 @@ smf_procedure_code session_update_sm_context_procedure::run(
         remove_far_ul.far_id.first         = true;
         remove_far_ul.far_id.second.far_id = flow->far_id_ul.second.far_id;
 
-        n4_triggered->pfcp_ies.set(remove_pdr_dl);
-        n4_triggered->pfcp_ies.set(remove_pdr_ul);
-        n4_triggered->pfcp_ies.set(remove_far_dl);
-        n4_triggered->pfcp_ies.set(remove_far_ul);
+        // we can get this request when we have only UL, so we have to check for
+        // 0
+        if (remove_pdr_dl.pdr_id.second.rule_id != 0) {
+          n4_triggered->pfcp_ies.set(remove_pdr_dl);
+        }
+        if (remove_pdr_ul.pdr_id.second.rule_id != 0) {
+          n4_triggered->pfcp_ies.set(remove_pdr_ul);
+        }
+        if (remove_far_dl.far_id.second.far_id != 0) {
+          n4_triggered->pfcp_ies.set(remove_far_dl);
+        }
+        if (remove_far_ul.far_id.second.far_id != 0) {
+          n4_triggered->pfcp_ies.set(remove_far_ul);
+        }
 
         Logger::smf_app().debug(
             "Remove FAR ID DL first %d,  FAR DL ID second "
@@ -1439,8 +1404,13 @@ smf_procedure_code session_update_sm_context_procedure::run(
             flow->pdr_id_ul.rule_id, flow->far_id_ul.second.far_id);
 
         send_n4 = true;
-        flow->clear();  // Clear the information of this flow (except
-                        // precedence)
+        flow->clear_session();
+
+        // we also have to remove PDR / FAR IDs in UL direction
+        for (auto& ul_edge : ul_edges) {
+          auto ul_flow = ul_edge.get_qos_flow(qfi);
+          ul_flow->clear_session();
+        }
 
         qos_flow_context_updated qcu = {};
         qcu.set_cause(static_cast<uint8_t>(
@@ -1558,6 +1528,11 @@ smf_procedure_code session_update_sm_context_procedure::handle_itti_msg(
           "AN F-TEID ID "
           "0x%" PRIx32 ", IP Addr %s",
           n3_dl_fteid.teid, conv::toString(n3_dl_fteid.ipv4_address).c_str());
+
+      if (session_procedure_type == session_management_procedures_type_e::
+                                        SERVICE_REQUEST_UE_TRIGGERED_STEP2) {
+        Logger::smf_app().error("bla temp");
+      }
 
       for (const auto& it_created_pdr : resp.pfcp_ies.created_pdrs) {
         pfcp::pdr_id_t pdr_id = {};
