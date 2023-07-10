@@ -1298,10 +1298,9 @@ smf_procedure_code session_update_sm_context_procedure::run(
           continue;
         }
 
-        edge dl_edge = dl_edges[0];
+        edge& dl_edge = dl_edges[0];
         // CREATE_FAR
-        auto flow_ul = dl_edge.get_qos_flow(flow->qfi);
-        for (auto ul_edge : ul_edges) {
+        for (auto& ul_edge : ul_edges) {
           //-------------------
           // IE CREATE_FAR
           //-------------------
@@ -1312,10 +1311,12 @@ smf_procedure_code session_update_sm_context_procedure::run(
           // Copy values from UL edge, so we simulate two downlink edges for
           // PFCP
           auto flow_dl               = dl_edge.get_qos_flow(flow->qfi);
+          auto flow_ul               = ul_edge.get_qos_flow(flow->qfi);
           flow_dl->pdr_id_ul.rule_id = 0;
           dl_edge.flow_description   = ul_edge.flow_description;
           dl_edge.precedence         = flow_dl->precedence.precedence + 1;
-          flow_dl->precedence.precedence += 1;
+          ul_edge.precedence         = flow_ul->precedence.precedence + 2;
+          graph->update_edge_info(current_upf, ul_edge);
 
           // CREATE_PDR
           pfcp::create_pdr create_pdr = pfcp_create_pdr(
@@ -1327,6 +1328,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
           n4_triggered->pfcp_ies.set(create_pdr);
           n4_triggered->pfcp_ies.set(create_far);
         }
+        graph->update_edge_info(current_upf, dl_edge);
         send_n4 = true;
 
         qos_flow_context_updated qcu = {};
