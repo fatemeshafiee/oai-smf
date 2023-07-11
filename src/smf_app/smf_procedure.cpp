@@ -1201,7 +1201,7 @@ smf_procedure_code session_update_sm_context_procedure::run(
               ue_ip_address.v6           = 1;
               ue_ip_address.ipv6_address = sps->ipv6_address;
             }
-            precedence.precedence = ul_flow->precedence.precedence;
+            precedence.precedence = ul_edge.precedence;
 
             source_interface.interface_value = pfcp::INTERFACE_VALUE_CORE;
             if (!ul_edge.nw_instance.empty()) {
@@ -1314,8 +1314,8 @@ smf_procedure_code session_update_sm_context_procedure::run(
           auto flow_ul               = ul_edge.get_qos_flow(flow->qfi);
           flow_dl->pdr_id_ul.rule_id = 0;
           dl_edge.flow_description   = ul_edge.flow_description;
-          dl_edge.precedence         = flow_dl->precedence.precedence + 1;
-          ul_edge.precedence         = flow_ul->precedence.precedence + 2;
+          dl_edge.precedence += 1;
+          ul_edge.precedence += 1;
           graph->update_edge_info(current_upf, ul_edge);
 
           // CREATE_PDR
