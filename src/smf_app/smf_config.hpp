@@ -196,57 +196,6 @@ class smf_config : public config {
 
   std::vector<pfcp::node_id_t> upfs;
 
-  struct sbi_addr {
-    struct in_addr ipv4_addr;
-    unsigned int port;
-    unsigned int http_version;
-    std::string api_version;
-    std::string fqdn;
-
-    // TODO delete, just for now until we refactor the calling classes as well
-    void from_sbi_config_type(const sbi_interface& sbi_val, int http_vers) {
-      ipv4_addr    = resolve_nf(sbi_val.get_host());
-      port         = sbi_val.get_port();
-      http_version = http_vers;
-      api_version  = sbi_val.get_api_version();
-      fqdn         = sbi_val.get_host();
-    }
-
-    void from_sbi_config_type_no_resolving(
-        const sbi_interface& sbi_val, int http_vers) {
-      fqdn         = sbi_val.get_host();
-      api_version  = sbi_val.get_api_version();
-      port         = sbi_val.get_port();
-      http_version = http_vers;
-    }
-
-    nlohmann::json to_json() const {
-      nlohmann::json json_data  = {};
-      json_data["ipv4_addr"]    = inet_ntoa(this->ipv4_addr);
-      json_data["port"]         = this->port;
-      json_data["http_version"] = this->http_version;
-      json_data["api_version"]  = this->api_version;
-      json_data["fqdn"]         = this->fqdn;
-      return json_data;
-    }
-
-    void from_json(nlohmann::json& json_data) {
-      std::string ipv4_addr_str = json_data["ipv4_addr"].get<std::string>();
-      IPV4_STR_ADDR_TO_INADDR(
-          util::trim(ipv4_addr_str).c_str(), this->ipv4_addr,
-          "BAD IPv4 ADDRESS FORMAT FOR INTERFACE !");
-      this->port         = json_data["port"].get<int>();
-      this->http_version = json_data["http_version"].get<std::uint32_t>();
-      this->api_version  = json_data["api_version"].get<std::string>();
-      this->fqdn         = json_data["fqdn"].get<std::string>();
-    }
-  };
-
-  sbi_addr nrf_addr;
-  sbi_addr pcf_addr;
-  sbi_addr udm_addr;
-  sbi_addr amf_addr;
-
   // Network instance
   // bool network_instance_configuration;
   struct upf_nwi_list_s {
