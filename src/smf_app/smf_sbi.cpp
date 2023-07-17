@@ -595,7 +595,8 @@ void smf_sbi::register_nf_instance(
 
   std::string body = json_data.dump();
   Logger::smf_sbi().debug(
-      "Send NF Instance Registration to NRF, msg body: \n %s", body.c_str());
+      "Send NF Instance Registration to NRF, msg body: \n %s (bytes %d)",
+      body.c_str(), body.size());
 
   std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle

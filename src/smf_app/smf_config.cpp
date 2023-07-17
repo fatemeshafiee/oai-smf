@@ -639,6 +639,8 @@ bool smf_config::from_json(nlohmann::json& json_data) {
         }
       }
     }
+
+    // TODO:
     /*
         if (json_data.find("local_configuration") != json_data.end()) {
           json_tmp = json_data["local_configuration"];

@@ -288,7 +288,7 @@ typedef struct qos_profile_s {
 #define NNRF_NF_STATUS_NOTIFY_BASE "/nsmf-nfstatus-notify/"
 
 // for CURL
-#define NF_CURL_TIMEOUT_MS 100L
+#define NF_CURL_TIMEOUT_MS 3000L
 #define MAX_WAIT_MSECS 10000  // 1 second
 #define AMF_NUMBER_RETRIES 3
 #define UDM_NUMBER_RETRIES 3

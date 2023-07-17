@@ -139,7 +139,7 @@ typedef struct dnn_s {
   }
 
   void from_json(nlohmann::json& json_data) {
-    this->dnn = json_data["if_name"].get<std::string>();
+    this->dnn = json_data["dnn"].get<std::string>();
 
     std::string ue_pool_range_low_str = {};
     ue_pool_range_low_str = json_data["ue_pool_range_low"].get<std::string>();
