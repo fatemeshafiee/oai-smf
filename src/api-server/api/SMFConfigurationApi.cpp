@@ -23,7 +23,7 @@
 #include "smf_config.hpp"
 #include "SMFConfigurationApi.h"
 
-extern oai::config::smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai::smf_server::api {
 
@@ -42,11 +42,11 @@ void SMFConfigurationApi::setupRoutes() {
   using namespace Pistache::Rest;
 
   Routes::Get(
-      *router, base + smf_cfg.sbi_api_version + "/configuration/",
+      *router, base + smf_cfg->sbi_api_version + "/configuration/",
       Routes::bind(&SMFConfigurationApi::read_configuration_handler, this));
 
   Routes::Put(
-      *router, base + smf_cfg.sbi_api_version + "/configuration/",
+      *router, base + smf_cfg->sbi_api_version + "/configuration/",
       Routes::bind(&SMFConfigurationApi::update_configuration_handler, this));
 
   // Default handler, called when a route is not found

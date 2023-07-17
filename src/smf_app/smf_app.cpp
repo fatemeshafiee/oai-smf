@@ -832,7 +832,7 @@ void smf_app::handle_itti_msg(itti_sbi_smf_configuration& itti_msg) {
 
   // Notify to the result
   if (itti_msg.promise_id > 0) {
-    trigger_process_response(itti_msg.promise_id, response_data);
+    trigger_http_response(response_data, itti_msg.promise_id);
     return;
   }
 }
@@ -859,7 +859,7 @@ void smf_app::handle_itti_msg(itti_sbi_update_smf_configuration& itti_msg) {
 
     // Update SMF profile (complete replacement of the existing profile by a new
     // one)
-    if (smf_cfg.register_nrf) register_to_nrf();
+    if (smf_cfg->register_nrf) register_to_nrf();
 
   } else {
     response_data["httpResponseCode"] = static_cast<uint32_t>(
@@ -871,21 +871,22 @@ void smf_app::handle_itti_msg(itti_sbi_update_smf_configuration& itti_msg) {
 
   // Notify to the result
   if (itti_msg.promise_id > 0) {
-    trigger_process_response(itti_msg.promise_id, response_data);
+    trigger_http_response(response_data, itti_msg.promise_id);
     return;
   }
 }
 
 //---------------------------------------------------------------------------------------------
 bool smf_app::read_smf_configuration(nlohmann::json& json_data) {
-  smf_cfg.to_json(json_data);
+  smf_cfg->to_json(json_data);
   return true;
 }
 
 //---------------------------------------------------------------------------------------------
 bool smf_app::update_smf_configuration(nlohmann::json& json_data) {
   // TODO: Check that no gNBs are connected (?)
-  return smf_cfg.from_json(json_data);
+  return smf_cfg->from_json(json_data);
+  // return true;  // TODO
 }
 
 //------------------------------------------------------------------------------
