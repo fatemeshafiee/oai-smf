@@ -40,7 +40,6 @@
 #include "logger.hpp"
 #include "fqdn.hpp"
 #include "smf_config_types.hpp"
-#include "ProblemDetails.h"
 
 using namespace std;
 using namespace smf;
@@ -201,6 +200,7 @@ void smf_config::to_smf_config() {
   discover_pcf = false;
   discover_upf = config::register_nrf();
 
+  http_version = config::get_http_version();
   // we need to set some things (e.g. API version even if we do NRF
   // discovery...)
   amf_addr.from_sbi_config_type_no_resolving(
@@ -395,7 +395,6 @@ void smf_config::to_json(nlohmann::json& json_data) const {
   json_data["interfaces"]["n4"]  = n4.to_json();
   json_data["interfaces"]["sbi"] = sbi.to_json();
 
-  json_data["http2_port"]      = sbi_http2_port;
   json_data["sbi_api_version"] = sbi_api_version;
 
   json_data["dnn_list"] = nlohmann::json::array();
@@ -422,7 +421,6 @@ void smf_config::to_json(nlohmann::json& json_data) const {
       use_local_subscription_info;
   // json_data["supported_features"]["use_network_instance"]   = use_nwi;
   json_data["supported_features"]["enable_usage_reporting"] = enable_ur;
-  json_data["supported_features"]["http_version"]           = http_version;
 
   if (register_nrf) {
     json_data["nrf"] = nrf_addr.to_json();
@@ -432,16 +430,14 @@ void smf_config::to_json(nlohmann::json& json_data) const {
     json_data["upf_list"].push_back(s.toString());
   }
 
-  if (amf_addr.ipv4_addr.s_addr != INADDR_ANY) {
+  if (get_nf(AMF_CONFIG_NAME)->is_set()) {
     json_data["amf"] = amf_addr.to_json();
   }
-  if (udm_addr.ipv4_addr.s_addr != INADDR_ANY) {
+  if (get_nf(UDM_CONFIG_NAME)->is_set()) {
     json_data["udm"] = udm_addr.to_json();
   }
 
-  json_data["local_configuration"]["session_management_subscription_list"] =
-      nlohmann::json::array();
-
+  json_data["local_subscription_infos"] = nlohmann::json::array();
   for (const auto& sub : smf()->get_subscription_info()) {
     nlohmann::json json_data_tmp = {};
 
@@ -462,47 +458,27 @@ void smf_config::to_json(nlohmann::json& json_data) const {
     json_data_tmp["ssc_mode"] = sub.get_ssc_mode();
 
     // 5gQosProfile
-    /*
     json_data_tmp["qos_profile"]["5qi"] = sub.get_default_qos()._5qi;
-    dnn_configuration->_5g_qos_profile.arp.priority_level =
+    json_data_tmp["qos_profile"]["arp"]["priority_level"] =
         sub.get_default_qos().arp.priority_level;
-    dnn_configuration->_5g_qos_profile.arp.preempt_cap =
+    json_data_tmp["qos_profile"]["arp"]["preempt_cap"] =
         sub.get_default_qos().arp.preempt_cap;
-    dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
+    json_data_tmp["qos_profile"]["arp"]["preempt_vuln"] =
         sub.get_default_qos().arp.preempt_vuln;
-    dnn_configuration->_5g_qos_profile.priority_level =
+    json_data_tmp["qos_profile"]["priority_level"] =
         sub.get_default_qos().priority_level;
 
     // Session_ambr
-    dnn_configuration->session_ambr.uplink = sub.get_session_ambr().uplink;
-    dnn_configuration->session_ambr.downlink =
-        sub.get_session_ambr().downlink;
-    Logger::smf_app().debug(
-        "Session AMBR Uplink %s, Downlink %s",
-        dnn_configuration->session_ambr.uplink.c_str(),
-        dnn_configuration->session_ambr.downlink.c_str());
+    json_data_tmp["session_ambr"]["uplink"]   = sub.get_session_ambr().uplink;
+    json_data_tmp["session_ambr"]["downlink"] = sub.get_session_ambr().downlink;
 
-*/
-  }
-
-  /*
-    for (auto s : session_management_subscriptions) {
-      json_data["local_configuration"]["session_management_subscription_list"]
-          .push_back(s.to_json());
-    }
-  */
-
-  for (auto s : upf_nwi_list) {
-    json_data["upf_nwi_list"].push_back(s.to_json());
+    json_data["local_subscription_infos"].push_back(json_data_tmp);
   }
 }
 
 //------------------------------------------------------------------------------
 bool smf_config::from_json(nlohmann::json& json_data) {
   nlohmann::json json_missing = {}, json_tmp = {};
-  oai::smf_server::model::ProblemDetails prob_details;
-
-  // TODO: Branch on the Supported Features whenever possible
 
   try {
     if (json_data.find("supported_features") != json_data.end()) {
@@ -516,8 +492,8 @@ bool smf_config::from_json(nlohmann::json& json_data) {
       if (true and json_tmp.find("enable_usage_reporting") != json_tmp.end())
         enable_ur = json_tmp["enable_usage_reporting"].get<bool>();
 
-      //  if (true and json_tmp.find("use_network_instance") != json_tmp.end())
-      //    smf_cfg.use_nwi = json_tmp["use_network_instance"].get<bool>();
+      // if (true and json_tmp.find("use_network_instance") != json_tmp.end())
+      //  use_nwi = json_tmp["use_network_instance"].get<bool>();
     }
 
     if (json_data.find("dnn_list") != json_data.end()) {
@@ -610,59 +586,14 @@ bool smf_config::from_json(nlohmann::json& json_data) {
       // TODO: Add to json_missing the non-updatable fields from json_data (?)
     }
 
-    if (!discover_upf && json_data.find("upf_list") != json_data.end()) {
-      for (auto s : json_data["upf_list"]) {
-        bool used                = false;
-        std::string astring      = {};
-        pfcp::node_id_t new_node = {};
-        unsigned char buf_in_addr[sizeof(struct in_addr) + 1];
-        // IPv4/6
-        // TODO: Is IPv6 supported???
-        astring               = s.get<std::string>();
-        new_node.node_id_type = pfcp::NODE_ID_TYPE_IPV4_ADDRESS;
-        if (inet_pton(AF_INET, util::trim(astring).c_str(), buf_in_addr) == 1) {
-          memcpy(
-              &new_node.u1.ipv4_address, buf_in_addr, sizeof(struct in_addr));
-          for (auto upf : upfs) {
-            if (new_node == upf) {
-              used = true;
-              break;
-            }
-          }
-          if (!used) {
-            upfs.push_back(new_node);
-          }
-        } else {
-          Logger::smf_app().warn(
-              "Failed to read UPF id in configuration update: %s", astring);
-          // TODO: Add to ProblemDetails
-        }
+    // TODO: UPF List
+    // TODO:
+    if (json_data.find("local_subscription_infos") != json_data.end()) {
+      json_tmp = json_data["local_subscription_infos"];
+      for (auto s : json_tmp) {
+        // TODO
       }
     }
-
-    // TODO:
-    /*
-        if (json_data.find("local_configuration") != json_data.end()) {
-          json_tmp = json_data["local_configuration"];
-          if (json_tmp.find("session_management_subscription_list") !=
-              json_tmp.end()) {
-            for (auto s : json_tmp["session_management_subscription_list"]) {
-              session_management_subscription_t new_sub = {};
-              bool used                                 = false;
-              new_sub.from_json(s);
-              for (auto sub : smf_cfg.session_management_subscriptions) {
-                if (!sub.dnn.compare(new_sub.dnn)) {
-                  used = true;
-                  break;
-                }
-              }
-              if (!used) {
-                smf_cfg.session_management_subscriptions.push_back(new_sub);
-              }
-            }
-          }
-        }
-        */
 
   } catch (nlohmann::detail::exception& e) {
     Logger::smf_app().error(
