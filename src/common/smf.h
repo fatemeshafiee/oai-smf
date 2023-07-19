@@ -281,6 +281,8 @@ typedef struct qos_profile_s {
 #define NSMF_SMF_CONFIGURATION_BASE "/nsmf-configuration/"
 #define NSMF_SMF_CONFIGURATION_CREATE_DNN "/dnn-configurations"
 
+#define NSMF_CUSTOMIZED_API_BASE "/nsmf-oai/"
+#define NSMF_CUSTOMIZED_API_CONFIGURATION_URL "/configuration"
 // NRF
 #define NNRF_NFM_BASE "/nnrf-nfm/"
 #define NNRF_NF_REGISTER_URL "/nf-instances/"

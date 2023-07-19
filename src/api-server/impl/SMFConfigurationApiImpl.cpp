@@ -22,8 +22,6 @@
 #include "logger.hpp"
 #include "SMFConfigurationApiImpl.h"
 
-extern itti_mw* itti_inst;
-
 namespace oai::smf_server::api {
 
 using namespace oai::smf_server::model;
@@ -34,7 +32,7 @@ SMFConfigurationApiImpl::SMFConfigurationApiImpl(
 
 void SMFConfigurationApiImpl::read_configuration(
     Pistache::Http::ResponseWriter& response) {
-  Logger::smf_api_server().debug("Receive SMFConfiguration, handling...");
+  Logger::smf_api_server().debug("Get SMF Configuration, handling...");
 
   // Generate a promise and associate this promise to the ITTI message
   uint32_t promise_id = generate_promise_id();
@@ -53,12 +51,7 @@ void SMFConfigurationApiImpl::read_configuration(
   itti_msg->http_version = 1;
   itti_msg->promise_id   = promise_id;
 
-  int ret = itti_inst->send_msg(itti_msg);
-  if (0 != ret) {
-    Logger::smf_api_server().error(
-        "Could not send ITTI message %s to task TASK_SMF_APP",
-        itti_msg->get_msg_name());
-  }
+  m_smf_app->handle_sbi_get_configuration(itti_msg);
 
   boost::future_status status;
   // wait for timeout or ready
@@ -104,7 +97,7 @@ void SMFConfigurationApiImpl::read_configuration(
 void SMFConfigurationApiImpl::update_configuration(
     nlohmann::json& configuration_info,
     Pistache::Http::ResponseWriter& response) {
-  Logger::smf_api_server().debug("Update SMFConfiguration, handling...");
+  Logger::smf_api_server().debug("Update SMF Configuration, handling...");
 
   // Generate a promise and associate this promise to the ITTI message
   uint32_t promise_id = generate_promise_id();
@@ -124,12 +117,7 @@ void SMFConfigurationApiImpl::update_configuration(
   itti_msg->promise_id    = promise_id;
   itti_msg->configuration = configuration_info;
 
-  int ret = itti_inst->send_msg(itti_msg);
-  if (0 != ret) {
-    Logger::smf_api_server().error(
-        "Could not send ITTI message %s to task TASK_SMF_APP",
-        itti_msg->get_msg_name());
-  }
+  m_smf_app->handle_sbi_update_configuration(itti_msg);
 
   boost::future_status status;
   // wait for timeout or ready
