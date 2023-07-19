@@ -1529,7 +1529,7 @@ void smf_context::handle_pdu_session_create_sm_context_request(
       .ci_ipv4_p_cscf_request                      = 0,
       .ci_selected_bearer_control_mode             = 0};
 
-  smf_app_inst->process_pco_request(pco_req, pco_resp, pco_ids);
+  smf_app_inst->process_pco_request(pco_req, dnn, pco_resp, pco_ids);
   sm_context_resp_pending->res.set_epco(pco_resp);
 
   // Step 7. Address allocation based on PDN type, IP Address pool is controlled
