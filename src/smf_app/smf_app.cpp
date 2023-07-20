@@ -1579,7 +1579,7 @@ void smf_app::handle_sbi_update_configuration(
 
   } else {
     response_data["httpResponseCode"] = static_cast<uint32_t>(
-        http_response_codes_e::HTTP_RESPONSE_CODE_BAD_REQUEST);
+        http_response_codes_e::HTTP_RESPONSE_CODE_406_NOT_ACCEPTED);
     oai::smf_server::model::ProblemDetails problem_details = {};
     // TODO set problem_details
     to_json(response_data["ProblemDetails"], problem_details);
@@ -1600,11 +1600,13 @@ bool smf_app::read_smf_configuration(nlohmann::json& json_data) {
 
 //---------------------------------------------------------------------------------------------
 bool smf_app::update_smf_configuration(nlohmann::json& json_data) {
-  // TODO: for the moment, we can only update SMF configuration when there's no
+  // For the moment, we can only update SMF configuration when there's no
   // connected UE
-  if (true) {
+  if (get_number_contexts() == 0) {
     return smf_cfg->from_json(json_data);
   }
+  Logger::smf_app().warn(
+      "Could not update SMF configuration when there's connected UE!");
   return false;
 }
 
@@ -1668,6 +1670,12 @@ bool smf_app::scid_2_smf_context(
     return true;
   }
   return false;
+}
+
+//------------------------------------------------------------------------------
+uint32_t smf_app::get_number_contexts() const {
+  std::shared_lock lock(m_scid2smf_context);
+  return scid2smf_context.size();
 }
 
 //------------------------------------------------------------------------------

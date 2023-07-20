@@ -512,6 +512,13 @@ class smf_app {
   std::shared_ptr<smf_context> supi_2_smf_context(const supi64_t& supi) const;
 
   /*
+   * Get number of current SM Contexts
+   * @param void
+   * @return number of contexts
+   */
+  uint32_t get_number_contexts() const;
+
+  /*
    * Find the PDU Session with its SCID
    * @param [const scid_t &] scid: SMF Context ID
    * @param [std::shared_ptr<smf_pdu_session> &] sp: pointer to the PDU session
