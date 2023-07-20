@@ -387,6 +387,7 @@ void smf_config::update_used_nfs() {
 
 //------------------------------------------------------------------------------
 void smf_config::to_json(nlohmann::json& json_data) const {
+  auto smf_cfg          = smf();
   json_data["instance"] = instance;
 
   json_data["interfaces"]["n4"]  = n4.to_json();
@@ -399,15 +400,21 @@ void smf_config::to_json(nlohmann::json& json_data) const {
     json_data["dnn_list"].push_back(s.second.to_json());
   }
 
-  json_data["default_dns_ipv4_address"]     = inet_ntoa(default_dnsv4);
-  json_data["default_dns_sec_ipv4_address"] = inet_ntoa(default_dns_secv4);
-  json_data["default_dns_ipv6_address"]     = conv::toString(default_dnsv6);
-  json_data["default_dns_sec_ipv6_address"] = conv::toString(default_dns_secv6);
+  json_data["default_dns_ipv4_address"] =
+      inet_ntoa(smf_cfg->get_ue_dns().get_primary_dns_v4());
+  json_data["default_dns_sec_ipv4_address"] =
+      inet_ntoa(smf_cfg->get_ue_dns().get_secondary_dns_v4());
+  json_data["default_dns_ipv6_address"] =
+      conv::toString(smf_cfg->get_ue_dns().get_primary_dns_v6());
+  json_data["default_dns_sec_ipv6_address"] =
+      conv::toString(smf_cfg->get_ue_dns().get_secondary_dns_v6());
 
-  json_data["default_cscf_ipv4_address"] = inet_ntoa(default_cscfv4);
-  json_data["default_cscf_ipv6_address"] = conv::toString(default_cscfv6);
+  json_data["default_cscf_ipv4_address"] =
+      inet_ntoa(smf_cfg->get_ims_config().get_pcscf_v4());
+  json_data["default_cscf_ipv6_address"] =
+      conv::toString(smf_cfg->get_ims_config().get_pcscf_v6());
 
-  json_data["ue_mtu"] = ue_mtu;
+  json_data["ue_mtu"] = smf_cfg->get_ue_mtu();
 
   // TODO: change to support_features (?)
   json_data["supported_features"]["registered_nrf"] = register_nrf;
@@ -510,72 +517,9 @@ bool smf_config::from_json(nlohmann::json& json_data) {
       }
     }
 
-    if (json_data.find("default_dns_ipv4_address") != json_data.end()) {
-      std::string addr =
-          json_data["default_dns_ipv4_address"].get<std::string>();
-      default_dnsv4 = conv::fromString(addr);
-    }
-    if (json_data.find("default_dns_ipv6_address") != json_data.end()) {
-      std::string addr =
-          json_data["default_dns_ipv6_address"].get<std::string>();
-      unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-      if (inet_pton(AF_INET6, addr.c_str(), buf_in6_addr) == 1) {
-        memcpy(&default_dnsv6, buf_in6_addr, sizeof(struct in6_addr));
-        Logger::smf_app().info(
-            "New Default DNS IPv6 address: %s", conv::toString(default_dnsv6));
-      } else {
-        Logger::smf_app().debug(
-            "Failed to update DNS IPv6 address from %s to %s",
-            conv::toString(default_dnsv6));
-        json_tmp["default_dns_ipv6_address"] =
-            json_data["default_dns_ipv6_address"];
-        json_missing.push_back(json_tmp);
-      }
-    }
-    if (json_data.find("default_dns_sec_ipv4_address") != json_data.end()) {
-      std::string addr =
-          json_data["default_dns_sec_ipv4_address"].get<std::string>();
-      default_dns_secv4 = conv::fromString(addr);
-    }
-    if (json_data.find("default_dns_sec_ipv6_address") != json_data.end()) {
-      std::string addr =
-          json_data["default_dns_sec_ipv6_address"].get<std::string>();
-      unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-      if (inet_pton(AF_INET6, addr.c_str(), buf_in6_addr) == 1) {
-        memcpy(&default_dns_secv6, buf_in6_addr, sizeof(struct in6_addr));
-        Logger::smf_app().info(
-            "New Default DNS Sec IPv6 address: %s",
-            conv::toString(default_dnsv6));
-      } else {
-        Logger::smf_app().debug(
-            "Failed to update DNS Sec IPv6 address from %s to %s",
-            conv::toString(default_dnsv6));
-      }
-    }
-    if (json_data.find("default_cscf_ipv4_address") != json_data.end()) {
-      std::string addr =
-          json_data["default_cscf_ipv4_address"].get<std::string>();
-      default_cscfv4 = conv::fromString(addr);
-    }
-    if (json_data.find("default_cscf_ipv6_address") != json_data.end()) {
-      std::string addr =
-          json_data["default_cscf_ipv6_address"].get<std::string>();
-      unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-      if (inet_pton(AF_INET6, addr.c_str(), buf_in6_addr) == 1) {
-        memcpy(&default_cscfv6, buf_in6_addr, sizeof(struct in6_addr));
-        Logger::smf_app().info(
-            "New Default CSCF IPv6 address: %s", conv::toString(default_dnsv6));
-      } else {
-        Logger::smf_app().debug(
-            "Failed to update DNS Sec IPv6 address from %s to %s",
-            conv::toString(default_dnsv6));
-      }
-    }
-
-    if (json_data.find("ue_mtu") != json_data.end()) {
-      ue_mtu = json_data["ue_mtu"].get<uint32_t>();
-    }
-
+    // TODO: DNS
+    // TODO: IMS
+    // TODO: MTU
     // TODO: UPF List
     // TODO:
     if (json_data.find("local_subscription_infos") != json_data.end()) {
