@@ -51,6 +51,8 @@ class smf_support_features : public config_type {
       bool external_ausf, bool external_udm, bool external_nssf);
 
   void from_yaml(const YAML::Node& node) override;
+  nlohmann::json to_json() override;
+  bool from_json(const nlohmann::json& json_data) override;
 
   // TODO can we unify SMF-style use_local_subscription_infos and AMF
   // use_external_UDM?
@@ -230,6 +232,8 @@ class smf_config_type : public nf {
       const std::string& name, const std::string& host,
       const sbi_interface& sbi, const local_interface& n4);
   void from_yaml(const YAML::Node& node) override;
+  nlohmann::json to_json() override;
+  bool from_json(const nlohmann::json& json_data) override;
 
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
 

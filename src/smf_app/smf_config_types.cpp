@@ -70,6 +70,39 @@ void smf_support_features::from_yaml(const YAML::Node& node) {
   }
 }
 
+nlohmann::json smf_support_features::to_json() {
+  nlohmann::json json_data = {};
+  /*
+  json_data[m_host.get_config_name()] = m_if_name.get_value();
+  json_data[m_port.get_config_name()] = m_port.get_value();
+  json_data[m_if_name.get_config_name()] = m_if_name.get_value();
+  json_data["mtu"] = m_mtu;
+  json_data["addr4"] = conv::toString(m_addr4);
+  */
+  return json_data;
+}
+
+bool smf_support_features::from_json(const nlohmann::json& json_data) {
+  try {
+    /*	 if (json_data.find(m_host.get_config_name()) != json_data.end()) {
+                     m_host.from_json(json_data[m_host.get_config_name()]);
+             }
+             if (json_data.find(m_port.get_config_name()) != json_data.end()) {
+                     m_port.from_json(json_data[m_port.get_config_name()]);
+             }
+             if (json_data.find(m_port.get_config_name()) != json_data.end()) {
+                     m_if_name.from_json(json_data[m_if_name.get_config_name()]);
+             }
+             //TODO: MTU/IP Addr
+*/
+  } catch (nlohmann::detail::exception& e) {
+    // TODO:
+  } catch (std::exception& e) {
+    // TODO:
+  }
+  return false;
+}
+
 std::string smf_support_features::to_string(const std::string& indent) const {
   std::string out;
   std::string inner_indent = indent + indent;
@@ -398,6 +431,27 @@ void smf_config_type::from_yaml(const YAML::Node& node) {
       m_subscription_infos.push_back(subcfg);
     }
   }
+}
+
+nlohmann::json smf_config_type::to_json() {
+  nlohmann::json json_data = {};
+  json_data                = nf::to_json();
+  // json_data[m_sbi.get_config_name()] = m_sbi.to_json();
+  // if (m_nx.is_set()) json_data[m_nx.get_config_name()] = m_nx.to_json();
+  // json_data["url"] = m_url;
+  return json_data;
+}
+
+bool smf_config_type::from_json(const nlohmann::json& json_data) {
+  try {
+    nf::from_json(json_data);
+
+  } catch (nlohmann::detail::exception& e) {
+    // TODO:
+  } catch (std::exception& e) {
+    // TODO:
+  }
+  return false;
 }
 
 std::string smf_config_type::to_string(const std::string& indent) const {

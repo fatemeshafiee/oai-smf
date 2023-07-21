@@ -1594,7 +1594,7 @@ void smf_app::handle_sbi_update_configuration(
 
 //---------------------------------------------------------------------------------------------
 bool smf_app::read_smf_configuration(nlohmann::json& json_data) {
-  smf_cfg->to_json(json_data);
+  json_data = smf_cfg->smf()->to_json();
   return true;
 }
 

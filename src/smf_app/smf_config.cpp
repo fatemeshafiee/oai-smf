@@ -62,24 +62,24 @@ smf_config::smf_config(
 
   // Define default values in YAML
   auto smf = std::make_shared<smf_config_type>(
-      "smf", "oai-smf", sbi_interface("SBI", "oai-smf", 80, "v1", "eth0"),
+      "smf", "oai-smf", sbi_interface("sbi", "oai-smf", 80, "v1", "eth0"),
       local_interface("N4", "oai-smf", 8805, "eth0"));
   add_nf("smf", smf);
 
   auto amf = std::make_shared<nf>(
-      "amf", "oai-amf", sbi_interface("SBI", "oai-amf", 80, "v1", ""));
+      "amf", "oai-amf", sbi_interface("sbi", "oai-amf", 80, "v1", ""));
   add_nf("amf", amf);
 
   auto udm = std::make_shared<nf>(
-      "udm", "oai-udm", sbi_interface("SBI", "oai-udm", 80, "v1", ""));
+      "udm", "oai-udm", sbi_interface("sbi", "oai-udm", 80, "v1", ""));
   add_nf("udm", udm);
 
   auto pcf = std::make_shared<nf>(
-      "pcf", "oai-pcf", sbi_interface("SBI", "oai-pcf", 80, "v1", ""));
+      "pcf", "oai-pcf", sbi_interface("sbi", "oai-pcf", 80, "v1", ""));
   add_nf("pcf", pcf);
 
   auto nrf = std::make_shared<nf>(
-      "nrf", "oai-nrf", sbi_interface("SBI", "oai-nrf", 80, "v1", ""));
+      "nrf", "oai-nrf", sbi_interface("sbi", "oai-nrf", 80, "v1", ""));
   add_nf("nrf", nrf);
 
   // DNN default values
@@ -390,55 +390,57 @@ void smf_config::to_json(nlohmann::json& json_data) const {
   auto smf_cfg          = smf();
   json_data["instance"] = instance;
 
-  json_data["interfaces"]["n4"]  = n4.to_json();
-  json_data["interfaces"]["sbi"] = sbi.to_json();
+  // json_data["interfaces"]["n4"]  = get_local()->get_nx().to_json();
+  // json_data["interfaces"]["sbi"] = get_local()->get_sbi().to_json();
 
-  json_data["sbi_api_version"] = sbi_api_version;
+  // json_data["sbi_api_version"] = sbi_api_version;
+  /*
+    json_data["dnn_list"] = nlohmann::json::array();
+    for (auto s : dnns) {
+      json_data["dnn_list"].push_back(s.second.to_json());
+    }
 
-  json_data["dnn_list"] = nlohmann::json::array();
-  for (auto s : dnns) {
-    json_data["dnn_list"].push_back(s.second.to_json());
+    json_data["default_dns_ipv4_address"] =
+                    conv::toString(smf_cfg->get_ue_dns().get_primary_dns_v4());
+    json_data["default_dns_sec_ipv4_address"] =
+                    conv::toString(smf_cfg->get_ue_dns().get_secondary_dns_v4());
+    json_data["default_dns_ipv6_address"] =
+        conv::toString(smf_cfg->get_ue_dns().get_primary_dns_v6());
+    json_data["default_dns_sec_ipv6_address"] =
+        conv::toString(smf_cfg->get_ue_dns().get_secondary_dns_v6());
+
+    json_data["default_cscf_ipv4_address"] =
+                    conv::toString(smf_cfg->get_ims_config().get_pcscf_v4());
+    json_data["default_cscf_ipv6_address"] =
+        conv::toString(smf_cfg->get_ims_config().get_pcscf_v6());
+
+    json_data["ue_mtu"] = smf_cfg->get_ue_mtu();
+
+    // TODO: change to support_features (?)
+    json_data["supported_features"]["registered_nrf"] = config::register_nrf();
+    json_data["supported_features"]["discover_upf"]   = config::register_nrf();
+    json_data["supported_features"]["force_push_protocol_configuration_options"]
+    = force_push_pco;
+    json_data["supported_features"]["use_local_subscription_info"] =
+                    smf_cfg->get_smf_support_features().use_local_subscription_info();
+    // TODO: json_data["supported_features"]["use_network_instance"]
+    //TODO: json_data["supported_features"]["enable_usage_reporting"]
+  */
+  if (config::register_nrf()) {
+    json_data["nrf"] = get_nf(NRF_CONFIG_NAME)->to_json();
   }
-
-  json_data["default_dns_ipv4_address"] =
-      inet_ntoa(smf_cfg->get_ue_dns().get_primary_dns_v4());
-  json_data["default_dns_sec_ipv4_address"] =
-      inet_ntoa(smf_cfg->get_ue_dns().get_secondary_dns_v4());
-  json_data["default_dns_ipv6_address"] =
-      conv::toString(smf_cfg->get_ue_dns().get_primary_dns_v6());
-  json_data["default_dns_sec_ipv6_address"] =
-      conv::toString(smf_cfg->get_ue_dns().get_secondary_dns_v6());
-
-  json_data["default_cscf_ipv4_address"] =
-      inet_ntoa(smf_cfg->get_ims_config().get_pcscf_v4());
-  json_data["default_cscf_ipv6_address"] =
-      conv::toString(smf_cfg->get_ims_config().get_pcscf_v6());
-
-  json_data["ue_mtu"] = smf_cfg->get_ue_mtu();
-
-  // TODO: change to support_features (?)
-  json_data["supported_features"]["registered_nrf"] = register_nrf;
-  json_data["supported_features"]["discover_upf"]   = discover_upf;
-  json_data["supported_features"]["force_push_protocol_configuration_options"] =
-      force_push_pco;
-  json_data["supported_features"]["use_local_subscription_info"] =
-      use_local_subscription_info;
-  // json_data["supported_features"]["use_network_instance"]   = use_nwi;
-  json_data["supported_features"]["enable_usage_reporting"] = enable_ur;
-
-  if (register_nrf) {
-    json_data["nrf"] = nrf_addr.to_json();
-  }
+  /*
   json_data["upf_list"] = nlohmann::json::array();
   for (auto s : upfs) {
     json_data["upf_list"].push_back(s.toString());
   }
+  */
 
   if (get_nf(AMF_CONFIG_NAME)->is_set()) {
-    json_data["amf"] = amf_addr.to_json();
+    json_data["amf"] = get_nf(AMF_CONFIG_NAME)->to_json();
   }
   if (get_nf(UDM_CONFIG_NAME)->is_set()) {
-    json_data["udm"] = udm_addr.to_json();
+    json_data["udm"] = get_nf(UDM_CONFIG_NAME)->to_json();
   }
 
   json_data["local_subscription_infos"] = nlohmann::json::array();
@@ -456,6 +458,7 @@ void smf_config::to_json(nlohmann::json& json_data) const {
     Logger::smf_app().debug(
         "Default session type %s", pdu_session_type.to_string());
 
+    /*
     json_data_tmp["session_type"] = pdu_session_type.to_string();
 
     // SSC_Mode
@@ -475,7 +478,7 @@ void smf_config::to_json(nlohmann::json& json_data) const {
     // Session_ambr
     json_data_tmp["session_ambr"]["uplink"]   = sub.get_session_ambr().uplink;
     json_data_tmp["session_ambr"]["downlink"] = sub.get_session_ambr().downlink;
-
+*/
     json_data["local_subscription_infos"].push_back(json_data_tmp);
   }
 }
@@ -493,7 +496,7 @@ bool smf_config::from_json(nlohmann::json& json_data) {
             json_tmp["use_local_subscription_info"].get<bool>();
 
       // TODO: Check if VPP is used
-      if (true and json_tmp.find("enable_usage_reporting") != json_tmp.end())
+      if (json_tmp.find("enable_usage_reporting") != json_tmp.end())
         enable_ur = json_tmp["enable_usage_reporting"].get<bool>();
 
       // if (true and json_tmp.find("use_network_instance") != json_tmp.end())
