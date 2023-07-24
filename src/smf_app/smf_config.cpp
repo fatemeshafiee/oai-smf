@@ -63,7 +63,7 @@ smf_config::smf_config(
   // Define default values in YAML
   auto smf = std::make_shared<smf_config_type>(
       "smf", "oai-smf", sbi_interface("sbi", "oai-smf", 80, "v1", "eth0"),
-      local_interface("N4", "oai-smf", 8805, "eth0"));
+      local_interface("n4", "oai-smf", 8805, "eth0"));
   add_nf("smf", smf);
 
   auto amf = std::make_shared<nf>(

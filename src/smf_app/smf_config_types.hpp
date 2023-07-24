@@ -75,6 +75,8 @@ class upf_info_config_value : public config_type {
       const std::string& n3_nwi, const std::string& n6_nwi);
 
   void from_yaml(const YAML::Node& node) override;
+  nlohmann::json to_json() override;
+  bool from_json(const nlohmann::json& json_data) override;
 
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
 
@@ -106,6 +108,8 @@ class upf : public config_type {
       const std::string& local_n3_ip);
 
   void from_yaml(const YAML::Node& node) override;
+  nlohmann::json to_json() override;
+  bool from_json(const nlohmann::json& json_data) override;
 
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
 
@@ -135,6 +139,8 @@ class ims_config : public config_type {
       const std::string& pcscf_ip_v4, const std::string& pcscf_ip_v6);
 
   void from_yaml(const YAML::Node& node) override;
+  nlohmann::json to_json() override;
+  bool from_json(const nlohmann::json& json_data) override;
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
 
   void validate() override;
@@ -164,6 +170,8 @@ class qos_profile_config_value : public config_type {
       const subscribed_default_qos_t& qos, const session_ambr_t& ambr);
 
   void from_yaml(const YAML::Node& node) override;
+  nlohmann::json to_json() override;
+  bool from_json(const nlohmann::json& json_data) override;
 
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
 
@@ -183,6 +191,8 @@ class snssai_config_value : public config_type {
   explicit snssai_config_value(const snssai_t& snssai);
 
   void from_yaml(const YAML::Node& node) override;
+  nlohmann::json to_json() override;
+  bool from_json(const nlohmann::json& json_data) override;
 
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
 
@@ -205,6 +215,8 @@ class subscription_info_config : public config_type {
       const snssai_t& snssai);
 
   void from_yaml(const YAML::Node& node) override;
+  nlohmann::json to_json() override;
+  bool from_json(const nlohmann::json& json_data) override;
 
   [[nodiscard]] std::string to_string(const std::string& indent) const override;
 

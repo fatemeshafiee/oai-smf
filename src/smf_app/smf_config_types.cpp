@@ -35,20 +35,23 @@ using namespace oai::config;
 
 smf_support_features::smf_support_features(
     bool local_subscription_info, bool local_pcc_rules) {
-  m_config_name              = "Supported Features";
+  set_config_name("supported_features");
   m_local_subscription_infos = option_config_value(
-      "Use Local Subscription Info", local_subscription_info);
+      "use_local_subscription_info", local_subscription_info);
   m_local_pcc_rules =
-      option_config_value("Use Local PCC Rules", local_pcc_rules);
+      option_config_value("use_local_pcc_rules", local_pcc_rules);
+  m_external_ausf = option_config_value("use_external_ausf", false);
+  m_external_udm  = option_config_value("use_external_udm", false);
+  m_external_nssf = option_config_value("use_external_nssf", false);
 }
 
 // TODO we should move this to common and use it together with AMF and other NFs
 smf_support_features::smf_support_features(
     bool external_ausf, bool external_udm, bool external_nssf) {
-  m_config_name   = "Supported Features";
-  m_external_ausf = option_config_value("Use External AUSF", external_ausf);
-  m_external_udm  = option_config_value("Use External UDM", external_udm);
-  m_external_nssf = option_config_value("Use External NSSF", external_nssf);
+  set_config_name("supported_features");
+  m_external_ausf = option_config_value("use_external_ausf", external_ausf);
+  m_external_udm  = option_config_value("use_external_udm", external_udm);
+  m_external_nssf = option_config_value("use_external_nssf", external_nssf);
 }
 
 void smf_support_features::from_yaml(const YAML::Node& node) {
@@ -66,35 +69,44 @@ void smf_support_features::from_yaml(const YAML::Node& node) {
     m_external_udm.from_yaml(node[USE_EXTERNAL_UDM_CONFIG_VALUE]);
   }
   if (node[USE_EXTERNAL_NSSF_CONFIG_VALUE]) {
-    m_external_ausf.from_yaml(node[USE_EXTERNAL_AUSF_CONFIG_VALUE]);
+    m_external_nssf.from_yaml(node[USE_EXTERNAL_AUSF_CONFIG_VALUE]);
   }
 }
 
 nlohmann::json smf_support_features::to_json() {
   nlohmann::json json_data = {};
-  /*
-  json_data[m_host.get_config_name()] = m_if_name.get_value();
-  json_data[m_port.get_config_name()] = m_port.get_value();
-  json_data[m_if_name.get_config_name()] = m_if_name.get_value();
-  json_data["mtu"] = m_mtu;
-  json_data["addr4"] = conv::toString(m_addr4);
-  */
+  json_data[m_local_pcc_rules.get_config_name()] =
+      m_local_pcc_rules.get_value();
+  json_data[m_local_subscription_infos.get_config_name()] =
+      m_local_subscription_infos.get_value();
+  json_data[m_external_ausf.get_config_name()] = m_external_ausf.get_value();
+  json_data[m_external_udm.get_config_name()]  = m_external_udm.get_value();
+  json_data[m_external_nssf.get_config_name()] = m_external_nssf.get_value();
   return json_data;
 }
 
 bool smf_support_features::from_json(const nlohmann::json& json_data) {
   try {
-    /*	 if (json_data.find(m_host.get_config_name()) != json_data.end()) {
-                     m_host.from_json(json_data[m_host.get_config_name()]);
-             }
-             if (json_data.find(m_port.get_config_name()) != json_data.end()) {
-                     m_port.from_json(json_data[m_port.get_config_name()]);
-             }
-             if (json_data.find(m_port.get_config_name()) != json_data.end()) {
-                     m_if_name.from_json(json_data[m_if_name.get_config_name()]);
-             }
-             //TODO: MTU/IP Addr
-*/
+    if (json_data.find(m_local_pcc_rules.get_config_name()) !=
+        json_data.end()) {
+      m_local_pcc_rules.from_json(
+          json_data[m_local_pcc_rules.get_config_name()]);
+    }
+    if (json_data.find(m_local_subscription_infos.get_config_name()) !=
+        json_data.end()) {
+      m_local_subscription_infos.from_json(
+          json_data[m_local_subscription_infos.get_config_name()]);
+    }
+    if (json_data.find(m_external_ausf.get_config_name()) != json_data.end()) {
+      m_external_ausf.from_json(json_data[m_external_ausf.get_config_name()]);
+    }
+    if (json_data.find(m_external_udm.get_config_name()) != json_data.end()) {
+      m_external_udm.from_json(json_data[m_external_udm.get_config_name()]);
+    }
+    if (json_data.find(m_external_nssf.get_config_name()) != json_data.end()) {
+      m_external_nssf.from_json(json_data[m_external_nssf.get_config_name()]);
+    }
+
   } catch (nlohmann::detail::exception& e) {
     // TODO:
   } catch (std::exception& e) {
@@ -171,8 +183,8 @@ bool smf_support_features::use_external_nssf() const {
 
 upf_info_config_value::upf_info_config_value(
     const std::string& n3_nwi, const std::string& n6_nwi) {
-  m_n3_nwi = string_config_value("NWI N3", n3_nwi);
-  m_n6_nwi = string_config_value("NWI N6", n6_nwi);
+  m_n3_nwi = string_config_value("nwi_n3", n3_nwi);
+  m_n6_nwi = string_config_value("nwi_n6", n6_nwi);
 }
 
 void upf_info_config_value::from_yaml(const YAML::Node& node) {
@@ -188,6 +200,31 @@ void upf_info_config_value::from_yaml(const YAML::Node& node) {
       }
     }
   }
+}
+
+nlohmann::json upf_info_config_value::to_json() {
+  nlohmann::json json_data              = {};
+  json_data[m_n3_nwi.get_config_name()] = m_n3_nwi.get_value();
+  json_data[m_n6_nwi.get_config_name()] = m_n6_nwi.get_value();
+  return json_data;
+}
+
+bool upf_info_config_value::from_json(const nlohmann::json& json_data) {
+  try {
+    if (json_data.find(m_n3_nwi.get_config_name()) != json_data.end()) {
+      m_n3_nwi.from_json(json_data[m_n3_nwi.get_config_name()]);
+    }
+
+    if (json_data.find(m_n6_nwi.get_config_name()) != json_data.end()) {
+      m_n6_nwi.from_json(json_data[m_n6_nwi.get_config_name()]);
+    }
+
+  } catch (nlohmann::detail::exception& e) {
+    // TODO:
+  } catch (std::exception& e) {
+    // TODO:
+  }
+  return false;
 }
 
 std::string upf_info_config_value::to_string(const std::string& indent) const {
@@ -223,14 +260,14 @@ upf::upf(
     const std::string& host, int port, bool enable_usage_reporting,
     bool enable_dl_pdr_in_session_establishment, const std::string& local_n3_ip)
     : m_upf_config_value("access.oai.org", "core.oai.org") {
-  m_host = string_config_value("Host", host);
-  m_port = int_config_value("Port", port);
+  m_host = string_config_value("host", host);
+  m_port = int_config_value("rort", port);
   m_usage_reporting =
-      option_config_value("Enable Usage Reporting", enable_usage_reporting);
+      option_config_value("enable_usage_reporting", enable_usage_reporting);
   m_dl_pdr_in_session_establishment = option_config_value(
-      "Enable DL PDR In Session Establishment",
+      "enable_dl_pdr_in_session_establishment",
       enable_dl_pdr_in_session_establishment);
-  m_local_n3_ipv4 = string_config_value("Local N3 IPv4", local_n3_ip);
+  m_local_n3_ipv4 = string_config_value("local_n3_ipv4", local_n3_ip);
 
   m_host.set_validation_regex(HOST_VALIDATOR_REGEX);
   m_port.set_validation_interval(PORT_MIN_VALUE, PORT_MAX_VALUE);
@@ -238,6 +275,7 @@ upf::upf(
   if (local_n3_ip.empty()) {
     m_local_n3_ipv4.unset_config();
   }
+  m_upf_config_value.set_config_name("nwi");
 }
 
 void upf::from_yaml(const YAML::Node& node) {
@@ -262,6 +300,61 @@ void upf::from_yaml(const YAML::Node& node) {
   if (node["config"]) {
     m_upf_config_value.from_yaml(node["config"]);
   }
+}
+
+nlohmann::json upf::to_json() {
+  nlohmann::json json_data            = {};
+  json_data[m_host.get_config_name()] = m_host.get_value();
+  json_data[m_port.get_config_name()] = m_port.get_value();
+  json_data["config"][m_usage_reporting.get_config_name()] =
+      m_usage_reporting.get_value();
+  json_data["config"][m_dl_pdr_in_session_establishment.get_config_name()] =
+      m_dl_pdr_in_session_establishment.get_value();
+  json_data["config"][m_local_n3_ipv4.get_config_name()] =
+      m_local_n3_ipv4.to_json();
+  json_data["config"][m_upf_config_value.get_config_name()] =
+      m_upf_config_value.to_json();
+  return json_data;
+}
+
+bool upf::from_json(const nlohmann::json& json_data) {
+  try {
+    if (json_data.find(m_host.get_config_name()) != json_data.end()) {
+      m_host.from_json(json_data[m_host.get_config_name()]);
+    }
+
+    if (json_data.find(m_port.get_config_name()) != json_data.end()) {
+      m_port.from_json(json_data[m_port.get_config_name()]);
+    }
+
+    if (json_data.find("config") != json_data.end()) {
+      if (json_data["config"].find(m_usage_reporting.get_config_name()) !=
+          json_data.end()) {
+        m_usage_reporting.from_json(
+            json_data["config"][m_usage_reporting.get_config_name()]);
+      }
+      if (json_data["config"].find(
+              m_dl_pdr_in_session_establishment.get_config_name()) !=
+          json_data.end()) {
+        m_dl_pdr_in_session_establishment.from_json(
+            json_data["config"]
+                     [m_dl_pdr_in_session_establishment.get_config_name()]);
+      }
+      if (json_data["config"].find(m_local_n3_ipv4.get_config_name()) !=
+          json_data.end()) {
+        m_local_n3_ipv4.from_json(
+            json_data["config"][m_local_n3_ipv4.get_config_name()]);
+      }
+      m_upf_config_value.from_json(
+          json_data[m_upf_config_value.get_config_name()]);
+    }
+
+  } catch (nlohmann::detail::exception& e) {
+    // TODO:
+  } catch (std::exception& e) {
+    // TODO:
+  }
+  return false;
 }
 
 std::string upf::to_string(const std::string& indent) const {
@@ -332,8 +425,8 @@ const upf_info_config_value& upf::get_upf_info() const {
 
 ims_config::ims_config(
     const std::string& pcscf_ip_v4, const std::string& pcscf_ip_v6) {
-  m_pcscf_v4 = string_config_value("P-CSCF IPv4", pcscf_ip_v4);
-  m_pcscf_v6 = string_config_value("P-CSCF IPv6", pcscf_ip_v6);
+  m_pcscf_v4 = string_config_value("p-cscf_ipv4", pcscf_ip_v4);
+  m_pcscf_v6 = string_config_value("p-cscf_ipv6", pcscf_ip_v6);
 
   m_pcscf_v4.set_validation_regex(IPV4_ADDRESS_VALIDATOR_REGEX);
   m_pcscf_v6.set_validation_regex(IPV6_ADDRESS_VALIDATOR_REGEX);
@@ -349,6 +442,31 @@ void ims_config::from_yaml(const YAML::Node& node) {
   if (node["pcscf_ipv6"]) {
     m_pcscf_v6.from_yaml(node["pcscf_ipv6"]);
   }
+}
+
+nlohmann::json ims_config::to_json() {
+  nlohmann::json json_data                = {};
+  json_data[m_pcscf_v4.get_config_name()] = m_pcscf_v4.get_value();
+  json_data[m_pcscf_v6.get_config_name()] = m_pcscf_v6.get_value();
+  return json_data;
+}
+
+bool ims_config::from_json(const nlohmann::json& json_data) {
+  try {
+    if (json_data.find(m_pcscf_v4.get_config_name()) != json_data.end()) {
+      m_pcscf_v4.from_json(json_data[m_pcscf_v4.get_config_name()]);
+    }
+
+    if (json_data.find(m_pcscf_v6.get_config_name()) != json_data.end()) {
+      m_pcscf_v6.from_json(json_data[m_pcscf_v6.get_config_name()]);
+    }
+
+  } catch (nlohmann::detail::exception& e) {
+    // TODO:
+  } catch (std::exception& e) {
+    // TODO:
+  }
+  return false;
 }
 
 std::string ims_config::to_string(const std::string& indent) const {
@@ -396,7 +514,7 @@ smf_config_type::smf_config_type(
       m_support_feature(false, true),
       m_ue_dns("8.8.8.8", "1.1.1.1", "", "") {
   m_config_name = "SMF Config";
-  m_ue_mtu      = int_config_value("UE MTU", 1500);
+  m_ue_mtu      = int_config_value("ue_mtu", 1500);
 }
 
 void smf_config_type::from_yaml(const YAML::Node& node) {
@@ -434,18 +552,35 @@ void smf_config_type::from_yaml(const YAML::Node& node) {
 }
 
 nlohmann::json smf_config_type::to_json() {
-  nlohmann::json json_data = {};
-  json_data                = nf::to_json();
-  // json_data[m_sbi.get_config_name()] = m_sbi.to_json();
-  // if (m_nx.is_set()) json_data[m_nx.get_config_name()] = m_nx.to_json();
-  // json_data["url"] = m_url;
+  nlohmann::json json_data                       = {};
+  json_data                                      = nf::to_json();
+  json_data[m_support_feature.get_config_name()] = m_support_feature.to_json();
+  json_data[m_ue_dns.get_config_name()]          = m_ue_dns.to_json();
+  json_data["upfs"]                              = nlohmann::json::array();
+  for (auto u : m_upfs) {
+    json_data["upfs"].push_back(u.to_json());
+  }
+  json_data["local_subscription_infos"] = nlohmann::json::array();
+  for (auto s : m_subscription_infos) {
+    json_data["local_subscription_infos"].push_back(s.to_json());
+  }
   return json_data;
 }
 
 bool smf_config_type::from_json(const nlohmann::json& json_data) {
   try {
     nf::from_json(json_data);
-
+    if (json_data.find(m_support_feature.get_config_name()) !=
+        json_data.end()) {
+      m_support_feature.from_json(
+          json_data[m_support_feature.get_config_name()]);
+    }
+    if (json_data.find(m_ue_dns.get_config_name()) != json_data.end()) {
+      m_ue_dns.from_json(json_data[m_ue_dns.get_config_name()]);
+    }
+    // TODO: UPF
+    // TODO: local_subscription_infos
+    return true;
   } catch (nlohmann::detail::exception& e) {
     // TODO:
   } catch (std::exception& e) {
@@ -523,9 +658,9 @@ subscription_info_config::subscription_info_config(
     const subscribed_default_qos_t& qos, const session_ambr_t& session_ambr,
     const snssai_t& snssai)
     : m_snssai(snssai), m_qos_profile(qos, session_ambr) {
-  m_dnn         = string_config_value("DNN", dnn);
-  m_ssc_mode    = int_config_value("SSC Mode", ssc_mode);
-  m_config_name = "Local Subscription Info";
+  m_dnn         = string_config_value("dnn", dnn);
+  m_ssc_mode    = int_config_value("ssc_mode", ssc_mode);
+  m_config_name = "local_subscription_info";
 
   // TODO do we need a validation regex for DNN?
   m_ssc_mode.set_validation_interval(1, 3);
@@ -544,6 +679,39 @@ void subscription_info_config::from_yaml(const YAML::Node& node) {
   if (node["qos_profile"]) {
     m_qos_profile.from_yaml(node["qos_profile"]);
   }
+}
+
+nlohmann::json subscription_info_config::to_json() {
+  nlohmann::json json_data                   = {};
+  json_data[m_dnn.get_config_name()]         = m_dnn.to_json();
+  json_data[m_ssc_mode.get_config_name()]    = m_ssc_mode.to_json();
+  json_data[m_snssai.get_config_name()]      = m_snssai.to_json();
+  json_data[m_qos_profile.get_config_name()] = m_qos_profile.to_json();
+  return json_data;
+}
+
+bool subscription_info_config::from_json(const nlohmann::json& json_data) {
+  try {
+    if (json_data.find(m_dnn.get_config_name()) != json_data.end()) {
+      m_dnn.from_json(json_data[m_dnn.get_config_name()]);
+    }
+
+    if (json_data.find(m_ssc_mode.get_config_name()) != json_data.end()) {
+      m_ssc_mode.from_json(json_data[m_ssc_mode.get_config_name()]);
+    }
+    if (json_data.find(m_snssai.get_config_name()) != json_data.end()) {
+      m_snssai.from_json(json_data[m_snssai.get_config_name()]);
+    }
+    if (json_data.find(m_qos_profile.get_config_name()) != json_data.end()) {
+      m_qos_profile.from_json(json_data[m_qos_profile.get_config_name()]);
+    }
+
+  } catch (nlohmann::detail::exception& e) {
+    // TODO:
+  } catch (std::exception& e) {
+    // TODO:
+  }
+  return false;
 }
 
 std::string subscription_info_config::to_string(
@@ -601,13 +769,13 @@ const snssai_t& subscription_info_config::get_single_nssai() const {
 snssai_config_value::snssai_config_value(const snssai_t& snssai) {
   m_snssai = snssai;
   // narrowing conversion, but should be okay because max value is 16777215
-  m_sd  = int_config_value("SD", m_snssai.sd);
-  m_sst = int_config_value("SST", m_snssai.sst);
+  m_sd  = int_config_value("sd", m_snssai.sd);
+  m_sst = int_config_value("sst", m_snssai.sst);
 
   m_sd.set_validation_interval(0, 16777215);
   m_sst.set_validation_interval(0, 255);
 
-  m_config_name = "Single NSSAI";
+  m_config_name = "single_nssai";
 }
 
 void snssai_config_value::from_yaml(const YAML::Node& node) {
@@ -621,6 +789,29 @@ void snssai_config_value::from_yaml(const YAML::Node& node) {
   }
 }
 
+nlohmann::json snssai_config_value::to_json() {
+  nlohmann::json json_data           = {};
+  json_data[m_sst.get_config_name()] = m_sst.to_json();
+  json_data[m_sd.get_config_name()]  = m_sd.to_json();
+  return json_data;
+}
+
+bool snssai_config_value::from_json(const nlohmann::json& json_data) {
+  try {
+    if (json_data.find(m_sst.get_config_name()) != json_data.end()) {
+      m_sst.from_json(json_data[m_sst.get_config_name()]);
+    }
+    if (json_data.find(m_sd.get_config_name()) != json_data.end()) {
+      m_sd.from_json(json_data[m_sd.get_config_name()]);
+    }
+
+  } catch (nlohmann::detail::exception& e) {
+    // TODO:
+  } catch (std::exception& e) {
+    // TODO:
+  }
+  return false;
+}
 std::string snssai_config_value::to_string(const std::string& indent) const {
   std::string out;
 
@@ -658,21 +849,21 @@ qos_profile_config_value::qos_profile_config_value(
     const subscribed_default_qos_t& qos, const session_ambr_t& ambr) {
   m_qos          = qos;
   m_ambr         = ambr;
-  m_5qi          = int_config_value("5QI", m_qos._5qi);
-  m_priority     = int_config_value("Priority", m_qos.priority_level);
-  m_arp_priority = int_config_value("ARP Priority", m_qos.arp.priority_level);
+  m_5qi          = int_config_value("5qi", m_qos._5qi);
+  m_priority     = int_config_value("priority", m_qos.priority_level);
+  m_arp_priority = int_config_value("arp_priority", m_qos.arp.priority_level);
   m_arp_preempt_capability =
-      string_config_value("ARP Preempt Capability", m_qos.arp.preempt_cap);
+      string_config_value("arp_preempt_capability", m_qos.arp.preempt_cap);
   m_arp_preempt_vulnerability =
-      string_config_value("ARP Preempt Vulnerability", m_qos.arp.preempt_vuln);
-  m_session_ambr_dl = string_config_value("Session AMBR DL", m_ambr.downlink);
-  m_session_ambr_ul = string_config_value("Session AMBR UL", m_ambr.uplink);
+      string_config_value("arp_preempt_vulnerability", m_qos.arp.preempt_vuln);
+  m_session_ambr_dl = string_config_value("session_ambr_dl", m_ambr.downlink);
+  m_session_ambr_ul = string_config_value("session_ambr_ul", m_ambr.uplink);
 
   m_5qi.set_validation_interval(1, 254);
   m_priority.set_validation_interval(1, 127);
   m_arp_priority.set_validation_interval(1, 15);
 
-  m_config_name = "QoS Profile";
+  m_config_name = "qos_profile";
 
   // TODO ARP Preempt and session AMBR String regex validators
 }
@@ -706,6 +897,62 @@ void qos_profile_config_value::from_yaml(const YAML::Node& node) {
     m_session_ambr_dl.from_yaml(node["session_ambr_dl"]);
     m_ambr.downlink = m_session_ambr_dl.get_value();
   }
+}
+
+nlohmann::json qos_profile_config_value::to_json() {
+  nlohmann::json json_data                = {};
+  json_data[m_5qi.get_config_name()]      = m_5qi.to_json();
+  json_data[m_priority.get_config_name()] = m_priority.to_json();
+
+  json_data[m_arp_priority.get_config_name()] = m_arp_priority.to_json();
+  json_data[m_arp_preempt_capability.get_config_name()] =
+      m_arp_preempt_capability.to_json();
+  json_data[m_arp_preempt_vulnerability.get_config_name()] =
+      m_arp_preempt_vulnerability.to_json();
+  json_data[m_session_ambr_ul.get_config_name()] = m_session_ambr_ul.to_json();
+  json_data[m_session_ambr_dl.get_config_name()] = m_session_ambr_dl.to_json();
+  return json_data;
+}
+
+bool qos_profile_config_value::from_json(const nlohmann::json& json_data) {
+  try {
+    if (json_data.find(m_5qi.get_config_name()) != json_data.end()) {
+      m_5qi.from_json(json_data[m_5qi.get_config_name()]);
+    }
+
+    if (json_data.find(m_priority.get_config_name()) != json_data.end()) {
+      m_priority.from_json(json_data[m_priority.get_config_name()]);
+    }
+    if (json_data.find(m_arp_priority.get_config_name()) != json_data.end()) {
+      m_arp_priority.from_json(json_data[m_arp_priority.get_config_name()]);
+    }
+    if (json_data.find(m_arp_preempt_capability.get_config_name()) !=
+        json_data.end()) {
+      m_arp_preempt_capability.from_json(
+          json_data[m_arp_preempt_capability.get_config_name()]);
+    }
+    if (json_data.find(m_arp_preempt_vulnerability.get_config_name()) !=
+        json_data.end()) {
+      m_arp_preempt_vulnerability.from_json(
+          json_data[m_arp_preempt_vulnerability.get_config_name()]);
+    }
+    if (json_data.find(m_session_ambr_ul.get_config_name()) !=
+        json_data.end()) {
+      m_session_ambr_ul.from_json(
+          json_data[m_session_ambr_ul.get_config_name()]);
+    }
+    if (json_data.find(m_session_ambr_dl.get_config_name()) !=
+        json_data.end()) {
+      m_session_ambr_dl.from_json(
+          json_data[m_session_ambr_dl.get_config_name()]);
+    }
+
+  } catch (nlohmann::detail::exception& e) {
+    // TODO:
+  } catch (std::exception& e) {
+    // TODO:
+  }
+  return false;
 }
 
 std::string qos_profile_config_value::to_string(

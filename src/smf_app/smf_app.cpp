@@ -1603,7 +1603,7 @@ bool smf_app::update_smf_configuration(nlohmann::json& json_data) {
   // For the moment, we can only update SMF configuration when there's no
   // connected UE
   if (get_number_contexts() == 0) {
-    return smf_cfg->from_json(json_data);
+    return smf_cfg->smf()->from_json(json_data);
   }
   Logger::smf_app().warn(
       "Could not update SMF configuration when there's connected UE!");

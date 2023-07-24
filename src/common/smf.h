@@ -145,6 +145,18 @@ typedef struct s_nssai  // section 28.4, TS23.003
     return s;
   }
 
+  nlohmann::json to_json() const {
+    nlohmann::json json_data = {};
+    json_data["sst"]         = sst;
+    json_data["sd"]          = sd;
+    return json_data;
+  }
+
+  void from_json(nlohmann::json& json_data) {
+    this->sst = json_data["sst"].get<int>();
+    this->sd  = json_data["sd"].get<int>();
+  }
+
   size_t operator()(const s_nssai&) const {
     size_t res = HASH_SEED;
     res        = res * HASH_FACTOR + std::hash<uint32_t>()(sd);
