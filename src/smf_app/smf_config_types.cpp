@@ -552,7 +552,8 @@ void smf_config_type::from_yaml(const YAML::Node& node) {
 }
 
 nlohmann::json smf_config_type::to_json() {
-  nlohmann::json json_data                       = {};
+  nlohmann::json json_data = {};
+
   json_data                                      = nf::to_json();
   json_data[m_support_feature.get_config_name()] = m_support_feature.to_json();
   json_data[m_ue_dns.get_config_name()]          = m_ue_dns.to_json();

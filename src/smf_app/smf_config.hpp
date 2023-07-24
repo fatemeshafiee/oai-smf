@@ -314,7 +314,7 @@ class smf_config : public config {
    * @param [nlohmann::json &] json_data: Json data
    * @return void
    */
-  void to_json(nlohmann::json& json_data) const;
+  void to_json(nlohmann::json& json_data);
 
   /*
    * Update SMF's config from Json
