@@ -145,6 +145,18 @@ typedef struct s_nssai  // section 28.4, TS23.003
     return s;
   }
 
+  nlohmann::json to_json() const {
+    nlohmann::json json_data = {};
+    json_data["sst"]         = sst;
+    json_data["sd"]          = sd;
+    return json_data;
+  }
+
+  void from_json(nlohmann::json& json_data) {
+    this->sst = json_data["sst"].get<int>();
+    this->sd  = json_data["sd"].get<int>();
+  }
+
   size_t operator()(const s_nssai&) const {
     size_t res = HASH_SEED;
     res        = res * HASH_FACTOR + std::hash<uint32_t>()(sd);
@@ -281,6 +293,8 @@ typedef struct qos_profile_s {
 #define NSMF_SMF_CONFIGURATION_BASE "/nsmf-configuration/"
 #define NSMF_SMF_CONFIGURATION_CREATE_DNN "/dnn-configurations"
 
+#define NSMF_CUSTOMIZED_API_BASE "/nsmf-oai/"
+#define NSMF_CUSTOMIZED_API_CONFIGURATION_URL "/configuration"
 // NRF
 #define NNRF_NFM_BASE "/nnrf-nfm/"
 #define NNRF_NF_REGISTER_URL "/nf-instances/"
@@ -288,7 +302,7 @@ typedef struct qos_profile_s {
 #define NNRF_NF_STATUS_NOTIFY_BASE "/nsmf-nfstatus-notify/"
 
 // for CURL
-#define NF_CURL_TIMEOUT_MS 100L
+#define NF_CURL_TIMEOUT_MS 3000L
 #define MAX_WAIT_MSECS 10000  // 1 second
 #define AMF_NUMBER_RETRIES 3
 #define UDM_NUMBER_RETRIES 3

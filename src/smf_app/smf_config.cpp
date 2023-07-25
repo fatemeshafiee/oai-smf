@@ -62,24 +62,24 @@ smf_config::smf_config(
 
   // Define default values in YAML
   auto smf = std::make_shared<smf_config_type>(
-      "smf", "oai-smf", sbi_interface("SBI", "oai-smf", 80, "v1", "eth0"),
-      local_interface("N4", "oai-smf", 8805, "eth0"));
+      "smf", "oai-smf", sbi_interface("sbi", "oai-smf", 80, "v1", "eth0"),
+      local_interface("n4", "oai-smf", 8805, "eth0"));
   add_nf("smf", smf);
 
   auto amf = std::make_shared<nf>(
-      "amf", "oai-amf", sbi_interface("SBI", "oai-amf", 80, "v1", ""));
+      "amf", "oai-amf", sbi_interface("sbi", "oai-amf", 80, "v1", ""));
   add_nf("amf", amf);
 
   auto udm = std::make_shared<nf>(
-      "udm", "oai-udm", sbi_interface("SBI", "oai-udm", 80, "v1", ""));
+      "udm", "oai-udm", sbi_interface("sbi", "oai-udm", 80, "v1", ""));
   add_nf("udm", udm);
 
   auto pcf = std::make_shared<nf>(
-      "pcf", "oai-pcf", sbi_interface("SBI", "oai-pcf", 80, "v1", ""));
+      "pcf", "oai-pcf", sbi_interface("sbi", "oai-pcf", 80, "v1", ""));
   add_nf("pcf", pcf);
 
   auto nrf = std::make_shared<nf>(
-      "nrf", "oai-nrf", sbi_interface("SBI", "oai-nrf", 80, "v1", ""));
+      "nrf", "oai-nrf", sbi_interface("sbi", "oai-nrf", 80, "v1", ""));
   add_nf("nrf", nrf);
 
   // DNN default values
@@ -200,6 +200,7 @@ void smf_config::to_smf_config() {
   discover_pcf = false;
   discover_upf = config::register_nrf();
 
+  http_version = config::get_http_version();
   // we need to set some things (e.g. API version even if we do NRF
   // discovery...)
   amf_addr.from_sbi_config_type_no_resolving(
@@ -384,6 +385,35 @@ void smf_config::update_used_nfs() {
   }
 }
 
+//------------------------------------------------------------------------------
+void smf_config::to_json(nlohmann::json& json_data) {
+  auto smf_cfg = smf();
+  json_data    = smf()->to_json();
+  config::to_json(json_data);
+}
+
+//------------------------------------------------------------------------------
+bool smf_config::from_json(nlohmann::json& json_data) {
+  auto smf_cfg = smf();
+  try {
+    // TODO: before enabling this, should check which configuration parameters
+    // can be updated
+    // smf()->from_json(json_data);
+    // config::from_json(json_data);
+    Logger::smf_app().warn("This feature is not ready to be enabled yet!");
+  } catch (nlohmann::detail::exception& e) {
+    Logger::smf_app().error(
+        "Exception when getting SMF configuration from JSON %s", e.what());
+    return false;
+  } catch (std::exception& e) {
+    Logger::smf_app().error(
+        "Exception when getting SMF configuration from JSON %s", e.what());
+    return false;
+  }
+  return false;  // TODO
+}
+
+//------------------------------------------------------------------------------
 const ue_dns& smf_config::get_dns_from_dnn(const string& dnn) {
   for (const auto& dnn_cfg : get_dnns()) {
     if (dnn_cfg.get_dnn() == dnn) {

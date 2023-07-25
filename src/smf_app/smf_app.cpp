@@ -1522,6 +1522,95 @@ bool smf_app::handle_nf_status_notification(
 }
 
 //------------------------------------------------------------------------------
+void smf_app::handle_sbi_get_configuration(
+    std::shared_ptr<itti_sbi_smf_configuration>& itti_msg) {
+  Logger::smf_app().info(
+      "Handle an SBI SMFConfiguration from a NF (HTTP version "
+      "%d)",
+      itti_msg->http_version);
+
+  // Process the request and trigger the response from SMF API Server
+  nlohmann::json response_data = {};
+  response_data["content"]     = {};
+  if (read_smf_configuration(response_data["content"])) {
+    Logger::smf_app().debug(
+        "SMF configuration:\n %s", response_data["content"].dump().c_str());
+    response_data["httpResponseCode"] =
+        static_cast<uint32_t>(http_response_codes_e::HTTP_RESPONSE_CODE_OK);
+  } else {
+    response_data["httpResponseCode"] = static_cast<uint32_t>(
+        http_response_codes_e::HTTP_RESPONSE_CODE_BAD_REQUEST);
+    oai::smf_server::model::ProblemDetails problem_details = {};
+    // TODO set problem_details
+    to_json(response_data["ProblemDetails"], problem_details);
+  }
+
+  // Notify to the result
+  if (itti_msg->promise_id > 0) {
+    trigger_http_response(response_data, itti_msg->promise_id);
+    return;
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_app::handle_sbi_update_configuration(
+    std::shared_ptr<itti_sbi_update_smf_configuration>& itti_msg) {
+  Logger::smf_app().info(
+      "Handle a SMF Configuration Update request from a NF (HTTP version "
+      "%d)",
+      itti_msg->http_version);
+
+  // Process the request and trigger the response from SMF API Server
+  nlohmann::json response_data = {};
+  response_data["content"]     = itti_msg->configuration;
+
+  if (update_smf_configuration(response_data["content"])) {
+    Logger::smf_app().debug(
+        "SMF configuration:\n %s", response_data["content"].dump().c_str());
+    response_data["httpResponseCode"] =
+        static_cast<uint32_t>(http_response_codes_e::HTTP_RESPONSE_CODE_OK);
+
+    // Update SMF profile
+    generate_smf_profile();
+
+    // Update SMF profile (complete replacement of the existing profile by a new
+    // one)
+    if (smf_cfg->register_nrf) register_to_nrf();
+
+  } else {
+    response_data["httpResponseCode"] = static_cast<uint32_t>(
+        http_response_codes_e::HTTP_RESPONSE_CODE_406_NOT_ACCEPTED);
+    oai::smf_server::model::ProblemDetails problem_details = {};
+    // TODO set problem_details
+    to_json(response_data["ProblemDetails"], problem_details);
+  }
+
+  // Notify to the result
+  if (itti_msg->promise_id > 0) {
+    trigger_http_response(response_data, itti_msg->promise_id);
+    return;
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+bool smf_app::read_smf_configuration(nlohmann::json& json_data) {
+  smf_cfg->to_json(json_data);
+  return true;
+}
+
+//---------------------------------------------------------------------------------------------
+bool smf_app::update_smf_configuration(nlohmann::json& json_data) {
+  // For the moment, we can only update SMF configuration when there's no
+  // connected UE
+  if (get_number_contexts() == 0) {
+    return smf_cfg->from_json(json_data);
+  }
+  Logger::smf_app().warn(
+      "Could not update SMF configuration when there's connected UE!");
+  return false;
+}
+
+//------------------------------------------------------------------------------
 bool smf_app::is_supi_2_smf_context(const supi64_t& supi) const {
   std::shared_lock lock(m_supi2smf_context);
   return bool{supi2smf_context.count(supi) > 0};
@@ -1581,6 +1670,12 @@ bool smf_app::scid_2_smf_context(
     return true;
   }
   return false;
+}
+
+//------------------------------------------------------------------------------
+uint32_t smf_app::get_number_contexts() const {
+  std::shared_lock lock(m_scid2smf_context);
+  return scid2smf_context.size();
 }
 
 //------------------------------------------------------------------------------
