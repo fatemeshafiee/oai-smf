@@ -286,7 +286,14 @@ void smf_config::to_smf_config() {
     dnn.ue_pool_range_low = cfg_dnn.get_ipv4_pool_start();
     // we need to add one IP as it is reserved for the GW
     dnn.ue_pool_range_low.s_addr += be32toh(1);
-    dnn.ue_pool_range_high   = cfg_dnn.get_ipv4_pool_end();
+    dnn.ue_pool_range_high = cfg_dnn.get_ipv4_pool_end();
+
+    logger::logger_registry::get_logger(LOGGER_NAME)
+        .debug(
+            "DNN %s: -- First UE IPv4: %s -- Last UE IPv4: %s", dnn.dnn,
+            conv::toString(dnn.ue_pool_range_low),
+            conv::toString(dnn.ue_pool_range_high));
+
     dnn.paa_pool6_prefix     = cfg_dnn.get_ipv6_prefix();
     dnn.paa_pool6_prefix_len = cfg_dnn.get_ipv6_prefix_length();
     dnns[dnn.dnn]            = dnn;
