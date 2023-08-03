@@ -685,8 +685,8 @@ void subscription_info_config::from_yaml(const YAML::Node& node) {
   if (node["dnn"]) {
     m_dnn.from_yaml(node["dnn"]);
   }
-  if (node["scc_mode"]) {
-    m_ssc_mode.from_yaml(node["scc_mode"]);
+  if (node["ssc_mode"]) {
+    m_ssc_mode.from_yaml(node["ssc_mode"]);
   }
   if (node["single_nssai"]) {
     m_snssai.from_yaml(node["single_nssai"]);
