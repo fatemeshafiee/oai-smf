@@ -516,6 +516,7 @@ smf_config_type::smf_config_type(
   m_config_name = "SMF Config";
   m_ue_mtu      = int_config_value("ue_mtu", 1500);
   m_ue_mtu.set_validation_interval(1, 65535);
+  m_upfs.push_back(DEFAULT_UPF);
   m_n4 = n4;
 }
 
