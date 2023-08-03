@@ -83,7 +83,7 @@ smf_config::smf_config(
   add_nf("nrf", nrf);
 
   // DNN default values
-  dnn_config dnn("default", "IPV4", "12.1.1.0 - 12.1.1.255", "");
+  dnn_config dnn("default", "IPV4", "12.1.1.0/24", "");
   m_dnns.push_back(dnn);
 
   // Local subscription default values
