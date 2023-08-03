@@ -165,7 +165,9 @@ pfcp::create_far smf_session_procedure::pfcp_create_far(
     forwarding_parameters.set(network_instance);
   }
 
-  // TODO: Redirect Information
+  if (edge.uplink && edge.redirect_information.redirect_address_type ==
+                         pfcp::redirect_address_type_e::URL)
+    forwarding_parameters.set(edge.redirect_information);
 
   if (edge.type != iface_type::N6) {
     pfcp::outer_header_creation_t outer_header_creation = {};

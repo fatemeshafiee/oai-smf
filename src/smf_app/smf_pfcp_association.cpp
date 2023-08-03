@@ -1453,13 +1453,13 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
 
   for (const auto& rule : pcc_rules) {
     std::unordered_set<std::string> dnais;
+    pfcp::redirect_information_t redirect_information = {};
     if (!rule.second.getRefTcData().empty()) {
       // we just take the first traffic control, as defined in the standard
       // see Note 1 in table 5.6.2.6-1 in TS29.512
       std::string tc_data_id = rule.second.getRefTcData()[0];
 
       auto traffic_it = traffic_conts.find(tc_data_id);
-
       if (traffic_it != traffic_conts.end()) {
         TrafficControlData data = traffic_it->second;
         traffic_it->second.getTcId();
@@ -1467,6 +1467,18 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
           for (const auto& route : traffic_it->second.getRouteToLocs()) {
             dnais.insert(route.getDnai());
             dnais_from_all_rules.insert(route.getDnai());
+          }
+          if (traffic_it->second.redirectInfoIsSet()) {
+            RedirectInformation redirectInfo =
+                traffic_it->second.getRedirectInfo();
+            if (redirectInfo.isRedirectEnabled()) {
+              redirect_information.redirect_address_type = static_cast<uint8_t>(
+                  redirectInfo.getRedirectAddressType().getEnumValue());
+              redirect_information.redirect_server_address =
+                  redirectInfo.getRedirectServerAddress();
+              redirect_information.redirect_server_address_length =
+                  redirect_information.redirect_server_address.size();
+            }
           }
         } else {
           Logger::smf_app().warn("Route to location is not set in PCC rules");
@@ -1518,12 +1530,14 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
             sub_graph_ptr = std::make_shared<upf_graph>();
           }
           set_dfs_selection_criteria(
-              dnais, flow_description, precedence, snssai, dnn);
+              dnais, flow_description, precedence, snssai, dnn,
+              redirect_information);
 
           create_subgraph_dfs(sub_graph_ptr, node.first, visited);
           // Verify the merged graph with all DNAIs so far
           sub_graph_ptr->set_dfs_selection_criteria(
-              dnais_from_all_rules, flow_description, precedence, snssai, dnn);
+              dnais_from_all_rules, flow_description, precedence, snssai, dnn,
+              redirect_information);
 
           if (!sub_graph_ptr->verify()) {
             // in case copy is null, new subgraph_ptr is also null, and we
@@ -1541,8 +1555,8 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
   // Now we verify the merged graph
   if (sub_graph_ptr) {
     sub_graph_ptr->set_dfs_selection_criteria(
-        dnais_from_all_rules, dfs_flow_description, dfs_precedence, snssai,
-        dnn);
+        dnais_from_all_rules, dfs_flow_description, dfs_precedence, snssai, dnn,
+        dfs_redirect_information);
   }
   if (sub_graph_ptr && sub_graph_ptr->verify()) {
     Logger::smf_app().info("Dynamic UPF selection successful.");
@@ -1649,12 +1663,14 @@ std::string upf_graph::get_dnai_list(const std::unordered_set<string>& dnais) {
 void upf_graph::set_dfs_selection_criteria(
     const std::unordered_set<std::string>& all_dnais,
     const std::string& flow_description, uint32_t precedence,
-    const snssai_t& snssai, const std::string& dnn) {
-  dfs_all_dnais        = all_dnais;
-  dfs_flow_description = flow_description;
-  dfs_precedence       = precedence;
-  dfs_snssai           = snssai;
-  dfs_dnn              = dnn;
+    const snssai_t& snssai, const std::string& dnn,
+    const pfcp::redirect_information_t& redirect_information) {
+  dfs_all_dnais            = all_dnais;
+  dfs_flow_description     = flow_description;
+  dfs_precedence           = precedence;
+  dfs_snssai               = snssai;
+  dfs_dnn                  = dnn;
+  dfs_redirect_information = redirect_information;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1697,6 +1713,8 @@ void upf_graph::create_subgraph_dfs(
       edge_it.used_dnai = found_dnai;
 
       edge_it.flow_description = dfs_flow_description;
+
+      edge_it.redirect_information = dfs_redirect_information;
       // TODO move this precedence to the QOS FLOW?
       // refactor the way qos_flow is handled in general
       edge_it.precedence = dfs_precedence;

@@ -298,7 +298,8 @@ struct edge {
   // for now we know this is always uplink
   std::string used_dnai;
   std::string flow_description;
-  unsigned int precedence = 0;
+  pfcp::redirect_information_t redirect_information = {};
+  unsigned int precedence                           = 0;
   std::string nw_instance;
   iface_type type;
   // Get first address from vector since multiple addresses on same interface
@@ -388,6 +389,7 @@ class upf_graph {
   // normal DFS temporary values
   std::unordered_set<std::string> dfs_all_dnais;
   std::string dfs_flow_description;
+  pfcp::redirect_information_t dfs_redirect_information = {};
   snssai_t dfs_snssai;
   std::string dfs_dnn;
   uint32_t dfs_precedence{};
@@ -434,7 +436,8 @@ class upf_graph {
   void set_dfs_selection_criteria(
       const std::unordered_set<std::string>& all_dnais,
       const std::string& flow_description, uint32_t precedence,
-      const snssai_t& snssai, const std::string& dnn);
+      const snssai_t& snssai, const std::string& dnn,
+      const pfcp::redirect_information_t& redirect_information);
 
   /**
    * @brief Creates a subgraph based on all the UPFs in the current graph which
