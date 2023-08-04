@@ -44,8 +44,8 @@ class SnssaiUpfInfoItem {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   /// <summary>
   ///
   /// </summary>
@@ -56,7 +56,7 @@ class SnssaiUpfInfoItem {
   friend void from_json(const nlohmann::json& j, SnssaiUpfInfoItem& o);
 
  protected:
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
 
   std::vector<DnnUpfInfoItem> m_DnnUpfInfoList;
 };

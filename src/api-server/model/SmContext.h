@@ -97,13 +97,13 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   /// <summary>
   ///
   /// </summary>
-  Snssai getHplmnSnssai() const;
-  void setHplmnSnssai(Snssai const& value);
+  oai::model::common::Snssai getHplmnSnssai() const;
+  void setHplmnSnssai(oai::model::common::Snssai const& value);
   bool hplmnSnssaiIsSet() const;
   void unsetHplmnSnssai();
   /// <summary>
@@ -309,9 +309,9 @@ class SmContext {
 
   std::string m_Dnn;
 
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
 
-  Snssai m_HplmnSnssai;
+  oai::model::common::Snssai m_HplmnSnssai;
   bool m_HplmnSnssaiIsSet;
   std::string m_ServingNfId;
 

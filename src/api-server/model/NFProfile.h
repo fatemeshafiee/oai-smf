@@ -99,8 +99,8 @@ class NFProfile {
   /// <summary>
   ///
   /// </summary>
-  std::vector<Snssai> getSNssais() const;
-  void setSNssais(std::vector<Snssai> const& value);
+  std::vector<oai::model::common::Snssai> getSNssais() const;
+  void setSNssais(std::vector<oai::model::common::Snssai> const& value);
   bool sNssaisIsSet() const;
   void unsetSNssais();
   /// <summary>
@@ -169,8 +169,8 @@ class NFProfile {
   /// <summary>
   ///
   /// </summary>
-  std::vector<Snssai>& getAllowedNssais();
-  void setAllowedNssais(std::vector<Snssai> const& value);
+  std::vector<oai::model::common::Snssai>& getAllowedNssais();
+  void setAllowedNssais(std::vector<oai::model::common::Snssai> const& value);
   bool allowedNssaisIsSet() const;
   void unsetAllowedNssais();
   /// <summary>
@@ -263,7 +263,7 @@ class NFProfile {
   bool m_HeartBeatTimerIsSet;
   std::vector<PlmnId> m_PlmnList;
   bool m_PlmnListIsSet;
-  std::vector<Snssai> m_SNssais;
+  std::vector<oai::model::common::Snssai> m_SNssais;
   bool m_SNssaisIsSet;
   std::vector<PlmnSnssai> m_PerPlmnSnssaiList;
   bool m_PerPlmnSnssaiListIsSet;
@@ -283,7 +283,7 @@ class NFProfile {
   bool m_AllowedNfTypesIsSet;
   std::vector<std::string> m_AllowedNfDomains;
   bool m_AllowedNfDomainsIsSet;
-  std::vector<Snssai> m_AllowedNssais;
+  std::vector<oai::model::common::Snssai> m_AllowedNssais;
   bool m_AllowedNssaisIsSet;
   int32_t m_Capacity;
   bool m_CapacityIsSet;

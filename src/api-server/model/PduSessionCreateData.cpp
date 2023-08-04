@@ -349,10 +349,10 @@ std::string PduSessionCreateData::getDnn() const {
 void PduSessionCreateData::setDnn(std::string const& value) {
   m_Dnn = value;
 }
-Snssai PduSessionCreateData::getSNssai() const {
+oai::model::common::Snssai PduSessionCreateData::getSNssai() const {
   return m_SNssai;
 }
-void PduSessionCreateData::setSNssai(Snssai const& value) {
+void PduSessionCreateData::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai      = value;
   m_SNssaiIsSet = true;
 }

@@ -295,8 +295,8 @@ class SmPolicyContextData {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSliceInfo() const;
-  void setSliceInfo(Snssai const& value);
+  oai::model::common::Snssai getSliceInfo() const;
+  void setSliceInfo(oai::model::common::Snssai const& value);
   /// <summary>
   ///
   /// </summary>
@@ -415,7 +415,7 @@ class SmPolicyContextData {
   bool m_RefQosIndicationIsSet;
   TraceData m_TraceReq;
   bool m_TraceReqIsSet;
-  Snssai m_SliceInfo;
+  oai::model::common::Snssai m_SliceInfo;
 
   // QosFlowUsage m_QosFlowUsage;
   // bool m_QosFlowUsageIsSet;

@@ -874,10 +874,11 @@ bool SmPolicyContextData::traceReqIsSet() const {
 void SmPolicyContextData::unsetTraceReq() {
   m_TraceReqIsSet = false;
 }
-Snssai SmPolicyContextData::getSliceInfo() const {
+oai::model::common::Snssai SmPolicyContextData::getSliceInfo() const {
   return m_SliceInfo;
 }
-void SmPolicyContextData::setSliceInfo(Snssai const& value) {
+void SmPolicyContextData::setSliceInfo(
+    oai::model::common::Snssai const& value) {
   m_SliceInfo = value;
 }
 /*

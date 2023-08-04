@@ -268,8 +268,8 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   bool sNssaiIsSet() const;
   void unsetSNssai();
   /// <summary>
@@ -386,7 +386,7 @@ class SmContextUpdateData {
   bool m_NgApCauseIsSet;
   int32_t m__5gMmCauseValue;
   bool m__5gMmCauseValueIsSet;
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
   bool m_SNssaiIsSet;
   TraceData m_TraceData;
   bool m_TraceDataIsSet;

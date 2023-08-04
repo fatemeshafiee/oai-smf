@@ -42,10 +42,11 @@ PlmnId PlmnSnssai::getPlmnId() const {
 void PlmnSnssai::setPlmnId(PlmnId const& value) {
   m_PlmnId = value;
 }
-std::vector<Snssai>& PlmnSnssai::getSNssaiList() {
+std::vector<oai::model::common::Snssai>& PlmnSnssai::getSNssaiList() {
   return m_SNssaiList;
 }
-void PlmnSnssai::setSNssaiList(std::vector<Snssai> const& value) {
+void PlmnSnssai::setSNssaiList(
+    std::vector<oai::model::common::Snssai> const& value) {
   m_SNssaiList = value;
 }
 

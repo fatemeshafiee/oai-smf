@@ -638,10 +638,10 @@ bool SmContextUpdateData::_5gMmCauseValueIsSet() const {
 void SmContextUpdateData::unset_5gMmCauseValue() {
   m__5gMmCauseValueIsSet = false;
 }
-Snssai SmContextUpdateData::getSNssai() const {
+oai::model::common::Snssai SmContextUpdateData::getSNssai() const {
   return m_SNssai;
 }
-void SmContextUpdateData::setSNssai(Snssai const& value) {
+void SmContextUpdateData::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai      = value;
   m_SNssaiIsSet = true;
 }

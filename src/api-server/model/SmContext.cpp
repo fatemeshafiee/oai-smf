@@ -300,16 +300,16 @@ std::string SmContext::getDnn() const {
 void SmContext::setDnn(std::string const& value) {
   m_Dnn = value;
 }
-Snssai SmContext::getSNssai() const {
+oai::model::common::Snssai SmContext::getSNssai() const {
   return m_SNssai;
 }
-void SmContext::setSNssai(Snssai const& value) {
+void SmContext::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai = value;
 }
-Snssai SmContext::getHplmnSnssai() const {
+oai::model::common::Snssai SmContext::getHplmnSnssai() const {
   return m_HplmnSnssai;
 }
-void SmContext::setHplmnSnssai(Snssai const& value) {
+void SmContext::setHplmnSnssai(oai::model::common::Snssai const& value) {
   m_HplmnSnssai      = value;
   m_HplmnSnssaiIsSet = true;
 }

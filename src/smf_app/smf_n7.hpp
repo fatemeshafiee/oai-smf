@@ -76,7 +76,7 @@ struct policy_association {
       const std::string& dnn, const snssai_t& snssai, const plmn_t& plmn,
       const uint8_t pdu_session_id,
       const pdu_session_type_t& pdu_session_type) {
-    oai::smf_server::model::Snssai snssai_model;
+    oai::model::common::Snssai snssai_model;
     snssai_model.setSst(snssai.sst);
     snssai_model.setSd(std::to_string(snssai.sd));
     oai::smf_server::model::PlmnIdNid plmn_id_model;
@@ -209,7 +209,7 @@ class smf_pcf_client : public policy_storage {
    * @return & smf_pcf_client nullptr in case of an error
    */
   static std::shared_ptr<smf_pcf_client> discover_pcf(
-      const oai::smf_server::model::Snssai& snssai,
+      const oai::model::common::Snssai& snssai,
       const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
 
   sm_policy_status_code create_policy_association(
@@ -229,12 +229,12 @@ class smf_pcf_client : public policy_storage {
  private:
   static bool discover_pcf_with_nrf(
       std::string& addr, std::string& api_version,
-      const oai::smf_server::model::Snssai& snssai,
+      const oai::model::common::Snssai& snssai,
       const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
 
   static bool discover_pcf_from_config_file(
       std::string& addr, std::string& api_version,
-      const oai::smf_server::model::Snssai& snssai,
+      const oai::model::common::Snssai& snssai,
       const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
 
   http_status_code_e send_request(

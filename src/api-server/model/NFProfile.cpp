@@ -272,10 +272,11 @@ bool NFProfile::plmnListIsSet() const {
 void NFProfile::unsetPlmnList() {
   m_PlmnListIsSet = false;
 }
-std::vector<Snssai> NFProfile::getSNssais() const {
+std::vector<oai::model::common::Snssai> NFProfile::getSNssais() const {
   return m_SNssais;
 }
-void NFProfile::setSNssais(std::vector<Snssai> const& value) {
+void NFProfile::setSNssais(
+    std::vector<oai::model::common::Snssai> const& value) {
   m_SNssais      = value;
   m_SNssaisIsSet = true;
 }
@@ -402,10 +403,11 @@ bool NFProfile::allowedNfDomainsIsSet() const {
 void NFProfile::unsetAllowedNfDomains() {
   m_AllowedNfDomainsIsSet = false;
 }
-std::vector<Snssai>& NFProfile::getAllowedNssais() {
+std::vector<oai::model::common::Snssai>& NFProfile::getAllowedNssais() {
   return m_AllowedNssais;
 }
-void NFProfile::setAllowedNssais(std::vector<Snssai> const& value) {
+void NFProfile::setAllowedNssais(
+    std::vector<oai::model::common::Snssai> const& value) {
   m_AllowedNssais      = value;
   m_AllowedNssaisIsSet = true;
 }
