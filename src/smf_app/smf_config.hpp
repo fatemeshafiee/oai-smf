@@ -63,6 +63,7 @@ const subscribed_default_qos_t DEFAULT_QOS{
     9,
     {1, "NOT_PREEMPT", "NOT_PREEMPTABLE"},
     1};
+const upf DEFAULT_UPF{"oai-upf", 8805, false, false, ""};
 
 typedef struct interface_cfg_s {
   std::string if_name;

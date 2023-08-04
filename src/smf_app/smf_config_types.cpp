@@ -515,11 +515,16 @@ smf_config_type::smf_config_type(
       m_ue_dns("8.8.8.8", "1.1.1.1", "", "") {
   m_config_name = "SMF Config";
   m_ue_mtu      = int_config_value("ue_mtu", 1500);
-  m_n4          = n4;
+  m_ue_mtu.set_validation_interval(1, 65535);
+  m_upfs.push_back(DEFAULT_UPF);
+  m_n4 = n4;
 }
 
 void smf_config_type::from_yaml(const YAML::Node& node) {
   nf::from_yaml(node);
+  if (node["ue_mtu"]) {
+    m_ue_mtu.from_yaml(node["ue_mtu"]);
+  }
   if (node["support_features"]) {
     m_support_feature.from_yaml(node["support_features"]);
   }
@@ -685,8 +690,8 @@ void subscription_info_config::from_yaml(const YAML::Node& node) {
   if (node["dnn"]) {
     m_dnn.from_yaml(node["dnn"]);
   }
-  if (node["scc_mode"]) {
-    m_ssc_mode.from_yaml(node["scc_mode"]);
+  if (node["ssc_mode"]) {
+    m_ssc_mode.from_yaml(node["ssc_mode"]);
   }
   if (node["single_nssai"]) {
     m_snssai.from_yaml(node["single_nssai"]);
