@@ -2006,7 +2006,7 @@ bool smf_app::get_session_management_subscription_data(
   for (const auto& sub : smf_cfg->smf()->get_subscription_info()) {
     oai::model::common::Snssai snnsai_common_model = sub.get_single_nssai();
     snssai_t sub_snssai(
-        snnsai_common_model.getSst(), snnsai_common_model.getSd());
+        snnsai_common_model.getSst(), snnsai_common_model.getSdInt());
 
     if (dnn == sub.get_dnn() && snssai == sub_snssai) {
       // PDU Session Type
@@ -2359,7 +2359,7 @@ void smf_app::generate_smf_profile() {
   // this conversion here
   for (const auto& snssai_item : smf_info.getSNssaiSmfInfoList()) {
     snssai_t snssai = snssai_t(
-        snssai_item.getSNssai().getSst(), snssai_item.getSNssai().getSd());
+        snssai_item.getSNssai().getSst(), snssai_item.getSNssai().getSdInt());
     std::vector<snssai_t> ss = {};
     nf_instance_profile.get_nf_snssais(ss);
     auto found = std::find(ss.begin(), ss.end(), snssai);
