@@ -259,10 +259,11 @@ bool NFProfile::heartBeatTimerIsSet() const {
 void NFProfile::unsetHeartBeatTimer() {
   m_HeartBeatTimerIsSet = false;
 }
-std::vector<PlmnId>& NFProfile::getPlmnList() {
+std::vector<oai::model::common::PlmnId>& NFProfile::getPlmnList() {
   return m_PlmnList;
 }
-void NFProfile::setPlmnList(std::vector<PlmnId> const& value) {
+void NFProfile::setPlmnList(
+    std::vector<oai::model::common::PlmnId> const& value) {
   m_PlmnList      = value;
   m_PlmnListIsSet = true;
 }
@@ -364,10 +365,11 @@ bool NFProfile::ipv6AddressesIsSet() const {
 void NFProfile::unsetIpv6Addresses() {
   m_Ipv6AddressesIsSet = false;
 }
-std::vector<PlmnId>& NFProfile::getAllowedPlmns() {
+std::vector<oai::model::common::PlmnId>& NFProfile::getAllowedPlmns() {
   return m_AllowedPlmns;
 }
-void NFProfile::setAllowedPlmns(std::vector<PlmnId> const& value) {
+void NFProfile::setAllowedPlmns(
+    std::vector<oai::model::common::PlmnId> const& value) {
   m_AllowedPlmns      = value;
   m_AllowedPlmnsIsSet = true;
 }

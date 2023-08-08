@@ -52,10 +52,10 @@ void from_json(const nlohmann::json& j, Ecgi& o) {
   j.at("eutraCellId").get_to(o.m_EutraCellId);
 }
 
-PlmnId Ecgi::getPlmnId() const {
+oai::model::common::PlmnId Ecgi::getPlmnId() const {
   return m_PlmnId;
 }
-void Ecgi::setPlmnId(PlmnId const& value) {
+void Ecgi::setPlmnId(oai::model::common::PlmnId const& value) {
   m_PlmnId = value;
 }
 std::string Ecgi::getEutraCellId() const {

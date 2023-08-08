@@ -36,10 +36,10 @@ void from_json(const nlohmann::json& j, PlmnSnssai& o) {
   j.at("sNssaiList").get_to(o.m_SNssaiList);
 }
 
-PlmnId PlmnSnssai::getPlmnId() const {
+oai::model::common::PlmnId PlmnSnssai::getPlmnId() const {
   return m_PlmnId;
 }
-void PlmnSnssai::setPlmnId(PlmnId const& value) {
+void PlmnSnssai::setPlmnId(oai::model::common::PlmnId const& value) {
   m_PlmnId = value;
 }
 std::vector<oai::model::common::Snssai>& PlmnSnssai::getSNssaiList() {

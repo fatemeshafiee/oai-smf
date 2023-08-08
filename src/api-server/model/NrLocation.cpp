@@ -112,10 +112,10 @@ void from_json(const nlohmann::json& j, NrLocation& o) {
   }
 }
 
-Tai NrLocation::getTai() const {
+oai::model::common::Tai NrLocation::getTai() const {
   return m_Tai;
 }
-void NrLocation::setTai(Tai const& value) {
+void NrLocation::setTai(oai::model::common::Tai const& value) {
   m_Tai = value;
 }
 Ncgi NrLocation::getNcgi() const {

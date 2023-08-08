@@ -457,10 +457,11 @@ bool SmContextCreateData::serviceNameIsSet() const {
 void SmContextCreateData::unsetServiceName() {
   m_ServiceNameIsSet = false;
 }
-PlmnId SmContextCreateData::getServingNetwork() const {
+oai::model::common::PlmnId SmContextCreateData::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void SmContextCreateData::setServingNetwork(PlmnId const& value) {
+void SmContextCreateData::setServingNetwork(
+    oai::model::common::PlmnId const& value) {
   m_ServingNetwork = value;
 }
 std::string SmContextCreateData::getRequestType() const {

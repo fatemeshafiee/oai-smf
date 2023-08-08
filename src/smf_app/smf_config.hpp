@@ -45,6 +45,7 @@
 #include "logger_base.hpp"
 #include "smf_config_types.hpp"
 #include "if.hpp"
+#include "Snssai.h"
 
 namespace oai::config::smf {
 
@@ -55,7 +56,7 @@ const std::string USE_EXTERNAL_AUSF_CONFIG_VALUE = "use_external_ausf";
 const std::string USE_EXTERNAL_UDM_CONFIG_VALUE  = "use_external_udm";
 const std::string USE_EXTERNAL_NSSF_CONFIG_VALUE = "use_external_nssf";
 
-const snssai_t DEFAULT_SNSSAI{1, 0xFFFFFF};
+const oai::model::common::Snssai DEFAULT_SNSSAI{1};
 const session_ambr_t DEFAULT_S_AMBR{"1000Mbps", "1000Mbps"};
 const std::string DEFAULT_DNN  = "default";
 const uint8_t DEFAULT_SSC_MODE = 1;

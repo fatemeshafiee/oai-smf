@@ -94,10 +94,10 @@ void from_json(const nlohmann::json& j, N3gaLocation& o) {
   }
 }
 
-Tai N3gaLocation::getN3gppTai() const {
+oai::model::common::Tai N3gaLocation::getN3gppTai() const {
   return m_N3gppTai;
 }
-void N3gaLocation::setN3gppTai(Tai const& value) {
+void N3gaLocation::setN3gppTai(oai::model::common::Tai const& value) {
   m_N3gppTai      = value;
   m_N3gppTaiIsSet = true;
 }

@@ -632,8 +632,8 @@ class event_notification {
   bool is_re_ipv4_addr_is_set() const;
 
   // m_PlmnId
-  void set_PlmnId(oai::smf_server::model::PlmnId const& value);
-  oai::smf_server::model::PlmnId get_plmnid() const;
+  void set_PlmnId(oai::model::common::PlmnId const& value);
+  oai::model::common::PlmnId get_plmnid() const;
   bool is_plmnid_is_set() const;
 
   // ddds change
@@ -686,7 +686,7 @@ class event_notification {
   bool m_re_ipv4_addr_is_set;  // m_ReIpv4AddrIsSet;
 
   // for a PLMN Change
-  oai::smf_server::model::PlmnId m_PlmnId;
+  oai::model::common::PlmnId m_PlmnId;
   bool m_PlmnIdIsSet;
 
   // for ddds change

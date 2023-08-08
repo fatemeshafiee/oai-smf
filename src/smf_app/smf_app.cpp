@@ -2004,7 +2004,11 @@ bool smf_app::get_session_management_subscription_data(
       std::make_shared<dnn_configuration_t>();
 
   for (const auto& sub : smf_cfg->smf()->get_subscription_info()) {
-    if (dnn == sub.get_dnn() && snssai == sub.get_single_nssai()) {
+    oai::model::common::Snssai snnsai_common_model = sub.get_single_nssai();
+    snssai_t sub_snssai(
+        snnsai_common_model.getSst(), snnsai_common_model.getSd());
+
+    if (dnn == sub.get_dnn() && snssai == sub_snssai) {
       // PDU Session Type
       pdu_session_type_t pdu_session_type(
           pdu_session_type_e::PDU_SESSION_TYPE_E_IPV4);
@@ -2348,26 +2352,28 @@ void smf_app::generate_smf_profile() {
   // TODO: custom info
 
   int i = 0;
-  for (const auto& sub : smf_cfg->smf()->get_subscription_info()) {
-    // SNSSAIS
-    snssai_t snssai = sub.get_single_nssai();
-    // Verify if this SNSSAI exist
+
+  auto smf_info = smf_cfg->smf()->get_smf_info();
+
+  // TODO we should just use the auto-generated NF profile, then we do not need
+  // this conversion here
+  for (const auto& snssai_item : smf_info.getSNssaiSmfInfoList()) {
+    snssai_t snssai = snssai_t(
+        snssai_item.getSNssai().getSst(), snssai_item.getSNssai().getSd());
     std::vector<snssai_t> ss = {};
     nf_instance_profile.get_nf_snssais(ss);
-    bool found = false;
-    for (const auto& it : ss) {
-      if ((it.sd == snssai.sd) and (it.sst == snssai.sst)) {
-        found = true;
-        break;
-      }
+    auto found = std::find(ss.begin(), ss.end(), snssai);
+    if (found == ss.end()) {
+      nf_instance_profile.add_snssai(snssai);
     }
-    if (!found) nf_instance_profile.add_snssai(snssai);
 
     // SMF info
-    dnn_smf_info_item_t dnn_item         = {.dnn = sub.get_dnn()};
     snssai_smf_info_item_t smf_info_item = {};
-    smf_info_item.dnn_smf_info_list.push_back(dnn_item);
-    smf_info_item.snssai = sub.get_single_nssai();
+    for (const auto& dnn : snssai_item.getDnnSmfInfoList()) {
+      dnn_smf_info_item_t dnn_item = {.dnn = dnn.getDnn()};
+      smf_info_item.dnn_smf_info_list.push_back(dnn_item);
+    }
+    smf_info_item.snssai = snssai;
     nf_instance_profile.add_smf_info_item(smf_info_item);
   }
 

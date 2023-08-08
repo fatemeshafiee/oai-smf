@@ -310,10 +310,11 @@ bool SmContextUpdateData::guamiIsSet() const {
 void SmContextUpdateData::unsetGuami() {
   m_GuamiIsSet = false;
 }
-PlmnId SmContextUpdateData::getServingNetwork() const {
+oai::model::common::PlmnId SmContextUpdateData::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void SmContextUpdateData::setServingNetwork(PlmnId const& value) {
+void SmContextUpdateData::setServingNetwork(
+    oai::model::common::PlmnId const& value) {
   m_ServingNetwork      = value;
   m_ServingNetworkIsSet = true;
 }
@@ -345,10 +346,11 @@ bool SmContextUpdateData::anTypeIsSet() const {
 void SmContextUpdateData::unsetAnType() {
   m_AnTypeIsSet = false;
 }
-AccessType SmContextUpdateData::getSecondAnType() const {
+oai::model::common::AccessType SmContextUpdateData::getSecondAnType() const {
   return m_SecondAnType;
 }
-void SmContextUpdateData::setSecondAnType(AccessType const& value) {
+void SmContextUpdateData::setSecondAnType(
+    oai::model::common::AccessType const& value) {
   m_SecondAnType      = value;
   m_SecondAnTypeIsSet = true;
 }

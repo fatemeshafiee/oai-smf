@@ -44,8 +44,8 @@ class PlmnSnssai {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getPlmnId() const;
-  void setPlmnId(PlmnId const& value);
+  oai::model::common::PlmnId getPlmnId() const;
+  void setPlmnId(oai::model::common::PlmnId const& value);
   /// <summary>
   ///
   /// </summary>
@@ -56,7 +56,7 @@ class PlmnSnssai {
   friend void from_json(const nlohmann::json& j, PlmnSnssai& o);
 
  protected:
-  PlmnId m_PlmnId;
+  oai::model::common::PlmnId m_PlmnId;
 
   std::vector<oai::model::common::Snssai> m_SNssaiList;
 };

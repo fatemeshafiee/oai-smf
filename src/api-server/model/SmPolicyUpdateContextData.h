@@ -108,8 +108,8 @@ class SmPolicyUpdateContextData {
   /// <summary>
   ///
   /// </summary>
-  AccessType getAccessType() const;
-  void setAccessType(AccessType const& value);
+  oai::model::common::AccessType getAccessType() const;
+  void setAccessType(oai::model::common::AccessType const& value);
   bool accessTypeIsSet() const;
   void unsetAccessType();
   /// <summary>
@@ -426,7 +426,7 @@ class SmPolicyUpdateContextData {
   bool m_RepPolicyCtrlReqTriggersIsSet;
   // std::vector<AccNetChId> m_AccNetChIds;
   // bool m_AccNetChIdsIsSet;
-  AccessType m_AccessType;
+  oai::model::common::AccessType m_AccessType;
   bool m_AccessTypeIsSet;
   RatType m_RatType;
   bool m_RatTypeIsSet;

@@ -38,10 +38,10 @@ void from_json(const nlohmann::json& j, Guami& o) {
   j.at("amfId").get_to(o.m_AmfId);
 }
 
-PlmnId Guami::getPlmnId() const {
+oai::model::common::PlmnId Guami::getPlmnId() const {
   return m_PlmnId;
 }
-void Guami::setPlmnId(PlmnId const& value) {
+void Guami::setPlmnId(oai::model::common::PlmnId const& value) {
   m_PlmnId = value;
 }
 std::string Guami::getAmfId() const {

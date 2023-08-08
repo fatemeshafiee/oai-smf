@@ -48,8 +48,8 @@ class NgRanTargetId {
   /// <summary>
   ///
   /// </summary>
-  Tai getTai() const;
-  void setTai(Tai const& value);
+  oai::model::common::Tai getTai() const;
+  void setTai(oai::model::common::Tai const& value);
 
   friend void to_json(nlohmann::json& j, const NgRanTargetId& o);
   friend void from_json(const nlohmann::json& j, NgRanTargetId& o);
@@ -57,7 +57,7 @@ class NgRanTargetId {
  protected:
   GlobalRanNodeId m_RanNodeId;
 
-  Tai m_Tai;
+  oai::model::common::Tai m_Tai;
 };
 
 }  // namespace model

@@ -112,10 +112,10 @@ void from_json(const nlohmann::json& j, EutraLocation& o) {
   }
 }
 
-Tai EutraLocation::getTai() const {
+oai::model::common::Tai EutraLocation::getTai() const {
   return m_Tai;
 }
-void EutraLocation::setTai(Tai const& value) {
+void EutraLocation::setTai(oai::model::common::Tai const& value) {
   m_Tai = value;
 }
 Ecgi EutraLocation::getEcgi() const {

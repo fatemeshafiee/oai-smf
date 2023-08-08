@@ -150,8 +150,8 @@ class SmPolicyContextData {
   /// <summary>
   ///
   /// </summary>
-  AccessType getAccessType() const;
-  void setAccessType(AccessType const& value);
+  oai::model::common::AccessType getAccessType() const;
+  void setAccessType(oai::model::common::AccessType const& value);
   bool accessTypeIsSet() const;
   void unsetAccessType();
   /// <summary>
@@ -377,7 +377,7 @@ class SmPolicyContextData {
   bool m_DnnSelModeIsSet;
   std::string m_NotificationUri;
 
-  AccessType m_AccessType;
+  oai::model::common::AccessType m_AccessType;
   bool m_AccessTypeIsSet;
   RatType m_RatType;
   bool m_RatTypeIsSet;

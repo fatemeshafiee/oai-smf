@@ -90,6 +90,16 @@ smf_config::smf_config(
   subscription_info_config info(
       "default", 1, DEFAULT_QOS, DEFAULT_S_AMBR, DEFAULT_SNSSAI);
   smf->get_subscription_info().push_back(info);
+
+  // SMF profile default values
+  oai::model::nrf::SmfInfo smf_info;
+  oai::model::nrf::SnssaiSmfInfoItem info_item;
+  oai::model::nrf::DnnSmfInfoItem dnn_item;
+  dnn_item.setDnn(DEFAULT_DNN);
+  info_item.setSNssai(DEFAULT_SNSSAI);
+  info_item.setDnnSmfInfoList(std::vector{dnn_item});
+  smf_info.setSNssaiSmfInfoList(std::vector{info_item});
+  smf->m_smf_info = smf_info;
 }
 
 //------------------------------------------------------------------------------

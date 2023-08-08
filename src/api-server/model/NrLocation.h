@@ -48,8 +48,8 @@ class NrLocation {
   /// <summary>
   ///
   /// </summary>
-  Tai getTai() const;
-  void setTai(Tai const& value);
+  oai::model::common::Tai getTai() const;
+  void setTai(oai::model::common::Tai const& value);
   /// <summary>
   ///
   /// </summary>
@@ -95,7 +95,7 @@ class NrLocation {
   friend void from_json(const nlohmann::json& j, NrLocation& o);
 
  protected:
-  Tai m_Tai;
+  oai::model::common::Tai m_Tai;
 
   Ncgi m_Ncgi;
 

@@ -1208,13 +1208,12 @@ bool event_notification::is_re_ipv4_addr_is_set() const {
 }
 
 // m_PlmnId
-void event_notification::set_PlmnId(
-    oai::smf_server::model::PlmnId const& value) {
+void event_notification::set_PlmnId(oai::model::common::PlmnId const& value) {
   m_PlmnId      = value;
   m_PlmnIdIsSet = true;
 }
 
-oai::smf_server::model::PlmnId event_notification::get_plmnid() const {
+oai::model::common::PlmnId event_notification::get_plmnid() const {
   return m_PlmnId;
 }
 

@@ -351,16 +351,16 @@ bool SmContext::serviceNameIsSet() const {
 void SmContext::unsetServiceName() {
   m_ServiceNameIsSet = false;
 }
-PlmnId SmContext::getServingNetwork() const {
+oai::model::common::PlmnId SmContext::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void SmContext::setServingNetwork(PlmnId const& value) {
+void SmContext::setServingNetwork(oai::model::common::PlmnId const& value) {
   m_ServingNetwork = value;
 }
-AccessType SmContext::getAnType() const {
+oai::model::common::AccessType SmContext::getAnType() const {
   return m_AnType;
 }
-void SmContext::setAnType(AccessType const& value) {
+void SmContext::setAnType(oai::model::common::AccessType const& value) {
   m_AnType = value;
 }
 RatType SmContext::getRatType() const {

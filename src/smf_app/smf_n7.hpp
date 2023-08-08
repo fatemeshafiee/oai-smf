@@ -210,7 +210,7 @@ class smf_pcf_client : public policy_storage {
    */
   static std::shared_ptr<smf_pcf_client> discover_pcf(
       const oai::model::common::Snssai& snssai,
-      const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
+      const oai::model::common::PlmnId& plmn_id, const std::string& dnn);
 
   sm_policy_status_code create_policy_association(
       policy_association& association) override;
@@ -230,12 +230,12 @@ class smf_pcf_client : public policy_storage {
   static bool discover_pcf_with_nrf(
       std::string& addr, std::string& api_version,
       const oai::model::common::Snssai& snssai,
-      const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
+      const oai::model::common::PlmnId& plmn_id, const std::string& dnn);
 
   static bool discover_pcf_from_config_file(
       std::string& addr, std::string& api_version,
       const oai::model::common::Snssai& snssai,
-      const oai::smf_server::model::PlmnId& plmn_id, const std::string& dnn);
+      const oai::model::common::PlmnId& plmn_id, const std::string& dnn);
 
   http_status_code_e send_request(
       const std::string& uri, const std::string& body,

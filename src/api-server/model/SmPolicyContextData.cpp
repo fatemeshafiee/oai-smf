@@ -617,10 +617,11 @@ std::string SmPolicyContextData::getNotificationUri() const {
 void SmPolicyContextData::setNotificationUri(std::string const& value) {
   m_NotificationUri = value;
 }
-AccessType SmPolicyContextData::getAccessType() const {
+oai::model::common::AccessType SmPolicyContextData::getAccessType() const {
   return m_AccessType;
 }
-void SmPolicyContextData::setAccessType(AccessType const& value) {
+void SmPolicyContextData::setAccessType(
+    oai::model::common::AccessType const& value) {
   m_AccessType      = value;
   m_AccessTypeIsSet = true;
 }

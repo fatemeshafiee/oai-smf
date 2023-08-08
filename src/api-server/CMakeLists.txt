@@ -45,6 +45,8 @@ include_directories(${SRC_TOP_DIR}/udp)
 include_directories(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger)
 include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/config/config.cmake)
 include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/common_model/common_model.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/nrf/nrf_model.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/utils/utils.cmake)
 
 file(GLOB SMF_API_SERVER_src_files
     ${SMF_API_SERVER_DIR}/smf-http2-server.cpp

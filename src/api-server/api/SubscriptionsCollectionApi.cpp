@@ -21,7 +21,7 @@ namespace oai {
 namespace smf_server {
 namespace api {
 
-using namespace oai::smf_server::helpers;
+using namespace oai::model::common::helpers;
 using namespace oai::smf_server::model;
 
 SubscriptionsCollectionApi::SubscriptionsCollectionApi(

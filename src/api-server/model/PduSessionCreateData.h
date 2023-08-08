@@ -100,8 +100,8 @@ class PduSessionCreateData {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getServingNetwork() const;
-  void setServingNetwork(PlmnId const& value);
+  oai::model::common::PlmnId getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnId const& value);
   /// <summary>
   ///
   /// </summary>
@@ -137,13 +137,13 @@ class PduSessionCreateData {
   /// <summary>
   ///
   /// </summary>
-  AccessType getAnType() const;
-  void setAnType(AccessType const& value);
+  oai::model::common::AccessType getAnType() const;
+  void setAnType(oai::model::common::AccessType const& value);
   /// <summary>
   ///
   /// </summary>
-  AccessType getSecondAnType() const;
-  void setSecondAnType(AccessType const& value);
+  oai::model::common::AccessType getSecondAnType() const;
+  void setSecondAnType(oai::model::common::AccessType const& value);
   bool secondAnTypeIsSet() const;
   void unsetSecondAnType();
   /// <summary>
@@ -347,7 +347,7 @@ class PduSessionCreateData {
   bool m_SNssaiIsSet;
   std::string m_VsmfId;
 
-  PlmnId m_ServingNetwork;
+  oai::model::common::PlmnId m_ServingNetwork;
 
   RequestType m_RequestType;
   bool m_RequestTypeIsSet;
@@ -359,9 +359,9 @@ class PduSessionCreateData {
 
   TunnelInfo m_VcnTunnelInfo;
   bool m_VcnTunnelInfoIsSet;
-  AccessType m_AnType;
+  oai::model::common::AccessType m_AnType;
 
-  AccessType m_SecondAnType;
+  oai::model::common::AccessType m_SecondAnType;
   bool m_SecondAnTypeIsSet;
   RatType m_RatType;
   bool m_RatTypeIsSet;

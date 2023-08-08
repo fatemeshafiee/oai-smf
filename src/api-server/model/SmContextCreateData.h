@@ -134,8 +134,8 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getServingNetwork() const;
-  void setServingNetwork(PlmnId const& value);
+  oai::model::common::PlmnId getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnId const& value);
   /// <summary>
   ///
   /// </summary>
@@ -387,7 +387,7 @@ class SmContextCreateData {
   bool m_GuamiIsSet;
   std::string m_ServiceName;
   bool m_ServiceNameIsSet;
-  PlmnId m_ServingNetwork;
+  oai::model::common::PlmnId m_ServingNetwork;
 
   std::string m_RequestType;
   bool m_RequestTypeIsSet;

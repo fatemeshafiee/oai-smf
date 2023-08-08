@@ -83,8 +83,8 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getServingNetwork() const;
-  void setServingNetwork(PlmnId const& value);
+  oai::model::common::PlmnId getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnId const& value);
   bool servingNetworkIsSet() const;
   void unsetServingNetwork();
   /// <summary>
@@ -104,8 +104,8 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  AccessType getSecondAnType() const;
-  void setSecondAnType(AccessType const& value);
+  oai::model::common::AccessType getSecondAnType() const;
+  void setSecondAnType(oai::model::common::AccessType const& value);
   bool secondAnTypeIsSet() const;
   void unsetSecondAnType();
   /// <summary>
@@ -332,13 +332,13 @@ class SmContextUpdateData {
   bool m_ServingNfIdIsSet;
   Guami m_Guami;
   bool m_GuamiIsSet;
-  PlmnId m_ServingNetwork;
+  oai::model::common::PlmnId m_ServingNetwork;
   bool m_ServingNetworkIsSet;
   std::vector<BackupAmfInfo> m_BackupAmfInfo;
   bool m_BackupAmfInfoIsSet;
   std::string m_AnType;
   bool m_AnTypeIsSet;
-  AccessType m_SecondAnType;
+  oai::model::common::AccessType m_SecondAnType;
   bool m_SecondAnTypeIsSet;
   std::string m_RatType;
   bool m_RatTypeIsSet;

@@ -48,8 +48,8 @@ class EutraLocation {
   /// <summary>
   ///
   /// </summary>
-  Tai getTai() const;
-  void setTai(Tai const& value);
+  oai::model::common::Tai getTai() const;
+  void setTai(oai::model::common::Tai const& value);
   /// <summary>
   ///
   /// </summary>
@@ -95,7 +95,7 @@ class EutraLocation {
   friend void from_json(const nlohmann::json& j, EutraLocation& o);
 
  protected:
-  Tai m_Tai;
+  oai::model::common::Tai m_Tai;
 
   Ecgi m_Ecgi;
 

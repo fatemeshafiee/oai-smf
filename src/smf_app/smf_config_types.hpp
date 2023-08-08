@@ -33,6 +33,8 @@
 #include "3gpp_29.571.h"
 #include "3gpp_24.501.h"
 #include "smf.h"
+#include "SmfInfo.h"
+#include "Snssai.h"
 
 namespace oai::config::smf {
 
@@ -181,38 +183,18 @@ class qos_profile_config_value : public config_type {
   [[nodiscard]] const session_ambr_t& get_session_ambr() const;
 };
 
-class snssai_config_value : public config_type {
- private:
-  int_config_value m_sd;
-  int_config_value m_sst;
-  snssai_t m_snssai;
-
- public:
-  explicit snssai_config_value(const snssai_t& snssai);
-
-  void from_yaml(const YAML::Node& node) override;
-  nlohmann::json to_json() override;
-  bool from_json(const nlohmann::json& json_data) override;
-
-  [[nodiscard]] std::string to_string(const std::string& indent) const override;
-
-  void validate() override;
-
-  [[nodiscard]] const snssai_t& get_snssai() const;
-};
-
 class subscription_info_config : public config_type {
  private:
   string_config_value m_dnn;
   int_config_value m_ssc_mode;
   qos_profile_config_value m_qos_profile;
-  snssai_config_value m_snssai;
+  oai::model::common::Snssai m_snssai;
 
  public:
   explicit subscription_info_config(
       const std::string& dnn, uint8_t ssc_mode,
       const subscribed_default_qos_t& qos, const session_ambr_t& session_ambr,
-      const snssai_t& snssai);
+      const oai::model::common::Snssai& snssai);
 
   void from_yaml(const YAML::Node& node) override;
   nlohmann::json to_json() override;
@@ -226,16 +208,19 @@ class subscription_info_config : public config_type {
   [[nodiscard]] uint8_t get_ssc_mode() const;
   [[nodiscard]] const subscribed_default_qos_t& get_default_qos() const;
   [[nodiscard]] const session_ambr_t& get_session_ambr() const;
-  [[nodiscard]] const snssai_t& get_single_nssai() const;
+  [[nodiscard]] const oai::model::common::Snssai& get_single_nssai() const;
 };
 
 class smf_config_type : public nf {
+  friend class smf_config;
+
  private:
   smf_support_features m_support_feature;
   ue_dns m_ue_dns;
   ims_config m_ims_config;
   std::vector<upf> m_upfs;
   std::vector<subscription_info_config> m_subscription_infos;
+  oai::model::nrf::SmfInfo m_smf_info;
   local_interface m_n4;
 
   int_config_value m_ue_mtu;
@@ -260,6 +245,7 @@ class smf_config_type : public nf {
 
   [[nodiscard]] const std::vector<upf>& get_upfs() const;
   [[nodiscard]] std::vector<subscription_info_config>& get_subscription_info();
+  [[nodiscard]] const oai::model::nrf::SmfInfo& get_smf_info();
   [[nodiscard]] const local_interface& get_n4() const;
 };
 

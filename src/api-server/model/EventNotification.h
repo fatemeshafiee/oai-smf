@@ -172,15 +172,15 @@ class EventNotification {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getPlmnId() const;
-  void setPlmnId(PlmnId const& value);
+  oai::model::common::PlmnId getPlmnId() const;
+  void setPlmnId(oai::model::common::PlmnId const& value);
   bool plmnIdIsSet() const;
   void unsetPlmnId();
   /// <summary>
   ///
   /// </summary>
-  AccessType getAccType() const;
-  void setAccType(AccessType const& value);
+  oai::model::common::AccessType getAccType() const;
+  void setAccType(oai::model::common::AccessType const& value);
   bool accTypeIsSet() const;
   void unsetAccType();
   /// <summary>
@@ -252,9 +252,9 @@ class EventNotification {
   bool m_ReIpv4AddrIsSet;
   Ipv6Prefix m_ReIpv6Prefix;
   bool m_ReIpv6PrefixIsSet;
-  PlmnId m_PlmnId;
+  oai::model::common::PlmnId m_PlmnId;
   bool m_PlmnIdIsSet;
-  AccessType m_AccType;
+  oai::model::common::AccessType m_AccType;
   bool m_AccTypeIsSet;
   int32_t m_PduSeId;
   bool m_PduSeIdIsSet;

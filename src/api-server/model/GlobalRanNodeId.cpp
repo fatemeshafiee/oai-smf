@@ -120,10 +120,10 @@ void from_json(const nlohmann::json& j, GlobalRanNodeId& o) {
   }
 }
 
-PlmnId GlobalRanNodeId::getPlmnId() const {
+oai::model::common::PlmnId GlobalRanNodeId::getPlmnId() const {
   return m_PlmnId;
 }
-void GlobalRanNodeId::setPlmnId(PlmnId const& value) {
+void GlobalRanNodeId::setPlmnId(oai::model::common::PlmnId const& value) {
   m_PlmnId = value;
 }
 std::string GlobalRanNodeId::getN3IwfId() const {
