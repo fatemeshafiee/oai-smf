@@ -554,7 +554,7 @@ void smf_config_type::from_yaml(const YAML::Node& node) {
     // any default SNSSAI info list is deleted if people configure a profile
     m_smf_info.getSNssaiSmfInfoList().clear();
     nlohmann::json j =
-        oai::utils::conversions::yaml_to_json(node["smf_info"], true);
+        oai::utils::conversions::yaml_to_json(node["smf_info"], false);
     nlohmann::from_json(j, m_smf_info);
   }
   if (node["local_subscription_infos"]) {
@@ -713,8 +713,8 @@ void subscription_info_config::from_yaml(const YAML::Node& node) {
     m_ssc_mode.from_yaml(node["ssc_mode"]);
   }
   if (node["single_nssai"]) {
-    nlohmann::json j =
-        oai::utils::conversions::yaml_to_json(node["single_nssai"], true);
+    nlohmann::json j = oai::utils::conversions::yaml_to_json(
+        node["single_nssai"], false);
     nlohmann::from_json(j, m_snssai);
   }
   if (node["qos_profile"]) {
