@@ -44,21 +44,21 @@ class PlmnSnssai {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getPlmnId() const;
-  void setPlmnId(PlmnId const& value);
+  oai::model::common::PlmnId getPlmnId() const;
+  void setPlmnId(oai::model::common::PlmnId const& value);
   /// <summary>
   ///
   /// </summary>
-  std::vector<Snssai>& getSNssaiList();
-  void setSNssaiList(std::vector<Snssai> const& value);
+  std::vector<oai::model::common::Snssai>& getSNssaiList();
+  void setSNssaiList(std::vector<oai::model::common::Snssai> const& value);
 
   friend void to_json(nlohmann::json& j, const PlmnSnssai& o);
   friend void from_json(const nlohmann::json& j, PlmnSnssai& o);
 
  protected:
-  PlmnId m_PlmnId;
+  oai::model::common::PlmnId m_PlmnId;
 
-  std::vector<Snssai> m_SNssaiList;
+  std::vector<oai::model::common::Snssai> m_SNssaiList;
 };
 
 }  // namespace model

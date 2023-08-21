@@ -251,10 +251,11 @@ bool HsmfUpdateData::vcnTunnelInfoIsSet() const {
 void HsmfUpdateData::unsetVcnTunnelInfo() {
   m_VcnTunnelInfoIsSet = false;
 }
-PlmnId HsmfUpdateData::getServingNetwork() const {
+oai::model::common::PlmnId HsmfUpdateData::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void HsmfUpdateData::setServingNetwork(PlmnId const& value) {
+void HsmfUpdateData::setServingNetwork(
+    oai::model::common::PlmnId const& value) {
   m_ServingNetwork      = value;
   m_ServingNetworkIsSet = true;
 }
@@ -264,10 +265,10 @@ bool HsmfUpdateData::servingNetworkIsSet() const {
 void HsmfUpdateData::unsetServingNetwork() {
   m_ServingNetworkIsSet = false;
 }
-AccessType HsmfUpdateData::getAnType() const {
+oai::model::common::AccessType HsmfUpdateData::getAnType() const {
   return m_AnType;
 }
-void HsmfUpdateData::setAnType(AccessType const& value) {
+void HsmfUpdateData::setAnType(oai::model::common::AccessType const& value) {
   m_AnType      = value;
   m_AnTypeIsSet = true;
 }
@@ -277,10 +278,11 @@ bool HsmfUpdateData::anTypeIsSet() const {
 void HsmfUpdateData::unsetAnType() {
   m_AnTypeIsSet = false;
 }
-AccessType HsmfUpdateData::getSecondAnType() const {
+oai::model::common::AccessType HsmfUpdateData::getSecondAnType() const {
   return m_SecondAnType;
 }
-void HsmfUpdateData::setSecondAnType(AccessType const& value) {
+void HsmfUpdateData::setSecondAnType(
+    oai::model::common::AccessType const& value) {
   m_SecondAnType      = value;
   m_SecondAnTypeIsSet = true;
 }

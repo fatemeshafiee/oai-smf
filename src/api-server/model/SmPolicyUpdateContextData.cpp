@@ -831,10 +831,12 @@ void SmPolicyUpdateContextData::unsetAccNetChIds() {
   m_AccNetChIdsIsSet = false;
 }
 */
-AccessType SmPolicyUpdateContextData::getAccessType() const {
+oai::model::common::AccessType SmPolicyUpdateContextData::getAccessType()
+    const {
   return m_AccessType;
 }
-void SmPolicyUpdateContextData::setAccessType(AccessType const& value) {
+void SmPolicyUpdateContextData::setAccessType(
+    oai::model::common::AccessType const& value) {
   m_AccessType      = value;
   m_AccessTypeIsSet = true;
 }

@@ -404,10 +404,10 @@ bool EventNotification::reIpv6PrefixIsSet() const {
 void EventNotification::unsetReIpv6Prefix() {
   m_ReIpv6PrefixIsSet = false;
 }
-PlmnId EventNotification::getPlmnId() const {
+oai::model::common::PlmnId EventNotification::getPlmnId() const {
   return m_PlmnId;
 }
-void EventNotification::setPlmnId(PlmnId const& value) {
+void EventNotification::setPlmnId(oai::model::common::PlmnId const& value) {
   m_PlmnId      = value;
   m_PlmnIdIsSet = true;
 }
@@ -417,10 +417,11 @@ bool EventNotification::plmnIdIsSet() const {
 void EventNotification::unsetPlmnId() {
   m_PlmnIdIsSet = false;
 }
-AccessType EventNotification::getAccType() const {
+oai::model::common::AccessType EventNotification::getAccType() const {
   return m_AccType;
 }
-void EventNotification::setAccType(AccessType const& value) {
+void EventNotification::setAccType(
+    oai::model::common::AccessType const& value) {
   m_AccType      = value;
   m_AccTypeIsSet = true;
 }

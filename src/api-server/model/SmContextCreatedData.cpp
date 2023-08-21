@@ -139,10 +139,10 @@ bool SmContextCreatedData::pduSessionIdIsSet() const {
 void SmContextCreatedData::unsetPduSessionId() {
   m_PduSessionIdIsSet = false;
 }
-Snssai SmContextCreatedData::getSNssai() const {
+oai::model::common::Snssai SmContextCreatedData::getSNssai() const {
   return m_SNssai;
 }
-void SmContextCreatedData::setSNssai(Snssai const& value) {
+void SmContextCreatedData::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai      = value;
   m_SNssaiIsSet = true;
 }

@@ -46,8 +46,8 @@ class Ncgi {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getPlmnId() const;
-  void setPlmnId(PlmnId const& value);
+  oai::model::common::PlmnId getPlmnId() const;
+  void setPlmnId(oai::model::common::PlmnId const& value);
   /// <summary>
   ///
   /// </summary>
@@ -58,7 +58,7 @@ class Ncgi {
   friend void from_json(const nlohmann::json& j, Ncgi& o);
 
  protected:
-  PlmnId m_PlmnId;
+  oai::model::common::PlmnId m_PlmnId;
 
   std::string m_NrCellId;
 };

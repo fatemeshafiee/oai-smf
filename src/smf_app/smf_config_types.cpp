@@ -29,9 +29,11 @@
 
 #include "smf_config_types.hpp"
 #include "smf_config.hpp"
+#include "conv.hpp"
 
 using namespace oai::config::smf;
 using namespace oai::config;
+using namespace oai::model::common;
 
 smf_support_features::smf_support_features(
     bool local_subscription_info, bool local_pcc_rules) {
@@ -548,6 +550,13 @@ void smf_config_type::from_yaml(const YAML::Node& node) {
       m_upfs.push_back(u);
     }
   }
+  if (node["smf_info"]) {
+    // any default SNSSAI info list is deleted if people configure a profile
+    m_smf_info.getSNssaiSmfInfoList().clear();
+    nlohmann::json j =
+        oai::utils::conversions::yaml_to_json(node["smf_info"], false);
+    nlohmann::from_json(j, m_smf_info);
+  }
   if (node["local_subscription_infos"]) {
     // any default subscription is deleted if people configure it
     m_subscription_infos.clear();
@@ -575,6 +584,7 @@ nlohmann::json smf_config_type::to_json() {
   for (auto s : m_subscription_infos) {
     json_data["local_subscription_infos"].push_back(s.to_json());
   }
+  nlohmann::to_json(json_data["smf_info"], m_smf_info);
   return json_data;
 }
 
@@ -588,6 +598,9 @@ bool smf_config_type::from_json(const nlohmann::json& json_data) {
     }
     if (json_data.find(m_ue_dns.get_config_name()) != json_data.end()) {
       m_ue_dns.from_json(json_data[m_ue_dns.get_config_name()]);
+    }
+    if (json_data.find("smf_info") != json_data.end()) {
+      nlohmann::from_json(json_data["smf_info"], m_smf_info);
     }
     // TODO: UPF
     // TODO: local_subscription_infos
@@ -626,6 +639,7 @@ std::string smf_config_type::to_string(const std::string& indent) const {
       out.append(sub.to_string(inner_indent));
     }
   }
+  out.append(m_smf_info.to_string(1));
 
   return out;
 }
@@ -642,6 +656,7 @@ void smf_config_type::validate() {
   for (auto& sub : m_subscription_infos) {
     sub.validate();
   }
+  m_smf_info.validate();
 }
 
 const smf_support_features& smf_config_type::get_smf_support_features() const {
@@ -673,11 +688,15 @@ const local_interface& smf_config_type::get_n4() const {
   return m_n4;
 }
 
+const oai::model::nrf::SmfInfo& smf_config_type::get_smf_info() {
+  return m_smf_info;
+}
+
 subscription_info_config::subscription_info_config(
     const std::string& dnn, uint8_t ssc_mode,
     const subscribed_default_qos_t& qos, const session_ambr_t& session_ambr,
-    const snssai_t& snssai)
-    : m_snssai(snssai), m_qos_profile(qos, session_ambr) {
+    const Snssai& snssai)
+    : m_qos_profile(qos, session_ambr), m_snssai(snssai) {
   m_dnn         = string_config_value("dnn", dnn);
   m_ssc_mode    = int_config_value("ssc_mode", ssc_mode);
   m_config_name = "local_subscription_info";
@@ -694,7 +713,9 @@ void subscription_info_config::from_yaml(const YAML::Node& node) {
     m_ssc_mode.from_yaml(node["ssc_mode"]);
   }
   if (node["single_nssai"]) {
-    m_snssai.from_yaml(node["single_nssai"]);
+    nlohmann::json j =
+        oai::utils::conversions::yaml_to_json(node["single_nssai"], false);
+    nlohmann::from_json(j, m_snssai);
   }
   if (node["qos_profile"]) {
     m_qos_profile.from_yaml(node["qos_profile"]);
@@ -702,10 +723,10 @@ void subscription_info_config::from_yaml(const YAML::Node& node) {
 }
 
 nlohmann::json subscription_info_config::to_json() {
-  nlohmann::json json_data                   = {};
-  json_data[m_dnn.get_config_name()]         = m_dnn.to_json();
-  json_data[m_ssc_mode.get_config_name()]    = m_ssc_mode.to_json();
-  json_data[m_snssai.get_config_name()]      = m_snssai.to_json();
+  nlohmann::json json_data                = {};
+  json_data[m_dnn.get_config_name()]      = m_dnn.to_json();
+  json_data[m_ssc_mode.get_config_name()] = m_ssc_mode.to_json();
+  nlohmann::to_json(json_data["snssai"], m_snssai);
   json_data[m_qos_profile.get_config_name()] = m_qos_profile.to_json();
   return json_data;
 }
@@ -719,8 +740,8 @@ bool subscription_info_config::from_json(const nlohmann::json& json_data) {
     if (json_data.find(m_ssc_mode.get_config_name()) != json_data.end()) {
       m_ssc_mode.from_json(json_data[m_ssc_mode.get_config_name()]);
     }
-    if (json_data.find(m_snssai.get_config_name()) != json_data.end()) {
-      m_snssai.from_json(json_data[m_snssai.get_config_name()]);
+    if (json_data.find("snssai") != json_data.end()) {
+      nlohmann::from_json(json_data["snssai"], m_snssai);
     }
     if (json_data.find(m_qos_profile.get_config_name()) != json_data.end()) {
       m_qos_profile.from_json(json_data[m_qos_profile.get_config_name()]);
@@ -752,7 +773,8 @@ std::string subscription_info_config::to_string(
           BASE_FORMATTER, INNER_LIST_ELEM, m_ssc_mode.get_config_name(),
           inner_width, m_ssc_mode.to_string("")));
 
-  out.append(m_snssai.to_string(inner_indent));
+  out.append(m_snssai.to_string(3));
+
   out.append(m_qos_profile.to_string(inner_indent));
 
   return out;
@@ -782,86 +804,7 @@ const session_ambr_t& subscription_info_config::get_session_ambr() const {
   return m_qos_profile.get_session_ambr();
 }
 
-const snssai_t& subscription_info_config::get_single_nssai() const {
-  return m_snssai.get_snssai();
-}
-
-snssai_config_value::snssai_config_value(const snssai_t& snssai) {
-  m_snssai = snssai;
-  // narrowing conversion, but should be okay because max value is 16777215
-  m_sd  = int_config_value("sd", m_snssai.sd);
-  m_sst = int_config_value("sst", m_snssai.sst);
-
-  m_sd.set_validation_interval(0, 16777215);
-  m_sst.set_validation_interval(0, 255);
-
-  m_config_name = "single_nssai";
-}
-
-void snssai_config_value::from_yaml(const YAML::Node& node) {
-  if (node["sd"]) {
-    m_sd.from_yaml(node["sd"]);
-    m_snssai.sd = m_sd.get_value();
-  }
-  if (node["sst"]) {
-    m_sst.from_yaml(node["sst"]);
-    m_snssai.sst = m_sst.get_value();
-  }
-}
-
-nlohmann::json snssai_config_value::to_json() {
-  nlohmann::json json_data           = {};
-  json_data[m_sst.get_config_name()] = m_sst.to_json();
-  json_data[m_sd.get_config_name()]  = m_sd.to_json();
-  return json_data;
-}
-
-bool snssai_config_value::from_json(const nlohmann::json& json_data) {
-  try {
-    if (json_data.find(m_sst.get_config_name()) != json_data.end()) {
-      m_sst.from_json(json_data[m_sst.get_config_name()]);
-    }
-    if (json_data.find(m_sd.get_config_name()) != json_data.end()) {
-      m_sd.from_json(json_data[m_sd.get_config_name()]);
-    }
-
-  } catch (nlohmann::detail::exception& e) {
-    // TODO:
-  } catch (std::exception& e) {
-    // TODO:
-  }
-  return false;
-}
-std::string snssai_config_value::to_string(const std::string& indent) const {
-  std::string out;
-
-  out.append(indent).append(
-      fmt::format("{} {}:\n", INNER_LIST_ELEM, m_config_name));
-
-  std::string inner_indent = add_indent(indent);
-
-  unsigned int inner_width = get_inner_width(inner_indent.length());
-  out.append(inner_indent)
-      .append(fmt::format(
-          BASE_FORMATTER, OUTER_LIST_ELEM, m_sst.get_config_name(), inner_width,
-          m_sst.to_string("")));
-
-  std::string sd_value =
-      fmt::format("{:#X} ({})", m_sd.get_value(), m_sd.get_value());
-  out.append(inner_indent)
-      .append(fmt::format(
-          BASE_FORMATTER, OUTER_LIST_ELEM, m_sd.get_config_name(), inner_width,
-          sd_value));
-
-  return out;
-}
-
-void snssai_config_value::validate() {
-  m_sst.validate();
-  m_sd.validate();
-}
-
-const snssai_t& snssai_config_value::get_snssai() const {
+const Snssai& subscription_info_config::get_single_nssai() const {
   return m_snssai;
 }
 

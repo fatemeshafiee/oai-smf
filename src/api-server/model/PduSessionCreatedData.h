@@ -96,8 +96,8 @@ class PduSessionCreatedData {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   bool sNssaiIsSet() const;
   void unsetSNssai();
   /// <summary>
@@ -217,7 +217,7 @@ class PduSessionCreatedData {
 
   int32_t m_PduSessionId;
   bool m_PduSessionIdIsSet;
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
   bool m_SNssaiIsSet;
   bool m_EnablePauseCharging;
   bool m_EnablePauseChargingIsSet;

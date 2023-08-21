@@ -63,8 +63,8 @@ class SmContextCreatedData {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   bool sNssaiIsSet() const;
   void unsetSNssai();
   /// <summary>
@@ -138,7 +138,7 @@ class SmContextCreatedData {
   bool m_HSmfUriIsSet;
   int32_t m_PduSessionId;
   bool m_PduSessionIdIsSet;
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
   bool m_SNssaiIsSet;
   UpCnxState m_UpCnxState;
   bool m_UpCnxStateIsSet;

@@ -103,6 +103,18 @@ database:
   generate_random: true
   connection_timeout: 300 # seconds
 
+## general single_nssai configuration
+## Defines YAML anchors, which are reused in the config file
+snssais:
+  - &embb_slice1
+    sst: 1
+  - &embb_slice2
+    sst: 1
+    sd: 1
+  - &custom_slice
+    sst: 222
+    sd: 123
+
 ############## NF-specific configuration
 amf:
   pid_directory: "/var/run"
@@ -132,11 +144,9 @@ amf:
       mnc: 95
       tac: 0xa000
       nssai:
-        - sst: 1
-        - sst: 1
-          sd: 1
-        - sst: 222
-          sd: 123
+        - *embb_slice1
+        - *embb_slice2
+        - *custom_slice
   supported_integrity_algorithms:
     - "NIA0"
     - "NIA1"
@@ -165,25 +175,32 @@ smf:
     pcscf_ipv4: "127.0.0.1"
     pcscf_ipv6: "fe80::7915:f408:1787:db8b"
   # the DNN you configure here should be configured in "dnns"
+  # follows the SmfInfo datatype from 3GPP TS 29.510
+  smf_info:
+    sNssaiSmfInfoList:
+      - sNssai: *embb_slice1
+        dnnSmfInfoList:
+          - dnn: "oai"
+      - sNssai: *embb_slice2
+        dnnSmfInfoList:
+          - dnn: "oai.ipv4"
+      - sNssai: *custom_slice
+        dnnSmfInfoList:
+          - dnn: "default"
   local_subscription_infos:
-    - single_nssai:
-        sst: 1
+    - single_nssai: *embb_slice1
       dnn: "oai"
       qos_profile:
         5qi: 9
         session_ambr_ul: "200Mbps"
         session_ambr_dl: "400Mbps"
-    - single_nssai:
-        sst: 1
-        sd: 1
+    - single_nssai: *embb_slice2
       dnn: "oai.ipv4"
       qos_profile:
         5qi: 9
         session_ambr_ul: "100Mbps"
         session_ambr_dl: "200Mbps"
-    - single_nssai:
-        sst: 222
-        sd: 123
+    - single_nssai: *custom_slice
       dnn: "default"
       qos_profile:
         5qi: 9

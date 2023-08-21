@@ -46,8 +46,8 @@ class N3gaLocation {
   /// <summary>
   ///
   /// </summary>
-  Tai getN3gppTai() const;
-  void setN3gppTai(Tai const& value);
+  oai::model::common::Tai getN3gppTai() const;
+  void setN3gppTai(oai::model::common::Tai const& value);
   bool n3gppTaiIsSet() const;
   void unsetN3gppTai();
   /// <summary>
@@ -83,7 +83,7 @@ class N3gaLocation {
   friend void from_json(const nlohmann::json& j, N3gaLocation& o);
 
  protected:
-  Tai m_N3gppTai;
+  oai::model::common::Tai m_N3gppTai;
   bool m_N3gppTaiIsSet;
   std::string m_N3IwfId;
   bool m_N3IwfIdIsSet;

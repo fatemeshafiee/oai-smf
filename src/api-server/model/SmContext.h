@@ -97,13 +97,13 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   /// <summary>
   ///
   /// </summary>
-  Snssai getHplmnSnssai() const;
-  void setHplmnSnssai(Snssai const& value);
+  oai::model::common::Snssai getHplmnSnssai() const;
+  void setHplmnSnssai(oai::model::common::Snssai const& value);
   bool hplmnSnssaiIsSet() const;
   void unsetHplmnSnssai();
   /// <summary>
@@ -128,13 +128,13 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getServingNetwork() const;
-  void setServingNetwork(PlmnId const& value);
+  oai::model::common::PlmnId getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnId const& value);
   /// <summary>
   ///
   /// </summary>
-  AccessType getAnType() const;
-  void setAnType(AccessType const& value);
+  oai::model::common::AccessType getAnType() const;
+  void setAnType(oai::model::common::AccessType const& value);
   /// <summary>
   ///
   /// </summary>
@@ -309,9 +309,9 @@ class SmContext {
 
   std::string m_Dnn;
 
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
 
-  Snssai m_HplmnSnssai;
+  oai::model::common::Snssai m_HplmnSnssai;
   bool m_HplmnSnssaiIsSet;
   std::string m_ServingNfId;
 
@@ -319,9 +319,9 @@ class SmContext {
   bool m_GuamiIsSet;
   ServiceName m_ServiceName;
   bool m_ServiceNameIsSet;
-  PlmnId m_ServingNetwork;
+  oai::model::common::PlmnId m_ServingNetwork;
 
-  AccessType m_AnType;
+  oai::model::common::AccessType m_AnType;
 
   RatType m_RatType;
   bool m_RatTypeIsSet;

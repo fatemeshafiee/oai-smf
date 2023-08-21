@@ -4682,7 +4682,7 @@ void smf_context::handle_plmn_change(
       std::string mcc, mnc;
       sc->get_plmn(plmn);
       conv::plmnToMccMnc(plmn, mcc, mnc);
-      oai::smf_server::model::PlmnId plmnid;
+      oai::model::common::PlmnId plmnid;
       plmnid.setMcc(mcc);
       plmnid.setMnc(mnc);
       ev_notif.set_PlmnId(plmnid);

@@ -398,10 +398,10 @@ bool SmContextCreateData::dnnIsSet() const {
 void SmContextCreateData::unsetDnn() {
   m_DnnIsSet = false;
 }
-Snssai SmContextCreateData::getSNssai() const {
+oai::model::common::Snssai SmContextCreateData::getSNssai() const {
   return m_SNssai;
 }
-void SmContextCreateData::setSNssai(Snssai const& value) {
+void SmContextCreateData::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai      = value;
   m_SNssaiIsSet = true;
 }
@@ -411,10 +411,11 @@ bool SmContextCreateData::sNssaiIsSet() const {
 void SmContextCreateData::unsetSNssai() {
   m_SNssaiIsSet = false;
 }
-Snssai SmContextCreateData::getHplmnSnssai() const {
+oai::model::common::Snssai SmContextCreateData::getHplmnSnssai() const {
   return m_HplmnSnssai;
 }
-void SmContextCreateData::setHplmnSnssai(Snssai const& value) {
+void SmContextCreateData::setHplmnSnssai(
+    oai::model::common::Snssai const& value) {
   m_HplmnSnssai      = value;
   m_HplmnSnssaiIsSet = true;
 }
@@ -456,10 +457,11 @@ bool SmContextCreateData::serviceNameIsSet() const {
 void SmContextCreateData::unsetServiceName() {
   m_ServiceNameIsSet = false;
 }
-PlmnId SmContextCreateData::getServingNetwork() const {
+oai::model::common::PlmnId SmContextCreateData::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void SmContextCreateData::setServingNetwork(PlmnId const& value) {
+void SmContextCreateData::setServingNetwork(
+    oai::model::common::PlmnId const& value) {
   m_ServingNetwork = value;
 }
 std::string SmContextCreateData::getRequestType() const {

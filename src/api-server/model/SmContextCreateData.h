@@ -101,15 +101,15 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   bool sNssaiIsSet() const;
   void unsetSNssai();
   /// <summary>
   ///
   /// </summary>
-  Snssai getHplmnSnssai() const;
-  void setHplmnSnssai(Snssai const& value);
+  oai::model::common::Snssai getHplmnSnssai() const;
+  void setHplmnSnssai(oai::model::common::Snssai const& value);
   bool hplmnSnssaiIsSet() const;
   void unsetHplmnSnssai();
   /// <summary>
@@ -134,8 +134,8 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getServingNetwork() const;
-  void setServingNetwork(PlmnId const& value);
+  oai::model::common::PlmnId getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnId const& value);
   /// <summary>
   ///
   /// </summary>
@@ -377,9 +377,9 @@ class SmContextCreateData {
   bool m_PduSessionIdIsSet;
   std::string m_Dnn;
   bool m_DnnIsSet;
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
   bool m_SNssaiIsSet;
-  Snssai m_HplmnSnssai;
+  oai::model::common::Snssai m_HplmnSnssai;
   bool m_HplmnSnssaiIsSet;
   std::string m_ServingNfId;
 
@@ -387,7 +387,7 @@ class SmContextCreateData {
   bool m_GuamiIsSet;
   std::string m_ServiceName;
   bool m_ServiceNameIsSet;
-  PlmnId m_ServingNetwork;
+  oai::model::common::PlmnId m_ServingNetwork;
 
   std::string m_RequestType;
   bool m_RequestTypeIsSet;

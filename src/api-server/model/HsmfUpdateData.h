@@ -78,22 +78,22 @@ class HsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  PlmnId getServingNetwork() const;
-  void setServingNetwork(PlmnId const& value);
+  oai::model::common::PlmnId getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnId const& value);
   bool servingNetworkIsSet() const;
   void unsetServingNetwork();
   /// <summary>
   ///
   /// </summary>
-  AccessType getAnType() const;
-  void setAnType(AccessType const& value);
+  oai::model::common::AccessType getAnType() const;
+  void setAnType(oai::model::common::AccessType const& value);
   bool anTypeIsSet() const;
   void unsetAnType();
   /// <summary>
   ///
   /// </summary>
-  AccessType getSecondAnType() const;
-  void setSecondAnType(AccessType const& value);
+  oai::model::common::AccessType getSecondAnType() const;
+  void setSecondAnType(oai::model::common::AccessType const& value);
   bool secondAnTypeIsSet() const;
   void unsetSecondAnType();
   /// <summary>
@@ -261,11 +261,11 @@ class HsmfUpdateData {
   bool m_PeiIsSet;
   TunnelInfo m_VcnTunnelInfo;
   bool m_VcnTunnelInfoIsSet;
-  PlmnId m_ServingNetwork;
+  oai::model::common::PlmnId m_ServingNetwork;
   bool m_ServingNetworkIsSet;
-  AccessType m_AnType;
+  oai::model::common::AccessType m_AnType;
   bool m_AnTypeIsSet;
-  AccessType m_SecondAnType;
+  oai::model::common::AccessType m_SecondAnType;
   bool m_SecondAnTypeIsSet;
   RatType m_RatType;
   bool m_RatTypeIsSet;

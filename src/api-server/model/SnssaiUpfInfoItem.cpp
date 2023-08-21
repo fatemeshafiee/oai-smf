@@ -36,10 +36,10 @@ void from_json(const nlohmann::json& j, SnssaiUpfInfoItem& o) {
   j.at("dnnUpfInfoList").get_to(o.m_DnnUpfInfoList);
 }
 
-Snssai SnssaiUpfInfoItem::getSNssai() const {
+oai::model::common::Snssai SnssaiUpfInfoItem::getSNssai() const {
   return m_SNssai;
 }
-void SnssaiUpfInfoItem::setSNssai(Snssai const& value) {
+void SnssaiUpfInfoItem::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai = value;
 }
 std::vector<DnnUpfInfoItem>& SnssaiUpfInfoItem::getDnnUpfInfoList() {

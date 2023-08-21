@@ -48,10 +48,10 @@ void from_json(const nlohmann::json& j, Ncgi& o) {
   j.at("nrCellId").get_to(o.m_NrCellId);
 }
 
-PlmnId Ncgi::getPlmnId() const {
+oai::model::common::PlmnId Ncgi::getPlmnId() const {
   return m_PlmnId;
 }
-void Ncgi::setPlmnId(PlmnId const& value) {
+void Ncgi::setPlmnId(oai::model::common::PlmnId const& value) {
   m_PlmnId = value;
 }
 std::string Ncgi::getNrCellId() const {
