@@ -713,8 +713,8 @@ void subscription_info_config::from_yaml(const YAML::Node& node) {
     m_ssc_mode.from_yaml(node["ssc_mode"]);
   }
   if (node["single_nssai"]) {
-    nlohmann::json j = oai::utils::conversions::yaml_to_json(
-        node["single_nssai"], false);
+    nlohmann::json j =
+        oai::utils::conversions::yaml_to_json(node["single_nssai"], false);
     nlohmann::from_json(j, m_snssai);
   }
   if (node["qos_profile"]) {
