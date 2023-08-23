@@ -1949,8 +1949,8 @@ void smf_app::timer_nrf_heartbeat_timeout(
 
   oai::model::common::PatchItem patch_item = {};
   oai::model::common::PatchOperation op;
-  op.setEnumValue(oai::model::common::PatchOperation_anyOf::ePatchOperation_anyOf::
-                      REPLACE);
+  op.setEnumValue(
+      oai::model::common::PatchOperation_anyOf::ePatchOperation_anyOf::REPLACE);
   patch_item.setOp(op);
   patch_item.setPath("/nfStatus");
   patch_item.setValue("REGISTERED");

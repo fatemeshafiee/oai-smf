@@ -256,8 +256,7 @@ void HsmfUpdateData::unsetVcnTunnelInfo() {
 PlmnId HsmfUpdateData::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void HsmfUpdateData::setServingNetwork(
-    PlmnId const& value) {
+void HsmfUpdateData::setServingNetwork(PlmnId const& value) {
   m_ServingNetwork      = value;
   m_ServingNetworkIsSet = true;
 }
@@ -283,8 +282,7 @@ void HsmfUpdateData::unsetAnType() {
 AccessType HsmfUpdateData::getSecondAnType() const {
   return m_SecondAnType;
 }
-void HsmfUpdateData::setSecondAnType(
-    AccessType const& value) {
+void HsmfUpdateData::setSecondAnType(AccessType const& value) {
   m_SecondAnType      = value;
   m_SecondAnTypeIsSet = true;
 }

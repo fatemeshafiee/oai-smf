@@ -227,13 +227,15 @@ class HsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  std::vector<oai::model::common::SecondaryRatUsageReport>& getSecondaryRatUsageReport();
+  std::vector<oai::model::common::SecondaryRatUsageReport>&
+  getSecondaryRatUsageReport();
   bool secondaryRatUsageReportIsSet() const;
   void unsetSecondaryRatUsageReport();
   /// <summary>
   ///
   /// </summary>
-  std::vector<oai::model::common::SecondaryRatUsageInfo>& getSecondaryRatUsageInfo();
+  std::vector<oai::model::common::SecondaryRatUsageInfo>&
+  getSecondaryRatUsageInfo();
   bool secondaryRatUsageInfoIsSet() const;
   void unsetSecondaryRatUsageInfo();
   /// <summary>
@@ -305,9 +307,11 @@ class HsmfUpdateData {
   bool m_AlwaysOnRequestedIsSet;
   EpsInterworkingIndication m_EpsInterworkingInd;
   bool m_EpsInterworkingIndIsSet;
-  std::vector<oai::model::common::SecondaryRatUsageReport> m_SecondaryRatUsageReport;
+  std::vector<oai::model::common::SecondaryRatUsageReport>
+      m_SecondaryRatUsageReport;
   bool m_SecondaryRatUsageReportIsSet;
-  std::vector<oai::model::common::SecondaryRatUsageInfo> m_SecondaryRatUsageInfo;
+  std::vector<oai::model::common::SecondaryRatUsageInfo>
+      m_SecondaryRatUsageInfo;
   bool m_SecondaryRatUsageInfoIsSet;
   bool m_AnTypeCanBeChanged;
   bool m_AnTypeCanBeChangedIsSet;
