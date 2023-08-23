@@ -3690,8 +3690,8 @@ bool smf_context::handle_ho_preparation_request_fail(
 
   // Prepare SmContextUpdateError
   oai::smf_server::model::SmContextUpdateError sm_context = {};
-  oai::smf_server::model::ProblemDetails problem_details  = {};
-  oai::smf_server::model::RefToBinaryData refToBinaryData = {};
+  oai::model::common::ProblemDetails problem_details  = {};
+  oai::model::common::RefToBinaryData refToBinaryData = {};
   Logger::smf_app().warn("Create SmContextCreateError");
   problem_details.setCause(pdu_session_application_error_e2str.at(
       PDU_SESSION_APPLICATION_ERROR_HANDOVER_RESOURCE_ALLOCATION_FAILURE));

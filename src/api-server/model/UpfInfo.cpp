@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 UpfInfo::UpfInfo() {
   m_SmfServingAreaIsSet       = false;
   m_InterfaceUpfInfoListIsSet = false;

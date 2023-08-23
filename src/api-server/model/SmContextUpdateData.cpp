@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmContextUpdateData::SmContextUpdateData() {
   m_Pei                     = "";
   m_PeiIsSet                = false;
@@ -310,11 +312,10 @@ bool SmContextUpdateData::guamiIsSet() const {
 void SmContextUpdateData::unsetGuami() {
   m_GuamiIsSet = false;
 }
-oai::model::common::PlmnId SmContextUpdateData::getServingNetwork() const {
+PlmnId SmContextUpdateData::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void SmContextUpdateData::setServingNetwork(
-    oai::model::common::PlmnId const& value) {
+void SmContextUpdateData::setServingNetwork(PlmnId const& value) {
   m_ServingNetwork      = value;
   m_ServingNetworkIsSet = true;
 }
@@ -346,11 +347,10 @@ bool SmContextUpdateData::anTypeIsSet() const {
 void SmContextUpdateData::unsetAnType() {
   m_AnTypeIsSet = false;
 }
-oai::model::common::AccessType SmContextUpdateData::getSecondAnType() const {
+AccessType SmContextUpdateData::getSecondAnType() const {
   return m_SecondAnType;
 }
-void SmContextUpdateData::setSecondAnType(
-    oai::model::common::AccessType const& value) {
+void SmContextUpdateData::setSecondAnType(AccessType const& value) {
   m_SecondAnType      = value;
   m_SecondAnTypeIsSet = true;
 }
@@ -640,10 +640,10 @@ bool SmContextUpdateData::_5gMmCauseValueIsSet() const {
 void SmContextUpdateData::unset_5gMmCauseValue() {
   m__5gMmCauseValueIsSet = false;
 }
-oai::model::common::Snssai SmContextUpdateData::getSNssai() const {
+Snssai SmContextUpdateData::getSNssai() const {
   return m_SNssai;
 }
-void SmContextUpdateData::setSNssai(oai::model::common::Snssai const& value) {
+void SmContextUpdateData::setSNssai(Snssai const& value) {
   m_SNssai      = value;
   m_SNssaiIsSet = true;
 }

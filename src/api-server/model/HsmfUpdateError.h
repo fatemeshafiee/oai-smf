@@ -44,8 +44,8 @@ class HsmfUpdateError {
   /// <summary>
   ///
   /// </summary>
-  ProblemDetails getError() const;
-  void setError(ProblemDetails const& value);
+  oai::model::common::ProblemDetails getError() const;
+  void setError(oai::model::common::ProblemDetails const& value);
   /// <summary>
   ///
   /// </summary>
@@ -63,8 +63,8 @@ class HsmfUpdateError {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmInfoToUe() const;
-  void setN1SmInfoToUe(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmInfoToUe() const;
+  void setN1SmInfoToUe(oai::model::common::RefToBinaryData const& value);
   bool n1SmInfoToUeIsSet() const;
   void unsetN1SmInfoToUe();
   /// <summary>
@@ -86,13 +86,13 @@ class HsmfUpdateError {
   friend void from_json(const nlohmann::json& j, HsmfUpdateError& o);
 
  protected:
-  ProblemDetails m_Error;
+  oai::model::common::ProblemDetails m_Error;
 
   int32_t m_Pti;
   bool m_PtiIsSet;
   std::string m_N1smCause;
   bool m_N1smCauseIsSet;
-  RefToBinaryData m_N1SmInfoToUe;
+  oai::model::common::RefToBinaryData m_N1SmInfoToUe;
   bool m_N1SmInfoToUeIsSet;
   int32_t m_BackOffTimer;
   bool m_BackOffTimerIsSet;

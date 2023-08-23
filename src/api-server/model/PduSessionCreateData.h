@@ -149,15 +149,15 @@ class PduSessionCreateData {
   /// <summary>
   ///
   /// </summary>
-  RatType getRatType() const;
-  void setRatType(RatType const& value);
+  oai::model::common::RatType getRatType() const;
+  void setRatType(oai::model::common::RatType const& value);
   bool ratTypeIsSet() const;
   void unsetRatType();
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUeLocation() const;
-  void setUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getUeLocation() const;
+  void setUeLocation(oai::model::common::UserLocation const& value);
   bool ueLocationIsSet() const;
   void unsetUeLocation();
   /// <summary>
@@ -170,8 +170,8 @@ class PduSessionCreateData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getAddUeLocation() const;
-  void setAddUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getAddUeLocation() const;
+  void setAddUeLocation(oai::model::common::UserLocation const& value);
   bool addUeLocationIsSet() const;
   void unsetAddUeLocation();
   /// <summary>
@@ -184,15 +184,15 @@ class PduSessionCreateData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmInfoFromUe() const;
-  void setN1SmInfoFromUe(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmInfoFromUe() const;
+  void setN1SmInfoFromUe(oai::model::common::RefToBinaryData const& value);
   bool n1SmInfoFromUeIsSet() const;
   void unsetN1SmInfoFromUe();
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getUnknownN1SmInfo() const;
-  void setUnknownN1SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getUnknownN1SmInfo() const;
+  void setUnknownN1SmInfo(oai::model::common::RefToBinaryData const& value);
   bool unknownN1SmInfoIsSet() const;
   void unsetUnknownN1SmInfo();
   /// <summary>
@@ -303,8 +303,8 @@ class PduSessionCreateData {
   /// <summary>
   ///
   /// </summary>
-  Guami getGuami() const;
-  void setGuami(Guami const& value);
+  oai::model::common::Guami getGuami() const;
+  void setGuami(oai::model::common::Guami const& value);
   bool guamiIsSet() const;
   void unsetGuami();
   /// <summary>
@@ -363,19 +363,19 @@ class PduSessionCreateData {
 
   oai::model::common::AccessType m_SecondAnType;
   bool m_SecondAnTypeIsSet;
-  RatType m_RatType;
+  oai::model::common::RatType m_RatType;
   bool m_RatTypeIsSet;
-  UserLocation m_UeLocation;
+  oai::model::common::UserLocation m_UeLocation;
   bool m_UeLocationIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
-  UserLocation m_AddUeLocation;
+  oai::model::common::UserLocation m_AddUeLocation;
   bool m_AddUeLocationIsSet;
   std::string m_Gpsi;
   bool m_GpsiIsSet;
-  RefToBinaryData m_N1SmInfoFromUe;
+  oai::model::common::RefToBinaryData m_N1SmInfoFromUe;
   bool m_N1SmInfoFromUeIsSet;
-  RefToBinaryData m_UnknownN1SmInfo;
+  oai::model::common::RefToBinaryData m_UnknownN1SmInfo;
   bool m_UnknownN1SmInfoIsSet;
   std::string m_SupportedFeatures;
   bool m_SupportedFeaturesIsSet;
@@ -407,7 +407,7 @@ class PduSessionCreateData {
   bool m_EpsBearerCtxStatusIsSet;
   std::string m_AmfNfId;
   bool m_AmfNfIdIsSet;
-  Guami m_Guami;
+  oai::model::common::Guami m_Guami;
   bool m_GuamiIsSet;
   bool m_CpCiotEnabled;
   bool m_CpCiotEnabledIsSet;

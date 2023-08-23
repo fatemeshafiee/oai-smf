@@ -120,8 +120,8 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  Guami getGuami() const;
-  void setGuami(Guami const& value);
+  oai::model::common::Guami getGuami() const;
+  void setGuami(oai::model::common::Guami const& value);
   bool guamiIsSet() const;
   void unsetGuami();
   /// <summary>
@@ -146,8 +146,8 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmMsg() const;
-  void setN1SmMsg(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmMsg() const;
+  void setN1SmMsg(oai::model::common::RefToBinaryData const& value);
   bool n1SmMsgIsSet() const;
   void unsetN1SmMsg();
   /// <summary>
@@ -179,8 +179,8 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUeLocation() const;
-  void setUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getUeLocation() const;
+  void setUeLocation(oai::model::common::UserLocation const& value);
   bool ueLocationIsSet() const;
   void unsetUeLocation();
   /// <summary>
@@ -193,8 +193,8 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getAddUeLocation() const;
-  void setAddUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getAddUeLocation() const;
+  void setAddUeLocation(oai::model::common::UserLocation const& value);
   bool addUeLocationIsSet() const;
   void unsetAddUeLocation();
   /// <summary>
@@ -273,14 +273,14 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  std::vector<BackupAmfInfo>& getBackupAmfInfo();
+  std::vector<oai::model::common::BackupAmfInfo>& getBackupAmfInfo();
   bool backupAmfInfoIsSet() const;
   void unsetBackupAmfInfo();
   /// <summary>
   ///
   /// </summary>
-  TraceData getTraceData() const;
-  void setTraceData(TraceData const& value);
+  oai::model::common::TraceData getTraceData() const;
+  void setTraceData(oai::model::common::TraceData const& value);
   bool traceDataIsSet() const;
   void unsetTraceData();
   /// <summary>
@@ -349,8 +349,8 @@ class SmContextCreateData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN2SmInfo() const;
-  void setN2SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN2SmInfo() const;
+  void setN2SmInfo(oai::model::common::RefToBinaryData const& value);
   bool n2SmInfoIsSet() const;
   void unsetN2SmInfo();
   /// <summary>
@@ -383,7 +383,7 @@ class SmContextCreateData {
   bool m_HplmnSnssaiIsSet;
   std::string m_ServingNfId;
 
-  Guami m_Guami;
+  oai::model::common::Guami m_Guami;
   bool m_GuamiIsSet;
   std::string m_ServiceName;
   bool m_ServiceNameIsSet;
@@ -391,7 +391,7 @@ class SmContextCreateData {
 
   std::string m_RequestType;
   bool m_RequestTypeIsSet;
-  RefToBinaryData m_N1SmMsg;
+  oai::model::common::RefToBinaryData m_N1SmMsg;
   bool m_N1SmMsgIsSet;
   std::string m_AnType;
 
@@ -401,11 +401,11 @@ class SmContextCreateData {
   bool m_RatTypeIsSet;
   std::string m_PresenceInLadn;
   bool m_PresenceInLadnIsSet;
-  UserLocation m_UeLocation;
+  oai::model::common::UserLocation m_UeLocation;
   bool m_UeLocationIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
-  UserLocation m_AddUeLocation;
+  oai::model::common::UserLocation m_AddUeLocation;
   bool m_AddUeLocationIsSet;
   std::string m_SmContextStatusUri;
 
@@ -429,9 +429,9 @@ class SmContextCreateData {
   bool m_SupportedFeaturesIsSet;
   std::string m_SelMode;
   bool m_SelModeIsSet;
-  std::vector<BackupAmfInfo> m_BackupAmfInfo;
+  std::vector<oai::model::common::BackupAmfInfo> m_BackupAmfInfo;
   bool m_BackupAmfInfoIsSet;
-  TraceData m_TraceData;
+  oai::model::common::TraceData m_TraceData;
   bool m_TraceDataIsSet;
   std::string m_UdmGroupId;
   bool m_UdmGroupIdIsSet;
@@ -451,7 +451,7 @@ class SmContextCreateData {
   bool m_InvokeNefIsSet;
   bool m_MaPduIndication;
   bool m_MaPduIndicationIsSet;
-  RefToBinaryData m_N2SmInfo;
+  oai::model::common::RefToBinaryData m_N2SmInfo;
   bool m_N2SmInfoIsSet;
   std::string m_SmContextRef;
   bool m_SmContextRefIsSet;

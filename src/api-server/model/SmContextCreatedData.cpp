@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmContextCreatedData::SmContextCreatedData() {
   m_HSmfUri                   = "";
   m_HSmfUriIsSet              = false;
@@ -139,10 +141,10 @@ bool SmContextCreatedData::pduSessionIdIsSet() const {
 void SmContextCreatedData::unsetPduSessionId() {
   m_PduSessionIdIsSet = false;
 }
-oai::model::common::Snssai SmContextCreatedData::getSNssai() const {
+Snssai SmContextCreatedData::getSNssai() const {
   return m_SNssai;
 }
-void SmContextCreatedData::setSNssai(oai::model::common::Snssai const& value) {
+void SmContextCreatedData::setSNssai(Snssai const& value) {
   m_SNssai      = value;
   m_SNssaiIsSet = true;
 }

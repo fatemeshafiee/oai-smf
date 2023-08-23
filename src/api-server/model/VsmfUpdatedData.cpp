@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 VsmfUpdatedData::VsmfUpdatedData() {
   m_QosFlowsAddModListIsSet         = false;
   m_QosFlowsRelListIsSet            = false;

@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 EventSubscription::EventSubscription() {
   m_DnaiChgTypeIsSet = false;
   m_DddTraDesIsSet   = false;

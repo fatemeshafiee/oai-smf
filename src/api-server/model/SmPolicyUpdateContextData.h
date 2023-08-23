@@ -115,8 +115,8 @@ class SmPolicyUpdateContextData {
   /// <summary>
   ///
   /// </summary>
-  RatType getRatType() const;
-  void setRatType(RatType const& value);
+  oai::model::common::RatType getRatType() const;
+  void setRatType(oai::model::common::RatType const& value);
   bool ratTypeIsSet() const;
   void unsetRatType();
   /// <summary>
@@ -140,15 +140,15 @@ class SmPolicyUpdateContextData {
   /// <summary>
   ///
   /// </summary>
-  PlmnIdNid getServingNetwork() const;
-  void setServingNetwork(PlmnIdNid const& value);
+  oai::model::common::PlmnIdNid getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnIdNid const& value);
   bool servingNetworkIsSet() const;
   void unsetServingNetwork();
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUserLocationInfo() const;
-  void setUserLocationInfo(UserLocation const& value);
+  oai::model::common::UserLocation getUserLocationInfo() const;
+  void setUserLocationInfo(oai::model::common::UserLocation const& value);
   bool userLocationInfoIsSet() const;
   void unsetUserLocationInfo();
   /// <summary>
@@ -368,8 +368,8 @@ class SmPolicyUpdateContextData {
   /// <summary>
   ///
   /// </summary>
-  TraceData getTraceReq() const;
-  void setTraceReq(TraceData const& value);
+  oai::model::common::TraceData getTraceReq() const;
+  void setTraceReq(oai::model::common::TraceData const& value);
   bool traceReqIsSet() const;
   void unsetTraceReq();
   /// <summary>
@@ -428,15 +428,15 @@ class SmPolicyUpdateContextData {
   // bool m_AccNetChIdsIsSet;
   oai::model::common::AccessType m_AccessType;
   bool m_AccessTypeIsSet;
-  RatType m_RatType;
+  oai::model::common::RatType m_RatType;
   bool m_RatTypeIsSet;
   // AdditionalAccessInfo m_AddAccessInfo;
   // bool m_AddAccessInfoIsSet;
   // AdditionalAccessInfo m_RelAccessInfo;
   // bool m_RelAccessInfoIsSet;
-  PlmnIdNid m_ServingNetwork;
+  oai::model::common::PlmnIdNid m_ServingNetwork;
   bool m_ServingNetworkIsSet;
-  UserLocation m_UserLocationInfo;
+  oai::model::common::UserLocation m_UserLocationInfo;
   bool m_UserLocationInfoIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
@@ -446,13 +446,13 @@ class SmPolicyUpdateContextData {
   bool m_Ipv4AddressIsSet;
   std::string m_IpDomain;
   bool m_IpDomainIsSet;
-  Ipv6Prefix m_Ipv6AddressPrefix;
+  oai::model::common::Ipv6Prefix m_Ipv6AddressPrefix;
   bool m_Ipv6AddressPrefixIsSet;
-  Ipv6Prefix m_RelIpv6AddressPrefix;
+  oai::model::common::Ipv6Prefix m_RelIpv6AddressPrefix;
   bool m_RelIpv6AddressPrefixIsSet;
-  Ipv6Prefix m_AddIpv6AddrPrefixes;
+  oai::model::common::Ipv6Prefix m_AddIpv6AddrPrefixes;
   bool m_AddIpv6AddrPrefixesIsSet;
-  Ipv6Prefix m_AddRelIpv6AddrPrefixes;
+  oai::model::common::Ipv6Prefix m_AddRelIpv6AddrPrefixes;
   bool m_AddRelIpv6AddrPrefixesIsSet;
   std::string m_RelUeMac;
   bool m_RelUeMacIsSet;
@@ -494,11 +494,11 @@ class SmPolicyUpdateContextData {
   // bool m_CreditManageStatusIsSet;
   // ServingNfIdentity m_ServNfId;
   // bool m_ServNfIdIsSet;
-  TraceData m_TraceReq;
+  oai::model::common::TraceData m_TraceReq;
   bool m_TraceReqIsSet;
   // MaPduIndication m_MaPduInd;
   // bool m_MaPduIndIsSet;
-  AtsssCapability m_AtsssCapab;
+  oai::model::common::AtsssCapability m_AtsssCapab;
   bool m_AtsssCapabIsSet;
   // TsnBridgeInfo m_TsnBridgeInfo;
   // bool m_TsnBridgeInfoIsSet;

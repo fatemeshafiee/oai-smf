@@ -81,15 +81,15 @@ class SmContextUpdatedData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmMsg() const;
-  void setN1SmMsg(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmMsg() const;
+  void setN1SmMsg(oai::model::common::RefToBinaryData const& value);
   bool n1SmMsgIsSet() const;
   void unsetN1SmMsg();
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN2SmInfo() const;
-  void setN2SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN2SmInfo() const;
+  void setN2SmInfo(oai::model::common::RefToBinaryData const& value);
   bool n2SmInfoIsSet() const;
   void unsetN2SmInfo();
   /// <summary>
@@ -134,9 +134,9 @@ class SmContextUpdatedData {
   bool m_AllocatedEbiListIsSet;
   std::vector<EbiArpMapping> m_ModifiedEbiList;
   bool m_ModifiedEbiListIsSet;
-  RefToBinaryData m_N1SmMsg;
+  oai::model::common::RefToBinaryData m_N1SmMsg;
   bool m_N1SmMsgIsSet;
-  RefToBinaryData m_N2SmInfo;
+  oai::model::common::RefToBinaryData m_N2SmInfo;
   bool m_N2SmInfoIsSet;
   N2SmInfoType m_N2SmInfoType;
   bool m_N2SmInfoTypeIsSet;

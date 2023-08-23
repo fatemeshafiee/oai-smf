@@ -46,8 +46,8 @@ class VsmfUpdateError {
   /// <summary>
   ///
   /// </summary>
-  ProblemDetails getError() const;
-  void setError(ProblemDetails const& value);
+  oai::model::common::ProblemDetails getError() const;
+  void setError(oai::model::common::ProblemDetails const& value);
   /// <summary>
   ///
   /// </summary>
@@ -65,15 +65,15 @@ class VsmfUpdateError {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmInfoFromUe() const;
-  void setN1SmInfoFromUe(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmInfoFromUe() const;
+  void setN1SmInfoFromUe(oai::model::common::RefToBinaryData const& value);
   bool n1SmInfoFromUeIsSet() const;
   void unsetN1SmInfoFromUe();
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getUnknownN1SmInfo() const;
-  void setUnknownN1SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getUnknownN1SmInfo() const;
+  void setUnknownN1SmInfo(oai::model::common::RefToBinaryData const& value);
   bool unknownN1SmInfoIsSet() const;
   void unsetUnknownN1SmInfo();
   /// <summary>
@@ -85,8 +85,8 @@ class VsmfUpdateError {
   /// <summary>
   ///
   /// </summary>
-  NgApCause getNgApCause() const;
-  void setNgApCause(NgApCause const& value);
+  oai::model::common::NgApCause getNgApCause() const;
+  void setNgApCause(oai::model::common::NgApCause const& value);
   bool ngApCauseIsSet() const;
   void unsetNgApCause();
   /// <summary>
@@ -108,19 +108,19 @@ class VsmfUpdateError {
   friend void from_json(const nlohmann::json& j, VsmfUpdateError& o);
 
  protected:
-  ProblemDetails m_Error;
+  oai::model::common::ProblemDetails m_Error;
 
   int32_t m_Pti;
   bool m_PtiIsSet;
   std::string m_N1smCause;
   bool m_N1smCauseIsSet;
-  RefToBinaryData m_N1SmInfoFromUe;
+  oai::model::common::RefToBinaryData m_N1SmInfoFromUe;
   bool m_N1SmInfoFromUeIsSet;
-  RefToBinaryData m_UnknownN1SmInfo;
+  oai::model::common::RefToBinaryData m_UnknownN1SmInfo;
   bool m_UnknownN1SmInfoIsSet;
   std::vector<int32_t> m_FailedToAssignEbiList;
   bool m_FailedToAssignEbiListIsSet;
-  NgApCause m_NgApCause;
+  oai::model::common::NgApCause m_NgApCause;
   bool m_NgApCauseIsSet;
   int32_t m__5gMmCauseValue;
   bool m__5gMmCauseValueIsSet;

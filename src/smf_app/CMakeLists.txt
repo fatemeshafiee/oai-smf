@@ -45,11 +45,10 @@ include_directories(${SRC_TOP_DIR}/api-server/model)
 include_directories(${SRC_TOP_DIR}/api-server/)
 include_directories(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger)
 include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/config/config.cmake)
-include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/common_model/common_model.cmake)
-include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/nrf/nrf_model.cmake)
 include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/utils/utils.cmake)
 # TODO Stefan: Why do I need include_directories here if it is already in utils.cmake?
 include_directories(${SRC_TOP_DIR}/${MOUNTED_COMMON}/utils)
+include(${BUILD_TOP_DIR}/smf/used_models.cmake)
 
 add_library (SMF STATIC
   smf_app.cpp

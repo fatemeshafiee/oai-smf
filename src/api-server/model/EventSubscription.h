@@ -51,15 +51,15 @@ class EventSubscription {
   /// <summary>
   ///
   /// </summary>
-  DnaiChangeType getDnaiChgType() const;
-  void setDnaiChgType(DnaiChangeType const& value);
+  oai::model::common::DnaiChangeType getDnaiChgType() const;
+  void setDnaiChgType(oai::model::common::DnaiChangeType const& value);
   bool dnaiChgTypeIsSet() const;
   void unsetDnaiChgType();
   /// <summary>
   ///
   /// </summary>
-  DddTrafficDescriptor getDddTraDes() const;
-  void setDddTraDes(DddTrafficDescriptor const& value);
+  oai::model::common::DddTrafficDescriptor getDddTraDes() const;
+  void setDddTraDes(oai::model::common::DddTrafficDescriptor const& value);
   bool dddTraDesIsSet() const;
   void unsetDddTraDes();
   /// <summary>
@@ -76,9 +76,9 @@ class EventSubscription {
  protected:
   SmfEvent m_Event;
 
-  DnaiChangeType m_DnaiChgType;
+  oai::model::common::DnaiChangeType m_DnaiChgType;
   bool m_DnaiChgTypeIsSet;
-  DddTrafficDescriptor m_DddTraDes;
+  oai::model::common::DddTrafficDescriptor m_DddTraDes;
   bool m_DddTraDesIsSet;
   std::vector<DddStatus> m_DddStati;
   bool m_DddStatiIsSet;

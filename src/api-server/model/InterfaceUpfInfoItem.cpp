@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 InterfaceUpfInfoItem::InterfaceUpfInfoItem() {
   m_Ipv4EndpointAddressesIsSet = false;
   m_Ipv6EndpointAddressesIsSet = false;

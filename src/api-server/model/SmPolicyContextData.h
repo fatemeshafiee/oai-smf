@@ -121,8 +121,8 @@ class SmPolicyContextData {
   /// <summary>
   ///
   /// </summary>
-  PduSessionType getPduSessionType() const;
-  void setPduSessionType(PduSessionType const& value);
+  oai::model::common::PduSessionType getPduSessionType() const;
+  void setPduSessionType(oai::model::common::PduSessionType const& value);
   /// <summary>
   ///
   /// </summary>
@@ -157,8 +157,8 @@ class SmPolicyContextData {
   /// <summary>
   ///
   /// </summary>
-  RatType getRatType() const;
-  void setRatType(RatType const& value);
+  oai::model::common::RatType getRatType() const;
+  void setRatType(oai::model::common::RatType const& value);
   bool ratTypeIsSet() const;
   void unsetRatType();
   /// <summary>
@@ -173,15 +173,15 @@ class SmPolicyContextData {
   /// <summary>
   ///
   /// </summary>
-  PlmnIdNid getServingNetwork() const;
-  void setServingNetwork(PlmnIdNid const& value);
+  oai::model::common::PlmnIdNid getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnIdNid const& value);
   bool servingNetworkIsSet() const;
   void unsetServingNetwork();
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUserLocationInfo() const;
-  void setUserLocationInfo(UserLocation const& value);
+  oai::model::common::UserLocation getUserLocationInfo() const;
+  void setUserLocationInfo(oai::model::common::UserLocation const& value);
   bool userLocationInfoIsSet() const;
   void unsetUserLocationInfo();
   /// <summary>
@@ -288,8 +288,8 @@ class SmPolicyContextData {
   /// <summary>
   ///
   /// </summary>
-  TraceData getTraceReq() const;
-  void setTraceReq(TraceData const& value);
+  oai::model::common::TraceData getTraceReq() const;
+  void setTraceReq(oai::model::common::TraceData const& value);
   bool traceReqIsSet() const;
   void unsetTraceReq();
   /// <summary>
@@ -367,7 +367,7 @@ class SmPolicyContextData {
   bool m_InterGrpIdsIsSet;
   int32_t m_PduSessionId;
 
-  PduSessionType m_PduSessionType;
+  oai::model::common::PduSessionType m_PduSessionType;
 
   std::string m_Chargingcharacteristics;
   bool m_ChargingcharacteristicsIsSet;
@@ -379,13 +379,13 @@ class SmPolicyContextData {
 
   oai::model::common::AccessType m_AccessType;
   bool m_AccessTypeIsSet;
-  RatType m_RatType;
+  oai::model::common::RatType m_RatType;
   bool m_RatTypeIsSet;
   // AdditionalAccessInfo m_AddAccessInfo;
   // bool m_AddAccessInfoIsSet;
-  PlmnIdNid m_ServingNetwork;
+  oai::model::common::PlmnIdNid m_ServingNetwork;
   bool m_ServingNetworkIsSet;
-  UserLocation m_UserLocationInfo;
+  oai::model::common::UserLocation m_UserLocationInfo;
   bool m_UserLocationInfoIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
@@ -413,7 +413,7 @@ class SmPolicyContextData {
   bool m_r_3gppPsDataOffStatusIsSet;
   bool m_RefQosIndication;
   bool m_RefQosIndicationIsSet;
-  TraceData m_TraceReq;
+  oai::model::common::TraceData m_TraceReq;
   bool m_TraceReqIsSet;
   oai::model::common::Snssai m_SliceInfo;
 

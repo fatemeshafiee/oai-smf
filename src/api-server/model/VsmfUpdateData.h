@@ -57,8 +57,8 @@ class VsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  Ambr getSessionAmbr() const;
-  void setSessionAmbr(Ambr const& value);
+  oai::model::common::Ambr getSessionAmbr() const;
+  void setSessionAmbr(oai::model::common::Ambr const& value);
   bool sessionAmbrIsSet() const;
   void unsetSessionAmbr();
   /// <summary>
@@ -107,8 +107,8 @@ class VsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmInfoToUe() const;
-  void setN1SmInfoToUe(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmInfoToUe() const;
+  void setN1SmInfoToUe(oai::model::common::RefToBinaryData const& value);
   bool n1SmInfoToUeIsSet() const;
   void unsetN1SmInfoToUe();
   /// <summary>
@@ -167,7 +167,7 @@ class VsmfUpdateData {
  protected:
   RequestIndication m_RequestIndication;
 
-  Ambr m_SessionAmbr;
+  oai::model::common::Ambr m_SessionAmbr;
   bool m_SessionAmbrIsSet;
   std::vector<QosFlowAddModifyRequestItem> m_QosFlowsAddModRequestList;
   bool m_QosFlowsAddModRequestListIsSet;
@@ -183,7 +183,7 @@ class VsmfUpdateData {
   bool m_ModifiedEbiListIsSet;
   int32_t m_Pti;
   bool m_PtiIsSet;
-  RefToBinaryData m_N1SmInfoToUe;
+  oai::model::common::RefToBinaryData m_N1SmInfoToUe;
   bool m_N1SmInfoToUeIsSet;
   bool m_AlwaysOnGranted;
   bool m_AlwaysOnGrantedIsSet;

@@ -73,22 +73,22 @@ class VsmfUpdatedData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmInfoFromUe() const;
-  void setN1SmInfoFromUe(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmInfoFromUe() const;
+  void setN1SmInfoFromUe(oai::model::common::RefToBinaryData const& value);
   bool n1SmInfoFromUeIsSet() const;
   void unsetN1SmInfoFromUe();
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getUnknownN1SmInfo() const;
-  void setUnknownN1SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getUnknownN1SmInfo() const;
+  void setUnknownN1SmInfo(oai::model::common::RefToBinaryData const& value);
   bool unknownN1SmInfoIsSet() const;
   void unsetUnknownN1SmInfo();
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUeLocation() const;
-  void setUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getUeLocation() const;
+  void setUeLocation(oai::model::common::UserLocation const& value);
   bool ueLocationIsSet() const;
   void unsetUeLocation();
   /// <summary>
@@ -101,8 +101,8 @@ class VsmfUpdatedData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getAddUeLocation() const;
-  void setAddUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getAddUeLocation() const;
+  void setAddUeLocation(oai::model::common::UserLocation const& value);
   bool addUeLocationIsSet() const;
   void unsetAddUeLocation();
   /// <summary>
@@ -126,13 +126,15 @@ class VsmfUpdatedData {
   /// <summary>
   ///
   /// </summary>
-  std::vector<SecondaryRatUsageReport>& getSecondaryRatUsageReport();
+  std::vector<oai::model::common::SecondaryRatUsageReport>&
+  getSecondaryRatUsageReport();
   bool secondaryRatUsageReportIsSet() const;
   void unsetSecondaryRatUsageReport();
   /// <summary>
   ///
   /// </summary>
-  std::vector<SecondaryRatUsageInfo>& getSecondaryRatUsageInfo();
+  std::vector<oai::model::common::SecondaryRatUsageInfo>&
+  getSecondaryRatUsageInfo();
   bool secondaryRatUsageInfoIsSet() const;
   void unsetSecondaryRatUsageInfo();
 
@@ -148,15 +150,15 @@ class VsmfUpdatedData {
   bool m_QosFlowsFailedtoAddModListIsSet;
   std::vector<QosFlowItem> m_QosFlowsFailedtoRelList;
   bool m_QosFlowsFailedtoRelListIsSet;
-  RefToBinaryData m_N1SmInfoFromUe;
+  oai::model::common::RefToBinaryData m_N1SmInfoFromUe;
   bool m_N1SmInfoFromUeIsSet;
-  RefToBinaryData m_UnknownN1SmInfo;
+  oai::model::common::RefToBinaryData m_UnknownN1SmInfo;
   bool m_UnknownN1SmInfoIsSet;
-  UserLocation m_UeLocation;
+  oai::model::common::UserLocation m_UeLocation;
   bool m_UeLocationIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
-  UserLocation m_AddUeLocation;
+  oai::model::common::UserLocation m_AddUeLocation;
   bool m_AddUeLocationIsSet;
   std::vector<EbiArpMapping> m_AssignedEbiList;
   bool m_AssignedEbiListIsSet;
@@ -164,9 +166,11 @@ class VsmfUpdatedData {
   bool m_FailedToAssignEbiListIsSet;
   std::vector<int32_t> m_ReleasedEbiList;
   bool m_ReleasedEbiListIsSet;
-  std::vector<SecondaryRatUsageReport> m_SecondaryRatUsageReport;
+  std::vector<oai::model::common::SecondaryRatUsageReport>
+      m_SecondaryRatUsageReport;
   bool m_SecondaryRatUsageReportIsSet;
-  std::vector<SecondaryRatUsageInfo> m_SecondaryRatUsageInfo;
+  std::vector<oai::model::common::SecondaryRatUsageInfo>
+      m_SecondaryRatUsageInfo;
   bool m_SecondaryRatUsageInfoIsSet;
 };
 

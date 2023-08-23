@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 NsmfEventExposure::NsmfEventExposure() {
   m_Supi                   = "";
   m_SupiIsSet              = false;

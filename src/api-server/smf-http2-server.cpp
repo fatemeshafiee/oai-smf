@@ -47,6 +47,7 @@
 using namespace nghttp2::asio_http2;
 using namespace nghttp2::asio_http2::server;
 using namespace oai::smf_server::model;
+using namespace oai::model::common;
 
 extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
