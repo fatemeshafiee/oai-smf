@@ -57,8 +57,9 @@ class DnnUpfInfoItem {
   /// <summary>
   ///
   /// </summary>
-  std::vector<PduSessionType>& getPduSessionTypes();
-  void setPduSessionTypes(std::vector<PduSessionType> const& value);
+  std::vector<oai::model::common::PduSessionType>& getPduSessionTypes();
+  void setPduSessionTypes(
+      std::vector<oai::model::common::PduSessionType> const& value);
   bool pduSessionTypesIsSet() const;
   void unsetPduSessionTypes();
 
@@ -75,7 +76,7 @@ class DnnUpfInfoItem {
 
   std::vector<std::string> m_DnaiList;
   bool m_DnaiListIsSet;
-  std::vector<PduSessionType> m_PduSessionTypes;
+  std::vector<oai::model::common::PduSessionType> m_PduSessionTypes;
   bool m_PduSessionTypesIsSet;
 
   std::map<std::string, std::string> m_DnaiNwInstanceList;

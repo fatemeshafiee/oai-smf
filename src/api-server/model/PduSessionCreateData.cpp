@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 PduSessionCreateData::PduSessionCreateData() {
   m_Supi                         = "";
   m_SupiIsSet                    = false;

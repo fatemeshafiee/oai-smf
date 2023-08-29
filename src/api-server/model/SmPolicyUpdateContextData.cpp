@@ -20,6 +20,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmPolicyUpdateContextData::SmPolicyUpdateContextData() {
   m_RepPolicyCtrlReqTriggersIsSet = false;
   // m_AccNetChIdsIsSet              = false;
@@ -831,12 +833,10 @@ void SmPolicyUpdateContextData::unsetAccNetChIds() {
   m_AccNetChIdsIsSet = false;
 }
 */
-oai::model::common::AccessType SmPolicyUpdateContextData::getAccessType()
-    const {
+AccessType SmPolicyUpdateContextData::getAccessType() const {
   return m_AccessType;
 }
-void SmPolicyUpdateContextData::setAccessType(
-    oai::model::common::AccessType const& value) {
+void SmPolicyUpdateContextData::setAccessType(AccessType const& value) {
   m_AccessType      = value;
   m_AccessTypeIsSet = true;
 }

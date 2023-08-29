@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmContextReleaseData::SmContextReleaseData() {
   m_CauseIsSet           = false;
   m_NgApCauseIsSet       = false;

@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmContextUpdateError::SmContextUpdateError() {
   m_N1SmMsgIsSet      = false;
   m_N2SmInfoIsSet     = false;

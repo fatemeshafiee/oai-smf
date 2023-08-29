@@ -20,6 +20,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmPolicyDeleteData::SmPolicyDeleteData() {
   m_UserLocationInfoIsSet     = false;
   m_UeTimeZone                = "";

@@ -79,7 +79,7 @@ struct policy_association {
     oai::model::common::Snssai snssai_model;
     snssai_model.setSst(snssai.sst);
     snssai_model.setSd(std::to_string(snssai.sd));
-    oai::smf_server::model::PlmnIdNid plmn_id_model;
+    oai::model::common::PlmnIdNid plmn_id_model;
     std::string mnc_string = std::to_string(plmn.mnc_digit1) +
                              std::to_string(plmn.mnc_digit2) +
                              std::to_string(plmn.mnc_digit3);
@@ -92,7 +92,7 @@ struct policy_association {
 
     context.setPduSessionId(pdu_session_id);
     context.setSupi(smf_get_supi_with_prefix(supi_prefix, supi));
-    oai::smf_server::model::PduSessionType pdu_session_type_model;
+    oai::model::common::PduSessionType pdu_session_type_model;
     // hacky
     from_json(pdu_session_type.to_string(), pdu_session_type_model);
     context.setPduSessionType(pdu_session_type_model);

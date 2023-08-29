@@ -20,6 +20,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmPolicyContextData::SmPolicyContextData() {
   // m_AccNetChIdIsSet              = false;
   // m_ChargEntityAddrIsSet         = false;
@@ -617,11 +619,10 @@ std::string SmPolicyContextData::getNotificationUri() const {
 void SmPolicyContextData::setNotificationUri(std::string const& value) {
   m_NotificationUri = value;
 }
-oai::model::common::AccessType SmPolicyContextData::getAccessType() const {
+AccessType SmPolicyContextData::getAccessType() const {
   return m_AccessType;
 }
-void SmPolicyContextData::setAccessType(
-    oai::model::common::AccessType const& value) {
+void SmPolicyContextData::setAccessType(AccessType const& value) {
   m_AccessType      = value;
   m_AccessTypeIsSet = true;
 }
@@ -875,11 +876,10 @@ bool SmPolicyContextData::traceReqIsSet() const {
 void SmPolicyContextData::unsetTraceReq() {
   m_TraceReqIsSet = false;
 }
-oai::model::common::Snssai SmPolicyContextData::getSliceInfo() const {
+Snssai SmPolicyContextData::getSliceInfo() const {
   return m_SliceInfo;
 }
-void SmPolicyContextData::setSliceInfo(
-    oai::model::common::Snssai const& value) {
+void SmPolicyContextData::setSliceInfo(Snssai const& value) {
   m_SliceInfo = value;
 }
 /*

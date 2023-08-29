@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 PduSessionCreatedData::PduSessionCreatedData() {
   m_SscMode                            = "";
   m_HcnTunnelInfoIsSet                 = false;

@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 QosFlowProfile::QosFlowProfile() {
   m__5qi                       = 0;
   m_NonDynamic5QiIsSet         = false;

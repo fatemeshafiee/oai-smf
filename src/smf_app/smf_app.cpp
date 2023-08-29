@@ -1367,8 +1367,7 @@ evsub_id_t smf_app::handle_event_exposure_subscription(
 //------------------------------------------------------------------------------
 bool smf_app::handle_nf_status_notification(
     std::shared_ptr<itti_sbi_notification_data>& msg,
-    oai::smf_server::model::ProblemDetails& problem_details,
-    uint8_t& http_code) {
+    oai::model::common::ProblemDetails& problem_details, uint8_t& http_code) {
   Logger::smf_app().info(
       "Handle a NF status notification from NRF (HTTP version "
       "%d)",
@@ -1540,7 +1539,7 @@ void smf_app::handle_sbi_get_configuration(
   } else {
     response_data["httpResponseCode"] = static_cast<uint32_t>(
         http_response_codes_e::HTTP_RESPONSE_CODE_BAD_REQUEST);
-    oai::smf_server::model::ProblemDetails problem_details = {};
+    oai::model::common::ProblemDetails problem_details = {};
     // TODO set problem_details
     to_json(response_data["ProblemDetails"], problem_details);
   }
@@ -1580,7 +1579,7 @@ void smf_app::handle_sbi_update_configuration(
   } else {
     response_data["httpResponseCode"] = static_cast<uint32_t>(
         http_response_codes_e::HTTP_RESPONSE_CODE_406_NOT_ACCEPTED);
-    oai::smf_server::model::ProblemDetails problem_details = {};
+    oai::model::common::ProblemDetails problem_details = {};
     // TODO set problem_details
     to_json(response_data["ProblemDetails"], problem_details);
   }
@@ -1948,9 +1947,11 @@ void smf_app::timer_nrf_heartbeat_timeout(
       std::make_shared<itti_n11_update_nf_instance_request>(
           TASK_SMF_APP, TASK_SMF_SBI);
 
-  oai::smf_server::model::PatchItem patch_item = {};
-  //{"op":"replace","path":"/nfStatus", "value": "REGISTERED"}
-  patch_item.setOp("replace");
+  oai::model::common::PatchItem patch_item = {};
+  oai::model::common::PatchOperation op;
+  op.setEnumValue(
+      oai::model::common::PatchOperation_anyOf::ePatchOperation_anyOf::REPLACE);
+  patch_item.setOp(op);
   patch_item.setPath("/nfStatus");
   patch_item.setValue("REGISTERED");
   itti_msg->patch_items.push_back(patch_item);
@@ -2150,8 +2151,8 @@ void smf_app::trigger_create_context_error_response(
       "Send ITTI msg to SMF APP to trigger the response of Server");
 
   oai::smf_server::model::SmContextCreateError sm_context = {};
-  oai::smf_server::model::ProblemDetails problem_details  = {};
-  oai::smf_server::model::RefToBinaryData refToBinaryData = {};
+  oai::model::common::ProblemDetails problem_details      = {};
+  oai::model::common::RefToBinaryData refToBinaryData     = {};
   Logger::smf_app().warn("Create SmContextCreateError");
   problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   sm_context.setError(problem_details);
@@ -2175,7 +2176,7 @@ void smf_app::trigger_update_context_error_response(
       "Send ITTI msg to SMF APP to trigger the response of API Server");
 
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = {};
-  oai::smf_server::model::ProblemDetails problem_details            = {};
+  oai::model::common::ProblemDetails problem_details                = {};
   problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   smContextUpdateError.setError(problem_details);
 
@@ -2196,7 +2197,7 @@ void smf_app::trigger_update_context_error_response(
       "Send ITTI msg to SMF APP to trigger the response of HTTP Server");
 
   oai::smf_server::model::SmContextUpdateError smContextUpdateError = {};
-  oai::smf_server::model::ProblemDetails problem_details            = {};
+  oai::model::common::ProblemDetails problem_details                = {};
   problem_details.setCause(pdu_session_application_error_e2str.at(cause));
   smContextUpdateError.setError(problem_details);
 

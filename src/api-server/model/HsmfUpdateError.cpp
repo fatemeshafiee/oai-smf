@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 HsmfUpdateError::HsmfUpdateError() {
   m_Pti               = 0;
   m_PtiIsSet          = false;

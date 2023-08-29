@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 DnnUpfInfoItem::DnnUpfInfoItem() {
   m_Dnn                  = "";
   m_DnaiListIsSet        = false;

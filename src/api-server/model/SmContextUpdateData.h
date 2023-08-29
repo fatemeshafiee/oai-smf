@@ -76,8 +76,8 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  Guami getGuami() const;
-  void setGuami(Guami const& value);
+  oai::model::common::Guami getGuami() const;
+  void setGuami(oai::model::common::Guami const& value);
   bool guamiIsSet() const;
   void unsetGuami();
   /// <summary>
@@ -90,7 +90,7 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  std::vector<BackupAmfInfo>& getBackupAmfInfo();
+  std::vector<oai::model::common::BackupAmfInfo>& getBackupAmfInfo();
   bool backupAmfInfoIsSet() const;
   void unsetBackupAmfInfo();
   /// <summary>
@@ -119,15 +119,15 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  PresenceState getPresenceInLadn() const;
-  void setPresenceInLadn(PresenceState const& value);
+  oai::model::common::PresenceState getPresenceInLadn() const;
+  void setPresenceInLadn(oai::model::common::PresenceState const& value);
   bool presenceInLadnIsSet() const;
   void unsetPresenceInLadn();
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUeLocation() const;
-  void setUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getUeLocation() const;
+  void setUeLocation(oai::model::common::UserLocation const& value);
   bool ueLocationIsSet() const;
   void unsetUeLocation();
   /// <summary>
@@ -140,8 +140,8 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getAddUeLocation() const;
-  void setAddUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getAddUeLocation() const;
+  void setAddUeLocation(oai::model::common::UserLocation const& value);
   bool addUeLocationIsSet() const;
   void unsetAddUeLocation();
   /// <summary>
@@ -176,15 +176,15 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmMsg() const;
-  void setN1SmMsg(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmMsg() const;
+  void setN1SmMsg(oai::model::common::RefToBinaryData const& value);
   bool n1SmMsgIsSet() const;
   void unsetN1SmMsg();
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN2SmInfo() const;
-  void setN2SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN2SmInfo() const;
+  void setN2SmInfo(oai::model::common::RefToBinaryData const& value);
   bool n2SmInfoIsSet() const;
   void unsetN2SmInfo();
   /// <summary>
@@ -254,8 +254,8 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  NgApCause getNgApCause() const;
-  void setNgApCause(NgApCause const& value);
+  oai::model::common::NgApCause getNgApCause() const;
+  void setNgApCause(oai::model::common::NgApCause const& value);
   bool ngApCauseIsSet() const;
   void unsetNgApCause();
   /// <summary>
@@ -275,8 +275,8 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  TraceData getTraceData() const;
-  void setTraceData(TraceData const& value);
+  oai::model::common::TraceData getTraceData() const;
+  void setTraceData(oai::model::common::TraceData const& value);
   bool traceDataIsSet() const;
   void unsetTraceData();
   /// <summary>
@@ -296,8 +296,8 @@ class SmContextUpdateData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN2SmInfoExt1() const;
-  void setN2SmInfoExt1(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN2SmInfoExt1() const;
+  void setN2SmInfoExt1(oai::model::common::RefToBinaryData const& value);
   bool n2SmInfoExt1IsSet() const;
   void unsetN2SmInfoExt1();
   /// <summary>
@@ -330,11 +330,11 @@ class SmContextUpdateData {
   bool m_PeiIsSet;
   std::string m_ServingNfId;
   bool m_ServingNfIdIsSet;
-  Guami m_Guami;
+  oai::model::common::Guami m_Guami;
   bool m_GuamiIsSet;
   oai::model::common::PlmnId m_ServingNetwork;
   bool m_ServingNetworkIsSet;
-  std::vector<BackupAmfInfo> m_BackupAmfInfo;
+  std::vector<oai::model::common::BackupAmfInfo> m_BackupAmfInfo;
   bool m_BackupAmfInfoIsSet;
   std::string m_AnType;
   bool m_AnTypeIsSet;
@@ -342,13 +342,13 @@ class SmContextUpdateData {
   bool m_SecondAnTypeIsSet;
   std::string m_RatType;
   bool m_RatTypeIsSet;
-  PresenceState m_PresenceInLadn;
+  oai::model::common::PresenceState m_PresenceInLadn;
   bool m_PresenceInLadnIsSet;
-  UserLocation m_UeLocation;
+  oai::model::common::UserLocation m_UeLocation;
   bool m_UeLocationIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
-  UserLocation m_AddUeLocation;
+  oai::model::common::UserLocation m_AddUeLocation;
   bool m_AddUeLocationIsSet;
   // UpCnxState m_UpCnxState;
   std::string m_UpCnxState;
@@ -359,9 +359,9 @@ class SmContextUpdateData {
   bool m_ToBeSwitchedIsSet;
   bool m_FailedToBeSwitched;
   bool m_FailedToBeSwitchedIsSet;
-  RefToBinaryData m_N1SmMsg;
+  oai::model::common::RefToBinaryData m_N1SmMsg;
   bool m_N1SmMsgIsSet;
-  RefToBinaryData m_N2SmInfo;
+  oai::model::common::RefToBinaryData m_N2SmInfo;
   bool m_N2SmInfoIsSet;
   // N2SmInfoType m_N2SmInfoType;
   std::string m_N2SmInfoType;
@@ -382,19 +382,19 @@ class SmContextUpdateData {
   bool m_ReleaseIsSet;
   Cause m_Cause;
   bool m_CauseIsSet;
-  NgApCause m_NgApCause;
+  oai::model::common::NgApCause m_NgApCause;
   bool m_NgApCauseIsSet;
   int32_t m__5gMmCauseValue;
   bool m__5gMmCauseValueIsSet;
   oai::model::common::Snssai m_SNssai;
   bool m_SNssaiIsSet;
-  TraceData m_TraceData;
+  oai::model::common::TraceData m_TraceData;
   bool m_TraceDataIsSet;
   EpsInterworkingIndication m_EpsInterworkingInd;
   bool m_EpsInterworkingIndIsSet;
   bool m_AnTypeCanBeChanged;
   bool m_AnTypeCanBeChangedIsSet;
-  RefToBinaryData m_N2SmInfoExt1;
+  oai::model::common::RefToBinaryData m_N2SmInfoExt1;
   bool m_N2SmInfoExt1IsSet;
   N2SmInfoType m_N2SmInfoTypeExt1;
   bool m_N2SmInfoTypeExt1IsSet;

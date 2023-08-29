@@ -73,15 +73,16 @@ class UpfInfo {
   /// <summary>
   ///
   /// </summary>
-  std::vector<PduSessionType>& getPduSessionTypes();
-  void setPduSessionTypes(std::vector<PduSessionType> const& value);
+  std::vector<oai::model::common::PduSessionType>& getPduSessionTypes();
+  void setPduSessionTypes(
+      std::vector<oai::model::common::PduSessionType> const& value);
   bool pduSessionTypesIsSet() const;
   void unsetPduSessionTypes();
   /// <summary>
   ///
   /// </summary>
-  AtsssCapability getAtsssCapability() const;
-  void setAtsssCapability(AtsssCapability const& value);
+  oai::model::common::AtsssCapability getAtsssCapability() const;
+  void setAtsssCapability(oai::model::common::AtsssCapability const& value);
   bool atsssCapabilityIsSet() const;
   void unsetAtsssCapability();
   /// <summary>
@@ -104,9 +105,9 @@ class UpfInfo {
   bool m_InterfaceUpfInfoListIsSet;
   bool m_IwkEpsInd;
   bool m_IwkEpsIndIsSet;
-  std::vector<PduSessionType> m_PduSessionTypes;
+  std::vector<oai::model::common::PduSessionType> m_PduSessionTypes;
   bool m_PduSessionTypesIsSet;
-  AtsssCapability m_AtsssCapability;
+  oai::model::common::AtsssCapability m_AtsssCapability;
   bool m_AtsssCapabilityIsSet;
   bool m_UeIpAddrInd;
   bool m_UeIpAddrIndIsSet;

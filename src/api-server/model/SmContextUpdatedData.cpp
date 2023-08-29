@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmContextUpdatedData::SmContextUpdatedData() {
   m_UpCnxStateIsSet       = false;
   m_HoStateIsSet          = false;

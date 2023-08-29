@@ -99,15 +99,15 @@ class HsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  RatType getRatType() const;
-  void setRatType(RatType const& value);
+  oai::model::common::RatType getRatType() const;
+  void setRatType(oai::model::common::RatType const& value);
   bool ratTypeIsSet() const;
   void unsetRatType();
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUeLocation() const;
-  void setUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getUeLocation() const;
+  void setUeLocation(oai::model::common::UserLocation const& value);
   bool ueLocationIsSet() const;
   void unsetUeLocation();
   /// <summary>
@@ -120,8 +120,8 @@ class HsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getAddUeLocation() const;
-  void setAddUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getAddUeLocation() const;
+  void setAddUeLocation(oai::model::common::UserLocation const& value);
   bool addUeLocationIsSet() const;
   void unsetAddUeLocation();
   /// <summary>
@@ -141,15 +141,15 @@ class HsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmInfoFromUe() const;
-  void setN1SmInfoFromUe(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmInfoFromUe() const;
+  void setN1SmInfoFromUe(oai::model::common::RefToBinaryData const& value);
   bool n1SmInfoFromUeIsSet() const;
   void unsetN1SmInfoFromUe();
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getUnknownN1SmInfo() const;
-  void setUnknownN1SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getUnknownN1SmInfo() const;
+  void setUnknownN1SmInfo(oai::model::common::RefToBinaryData const& value);
   bool unknownN1SmInfoIsSet() const;
   void unsetUnknownN1SmInfo();
   /// <summary>
@@ -199,8 +199,8 @@ class HsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  NgApCause getNgApCause() const;
-  void setNgApCause(NgApCause const& value);
+  oai::model::common::NgApCause getNgApCause() const;
+  void setNgApCause(oai::model::common::NgApCause const& value);
   bool ngApCauseIsSet() const;
   void unsetNgApCause();
   /// <summary>
@@ -227,13 +227,15 @@ class HsmfUpdateData {
   /// <summary>
   ///
   /// </summary>
-  std::vector<SecondaryRatUsageReport>& getSecondaryRatUsageReport();
+  std::vector<oai::model::common::SecondaryRatUsageReport>&
+  getSecondaryRatUsageReport();
   bool secondaryRatUsageReportIsSet() const;
   void unsetSecondaryRatUsageReport();
   /// <summary>
   ///
   /// </summary>
-  std::vector<SecondaryRatUsageInfo>& getSecondaryRatUsageInfo();
+  std::vector<oai::model::common::SecondaryRatUsageInfo>&
+  getSecondaryRatUsageInfo();
   bool secondaryRatUsageInfoIsSet() const;
   void unsetSecondaryRatUsageInfo();
   /// <summary>
@@ -267,21 +269,21 @@ class HsmfUpdateData {
   bool m_AnTypeIsSet;
   oai::model::common::AccessType m_SecondAnType;
   bool m_SecondAnTypeIsSet;
-  RatType m_RatType;
+  oai::model::common::RatType m_RatType;
   bool m_RatTypeIsSet;
-  UserLocation m_UeLocation;
+  oai::model::common::UserLocation m_UeLocation;
   bool m_UeLocationIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
-  UserLocation m_AddUeLocation;
+  oai::model::common::UserLocation m_AddUeLocation;
   bool m_AddUeLocationIsSet;
   bool m_PauseCharging;
   bool m_PauseChargingIsSet;
   int32_t m_Pti;
   bool m_PtiIsSet;
-  RefToBinaryData m_N1SmInfoFromUe;
+  oai::model::common::RefToBinaryData m_N1SmInfoFromUe;
   bool m_N1SmInfoFromUeIsSet;
-  RefToBinaryData m_UnknownN1SmInfo;
+  oai::model::common::RefToBinaryData m_UnknownN1SmInfo;
   bool m_UnknownN1SmInfoIsSet;
   std::vector<QosFlowItem> m_QosFlowsRelNotifyList;
   bool m_QosFlowsRelNotifyListIsSet;
@@ -297,7 +299,7 @@ class HsmfUpdateData {
   bool m_RevokeEbiListIsSet;
   Cause m_Cause;
   bool m_CauseIsSet;
-  NgApCause m_NgApCause;
+  oai::model::common::NgApCause m_NgApCause;
   bool m_NgApCauseIsSet;
   int32_t m__5gMmCauseValue;
   bool m__5gMmCauseValueIsSet;
@@ -305,9 +307,11 @@ class HsmfUpdateData {
   bool m_AlwaysOnRequestedIsSet;
   EpsInterworkingIndication m_EpsInterworkingInd;
   bool m_EpsInterworkingIndIsSet;
-  std::vector<SecondaryRatUsageReport> m_SecondaryRatUsageReport;
+  std::vector<oai::model::common::SecondaryRatUsageReport>
+      m_SecondaryRatUsageReport;
   bool m_SecondaryRatUsageReportIsSet;
-  std::vector<SecondaryRatUsageInfo> m_SecondaryRatUsageInfo;
+  std::vector<oai::model::common::SecondaryRatUsageInfo>
+      m_SecondaryRatUsageInfo;
   bool m_SecondaryRatUsageInfoIsSet;
   bool m_AnTypeCanBeChanged;
   bool m_AnTypeCanBeChangedIsSet;

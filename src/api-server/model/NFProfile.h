@@ -141,8 +141,8 @@ class NFProfile {
   /// <summary>
   ///
   /// </summary>
-  std::vector<Ipv6Addr>& getIpv6Addresses();
-  void setIpv6Addresses(std::vector<Ipv6Addr> const& value);
+  std::vector<oai::model::common::Ipv6Addr>& getIpv6Addresses();
+  void setIpv6Addresses(std::vector<oai::model::common::Ipv6Addr> const& value);
   bool ipv6AddressesIsSet() const;
   void unsetIpv6Addresses();
   /// <summary>
@@ -275,7 +275,7 @@ class NFProfile {
   bool m_InterPlmnFqdnIsSet;
   std::vector<std::string> m_Ipv4Addresses;
   bool m_Ipv4AddressesIsSet;
-  std::vector<Ipv6Addr> m_Ipv6Addresses;
+  std::vector<oai::model::common::Ipv6Addr> m_Ipv6Addresses;
   bool m_Ipv6AddressesIsSet;
   std::vector<oai::model::common::PlmnId> m_AllowedPlmns;
   bool m_AllowedPlmnsIsSet;

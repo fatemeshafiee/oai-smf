@@ -77,8 +77,8 @@ class SmContextCreatedData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN2SmInfo() const;
-  void setN2SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN2SmInfo() const;
+  void setN2SmInfo(oai::model::common::RefToBinaryData const& value);
   bool n2SmInfoIsSet() const;
   void unsetN2SmInfo();
   /// <summary>
@@ -142,7 +142,7 @@ class SmContextCreatedData {
   bool m_SNssaiIsSet;
   UpCnxState m_UpCnxState;
   bool m_UpCnxStateIsSet;
-  RefToBinaryData m_N2SmInfo;
+  oai::model::common::RefToBinaryData m_N2SmInfo;
   bool m_N2SmInfoIsSet;
   N2SmInfoType m_N2SmInfoType;
   bool m_N2SmInfoTypeIsSet;

@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 PduSessionCreateError::PduSessionCreateError() {
   m_N1smCause         = "";
   m_N1smCauseIsSet    = false;
