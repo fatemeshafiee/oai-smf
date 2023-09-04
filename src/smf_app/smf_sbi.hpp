@@ -56,6 +56,11 @@ class smf_sbi {
 
   std::thread::id thread_id;
   std::thread thread;
+  /**
+   * Generate NRF base URL from configuration, including API version
+   * @return
+   */
+  static std::string get_nrf_base_url();
 
  public:
   smf_sbi();
