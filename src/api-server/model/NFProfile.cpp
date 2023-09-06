@@ -18,6 +18,7 @@ namespace smf_server {
 namespace model {
 
 using namespace oai::model::common;
+using namespace oai::model::nrf;
 
 NFProfile::NFProfile() {
   m_NfInstanceId                    = "";

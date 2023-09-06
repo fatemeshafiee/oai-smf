@@ -106,8 +106,9 @@ class NFProfile {
   /// <summary>
   ///
   /// </summary>
-  std::vector<PlmnSnssai>& getPerPlmnSnssaiList();
-  void setPerPlmnSnssaiList(std::vector<PlmnSnssai> const& value);
+  std::vector<oai::model::nrf::PlmnSnssai>& getPerPlmnSnssaiList();
+  void setPerPlmnSnssaiList(
+      std::vector<oai::model::nrf::PlmnSnssai> const& value);
   bool perPlmnSnssaiListIsSet() const;
   void unsetPerPlmnSnssaiList();
   /// <summary>
@@ -204,15 +205,15 @@ class NFProfile {
   /// <summary>
   ///
   /// </summary>
-  UpfInfo getUpfInfo() const;
-  void setUpfInfo(UpfInfo const& value);
+  oai::model::nrf::UpfInfo getUpfInfo() const;
+  void setUpfInfo(oai::model::nrf::UpfInfo const& value);
   bool upfInfoIsSet() const;
   void unsetUpfInfo();
   /// <summary>
   ///
   /// </summary>
-  std::vector<UpfInfo>& getUpfInfoExt();
-  void setUpfInfoExt(std::vector<UpfInfo> const& value);
+  std::vector<oai::model::nrf::UpfInfo>& getUpfInfoExt();
+  void setUpfInfoExt(std::vector<oai::model::nrf::UpfInfo> const& value);
   bool upfInfoExtIsSet() const;
   void unsetUpfInfoExt();
 
@@ -265,7 +266,7 @@ class NFProfile {
   bool m_PlmnListIsSet;
   std::vector<oai::model::common::Snssai> m_SNssais;
   bool m_SNssaisIsSet;
-  std::vector<PlmnSnssai> m_PerPlmnSnssaiList;
+  std::vector<oai::model::nrf::PlmnSnssai> m_PerPlmnSnssaiList;
   bool m_PerPlmnSnssaiListIsSet;
   std::vector<std::string> m_NsiList;
   bool m_NsiListIsSet;
@@ -293,9 +294,9 @@ class NFProfile {
   bool m_LocalityIsSet;
   int32_t m_Priority;
   bool m_PriorityIsSet;
-  UpfInfo m_UpfInfo;
+  oai::model::nrf::UpfInfo m_UpfInfo;
   bool m_UpfInfoIsSet;
-  std::vector<UpfInfo> m_UpfInfoExt;
+  std::vector<oai::model::nrf::UpfInfo> m_UpfInfoExt;
   bool m_UpfInfoExtIsSet;
   std::string m_RecoveryTime;
   bool m_RecoveryTimeIsSet;

@@ -35,6 +35,7 @@
 #include "smf.h"
 #include "SmfInfo.h"
 #include "Snssai.h"
+#include "UpfInfo.h"
 
 namespace oai::config::smf {
 
@@ -66,27 +67,6 @@ class smf_support_features : public config_type {
   [[nodiscard]] bool use_external_nssf() const;
 };
 
-// TODO remove this after refactor
-class upf_info_config_value : public config_type {
- private:
-  string_config_value m_n3_nwi;
-  string_config_value m_n6_nwi;
-
- public:
-  explicit upf_info_config_value(
-      const std::string& n3_nwi, const std::string& n6_nwi);
-
-  void from_yaml(const YAML::Node& node) override;
-  nlohmann::json to_json() override;
-  bool from_json(const nlohmann::json& json_data) override;
-
-  [[nodiscard]] std::string to_string(const std::string& indent) const override;
-
-  [[nodiscard]] const std::string& get_n3_nwi() const;
-
-  [[nodiscard]] const std::string& get_n6_nwi() const;
-};
-
 class upf : public config_type {
  private:
   string_config_value m_host;
@@ -94,14 +74,8 @@ class upf : public config_type {
   option_config_value m_usage_reporting;
   option_config_value m_dl_pdr_in_session_establishment;
   string_config_value m_local_n3_ipv4;
-  // TODO this is just stupid
-  // We have to refactor as follows:
-  // 1) Use the UPF info from the model here
-  // Write a small parser that converts YAML to JSON and then call the from_json
-  // method Like I did on the PCF for the PCC rules Now we have 3(!!!!) UPF info
-  // DTOs, but I can't / don't want to just easily move the smf_profile in the
-  // common src submodule
-  upf_info_config_value m_upf_config_value;
+  oai::model::nrf::UpfInfo m_upf_info;
+  bool m_upf_info_is_set = true;
 
  public:
   explicit upf(
@@ -124,7 +98,8 @@ class upf : public config_type {
   [[nodiscard]] bool enable_usage_reporting() const;
   [[nodiscard]] bool enable_dl_pdr_in_session_establishment() const;
   [[nodiscard]] const std::string& get_local_n3_ip() const;
-  [[nodiscard]] const upf_info_config_value& get_upf_info() const;
+  [[nodiscard]] const oai::model::nrf::UpfInfo& get_upf_info() const;
+  void enable_upf_info(bool val);
 };
 
 class ims_config : public config_type {

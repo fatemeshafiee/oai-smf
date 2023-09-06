@@ -121,8 +121,8 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  ServiceName getServiceName() const;
-  void setServiceName(ServiceName const& value);
+  oai::model::nrf::ServiceName getServiceName() const;
+  void setServiceName(oai::model::nrf::ServiceName const& value);
   bool serviceNameIsSet() const;
   void unsetServiceName();
   /// <summary>
@@ -317,7 +317,7 @@ class SmContext {
 
   oai::model::common::Guami m_Guami;
   bool m_GuamiIsSet;
-  ServiceName m_ServiceName;
+  oai::model::nrf::ServiceName m_ServiceName;
   bool m_ServiceNameIsSet;
   oai::model::common::PlmnId m_ServingNetwork;
 
