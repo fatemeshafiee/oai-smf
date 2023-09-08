@@ -2416,6 +2416,8 @@ void smf_app::trigger_nf_registration_request() {
 
 //------------------------------------------------------------------------------
 void smf_app::trigger_nf_deregistration() {
+  if (!smf_cfg->register_nrf) return;
+
   Logger::smf_app().debug(
       "Send ITTI msg to N11 task to trigger the deregistration request to "
       "NRF");
