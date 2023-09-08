@@ -65,6 +65,8 @@ void send_heartbeat_to_tasks(const uint32_t sequence) {
 void my_app_signal_handler(int s) {
   std::cout << "Caught signal " << s << std::endl;
   Logger::system().startup("exiting");
+  // we have to trigger ITTI message before terminate
+  smf_app_inst->trigger_nf_deregistration();
   itti_inst->send_terminate_msg(TASK_SMF_APP);
   itti_inst->wait_tasks_end();
   std::cout << "Freeing Allocated memory..." << std::endl;
