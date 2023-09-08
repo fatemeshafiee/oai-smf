@@ -34,6 +34,7 @@
 using namespace oai::config::smf;
 using namespace oai::config;
 using namespace oai::model::common;
+using namespace oai::model::nrf;
 
 smf_support_features::smf_support_features(
     bool local_subscription_info, bool local_pcc_rules) {
@@ -183,85 +184,10 @@ bool smf_support_features::use_external_nssf() const {
   return m_external_nssf.get_value();
 }
 
-upf_info_config_value::upf_info_config_value(
-    const std::string& n3_nwi, const std::string& n6_nwi) {
-  m_n3_nwi = string_config_value("nwi_n3", n3_nwi);
-  m_n6_nwi = string_config_value("nwi_n6", n6_nwi);
-}
-
-void upf_info_config_value::from_yaml(const YAML::Node& node) {
-  if (node["interfaceUpfInfoList"]) {
-    YAML::Node inner_node = node["interfaceUpfInfoList"];
-    for (const auto& elem : inner_node) {
-      if (elem["interfaceType"] && elem["networkInstance"]) {
-        if (elem["interfaceType"].as<std::string>() == "N3") {
-          m_n3_nwi.from_yaml(elem["networkInstance"]);
-        } else if (elem["interfaceType"].as<std::string>() == "N6") {
-          m_n6_nwi.from_yaml(elem["networkInstance"]);
-        }
-      }
-    }
-  }
-}
-
-nlohmann::json upf_info_config_value::to_json() {
-  nlohmann::json json_data              = {};
-  json_data[m_n3_nwi.get_config_name()] = m_n3_nwi.get_value();
-  json_data[m_n6_nwi.get_config_name()] = m_n6_nwi.get_value();
-  return json_data;
-}
-
-bool upf_info_config_value::from_json(const nlohmann::json& json_data) {
-  try {
-    if (json_data.find(m_n3_nwi.get_config_name()) != json_data.end()) {
-      m_n3_nwi.from_json(json_data[m_n3_nwi.get_config_name()]);
-    }
-
-    if (json_data.find(m_n6_nwi.get_config_name()) != json_data.end()) {
-      m_n6_nwi.from_json(json_data[m_n6_nwi.get_config_name()]);
-    }
-
-  } catch (nlohmann::detail::exception& e) {
-    // TODO:
-  } catch (std::exception& e) {
-    // TODO:
-  }
-  return false;
-}
-
-std::string upf_info_config_value::to_string(const std::string& indent) const {
-  std::string out;
-
-  std::string inner_indent = add_indent(indent);
-  unsigned int inner_width = get_inner_width(inner_indent.length());
-
-  out.append(indent).append(
-      fmt::format("{} Interface Configuration:\n", INNER_LIST_ELEM));
-
-  out.append(inner_indent)
-      .append(fmt::format(
-          BASE_FORMATTER, OUTER_LIST_ELEM, m_n3_nwi.get_config_name(),
-          inner_width, m_n3_nwi.to_string("")));
-
-  out.append(inner_indent)
-      .append(fmt::format(
-          BASE_FORMATTER, OUTER_LIST_ELEM, m_n6_nwi.get_config_name(),
-          inner_width, m_n6_nwi.to_string("")));
-  return out;
-}
-
-const std::string& upf_info_config_value::get_n3_nwi() const {
-  return m_n3_nwi.get_value();
-}
-
-const std::string& upf_info_config_value::get_n6_nwi() const {
-  return m_n6_nwi.get_value();
-}
-
 upf::upf(
     const std::string& host, int port, bool enable_usage_reporting,
-    bool enable_dl_pdr_in_session_establishment, const std::string& local_n3_ip)
-    : m_upf_config_value("access.oai.org", "core.oai.org") {
+    bool enable_dl_pdr_in_session_establishment,
+    const std::string& local_n3_ip) {
   m_host = string_config_value("host", host);
   m_port = int_config_value("port", port);
   m_usage_reporting =
@@ -277,7 +203,21 @@ upf::upf(
   if (local_n3_ip.empty()) {
     m_local_n3_ipv4.unset_config();
   }
-  m_upf_config_value.set_config_name("nwi");
+  InterfaceUpfInfoItem item_n3;
+  InterfaceUpfInfoItem item_n6;
+  UPInterfaceType type_n3;
+  UPInterfaceType type_n6;
+  type_n3.setEnumValue(UPInterfaceType_anyOf::eUPInterfaceType_anyOf::N3);
+  type_n6.setEnumValue(UPInterfaceType_anyOf::eUPInterfaceType_anyOf::N6);
+  item_n3.setNetworkInstance("access.oai.org");
+  item_n3.setInterfaceType(type_n3);
+
+  item_n6.setNetworkInstance("core.oai.org");
+  item_n6.setInterfaceType(type_n6);
+
+  m_upf_info.setInterfaceUpfInfoList(
+      std::vector<InterfaceUpfInfoItem>{item_n3, item_n6});
+  m_set = true;
 }
 
 void upf::from_yaml(const YAML::Node& node) {
@@ -299,8 +239,10 @@ void upf::from_yaml(const YAML::Node& node) {
       m_local_n3_ipv4.from_yaml(node["config"]["n3_local_ipv4"]);
     }
   }
-  if (node["config"]) {
-    m_upf_config_value.from_yaml(node["config"]);
+  if (node["upf_info"]) {
+    nlohmann::json j =
+        oai::utils::conversions::yaml_to_json(node["upf_info"], false);
+    nlohmann::from_json(j, m_upf_info);
   }
 }
 
@@ -314,8 +256,7 @@ nlohmann::json upf::to_json() {
       m_dl_pdr_in_session_establishment.get_value();
   json_data["config"][m_local_n3_ipv4.get_config_name()] =
       m_local_n3_ipv4.to_json();
-  json_data["config"][m_upf_config_value.get_config_name()] =
-      m_upf_config_value.to_json();
+  nlohmann::to_json(json_data["upf_info"], m_upf_info);
   return json_data;
 }
 
@@ -347,8 +288,7 @@ bool upf::from_json(const nlohmann::json& json_data) {
         m_local_n3_ipv4.from_json(
             json_data["config"][m_local_n3_ipv4.get_config_name()]);
       }
-      m_upf_config_value.from_json(
-          json_data[m_upf_config_value.get_config_name()]);
+      nlohmann::from_json(json_data["upf_info"], m_upf_info);
     }
 
   } catch (nlohmann::detail::exception& e) {
@@ -364,32 +304,27 @@ std::string upf::to_string(const std::string& indent) const {
   std::string inner_indent = add_indent(indent);
   unsigned int inner_width = get_inner_width(inner_indent.length());
   out.append(indent).append(
-      fmt::format("{} {}\n", OUTER_LIST_ELEM, m_host.get_value()));
+      fmt::format("{} {}\n", INNER_LIST_ELEM, m_host.get_value()));
 
-  out.append(inner_indent)
-      .append(fmt::format(
-          BASE_FORMATTER, INNER_LIST_ELEM, m_host.get_config_name(),
-          inner_width, m_host.to_string("")));
-  out.append(inner_indent)
-      .append(fmt::format(
-          BASE_FORMATTER, INNER_LIST_ELEM, m_port.get_config_name(),
-          inner_width, m_port.to_string("")));
-  out.append(inner_indent)
-      .append(fmt::format(
-          BASE_FORMATTER, INNER_LIST_ELEM, m_usage_reporting.get_config_name(),
-          inner_width, m_usage_reporting.to_string("")));
-  out.append(inner_indent)
-      .append(fmt::format(
-          BASE_FORMATTER, INNER_LIST_ELEM,
-          m_dl_pdr_in_session_establishment.get_config_name(), inner_width,
-          m_dl_pdr_in_session_establishment.to_string("")));
+  std::string fmt_value = get_value_formatter(3);
+  out.append(
+      fmt::format(fmt_value, m_host.get_config_name(), m_host.to_string("")));
+  out.append(
+      fmt::format(fmt_value, m_port.get_config_name(), m_port.to_string("")));
+  out.append(fmt::format(
+      fmt_value, m_usage_reporting.get_config_name(),
+      m_usage_reporting.to_string("")));
+  out.append(fmt::format(
+      fmt_value, m_dl_pdr_in_session_establishment.get_config_name(),
+      m_dl_pdr_in_session_establishment.to_string("")));
   if (m_local_n3_ipv4.is_set()) {
-    out.append(inner_indent)
-        .append(fmt::format(
-            BASE_FORMATTER, INNER_LIST_ELEM, m_local_n3_ipv4.get_config_name(),
-            inner_width, m_local_n3_ipv4.to_string("")));
+    out.append(fmt::format(
+        fmt_value, m_local_n3_ipv4.get_config_name(),
+        m_local_n3_ipv4.to_string("")));
   }
-  out.append(m_upf_config_value.to_string(inner_indent));
+  if (m_upf_info_is_set) {
+    out.append(m_upf_info.to_string(3));
+  }
   return out;
 }
 
@@ -398,7 +333,9 @@ void upf::validate() {
   m_host.validate();
   m_port.validate();
   m_local_n3_ipv4.validate();
-  m_upf_config_value.validate();
+  if (m_upf_info_is_set) {
+    m_upf_info.validate(false);
+  }
 }
 
 const std::string& upf::get_host() const {
@@ -421,8 +358,12 @@ const std::string& upf::get_local_n3_ip() const {
   return m_local_n3_ipv4.get_value();
 }
 
-const upf_info_config_value& upf::get_upf_info() const {
-  return m_upf_config_value;
+const oai::model::nrf::UpfInfo& upf::get_upf_info() const {
+  return m_upf_info;
+}
+
+void upf::enable_upf_info(bool val) {
+  m_upf_info_is_set = val;
 }
 
 ims_config::ims_config(
@@ -688,7 +629,7 @@ const local_interface& smf_config_type::get_n4() const {
   return m_n4;
 }
 
-const oai::model::nrf::SmfInfo& smf_config_type::get_smf_info() {
+const SmfInfo& smf_config_type::get_smf_info() {
   return m_smf_info;
 }
 

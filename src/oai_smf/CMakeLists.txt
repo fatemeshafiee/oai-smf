@@ -307,9 +307,6 @@ include_directories(${SRC_TOP_DIR}/nas/security)
 include_directories(${SRC_TOP_DIR}/ngap)
 include_directories(${SRC_TOP_DIR}/ngap/asn1c)
 include_directories(${SRC_TOP_DIR}/ngap/ies)
-include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/common_model/common_model.cmake)
-include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/nrf/nrf_model.cmake)
-include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/utils/utils.cmake)
 
 add_executable(smf
   ${SRC_TOP_DIR}/oai_smf/main.cpp
@@ -320,6 +317,9 @@ add_executable(smf
 
 include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger/logger.cmake)
 include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/config/config.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/common_model/common_model.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/nrf/nrf_model.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/utils/utils.cmake)
 
 IF(STATIC_LINKING)
     SET(CMAKE_EXE_LINKER_FLAGS "-static")

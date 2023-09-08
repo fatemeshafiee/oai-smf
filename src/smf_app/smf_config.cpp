@@ -45,6 +45,7 @@ using namespace std;
 using namespace smf;
 using namespace oai::config::smf;
 using namespace oai::config;
+using namespace oai::model::nrf;
 
 smf_config::smf_config(
     const std::string& configPath, bool logStdout, bool logRotFile)
@@ -178,11 +179,17 @@ std::string smf_config::get_nwi(
     const pfcp::node_id_t& node_id, const iface_type& type) const {
   try {
     upf used_upf = get_upf(node_id);
+    UPInterfaceType type_to_check;
+
     switch (type) {
       case iface_type::N3:
-        return used_upf.get_upf_info().get_n3_nwi();
+        type_to_check.setEnumValue(
+            UPInterfaceType_anyOf::eUPInterfaceType_anyOf::N3);
+        break;
       case iface_type::N6:
-        return used_upf.get_upf_info().get_n6_nwi();
+        type_to_check.setEnumValue(
+            UPInterfaceType_anyOf::eUPInterfaceType_anyOf::N6);
+        break;
       case iface_type::N9:
         Logger::smf_app().warn(
             "N9 interface type not supported for locally configured NWI");
@@ -191,6 +198,13 @@ std::string smf_config::get_nwi(
         Logger::smf_app().error("Unsupported enum parameter in get_nwi");
         return "";
     }
+    for (const auto& iface :
+         used_upf.get_upf_info().getInterfaceUpfInfoList()) {
+      if (iface.getInterfaceType() == type_to_check) {
+        return iface.getNetworkInstance();
+      }
+    }
+
   } catch (invalid_argument&) {
   }
   return "";
@@ -362,6 +376,10 @@ void smf_config::update_used_nfs() {
       logger::logger_registry::get_logger(LOGGER_NAME)
           .warn("PCF NRF discovery not supported. Using the provided values");
       get_nf(PCF_CONFIG_NAME)->set_config();
+    }
+    // When NRF discovery is used, we disable the local UPF INFO
+    for (auto& upf : smf()->m_upfs) {
+      upf.enable_upf_info(false);
     }
   }
   if (!smf()->get_smf_support_features().use_local_subscription_info()) {
