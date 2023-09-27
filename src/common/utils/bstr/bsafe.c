@@ -40,7 +40,7 @@ char* strcat(char* dst, const char* src) {
 }
 
 #if !defined(__GNUC__) && (!defined(_MSC_VER) || (_MSC_VER <= 1310))
-char*(gets)(char* buf) {
+char*(gets) (char* buf) {
   (void) buf;
   fprintf(stderr, "bsafe error: gets() is not safe, use bgets.\n");
   if (bsafeShouldExit) exit(-1);
@@ -48,7 +48,7 @@ char*(gets)(char* buf) {
 }
 #endif
 
-char*(strncpy)(char* dst, const char* src, size_t n) {
+char*(strncpy) (char* dst, const char* src, size_t n) {
   (void) dst;
   (void) src;
   (void) n;
@@ -57,7 +57,7 @@ char*(strncpy)(char* dst, const char* src, size_t n) {
   return NULL;
 }
 
-char*(strncat)(char* dst, const char* src, size_t n) {
+char*(strncat) (char* dst, const char* src, size_t n) {
   (void) dst;
   (void) src;
   (void) n;
@@ -69,7 +69,7 @@ char*(strncat)(char* dst, const char* src, size_t n) {
   return NULL;
 }
 
-char*(strtok)(char* s1, const char* s2) {
+char*(strtok) (char* s1, const char* s2) {
   (void) s1;
   (void) s2;
   fprintf(

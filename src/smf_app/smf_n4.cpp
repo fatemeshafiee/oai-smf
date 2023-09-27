@@ -393,8 +393,8 @@ void smf_n4::handle_receive_association_setup_request(
     pfcp::node_id_t node_id = {};
     if (smf_cfg->get_pfcp_node_id(node_id) == RETURNok) {
       a.pfcp_ies.set(node_id);
-      pfcp::recovery_time_stamp_t r = {.recovery_time_stamp =
-                                           (uint32_t) recovery_time_stamp};
+      pfcp::recovery_time_stamp_t r = {
+          .recovery_time_stamp = (uint32_t) recovery_time_stamp};
       a.pfcp_ies.set(r);
       a.pfcp_ies.set(cp_function_features);
       if ((node_id.node_id_type != pfcp::NODE_ID_TYPE_IPV6_ADDRESS) and
@@ -755,8 +755,8 @@ void smf_n4::send_heartbeat_request(std::shared_ptr<pfcp_association>& a) {
 void smf_n4::send_heartbeat_response(
     const endpoint& r_endpoint, const uint64_t trxn_id) {
   pfcp::pfcp_heartbeat_response h = {};
-  pfcp::recovery_time_stamp_t r   = {.recovery_time_stamp =
-                                       (uint32_t) recovery_time_stamp};
+  pfcp::recovery_time_stamp_t r   = {
+      .recovery_time_stamp = (uint32_t) recovery_time_stamp};
   h.set(r);
   send_response(r_endpoint, h, trxn_id);
 }

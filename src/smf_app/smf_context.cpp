@@ -2290,8 +2290,8 @@ bool smf_context::handle_pdu_session_resource_setup_response_transfer(
        i <
        decoded_msg->dLQosFlowPerTNLInformation.associatedQosFlowList.list.count;
        i++) {
-    pfcp::qfi_t qfi((uint8_t)(decoded_msg->dLQosFlowPerTNLInformation
-                                  .associatedQosFlowList.list.array[i])
+    pfcp::qfi_t qfi((uint8_t) (decoded_msg->dLQosFlowPerTNLInformation
+                                   .associatedQosFlowList.list.array[i])
                         ->qosFlowIdentifier);
     sm_context_request.get()->req.add_qfi(qfi);
     Logger::smf_app().debug(
@@ -3447,13 +3447,14 @@ bool smf_context::handle_ho_path_switch_req(
           conv::toString(dl_teid.ipv4_address).c_str());
 
       for (int i = 0; i < decoded_msg->qosFlowAcceptedList.list.count; i++) {
-        pfcp::qfi_t qfi((uint8_t)(
-            decoded_msg->qosFlowAcceptedList.list.array[i]->qosFlowIdentifier));
+        pfcp::qfi_t qfi(
+            (uint8_t) (decoded_msg->qosFlowAcceptedList.list.array[i]
+                           ->qosFlowIdentifier));
         sm_context_request.get()->req.add_qfi(qfi);
         Logger::smf_app().debug(
             "QoSFlowAcceptedList, QFI % d ",
-            (uint8_t)(decoded_msg->qosFlowAcceptedList.list.array[i]
-                          ->qosFlowIdentifier));
+            (uint8_t) (decoded_msg->qosFlowAcceptedList.list.array[i]
+                           ->qosFlowIdentifier));
       }
     }
 
@@ -3639,7 +3640,7 @@ bool smf_context::handle_ho_preparation_request_ack(
 
   for (int i = 0; i < decoded_msg->qosFlowSetupResponseList.list.count; i++) {
     pfcp::qfi_t qfi(
-        (uint8_t)(decoded_msg->qosFlowSetupResponseList.list.array[i])
+        (uint8_t) (decoded_msg->qosFlowSetupResponseList.list.array[i])
             ->qosFlowIdentifier);
     sm_context_request.get()->req.add_qfi(qfi);
     Logger::smf_app().debug(

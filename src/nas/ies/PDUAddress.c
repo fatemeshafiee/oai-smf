@@ -48,7 +48,7 @@ int encode_pdu_address(
   uint8_t len_pos = encoded;
 
   ENCODE_U8(
-      buffer + encoded, (uint8_t)(pduaddress.pdu_session_type_value & 0x07),
+      buffer + encoded, (uint8_t) (pduaddress.pdu_session_type_value & 0x07),
       encoded);
 
   if ((encode_result = encode_bstring(

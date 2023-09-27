@@ -596,7 +596,7 @@ void CBString::format(const char* fmt, ...) {
       *this = "<NULL>";
 #endif
     } else {
-      if ((n = (int) (2 * (strlen)(fmt))) < START_VSNBUFF) n = START_VSNBUFF;
+      if ((n = (int) (2 * (strlen) (fmt))) < START_VSNBUFF) n = START_VSNBUFF;
       for (;;) {
         if (BSTR_OK != balloc(b, n + 2)) {
 #ifdef BSTRLIB_THROWS_EXCEPTIONS
@@ -612,7 +612,7 @@ void CBString::format(const char* fmt, ...) {
         va_end(arglist);
 
         b->data[n] = '\0';
-        b->slen    = (int) (strlen)((char*) b->data);
+        b->slen    = (int) (strlen) ((char*) b->data);
 
         if (b->slen < n) break;
         if (r > n)
@@ -643,7 +643,7 @@ void CBString::formata(const char* fmt, ...) {
       *this += "<NULL>";
 #endif
     } else {
-      if ((n = (int) (2 * (strlen)(fmt))) < START_VSNBUFF) n = START_VSNBUFF;
+      if ((n = (int) (2 * (strlen) (fmt))) < START_VSNBUFF) n = START_VSNBUFF;
       for (;;) {
         if (BSTR_OK != balloc(b, n + 2)) {
 #ifdef BSTRLIB_THROWS_EXCEPTIONS
@@ -659,7 +659,7 @@ void CBString::formata(const char* fmt, ...) {
         va_end(arglist);
 
         b->data[n] = '\0';
-        b->slen    = (int) (strlen)((char*) b->data);
+        b->slen    = (int) (strlen) ((char*) b->data);
 
         if (b->slen < n) break;
         if (r > n)

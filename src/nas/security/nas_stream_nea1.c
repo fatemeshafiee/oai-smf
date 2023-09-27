@@ -92,7 +92,7 @@ int nas_stream_encrypt_nea1(
   snow3g_generate_key_stream(n, (uint32_t*) KS, &snow_3g_context);
 
   if (zero_bit > 0) {
-    KS[n - 1] = KS[n - 1] & (uint32_t)(0xFFFFFFFF << (8 - zero_bit));
+    KS[n - 1] = KS[n - 1] & (uint32_t) (0xFFFFFFFF << (8 - zero_bit));
   }
 
   for (i = 0; i < n; i++) {
@@ -113,7 +113,7 @@ int nas_stream_encrypt_nea1(
     ceil_index = (stream_cipher->blength + 7) >> 3;
     stream_cipher->message[ceil_index - 1] =
         stream_cipher->message[ceil_index - 1] &
-        (uint8_t)(0xFF << (8 - zero_bit));
+        (uint8_t) (0xFF << (8 - zero_bit));
   }
 
   free_wrapper((void**) &KS);

@@ -58,8 +58,8 @@ int encode_snssai(SNSSAI snssai, uint8_t iei, uint8_t* buffer, uint32_t len) {
       (ielen == SST_AND_SD_AND_MAPPEDHPLMNSST_LENGTH) ||
       (ielen == SST_AND_SD_AND_MAPPEDHPLMNSST_AND_MAPPEDHPLMNSD_LENGTH)) {
     bit32Stream = snssai.sd;
-    ENCODE_U8(buffer + encoded, (uint8_t)(bit32Stream >> 16), encoded);
-    ENCODE_U8(buffer + encoded, (uint8_t)(bit32Stream >> 8), encoded);
+    ENCODE_U8(buffer + encoded, (uint8_t) (bit32Stream >> 16), encoded);
+    ENCODE_U8(buffer + encoded, (uint8_t) (bit32Stream >> 8), encoded);
     ENCODE_U8(buffer + encoded, (uint8_t) bit32Stream, encoded);
   }
 
@@ -72,8 +72,8 @@ int encode_snssai(SNSSAI snssai, uint8_t iei, uint8_t* buffer, uint32_t len) {
   if (ielen == SST_AND_SD_AND_MAPPEDHPLMNSST_AND_MAPPEDHPLMNSD_LENGTH) {
     bit32Stream = snssai.mappedhplmnsd;
     ENCODE_U8(buffer + encoded, (uint8_t) bit32Stream, encoded);
-    ENCODE_U8(buffer + encoded, (uint8_t)(bit32Stream >> 8), encoded);
-    ENCODE_U8(buffer + encoded, (uint8_t)(bit32Stream >> 16), encoded);
+    ENCODE_U8(buffer + encoded, (uint8_t) (bit32Stream >> 8), encoded);
+    ENCODE_U8(buffer + encoded, (uint8_t) (bit32Stream >> 16), encoded);
   }
 
   return encoded;
@@ -103,11 +103,11 @@ int decode_snssai(SNSSAI* snssai, uint8_t iei, uint8_t* buffer, uint32_t len) {
       (ielen == SST_AND_SD_AND_MAPPEDHPLMNSST_LENGTH) ||
       (ielen == SST_AND_SD_AND_MAPPEDHPLMNSST_AND_MAPPEDHPLMNSD_LENGTH)) {
     DECODE_U8(buffer + decoded, bitStream, decoded);
-    bit32Stream = (uint32_t)(bitStream & 0Xff);
+    bit32Stream = (uint32_t) (bitStream & 0Xff);
     DECODE_U8(buffer + decoded, bitStream, decoded);
-    bit32Stream |= (uint32_t)((bitStream << 8) & 0xff00);
+    bit32Stream |= (uint32_t) ((bitStream << 8) & 0xff00);
     DECODE_U8(buffer + decoded, bitStream, decoded);
-    bit32Stream |= (uint32_t)((bitStream << 16) & 0xff0000);
+    bit32Stream |= (uint32_t) ((bitStream << 16) & 0xff0000);
 
     snssai->sd = bit32Stream;
   }
@@ -120,11 +120,11 @@ int decode_snssai(SNSSAI* snssai, uint8_t iei, uint8_t* buffer, uint32_t len) {
   }
   if (ielen == SST_AND_SD_AND_MAPPEDHPLMNSST_AND_MAPPEDHPLMNSD_LENGTH) {
     DECODE_U8(buffer + decoded, bitStream, decoded);
-    bit32Stream = (uint32_t)(bitStream & 0Xff);
+    bit32Stream = (uint32_t) (bitStream & 0Xff);
     DECODE_U8(buffer + decoded, bitStream, decoded);
-    bit32Stream |= (uint32_t)((bitStream << 8) & 0xff00);
+    bit32Stream |= (uint32_t) ((bitStream << 8) & 0xff00);
     DECODE_U8(buffer + decoded, bitStream, decoded);
-    bit32Stream |= (uint32_t)((bitStream << 16) & 0xff0000);
+    bit32Stream |= (uint32_t) ((bitStream << 16) & 0xff0000);
 
     snssai->mappedhplmnsd = bit32Stream;
   }

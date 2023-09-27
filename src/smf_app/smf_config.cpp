@@ -58,8 +58,9 @@ smf_config::smf_config(
                           NF_LIST_CONFIG_NAME,   SMF_CONFIG_NAME,
                           DNNS_CONFIG_NAME,      NF_CONFIG_HTTP_NAME};
 
-  m_used_sbi_values = {SMF_CONFIG_NAME, PCF_CONFIG_NAME, NRF_CONFIG_NAME,
-                       AMF_CONFIG_NAME, UDM_CONFIG_NAME};
+  m_used_sbi_values = {
+      SMF_CONFIG_NAME, PCF_CONFIG_NAME, NRF_CONFIG_NAME, AMF_CONFIG_NAME,
+      UDM_CONFIG_NAME};
 
   // Define default values in YAML
   auto smf = std::make_shared<smf_config_type>(
