@@ -65,7 +65,7 @@ int nas_stream_encrypt_nea2(
 
   if (zero_bit > 0)
     data[byte_length - 1] =
-        data[byte_length - 1] & (uint8_t)(0xFF << (8 - zero_bit));
+        data[byte_length - 1] & (uint8_t) (0xFF << (8 - zero_bit));
 
   memcpy(out, data, byte_length);
   free_wrapper((void**) &data);

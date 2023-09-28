@@ -211,7 +211,7 @@ bstring bfromcstr(const char* str) {
   size_t j;
 
   if (str == NULL) return NULL;
-  j = (strlen)(str);
+  j = (strlen) (str);
   i = snapUpSize((int) (j + (2 - (j != 0))));
   if (i <= (int) j) return NULL;
 
@@ -245,7 +245,7 @@ bstring bfromcstrrangealloc(int minl, int maxl, const char* str) {
   if (maxl < minl || minl < 0) return NULL;
 
   /* Adjust lengths */
-  j = (strlen)(str);
+  j = (strlen) (str);
   if ((size_t) minl < (j + 1)) minl = (int) (j + 1);
   if (maxl < minl) maxl = minl;
   i = maxl;
@@ -321,7 +321,7 @@ char* bstr2cstr(const_bstring b, char z) {
 
   if (b == NULL || b->slen < 0 || b->data == NULL) return NULL;
   l = b->slen;
-  r = (char*) bstr__alloc((size_t)(l + 1));
+  r = (char*) bstr__alloc((size_t) (l + 1));
   if (r == NULL) return r;
 
   for (i = 0; i < l; i++) {
@@ -1393,7 +1393,7 @@ struct charField {
   {                                                                            \
     unsigned int c = (unsigned int) (idx);                                     \
     (cf)->content[c >> LONG_LOG_BITS_QTY] |=                                   \
-        (LONG_TYPE)(1ul << (c & (LONG_BITS_QTY - 1)));                         \
+        (LONG_TYPE) (1ul << (c & (LONG_BITS_QTY - 1)));                        \
   }
 
 #else
@@ -1528,7 +1528,7 @@ int bsetstr(bstring b0, int pos, const_bstring b1, unsigned char fill) {
 
   /* Aliasing case */
   if (NULL != aux) {
-    if ((pd = (ptrdiff_t)(b1->data - b0->data)) >= 0 &&
+    if ((pd = (ptrdiff_t) (b1->data - b0->data)) >= 0 &&
         pd < (ptrdiff_t) b0->mlen) {
       if (NULL == (aux = bstrcpy(b1))) return BSTR_ERR;
     }
@@ -1545,7 +1545,7 @@ int bsetstr(bstring b0, int pos, const_bstring b1, unsigned char fill) {
 
   /* Fill in "fill" character as necessary */
   if (pos > newlen) {
-    bstr__memset(b0->data + b0->slen, (int) fill, (size_t)(pos - b0->slen));
+    bstr__memset(b0->data + b0->slen, (int) fill, (size_t) (pos - b0->slen));
     newlen = pos;
   }
 
@@ -1587,8 +1587,8 @@ int binsertblk(
   if ((d | l) < 0) return BSTR_ERR; /* Integer wrap around. */
 
   /* Aliasing case */
-  if (((size_t)((unsigned char*) blk + len)) >= ((size_t) b->data) &&
-      ((size_t) blk) < ((size_t)(b->data + b->mlen))) {
+  if (((size_t) ((unsigned char*) blk + len)) >= ((size_t) b->data) &&
+      ((size_t) blk) < ((size_t) (b->data + b->mlen))) {
     aux = (unsigned char*) bstr__alloc(len);
     if (aux == NULL) return BSTR_ERR;
     bstr__memcpy(aux, blk, len);
@@ -1600,7 +1600,7 @@ int binsertblk(
       if (aux != (unsigned char*) blk) bstr__free(aux);
       return BSTR_ERR;
     }
-    bstr__memset(b->data + b->slen, (int) fill, (size_t)(pos - b->slen));
+    bstr__memset(b->data + b->slen, (int) fill, (size_t) (pos - b->slen));
     b->slen = l;
   } else {
     /* Inserting in the middle of the string */
@@ -1659,7 +1659,7 @@ int breplace(
   }
 
   /* Aliasing case */
-  if ((pd = (ptrdiff_t)(b2->data - b1->data)) >= 0 &&
+  if ((pd = (ptrdiff_t) (b2->data - b1->data)) >= 0 &&
       pd < (ptrdiff_t) b1->slen) {
     if (NULL == (aux = bstrcpy(b2))) return BSTR_ERR;
   }
@@ -1710,14 +1710,14 @@ static int findreplaceengine(
   if (pos > b->slen - find->slen) return BSTR_OK;
 
   /* Alias with find string */
-  pd = (ptrdiff_t)(find->data - b->data);
-  if ((ptrdiff_t)(pos - find->slen) < pd && pd < (ptrdiff_t) b->slen) {
+  pd = (ptrdiff_t) (find->data - b->data);
+  if ((ptrdiff_t) (pos - find->slen) < pd && pd < (ptrdiff_t) b->slen) {
     if (NULL == (auxf = bstrcpy(find))) return BSTR_ERR;
   }
 
   /* Alias with repl string */
-  pd = (ptrdiff_t)(repl->data - b->data);
-  if ((ptrdiff_t)(pos - repl->slen) < pd && pd < (ptrdiff_t) b->slen) {
+  pd = (ptrdiff_t) (repl->data - b->data);
+  if ((ptrdiff_t) (pos - repl->slen) < pd && pd < (ptrdiff_t) b->slen) {
     if (NULL == (auxr = bstrcpy(repl))) {
       if (auxf != find) bdestroy(auxf);
       return BSTR_ERR;
@@ -3031,7 +3031,7 @@ int bformata(bstring b, const char* fmt, ...) {
     va_end(arglist);
 
     buff->data[n] = (unsigned char) '\0';
-    buff->slen    = (int) (strlen)((char*) buff->data);
+    buff->slen    = (int) (strlen) ((char*) buff->data);
 
     if (buff->slen < n) break;
 
@@ -3083,7 +3083,7 @@ int bassignformat(bstring b, const char* fmt, ...) {
     va_end(arglist);
 
     buff->data[n] = (unsigned char) '\0';
-    buff->slen    = (int) (strlen)((char*) buff->data);
+    buff->slen    = (int) (strlen) ((char*) buff->data);
 
     if (buff->slen < n) break;
 
@@ -3133,7 +3133,7 @@ bstring bformat(const char* fmt, ...) {
     va_end(arglist);
 
     buff->data[n] = (unsigned char) '\0';
-    buff->slen    = (int) (strlen)((char*) buff->data);
+    buff->slen    = (int) (strlen) ((char*) buff->data);
 
     if (buff->slen < n) break;
 
@@ -3186,7 +3186,7 @@ int bvcformata(bstring b, int count, const char* fmt, va_list arg) {
 
   /* Did the operation complete successfully within bounds? */
 
-  if (n >= (l = b->slen + (int) (strlen)((char*) b->data + b->slen))) {
+  if (n >= (l = b->slen + (int) (strlen) ((char*) b->data + b->slen))) {
     b->slen = l;
     return BSTR_OK;
   }

@@ -26279,10 +26279,10 @@ static asn_TYPE_member_t asn_MBR_Ngap_extensionValue_264[] = {
      0, /* No default value */
      "DataForwardingResponseERABList"},
 };
-static const unsigned asn_MAP_Ngap_extensionValue_to_canonical_264[] = {0, 2, 3,
-                                                                        1};
-static const unsigned asn_MAP_Ngap_extensionValue_from_canonical_264[] = {0, 3,
-                                                                          1, 2};
+static const unsigned asn_MAP_Ngap_extensionValue_to_canonical_264[] = {
+    0, 2, 3, 1};
+static const unsigned asn_MAP_Ngap_extensionValue_from_canonical_264[] = {
+    0, 3, 1, 2};
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_extensionValue_tag2el_264[] = {
     {(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0,
      2}, /* QosFlowPerTNLInformationList */
@@ -26582,10 +26582,10 @@ static asn_TYPE_member_t asn_MBR_Ngap_extensionValue_272[] = {
      0, /* No default value */
      "DataForwardingResponseERABList"},
 };
-static const unsigned asn_MAP_Ngap_extensionValue_to_canonical_272[] = {0, 2, 3,
-                                                                        1};
-static const unsigned asn_MAP_Ngap_extensionValue_from_canonical_272[] = {0, 3,
-                                                                          1, 2};
+static const unsigned asn_MAP_Ngap_extensionValue_to_canonical_272[] = {
+    0, 2, 3, 1};
+static const unsigned asn_MAP_Ngap_extensionValue_from_canonical_272[] = {
+    0, 3, 1, 2};
 static const asn_TYPE_tag2member_t asn_MAP_Ngap_extensionValue_tag2el_272[] = {
     {(ASN_TAG_CLASS_UNIVERSAL | (16 << 2)), 0, 0,
      2}, /* AdditionalDLUPTNLInformationForHOList */

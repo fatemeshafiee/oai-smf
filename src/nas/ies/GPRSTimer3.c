@@ -70,8 +70,8 @@ int decode_gprs_timer3(
   CHECK_LENGTH_DECODER(len - decoded, ielen);
 
   DECODE_U8(buffer + decoded, timeValue, decoded);
-  gprstimer3->unit      = (uint8_t)((timeValue & 0xe0) >> 5);
-  gprstimer3->timeValue = (uint8_t)(timeValue & 0x1f);
+  gprstimer3->unit      = (uint8_t) ((timeValue & 0xe0) >> 5);
+  gprstimer3->timeValue = (uint8_t) (timeValue & 0x1f);
 
   return decoded;
 }

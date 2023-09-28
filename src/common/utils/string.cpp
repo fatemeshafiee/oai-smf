@@ -90,10 +90,10 @@ std::string& util::trim(std::string& s) {
 
 void util::ipv4_to_bstring(struct in_addr ipv4_address, bstring str) {
   unsigned char bitstream_addr[4];
-  bitstream_addr[0] = (uint8_t)((ipv4_address.s_addr) & 0x000000ff);
-  bitstream_addr[1] = (uint8_t)(((ipv4_address.s_addr) & 0x0000ff00) >> 8);
-  bitstream_addr[2] = (uint8_t)(((ipv4_address.s_addr) & 0x00ff0000) >> 16);
-  bitstream_addr[3] = (uint8_t)(((ipv4_address.s_addr) & 0xff000000) >> 24);
+  bitstream_addr[0] = (uint8_t) ((ipv4_address.s_addr) & 0x000000ff);
+  bitstream_addr[1] = (uint8_t) (((ipv4_address.s_addr) & 0x0000ff00) >> 8);
+  bitstream_addr[2] = (uint8_t) (((ipv4_address.s_addr) & 0x00ff0000) >> 16);
+  bitstream_addr[3] = (uint8_t) (((ipv4_address.s_addr) & 0xff000000) >> 24);
 
   //  str       = bfromcstralloc(4, "\0");
   str->slen = 4;
@@ -126,14 +126,14 @@ void util::ipv4v6_to_pdu_address_information(
     if (inet_pton(AF_INET6, util::trim(ipv6_addr_str).c_str(), buf_in6_addr) ==
         1) {
       for (int i = 0; i <= 7; i++)
-        bitstream_addr[i] = (uint8_t)(buf_in6_addr[i]);
+        bitstream_addr[i] = (uint8_t) (buf_in6_addr[i]);
     }
   }
 
-  bitstream_addr[8]  = (uint8_t)((ipv4_address.s_addr) & 0x000000ff);
-  bitstream_addr[9]  = (uint8_t)(((ipv4_address.s_addr) & 0x0000ff00) >> 8);
-  bitstream_addr[10] = (uint8_t)(((ipv4_address.s_addr) & 0x00ff0000) >> 16);
-  bitstream_addr[11] = (uint8_t)(((ipv4_address.s_addr) & 0xff000000) >> 24);
+  bitstream_addr[8]  = (uint8_t) ((ipv4_address.s_addr) & 0x000000ff);
+  bitstream_addr[9]  = (uint8_t) (((ipv4_address.s_addr) & 0x0000ff00) >> 8);
+  bitstream_addr[10] = (uint8_t) (((ipv4_address.s_addr) & 0x00ff0000) >> 16);
+  bitstream_addr[11] = (uint8_t) (((ipv4_address.s_addr) & 0xff000000) >> 24);
 
   str->slen = 12;
   memcpy(str->data, bitstream_addr, sizeof(bitstream_addr));
