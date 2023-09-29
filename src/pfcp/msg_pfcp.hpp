@@ -4809,6 +4809,7 @@ class usage_report_within_pfcp_session_deletion_response
   std::pair<bool, pfcp::usage_information_t> usage_information;
   std::pair<bool, pfcp::ethernet_traffic_information>
       ethernet_traffic_information;
+  std::pair<bool, pfcp::enterprise_specific_t> enterprise_specific;
 
   usage_report_within_pfcp_session_deletion_response()
       : urr_id(),
@@ -4821,7 +4822,8 @@ class usage_report_within_pfcp_session_deletion_response
         time_of_first_packet(),
         time_of_last_packet(),
         usage_information(),
-        ethernet_traffic_information() {}
+        ethernet_traffic_information(),
+        enterprise_specific() {}
 
   usage_report_within_pfcp_session_deletion_response(
       const usage_report_within_pfcp_session_deletion_response& u)
@@ -4835,7 +4837,8 @@ class usage_report_within_pfcp_session_deletion_response
         time_of_first_packet(u.time_of_first_packet),
         time_of_last_packet(u.time_of_last_packet),
         usage_information(u.usage_information),
-        ethernet_traffic_information(u.ethernet_traffic_information) {}
+        ethernet_traffic_information(u.ethernet_traffic_information),
+        enterprise_specific(u.enterprise_specific) {}
 
   // virtual ~usage_report_within_pfcp_session_deletion_response() {};
   void set(const pfcp::urr_id_t& v) {
@@ -4881,6 +4884,10 @@ class usage_report_within_pfcp_session_deletion_response
   void set(const pfcp::ethernet_traffic_information& v) {
     ethernet_traffic_information.first  = true;
     ethernet_traffic_information.second = v;
+  }
+  void set(const pfcp::enterprise_specific_t& v) {
+    enterprise_specific.first  = true;
+    enterprise_specific.second = v;
   }
 
   bool get(pfcp::urr_id_t& v) const {
@@ -4956,6 +4963,13 @@ class usage_report_within_pfcp_session_deletion_response
   bool get(pfcp::ethernet_traffic_information& v) const {
     if (ethernet_traffic_information.first) {
       v = ethernet_traffic_information.second;
+      return true;
+    }
+    return false;
+  }
+  bool get(pfcp::enterprise_specific_t& v) const {
+    if (enterprise_specific.first) {
+      v = enterprise_specific.second;
       return true;
     }
     return false;
@@ -7201,11 +7215,14 @@ class pfcp_session_deletion_response : public pfcp_ies_container {
 
   std::pair<bool, pfcp::cause_t> cause;
   std::pair<bool, pfcp::offending_ie_t> offending_ie;
-  std::pair<bool, pfcp::usage_report_within_pfcp_session_deletion_response> usage_report;
+  std::pair<bool, pfcp::usage_report_within_pfcp_session_deletion_response>
+      usage_report;
   pfcp_session_deletion_response() : cause(), offending_ie(), usage_report() {}
 
   pfcp_session_deletion_response(const pfcp_session_deletion_response& i)
-      : cause(i.cause), offending_ie(i.offending_ie), usage_report(i.usage_report) {}
+      : cause(i.cause),
+        offending_ie(i.offending_ie),
+        usage_report(i.usage_report) {}
 
   const char* get_msg_name() const { return "PFCP_SESSION_DELETION_RESPONSE"; };
 
@@ -7240,7 +7257,7 @@ class pfcp_session_deletion_response : public pfcp_ies_container {
     offending_ie.first  = true;
     offending_ie.second = v;
   }
-    void set(const pfcp::usage_report_within_pfcp_session_deletion_response& v) {
+  void set(const pfcp::usage_report_within_pfcp_session_deletion_response& v) {
     usage_report.first  = true;
     usage_report.second = v;
   }

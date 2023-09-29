@@ -9973,11 +9973,9 @@ class pfcp_create_traffic_endpoint_ie : public pfcp_grouped_ie {
 };
 //-------------------------------------
 
-
 //// IE USAGE_REPORT_WITHIN_SESSION_DELETION_RESPONSE
-class pfcp_usage_report_within_session_deletion_response_ie : public pfcp_grouped_ie
-{ 
-
+class pfcp_usage_report_within_session_deletion_response_ie
+    : public pfcp_grouped_ie {
  public:
   //--------
   pfcp_usage_report_within_session_deletion_response_ie(
@@ -10025,7 +10023,6 @@ class pfcp_usage_report_within_session_deletion_response_ie : public pfcp_groupe
     //   add_ie(sie);
     // }
 
-
     // if (b.usage_information.first) {
     //   std::shared_ptr<pfcp_usage_information_ie> sie(
     //       new pfcp_usage_information_ie(b.usage_information.second));
@@ -10045,12 +10042,15 @@ class pfcp_usage_report_within_session_deletion_response_ie : public pfcp_groupe
   }
   //--------
   pfcp_usage_report_within_session_deletion_response_ie()
-      : pfcp_grouped_ie(PFCP_IE_USAGE_REPORT_WITHIN_SESSION_DELETION_RESPONSE) {}
+      : pfcp_grouped_ie(PFCP_IE_USAGE_REPORT_WITHIN_SESSION_DELETION_RESPONSE) {
+  }
   //--------
-  explicit pfcp_usage_report_within_session_deletion_response_ie(const pfcp_tlv& t)
+  explicit pfcp_usage_report_within_session_deletion_response_ie(
+      const pfcp_tlv& t)
       : pfcp_grouped_ie(t){};
   //--------
-  void to_core_type(pfcp::usage_report_within_pfcp_session_deletion_response& c) {
+  void to_core_type(
+      pfcp::usage_report_within_pfcp_session_deletion_response& c) {
     for (auto sie : ies) {
       sie.get()->to_core_type(c);
     }
@@ -10063,7 +10063,6 @@ class pfcp_usage_report_within_session_deletion_response_ie : public pfcp_groupe
   }
 };
 //-------------------------------------
-
 
 }  // namespace pfcp
 
