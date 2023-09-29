@@ -54,8 +54,8 @@ class PduSessionCreatedData {
   /// <summary>
   ///
   /// </summary>
-  PduSessionType getPduSessionType() const;
-  void setPduSessionType(PduSessionType const& value);
+  oai::model::common::PduSessionType getPduSessionType() const;
+  void setPduSessionType(oai::model::common::PduSessionType const& value);
   /// <summary>
   ///
   /// </summary>
@@ -71,8 +71,8 @@ class PduSessionCreatedData {
   /// <summary>
   ///
   /// </summary>
-  Ambr getSessionAmbr() const;
-  void setSessionAmbr(Ambr const& value);
+  oai::model::common::Ambr getSessionAmbr() const;
+  void setSessionAmbr(oai::model::common::Ambr const& value);
   bool sessionAmbrIsSet() const;
   void unsetSessionAmbr();
   /// <summary>
@@ -96,8 +96,8 @@ class PduSessionCreatedData {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   bool sNssaiIsSet() const;
   void unsetSNssai();
   /// <summary>
@@ -124,8 +124,8 @@ class PduSessionCreatedData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmInfoToUe() const;
-  void setN1SmInfoToUe(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmInfoToUe() const;
+  void setN1SmInfoToUe(oai::model::common::RefToBinaryData const& value);
   bool n1SmInfoToUeIsSet() const;
   void unsetN1SmInfoToUe();
   /// <summary>
@@ -173,8 +173,8 @@ class PduSessionCreatedData {
   /// <summary>
   ///
   /// </summary>
-  UpSecurity getUpSecurity() const;
-  void setUpSecurity(UpSecurity const& value);
+  oai::model::common::UpSecurity getUpSecurity() const;
+  void setUpSecurity(oai::model::common::UpSecurity const& value);
   bool upSecurityIsSet() const;
   void unsetUpSecurity();
   /// <summary>
@@ -203,13 +203,13 @@ class PduSessionCreatedData {
   friend void from_json(const nlohmann::json& j, PduSessionCreatedData& o);
 
  protected:
-  PduSessionType m_PduSessionType;
+  oai::model::common::PduSessionType m_PduSessionType;
 
   std::string m_SscMode;
 
   TunnelInfo m_HcnTunnelInfo;
   bool m_HcnTunnelInfoIsSet;
-  Ambr m_SessionAmbr;
+  oai::model::common::Ambr m_SessionAmbr;
   bool m_SessionAmbrIsSet;
   std::vector<QosFlowSetupItem> m_QosFlowsSetupList;
   bool m_QosFlowsSetupListIsSet;
@@ -217,7 +217,7 @@ class PduSessionCreatedData {
 
   int32_t m_PduSessionId;
   bool m_PduSessionIdIsSet;
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
   bool m_SNssaiIsSet;
   bool m_EnablePauseCharging;
   bool m_EnablePauseChargingIsSet;
@@ -225,7 +225,7 @@ class PduSessionCreatedData {
   bool m_UeIpv4AddressIsSet;
   std::string m_UeIpv6Prefix;
   bool m_UeIpv6PrefixIsSet;
-  RefToBinaryData m_N1SmInfoToUe;
+  oai::model::common::RefToBinaryData m_N1SmInfoToUe;
   bool m_N1SmInfoToUeIsSet;
   EpsPdnCnxInfo m_EpsPdnCnxInfo;
   bool m_EpsPdnCnxInfoIsSet;
@@ -239,7 +239,7 @@ class PduSessionCreatedData {
   bool m_AlwaysOnGrantedIsSet;
   std::string m_Gpsi;
   bool m_GpsiIsSet;
-  UpSecurity m_UpSecurity;
+  oai::model::common::UpSecurity m_UpSecurity;
   bool m_UpSecurityIsSet;
   RoamingChargingProfile m_RoamingChargingProfile;
   bool m_RoamingChargingProfileIsSet;

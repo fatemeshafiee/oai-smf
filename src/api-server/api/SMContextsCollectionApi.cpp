@@ -47,13 +47,13 @@
 #include "mime_parser.hpp"
 #include "smf_config.hpp"
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
 namespace api {
 
-using namespace oai::smf_server::helpers;
+using namespace oai::model::common::helpers;
 using namespace oai::smf_server::model;
 
 SMContextsCollectionApi::SMContextsCollectionApi(
@@ -70,7 +70,7 @@ void SMContextsCollectionApi::setupRoutes() {
 
   Routes::Post(
       *router,
-      base + smf_cfg.sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
+      base + smf_cfg->sbi_api_version + NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
       Routes::bind(&SMContextsCollectionApi::post_sm_contexts_handler, this));
 
   // Default handler, called when a route is not found

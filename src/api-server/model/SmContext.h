@@ -97,13 +97,13 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  Snssai getSNssai() const;
-  void setSNssai(Snssai const& value);
+  oai::model::common::Snssai getSNssai() const;
+  void setSNssai(oai::model::common::Snssai const& value);
   /// <summary>
   ///
   /// </summary>
-  Snssai getHplmnSnssai() const;
-  void setHplmnSnssai(Snssai const& value);
+  oai::model::common::Snssai getHplmnSnssai() const;
+  void setHplmnSnssai(oai::model::common::Snssai const& value);
   bool hplmnSnssaiIsSet() const;
   void unsetHplmnSnssai();
   /// <summary>
@@ -114,32 +114,32 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  Guami getGuami() const;
-  void setGuami(Guami const& value);
+  oai::model::common::Guami getGuami() const;
+  void setGuami(oai::model::common::Guami const& value);
   bool guamiIsSet() const;
   void unsetGuami();
   /// <summary>
   ///
   /// </summary>
-  ServiceName getServiceName() const;
-  void setServiceName(ServiceName const& value);
+  oai::model::nrf::ServiceName getServiceName() const;
+  void setServiceName(oai::model::nrf::ServiceName const& value);
   bool serviceNameIsSet() const;
   void unsetServiceName();
   /// <summary>
   ///
   /// </summary>
-  PlmnId getServingNetwork() const;
-  void setServingNetwork(PlmnId const& value);
+  oai::model::common::PlmnId getServingNetwork() const;
+  void setServingNetwork(oai::model::common::PlmnId const& value);
   /// <summary>
   ///
   /// </summary>
-  AccessType getAnType() const;
-  void setAnType(AccessType const& value);
+  oai::model::common::AccessType getAnType() const;
+  void setAnType(oai::model::common::AccessType const& value);
   /// <summary>
   ///
   /// </summary>
-  RatType getRatType() const;
-  void setRatType(RatType const& value);
+  oai::model::common::RatType getRatType() const;
+  void setRatType(oai::model::common::RatType const& value);
   bool ratTypeIsSet() const;
   void unsetRatType();
   /// <summary>
@@ -171,8 +171,8 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  TraceData getTraceData() const;
-  void setTraceData(TraceData const& value);
+  oai::model::common::TraceData getTraceData() const;
+  void setTraceData(oai::model::common::TraceData const& value);
   bool traceDataIsSet() const;
   void unsetTraceData();
   /// <summary>
@@ -199,8 +199,8 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  PduSessionType getPduSessionType() const;
-  void setPduSessionType(PduSessionType const& value);
+  oai::model::common::PduSessionType getPduSessionType() const;
+  void setPduSessionType(oai::model::common::PduSessionType const& value);
   /// <summary>
   ///
   /// </summary>
@@ -209,8 +209,8 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  Ambr getSessionAmbr() const;
-  void setSessionAmbr(Ambr const& value);
+  oai::model::common::Ambr getSessionAmbr() const;
+  void setSessionAmbr(oai::model::common::Ambr const& value);
   /// <summary>
   ///
   /// </summary>
@@ -274,8 +274,8 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  UpSecurity getUpSecurity() const;
-  void setUpSecurity(UpSecurity const& value);
+  oai::model::common::UpSecurity getUpSecurity() const;
+  void setUpSecurity(oai::model::common::UpSecurity const& value);
   bool upSecurityIsSet() const;
   void unsetUpSecurity();
   /// <summary>
@@ -309,21 +309,21 @@ class SmContext {
 
   std::string m_Dnn;
 
-  Snssai m_SNssai;
+  oai::model::common::Snssai m_SNssai;
 
-  Snssai m_HplmnSnssai;
+  oai::model::common::Snssai m_HplmnSnssai;
   bool m_HplmnSnssaiIsSet;
   std::string m_ServingNfId;
 
-  Guami m_Guami;
+  oai::model::common::Guami m_Guami;
   bool m_GuamiIsSet;
-  ServiceName m_ServiceName;
+  oai::model::nrf::ServiceName m_ServiceName;
   bool m_ServiceNameIsSet;
-  PlmnId m_ServingNetwork;
+  oai::model::common::PlmnId m_ServingNetwork;
 
-  AccessType m_AnType;
+  oai::model::common::AccessType m_AnType;
 
-  RatType m_RatType;
+  oai::model::common::RatType m_RatType;
   bool m_RatTypeIsSet;
   std::string m_SmContextStatusUri;
 
@@ -333,7 +333,7 @@ class SmContext {
   bool m_PcfIdIsSet;
   DnnSelectionMode m_SelMode;
   bool m_SelModeIsSet;
-  TraceData m_TraceData;
+  oai::model::common::TraceData m_TraceData;
   bool m_TraceDataIsSet;
   std::string m_UdmGroupId;
   bool m_UdmGroupIdIsSet;
@@ -341,11 +341,11 @@ class SmContext {
   bool m_RoutingIndicatorIsSet;
   EpsInterworkingIndication m_EpsInterworkingInd;
   bool m_EpsInterworkingIndIsSet;
-  PduSessionType m_PduSessionType;
+  oai::model::common::PduSessionType m_PduSessionType;
 
   std::string m_SscMode;
 
-  Ambr m_SessionAmbr;
+  oai::model::common::Ambr m_SessionAmbr;
 
   std::vector<QosFlowSetupItem> m_QosFlowsSetupList;
 
@@ -365,7 +365,7 @@ class SmContext {
   bool m_MaxIntegrityProtectedDataRateIsSet;
   bool m_AlwaysOnGranted;
   bool m_AlwaysOnGrantedIsSet;
-  UpSecurity m_UpSecurity;
+  oai::model::common::UpSecurity m_UpSecurity;
   bool m_UpSecurityIsSet;
   std::string m_HSmfServiceInstanceId;
   bool m_HSmfServiceInstanceIdIsSet;

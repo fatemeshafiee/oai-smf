@@ -17,6 +17,9 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+using namespace oai::model::nrf;
+
 SmContext::SmContext() {
   m_Supi                               = "";
   m_SupiIsSet                          = false;
@@ -300,16 +303,16 @@ std::string SmContext::getDnn() const {
 void SmContext::setDnn(std::string const& value) {
   m_Dnn = value;
 }
-Snssai SmContext::getSNssai() const {
+oai::model::common::Snssai SmContext::getSNssai() const {
   return m_SNssai;
 }
-void SmContext::setSNssai(Snssai const& value) {
+void SmContext::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai = value;
 }
-Snssai SmContext::getHplmnSnssai() const {
+oai::model::common::Snssai SmContext::getHplmnSnssai() const {
   return m_HplmnSnssai;
 }
-void SmContext::setHplmnSnssai(Snssai const& value) {
+void SmContext::setHplmnSnssai(oai::model::common::Snssai const& value) {
   m_HplmnSnssai      = value;
   m_HplmnSnssaiIsSet = true;
 }
@@ -351,16 +354,16 @@ bool SmContext::serviceNameIsSet() const {
 void SmContext::unsetServiceName() {
   m_ServiceNameIsSet = false;
 }
-PlmnId SmContext::getServingNetwork() const {
+oai::model::common::PlmnId SmContext::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void SmContext::setServingNetwork(PlmnId const& value) {
+void SmContext::setServingNetwork(oai::model::common::PlmnId const& value) {
   m_ServingNetwork = value;
 }
-AccessType SmContext::getAnType() const {
+oai::model::common::AccessType SmContext::getAnType() const {
   return m_AnType;
 }
-void SmContext::setAnType(AccessType const& value) {
+void SmContext::setAnType(oai::model::common::AccessType const& value) {
   m_AnType = value;
 }
 RatType SmContext::getRatType() const {

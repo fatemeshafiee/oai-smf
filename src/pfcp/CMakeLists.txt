@@ -27,7 +27,8 @@ include_directories(${SRC_TOP_DIR}/common/utils/bstr)
 include_directories(${SRC_TOP_DIR}/oai_smf)
 include_directories(${SRC_TOP_DIR}/pfcp)
 include_directories(${SRC_TOP_DIR}/udp)
-include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
+include_directories(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/config/config.cmake)
 
 add_library(PFCP STATIC
     3gpp_29.244.cpp

@@ -17,6 +17,9 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+using namespace oai::model::nrf;
+
 NFProfile::NFProfile() {
   m_NfInstanceId                    = "";
   m_NfInstanceName                  = "";
@@ -259,10 +262,11 @@ bool NFProfile::heartBeatTimerIsSet() const {
 void NFProfile::unsetHeartBeatTimer() {
   m_HeartBeatTimerIsSet = false;
 }
-std::vector<PlmnId>& NFProfile::getPlmnList() {
+std::vector<oai::model::common::PlmnId>& NFProfile::getPlmnList() {
   return m_PlmnList;
 }
-void NFProfile::setPlmnList(std::vector<PlmnId> const& value) {
+void NFProfile::setPlmnList(
+    std::vector<oai::model::common::PlmnId> const& value) {
   m_PlmnList      = value;
   m_PlmnListIsSet = true;
 }
@@ -272,10 +276,11 @@ bool NFProfile::plmnListIsSet() const {
 void NFProfile::unsetPlmnList() {
   m_PlmnListIsSet = false;
 }
-std::vector<Snssai> NFProfile::getSNssais() const {
+std::vector<oai::model::common::Snssai> NFProfile::getSNssais() const {
   return m_SNssais;
 }
-void NFProfile::setSNssais(std::vector<Snssai> const& value) {
+void NFProfile::setSNssais(
+    std::vector<oai::model::common::Snssai> const& value) {
   m_SNssais      = value;
   m_SNssaisIsSet = true;
 }
@@ -363,10 +368,11 @@ bool NFProfile::ipv6AddressesIsSet() const {
 void NFProfile::unsetIpv6Addresses() {
   m_Ipv6AddressesIsSet = false;
 }
-std::vector<PlmnId>& NFProfile::getAllowedPlmns() {
+std::vector<oai::model::common::PlmnId>& NFProfile::getAllowedPlmns() {
   return m_AllowedPlmns;
 }
-void NFProfile::setAllowedPlmns(std::vector<PlmnId> const& value) {
+void NFProfile::setAllowedPlmns(
+    std::vector<oai::model::common::PlmnId> const& value) {
   m_AllowedPlmns      = value;
   m_AllowedPlmnsIsSet = true;
 }
@@ -402,10 +408,11 @@ bool NFProfile::allowedNfDomainsIsSet() const {
 void NFProfile::unsetAllowedNfDomains() {
   m_AllowedNfDomainsIsSet = false;
 }
-std::vector<Snssai>& NFProfile::getAllowedNssais() {
+std::vector<oai::model::common::Snssai>& NFProfile::getAllowedNssais() {
   return m_AllowedNssais;
 }
-void NFProfile::setAllowedNssais(std::vector<Snssai> const& value) {
+void NFProfile::setAllowedNssais(
+    std::vector<oai::model::common::Snssai> const& value) {
   m_AllowedNssais      = value;
   m_AllowedNssaisIsSet = true;
 }

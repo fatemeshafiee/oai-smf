@@ -47,13 +47,13 @@
 #include "mime_parser.hpp"
 #include "smf_config.hpp"
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
 namespace api {
 
-using namespace oai::smf_server::helpers;
+using namespace oai::model::common::helpers;
 using namespace oai::smf_server::model;
 
 IndividualSMContextApi::IndividualSMContextApi(
@@ -70,15 +70,15 @@ void IndividualSMContextApi::setupRoutes() {
 
   Routes::Post(
       *router,
-      base + smf_cfg.sbi_api_version + "/sm-contexts/:smContextRef/release",
+      base + smf_cfg->sbi_api_version + "/sm-contexts/:smContextRef/release",
       Routes::bind(&IndividualSMContextApi::release_sm_context_handler, this));
   Routes::Post(
       *router,
-      base + smf_cfg.sbi_api_version + "/sm-contexts/:smContextRef/retrieve",
+      base + smf_cfg->sbi_api_version + "/sm-contexts/:smContextRef/retrieve",
       Routes::bind(&IndividualSMContextApi::retrieve_sm_context_handler, this));
   Routes::Post(
       *router,
-      base + smf_cfg.sbi_api_version + "/sm-contexts/:smContextRef/modify",
+      base + smf_cfg->sbi_api_version + "/sm-contexts/:smContextRef/modify",
       Routes::bind(&IndividualSMContextApi::update_sm_context_handler, this));
 
   // Default handler, called when a route is not found

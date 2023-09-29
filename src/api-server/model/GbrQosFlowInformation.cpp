@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 GbrQosFlowInformation::GbrQosFlowInformation() {
   m_MaxFbrDl                 = "";
   m_MaxFbrUl                 = "";

@@ -38,9 +38,9 @@
 #define IN_ADDR_FMT "%u.%u.%u.%u"
 #define PRI_IN_ADDR(aDDRESS)                                                   \
   (uint8_t)((aDDRESS.s_addr) & 0x000000ff),                                    \
-      (uint8_t)(((aDDRESS.s_addr) & 0x0000ff00) >> 8),                         \
-      (uint8_t)(((aDDRESS.s_addr) & 0x00ff0000) >> 16),                        \
-      (uint8_t)(((aDDRESS.s_addr) & 0xff000000) >> 24)
+      (uint8_t) (((aDDRESS.s_addr) & 0x0000ff00) >> 8),                        \
+      (uint8_t) (((aDDRESS.s_addr) & 0x00ff0000) >> 16),                       \
+      (uint8_t) (((aDDRESS.s_addr) & 0xff000000) >> 24)
 
 #define IPV4_ADDR_DISPLAY_8(aDDRESS)                                           \
   (aDDRESS)[0], (aDDRESS)[1], (aDDRESS)[2], (aDDRESS)[3]
@@ -54,7 +54,8 @@ class conv {
  public:
   static void hexa_to_ascii(uint8_t* from, char* to, size_t length);
   static int ascii_to_hex(uint8_t* dst, const char* h);
-  static struct in_addr fromString(const std::string addr4);
+  static struct in_addr fromString(const std::string& addr4);
+  static struct in6_addr fromStringV6(const std::string& addr6);
   static bool plmnFromString(
       plmn_t& p, const std::string mcc, const std::string mnc);
   static void plmnToMccMnc(

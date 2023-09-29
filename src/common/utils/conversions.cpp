@@ -164,34 +164,61 @@ bool conv::plmnFromString(
 //------------------------------------------------------------------------------
 void conv::plmnToMccMnc(
     const plmn_t& plmn, std::string& mcc, std::string& mnc) {
-  uint16_t mcc_dec = 0;
-  uint16_t mnc_dec = 0;
-  uint16_t mnc_len = 0;
+  int m_mcc = plmn.mcc_digit1 * 100 + plmn.mcc_digit2 * 10 + plmn.mcc_digit3;
+  mcc       = std::to_string(m_mcc);
+  if ((plmn.mcc_digit2 == 0) and (plmn.mcc_digit1 == 0)) {
+    mcc = "00" + mcc;
+  } else if (plmn.mcc_digit1 == 0) {
+    mcc = "0" + mcc;
+  }
 
-  mcc_dec = plmn.mcc_digit1 * 100 + plmn.mcc_digit2 * 10 + plmn.mcc_digit3;
-  mnc_len = (plmn.mnc_digit3 == 0x0 ? 2 : 3);
-  mnc_dec = plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
-  mnc_dec = (mnc_len == 2 ? mnc_dec : mnc_dec * 10 + plmn.mnc_digit3);
+  int m_mnc = 0;
+  if (plmn.mnc_digit3 == 0xf) {
+    m_mnc = plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
+    if (plmn.mnc_digit1 == 0) {
+      mnc = "0" + std::to_string(m_mnc);
+      return;
+    }
+  } else {
+    m_mnc = plmn.mnc_digit3 * 100 + plmn.mnc_digit1 * 10 + plmn.mnc_digit2;
+    mnc   = std::to_string(m_mnc);
+    if ((plmn.mnc_digit2 == 0) and (plmn.mnc_digit1 == 0)) {
+      mnc = "00" + mnc;
+    } else if (plmn.mnc_digit1 == 0) {
+      mnc = "0" + mnc;
+    }
+  }
 
-  mcc = std::to_string(mcc_dec);
-  mnc = std::to_string(mnc_dec);
   return;
 }
 
 //------------------------------------------------------------------------------
-struct in_addr conv::fromString(const std::string addr4) {
+struct in_addr conv::fromString(const std::string& addr4) {
   unsigned char buf[sizeof(struct in6_addr)] = {};
-  int s              = inet_pton(AF_INET, addr4.c_str(), buf);
-  struct in_addr* ia = (struct in_addr*) buf;
-  return *ia;
+  struct in_addr ipv4_addr;
+  ipv4_addr.s_addr = INADDR_ANY;
+  if (inet_pton(AF_INET, addr4.c_str(), buf) == 1) {
+    memcpy(&ipv4_addr, buf, sizeof(struct in_addr));
+  }
+  return ipv4_addr;
 }
+
+struct in6_addr conv::fromStringV6(const std::string& addr6) {
+  unsigned char buf[sizeof(struct in6_addr)] = {};
+  struct in6_addr ipv6_addr {};
+  if (inet_pton(AF_INET6, addr6.c_str(), buf) == 1) {
+    memcpy(&ipv6_addr, buf, sizeof(struct in6_addr));
+  }
+  return ipv6_addr;
+}
+
 //------------------------------------------------------------------------------
 std::string conv::toString(const struct in_addr& inaddr) {
   std::string s              = {};
   char str[INET6_ADDRSTRLEN] = {};
   if (inet_ntop(AF_INET, (const void*) &inaddr, str, INET6_ADDRSTRLEN) ==
       NULL) {
-    s.append("Error in_addr");
+    s.append("");
   } else {
     s.append(str);
   }
@@ -203,7 +230,7 @@ std::string conv::toString(const struct in6_addr& in6addr) {
   char str[INET6_ADDRSTRLEN] = {};
   if (inet_ntop(AF_INET6, (const void*) &in6addr, str, INET6_ADDRSTRLEN) ==
       nullptr) {
-    s.append("Error in6_addr");
+    s.append("");
   } else {
     s.append(str);
   }
@@ -218,13 +245,14 @@ void conv::convert_string_2_hex(
   memset(data, 0, input_str.length() + 1);
   memcpy((void*) data, (void*) input_str.c_str(), input_str.length());
 
-#if DEBUG_IS_ON
   Logger::smf_app().debug("Input: ");
-  for (int i = 0; i < input_str.length(); i++) {
-    printf("%02x ", data[i]);
+  if (Logger::should_log(spdlog::level::debug)) {
+    for (int i = 0; i < input_str.length(); i++) {
+      printf("%02x ", data[i]);
+    }
+    printf("\n");
   }
-  printf("\n");
-#endif
+
   char* datahex = (char*) malloc(input_str.length() * 2 + 1);
   memset(datahex, 0, input_str.length() * 2 + 1);
 

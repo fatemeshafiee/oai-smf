@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 HsmfUpdatedData::HsmfUpdatedData() {
   m_N1SmInfoToUeIsSet = false;
 }

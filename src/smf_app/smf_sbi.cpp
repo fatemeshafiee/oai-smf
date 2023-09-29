@@ -60,7 +60,7 @@ using json = nlohmann::json;
 
 extern itti_mw* itti_inst;
 extern smf_sbi* smf_sbi_inst;
-extern smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 void smf_sbi_task(void*);
 
 // To read content of the response from AMF
@@ -164,8 +164,8 @@ smf_sbi::smf_sbi() {
   handles       = {};
   headers       = nullptr;
   headers       = curl_slist_append(headers, "Accept: application/json");
+  headers       = curl_slist_append(headers, "Charsets: utf-8");
   headers       = curl_slist_append(headers, "Content-Type: application/json");
-  headers       = curl_slist_append(headers, "charsets: utf-8");
 
   if ((code < 0) or (curl_multi == nullptr) or (headers == nullptr)) {
     Logger::smf_sbi().error("Cannot initialize Curl Multi Interface");
@@ -584,18 +584,15 @@ void smf_sbi::register_nf_instance(
   nlohmann::json json_data = {};
   msg->profile.to_json(json_data);
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->profile.get_nf_instance_id();
+  std::string url = get_nrf_base_url() + msg->profile.get_nf_instance_id();
 
   Logger::smf_sbi().debug(
       "Send NF Instance Registration to NRF, NRF URL %s", url.c_str());
 
   std::string body = json_data.dump();
   Logger::smf_sbi().debug(
-      "Send NF Instance Registration to NRF, msg body: \n %s", body.c_str());
+      "Send NF Instance Registration to NRF, msg body: \n %s (bytes %d)",
+      body.c_str(), body.size());
 
   std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle
@@ -674,11 +671,7 @@ void smf_sbi::update_nf_instance(
   std::string body = json_data.dump();
   Logger::smf_sbi().debug("Send NF Update to NRF, Msg body %s", body.c_str());
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->smf_instance_id;
+  std::string url = get_nrf_base_url() + msg->smf_instance_id;
 
   Logger::smf_sbi().debug("Send NF Update to NRF, NRF URL %s", url.c_str());
 
@@ -741,11 +734,7 @@ void smf_sbi::deregister_nf_instance(
   Logger::smf_sbi().debug(
       "Send NF De-register to NRF (HTTP version %d)", msg->http_version);
 
-  std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.nrf_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.nrf_addr.port) + NNRF_NFM_BASE +
-      smf_cfg.nrf_addr.api_version + NNRF_NF_REGISTER_URL +
-      msg->smf_instance_id;
+  std::string url = get_nrf_base_url() + msg->smf_instance_id;
 
   Logger::smf_sbi().debug(
       "Send NF De-register to NRF (NRF URL %s)", url.c_str());
@@ -796,12 +785,10 @@ void smf_sbi::subscribe_upf_status_notify(
       "available (HTTP version %d)",
       msg->http_version);
 
-  Logger::smf_sbi().debug(
-      "Send NFStatusNotify to NRF, NRF URL %s", msg->url.c_str());
+  Logger::smf_sbi().debug("NRF's URL: %s", msg->url.c_str());
 
   std::string body = msg->json_data.dump();
-  Logger::smf_sbi().debug(
-      "Send NFStatusNotify to NRF, msg body: %s", body.c_str());
+  Logger::smf_sbi().debug("Message body: %s", body.c_str());
 
   std::string response_data = {};
   // Generate a promise and associate this promise to the curl handle
@@ -858,10 +845,13 @@ bool smf_sbi::get_sm_data(
               ",\"sd\":\"" + std::to_string(snssai.sd) + "\"}&dnn=" + dnn +
               "&plmn-id={\"mcc\":\"" + mcc + "\",\"mnc\":\"" + mnc + "\"}";
   std::string url =
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.udm_addr.ipv4_addr))) +
-      ":" + std::to_string(smf_cfg.udm_addr.port) + NUDM_SDM_BASE +
-      smf_cfg.udm_addr.api_version +
-      fmt::format(NUDM_SDM_GET_SM_DATA_URL, std::to_string(supi)) + query_str;
+      smf_cfg->get_nf(oai::config::UDM_CONFIG_NAME)->get_sbi().get_url() +
+      NUDM_SDM_BASE +
+      smf_cfg->get_nf(oai::config::UDM_CONFIG_NAME)
+          ->get_sbi()
+          .get_api_version() +
+      fmt::format(NUDM_SDM_GET_SM_DATA_URL, smf_supi64_to_string(supi)) +
+      query_str;
 
   Logger::smf_sbi().debug("UDM's URL: %s ", url.c_str());
 
@@ -877,7 +867,8 @@ bool smf_sbi::get_sm_data(
   add_promise(promise_id, p);
 
   // Create a new curl easy handle and add to the multi handle
-  if (!curl_create_handle(url, response_data, pid_ptr, "GET")) {
+  if (!curl_create_handle(
+          url, response_data, pid_ptr, "GET", smf_cfg->get_http_version())) {
     Logger::smf_sbi().warn("Could not create a new handle to send message");
     remove_promise(promise_id);
     return false;
@@ -911,6 +902,11 @@ bool smf_sbi::get_sm_data(
 
   // Process the response
   if (!jsonData.empty()) {
+    if (jsonData.type() == json::value_t::array) {
+      if (!jsonData[0].empty())
+        jsonData = jsonData[0];  // Array with only 1 member!
+    }
+
     Logger::smf_sbi().debug("Response from UDM %s", jsonData.dump().c_str());
     // Verify SNSSAI
     if (jsonData.find("singleNssai") == jsonData.end()) return false;
@@ -922,7 +918,7 @@ bool smf_sbi::get_sm_data(
     }
     if (jsonData["singleNssai"].find("sd") != jsonData["singleNssai"].end()) {
       std::string sd_str = jsonData["singleNssai"]["sd"];
-      uint32_t sd        = 0xFFFFFF;
+      uint32_t sd        = SD_NO_VALUE;
       xgpp_conv::sd_string_to_int(
           jsonData["singleNssai"]["sd"].get<std::string>(), sd);
       if (sd != snssai.sd) {
@@ -930,135 +926,143 @@ bool smf_sbi::get_sm_data(
       }
     }
 
+    // Verify DNN configurations
+    if (jsonData.find("dnnConfigurations") == jsonData.end()) return false;
+    Logger::smf_sbi().debug(
+        "DNN Configurations %s", jsonData["dnnConfigurations"].dump().c_str());
+
     // Retrieve SessionManagementSubscription and store in the context
     for (nlohmann::json::iterator it = jsonData["dnnConfigurations"].begin();
          it != jsonData["dnnConfigurations"].end(); ++it) {
       Logger::smf_sbi().debug("DNN %s", it.key().c_str());
-      if (it.key().compare(dnn) != 0) break;
-
-      try {
-        std::shared_ptr<dnn_configuration_t> dnn_configuration =
-            std::make_shared<dnn_configuration_t>();
-        // PDU Session Type (Mandatory)
-        std::string default_session_type =
-            it.value()["pduSessionTypes"]["defaultSessionType"];
-        Logger::smf_sbi().debug(
-            "Default session type %s", default_session_type.c_str());
-        pdu_session_type_t pdu_session_type(default_session_type);
-        dnn_configuration->pdu_session_types.default_session_type =
-            pdu_session_type;
-
-        // SSC_Mode (Mandatory)
-        std::string default_ssc_mode = it.value()["sscModes"]["defaultSscMode"];
-        Logger::smf_sbi().debug(
-            "Default SSC Mode %s", default_ssc_mode.c_str());
-        ssc_mode_t ssc_mode(default_ssc_mode);
-        dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode;
-
-        // 5gQosProfile (Optional)
-        if (it.value().find("5gQosProfile") != it.value().end()) {
-          dnn_configuration->_5g_qos_profile._5qi =
-              it.value()["5gQosProfile"]["5qi"];
-          dnn_configuration->_5g_qos_profile.arp.priority_level =
-              it.value()["5gQosProfile"]["arp"]["priorityLevel"];
-          dnn_configuration->_5g_qos_profile.arp.preempt_cap =
-              it.value()["5gQosProfile"]["arp"]["preemptCap"];
-          dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
-              it.value()["5gQosProfile"]["arp"]["preemptVuln"];
-          // Optinal
-          if (it.value()["5gQosProfile"].find("") !=
-              it.value()["5gQosProfile"].end()) {
-            dnn_configuration->_5g_qos_profile.priority_level =
-                it.value()["5gQosProfile"]["5QiPriorityLevel"];
-          }
-        }
-
-        // session_ambr (Optional)
-        if (it.value().find("sessionAmbr") != it.value().end()) {
-          dnn_configuration->session_ambr.uplink =
-              it.value()["sessionAmbr"]["uplink"];
-          dnn_configuration->session_ambr.downlink =
-              it.value()["sessionAmbr"]["downlink"];
+      if (it.key().compare(dnn) == 0) {
+        // Get DNN configuration
+        try {
+          std::shared_ptr<dnn_configuration_t> dnn_configuration =
+              std::make_shared<dnn_configuration_t>();
+          // PDU Session Type (Mandatory)
+          std::string default_session_type =
+              it.value()["pduSessionTypes"]["defaultSessionType"];
           Logger::smf_sbi().debug(
-              "Session AMBR Uplink %s, Downlink %s",
-              dnn_configuration->session_ambr.uplink.c_str(),
-              dnn_configuration->session_ambr.downlink.c_str());
-        }
+              "Default session type %s", default_session_type.c_str());
+          pdu_session_type_t pdu_session_type(default_session_type);
+          dnn_configuration->pdu_session_types.default_session_type =
+              pdu_session_type;
 
-        // Static IP Addresses (Optional)
-        if (it.value().find("staticIpAddress") != it.value().end()) {
-          for (const auto& ip_addr : it.value()["staticIpAddress"]) {
-            if (ip_addr.find("ipv4Addr") != ip_addr.end()) {
-              struct in_addr ue_ipv4_addr = {};
-              std::string ue_ip_str = ip_addr["ipv4Addr"].get<std::string>();
-              // ip_addr.at("ipv4Addr").get_to(ue_ip_str);
-              IPV4_STR_ADDR_TO_INADDR(
-                  util::trim(ue_ip_str).c_str(), ue_ipv4_addr,
-                  "BAD IPv4 ADDRESS FORMAT FOR UE IP ADDR !");
-              ip_address_t ue_ip = {};
-              ue_ip              = ue_ipv4_addr;
-              dnn_configuration->static_ip_addresses.push_back(ue_ip);
-            } else if (ip_addr.find("ipv6Addr") != ip_addr.end()) {
-              unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-              struct in6_addr ue_ipv6_addr;
-              std::string ue_ip_str = ip_addr["ipv6Addr"].get<std::string>();
+          // SSC_Mode (Mandatory)
+          std::string default_ssc_mode =
+              it.value()["sscModes"]["defaultSscMode"];
+          Logger::smf_sbi().debug(
+              "Default SSC Mode %s", default_ssc_mode.c_str());
+          ssc_mode_t ssc_mode(default_ssc_mode);
+          dnn_configuration->ssc_modes.default_ssc_mode = ssc_mode;
 
-              if (inet_pton(
-                      AF_INET6, util::trim(ue_ip_str).c_str(), buf_in6_addr) ==
-                  1) {
-                memcpy(&ue_ipv6_addr, buf_in6_addr, sizeof(struct in6_addr));
-              } else {
-                Logger::smf_app().error(
-                    "Bad UE IPv6 Addr %s", ue_ip_str.c_str());
-                throw("Bad UE IPv6 Addr %s", ue_ip_str.c_str());
-              }
-
-              ip_address_t ue_ip = {};
-              ue_ip              = ue_ipv6_addr;
-              dnn_configuration->static_ip_addresses.push_back(ue_ip);
-            } else if (ip_addr.find("ipv6Prefix") != ip_addr.end()) {
-              unsigned char buf_in6_addr[sizeof(struct in6_addr)];
-              struct in6_addr ipv6_prefix;
-              std::string prefix_str = ip_addr["ipv6Prefix"].get<std::string>();
-              std::vector<std::string> words = {};
-              boost::split(
-                  words, prefix_str, boost::is_any_of("/"),
-                  boost::token_compress_on);
-              if (words.size() != 2) {
-                Logger::smf_app().error(
-                    "Bad value for UE IPv6 Prefix %s", prefix_str.c_str());
-                return RETURNerror;
-              }
-
-              if (inet_pton(
-                      AF_INET6, util::trim(words.at(0)).c_str(),
-                      buf_in6_addr) == 1) {
-                memcpy(&ipv6_prefix, buf_in6_addr, sizeof(struct in6_addr));
-              } else {
-                Logger::smf_app().error(
-                    "Bad UE IPv6 Addr %s", words.at(0).c_str());
-                throw("Bad UE IPv6 Addr %s", words.at(0).c_str());
-              }
-
-              ip_address_t ue_ip           = {};
-              ipv6_prefix_t ue_ipv6_prefix = {};
-              ue_ipv6_prefix.prefix_len    = std::stoi(util::trim(words.at(1)));
-              ue_ipv6_prefix.prefix        = ipv6_prefix;
-              ue_ip                        = ue_ipv6_prefix;
-              dnn_configuration->static_ip_addresses.push_back(ue_ip);
+          // 5gQosProfile (Optional)
+          if (it.value().find("5gQosProfile") != it.value().end()) {
+            dnn_configuration->_5g_qos_profile._5qi =
+                it.value()["5gQosProfile"]["5qi"];
+            dnn_configuration->_5g_qos_profile.arp.priority_level =
+                it.value()["5gQosProfile"]["arp"]["priorityLevel"];
+            dnn_configuration->_5g_qos_profile.arp.preempt_cap =
+                it.value()["5gQosProfile"]["arp"]["preemptCap"];
+            dnn_configuration->_5g_qos_profile.arp.preempt_vuln =
+                it.value()["5gQosProfile"]["arp"]["preemptVuln"];
+            // Optinal
+            if (it.value()["5gQosProfile"].find("") !=
+                it.value()["5gQosProfile"].end()) {
+              dnn_configuration->_5g_qos_profile.priority_level =
+                  it.value()["5gQosProfile"]["5QiPriorityLevel"];
             }
           }
-        }
 
-        subscription->insert_dnn_configuration(it.key(), dnn_configuration);
-        return true;
-      } catch (nlohmann::json::exception& e) {
-        Logger::smf_sbi().warn(
-            "Exception message %s, exception id %d ", e.what(), e.id);
-        return false;
-      } catch (std::exception& e) {
-        Logger::smf_sbi().warn("Exception message %s", e.what());
-        return false;
+          // session_ambr (Optional)
+          if (it.value().find("sessionAmbr") != it.value().end()) {
+            dnn_configuration->session_ambr.uplink =
+                it.value()["sessionAmbr"]["uplink"];
+            dnn_configuration->session_ambr.downlink =
+                it.value()["sessionAmbr"]["downlink"];
+            Logger::smf_sbi().debug(
+                "Session AMBR Uplink %s, Downlink %s",
+                dnn_configuration->session_ambr.uplink.c_str(),
+                dnn_configuration->session_ambr.downlink.c_str());
+          }
+
+          // Static IP Addresses (Optional)
+          if (it.value().find("staticIpAddress") != it.value().end()) {
+            for (const auto& ip_addr : it.value()["staticIpAddress"]) {
+              if (ip_addr.find("ipv4Addr") != ip_addr.end()) {
+                struct in_addr ue_ipv4_addr = {};
+                std::string ue_ip_str = ip_addr["ipv4Addr"].get<std::string>();
+                // ip_addr.at("ipv4Addr").get_to(ue_ip_str);
+                IPV4_STR_ADDR_TO_INADDR(
+                    util::trim(ue_ip_str).c_str(), ue_ipv4_addr,
+                    "BAD IPv4 ADDRESS FORMAT FOR UE IP ADDR !");
+                ip_address_t ue_ip = {};
+                ue_ip              = ue_ipv4_addr;
+                dnn_configuration->static_ip_addresses.push_back(ue_ip);
+              } else if (ip_addr.find("ipv6Addr") != ip_addr.end()) {
+                unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+                struct in6_addr ue_ipv6_addr;
+                std::string ue_ip_str = ip_addr["ipv6Addr"].get<std::string>();
+
+                if (inet_pton(
+                        AF_INET6, util::trim(ue_ip_str).c_str(),
+                        buf_in6_addr) == 1) {
+                  memcpy(&ue_ipv6_addr, buf_in6_addr, sizeof(struct in6_addr));
+                } else {
+                  Logger::smf_app().error(
+                      "Bad UE IPv6 Addr %s", ue_ip_str.c_str());
+                  ue_ipv6_addr = in6addr_any;
+                }
+
+                ip_address_t ue_ip = {};
+                ue_ip              = ue_ipv6_addr;
+                dnn_configuration->static_ip_addresses.push_back(ue_ip);
+              } else if (ip_addr.find("ipv6Prefix") != ip_addr.end()) {
+                unsigned char buf_in6_addr[sizeof(struct in6_addr)];
+                struct in6_addr ipv6_prefix;
+                std::string prefix_str =
+                    ip_addr["ipv6Prefix"].get<std::string>();
+                std::vector<std::string> words = {};
+                boost::split(
+                    words, prefix_str, boost::is_any_of("/"),
+                    boost::token_compress_on);
+                if (words.size() != 2) {
+                  Logger::smf_app().error(
+                      "Bad value for UE IPv6 Prefix %s", prefix_str.c_str());
+                  return RETURNerror;
+                }
+
+                if (inet_pton(
+                        AF_INET6, util::trim(words.at(0)).c_str(),
+                        buf_in6_addr) == 1) {
+                  memcpy(&ipv6_prefix, buf_in6_addr, sizeof(struct in6_addr));
+                } else {
+                  Logger::smf_app().error(
+                      "Bad UE IPv6 Addr %s", words.at(0).c_str());
+                  ipv6_prefix = in6addr_any;
+                }
+
+                ip_address_t ue_ip           = {};
+                ipv6_prefix_t ue_ipv6_prefix = {};
+                ue_ipv6_prefix.prefix_len = std::stoi(util::trim(words.at(1)));
+                ue_ipv6_prefix.prefix     = ipv6_prefix;
+                ue_ip                     = ue_ipv6_prefix;
+                dnn_configuration->static_ip_addresses.push_back(ue_ip);
+              }
+            }
+          }
+
+          subscription->insert_dnn_configuration(it.key(), dnn_configuration);
+          return true;
+        } catch (nlohmann::json::exception& e) {
+          Logger::smf_sbi().warn(
+              "Exception message %s, exception id %d ", e.what(), e.id);
+          return false;
+        } catch (std::exception& e) {
+          Logger::smf_sbi().warn("Exception message %s", e.what());
+          return false;
+        }
       }
     }
     return true;
@@ -1080,10 +1084,16 @@ bool smf_sbi::curl_create_handle(
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
+  headers = nullptr;
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "Charsets: utf-8");
+
   if (is_multipart) {
-    std::string content_type = "content-type: multipart/related; boundary=" +
+    std::string content_type = "Content-type: multipart/related; boundary=" +
                                std::string(CURL_MIME_BOUNDARY);
     headers = curl_slist_append(headers, content_type.c_str());
+  } else {
+    headers = curl_slist_append(headers, "Content-Type: application/json");
   }
 
   if ((curl == nullptr) or (headers == nullptr)) {
@@ -1093,7 +1103,6 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
   if (method.compare("POST") == 0)
     curl_easy_setopt(curl, CURLOPT_POST, 1);
@@ -1105,10 +1114,11 @@ bool smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg->sbi.if_name.c_str());
 
   if (http_version == 2) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if (Logger::should_log(spdlog::level::debug))
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     // We use a self-signed test server, skip verification during debugging
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -1141,6 +1151,11 @@ bool smf_sbi::curl_create_handle(
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
 
+  headers = nullptr;
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "Charsets: utf-8");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+
   if ((curl == nullptr) or (headers == nullptr)) {
     Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
     return false;
@@ -1148,7 +1163,6 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
 
   if (method.compare("POST") == 0)
@@ -1161,10 +1175,11 @@ bool smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg->sbi.if_name.c_str());
 
   if (http_version == 2) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if (Logger::should_log(spdlog::level::debug))
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     // We use a self-signed test server, skip verification during debugging
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -1190,12 +1205,20 @@ bool smf_sbi::curl_create_handle(
   return true;
 }
 
+// TODO we should not repeat ourselves... propose to make a private function
+// which does curl_init
 //------------------------------------------------------------------------------
 bool smf_sbi::curl_create_handle(
-    const std::string& uri, std::string& response_data, uint32_t* promise_id,
+    const std::string& uri, const std::string& data, std::string& response_data,
+    std::string& response_headers, uint32_t* promise_id,
     const std::string& method, uint8_t http_version) {
   // Create handle for a curl request
   CURL* curl = curl_easy_init();
+
+  headers = nullptr;
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "Charsets: utf-8");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
 
   if ((curl == nullptr) or (headers == nullptr)) {
     Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
@@ -1204,7 +1227,68 @@ bool smf_sbi::curl_create_handle(
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-  // curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+  curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
+
+  if (method.compare("POST") == 0)
+    curl_easy_setopt(curl, CURLOPT_POST, 1);
+  else if (method.compare("PATCH") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+  else if (method.compare("PUT") == 0)
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+  else
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg->sbi.if_name.c_str());
+
+  if (http_version == 2) {
+    if (Logger::should_log(spdlog::level::debug))
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    // We use a self-signed test server, skip verification during debugging
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(
+        curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
+  }
+
+  // Hook up data handling function.
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
+  curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &response_headers);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  if (method.compare("DELETE") != 0) {
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.length());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+  }
+  // Add to the multi handle
+  curl_multi_add_handle(curl_multi, curl);
+  handles.push_back(curl);
+
+  // Curl cmd will actually be performed in perform_curl_multi
+  perform_curl_multi(
+      0);  // TODO: current time as parameter if curl is performed per event
+  return true;
+}
+
+//------------------------------------------------------------------------------
+bool smf_sbi::curl_create_handle(
+    const std::string& uri, std::string& response_data, uint32_t* promise_id,
+    const std::string& method, uint8_t http_version) {
+  // Create handle for a curl request
+  CURL* curl = curl_easy_init();
+
+  headers = nullptr;
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "Charsets: utf-8");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+
+  if ((curl == nullptr) or (headers == nullptr)) {
+    Logger::smf_sbi().error("Cannot initialize a new Curl Handle");
+    return false;
+  }
+
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
   curl_easy_setopt(curl, CURLOPT_PRIVATE, promise_id);
 
   if (method.compare("DELETE") == 0)
@@ -1213,10 +1297,11 @@ bool smf_sbi::curl_create_handle(
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
 
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, NF_CURL_TIMEOUT_MS);
-  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg.sbi.if_name.c_str());
+  curl_easy_setopt(curl, CURLOPT_INTERFACE, smf_cfg->sbi.if_name.c_str());
 
   if (http_version == 2) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    if (Logger::should_log(spdlog::level::debug))
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     // We use a self-signed test server, skip verification during debugging
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -1314,13 +1399,18 @@ void smf_sbi::curl_release_handles() {
 
 //---------------------------------------------------------------------------------------------
 uint32_t smf_sbi::get_available_response(boost::shared_future<uint32_t>& f) {
-  f.wait();  // Wait for it to finish
-  assert(f.is_ready());
-  assert(f.has_value());
-  assert(!f.has_exception());
-
-  uint32_t response_code = f.get();
-  return response_code;
+  boost::future_status status;
+  // wait for timeout or ready
+  status = f.wait_for(boost::chrono::milliseconds(FUTURE_STATUS_TIMEOUT_MS));
+  if (status == boost::future_status::ready) {
+    assert(f.is_ready());
+    assert(f.has_value());
+    assert(!f.has_exception());
+    uint32_t response_code = f.get();
+    return response_code;
+  } else {
+    return http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
+  }
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1348,4 +1438,11 @@ void smf_sbi::trigger_process_response(uint32_t pid, uint32_t http_code) {
     // Remove this promise from list
     curl_handle_promises.erase(pid);
   }
+}
+
+//------------------------------------------------------------------------------
+std::string smf_sbi::get_nrf_base_url() {
+  auto nrf_sbi = smf_cfg->get_nf(oai::config::NRF_CONFIG_NAME)->get_sbi();
+  return nrf_sbi.get_url() + NNRF_NFM_BASE + nrf_sbi.get_api_version() +
+         NNRF_NF_REGISTER_URL;
 }

@@ -46,10 +46,9 @@ typedef bs2::signal_type<
     bs2::keywords::mutex_type<bs2::dummy_mutex>>::type sm_context_status_sig_t;
 
 // Signal for Event exposure
-// PDU session Release, SUPI, PDU SessionID, HTTP version
+// PDU session Release, SCID, HTTP version
 typedef bs2::signal_type<
-    void(supi64_t, pdu_session_id_t, uint8_t),
-    bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
+    void(scid_t, uint8_t), bs2::keywords::mutex_type<bs2::dummy_mutex>>::type
     ee_pdu_session_release_sig_t;
 
 // TODO: ee_ue_ip_address_change_sig_t; //UI IP Address, UE ID

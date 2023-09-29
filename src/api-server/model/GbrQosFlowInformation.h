@@ -63,8 +63,8 @@ class GbrQosFlowInformation {
   /// <summary>
   ///
   /// </summary>
-  NotificationControl getNotifControl() const;
-  void setNotifControl(NotificationControl const& value);
+  oai::model::common::NotificationControl getNotifControl() const;
+  void setNotifControl(oai::model::common::NotificationControl const& value);
   bool notifControlIsSet() const;
   void unsetNotifControl();
   /// <summary>
@@ -94,7 +94,7 @@ class GbrQosFlowInformation {
 
   std::string m_GuaFbrUl;
 
-  NotificationControl m_NotifControl;
+  oai::model::common::NotificationControl m_NotifControl;
   bool m_NotifControlIsSet;
   int32_t m_MaxPacketLossRateDl;
   bool m_MaxPacketLossRateDlIsSet;

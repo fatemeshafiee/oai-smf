@@ -46,14 +46,14 @@ int encode_plmn_list(
 
   for (; plmn_index < 15; plmn_index++) {
     mcc_mnc_value = 0;
-    mcc_mnc_value |= (uint8_t)(plmnlist[plmn_index].mcc & 0x00ff);
+    mcc_mnc_value |= (uint8_t) (plmnlist[plmn_index].mcc & 0x00ff);
     ENCODE_U8(buffer + encoded, mcc_mnc_value, encoded);
     mcc_mnc_value = 0x0;
-    mcc_mnc_value = (uint8_t)((plmnlist[plmn_index].mcc & 0x0f00) >> 8) |
-                    (uint8_t)((plmnlist[plmn_index].mnc & 0x0f00) >> 4);
+    mcc_mnc_value = (uint8_t) ((plmnlist[plmn_index].mcc & 0x0f00) >> 8) |
+                    (uint8_t) ((plmnlist[plmn_index].mnc & 0x0f00) >> 4);
     ENCODE_U8(buffer + encoded, mcc_mnc_value, encoded);
     mcc_mnc_value = 0x0;
-    mcc_mnc_value |= (uint8_t)(plmnlist[plmn_index].mnc & 0x00ff);
+    mcc_mnc_value |= (uint8_t) (plmnlist[plmn_index].mnc & 0x00ff);
     ENCODE_U8(buffer + encoded, mcc_mnc_value, encoded);
   }
 

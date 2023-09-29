@@ -112,8 +112,9 @@ class NsmfEventExposure {
   /// <summary>
   /// Alternate or backup IPv6 Addess(es) where to send Notifications.
   /// </summary>
-  std::vector<Ipv6Addr>& getAltNotifIpv6Addrs();
-  void setAltNotifIpv6Addrs(std::vector<Ipv6Addr> const& value);
+  std::vector<oai::model::common::Ipv6Addr>& getAltNotifIpv6Addrs();
+  void setAltNotifIpv6Addrs(
+      std::vector<oai::model::common::Ipv6Addr> const& value);
   bool altNotifIpv6AddrsIsSet() const;
   void unsetAltNotifIpv6Addrs();
   /// <summary>
@@ -160,8 +161,8 @@ class NsmfEventExposure {
   /// <summary>
   ///
   /// </summary>
-  Guami getGuami() const;
-  void setGuami(Guami const& value);
+  oai::model::common::Guami getGuami() const;
+  void setGuami(oai::model::common::Guami const& value);
   bool guamiIsSet() const;
   void unsetGuami();
   /// <summary>
@@ -203,7 +204,7 @@ class NsmfEventExposure {
 
   std::vector<std::string> m_AltNotifIpv4Addrs;
   bool m_AltNotifIpv4AddrsIsSet;
-  std::vector<Ipv6Addr> m_AltNotifIpv6Addrs;
+  std::vector<oai::model::common::Ipv6Addr> m_AltNotifIpv6Addrs;
   bool m_AltNotifIpv6AddrsIsSet;
   std::vector<EventSubscription> m_EventSubs;
 
@@ -217,7 +218,7 @@ class NsmfEventExposure {
   bool m_ExpiryIsSet;
   int32_t m_RepPeriod;
   bool m_RepPeriodIsSet;
-  Guami m_Guami;
+  oai::model::common::Guami m_Guami;
   bool m_GuamiIsSet;
   std::string m_ServiveName;
   bool m_ServiveNameIsSet;

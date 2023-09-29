@@ -55,8 +55,8 @@ class ReleaseData {
   /// <summary>
   ///
   /// </summary>
-  NgApCause getNgApCause() const;
-  void setNgApCause(NgApCause const& value);
+  oai::model::common::NgApCause getNgApCause() const;
+  void setNgApCause(oai::model::common::NgApCause const& value);
   bool ngApCauseIsSet() const;
   void unsetNgApCause();
   /// <summary>
@@ -69,8 +69,8 @@ class ReleaseData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUeLocation() const;
-  void setUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getUeLocation() const;
+  void setUeLocation(oai::model::common::UserLocation const& value);
   bool ueLocationIsSet() const;
   void unsetUeLocation();
   /// <summary>
@@ -83,20 +83,22 @@ class ReleaseData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getAddUeLocation() const;
-  void setAddUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getAddUeLocation() const;
+  void setAddUeLocation(oai::model::common::UserLocation const& value);
   bool addUeLocationIsSet() const;
   void unsetAddUeLocation();
   /// <summary>
   ///
   /// </summary>
-  std::vector<SecondaryRatUsageReport>& getSecondaryRatUsageReport();
+  std::vector<oai::model::common::SecondaryRatUsageReport>&
+  getSecondaryRatUsageReport();
   bool secondaryRatUsageReportIsSet() const;
   void unsetSecondaryRatUsageReport();
   /// <summary>
   ///
   /// </summary>
-  std::vector<SecondaryRatUsageInfo>& getSecondaryRatUsageInfo();
+  std::vector<oai::model::common::SecondaryRatUsageInfo>&
+  getSecondaryRatUsageInfo();
   bool secondaryRatUsageInfoIsSet() const;
   void unsetSecondaryRatUsageInfo();
 
@@ -106,19 +108,21 @@ class ReleaseData {
  protected:
   Cause m_Cause;
   bool m_CauseIsSet;
-  NgApCause m_NgApCause;
+  oai::model::common::NgApCause m_NgApCause;
   bool m_NgApCauseIsSet;
   int32_t m__5gMmCauseValue;
   bool m__5gMmCauseValueIsSet;
-  UserLocation m_UeLocation;
+  oai::model::common::UserLocation m_UeLocation;
   bool m_UeLocationIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
-  UserLocation m_AddUeLocation;
+  oai::model::common::UserLocation m_AddUeLocation;
   bool m_AddUeLocationIsSet;
-  std::vector<SecondaryRatUsageReport> m_SecondaryRatUsageReport;
+  std::vector<oai::model::common::SecondaryRatUsageReport>
+      m_SecondaryRatUsageReport;
   bool m_SecondaryRatUsageReportIsSet;
-  std::vector<SecondaryRatUsageInfo> m_SecondaryRatUsageInfo;
+  std::vector<oai::model::common::SecondaryRatUsageInfo>
+      m_SecondaryRatUsageInfo;
   bool m_SecondaryRatUsageInfoIsSet;
 };
 

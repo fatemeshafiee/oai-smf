@@ -44,13 +44,13 @@ class SmContextCreateError {
   /// <summary>
   ///
   /// </summary>
-  ProblemDetails getError() const;
-  void setError(ProblemDetails const& value);
+  oai::model::common::ProblemDetails getError() const;
+  void setError(oai::model::common::ProblemDetails const& value);
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmMsg() const;
-  void setN1SmMsg(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmMsg() const;
+  void setN1SmMsg(oai::model::common::RefToBinaryData const& value);
   bool n1SmMsgIsSet() const;
   void unsetN1SmMsg();
   /// <summary>
@@ -65,9 +65,9 @@ class SmContextCreateError {
   friend void from_json(const nlohmann::json& j, SmContextCreateError& o);
 
  protected:
-  ProblemDetails m_Error;
+  oai::model::common::ProblemDetails m_Error;
 
-  RefToBinaryData m_N1SmMsg;
+  oai::model::common::RefToBinaryData m_N1SmMsg;
   bool m_N1SmMsgIsSet;
   std::string m_RecoveryTime;
   bool m_RecoveryTimeIsSet;

@@ -54,8 +54,8 @@ class SmContextReleaseData {
   /// <summary>
   ///
   /// </summary>
-  NgApCause getNgApCause() const;
-  void setNgApCause(NgApCause const& value);
+  oai::model::common::NgApCause getNgApCause() const;
+  void setNgApCause(oai::model::common::NgApCause const& value);
   bool ngApCauseIsSet() const;
   void unsetNgApCause();
   /// <summary>
@@ -68,8 +68,8 @@ class SmContextReleaseData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getUeLocation() const;
-  void setUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getUeLocation() const;
+  void setUeLocation(oai::model::common::UserLocation const& value);
   bool ueLocationIsSet() const;
   void unsetUeLocation();
   /// <summary>
@@ -82,8 +82,8 @@ class SmContextReleaseData {
   /// <summary>
   ///
   /// </summary>
-  UserLocation getAddUeLocation() const;
-  void setAddUeLocation(UserLocation const& value);
+  oai::model::common::UserLocation getAddUeLocation() const;
+  void setAddUeLocation(oai::model::common::UserLocation const& value);
   bool addUeLocationIsSet() const;
   void unsetAddUeLocation();
   /// <summary>
@@ -96,8 +96,8 @@ class SmContextReleaseData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN2SmInfo() const;
-  void setN2SmInfo(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN2SmInfo() const;
+  void setN2SmInfo(oai::model::common::RefToBinaryData const& value);
   bool n2SmInfoIsSet() const;
   void unsetN2SmInfo();
   /// <summary>
@@ -121,19 +121,19 @@ class SmContextReleaseData {
  protected:
   std::string m_Cause;
   bool m_CauseIsSet;
-  NgApCause m_NgApCause;
+  oai::model::common::NgApCause m_NgApCause;
   bool m_NgApCauseIsSet;
   int32_t m__5gMmCauseValue;
   bool m__5gMmCauseValueIsSet;
-  UserLocation m_UeLocation;
+  oai::model::common::UserLocation m_UeLocation;
   bool m_UeLocationIsSet;
   std::string m_UeTimeZone;
   bool m_UeTimeZoneIsSet;
-  UserLocation m_AddUeLocation;
+  oai::model::common::UserLocation m_AddUeLocation;
   bool m_AddUeLocationIsSet;
   bool m_VsmfReleaseOnly;
   bool m_VsmfReleaseOnlyIsSet;
-  RefToBinaryData m_N2SmInfo;
+  oai::model::common::RefToBinaryData m_N2SmInfo;
   bool m_N2SmInfoIsSet;
   std::string m_N2SmInfoType;
   bool m_N2SmInfoTypeIsSet;

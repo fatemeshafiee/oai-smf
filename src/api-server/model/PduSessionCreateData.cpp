@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 PduSessionCreateData::PduSessionCreateData() {
   m_Supi                         = "";
   m_SupiIsSet                    = false;
@@ -349,10 +351,10 @@ std::string PduSessionCreateData::getDnn() const {
 void PduSessionCreateData::setDnn(std::string const& value) {
   m_Dnn = value;
 }
-Snssai PduSessionCreateData::getSNssai() const {
+oai::model::common::Snssai PduSessionCreateData::getSNssai() const {
   return m_SNssai;
 }
-void PduSessionCreateData::setSNssai(Snssai const& value) {
+void PduSessionCreateData::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai      = value;
   m_SNssaiIsSet = true;
 }
@@ -368,10 +370,11 @@ std::string PduSessionCreateData::getVsmfId() const {
 void PduSessionCreateData::setVsmfId(std::string const& value) {
   m_VsmfId = value;
 }
-PlmnId PduSessionCreateData::getServingNetwork() const {
+oai::model::common::PlmnId PduSessionCreateData::getServingNetwork() const {
   return m_ServingNetwork;
 }
-void PduSessionCreateData::setServingNetwork(PlmnId const& value) {
+void PduSessionCreateData::setServingNetwork(
+    oai::model::common::PlmnId const& value) {
   m_ServingNetwork = value;
 }
 RequestType PduSessionCreateData::getRequestType() const {
@@ -428,16 +431,18 @@ bool PduSessionCreateData::vcnTunnelInfoIsSet() const {
 void PduSessionCreateData::unsetVcnTunnelInfo() {
   m_VcnTunnelInfoIsSet = false;
 }
-AccessType PduSessionCreateData::getAnType() const {
+oai::model::common::AccessType PduSessionCreateData::getAnType() const {
   return m_AnType;
 }
-void PduSessionCreateData::setAnType(AccessType const& value) {
+void PduSessionCreateData::setAnType(
+    oai::model::common::AccessType const& value) {
   m_AnType = value;
 }
-AccessType PduSessionCreateData::getSecondAnType() const {
+oai::model::common::AccessType PduSessionCreateData::getSecondAnType() const {
   return m_SecondAnType;
 }
-void PduSessionCreateData::setSecondAnType(AccessType const& value) {
+void PduSessionCreateData::setSecondAnType(
+    oai::model::common::AccessType const& value) {
   m_SecondAnType      = value;
   m_SecondAnTypeIsSet = true;
 }

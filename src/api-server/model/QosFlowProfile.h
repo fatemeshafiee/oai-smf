@@ -52,22 +52,22 @@ class QosFlowProfile {
   /// <summary>
   ///
   /// </summary>
-  NonDynamic5Qi getNonDynamic5Qi() const;
-  void setNonDynamic5Qi(NonDynamic5Qi const& value);
+  oai::model::common::NonDynamic5Qi getNonDynamic5Qi() const;
+  void setNonDynamic5Qi(oai::model::common::NonDynamic5Qi const& value);
   bool nonDynamic5QiIsSet() const;
   void unsetNonDynamic5Qi();
   /// <summary>
   ///
   /// </summary>
-  Dynamic5Qi getDynamic5Qi() const;
-  void setDynamic5Qi(Dynamic5Qi const& value);
+  oai::model::common::Dynamic5Qi getDynamic5Qi() const;
+  void setDynamic5Qi(oai::model::common::Dynamic5Qi const& value);
   bool dynamic5QiIsSet() const;
   void unsetDynamic5Qi();
   /// <summary>
   ///
   /// </summary>
-  Arp getArp() const;
-  void setArp(Arp const& value);
+  oai::model::common::Arp getArp() const;
+  void setArp(oai::model::common::Arp const& value);
   bool arpIsSet() const;
   void unsetArp();
   /// <summary>
@@ -80,15 +80,16 @@ class QosFlowProfile {
   /// <summary>
   ///
   /// </summary>
-  ReflectiveQoSAttribute getRqa() const;
-  void setRqa(ReflectiveQoSAttribute const& value);
+  oai::model::common::ReflectiveQoSAttribute getRqa() const;
+  void setRqa(oai::model::common::ReflectiveQoSAttribute const& value);
   bool rqaIsSet() const;
   void unsetRqa();
   /// <summary>
   ///
   /// </summary>
-  AdditionalQosFlowInfo getAdditionalQosFlowInfo() const;
-  void setAdditionalQosFlowInfo(AdditionalQosFlowInfo const& value);
+  oai::model::common::AdditionalQosFlowInfo getAdditionalQosFlowInfo() const;
+  void setAdditionalQosFlowInfo(
+      oai::model::common::AdditionalQosFlowInfo const& value);
   bool additionalQosFlowInfoIsSet() const;
   void unsetAdditionalQosFlowInfo();
 
@@ -98,17 +99,17 @@ class QosFlowProfile {
  protected:
   int32_t m__5qi;
 
-  NonDynamic5Qi m_NonDynamic5Qi;
+  oai::model::common::NonDynamic5Qi m_NonDynamic5Qi;
   bool m_NonDynamic5QiIsSet;
-  Dynamic5Qi m_Dynamic5Qi;
+  oai::model::common::Dynamic5Qi m_Dynamic5Qi;
   bool m_Dynamic5QiIsSet;
-  Arp m_Arp;
+  oai::model::common::Arp m_Arp;
   bool m_ArpIsSet;
   GbrQosFlowInformation m_GbrQosFlowInfo;
   bool m_GbrQosFlowInfoIsSet;
-  ReflectiveQoSAttribute m_Rqa;
+  oai::model::common::ReflectiveQoSAttribute m_Rqa;
   bool m_RqaIsSet;
-  AdditionalQosFlowInfo m_AdditionalQosFlowInfo;
+  oai::model::common::AdditionalQosFlowInfo m_AdditionalQosFlowInfo;
   bool m_AdditionalQosFlowInfoIsSet;
 };
 

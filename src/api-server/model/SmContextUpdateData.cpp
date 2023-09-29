@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 SmContextUpdateData::SmContextUpdateData() {
   m_Pei                     = "";
   m_PeiIsSet                = false;

@@ -42,8 +42,8 @@ class HsmfUpdatedData {
   /// <summary>
   ///
   /// </summary>
-  RefToBinaryData getN1SmInfoToUe() const;
-  void setN1SmInfoToUe(RefToBinaryData const& value);
+  oai::model::common::RefToBinaryData getN1SmInfoToUe() const;
+  void setN1SmInfoToUe(oai::model::common::RefToBinaryData const& value);
   bool n1SmInfoToUeIsSet() const;
   void unsetN1SmInfoToUe();
 
@@ -51,7 +51,7 @@ class HsmfUpdatedData {
   friend void from_json(const nlohmann::json& j, HsmfUpdatedData& o);
 
  protected:
-  RefToBinaryData m_N1SmInfoToUe;
+  oai::model::common::RefToBinaryData m_N1SmInfoToUe;
   bool m_N1SmInfoToUeIsSet;
 };
 

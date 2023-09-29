@@ -46,6 +46,8 @@
 #include "smf_event.hpp"
 #include "smf_procedure.hpp"
 #include "uint_generator.hpp"
+#include "smf_n7.hpp"
+#include "smf_pfcp_association.hpp"
 
 extern "C" {
 #include "Ngap_PDUSessionAggregateMaximumBitRate.h"
@@ -53,63 +55,12 @@ extern "C" {
 #include "QOSFlowDescriptions.h"
 #include "QOSRules.h"
 #include "nas_message.h"
+#include "smf_pfcp_association.hpp"
 }
 
 using namespace boost::placeholders;
 
 namespace smf {
-
-class smf_qos_flow {
- public:
-  smf_qos_flow() { clear(); }
-
-  void clear() {
-    ul_fteid    = {};
-    dl_fteid    = {};
-    pdr_id_ul   = {};
-    pdr_id_dl   = {};
-    precedence  = {};
-    far_id_ul   = {};
-    far_id_dl   = {};
-    released    = false;
-    qos_profile = {};
-    cause_value = 0;
-  }
-
-  /*
-   * Release resources associated with this flow
-   * @param void
-   * @return void
-   */
-  void deallocate_ressources();
-
-  /*
-   * Mark this flow as released
-   * @param void
-   * @return void
-   */
-  void mark_as_released();
-
-  /*
-   * Represent flow as string to be printed
-   * @param void
-   * @return void
-   */
-  std::string toString() const;
-
-  pfcp::qfi_t qfi;           // QoS Flow Identifier
-  pfcp::fteid_t ul_fteid;    // fteid of UPF
-  pfcp::fteid_t dl_fteid;    // fteid of AN
-  pfcp::pdr_id_t pdr_id_ul;  // Packet Detection Rule ID, UL
-  pfcp::pdr_id_t pdr_id_dl;  // Packet Detection Rule ID, DL
-  pfcp::precedence_t precedence;
-  std::pair<bool, pfcp::far_id_t> far_id_ul;  // FAR ID, UL
-  std::pair<bool, pfcp::far_id_t> far_id_dl;  // FAR ID, DL
-  bool released;  // finally seems necessary, TODO try to find heuristic ?
-  pdu_session_id_t pdu_session_id;
-  qos_profile_t qos_profile;  // QoS profile
-  uint8_t cause_value;        // cause
-};
 
 class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
  public:
@@ -336,6 +287,12 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   void set_seid(const uint64_t& seid);
 
   /*
+   * Generate a value for TEID
+   * @return uint32_t
+   */
+  void generate_teid(pfcp::fteid_t& local_fteid);
+
+  /*
    * Generate a PDR ID
    * @param [pfcp::pdr_id_t &]: pdr_id: PDR ID generated
    * @return void
@@ -492,26 +449,9 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
    */
   void set_nwi_core(const std::string& nwiCore);
 
-  /*
-   * Set UPF Node ID of this PDU Session
-   * @param [const pfcp::node_id_t&] node_id: UPF Node Id
-   * @return void
-   */
-  void set_upf_node_id(const pfcp::node_id_t& node_id);
+  void set_sessions_graph(const std::shared_ptr<upf_graph> upf_graph);
 
-  /*
-   * Get UPF Node ID of this PDU Session
-   * @param [pfcp::node_id_t&] node_id: UPF Node Id
-   * @return void
-   */
-  void get_upf_node_id(pfcp::node_id_t& node_id) const;
-
-  /*
-   * Get UPF Node ID of this PDU Session
-   * @param void
-   * @return UPF Node Id
-   */
-  pfcp::node_id_t get_upf_node_id() const;
+  std::shared_ptr<upf_graph> get_sessions_graph() const;
 
   /*
    * Get DNN associated with this PDU Session
@@ -560,6 +500,8 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
 
   bool released;  // release session request
 
+  std::shared_ptr<n7::policy_association> policy_ptr;
+
   uint32_t pdu_session_id;
   std::string dnn;  // associated DNN
   snssai_t snssai;  // associated SNSSAI
@@ -570,7 +512,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   std::string nwi_access;  // associated nwi_access
   std::string nwi_core;    // associated nwi_core
 
-  pfcp::node_id_t upf_node_id;
+  std::shared_ptr<upf_graph> sessions_graph;
 
   pdu_session_status_e pdu_session_status;
   upCnx_state_e
@@ -603,6 +545,7 @@ class smf_pdu_session : public std::enable_shared_from_this<smf_pdu_session> {
   util::uint_generator<uint32_t> far_id_generator;
   util::uint_generator<uint32_t> urr_id_generator;
 
+  util::uint_generator<uint32_t> teid_generator;
   // Shared lock
   mutable std::shared_mutex m_pdu_session_mutex;
 
@@ -678,7 +621,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     // Subscribe to PDU Session Release (event exposure)
     ee_pdu_session_release_connection =
         event_sub.subscribe_ee_pdu_session_release(boost::bind(
-            &smf_context::handle_ee_pdu_session_release, this, _1, _2, _3));
+            &smf_context::handle_ee_pdu_session_release, this, _1, _2));
 
     // Subscribe to UE IP Change Event
     ee_ue_ip_change_connection = event_sub.subscribe_ee_ue_ip_change(
@@ -908,6 +851,20 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::shared_ptr<smf_pdu_session>& sp);
 
   /*
+   * Handle AN Release procedure
+   * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
+   * sm_context_request: Request message
+   * @param [std::shared_ptr<itti_n11_update_sm_context_response>&]
+   * sm_context_resp: Response message
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: PDU session
+   * @return True if SMF can handle successful, otherwise return false
+   */
+  bool handle_an_release(
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<itti_n11_update_sm_context_response>& sm_context_resp,
+      std::shared_ptr<smf_pdu_session>& sp);
+
+  /*
    * Handle PDU Session Resource Setup Response Transfer
    * @param [std::string&] n2_sm_information: NGAP message in form of string
    * @param [std::shared_ptr<itti_n11_update_sm_context_request>&]
@@ -949,7 +906,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    */
   bool handle_pdu_session_resource_release_response_transfer(
       std::string& n2_sm_information,
-      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request);
+      std::shared_ptr<itti_n11_update_sm_context_request>& sm_context_request,
+      std::shared_ptr<smf_pdu_session>& sp);
 
   /*
    * Handle Xn Handover Patch Switch Request
@@ -1237,14 +1195,29 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       std::map<pdu_session_id_t, std::shared_ptr<smf_pdu_session>>& sessions);
 
   /*
-   * Handle SM Context Status Change (Send notification AMF)
-   * @param [scid_t] scid: SMF Context ID
-   * @param [uint32_t] status: Updated status
-   * @param [uint8_t] http_version: HTTP version
-   * @return void
+   * Get PDU related information
+   * @param [const scid_t&] scid: SMF Context ID
+   * @param [supi64_t&] supi: SUPI
+   * @param [pdu_session_id_t&] pdu_session_id: PDU Session ID
+   * @return true if this Context ID exist and can get related info, otherwise,
+   * return false
    */
-  void handle_sm_context_status_change(
-      scid_t scid, const std::string& status, uint8_t http_version);
+  bool get_pdu_session_info(
+      const scid_t& scid, supi64_t& supi,
+      pdu_session_id_t& pdu_session_id) const;
+
+  /*
+   * Get PDU related information
+   * @param [const scid_t&] scid: SMF Context ID
+   * @param [supi64_t&] supi: SUPI
+   * @param [std::shared_ptr<smf_pdu_session>&] sp: Pointer to the PDU Session
+   * Info
+   * @return true if this Context ID exist and can get related info, otherwise,
+   * return false
+   */
+  bool get_pdu_session_info(
+      const scid_t& scid, supi64_t& supi,
+      std::shared_ptr<smf_pdu_session>& sp) const;
 
   /*
    * Handle SM Context Status Change (Send notification AMF)
@@ -1253,30 +1226,51 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
    * @param [uint8_t] http_version: HTTP version
    * @return void
    */
+  void handle_sm_context_status_change(
+      const scid_t& scid, const std::string& status,
+      const uint8_t& http_version) const;
+
+  /*
+   * Trigger PDU Session Release Notification (Send notification AMF)
+   * @param [scid_t] scid: SMF Context ID
+   * @param [uint8_t] http_version: HTTP version
+   * @return void
+   */
+  void trigger_pdu_session_release(
+      const scid_t& scid, const uint8_t& http_version) const;
   void handle_ee_pdu_session_release(
-      supi64_t supi, pdu_session_id_t pdu_session_id, uint8_t http_version);
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_ue_ip_change(scid_t scid, uint8_t http_version);
-  void handle_ue_ip_change(scid_t scid, uint8_t http_version);
+  void trigger_ue_ip_change(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_ue_ip_change(
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_plmn_change(scid_t scid, uint8_t http_version);
-  void handle_plmn_change(scid_t scid, uint8_t http_version);
+  void trigger_plmn_change(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_plmn_change(
+      const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_ddds(scid_t scid, uint8_t http_version);
-  void handle_ddds(scid_t scid, uint8_t http_version);
+  void trigger_ddds(const scid_t& scid, const uint8_t& http_version) const;
+  void handle_ddds(const scid_t& scid, const uint8_t& http_version) const;
 
-  void trigger_pdusesest(scid_t scid, uint8_t http_version);
-  void handle_pdusesest(scid_t scid, uint8_t http_version);
+  void trigger_pdusesest(const scid_t& scid, const uint8_t& http_version) const;
+  void handle_pdusesest(const scid_t& scid, const uint8_t& http_version) const;
 
   void trigger_qos_monitoring(
-      seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
-      uint8_t http_version);
+      const seid_t& seid,
+      const oai::smf_server::model::EventNotification& ev_notif_model,
+      const uint8_t& http_version) const;
   void handle_qos_monitoring(
-      seid_t seid, oai::smf_server::model::EventNotification ev_notif_model,
-      uint8_t http_version);
+      const seid_t& seid,
+      const oai::smf_server::model::EventNotification& ev_notif_model,
+      const uint8_t& http_version) const;
 
-  void trigger_flexcn_event(scid_t scid, uint8_t http_version);
-  void handle_flexcn_event(scid_t scid, uint8_t http_version);
+  void trigger_flexcn_event(
+      const scid_t& scid, const uint8_t& http_version) const;
+  void handle_flexcn_event(
+      const scid_t& scid, const uint8_t& http_version) const;
+
   /*
    * Update QoS information in the Response message according to the content of
    * decoded NAS msg
@@ -1378,6 +1372,47 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bool check_handover_possibility(
       const ng_ran_target_id_t& ran_target_id,
       const pdu_session_id_t& pdu_session_id) const;
+
+  /**
+   * Send a PDU Session Establishment response with a reject
+   * @param smreq Original request
+   * @param cause NAS cause value for PDU session establishment reject
+   * @param application_error PDU session establishment application error
+   * @param http_status
+   */
+  void send_pdu_session_establishment_response_reject(
+      const std::shared_ptr<itti_n11_create_sm_context_request> smreq,
+      cause_value_5gsm_e cause,
+      pdu_session_application_error_e application_error,
+      http_status_code_e http_status);
+
+  /**
+   * Send a PDU session Create Response, based on the content of resp.
+   * @param resp
+   */
+  void send_pdu_session_create_response(
+      const std::shared_ptr<itti_n11_create_sm_context_response>& resp);
+
+  /**
+   * Create a PDU session UPDATE response, based on the content of resp
+   * @param resp
+   * @pram session_procedure_type The session procedure type of this reply
+   */
+  void send_pdu_session_update_response(
+      const std::shared_ptr<itti_n11_update_sm_context_request>& req,
+      const std::shared_ptr<itti_n11_update_sm_context_response>& resp,
+      const session_management_procedures_type_e& session_procedure_type,
+      const std::shared_ptr<smf_pdu_session>& sps);
+
+  /**
+   * Create a PDU session Release response, based on the content of resp
+   * @param resp
+   */
+  void send_pdu_session_release_response(
+      const std::shared_ptr<itti_n11_release_sm_context_request>& req,
+      const std::shared_ptr<itti_n11_release_sm_context_response>& resp,
+      const session_management_procedures_type_e& session_procedure_type,
+      const std::shared_ptr<smf_pdu_session>& sps);
 
  private:
   std::vector<std::shared_ptr<smf_procedure>> pending_procedures;

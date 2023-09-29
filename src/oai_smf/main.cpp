@@ -39,11 +39,12 @@ using namespace smf;
 using namespace util;
 using namespace std;
 using namespace oai::smf_server::api;
+using namespace oai::config::smf;
 
 itti_mw* itti_inst                    = nullptr;
 async_shell_cmd* async_shell_cmd_inst = nullptr;
 smf_app* smf_app_inst                 = nullptr;
-smf_config smf_cfg;
+std::unique_ptr<smf_config> smf_cfg;
 SMFApiServer* smf_api_server_1     = nullptr;
 smf_http2_server* smf_api_server_2 = nullptr;
 
@@ -64,6 +65,8 @@ void send_heartbeat_to_tasks(const uint32_t sequence) {
 void my_app_signal_handler(int s) {
   std::cout << "Caught signal " << s << std::endl;
   Logger::system().startup("exiting");
+  // we have to trigger ITTI message before terminate
+  smf_app_inst->trigger_nf_deregistration();
   itti_inst->send_terminate_msg(TASK_SMF_APP);
   itti_inst->wait_tasks_end();
   std::cout << "Freeing Allocated memory..." << std::endl;
@@ -104,54 +107,64 @@ int main(int argc, char** argv) {
   Logger::init("smf", Options::getlogStdout(), Options::getlogRotFilelog());
   Logger::smf_app().startup("Options parsed");
 
-  struct sigaction sigIntHandler;
-  sigIntHandler.sa_handler = my_app_signal_handler;
-  sigemptyset(&sigIntHandler.sa_mask);
-  sigIntHandler.sa_flags = 0;
-  sigaction(SIGINT, &sigIntHandler, NULL);
+  std::signal(SIGTERM, my_app_signal_handler);
+  std::signal(SIGINT, my_app_signal_handler);
 
   // Config
-  smf_cfg.load(Options::getlibconfigConfig());
-  smf_cfg.display();
+  smf_cfg = std::make_unique<smf_config>(
+      Options::getlibconfigConfig(), Options::getlogStdout(),
+      Options::getlogRotFilelog());
+
+  if (!smf_cfg->init()) {
+    smf_cfg->display();
+    Logger::system().error("Reading the configuration failed. Exiting.");
+    return 1;
+  }
+  smf_cfg->display();
+  Logger::set_level(smf_cfg->log_level);
 
   // Inter-task Interface
   itti_inst = new itti_mw();
-  itti_inst->start(smf_cfg.itti.itti_timer_sched_params);
+  itti_inst->start(smf_cfg->itti.itti_timer_sched_params);
 
   // system command
   async_shell_cmd_inst =
-      new async_shell_cmd(smf_cfg.itti.async_cmd_sched_params);
+      new async_shell_cmd(smf_cfg->itti.async_cmd_sched_params);
 
   // SMF application layer
   smf_app_inst = new smf_app(Options::getlibconfigConfig());
 
   // PID file
   // Currently hard-coded value. TODO: add as config option.
-  string pid_file_name = get_exe_absolute_path("/var/run", smf_cfg.instance);
+  string pid_file_name = get_exe_absolute_path("/var/run", smf_cfg->instance);
   if (!is_pid_file_lock_success(pid_file_name.c_str())) {
     Logger::smf_app().error("Lock PID file %s failed\n", pid_file_name.c_str());
     exit(-EDEADLK);
   }
 
-  // SMF Pistache API server (HTTP1)
-  Pistache::Address addr(
-      std::string(inet_ntoa(*((struct in_addr*) &smf_cfg.sbi.addr4))),
-      Pistache::Port(smf_cfg.sbi.port));
-  smf_api_server_1 = new SMFApiServer(addr, smf_app_inst);
-  smf_api_server_1->init(2);
-  // smf_api_server_1->start();
-  std::thread smf_http1_manager(&SMFApiServer::start, smf_api_server_1);
-  // SMF NGHTTP API server (HTTP2)
-  smf_api_server_2 = new smf_http2_server(
-      conv::toString(smf_cfg.sbi.addr4), smf_cfg.sbi_http2_port, smf_app_inst);
-  // smf_api_server_2->start();
-  std::thread smf_http2_manager(&smf_http2_server::start, smf_api_server_2);
-
-  // Register to NRF and discover appropriate UPFs
-  smf_app_inst->start_nf_registration_discovery();
-
-  smf_http1_manager.join();
-  smf_http2_manager.join();
+  if (smf_cfg->get_http_version() == 1) {
+    // SMF Pistache API server (HTTP1)
+    Pistache::Address addr(
+        std::string(inet_ntoa(*((struct in_addr*) &smf_cfg->sbi.addr4))),
+        Pistache::Port(smf_cfg->sbi.port));
+    smf_api_server_1 = new SMFApiServer(addr, smf_app_inst);
+    smf_api_server_1->init(2);
+    // smf_api_server_1->start();
+    std::thread smf_http1_manager(&SMFApiServer::start, smf_api_server_1);
+    // Register to NRF and discover appropriate UPFs
+    smf_app_inst->start_nf_registration_discovery();
+    smf_http1_manager.join();
+  } else if (smf_cfg->get_http_version() == 2) {
+    // SMF NGHTTP API server (HTTP2)
+    smf_api_server_2 = new smf_http2_server(
+        conv::toString(smf_cfg->sbi.addr4), smf_cfg->sbi_http2_port,
+        smf_app_inst);
+    // smf_api_server_2->start();
+    std::thread smf_http2_manager(&smf_http2_server::start, smf_api_server_2);
+    // Register to NRF and discover appropriate UPFs
+    smf_app_inst->start_nf_registration_discovery();
+    smf_http2_manager.join();
+  }
 
   FILE* fp             = NULL;
   std::string filename = fmt::format("/tmp/smf_{}.status", getpid());

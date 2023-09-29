@@ -72,8 +72,6 @@ typedef enum {
   PDU_SESSION_RELEASE       = 3
 } pdu_session_procedure_t;
 
-class smf_config;
-
 class smf_context_ref {
  public:
   smf_context_ref() { clear(); }
@@ -114,22 +112,10 @@ class smf_app {
   mutable std::shared_mutex m_scid2smf_context;
   mutable std::shared_mutex m_smf_event_subscriptions;
   // Store promise IDs for Create/Update session
-  mutable std::shared_mutex m_sm_context_create_promises;
-  mutable std::shared_mutex m_sm_context_update_promises;
-  mutable std::shared_mutex m_sm_context_release_promises;
+  mutable std::shared_mutex m_sbi_server_promises;
 
-  std::map<
-      uint32_t,
-      boost::shared_ptr<boost::promise<pdu_session_create_sm_context_response>>>
-      sm_context_create_promises;
-  std::map<
-      uint32_t,
-      boost::shared_ptr<boost::promise<pdu_session_update_sm_context_response>>>
-      sm_context_update_promises;
-  std::map<
-      uint32_t, boost::shared_ptr<
-                    boost::promise<pdu_session_release_sm_context_response>>>
-      sm_context_release_promises;
+  std::map<uint32_t, boost::shared_ptr<boost::promise<nlohmann::json>>>
+      sbi_server_promises;
 
   smf_profile nf_instance_profile;  // SMF profile
   std::string smf_instance_id;      // SMF instance id
@@ -137,10 +123,9 @@ class smf_app {
 
   /*
    * Apply the config from the configuration file for DNN pools
-   * @param [const smf_config &cfg] cfg
    * @return
    */
-  int apply_config(const smf_config& cfg);
+  int apply_config();
 
   /*
    * pco_push_protocol_or_container_id
@@ -153,35 +138,41 @@ class smf_app {
       pco_protocol_or_container_id_t* const
           poc_id /* STOLEN_REF poc_id->contents*/);
 
-  /*
+  /**
    * process_pco_request_ipcp
    * @param [protocol_configuration_options_t &] pco_resp
    * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @param dnn DNN for DNS selection, use default if not found in config
    * @return
    */
   int process_pco_request_ipcp(
       protocol_configuration_options_t& pco_resp,
-      const pco_protocol_or_container_id_t* const poc_id);
+      const pco_protocol_or_container_id_t* const poc_id,
+      const std::string& dnn);
 
-  /*
+  /**
    * process_pco_dns_server_request
    * @param [protocol_configuration_options_t &] pco_resp
    * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @param dnn DNN for DNS selection, use default if not found in config
    * @return
    */
   int process_pco_dns_server_request(
       protocol_configuration_options_t& pco_resp,
-      const pco_protocol_or_container_id_t* const poc_id);
+      const pco_protocol_or_container_id_t* const poc_id,
+      const std::string& dnn);
 
-  /*
+  /**
    * process_pco_dns_server_v6_request
    * @param [protocol_configuration_options_t &] pco_resp
    * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @param dnn DNN for DNS selection, use default if not found in config
    * @return
    */
   int process_pco_dns_server_v6_request(
       protocol_configuration_options_t& pco_resp,
-      const pco_protocol_or_container_id_t* const poc_id);
+      const pco_protocol_or_container_id_t* const poc_id,
+      const std::string& dnn);
 
   /*
    * process_pco_link_mtu_request
@@ -210,6 +201,16 @@ class smf_app {
    * @return
    */
   int process_pco_p_cscf_v6_request(
+      protocol_configuration_options_t& pco_resp,
+      const pco_protocol_or_container_id_t* const poc_id);
+
+  /*
+   * process_pco_selected_bearer_control_mode
+   * @param [protocol_configuration_options_t &] pco_resp
+   * @param [pco_protocol_or_container_id_t *const] proc_id
+   * @return
+   */
+  int process_pco_selected_bearer_control_mode(
       protocol_configuration_options_t& pco_resp,
       const pco_protocol_or_container_id_t* const poc_id);
 
@@ -287,15 +288,16 @@ class smf_app {
    */
   int static_paa_get_pool_id(const struct in_addr& ue_addr);
 
-  /*
+  /**
    * process_pco_request
    * @param [const protocol_configuration_options_t &] pco_req
+   * @param dnn DNN to lookup DNS server
    * @param [const protocol_configuration_options_t &] pco_resp
    * @param [const protocol_configuration_options_ids_t &] pco_ids
    * @return pool index
    */
   int process_pco_request(
-      const protocol_configuration_options_t& pco_req,
+      const protocol_configuration_options_t& pco_req, const std::string& dnn,
       protocol_configuration_options_t& pco_resp,
       protocol_configuration_options_ids_t& pco_ids);
 
@@ -510,6 +512,13 @@ class smf_app {
   std::shared_ptr<smf_context> supi_2_smf_context(const supi64_t& supi) const;
 
   /*
+   * Get number of current SM Contexts
+   * @param void
+   * @return number of contexts
+   */
+  uint32_t get_number_contexts() const;
+
+  /*
    * Find the PDU Session with its SCID
    * @param [const scid_t &] scid: SMF Context ID
    * @param [std::shared_ptr<smf_pdu_session> &] sp: pointer to the PDU session
@@ -561,8 +570,37 @@ class smf_app {
    */
   bool handle_nf_status_notification(
       std::shared_ptr<itti_sbi_notification_data>& msg,
-      oai::smf_server::model::ProblemDetails& problem_details,
-      uint8_t& http_code);
+      oai::model::common::ProblemDetails& problem_details, uint8_t& http_code);
+
+  /*
+   * Handle SBI API to get SMF configuration (Get SMF configuration)
+   * @param [std::shared_ptr<itti_sbi_smf_configuration>&] c
+   * @return void
+   */
+  void handle_sbi_get_configuration(
+      std::shared_ptr<itti_sbi_smf_configuration>& c);
+
+  /*
+   * Handle SBI API to update SMF conf
+   * @param [std::shared_ptr<itti_sbi_update_smf_configuration>&] c
+   * @return void
+   */
+  void handle_sbi_update_configuration(
+      std::shared_ptr<itti_sbi_update_smf_configuration>& c);
+
+  /*
+   * Get the current SMF's configuration
+   * @param [nlohmann::json&]: json_data: Store SMF configuration
+   * @return true if success, otherwise return false
+   */
+  bool read_smf_configuration(nlohmann::json& json_data);
+
+  /*
+   * Update SMF configuration
+   * @param [nlohmann::json&]: json_data: New SMF configuration
+   * @return true if success, otherwise return false
+   */
+  bool update_smf_configuration(nlohmann::json& json_data);
 
   /*
    * Trigger pdu session modification
@@ -716,32 +754,25 @@ class smf_app {
           p);
 
   /*
-   * To store a promise of a PDU Session Update SM Contex Response to be
+   * To store a promise of a SBI Server response message to be
    * triggered when the result is ready
    * @param [uint32_t] id: promise id
    * @param [boost::shared_ptr<
-   * boost::promise<pdu_session_update_sm_context_response> >&] p: pointer to
+   * boost::promise<nlohmann::json> >&] p: pointer to
    * the promise
    * @return void
    */
   void add_promise(
-      uint32_t id,
-      boost::shared_ptr<boost::promise<pdu_session_update_sm_context_response>>&
-          p);
+      uint32_t id, boost::shared_ptr<boost::promise<nlohmann::json>>& p);
 
   /*
-   * To store a promise of a PDU Session Release SM Context Response to be
-   * triggered when the result is ready
-   * @param [uint32_t] id: promise id
-   * @param [boost::shared_ptr<
-   * boost::promise<pdu_session_release_sm_context_response> >&] p: pointer to
-   * the promise
-   * @return void
+   * To generate promise ID across SMF components
+   * @param void
+   * @return generated ID
    */
-  void add_promise(
-      uint32_t id,
-      boost::shared_ptr<
-          boost::promise<pdu_session_release_sm_context_response>>& p);
+  static uint64_t generate_promise_id() {
+    return util::uint_uid_generator<uint64_t>::get_instance().get_uid();
+  }
 
   /*
    * To trigger the response to the HTTP server by set the value of the
@@ -783,6 +814,17 @@ class smf_app {
   /*
    * To trigger the response to the HTTP server by set the value of the
    * corresponding promise to ready
+   * @param [const nlohmann::json&] response_message_json: response message in
+   * JSON format
+   * @param [uint32_t &] promise_id: Promise Id
+   * @return void
+   */
+  void trigger_http_response(
+      const nlohmann::json& response_message_json, uint32_t& pid);
+
+  /*
+   * To trigger the response to the HTTP server by set the value of the
+   * corresponding promise to ready
    * @param [const uint32_t &] http_code: Status code of HTTP response
    * @param [uint32_t &] promise_id: Promise Id
    * @param [uint8_t] msg_type: Type of HTTP message (Create/Update/Release)
@@ -813,18 +855,6 @@ class smf_app {
    */
   void trigger_session_update_sm_context_response(
       pdu_session_update_sm_context_response& sm_context_response,
-      uint32_t& pid);
-
-  /*
-   * To trigger the session release sm context response by set the value of the
-   * corresponding promise to ready
-   * @param [pdu_session_release_sm_context_response&] sm_context_response:
-   * response message
-   * @param [uint32_t &] promise_id: Promise Id
-   * @return void
-   */
-  void trigger_session_release_sm_context_response(
-      pdu_session_release_sm_context_response& sm_context_response,
       uint32_t& pid);
 
   /*
@@ -914,6 +944,13 @@ class smf_app {
    * @return void
    */
   void trigger_upf_status_notification_subscribe();
+
+  /*
+   * Get the SMF instance ID
+   * @param [void]
+   * @return SMF instance ID
+   */
+  std::string get_smf_instance_id() const;
 };
 }  // namespace smf
 #include "smf_config.hpp"

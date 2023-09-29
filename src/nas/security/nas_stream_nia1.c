@@ -156,10 +156,10 @@ int nas_stream_encrypt_nia1(
    */
   IV[3] = (uint32_t) stream_cipher->count;
   IV[2] = ((((uint32_t) stream_cipher->bearer) & 0x0000001F) << 27);
-  IV[1] = (uint32_t)(stream_cipher->count) ^
-          ((uint32_t)(stream_cipher->direction) << 31);
+  IV[1] = (uint32_t) (stream_cipher->count) ^
+          ((uint32_t) (stream_cipher->direction) << 31);
   IV[0] = ((((uint32_t) stream_cipher->bearer) & 0x0000001F) << 27) ^
-          ((uint32_t)(stream_cipher->direction & 0x00000001) << 15);
+          ((uint32_t) (stream_cipher->direction & 0x00000001) << 15);
   z[0] = z[1] = z[2] = z[3] = z[4] = 0;
   /*
    * Run SNOW 3G to produce 5 keystream words z_1, z_2, z_3, z_4 and z_5.
@@ -195,7 +195,7 @@ int nas_stream_encrypt_nia1(
 
   if (rem_bits > 32) {
     M_D_2 = ((uint64_t) hton_int32(message[2 * (D - 2)]) << 32) |
-            (uint64_t)(hton_int32(message[2 * (D - 2) + 1]) & mask);
+            (uint64_t) (hton_int32(message[2 * (D - 2) + 1]) & mask);
   } else {
     M_D_2 = ((uint64_t) hton_int32(message[2 * (D - 2)]) & mask) << 32;
   }
@@ -210,7 +210,7 @@ int nas_stream_encrypt_nia1(
    * Multiply by Q
    */
   EVAL  = MUL64(EVAL, Q, c);
-  MAC_I = (uint32_t)(EVAL >> 32) ^ z[4];
+  MAC_I = (uint32_t) (EVAL >> 32) ^ z[4];
   MAC_I = hton_int32(MAC_I);
   memcpy((void*) out, &MAC_I, 4);
   return 0;

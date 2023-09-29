@@ -40,15 +40,15 @@ int encode__5gs_tracking_area_identity(
   }
 
   ENCODE_U8(
-      buffer + encoded, (uint8_t)(_5gstrackingareaidentity.mcc & 0x00ff),
+      buffer + encoded, (uint8_t) (_5gstrackingareaidentity.mcc & 0x00ff),
       encoded);
   ENCODE_U8(
       buffer + encoded,
-      (uint8_t)((_5gstrackingareaidentity.mcc & 0x0f00) >> 8) |
-          (uint8_t)((_5gstrackingareaidentity.mnc & 0x0f00) >> 4),
+      (uint8_t) ((_5gstrackingareaidentity.mcc & 0x0f00) >> 8) |
+          (uint8_t) ((_5gstrackingareaidentity.mnc & 0x0f00) >> 4),
       encoded);
   ENCODE_U8(
-      buffer + encoded, (uint8_t)(_5gstrackingareaidentity.mnc & 0x00ff),
+      buffer + encoded, (uint8_t) (_5gstrackingareaidentity.mnc & 0x00ff),
       encoded);
   ENCODE_U32(
       buffer + encoded, _5gstrackingareaidentity.tac & 0x00ffffff, encoded);

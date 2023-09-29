@@ -40,13 +40,14 @@
 #include "smf_config.hpp"
 #include "3gpp_conversions.hpp"
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
 namespace api {
 
 using namespace oai::smf_server::model;
+using namespace oai::model::common;
 
 NFStatusNotifyApiImpl::NFStatusNotifyApiImpl(
     std::shared_ptr<Pistache::Rest::Router> rtr, smf::smf_app* smf_app_inst,

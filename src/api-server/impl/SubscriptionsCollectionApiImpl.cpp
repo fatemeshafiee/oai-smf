@@ -41,7 +41,7 @@
 #include "smf_config.hpp"
 #include "3gpp_conversions.hpp"
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
@@ -87,7 +87,7 @@ void SubscriptionsCollectionApiImpl::create_individual_subcription(
   if (sub_id != -1) {
     json_data["subId"] = std::to_string(sub_id);
     response.headers().add<Pistache::Http::Header::Location>(
-        m_address + base + smf_cfg.sbi_api_version + "/nsmf_event-exposure/" +
+        m_address + base + smf_cfg->sbi_api_version + "/nsmf_event-exposure/" +
         std::to_string(sub_id));  // Location header
   }
 

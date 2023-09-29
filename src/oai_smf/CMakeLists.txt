@@ -125,7 +125,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
   SET(ASAN asan)
 endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-  SET(ASAN asan)
+  Message("no more asan in Release Mode")
 endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_boolean_option(LOG_OAI True "Thread safe logging API")
@@ -142,7 +142,12 @@ endif()
 Message("Architecture is ${CMAKE_SYSTEM_PROCESSOR}")
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7l")
   set(C_FLAGS_PROCESSOR "-gdwarf-2 -mfloat-abi=hard -mfpu=neon -lgcc -lrt")
-else (CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7l")
+elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+  # Tested on aarch64 system in Little Endian
+  # Model ARM-Neoverse-N1
+  #   flags: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs
+  set(C_FLAGS_PROCESSOR "-gdwarf-2 -lgcc -lrt")
+else ()
   set(C_FLAGS_PROCESSOR "-msse4.2")
 endif()
 #
@@ -159,21 +164,21 @@ add_definitions(-DBSTRLIB_CAN_USE_STL=1 -DBSTRLIB_CAN_USE_IOSTREAM=1 -DBSTRLIB_T
 
 
 if(STATIC_LINKING)
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -fstack-protector-all -DMALLOC_CHECK_=3 -DINFO_IS_ON=1 -DDEBUG_IS_ON=1 -DTRACE_IS_ON=1 -O0  -fno-omit-frame-pointer")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -fstack-protector-all -DMALLOC_CHECK_=3 -O0  -fno-omit-frame-pointer")
 else (STATIC_LINKING)
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -fstack-protector-all -DMALLOC_CHECK_=3 -DINFO_IS_ON=1 -DDEBUG_IS_ON=1 -DTRACE_IS_ON=1 -O0 -fsanitize=address -fno-omit-frame-pointer")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -fstack-protector-all -DMALLOC_CHECK_=3 -O0 -fsanitize=address -fno-omit-frame-pointer")
 endif(STATIC_LINKING)
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O2 -fno-omit-frame-pointer -s -DINFO_IS_ON=1 -DDEBUG_IS_ON=1 ")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS} -g  -O2 -DINFO_IS_ON=1 ")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O2 -fno-omit-frame-pointer -s ")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS} -g  -O2 ")
 set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS} -Os -s")
 
 if(STATIC_LINKING)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++17  -g -fstack-protector-all -DMALLOC_CHECK_=3 -DINFO_IS_ON=1 -DDEBUG_IS_ON=1 -DTRACE_IS_ON=1 -O0 -fno-omit-frame-pointer")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++17  -g -fstack-protector-all -DMALLOC_CHECK_=3 -O0 -fno-omit-frame-pointer")
 else(STATIC_LINKING)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++17  -g -fstack-protector-all -DMALLOC_CHECK_=3 -DINFO_IS_ON=1 -DDEBUG_IS_ON=1 -DTRACE_IS_ON=1 -O0 -fsanitize=address -fno-omit-frame-pointer")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++17  -g -fstack-protector-all -DMALLOC_CHECK_=3 -O0 -fsanitize=address -fno-omit-frame-pointer")
 endif(STATIC_LINKING)
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -std=c++17  -O2 -fno-omit-frame-pointer -s -DINFO_IS_ON=1 -DDEBUG_IS_ON=1")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -std=c++17 -g -O2 -DINFO_IS_ON=1")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -std=c++17  -O2 -fno-omit-frame-pointer -s ")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -std=c++17 -g -O2 ")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS} -std=c++17 -Os -s")
 
 
@@ -220,7 +225,7 @@ add_definitions("-DPACKAGE_BUGREPORT=\"openaircn-user@lists.eurecom.fr\"")
 # Include CMake modules to find other library
 ###############################################################################
 
-set(CMAKE_MODULE_PATH "${OPENAIRCN_DIR}/build/cmake_modules" "${CMAKE_MODULE_PATH}")
+set(CMAKE_MODULE_PATH "${OPENAIRCN_DIR}/build/common-build/cmake_modules" "${CMAKE_MODULE_PATH}")
 include(FindPkgConfig)
 
 ###############################################################################
@@ -250,7 +255,6 @@ add_boolean_option( LOG_OAI                         False    "Thread safe loggin
 # or cmake provide a generic interface to pkg-config that widely used
 ###################################
 
-pkg_search_module(CONFIG REQUIRED libconfig++)
 include_directories(${CONFIG_INCLUDE_DIRS})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -289,7 +293,6 @@ include_directories(${SRC_TOP_DIR}/common/utils)
 include_directories(${SRC_TOP_DIR}/common/utils/bstr)
 include_directories(${SRC_TOP_DIR}/pfcp)
 include_directories(${SRC_TOP_DIR}/udp)
-include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 include_directories(${SRC_TOP_DIR}/api-server)
 include_directories(${SRC_TOP_DIR}/api-server/api)
 include_directories(${SRC_TOP_DIR}/api-server/impl)
@@ -312,6 +315,12 @@ add_executable(smf
   ${SRC_TOP_DIR}/itti/itti_msg.cpp
   )
 
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger/logger.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/config/config.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/common_model/common_model.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/nrf/nrf_model.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/utils/utils.cmake)
+
 IF(STATIC_LINKING)
     SET(CMAKE_EXE_LINKER_FLAGS "-static")
     SET_TARGET_PROPERTIES(smf PROPERTIES LINK_SEARCH_END_STATIC 1)
@@ -320,4 +329,4 @@ IF(STATIC_LINKING)
 ENDIF(STATIC_LINKING)   
 
 target_link_libraries (smf ${ASAN} 
-    -Wl,--start-group CN_UTILS SMF UDP  PFCP 3GPP_COMMON_TYPES SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} -lnghttp2_asio -lboost_system -lboost_thread -lssl -lcrypto NAS dl -Wl,--end-group pthread m rt config++ event boost_system boost_chrono pistache curl)
+    -Wl,--start-group CN_UTILS SMF UDP PFCP SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} -lnghttp2_asio -lboost_system -lboost_thread -lssl -lcrypto -lfmt -lspdlog NAS dl -Wl,--end-group pthread m rt event boost_system boost_chrono pistache curl -lyaml-cpp)

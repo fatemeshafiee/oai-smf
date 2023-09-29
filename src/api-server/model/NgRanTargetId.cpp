@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 NgRanTargetId::NgRanTargetId() {}
 
 NgRanTargetId::~NgRanTargetId() {}
@@ -42,10 +44,10 @@ GlobalRanNodeId NgRanTargetId::getRanNodeId() const {
 void NgRanTargetId::setRanNodeId(GlobalRanNodeId const& value) {
   m_RanNodeId = value;
 }
-Tai NgRanTargetId::getTai() const {
+oai::model::common::Tai NgRanTargetId::getTai() const {
   return m_Tai;
 }
-void NgRanTargetId::setTai(Tai const& value) {
+void NgRanTargetId::setTai(oai::model::common::Tai const& value) {
   m_Tai = value;
 }
 

@@ -17,6 +17,8 @@ namespace oai {
 namespace smf_server {
 namespace model {
 
+using namespace oai::model::common;
+
 PduSessionCreatedData::PduSessionCreatedData() {
   m_SscMode                            = "";
   m_HcnTunnelInfoIsSet                 = false;
@@ -236,10 +238,10 @@ bool PduSessionCreatedData::pduSessionIdIsSet() const {
 void PduSessionCreatedData::unsetPduSessionId() {
   m_PduSessionIdIsSet = false;
 }
-Snssai PduSessionCreatedData::getSNssai() const {
+oai::model::common::Snssai PduSessionCreatedData::getSNssai() const {
   return m_SNssai;
 }
-void PduSessionCreatedData::setSNssai(Snssai const& value) {
+void PduSessionCreatedData::setSNssai(oai::model::common::Snssai const& value) {
   m_SNssai      = value;
   m_SNssaiIsSet = true;
 }

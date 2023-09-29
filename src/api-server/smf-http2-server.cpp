@@ -47,8 +47,9 @@
 using namespace nghttp2::asio_http2;
 using namespace nghttp2::asio_http2::server;
 using namespace oai::smf_server::model;
+using namespace oai::model::common;
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 //------------------------------------------------------------------------------
 void smf_http2_server::start() {
@@ -57,7 +58,7 @@ void smf_http2_server::start() {
   Logger::smf_api_server().info("HTTP2 server started");
   // Create SM Context Request
   server.handle(
-      NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version +
+      NSMF_PDU_SESSION_BASE + smf_cfg->sbi_api_version +
           NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL,
       [&](const request& request, const response& response) {
         request.on_data([&](const uint8_t* data, std::size_t len) {
@@ -142,7 +143,7 @@ void smf_http2_server::start() {
 
   // Update SM Context Request
   server.handle(
-      NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version +
+      NSMF_PDU_SESSION_BASE + smf_cfg->sbi_api_version +
           NSMF_PDU_SESSION_SM_CONTEXT_UPDATE_URL,
       [&](const request& request, const response& response) {
         request.on_data([&](const uint8_t* data, std::size_t len) {
@@ -318,7 +319,7 @@ void smf_http2_server::start() {
 
   // NFStatusNotify
   server.handle(
-      NNRF_NF_STATUS_NOTIFY_BASE + smf_cfg.sbi_api_version +
+      NNRF_NF_STATUS_NOTIFY_BASE + smf_cfg->sbi_api_version +
           NNRF_NF_STATUS_SUBSCRIBE_URL,
       [&](const request& request, const response& response) {
         request.on_data([&](const uint8_t* data, std::size_t len) {
@@ -333,6 +334,32 @@ void smf_http2_server::start() {
           } catch (nlohmann::detail::exception& e) {
             Logger::smf_sbi().warn(
                 "Can not parse the json data (error: %s)!", e.what());
+            response.write_head(
+                http_status_code_e::HTTP_STATUS_CODE_400_BAD_REQUEST);
+            response.end();
+            return;
+          }
+        });
+      });
+
+  // SMF Configuration
+  server.handle(
+      NSMF_CUSTOMIZED_API_BASE + smf_cfg->sbi_api_version +
+          NSMF_CUSTOMIZED_API_CONFIGURATION_URL,
+      [&](const request& request, const response& response) {
+        request.on_data([&](const uint8_t* data, std::size_t len) {
+          try {
+            if (request.method().compare("GET") == 0) {
+              this->get_configuration_handler(response);
+            }
+            if (request.method().compare("PUT") == 0 && len > 0) {
+              std::string msg((char*) data, len);
+              auto configuration_info = nlohmann::json::parse(msg.c_str());
+              this->update_configuration_handler(configuration_info, response);
+            }
+          } catch (nlohmann::detail::exception& e) {
+            Logger::smf_sbi().warn(
+                "Can not parse the JSON data (error: %s)!", e.what());
             response.write_head(
                 http_status_code_e::HTTP_STATUS_CODE_400_BAD_REQUEST);
             response.end();
@@ -370,18 +397,16 @@ void smf_http2_server::create_sm_contexts_handler(
   // Set api root to be used as location header in HTTP response
   sm_context_req_msg.set_api_root(
       // m_address + ":" + std::to_string(m_port) +
-      NSMF_PDU_SESSION_BASE + smf_cfg.sbi_api_version +
+      NSMF_PDU_SESSION_BASE + smf_cfg->sbi_api_version +
       NSMF_PDU_SESSION_SM_CONTEXT_CREATE_URL);
 
-  boost::shared_ptr<
-      boost::promise<smf::pdu_session_create_sm_context_response> >
-      p = boost::make_shared<
-          boost::promise<smf::pdu_session_create_sm_context_response> >();
-  boost::shared_future<smf::pdu_session_create_sm_context_response> f;
+  boost::shared_ptr<boost::promise<nlohmann::json>> p =
+      boost::make_shared<boost::promise<nlohmann::json>>();
+  boost::shared_future<nlohmann::json> f;
   f = p->get_future();
 
   // Generate ID for this promise (to be used in SMF-APP)
-  uint32_t promise_id = generate_promise_id();
+  uint32_t promise_id = m_smf_app->generate_promise_id();
   Logger::smf_api_server().debug("Promise ID generated %d", promise_id);
   m_smf_app->add_promise(promise_id, p);
 
@@ -394,27 +419,46 @@ void smf_http2_server::create_sm_contexts_handler(
   m_smf_app->handle_pdu_session_create_sm_context_request(itti_msg);
 
   // Wait for the result from APP and send reply to AMF
-  smf::pdu_session_create_sm_context_response sm_context_response = f.get();
+  nlohmann::json sm_context_response = f.get();
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
+
   nlohmann::json json_data = {};
-  sm_context_response.get_json_data(json_data);
-  std::string json_format;
-  sm_context_response.get_json_format(json_format);
+  std::string json_format  = {};
+  bool n1_sm_msg_is_set    = false;
+  int http_code = http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
+
+  if (sm_context_response.find("http_code") != sm_context_response.end()) {
+    http_code = sm_context_response["http_code"].get<int>();
+  }
+
+  if (sm_context_response.find("json_format") != sm_context_response.end()) {
+    json_format = sm_context_response["json_format"].get<std::string>();
+  }
+  if (sm_context_response.find("json_data") != sm_context_response.end()) {
+    json_data = sm_context_response["json_data"];
+  }
+
+  if (sm_context_response.find("n1_sm_message") != sm_context_response.end()) {
+    // json_data = sm_context_response["n1_sm_message"].get<std::string>();
+    n1_sm_msg_is_set = true;
+  }
 
   // Add header
   header_map h;
   // Location header
-  if (sm_context_response.get_smf_context_uri().size() > 0) {
+  if (sm_context_response.find("smf_context_uri") !=
+      sm_context_response.end()) {
     Logger::smf_api_server().debug(
         "Add location header %s",
-        sm_context_response.get_smf_context_uri().c_str());
+        sm_context_response["smf_context_uri"].get<std::string>().c_str());
     h.emplace(
         "location",
-        header_value{sm_context_response.get_smf_context_uri().c_str()});
+        header_value{
+            sm_context_response["smf_context_uri"].get<std::string>().c_str()});
   }
   // content-type header
   h.emplace("content-type", header_value{json_format});
-  response.write_head(sm_context_response.get_http_code(), h);
+  response.write_head(http_code, h);
 
   response.end(json_data.dump().c_str());
 }
@@ -438,15 +482,13 @@ void smf_http2_server::update_sm_context_handler(
   xgpp_conv::sm_context_update_from_openapi(
       smContextUpdateMessage, sm_context_req_msg);
 
-  boost::shared_ptr<
-      boost::promise<smf::pdu_session_update_sm_context_response> >
-      p = boost::make_shared<
-          boost::promise<smf::pdu_session_update_sm_context_response> >();
-  boost::shared_future<smf::pdu_session_update_sm_context_response> f;
+  boost::shared_ptr<boost::promise<nlohmann::json>> p =
+      boost::make_shared<boost::promise<nlohmann::json>>();
+  boost::shared_future<nlohmann::json> f;
   f = p->get_future();
 
   // Generate ID for this promise (to be used in SMF-APP)
-  uint32_t promise_id = generate_promise_id();
+  uint32_t promise_id = m_smf_app->generate_promise_id();
   Logger::smf_api_server().debug("Promise ID generated %d", promise_id);
   m_smf_app->add_promise(promise_id, p);
 
@@ -459,49 +501,74 @@ void smf_http2_server::update_sm_context_handler(
   m_smf_app->handle_pdu_session_update_sm_context_request(itti_msg);
 
   // Wait for the result from APP and send reply to AMF
-  smf::pdu_session_update_sm_context_response sm_context_response = f.get();
+  nlohmann::json sm_context_response = f.get();
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
   nlohmann::json json_data = {};
   std::string body         = {};
   header_map h             = {};
   std::string json_format  = {};
+  bool n1_sm_msg_is_set    = false;
+  bool n2_sm_info_is_set   = false;
+  int http_code = http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
 
-  sm_context_response.get_json_format(json_format);
-  sm_context_response.get_json_data(json_data);
+  if (sm_context_response.find("http_code") != sm_context_response.end()) {
+    http_code = sm_context_response["http_code"].get<int>();
+  }
+
+  if (sm_context_response.find("json_format") != sm_context_response.end()) {
+    json_format = sm_context_response["json_format"].get<std::string>();
+  }
+  if (sm_context_response.find("json_data") != sm_context_response.end()) {
+    json_data = sm_context_response["json_data"];
+  }
+
+  if (sm_context_response.find("n1_sm_message") != sm_context_response.end()) {
+    // json_data = sm_context_response["n1_sm_message"].get<std::string>();
+    n1_sm_msg_is_set = true;
+  }
+
+  if (sm_context_response.find("n2_sm_information") !=
+      sm_context_response.end()) {
+    n2_sm_info_is_set = true;
+  }
+
   Logger::smf_api_server().debug("Json data %s", json_data.dump().c_str());
 
-  if (sm_context_response.n1_sm_msg_is_set() and
-      sm_context_response.n2_sm_info_is_set()) {
+  if (n1_sm_msg_is_set and n2_sm_info_is_set) {
     mime_parser::create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
-        sm_context_response.get_n1_sm_message(),
-        sm_context_response.get_n2_sm_information(), json_format);
+        sm_context_response["n1_sm_message"].get<std::string>(),
+        sm_context_response["n2_sm_information"].get<std::string>(),
+        json_format);
     h.emplace(
-        "content-type", header_value{"multipart/related; boundary=" +
-                                     std::string(CURL_MIME_BOUNDARY)});
-  } else if (sm_context_response.n1_sm_msg_is_set()) {
+        "content-type",
+        header_value{
+            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)});
+  } else if (n1_sm_msg_is_set) {
     mime_parser::create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
-        sm_context_response.get_n1_sm_message(),
+        sm_context_response["n1_sm_message"].get<std::string>(),
         multipart_related_content_part_e::NAS, json_format);
     h.emplace(
-        "content-type", header_value{"multipart/related; boundary=" +
-                                     std::string(CURL_MIME_BOUNDARY)});
-  } else if (sm_context_response.n2_sm_info_is_set()) {
+        "content-type",
+        header_value{
+            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)});
+  } else if (n2_sm_info_is_set) {
     mime_parser::create_multipart_related_content(
         body, json_data.dump(), CURL_MIME_BOUNDARY,
-        sm_context_response.get_n2_sm_information(),
+        sm_context_response["n2_sm_information"].get<std::string>(),
         multipart_related_content_part_e::NGAP, json_format);
     h.emplace(
-        "content-type", header_value{"multipart/related; boundary=" +
-                                     std::string(CURL_MIME_BOUNDARY)});
+        "content-type",
+        header_value{
+            "multipart/related; boundary=" + std::string(CURL_MIME_BOUNDARY)});
   } else {
     h.emplace("content-type", header_value{json_format});
     body = json_data.dump().c_str();
   }
 
-  response.write_head(sm_context_response.get_http_code(), h);
+  response.write_head(http_code, h);
   response.end(body);
 }
 
@@ -519,15 +586,13 @@ void smf_http2_server::release_sm_context_handler(
   xgpp_conv::sm_context_release_from_openapi(
       smContextReleaseMessage, sm_context_req_msg);
 
-  boost::shared_ptr<
-      boost::promise<smf::pdu_session_release_sm_context_response> >
-      p = boost::make_shared<
-          boost::promise<smf::pdu_session_release_sm_context_response> >();
-  boost::shared_future<smf::pdu_session_release_sm_context_response> f;
+  boost::shared_ptr<boost::promise<nlohmann::json>> p =
+      boost::make_shared<boost::promise<nlohmann::json>>();
+  boost::shared_future<nlohmann::json> f;
   f = p->get_future();
 
   // Generate ID for this promise (to be used in SMF-APP)
-  uint32_t promise_id = generate_promise_id();
+  uint32_t promise_id = m_smf_app->generate_promise_id();
   Logger::smf_api_server().debug("Promise ID generated %d", promise_id);
   m_smf_app->add_promise(promise_id, p);
 
@@ -544,13 +609,19 @@ void smf_http2_server::release_sm_context_handler(
   m_smf_app->handle_pdu_session_release_sm_context_request(itti_msg);
 
   // wait for the result from APP and send reply to AMF
-  smf::pdu_session_release_sm_context_response sm_context_response = f.get();
+  nlohmann::json sm_context_response = f.get();
   Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
 
-  response.write_head(sm_context_response.get_http_code());
+  int http_code = http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
+  if (sm_context_response.find("http_code") != sm_context_response.end()) {
+    http_code = sm_context_response["http_code"].get<int>();
+  }
+
+  response.write_head(http_code);
   response.end();
 }
 
+//------------------------------------------------------------------------------
 void smf_http2_server::nf_status_notify_handler(
     const NotificationData& notificationData, const response& response) {
   Logger::smf_api_server().info(
@@ -584,6 +655,143 @@ void smf_http2_server::nf_status_notify_handler(
     response.end(json_data.dump().c_str());
   }
 }
+
+//------------------------------------------------------------------------------
+void smf_http2_server::get_configuration_handler(const response& response) {
+  Logger::smf_api_server().debug("Get SMF Configuration, handling...");
+
+  header_map h;
+
+  // Generate a promise and associate this promise to the ITTI message
+  uint32_t promise_id = m_smf_app->generate_promise_id();
+  Logger::smf_n1().debug("Promise ID generated %d", promise_id);
+
+  boost::shared_ptr<boost::promise<nlohmann::json>> p =
+      boost::make_shared<boost::promise<nlohmann::json>>();
+  boost::shared_future<nlohmann::json> f = p->get_future();
+  m_smf_app->add_promise(promise_id, p);
+
+  // Handle the SMFConfiguration in smf_app
+  std::shared_ptr<itti_sbi_smf_configuration> itti_msg =
+      std::make_shared<itti_sbi_smf_configuration>(
+          TASK_SMF_SBI, TASK_SMF_APP, promise_id);
+
+  itti_msg->http_version = 2;
+  itti_msg->promise_id   = promise_id;
+
+  // TODO:
+  m_smf_app->handle_sbi_get_configuration(itti_msg);
+
+  boost::future_status status;
+  // Wait for the result from APP and send reply to AMF
+  status = f.wait_for(boost::chrono::milliseconds(FUTURE_STATUS_TIMEOUT_MS));
+  if (status == boost::future_status::ready) {
+    assert(f.is_ready());
+    assert(f.has_value());
+    assert(!f.has_exception());
+
+    // result includes json content and http response code
+    nlohmann::json result = f.get();
+    Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
+
+    // process data
+    uint32_t http_response_code = 0;
+    nlohmann::json json_data    = {};
+
+    if (result.find("httpResponseCode") != result.end()) {
+      http_response_code = result["httpResponseCode"].get<int>();
+    }
+
+    if (http_response_code == 200) {
+      if (result.find("content") != result.end()) {
+        json_data = result["content"];
+      }
+      h.emplace("content-type", header_value{"application/json"});
+      response.end(json_data.dump().c_str());
+    } else {
+      // Problem details
+      if (result.find("ProblemDetails") != result.end()) {
+        json_data = result["ProblemDetails"];
+      }
+      h.emplace("content-type", header_value{"application/problem+json"});
+      response.end(json_data.dump().c_str());
+    }
+  } else {
+    int http_code = http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
+    response.write_head(http_code);
+    response.end();
+  }
+}
+
+//------------------------------------------------------------------------------
+void smf_http2_server::update_configuration_handler(
+    nlohmann::json& configuration_info, const response& response) {
+  Logger::smf_api_server().debug("Update SMF Configuration, handling...");
+
+  header_map h;
+
+  // Generate a promise and associate this promise to the ITTI message
+  uint32_t promise_id = m_smf_app->generate_promise_id();
+  Logger::smf_n1().debug("Promise ID generated %d", promise_id);
+
+  boost::shared_ptr<boost::promise<nlohmann::json>> p =
+      boost::make_shared<boost::promise<nlohmann::json>>();
+  boost::shared_future<nlohmann::json> f = p->get_future();
+  m_smf_app->add_promise(promise_id, p);
+
+  // Handle the SMFConfiguration in smf_app
+  std::shared_ptr<itti_sbi_update_smf_configuration> itti_msg =
+      std::make_shared<itti_sbi_update_smf_configuration>(
+          TASK_SMF_SBI, TASK_SMF_APP, promise_id);
+
+  itti_msg->http_version  = 2;
+  itti_msg->promise_id    = promise_id;
+  itti_msg->configuration = configuration_info;
+
+  // TODO:
+  m_smf_app->handle_sbi_update_configuration(itti_msg);
+
+  boost::future_status status;
+  // wait for timeout or ready
+  status = f.wait_for(boost::chrono::milliseconds(FUTURE_STATUS_TIMEOUT_MS));
+  if (status == boost::future_status::ready) {
+    assert(f.is_ready());
+    assert(f.has_value());
+    assert(!f.has_exception());
+    // Wait for the result from APP
+    // result includes json content and http response code
+    nlohmann::json result = f.get();
+    Logger::smf_api_server().debug("Got result for promise ID %d", promise_id);
+
+    // process data
+    uint32_t http_response_code = 0;
+    nlohmann::json json_data    = {};
+
+    if (result.find("httpResponseCode") != result.end()) {
+      http_response_code = result["httpResponseCode"].get<int>();
+    }
+
+    if (http_response_code == 200) {
+      if (result.find("content") != result.end()) {
+        json_data = result["content"];
+      }
+      h.emplace("content-type", header_value{"application/json"});
+      response.end(json_data.dump().c_str());
+    } else {
+      // Problem details
+      if (result.find("ProblemDetails") != result.end()) {
+        json_data = result["ProblemDetails"];
+      }
+      h.emplace("content-type", header_value{"application/problem+json"});
+      response.end(json_data.dump().c_str());
+    }
+  } else {
+    int http_code = http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT;
+    response.write_head(http_code);
+    response.end();
+  }
+}
+
 //------------------------------------------------------------------------------
 void smf_http2_server::stop() {
   server.stop();

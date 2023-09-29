@@ -57,12 +57,12 @@ int encode_service_area_list(
         else
           octet = 0x00 | ((ptr->numberOfElements) & 0x1f);
         ENCODE_U8(buffer + encoded, octet, encoded);
-        octet = (uint8_t)((ptr->mcc_mnc->mcc) & 0x00ff);
+        octet = (uint8_t) ((ptr->mcc_mnc->mcc) & 0x00ff);
         ENCODE_U8(buffer + encoded, octet, encoded);
-        octet = (uint8_t)(((ptr->mcc_mnc->mcc) & 0x0f00) >> 8) |
-                (uint8_t)(((ptr->mcc_mnc->mnc) & 0x0f00) >> 4);
+        octet = (uint8_t) (((ptr->mcc_mnc->mcc) & 0x0f00) >> 8) |
+                (uint8_t) (((ptr->mcc_mnc->mnc) & 0x0f00) >> 4);
         ENCODE_U8(buffer + encoded, octet, encoded);
-        octet = (uint8_t)((ptr->mcc_mnc->mnc) & 0x00ff);
+        octet = (uint8_t) ((ptr->mcc_mnc->mnc) & 0x00ff);
         ENCODE_U8(buffer + encoded, octet, encoded);
 
         struct TrackingAreaIdentity* ptrTai = ptr->tai;
@@ -80,12 +80,12 @@ int encode_service_area_list(
         else
           octet = 0x00 | ((ptr->numberOfElements) & 0x1f) | 0x20;
         ENCODE_U8(buffer + encoded, octet, encoded);
-        octet = (uint8_t)((ptr->mcc_mnc->mcc) & 0x00ff);
+        octet = (uint8_t) ((ptr->mcc_mnc->mcc) & 0x00ff);
         ENCODE_U8(buffer + encoded, octet, encoded);
-        octet = (uint8_t)(((ptr->mcc_mnc->mcc) & 0x0f00) >> 8) |
-                (uint8_t)(((ptr->mcc_mnc->mnc) & 0x0f00) >> 4);
+        octet = (uint8_t) (((ptr->mcc_mnc->mcc) & 0x0f00) >> 8) |
+                (uint8_t) (((ptr->mcc_mnc->mnc) & 0x0f00) >> 4);
         ENCODE_U8(buffer + encoded, octet, encoded);
-        octet = (uint8_t)((ptr->mcc_mnc->mnc) & 0x00ff);
+        octet = (uint8_t) ((ptr->mcc_mnc->mnc) & 0x00ff);
         ENCODE_U8(buffer + encoded, octet, encoded);
         ENCODE_U8(buffer + encoded, ptr->tai->tac, encoded);
         ENCODE_U16(buffer + encoded, ptr->tai->tacContinued, encoded);
@@ -101,12 +101,12 @@ int encode_service_area_list(
         struct MccMnc* ptrMccMnc             = ptr->mcc_mnc;
         for (; elementIndex < ptr->numberOfElements; elementIndex++) {
           if (!ptrTai3 | !ptrMccMnc) break;
-          octet = (uint8_t)((ptrMccMnc->mcc) & 0x00ff);
+          octet = (uint8_t) ((ptrMccMnc->mcc) & 0x00ff);
           ENCODE_U8(buffer + encoded, octet, encoded);
-          octet = (uint8_t)(((ptrMccMnc->mcc) & 0x0f00) >> 8) |
-                  (uint8_t)(((ptrMccMnc->mnc) & 0x0f00) >> 4);
+          octet = (uint8_t) (((ptrMccMnc->mcc) & 0x0f00) >> 8) |
+                  (uint8_t) (((ptrMccMnc->mnc) & 0x0f00) >> 4);
           ENCODE_U8(buffer + encoded, octet, encoded);
-          octet = (uint8_t)((ptrMccMnc->mnc) & 0x00ff);
+          octet = (uint8_t) ((ptrMccMnc->mnc) & 0x00ff);
           ENCODE_U8(buffer + encoded, octet, encoded);
           ENCODE_U8(buffer + encoded, ptrTai3->tac, encoded);
           ENCODE_U16(buffer + encoded, ptrTai3->tacContinued, encoded);
@@ -122,12 +122,12 @@ int encode_service_area_list(
           octet = 0x00 | ((ptr->numberOfElements) & 0x1f) | 0x60;
         ENCODE_U8(buffer + encoded, octet, encoded);
 
-        octet = (uint8_t)((ptr->mcc_mnc->mcc) & 0x00ff);
+        octet = (uint8_t) ((ptr->mcc_mnc->mcc) & 0x00ff);
         ENCODE_U8(buffer + encoded, octet, encoded);
-        octet = (uint8_t)(((ptr->mcc_mnc->mcc) & 0x0f00) >> 8) |
-                (uint8_t)(((ptr->mcc_mnc->mnc) & 0x0f00) >> 4);
+        octet = (uint8_t) (((ptr->mcc_mnc->mcc) & 0x0f00) >> 8) |
+                (uint8_t) (((ptr->mcc_mnc->mnc) & 0x0f00) >> 4);
         ENCODE_U8(buffer + encoded, octet, encoded);
-        octet = (uint8_t)((ptr->mcc_mnc->mnc) & 0x00ff);
+        octet = (uint8_t) ((ptr->mcc_mnc->mnc) & 0x00ff);
         ENCODE_U8(buffer + encoded, octet, encoded);
         break;
     }

@@ -39,11 +39,16 @@ include_directories(${SRC_TOP_DIR}/nas/sm)
 include_directories(${SRC_TOP_DIR}/nas/sm/msg)
 include_directories(${SRC_TOP_DIR}/nas/security)
 include_directories(${SRC_TOP_DIR}/udp)
-include_directories(${SRC_TOP_DIR}/../build/ext/spdlog/include)
 include_directories(${SRC_TOP_DIR}/api-server/api)
 include_directories(${SRC_TOP_DIR}/api-server/impl)
 include_directories(${SRC_TOP_DIR}/api-server/model)
 include_directories(${SRC_TOP_DIR}/api-server/)
+include_directories(${SRC_TOP_DIR}/${MOUNTED_COMMON}/logger)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/config/config.cmake)
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/utils/utils.cmake)
+# TODO Stefan: Why do I need include_directories here if it is already in utils.cmake?
+include_directories(${SRC_TOP_DIR}/${MOUNTED_COMMON}/utils)
+include(${BUILD_TOP_DIR}/smf/used_models.cmake)
 
 add_library (SMF STATIC
   smf_app.cpp
@@ -55,10 +60,12 @@ add_library (SMF STATIC
   smf_pco.cpp
   smf_procedure.cpp
   smf_n4.cpp
+  smf_n7.cpp
   smf_sbi.cpp
   smf_event.cpp
   smf_profile.cpp
   smf_subscription.cpp
   smf_msg.cpp
+  smf_config_types.cpp
 )
 

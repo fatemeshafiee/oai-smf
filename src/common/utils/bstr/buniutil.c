@@ -79,8 +79,8 @@ int buGetBlkUTF16(
         len--;
       } else {
         long y  = ucs4 - 0x10000;
-        ucs2[0] = (cpUcs2)(0xD800 | (y >> 10));
-        ucs2[1] = (cpUcs2)(0xDC00 | (y & 0x03FF));
+        ucs2[0] = (cpUcs2) (0xD800 | (y >> 10));
+        ucs2[1] = (cpUcs2) (0xDC00 | (y & 0x03FF));
         len -= 2;
         ucs2 += 2;
         i++;

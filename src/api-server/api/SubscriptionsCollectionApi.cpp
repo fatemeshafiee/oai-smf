@@ -15,13 +15,13 @@
 #include "Helpers.h"
 #include "smf_config.hpp"
 
-extern smf::smf_config smf_cfg;
+extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;
 
 namespace oai {
 namespace smf_server {
 namespace api {
 
-using namespace oai::smf_server::helpers;
+using namespace oai::model::common::helpers;
 using namespace oai::smf_server::model;
 
 SubscriptionsCollectionApi::SubscriptionsCollectionApi(
@@ -37,7 +37,7 @@ void SubscriptionsCollectionApi::setupRoutes() {
   using namespace Pistache::Rest;
 
   Routes::Post(
-      *router, base + smf_cfg.sbi_api_version + "/subscriptions",
+      *router, base + smf_cfg->sbi_api_version + "/subscriptions",
       Routes::bind(
           &SubscriptionsCollectionApi::create_individual_subcription_handler,
           this));

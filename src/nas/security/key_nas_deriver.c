@@ -55,7 +55,7 @@ int derive_key_nas(
   /*
    * P0 = algorithm type distinguisher
    */
-  s[1] = (uint8_t)(nas_alg_type & 0xFF);
+  s[1] = (uint8_t) (nas_alg_type & 0xFF);
   /*
    * L0 = length(P0) = 1
    */

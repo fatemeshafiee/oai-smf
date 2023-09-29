@@ -88,8 +88,8 @@ class EventNotification {
   /// <summary>
   ///
   /// </summary>
-  DnaiChangeType getDnaiChgType() const;
-  void setDnaiChgType(DnaiChangeType const& value);
+  oai::model::common::DnaiChangeType getDnaiChgType() const;
+  void setDnaiChgType(oai::model::common::DnaiChangeType const& value);
   bool dnaiChgTypeIsSet() const;
   void unsetDnaiChgType();
   /// <summary>
@@ -102,8 +102,8 @@ class EventNotification {
   /// <summary>
   ///
   /// </summary>
-  Ipv6Prefix getSourceUeIpv6Prefix() const;
-  void setSourceUeIpv6Prefix(Ipv6Prefix const& value);
+  oai::model::common::Ipv6Prefix getSourceUeIpv6Prefix() const;
+  void setSourceUeIpv6Prefix(oai::model::common::Ipv6Prefix const& value);
   bool sourceUeIpv6PrefixIsSet() const;
   void unsetSourceUeIpv6Prefix();
   /// <summary>
@@ -116,22 +116,22 @@ class EventNotification {
   /// <summary>
   ///
   /// </summary>
-  Ipv6Prefix getTargetUeIpv6Prefix() const;
-  void setTargetUeIpv6Prefix(Ipv6Prefix const& value);
+  oai::model::common::Ipv6Prefix getTargetUeIpv6Prefix() const;
+  void setTargetUeIpv6Prefix(oai::model::common::Ipv6Prefix const& value);
   bool targetUeIpv6PrefixIsSet() const;
   void unsetTargetUeIpv6Prefix();
   /// <summary>
   ///
   /// </summary>
-  RouteToLocation getSourceTraRouting() const;
-  void setSourceTraRouting(RouteToLocation const& value);
+  oai::model::common::RouteToLocation getSourceTraRouting() const;
+  void setSourceTraRouting(oai::model::common::RouteToLocation const& value);
   bool sourceTraRoutingIsSet() const;
   void unsetSourceTraRouting();
   /// <summary>
   ///
   /// </summary>
-  RouteToLocation getTargetTraRouting() const;
-  void setTargetTraRouting(RouteToLocation const& value);
+  oai::model::common::RouteToLocation getTargetTraRouting() const;
+  void setTargetTraRouting(oai::model::common::RouteToLocation const& value);
   bool targetTraRoutingIsSet() const;
   void unsetTargetTraRouting();
   /// <summary>
@@ -151,8 +151,8 @@ class EventNotification {
   /// <summary>
   ///
   /// </summary>
-  Ipv6Prefix getAdIpv6Prefix() const;
-  void setAdIpv6Prefix(Ipv6Prefix const& value);
+  oai::model::common::Ipv6Prefix getAdIpv6Prefix() const;
+  void setAdIpv6Prefix(oai::model::common::Ipv6Prefix const& value);
   bool adIpv6PrefixIsSet() const;
   void unsetAdIpv6Prefix();
   /// <summary>
@@ -165,22 +165,22 @@ class EventNotification {
   /// <summary>
   ///
   /// </summary>
-  Ipv6Prefix getReIpv6Prefix() const;
-  void setReIpv6Prefix(Ipv6Prefix const& value);
+  oai::model::common::Ipv6Prefix getReIpv6Prefix() const;
+  void setReIpv6Prefix(oai::model::common::Ipv6Prefix const& value);
   bool reIpv6PrefixIsSet() const;
   void unsetReIpv6Prefix();
   /// <summary>
   ///
   /// </summary>
-  PlmnId getPlmnId() const;
-  void setPlmnId(PlmnId const& value);
+  oai::model::common::PlmnId getPlmnId() const;
+  void setPlmnId(oai::model::common::PlmnId const& value);
   bool plmnIdIsSet() const;
   void unsetPlmnId();
   /// <summary>
   ///
   /// </summary>
-  AccessType getAccType() const;
-  void setAccType(AccessType const& value);
+  oai::model::common::AccessType getAccType() const;
+  void setAccType(oai::model::common::AccessType const& value);
   bool accTypeIsSet() const;
   void unsetAccType();
   /// <summary>
@@ -228,33 +228,33 @@ class EventNotification {
   bool m_SourceDnaiIsSet;
   std::string m_TargetDnai;
   bool m_TargetDnaiIsSet;
-  DnaiChangeType m_DnaiChgType;
+  oai::model::common::DnaiChangeType m_DnaiChgType;
   bool m_DnaiChgTypeIsSet;
   std::string m_SourceUeIpv4Addr;
   bool m_SourceUeIpv4AddrIsSet;
-  Ipv6Prefix m_SourceUeIpv6Prefix;
+  oai::model::common::Ipv6Prefix m_SourceUeIpv6Prefix;
   bool m_SourceUeIpv6PrefixIsSet;
   std::string m_TargetUeIpv4Addr;
   bool m_TargetUeIpv4AddrIsSet;
-  Ipv6Prefix m_TargetUeIpv6Prefix;
+  oai::model::common::Ipv6Prefix m_TargetUeIpv6Prefix;
   bool m_TargetUeIpv6PrefixIsSet;
-  RouteToLocation m_SourceTraRouting;
+  oai::model::common::RouteToLocation m_SourceTraRouting;
   bool m_SourceTraRoutingIsSet;
-  RouteToLocation m_TargetTraRouting;
+  oai::model::common::RouteToLocation m_TargetTraRouting;
   bool m_TargetTraRoutingIsSet;
   std::string m_UeMac;
   bool m_UeMacIsSet;
   std::string m_AdIpv4Addr;
   bool m_AdIpv4AddrIsSet;
-  Ipv6Prefix m_AdIpv6Prefix;
+  oai::model::common::Ipv6Prefix m_AdIpv6Prefix;
   bool m_AdIpv6PrefixIsSet;
   std::string m_ReIpv4Addr;
   bool m_ReIpv4AddrIsSet;
-  Ipv6Prefix m_ReIpv6Prefix;
+  oai::model::common::Ipv6Prefix m_ReIpv6Prefix;
   bool m_ReIpv6PrefixIsSet;
-  PlmnId m_PlmnId;
+  oai::model::common::PlmnId m_PlmnId;
   bool m_PlmnIdIsSet;
-  AccessType m_AccType;
+  oai::model::common::AccessType m_AccType;
   bool m_AccTypeIsSet;
   int32_t m_PduSeId;
   bool m_PduSeIdIsSet;
