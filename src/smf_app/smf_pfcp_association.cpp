@@ -38,7 +38,7 @@
 
 using namespace smf;
 using namespace std;
-using namespace oai::smf_server::model;
+using namespace oai::model::pcf;
 
 extern itti_mw* itti_inst;
 extern smf_n4* smf_n4_inst;
@@ -823,7 +823,7 @@ std::shared_ptr<upf_graph> pfcp_associations::select_up_node(
 
 //------------------------------------------------------------------------------
 std::shared_ptr<upf_graph> pfcp_associations::select_up_node(
-    const oai::smf_server::model::SmPolicyDecision& decision,
+    const SmPolicyDecision& decision,
     const snssai_t& snssai, const std::string& dnn) {
   return associations_graph.select_upf_nodes(decision, snssai, dnn);
 }
@@ -1428,7 +1428,7 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
 // TODO in the current implementation, UL CL needs to be the first node,
 // otherwise it is not explored anymore when graph is merged
 std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
-    const oai::smf_server::model::SmPolicyDecision& policy_decision,
+    const SmPolicyDecision& policy_decision,
     const snssai_t& snssai, const std::string& dnn) {
   // TODO move this maybe
   std::unique_lock graph_lock(graph_mutex);

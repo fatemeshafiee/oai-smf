@@ -559,7 +559,7 @@ class upf_graph {
    * @return std::shared_ptr<upf_graph>
    */
   std::shared_ptr<upf_graph> select_upf_nodes(
-      const oai::smf_server::model::SmPolicyDecision& policy_decision,
+      const oai::model::pcf::SmPolicyDecision& policy_decision,
       const snssai_t& snssai, const std::string& dnn);
 
   /**
@@ -702,7 +702,7 @@ class pfcp_associations {
       const snssai_t& snssai, const std::string& dnn);
 
   std::shared_ptr<upf_graph> select_up_node(
-      const oai::smf_server::model::SmPolicyDecision& decision,
+      const oai::model::pcf::SmPolicyDecision& decision,
       const snssai_t& snssai, const std::string& dnn);
 
   bool add_peer_candidate_node(const pfcp::node_id_t& node_id);

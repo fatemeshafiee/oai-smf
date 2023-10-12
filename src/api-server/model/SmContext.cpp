@@ -411,10 +411,10 @@ bool SmContext::pcfIdIsSet() const {
 void SmContext::unsetPcfId() {
   m_PcfIdIsSet = false;
 }
-DnnSelectionMode SmContext::getSelMode() const {
+oai::model::smf::DnnSelectionMode SmContext::getSelMode() const {
   return m_SelMode;
 }
-void SmContext::setSelMode(DnnSelectionMode const& value) {
+void SmContext::setSelMode(oai::model::smf::DnnSelectionMode const& value) {
   m_SelMode      = value;
   m_SelModeIsSet = true;
 }
