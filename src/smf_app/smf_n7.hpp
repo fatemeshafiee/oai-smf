@@ -320,8 +320,7 @@ class smf_n7 {
    * @param context: Context containing at least Snssai, plmn ID and DNN
    * @return 0 in case of failure, otherwise ID > 0
    */
-  uint32_t select_pcf(
-      const oai::model::pcf::SmPolicyContextData& context);
+  uint32_t select_pcf(const oai::model::pcf::SmPolicyContextData& context);
 
   /**
    * @brief Helper method to receive the policy storage (thread safe)

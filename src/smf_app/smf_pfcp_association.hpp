@@ -702,8 +702,8 @@ class pfcp_associations {
       const snssai_t& snssai, const std::string& dnn);
 
   std::shared_ptr<upf_graph> select_up_node(
-      const oai::model::pcf::SmPolicyDecision& decision,
-      const snssai_t& snssai, const std::string& dnn);
+      const oai::model::pcf::SmPolicyDecision& decision, const snssai_t& snssai,
+      const std::string& dnn);
 
   bool add_peer_candidate_node(const pfcp::node_id_t& node_id);
   bool add_peer_candidate_node(

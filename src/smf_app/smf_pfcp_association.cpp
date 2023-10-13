@@ -823,8 +823,8 @@ std::shared_ptr<upf_graph> pfcp_associations::select_up_node(
 
 //------------------------------------------------------------------------------
 std::shared_ptr<upf_graph> pfcp_associations::select_up_node(
-    const SmPolicyDecision& decision,
-    const snssai_t& snssai, const std::string& dnn) {
+    const SmPolicyDecision& decision, const snssai_t& snssai,
+    const std::string& dnn) {
   return associations_graph.select_upf_nodes(decision, snssai, dnn);
 }
 
@@ -1428,8 +1428,8 @@ std::shared_ptr<upf_graph> upf_graph::select_upf_node(
 // TODO in the current implementation, UL CL needs to be the first node,
 // otherwise it is not explored anymore when graph is merged
 std::shared_ptr<upf_graph> upf_graph::select_upf_nodes(
-    const SmPolicyDecision& policy_decision,
-    const snssai_t& snssai, const std::string& dnn) {
+    const SmPolicyDecision& policy_decision, const snssai_t& snssai,
+    const std::string& dnn) {
   // TODO move this maybe
   std::unique_lock graph_lock(graph_mutex);
 

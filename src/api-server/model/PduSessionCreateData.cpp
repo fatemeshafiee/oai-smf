@@ -585,7 +585,8 @@ void PduSessionCreateData::unsetHoPreparationIndication() {
 oai::model::smf::DnnSelectionMode PduSessionCreateData::getSelMode() const {
   return m_SelMode;
 }
-void PduSessionCreateData::setSelMode(oai::model::smf::DnnSelectionMode const& value) {
+void PduSessionCreateData::setSelMode(
+    oai::model::smf::DnnSelectionMode const& value) {
   m_SelMode      = value;
   m_SelModeIsSet = true;
 }
