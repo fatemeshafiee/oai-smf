@@ -367,6 +367,35 @@ void smf_http2_server::start() {
           }
         });
       });
+  server.handle(
+      NSMF_EVENT_EXPOSURE_API_BASE + smf_cfg->sbi_api_version +
+          NSMF_EVENT_EXPOSURE_SUBSCRIBE_URL,
+      [&](const request& request, const response& response) {
+        request.on_data([&](const uint8_t* data, std::size_t len) {
+          try {
+            if (request.method().compare("GET") == 0) {
+              // TODO: Get subscriptions
+            }
+            if (request.method().compare("PUT") == 0 && len > 0) {
+              std::string msg((char*) data, len);
+              auto configuration_info = nlohmann::json::parse(msg.c_str());
+              // TODO: Update subscription
+            }
+            if (request.method().compare("POST") == 0 && len > 0) {
+              std::string msg((char*) data, len);
+              auto subscription_create_data = nlohmann::json::parse(msg.c_str());
+              this->create_event_subscription_handler(subscription_create_data, response)
+            }
+          } catch (nlohmann::detail::exception& e) {
+            Logger::smf_sbi().warn(
+                "Can not parse the JSON data (error: %s)!", e.what());
+            response.write_head(
+                http_status_code_e::HTTP_STATUS_CODE_400_BAD_REQUEST);
+            response.end();
+            return;
+          }
+        });
+      });
 
   if (server.listen_and_serve(ec, m_address, std::to_string(m_port))) {
     std::cerr << "HTTP Server error: " << ec.message() << std::endl;
