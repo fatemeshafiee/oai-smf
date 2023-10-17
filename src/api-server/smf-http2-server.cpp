@@ -367,6 +367,7 @@ void smf_http2_server::start() {
           }
         });
       });
+  // Event Exposure
   server.handle(
       NSMF_EVENT_EXPOSURE_API_BASE + smf_cfg->sbi_api_version +
           NSMF_EVENT_EXPOSURE_SUBSCRIBE_URL,
@@ -378,12 +379,12 @@ void smf_http2_server::start() {
             }
             if (request.method().compare("PUT") == 0 && len > 0) {
               std::string msg((char*) data, len);
-              auto configuration_info = nlohmann::json::parse(msg.c_str());
               // TODO: Update subscription
             }
             if (request.method().compare("POST") == 0 && len > 0) {
               std::string msg((char*) data, len);
-              auto subscription_create_data = nlohmann::json::parse(msg.c_str());
+              NsmfEventExposure subsctiptionData;
+              auto subscription_create_data = nlohmann::json::parse(msg.c_str()).get_to(subsctiptionData);
               this->create_event_subscription_handler(subscription_create_data, response);
             }
           } catch (nlohmann::detail::exception& e) {
@@ -824,7 +825,7 @@ void smf_http2_server::update_configuration_handler(
 void smf_http2_server::create_event_subscription_handler(
     const NsmfEventExposure& nsmfEventExposure,
     const response& response) {
-  Logger::amf_server().info("Received SmfCreateEventSubscription Request");
+  Logger::smf_api_server().info("Received SmfCreateEventSubscription Request");
 
   header_map h;
   smf::event_exposure_msg event_exposure = {};
@@ -838,7 +839,7 @@ void smf_http2_server::create_event_subscription_handler(
       std::make_shared<itti_sbi_event_exposure_request>(
           TASK_SMF_SBI, TASK_SMF_APP);
   itti_msg->event_exposure = event_exposure;
-  itti_msg->http_version   = 1;
+  itti_msg->http_version   = 2;
 
   evsub_id_t sub_id = m_smf_app->handle_event_exposure_subscription(itti_msg);
 
@@ -848,14 +849,15 @@ void smf_http2_server::create_event_subscription_handler(
 
   if (sub_id != -1) {
     json_data["subId"] = std::to_string(sub_id);
-    response.headers().add<Pistache::Http::Header::Location>(
+    h.emplace("Location", header_value{
         m_address + NSMF_EVENT_EXPOSURE_API_BASE + smf_cfg->sbi_api_version + NSMF_EVENT_EXPOSURE_SUBSCRIBE_URL +
-        std::to_string(sub_id));  // Location header
+        std::to_string(sub_id)
+        });
   }
-
-  response.headers().add<Pistache::Http::Header::ContentType>(
-      Pistache::Http::Mime::MediaType("application/json"));
-  response.send(Pistache::Http::Code(201), json_data.dump().c_str());
+  
+  h.emplace("content-type", header_value{"application/json"});
+  response.write_head(http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT, h);
+  response.end(json_data.dump().c_str());
 
 }
 

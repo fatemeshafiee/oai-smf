@@ -33,6 +33,7 @@
 #include "smf_app.hpp"
 #include <nghttp2/asio_http2_server.h>
 #include "SmContextUpdateMessage.h"
+#include "NsmfEventExposure.h"
 #include "SmContextMessage.h"
 #include "SmContextReleaseMessage.h"
 #include "NFStatusNotifyApiImpl.h"
