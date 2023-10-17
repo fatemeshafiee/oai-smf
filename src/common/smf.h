@@ -297,7 +297,7 @@ typedef struct qos_profile_s {
 #define NSMF_CUSTOMIZED_API_CONFIGURATION_URL "/configuration"
 
 // Event Exposure
-#define NSMF_EVENT_EXPOSURE_API_BASE "/nsmf-event_exposure/"
+#define NSMF_EVENT_EXPOSURE_API_BASE "/nsmf_event-exposure/"
 #define NSMF_EVENT_EXPOSURE_SUBSCRIBE_URL "/subscriptions"
 // NRF
 #define NNRF_NFM_BASE "/nnrf-nfm/"

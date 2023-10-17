@@ -384,7 +384,7 @@ void smf_http2_server::start() {
             if (request.method().compare("POST") == 0 && len > 0) {
               std::string msg((char*) data, len);
               auto subscription_create_data = nlohmann::json::parse(msg.c_str());
-              this->create_event_subscription_handler(subscription_create_data, response)
+              this->create_event_subscription_handler(subscription_create_data, response);
             }
           } catch (nlohmann::detail::exception& e) {
             Logger::smf_sbi().warn(
@@ -820,6 +820,46 @@ void smf_http2_server::update_configuration_handler(
     response.end();
   }
 }
+//------------------------------------------------------------------------------
+void smf_http2_server::create_event_subscription_handler(
+    const NsmfEventExposure& nsmfEventExposure,
+    const response& response) {
+  Logger::amf_server().info("Received SmfCreateEventSubscription Request");
+
+  header_map h;
+  smf::event_exposure_msg event_exposure = {};
+
+  // Convert from NsmfEventExposure to event_exposure_msg
+  xgpp_conv::smf_event_exposure_notification_from_openapi(
+      nsmfEventExposure, event_exposure);
+
+  // Handle the message in smf_app
+  std::shared_ptr<itti_sbi_event_exposure_request> itti_msg =
+      std::make_shared<itti_sbi_event_exposure_request>(
+          TASK_SMF_SBI, TASK_SMF_APP);
+  itti_msg->event_exposure = event_exposure;
+  itti_msg->http_version   = 1;
+
+  evsub_id_t sub_id = m_smf_app->handle_event_exposure_subscription(itti_msg);
+
+  // Send response
+  nlohmann::json json_data = {};
+  to_json(json_data, nsmfEventExposure);
+
+  if (sub_id != -1) {
+    json_data["subId"] = std::to_string(sub_id);
+    response.headers().add<Pistache::Http::Header::Location>(
+        m_address + NSMF_EVENT_EXPOSURE_API_BASE + smf_cfg->sbi_api_version + NSMF_EVENT_EXPOSURE_SUBSCRIBE_URL +
+        std::to_string(sub_id));  // Location header
+  }
+
+  response.headers().add<Pistache::Http::Header::ContentType>(
+      Pistache::Http::Mime::MediaType("application/json"));
+  response.send(Pistache::Http::Code(201), json_data.dump().c_str());
+
+}
+
+
 
 //------------------------------------------------------------------------------
 void smf_http2_server::stop() {
