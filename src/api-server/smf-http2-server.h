@@ -64,12 +64,10 @@ class smf_http2_server {
 
   void nf_status_notify_handler(
       const NotificationData& notificationData, const response& response);
-  
+
   void create_event_subscription_handler(
       const NsmfEventExposure& smfCreateEventSubscription,
       const response& response);
-
-
 
   void get_configuration_handler(const response& response);
   void update_configuration_handler(
