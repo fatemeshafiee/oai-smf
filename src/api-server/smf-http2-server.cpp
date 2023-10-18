@@ -859,7 +859,7 @@ void smf_http2_server::create_event_subscription_handler(
   }
 
   h.emplace("content-type", header_value{"application/json"});
-  response.write_head(http_status_code_e::HTTP_RESPONSE_CODE_201_CREATED, h);
+  response.write_head(http_status_code_e::HTTP_STATUS_CODE_201_CREATED, h);
   response.end(json_data.dump().c_str());
 }
 
