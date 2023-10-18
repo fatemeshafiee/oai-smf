@@ -2196,7 +2196,7 @@ bool smf_context::handle_pdu_session_release_complete(
 
   // SM Policy Association termination
   if (sp->policy_ptr) {
-    oai::smf_server::model::SmPolicyDeleteData delete_data;
+    oai::model::pcf::SmPolicyDeleteData delete_data;
     // TODO set data such as release cause, usage reports etc
     n7::smf_n7::get_instance().remove_sm_policy_association(
         *sp->policy_ptr, delete_data);

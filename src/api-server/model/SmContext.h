@@ -164,8 +164,8 @@ class SmContext {
   /// <summary>
   ///
   /// </summary>
-  DnnSelectionMode getSelMode() const;
-  void setSelMode(DnnSelectionMode const& value);
+  oai::model::smf::DnnSelectionMode getSelMode() const;
+  void setSelMode(oai::model::smf::DnnSelectionMode const& value);
   bool selModeIsSet() const;
   void unsetSelMode();
   /// <summary>
@@ -331,7 +331,7 @@ class SmContext {
   bool m_HSmfUriIsSet;
   std::string m_PcfId;
   bool m_PcfIdIsSet;
-  DnnSelectionMode m_SelMode;
+  oai::model::smf::DnnSelectionMode m_SelMode;
   bool m_SelModeIsSet;
   oai::model::common::TraceData m_TraceData;
   bool m_TraceDataIsSet;

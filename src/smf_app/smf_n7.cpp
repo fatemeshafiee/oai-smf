@@ -39,7 +39,7 @@
 
 using namespace smf;
 using namespace smf::n7;
-using namespace oai::smf_server::model;
+using namespace oai::model::pcf;
 using namespace oai::model::common;
 
 extern std::unique_ptr<oai::config::smf::smf_config> smf_cfg;

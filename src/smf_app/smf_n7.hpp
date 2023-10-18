@@ -65,8 +65,8 @@ enum class sm_policy_status_code {
  *
  */
 struct policy_association {
-  oai::smf_server::model::SmPolicyDecision decision;
-  oai::smf_server::model::SmPolicyContextData context;
+  oai::model::pcf::SmPolicyDecision decision;
+  oai::model::pcf::SmPolicyContextData context;
   uint64_t id     = 0;
   uint64_t pcf_id = 0;
   std::string pcf_location;
@@ -153,7 +153,7 @@ class policy_storage {
    */
   virtual sm_policy_status_code remove_policy_association(
       const policy_association& association,
-      const oai::smf_server::model::SmPolicyDeleteData& delete_data) = 0;
+      const oai::model::pcf::SmPolicyDeleteData& delete_data) = 0;
 
   /**
    * @brief Updates a policy association, identified by the ID
@@ -166,7 +166,7 @@ class policy_storage {
    * INTERNAL_ERROR, PCF_NOT_AVAILABLE
    */
   virtual sm_policy_status_code update_policy_association(
-      const oai::smf_server::model::SmPolicyUpdateContextData& update_data,
+      const oai::model::pcf::SmPolicyUpdateContextData& update_data,
       policy_association& association) = 0;
   /**
    * @brief Get the the policy association together with the original context
@@ -217,10 +217,10 @@ class smf_pcf_client : public policy_storage {
 
   sm_policy_status_code remove_policy_association(
       const policy_association& association,
-      const oai::smf_server::model::SmPolicyDeleteData& delete_data) override;
+      const oai::model::pcf::SmPolicyDeleteData& delete_data) override;
 
   sm_policy_status_code update_policy_association(
-      const oai::smf_server::model::SmPolicyUpdateContextData& update_data,
+      const oai::model::pcf::SmPolicyUpdateContextData& update_data,
       policy_association& association) override;
 
   sm_policy_status_code get_policy_association(
@@ -295,7 +295,7 @@ class smf_n7 {
    */
   sm_policy_status_code remove_sm_policy_association(
       const policy_association& association,
-      const oai::smf_server::model::SmPolicyDeleteData& delete_data);
+      const oai::model::pcf::SmPolicyDeleteData& delete_data);
 
   /**
    * @brief Updates an SM Policy Association, requires the triggers to be set as
@@ -308,7 +308,7 @@ class smf_n7 {
    */
   sm_policy_status_code update_sm_policy_association(
       policy_association& association,
-      const oai::smf_server::model::SmPolicyUpdateContextData& update_data);
+      const oai::model::pcf::SmPolicyUpdateContextData& update_data);
 
  private:
   /**
@@ -320,8 +320,7 @@ class smf_n7 {
    * @param context: Context containing at least Snssai, plmn ID and DNN
    * @return 0 in case of failure, otherwise ID > 0
    */
-  uint32_t select_pcf(
-      const oai::smf_server::model::SmPolicyContextData& context);
+  uint32_t select_pcf(const oai::model::pcf::SmPolicyContextData& context);
 
   /**
    * @brief Helper method to receive the policy storage (thread safe)

@@ -49,6 +49,14 @@ list(APPEND USED_COMMON_MODEL_SRC_FILES
         ${COMMON_MODEL_DIR}/ChangeType_anyOf.cpp
         ${COMMON_MODEL_DIR}/BackupAmfInfo.cpp
         # SM Policy
+        ${COMMON_MODEL_DIR}/QosResourceType.cpp
+        ${COMMON_MODEL_DIR}/QosResourceType_anyOf.cpp
+        ${COMMON_MODEL_DIR}/Arp.cpp
+        ${COMMON_MODEL_DIR}/PreemptionVulnerability.cpp
+        ${COMMON_MODEL_DIR}/PreemptionVulnerability_anyOf.cpp
+        ${COMMON_MODEL_DIR}/PreemptionCapability.cpp
+        ${COMMON_MODEL_DIR}/PreemptionCapability_anyOf.cpp
+        ${COMMON_MODEL_DIR}/Ambr.cpp
         ${COMMON_MODEL_DIR}/AtsssCapability.cpp
         ${COMMON_MODEL_DIR}/PresenceState.cpp
         ${COMMON_MODEL_DIR}/PresenceState_anyOf.cpp
@@ -59,6 +67,13 @@ list(APPEND USED_COMMON_MODEL_SRC_FILES
         ${COMMON_MODEL_DIR}/Ipv6Prefix.cpp
         ${COMMON_MODEL_DIR}/Ipv6Addr.cpp
         ${COMMON_MODEL_DIR}/Guami.cpp
+        ${COMMON_MODEL_DIR}/AccessType.cpp
+        ${COMMON_MODEL_DIR}/AccessTypeRm.cpp
+        ${COMMON_MODEL_DIR}/DlDataDeliveryStatus.cpp
+        ${COMMON_MODEL_DIR}/DlDataDeliveryStatus_anyOf.cpp
+        ${COMMON_MODEL_DIR}/PresenceInfoRm.cpp
+        ${COMMON_MODEL_DIR}/PresenceInfo.cpp
+        ${COMMON_MODEL_DIR}/SubscribedDefaultQos.cpp
         # RAN Node ID dependencies
         ${COMMON_MODEL_DIR}/GlobalRanNodeId.cpp
         ${COMMON_MODEL_DIR}/GNbId.cpp
@@ -92,6 +107,132 @@ list(APPEND USED_COMMON_MODEL_SRC_FILES
         ${COMMON_MODEL_DIR}/QosFlowUsageReport.cpp
         ${COMMON_MODEL_DIR}/VolumeTimedReport.cpp
         )
+
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/smf/smf_model.cmake)
+
+list(APPEND USED_SMF_MODEL_SRC_FILES
+        ${SMF_MODEL_DIR}/DnnSelectionMode.cpp
+        ${SMF_MODEL_DIR}/DnnSelectionMode_anyOf.cpp
+        ${SMF_MODEL_DIR}/VplmnQos.cpp
+        )
+
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/pcf/pcf_model.cmake)
+
+list(APPEND USED_PCF_MODEL_SRC_FILES
+        # SM Policy Decision
+        ${PCF_MODEL_DIR}/QosData.cpp
+        ${PCF_MODEL_DIR}/SmPolicyDecision.cpp
+        ${PCF_MODEL_DIR}/ChargingInformation.cpp
+        ${PCF_MODEL_DIR}/RequestedUsageData.cpp
+        ${PCF_MODEL_DIR}/QosFlowUsage.cpp
+        ${PCF_MODEL_DIR}/QosFlowUsage_anyOf.cpp
+        ${PCF_MODEL_DIR}/SmPolicyAssociationReleaseCause.cpp
+        ${PCF_MODEL_DIR}/SmPolicyAssociationReleaseCause_anyOf.cpp
+        ${PCF_MODEL_DIR}/BridgeManagementContainer.cpp
+        ${PCF_MODEL_DIR}/PortManagementContainer.cpp
+        ${PCF_MODEL_DIR}/RequestedRuleData.cpp
+        ${PCF_MODEL_DIR}/RequestedRuleDataType.cpp
+        ${PCF_MODEL_DIR}/RequestedRuleDataType_anyOf.cpp
+        ${PCF_MODEL_DIR}/PolicyControlRequestTrigger.cpp
+        ${PCF_MODEL_DIR}/PolicyControlRequestTrigger_anyOf.cpp
+        ${PCF_MODEL_DIR}/SessionRule.cpp
+        ${PCF_MODEL_DIR}/AuthorizedDefaultQos.cpp
+        ${PCF_MODEL_DIR}/PccRule.cpp
+        ${PCF_MODEL_DIR}/AfSigProtocol.cpp
+        ${PCF_MODEL_DIR}/AfSigProtocol_anyOf.cpp
+        ${PCF_MODEL_DIR}/FlowInformation.cpp
+        ${PCF_MODEL_DIR}/EthFlowDescription.cpp
+        ${PCF_MODEL_DIR}/FlowDirectionRm.cpp
+        ${PCF_MODEL_DIR}/FlowDirection_anyOf.cpp
+        ${PCF_MODEL_DIR}/TscaiInputContainer.cpp
+        ${PCF_MODEL_DIR}/DownlinkDataNotificationControl.cpp
+        ${PCF_MODEL_DIR}/NotificationControlIndication.cpp
+        ${PCF_MODEL_DIR}/NotificationControlIndication_anyOf.cpp
+        ${PCF_MODEL_DIR}/DownlinkDataNotificationControlRm.cpp
+        ${PCF_MODEL_DIR}/ChargingData.cpp
+        ${PCF_MODEL_DIR}/ReportingLevel.cpp
+        ${PCF_MODEL_DIR}/ReportingLevel_anyOf.cpp
+        ${PCF_MODEL_DIR}/MeteringMethod.cpp
+        ${PCF_MODEL_DIR}/MeteringMethod_anyOf.cpp
+        ${PCF_MODEL_DIR}/UsageMonitoringData.cpp
+        ${PCF_MODEL_DIR}/QosCharacteristics.cpp
+        ${PCF_MODEL_DIR}/TrafficControlData.cpp
+        ${PCF_MODEL_DIR}/FlowStatus.cpp
+        ${PCF_MODEL_DIR}/FlowStatus_anyOf.cpp
+        ${PCF_MODEL_DIR}/SteeringFunctionality.cpp
+        ${PCF_MODEL_DIR}/SteeringFunctionality_anyOf.cpp
+        ${PCF_MODEL_DIR}/SteeringMode.cpp
+        ${PCF_MODEL_DIR}/SteerModeValue.cpp
+        ${PCF_MODEL_DIR}/SteerModeValue_anyOf.cpp
+        ${PCF_MODEL_DIR}/MulticastAccessControl.cpp
+        ${PCF_MODEL_DIR}/MulticastAccessControl_anyOf.cpp
+        ${PCF_MODEL_DIR}/RedirectInformation.cpp
+        ${PCF_MODEL_DIR}/RedirectAddressType.cpp
+        ${PCF_MODEL_DIR}/RedirectAddressType_anyOf.cpp
+        ${PCF_MODEL_DIR}/UpPathChgEvent.cpp
+        ${PCF_MODEL_DIR}/QosMonitoringData.cpp
+        ${PCF_MODEL_DIR}/ReportingFrequency.cpp
+        ${PCF_MODEL_DIR}/ReportingFrequency_anyOf.cpp
+        ${PCF_MODEL_DIR}/RequestedQosMonitoringParameter.cpp
+        ${PCF_MODEL_DIR}/RequestedQosMonitoringParameter_anyOf.cpp
+        ${PCF_MODEL_DIR}/ConditionData.cpp
+        ${PCF_MODEL_DIR}/SmPolicyControl.cpp
+        # SM Policy Context
+        ${PCF_MODEL_DIR}/SmPolicyContextData.cpp
+        ${PCF_MODEL_DIR}/AccNetChId.cpp
+        ${PCF_MODEL_DIR}/AccNetChargingAddress.cpp
+        ${PCF_MODEL_DIR}/AdditionalAccessInfo.cpp
+        ${PCF_MODEL_DIR}/ServingNfIdentity.cpp
+        ${PCF_MODEL_DIR}/AnGwAddress.cpp
+        ${PCF_MODEL_DIR}/MaPduIndication.cpp
+        ${PCF_MODEL_DIR}/MaPduIndication_anyOf.cpp
+        ${PCF_MODEL_DIR}/PcfAtsssCapability.cpp
+        ${PCF_MODEL_DIR}/PcfAtsssCapability_anyOf.cpp
+        # SmPolicyUpdateContextData
+        ${PCF_MODEL_DIR}/SmPolicyUpdateContextData.cpp
+        ${PCF_MODEL_DIR}/UeInitiatedResourceRequest.cpp
+        ${PCF_MODEL_DIR}/RuleOperation.cpp
+        ${PCF_MODEL_DIR}/RuleOperation_anyOf.cpp
+        ${PCF_MODEL_DIR}/RequestedQos.cpp
+        ${PCF_MODEL_DIR}/PacketFilterInfo.cpp
+        ${PCF_MODEL_DIR}/FlowDirection.cpp
+        ${PCF_MODEL_DIR}/FlowDirection_anyOf.cpp
+        ${PCF_MODEL_DIR}/CreditManagementStatus.cpp
+        ${PCF_MODEL_DIR}/CreditManagementStatus_anyOf.cpp
+        ${PCF_MODEL_DIR}/TsnBridgeInfo.cpp
+        ${PCF_MODEL_DIR}/AppDetectionInfo.cpp
+        ${PCF_MODEL_DIR}/RuleReport.cpp
+        ${PCF_MODEL_DIR}/RuleStatus.cpp
+        ${PCF_MODEL_DIR}/RuleStatus_anyOf.cpp
+        ${PCF_MODEL_DIR}/FailureCode.cpp
+        ${PCF_MODEL_DIR}/FailureCode_anyOf.cpp
+        ${PCF_MODEL_DIR}/RanNasRelCause.cpp
+        ${PCF_MODEL_DIR}/FinalUnitAction.cpp
+        ${PCF_MODEL_DIR}/FinalUnitAction_anyOf.cpp
+        ${PCF_MODEL_DIR}/SessionRuleReport.cpp
+        ${PCF_MODEL_DIR}/SessionRuleFailureCode.cpp
+        ${PCF_MODEL_DIR}/SessionRuleFailureCode_anyOf.cpp
+        ${PCF_MODEL_DIR}/QosNotificationControlInfo.cpp
+        ${PCF_MODEL_DIR}/QosNotifType.cpp
+        ${PCF_MODEL_DIR}/QosNotifType_anyOf.cpp
+        ${PCF_MODEL_DIR}/QosMonitoringReport.cpp
+        ${PCF_MODEL_DIR}/IpMulticastAddressInfo.cpp
+        ${PCF_MODEL_DIR}/PolicyDecisionFailureCode.cpp
+        ${PCF_MODEL_DIR}/PolicyDecisionFailureCode_anyOf.cpp
+        ${PCF_MODEL_DIR}/CreditManagementStatus.cpp
+        ${PCF_MODEL_DIR}/TsnBridgeInfo.cpp
+        ${PCF_MODEL_DIR}/AccuUsageReport.cpp
+        # Sm Policy Delete Data
+        ${PCF_MODEL_DIR}/SmPolicyDeleteData.cpp
+        ${PCF_MODEL_DIR}/PduSessionRelCause.cpp
+        ${PCF_MODEL_DIR}/PduSessionRelCause_anyOf.cpp
+        )
+
+# we also use SMF models
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/smf/smf_model.cmake)
+
+# we also use PCF models
+include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/pcf/pcf_model.cmake)
 
 # we also use NRF models
 include(${SRC_TOP_DIR}/${MOUNTED_COMMON}/model/nrf/nrf_model.cmake)

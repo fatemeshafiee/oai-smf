@@ -219,8 +219,8 @@ class PduSessionCreateData {
   /// <summary>
   ///
   /// </summary>
-  DnnSelectionMode getSelMode() const;
-  void setSelMode(DnnSelectionMode const& value);
+  oai::model::smf::DnnSelectionMode getSelMode() const;
+  void setSelMode(oai::model::smf::DnnSelectionMode const& value);
   bool selModeIsSet() const;
   void unsetSelMode();
   /// <summary>
@@ -383,7 +383,7 @@ class PduSessionCreateData {
   bool m_HPcfIdIsSet;
   bool m_HoPreparationIndication;
   bool m_HoPreparationIndicationIsSet;
-  DnnSelectionMode m_SelMode;
+  oai::model::smf::DnnSelectionMode m_SelMode;
   bool m_SelModeIsSet;
   bool m_AlwaysOnRequested;
   bool m_AlwaysOnRequestedIsSet;
