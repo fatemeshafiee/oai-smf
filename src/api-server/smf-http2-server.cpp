@@ -383,7 +383,7 @@ void smf_http2_server::start() {
             }
             if (request.method().compare("POST") == 0 && len > 0) {
               std::string msg((char*) data, len);
-              NsmfEventExposure subsctiptionData;
+              NsmfEventExposure subsctiptionData = {};
               auto subscription_create_data =
                   nlohmann::json::parse(msg.c_str()).get_to(subsctiptionData);
               this->create_event_subscription_handler(
@@ -859,8 +859,7 @@ void smf_http2_server::create_event_subscription_handler(
   }
 
   h.emplace("content-type", header_value{"application/json"});
-  response.write_head(
-      http_status_code_e::HTTP_STATUS_CODE_408_REQUEST_TIMEOUT, h);
+  response.write_head(http_status_code_e::HTTP_RESPONSE_CODE_201_CREATED, h);
   response.end(json_data.dump().c_str());
 }
 
