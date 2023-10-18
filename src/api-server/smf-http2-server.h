@@ -33,6 +33,7 @@
 #include "smf_app.hpp"
 #include <nghttp2/asio_http2_server.h>
 #include "SmContextUpdateMessage.h"
+#include "NsmfEventExposure.h"
 #include "SmContextMessage.h"
 #include "SmContextReleaseMessage.h"
 #include "NFStatusNotifyApiImpl.h"
@@ -63,6 +64,10 @@ class smf_http2_server {
 
   void nf_status_notify_handler(
       const NotificationData& notificationData, const response& response);
+
+  void create_event_subscription_handler(
+      const NsmfEventExposure& smfCreateEventSubscription,
+      const response& response);
 
   void get_configuration_handler(const response& response);
   void update_configuration_handler(

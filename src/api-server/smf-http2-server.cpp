@@ -367,6 +367,38 @@ void smf_http2_server::start() {
           }
         });
       });
+  // Event Exposure
+  server.handle(
+      NSMF_EVENT_EXPOSURE_API_BASE + smf_cfg->sbi_api_version +
+          NSMF_EVENT_EXPOSURE_SUBSCRIBE_URL,
+      [&](const request& request, const response& response) {
+        request.on_data([&](const uint8_t* data, std::size_t len) {
+          try {
+            if (request.method().compare("GET") == 0) {
+              // TODO: Get subscriptions
+            }
+            if (request.method().compare("PUT") == 0 && len > 0) {
+              std::string msg((char*) data, len);
+              // TODO: Update subscription
+            }
+            if (request.method().compare("POST") == 0 && len > 0) {
+              std::string msg((char*) data, len);
+              NsmfEventExposure subsctiptionData = {};
+              auto subscription_create_data =
+                  nlohmann::json::parse(msg.c_str()).get_to(subsctiptionData);
+              this->create_event_subscription_handler(
+                  subscription_create_data, response);
+            }
+          } catch (nlohmann::detail::exception& e) {
+            Logger::smf_sbi().warn(
+                "Can not parse the JSON data (error: %s)!", e.what());
+            response.write_head(
+                http_status_code_e::HTTP_STATUS_CODE_400_BAD_REQUEST);
+            response.end();
+            return;
+          }
+        });
+      });
 
   if (server.listen_and_serve(ec, m_address, std::to_string(m_port))) {
     std::cerr << "HTTP Server error: " << ec.message() << std::endl;
@@ -790,6 +822,45 @@ void smf_http2_server::update_configuration_handler(
     response.write_head(http_code);
     response.end();
   }
+}
+//------------------------------------------------------------------------------
+void smf_http2_server::create_event_subscription_handler(
+    const NsmfEventExposure& nsmfEventExposure, const response& response) {
+  Logger::smf_api_server().info("Received SmfCreateEventSubscription Request");
+
+  header_map h;
+  smf::event_exposure_msg event_exposure = {};
+
+  // Convert from NsmfEventExposure to event_exposure_msg
+  xgpp_conv::smf_event_exposure_notification_from_openapi(
+      nsmfEventExposure, event_exposure);
+
+  // Handle the message in smf_app
+  std::shared_ptr<itti_sbi_event_exposure_request> itti_msg =
+      std::make_shared<itti_sbi_event_exposure_request>(
+          TASK_SMF_SBI, TASK_SMF_APP);
+  itti_msg->event_exposure = event_exposure;
+  itti_msg->http_version   = 2;
+
+  evsub_id_t sub_id = m_smf_app->handle_event_exposure_subscription(itti_msg);
+
+  // Send response
+  nlohmann::json json_data = {};
+  to_json(json_data, nsmfEventExposure);
+
+  if (sub_id != -1) {
+    json_data["subId"] = std::to_string(sub_id);
+    h.emplace(
+        "Location",
+        header_value{
+            m_address + NSMF_EVENT_EXPOSURE_API_BASE +
+            smf_cfg->sbi_api_version + NSMF_EVENT_EXPOSURE_SUBSCRIBE_URL +
+            std::to_string(sub_id)});
+  }
+
+  h.emplace("content-type", header_value{"application/json"});
+  response.write_head(http_status_code_e::HTTP_STATUS_CODE_201_CREATED, h);
+  response.end(json_data.dump().c_str());
 }
 
 //------------------------------------------------------------------------------
