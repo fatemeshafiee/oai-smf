@@ -8,7 +8,7 @@
     * Make DNS configurable per DNN
     * Add CIDR DNN configuration
     * implement UpfInfo parsing for YAML config
-  - SMF configuration api new
+  - Support getting SMF configuration with the new SMF configuration API
   - Handled traffic redirection PCF policy
   - Giving users possibility to configure SMF info themselves
   - Removed SBI DNS lookup upon start of SMF
@@ -20,10 +20,11 @@
   - Fixed Service Request handling
   - Fixed YAML config issues
   - Fixed Handle IE Usage Report in session deletion response
+  - Fixed SMF selection (NRF registration) when local subscription info is not used
 * Tech debt
-  - Moved common models to the shared common submodule
-  - Moved NRF models to the shared common submodule
-  - Moved PCF models to the shared common submodule
+  - Updated common models to 3GPP TS 29.571 Release 16.13.0 and moved them to the shared common submodule
+  - Updated SMF-specific NRF models to Release 16.15.0 and moved them to the shared common submodule
+  - Updated PCF models to Release 16.17.0 and moved them to the shared common submodule
   - Switching to clang-format-12
   - Published image on Docker-Hub is using now Ubuntu-22 as base image
     * Ubuntu-18 is no longer supported
