@@ -1,5 +1,33 @@
 # RELEASE NOTES: #
 
+## v2.0.0 -- December 2023 ##
+
+* Features
+  - Support YAML configuration file
+    * Yaml validation default value
+    * Make DNS configurable per DNN
+    * Add CIDR DNN configuration
+    * implement UpfInfo parsing for YAML config
+  - SMF configuration api new
+  - Handled traffic redirection PCF policy
+  - Giving users possibility to configure SMF info themselves
+  - Removed SBI DNS lookup upon start of SMF
+  - De-register to NRF on exit
+  - Enabled event exposure in HTTP/2 API server
+* Fixes
+  - Fixed ULCL support in SM context update procedure
+  - Fixed SEID assignment in N4 session establishment request
+  - Fixed Service Request handling
+  - Fixed YAML config issues
+  - Fixed Handle IE Usage Report in session deletion response
+* Tech debt
+  - Moved common models to the shared common submodule
+  - Moved NRF models to the shared common submodule
+  - Moved PCF models to the shared common submodule
+  - Switching to clang-format-12
+  - Published image on Docker-Hub is using now Ubuntu-22 as base image
+    * Ubuntu-18 is no longer supported
+
 ## v1.5.1 -- May 2023 ##
 
 * Fix N1N2 Content message
