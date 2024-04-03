@@ -655,12 +655,14 @@ enum redirect_address_type_e {
 
 //-------------------------------------
 // 8.2.21 Report Type
+// FATEMEH: TODO: define traffic report type
 typedef struct report_type_s {
   uint8_t upir : 1;
   uint8_t erir : 1;
   uint8_t usar : 1;
   uint8_t dldr : 1;
-  uint8_t spare : 4;
+  uint8_t spare : 3;
+    uint8_t pack : 1;
 } report_type_t;
 
 //-------------------------------------

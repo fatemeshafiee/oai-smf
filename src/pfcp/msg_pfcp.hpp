@@ -5018,6 +5018,66 @@ class downlink_data_report : public pfcp::pfcp_ies_container {
 };
 
 //------------------------------------------------------------------------------
+// Table 7.5.8.2-1: Packet Report IE within PFCP Session Report Request
+// FATEMEH [3]
+class fatemeh_packet_report : public pfcp::pfcp_ies_container {
+public:
+    std::pair<bool, pfcp::fatemeh_packet_type_t> fatemeh_packet_type;
+    std::pair<bool, pfcp::fatemeh_packet_header_t> fatemeh_packet_header;
+    std::pair<bool, pfcp::fatemeh_packet_data_t> fatemeh_packet_data;
+
+    fatemeh_packet_report() : fatemeh_packet_type(), fatemeh_packet_header(), fatemeh_packet_data() {}
+
+    fatemeh_packet_report(const fatemeh_packet_report& v)
+            : fatemeh_packet_type(v.fatemeh_packet_type),
+              fatemeh_packet_header(v.fatemeh_packet_header),
+              fatemeh_packet_data(v.fatemeh_packet_data)
+    {
+
+    }
+
+
+    void set(const pfcp::fatemeh_packet_type_t& v) {
+        fatemeh_packet_type.first  = true;
+        fatemeh_packet_type.second = v;
+    }
+    void set(const pfcp::fatemeh_packet_header_t& v) {
+        fatemeh_packet_header.first  = true;
+        fatemeh_packet_header.second = v;
+    }
+    void set(const pfcp::fatemeh_packet_data_t& v) {
+        fatemeh_packet_data.first  = true;
+        fatemeh_packet_data.second = v;
+    }
+
+
+    bool get(pfcp::fatemeh_packet_type_t& v) const {
+        if (fatemeh_packet_type.first) {
+            v = fatemeh_packet_type.second;
+            return true;
+        }
+        return false;
+    }
+    bool get(pfcp::fatemeh_packet_header_t& v) const {
+        if (fatemeh_packet_header.first) {
+            v = fatemeh_packet_header.second;
+            return true;
+        }
+        return false;
+    }
+    bool get(pfcp::fatemeh_packet_data_t& v) const {
+        if (fatemeh_packet_data.first) {
+            v = fatemeh_packet_data.second;
+            return true;
+        }
+        return false;
+    }
+};
+
+
+
+
+//------------------------------------------------------------------------------
 // Table 7.5.8.3-2: Application Detection Information IE within Usage Report IE
 class application_detection_information : public pfcp::pfcp_ies_container {
  public:
@@ -7277,15 +7337,18 @@ class pfcp_session_report_request : public pfcp_ies_container {
       overload_control_information;
   std::pair<bool, pfcp::additional_usage_reports_information_t>
       additional_usage_reports_information;
+  std::pair<bool, pfcp::fatemeh_packet_report> fatemeh_packet_report;
 
-  pfcp_session_report_request()
+
+    pfcp_session_report_request()
       : report_type(),
         downlink_data_report(),
         usage_report(),
         error_indication_report(),
         load_control_information(),
         overload_control_information(),
-        additional_usage_reports_information() {}
+        additional_usage_reports_information(),
+        fatemeh_packet_report() {}
 
   pfcp_session_report_request(const pfcp_session_report_request& i) {
     report_type                  = i.report_type;
@@ -7296,6 +7359,7 @@ class pfcp_session_report_request : public pfcp_ies_container {
     overload_control_information = i.overload_control_information;
     additional_usage_reports_information =
         i.additional_usage_reports_information;
+    fatemeh_packet_report = i.fatemeh_packet_report;
   }
 
   const char* get_msg_name() const { return "PFCP_SESSION_REPORT_REQUEST"; };
@@ -7349,7 +7413,13 @@ class pfcp_session_report_request : public pfcp_ies_container {
     }
     return false;
   }
-
+  bool get(pfcp::fatemeh_packet_report& v) const {
+        if (fatemeh_packet_report.first) {
+            v = fatemeh_packet_report.second;
+            return true;
+        }
+        return false;
+  }
   void set(const pfcp::report_type_t& v) {
     report_type.first  = true;
     report_type.second = v;
@@ -7377,6 +7447,10 @@ class pfcp_session_report_request : public pfcp_ies_container {
   void set(const pfcp::additional_usage_reports_information_t& v) {
     additional_usage_reports_information.first  = true;
     additional_usage_reports_information.second = v;
+  }
+  void set(const pfcp::fatemeh_packet_report& v) {
+        fatemeh_packet_report.first  = true;
+        fatemeh_packet_report.second = v;
   }
 };
 

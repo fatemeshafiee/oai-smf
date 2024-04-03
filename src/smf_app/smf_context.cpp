@@ -1041,6 +1041,8 @@ void smf_context::handle_itti_msg(
         }
       }
 
+        }
+
       std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
           std::make_shared<itti_n4_session_report_response>(
               TASK_SMF_APP, TASK_SMF_N4);
@@ -1061,6 +1063,7 @@ void smf_context::handle_itti_msg(
         return;
       }
     }
+    //[FATEMEH | GOAL 3]
     // Error Indication Report
     if (report_type.erir) {
       // TODO
@@ -1073,7 +1076,12 @@ void smf_context::handle_itti_msg(
       Logger::smf_app().debug(
           "PFCP_SESSION_REPORT_REQUEST/User Plane Inactivity Report");
     }
-  }
+
+    // Traffic packet report
+    if (report_type.pack) {
+        Logger::smf_app().debug(
+                "PFCP_SESSION_REPORT_REQUEST/Traffic packet report");
+    }
 }
 
 //------------------------------------------------------------------------------

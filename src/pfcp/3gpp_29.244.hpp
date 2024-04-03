@@ -2121,13 +2121,15 @@ class pfcp_redirect_information_ie : public pfcp_ie {
 // IE REPORT_TYPE
 class pfcp_report_type_ie : public pfcp_ie {
  public:
+ // FATEMEH: TODO report type
   union {
     struct {
       uint8_t dldr : 1;
       uint8_t usar : 1;
       uint8_t erir : 1;
       uint8_t upir : 1;
-      uint8_t spare : 4;
+      uint8_t spare : 3;
+      uint8_t pack : 1;
     } bf;
     uint8_t b;
   } u1;
@@ -2140,6 +2142,7 @@ class pfcp_report_type_ie : public pfcp_ie {
     u1.bf.usar = b.usar;
     u1.bf.erir = b.erir;
     u1.bf.upir = b.upir;
+    u1.bf.pack = b.pack;
     tlv.set_length(1);
   }
   //--------
@@ -2155,6 +2158,7 @@ class pfcp_report_type_ie : public pfcp_ie {
     b.usar = u1.bf.usar;
     b.erir = u1.bf.erir;
     b.upir = u1.bf.upir;
+    b.pack = u1.bf.pack;
   }
   //--------
   void dump_to(std::ostream& os) {
