@@ -378,6 +378,14 @@ pfcp_ie* pfcp_ie::new_pfcp_ie_from_stream(std::istream& is) {
         //        pfcp_measurement_method_ie(tlv); ie->load_from(is); return ie;
         //      }
         //      break;
+        //[FATEMEH]:
+      case PFCP_IE_PACKET_REPORT: {
+        pfcp_usage_report_trigger_ie* ie =
+            new pfcp_usage_report_trigger_ie(tlv);
+        ie->load_from(is);
+        return ie;
+      } break;
+        // end of Fatemeh's section
       case PFCP_IE_USAGE_REPORT_TRIGGER: {
         pfcp_usage_report_trigger_ie* ie =
             new pfcp_usage_report_trigger_ie(tlv);
@@ -477,6 +485,7 @@ pfcp_ie* pfcp_ie::new_pfcp_ie_from_stream(std::istream& is) {
         ie->load_from(is);
         return ie;
       } break;
+        // [FATEMEH]: might be interesting!
       case PFCP_IE_USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST: {
         pfcp_usage_report_within_session_report_request_ie* ie =
             new pfcp_usage_report_within_session_report_request_ie(tlv);

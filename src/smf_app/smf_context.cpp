@@ -1083,7 +1083,7 @@ void smf_context::handle_itti_msg(
                 "PFCP_SESSION_REPORT_REQUEST/Traffic packet report");
     }
 }
-
+    }
 //------------------------------------------------------------------------------
 std::string smf_context::toString() const {
   std::unique_lock<std::recursive_mutex> lock(m_context);

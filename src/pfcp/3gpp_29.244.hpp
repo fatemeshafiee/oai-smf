@@ -4114,6 +4114,57 @@ class pfcp_duration_measurement_ie : public pfcp_ie {
     s.set(v);
   }
 };
+
+// IE Packet Report
+//[FATEMEH]
+
+class pfcp_duration_measurement_ie :
+{
+    public:
+    uint32_t duration;
+
+    //--------
+    explicit pfcp_duration_measurement_ie(const pfcp::duration_measurement_t& b)
+            : pfcp_ie(PFCP_IE_DURATION_MEASUREMENT) {
+        duration = b.duration;
+        tlv.set_length(sizeof(duration));
+    }
+    //--------
+    pfcp_duration_measurement_ie() : pfcp_ie(PFCP_IE_DURATION_MEASUREMENT) {
+        duration = 0;
+        tlv.set_length(sizeof(duration));
+    }
+    //--------
+    explicit pfcp_duration_measurement_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+        duration = 0;
+    };
+    //--------
+    void to_core_type(pfcp::duration_measurement_t& b) { b.duration = duration; }
+    //--------
+    void dump_to(std::ostream& os) {
+        tlv.dump_to(os);
+        auto be_duration = htobe32(duration);
+        os.write(reinterpret_cast<const char*>(&be_duration), sizeof(be_duration));
+    }
+    //--------
+    void load_from(std::istream& is) {
+        // tlv.load_from(is);
+        if (tlv.get_length() != sizeof(duration)) {
+            throw pfcp_tlv_bad_length_exception(
+                    tlv.type, tlv.get_length(), __FILE__, __LINE__);
+        }
+        is.read(reinterpret_cast<char*>(&duration), sizeof(duration));
+        duration = be32toh(duration);
+    }
+    //--------
+    void to_core_type(pfcp_ies_container& s) {
+        pfcp::duration_measurement_t v = {};
+        to_core_type(v);
+        s.set(v);
+    }
+};
+
+
 ////-------------------------------------
 //// IE APPLICATION_DETECTION_INFORMATION
 // class pfcp_application_detection_information_ie : public pfcp_ie {
@@ -4267,6 +4318,13 @@ class pfcp_time_of_last_packet_ie : public pfcp_ie {
     s.set(time_of_last_packet);
   }
 };
+
+//---------------------------------------
+// [FATEMEH] IE Packet type
+
+
+
+
 ////-------------------------------------
 //// IE QUOTA_HOLDING_TIME
 // class pfcp_quota_holding_time_ie : public pfcp_ie {
@@ -6272,33 +6330,52 @@ class pfcp_usage_report_within_session_report_request_ie
     }
   }
   //--------
+  // [FATEMEH]:
+  // IE USAGE_REPORT_WITHIN_SESSION_REPORT_REQUEST
+class pfcp_fatemeh_packet_report_ie
+    : public pfcp_grouped_ie {
+ public:
+  //--------
+  pfcp_fatemeh_packet_report_ie(
+      const pfcp::fatemeh_packet_report& b)
+      : pfcp_grouped_ie(PFCP_IE_PACKET_REPORT) {
+    tlv.set_length(0);
+    if (b.fatemeh_packet_type.first) {
+      std::shared_ptr<pfcp_fatemeh_packet_type_ie> sie(new pfcp_fatemeh_packet_type_ie(b.fatemeh_packet_type.second));
+      add_ie(sie);
+    }
+    if (b.fatemeh_packet_header.first) {
+      std::shared_ptr<pfcp_fatemeh_packet_header_ie> sie(
+          new pfcp_fatemeh_packet_header_ie(fatemeh_packet_header.second));
+      add_ie(sie);
+    }
+
+    if (b.fatemeh_packet_data.first) {
+      std::shared_ptr<pfcp_fatemeh_packet_data_ie> sie(
+          new pfcp_fatemeh_packet_data_ie(b.fatemeh_packet_data.second));
+      add_ie(sie);
+    }
+
+    pfcp_fatemeh_packet_report_ie()
+      : pfcp_grouped_ie(PFCP_IE_PACKET_REPORT) {}
+  //--------
+  explicit pfcp_fatemeh_packet_report_ie(const pfcp_tlv& t)
+      : pfcp_grouped_ie(t){};
+  //--------
+  void to_core_type(pfcp::fatemeh_packet_report& c) {
+    for (auto sie : ies) {
+      sie.get()->to_core_type(c);
+    }
+  }
+  /---------
   void to_core_type(pfcp_ies_container& s) {
-    pfcp::usage_report_within_pfcp_session_report_request i = {};
+    pfcp::fatemeh_packet_report i = {};
     to_core_type(i);
     s.set(i);
   }
-  //  //--------
-  //  void dump_to(std::ostream& os) {
-  //    tlv.dump_to(os);
-  //    os.write(reinterpret_cast<const char*>(&todo), sizeof(todo));
-  //  }
-  //  //--------
-  //  void load_from(std::istream& is) {
-  //    //tlv.load_from(is);
-  //    if (tlv.get_length() != 1) {
-  //      throw pfcp_tlv_bad_length_exception(tlv.type, tlv.get_length(),
-  //      __FILE__, __LINE__);
-  //    }
-  //    is.read(reinterpret_cast<char*>(&todo), sizeof(todo));
-  //  }
-  //  //--------
-  //  void to_core_type(pfcp_ies_container& s) {
-  //      pfcp::usage_report_within_pfcp_session_report_request
-  //      usage_report_within_session_report_request = {};
-  //      to_core_type(usage_report_within_session_report_request);
-  //      s.set(usage_report_within_session_report_request);
-  //  }
+
 };
+
 ////-------------------------------------
 //// IE UPDATE_DUPLICATING_PARAMETERS
 // class pfcp_update_duplicating_parameters_ie : public pfcp_ie {

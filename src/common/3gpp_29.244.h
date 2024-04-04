@@ -341,6 +341,12 @@ struct pfcp_ie_value_exception : public pfcp_ie_exception {
 #define PFCP_IE_UE_IP_ADDRESS_POOL_IDENTITY (177)
 #define PFCP_IE_ALTERNATIVE_SMF_IP_ADDRESS (178)
 #define PFCP_IE_SPARED (179)
+// [FATEMEH]
+#define PFCP_IE_PACKET_REPORT (259)
+#define PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE (260)
+#define PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER (261)
+#define PFCP_IE_TRAFFIC_REPORT_PACKET_DATA (262)
+
 
 #define PFCP_MESSAGE_RESERVED (0)
 // PFCP_NODE_RELATED_MESSAGES
@@ -368,6 +374,7 @@ struct pfcp_ie_value_exception : public pfcp_ie_exception {
 #define PFCP_SESSION_DELETION_RESPONSE (55)
 #define PFCP_SESSION_REPORT_REQUEST (56)
 #define PFCP_SESSION_REPORT_RESPONSE (57)
+
 }  // namespace pfcp
 
 namespace pfcp {
@@ -664,7 +671,29 @@ typedef struct report_type_s {
   uint8_t spare : 3;
     uint8_t pack : 1;
 } report_type_t;
+//-------------------------------------
+// added by FATEMEH
+typedef struct fatemeh_packet_header_s{
+    uint8_t   ip_version_and_header_length;
+    uint8_t   tos;
+    uint16_t  length;
+    uint16_t  fragment_id;
+    uint16_t  flags_and_fragment_offset;
+    uint8_t   ttl;
+    uint8_t   protocol;
+    uint16_t  checksum;
+    uint32_t src;
+    uint32_t dst;
 
+}fatemeh_packet_header_t;
+
+//-------------------------------------
+// added by FATEMEH
+typedef uint8_t fatemeh_packet_type_t;
+//-------------------------------------
+// added by FATEMEH
+typedef uint8_t* fatemeh_packet_data_t;
+//-------------------------------------
 //-------------------------------------
 // 8.2.22 Offending IE
 typedef struct offending_ie_s {
