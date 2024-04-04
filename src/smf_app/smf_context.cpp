@@ -1041,7 +1041,7 @@ void smf_context::handle_itti_msg(
         }
       }
 
-        }
+    
 
       std::shared_ptr<itti_n4_session_report_response> n4_report_ack =
           std::make_shared<itti_n4_session_report_response>(
