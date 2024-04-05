@@ -1484,6 +1484,11 @@ class pfcp_ies_container {
           0, PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER, __FILE__, __LINE__);
     }
 
+    virtual void set(const pfcp::fatemeh_packet_report& v) {
+      throw pfcp_msg_illegal_ie_exception(
+          0, PFCP_IE_PACKET_REPORT, __FILE__, __LINE__);
+    }
+
 
   virtual ~pfcp_ies_container(){};
 };

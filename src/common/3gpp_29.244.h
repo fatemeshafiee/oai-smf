@@ -341,11 +341,11 @@ struct pfcp_ie_value_exception : public pfcp_ie_exception {
 #define PFCP_IE_UE_IP_ADDRESS_POOL_IDENTITY (177)
 #define PFCP_IE_ALTERNATIVE_SMF_IP_ADDRESS (178)
 #define PFCP_IE_SPARED (179)
-// [FATEMEH]
-#define PFCP_IE_PACKET_REPORT (259)
-#define PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE (260)
-#define PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER (261)
-#define PFCP_IE_TRAFFIC_REPORT_PACKET_DATA (262)
+// [FATEMEH] change due to uint_8
+#define PFCP_IE_PACKET_REPORT (180)
+#define PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE (181)
+#define PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER (182)
+#define PFCP_IE_TRAFFIC_REPORT_PACKET_DATA (183)
 
 
 #define PFCP_MESSAGE_RESERVED (0)
@@ -692,7 +692,10 @@ typedef struct fatemeh_packet_header_s{
 typedef uint8_t fatemeh_packet_type_t;
 //-------------------------------------
 // added by FATEMEH
-typedef uint8_t* fatemeh_packet_data_t;
+typedef struct fatemeh_packet_data_s{
+  u16 length;
+  std::string data;
+}fatemeh_packet_data_t;
 //-------------------------------------
 //-------------------------------------
 // 8.2.22 Offending IE
