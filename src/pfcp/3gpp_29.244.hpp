@@ -119,7 +119,8 @@ public:
  virtual void dump_to(std::ostream& os) { tlv.dump_to(os); };
 
  virtual void load_from(std::istream& is) {
-       tlv.type); /* should not hapen of course*/
+      throw pfcp_ie_unimplemented_exception(
+        tlv.type);  /* should not hapen of course*/
  };
 
  static pfcp_ie* new_pfcp_ie_from_stream(std::istream& is);
@@ -4331,14 +4332,14 @@ class pfcp_fatemeh_packet_data_ie : public pfcp_ie {
   explicit pfcp_fatemeh_packet_data_ie(const pfcp::fatemeh_packet_data_t& b)
       : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_DATA) {
     data = b.data;
-    length = b.length
-    tlv.set_length( (lenght * sizeof (char))+ sizeof(uint16_t));
+    length = b.length;
+    tlv.set_length( (length * sizeof (char))+ sizeof(uint16_t));
   }
   //--------
   pfcp_fatemeh_packet_data_ie() : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_DATA) {
     length = 0;
     data = "";//?
-    tlv.set_length(sizeof((lenght * sizeof (char))+ sizeof(uint16_t)));
+    tlv.set_length(sizeof((length * sizeof (char))+ sizeof(uint16_t)));
   }
   //--------
   pfcp_fatemeh_packet_data_ie(const pfcp_tlv& t) : pfcp_ie(t) {
@@ -4347,13 +4348,13 @@ class pfcp_fatemeh_packet_data_ie : public pfcp_ie {
   };
   //--------
   void to_core_type(pfcp::fatemeh_packet_data_t& b) {
-    b.lenght = length;
+    b.length = length;
     b.data = data;
   }
   //--------
   void dump_to(std::ostream& os) {
     tlv.dump_to(os);
-    auto be_lenght = htobe16(lenght)
+    auto be_lenght = htobe16(length);
     os.write(
         reinterpret_cast<const char*>(&be_lenght),   //?
         sizeof(be_lenght));
@@ -4363,7 +4364,7 @@ class pfcp_fatemeh_packet_data_ie : public pfcp_ie {
   //--------
   void load_from(std::istream& is) {
     // tlv.load_from(is);
-    if (tlv.get_length() != lenght * sizeof (char))+ sizeof(uint16_t)) {
+    if (tlv.get_length() != (length * sizeof (char))+ sizeof(uint16_t)) {
       throw pfcp_tlv_bad_length_exception(
           tlv.type, tlv.get_length(), __FILE__, __LINE__);
     }

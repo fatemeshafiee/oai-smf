@@ -81,6 +81,7 @@ class additional_monitoring_time;
 //  class event_information;
 //  class event_reporting;
 class ethernet_packet_filter;
+class fatemeh_packet_report;
 }  // namespace pfcp
 
 namespace pfcp {
@@ -1471,22 +1472,22 @@ class pfcp_ies_container {
 
     virtual void set(const pfcp::fatemeh_packet_type_t& v) {
       throw pfcp_msg_illegal_ie_exception(
-          0, PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE, __FILE__, __LINE__);
+          183, PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE, __FILE__, __LINE__);
     }
 
     virtual void set(const pfcp::fatemeh_packet_data_t& v) {
       throw pfcp_msg_illegal_ie_exception(
-          0, PFCP_IE_TRAFFIC_REPORT_PACKET_DATA, __FILE__, __LINE__);
+          181, PFCP_IE_TRAFFIC_REPORT_PACKET_DATA, __FILE__, __LINE__);
     }
 
     virtual void set(const pfcp::fatemeh_packet_header_t& v) {
       throw pfcp_msg_illegal_ie_exception(
-          0, PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER, __FILE__, __LINE__);
+          182, PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER, __FILE__, __LINE__);
     }
 
     virtual void set(const pfcp::fatemeh_packet_report& v) {
       throw pfcp_msg_illegal_ie_exception(
-          0, PFCP_IE_PACKET_REPORT, __FILE__, __LINE__);
+          180, PFCP_IE_PACKET_REPORT, __FILE__, __LINE__);
     }
 
 

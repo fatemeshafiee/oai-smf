@@ -693,7 +693,7 @@ typedef uint8_t fatemeh_packet_type_t;
 //-------------------------------------
 // added by FATEMEH
 typedef struct fatemeh_packet_data_s{
-  u16 length;
+  uint16_t length;
   std::string data;
 }fatemeh_packet_data_t;
 //-------------------------------------
