@@ -1467,6 +1467,23 @@ class pfcp_ies_container {
     throw pfcp_msg_illegal_ie_exception(
         0, PFCP_IE_3GPP_INTERFACE_TYPE, __FILE__, __LINE__);
   }
+  // FATEMEH
+
+    virtual void set(const pfcp::fatemeh_packet_type_t& v) {
+      throw pfcp_msg_illegal_ie_exception(
+          0, PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE, __FILE__, __LINE__);
+    }
+
+    virtual void set(const pfcp::fatemeh_packet_data_t& v) {
+      throw pfcp_msg_illegal_ie_exception(
+          0, PFCP_IE_TRAFFIC_REPORT_PACKET_DATA, __FILE__, __LINE__);
+    }
+
+    virtual void set(const pfcp::fatemeh_packet_header_t& v) {
+      throw pfcp_msg_illegal_ie_exception(
+          0, PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER, __FILE__, __LINE__);
+    }
+
 
   virtual ~pfcp_ies_container(){};
 };

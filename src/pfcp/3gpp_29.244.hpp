@@ -4349,7 +4349,7 @@ class pfcp_fatemeh_packet_data_ie : public pfcp_ie {
     fatemeh_packet_data = nullptr;
   };
   //--------
-  void to_core_type(pfcp::& b) {
+  void to_core_type(pfcp::fatemeh_packet_data_t& b) {
     b = fatemeh_packet_data;
   }
   //--------
@@ -4428,18 +4428,18 @@ class pfcp_fatemeh_packet_header_ie : public pfcp_ie {
   //--------
   pfcp_fatemeh_packet_header_ie(const pfcp_tlv& t) : pfcp_ie(t) {
     ip_version_and_header_length = 0;
-    tos = 0;
-    length = 0;
-    fragment_id = 0;
-    flags_and_fragment_offset = 0;
-    ttl = 0;
-    protocol = 0;
-    checksum = 0;
-    src = 0;
-    dst = 0;
-  };
+    tos                          = 0;
+    length                       = 0;
+    fragment_id                  = 0;
+    flags_and_fragment_offset    = 0;
+    ttl                          = 0;
+    protocol                     = 0;
+    checksum                     = 0;
+    src                          = 0;
+    dst                          = 0;
+  }
   //--------
-  void to_core_type(pfcp::& b) {
+  void to_core_type(pfcp::fatemeh_packet_header_t& b) {
     b.ip_version_and_header_length = ip_version_and_header_length;
     b.tos = tos;
     b.length = length;
@@ -4447,11 +4447,9 @@ class pfcp_fatemeh_packet_header_ie : public pfcp_ie {
     b.flags_and_fragment_offset = flags_and_fragment_offset;
     b.ttl = ttl;
     b.protocol = protocol;
-    b.checksum;
-    b.checksum;
     b.checksum = checksum;
     b.src = src;
-    b.dst;acket_data = dst;
+    b.dst = dst;
   }
   //--------
   void dump_to(std::ostream& os) {
@@ -6489,7 +6487,7 @@ class pfcp_usage_report_within_session_report_request_ie
     //   std::shared_ptr<pfcp_ethernet_traffic_information_ie> sie(
     //       new
     //       pfcp_ethernet_traffic_information_ie(b.ethernet_traffic_information.second));
-    //   add_ie(sie);
+    //   add_ie(sie);/**/
     // }
   }
   //--------
