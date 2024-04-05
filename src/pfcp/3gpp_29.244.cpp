@@ -379,14 +379,14 @@ pfcp_ie* pfcp_ie::new_pfcp_ie_from_stream(std::istream& is) {
         //      }
         //      break;
         //[FATEMEH]:
-      case PFCP_IE_PACKET_REPORT: {
+      case PFCP_IE_USAGE_REPORT_TRIGGER: {
         pfcp_usage_report_trigger_ie* ie =
             new pfcp_usage_report_trigger_ie(tlv);
         ie->load_from(is);
         return ie;
       } break;
         // end of Fatemeh's section
-      case PFCP_IE_USAGE_REPORT_TRIGGER: {
+      case PFCP_IE_PACKET_REPORT: {
         pfcp_fatemeh_packet_report_ie* ie =
             new pfcp_fatemeh_packet_report_ie(tlv);
         ie->load_from(is);

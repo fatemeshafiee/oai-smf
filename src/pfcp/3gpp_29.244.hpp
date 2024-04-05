@@ -4303,7 +4303,7 @@ class pfcp_fatemeh_packet_type_ie : public pfcp_ie {
   //--------
   void load_from(std::istream& is) {
     // tlv.load_from(is);
-    if (tlv.get_length() != sizeof(fatemeh_packet_type)) {
+    if (tlv.get_length() != sizeof(uint8_t)) {
       throw pfcp_tlv_bad_length_exception(
           tlv.type, tlv.get_length(), __FILE__, __LINE__);
     }
