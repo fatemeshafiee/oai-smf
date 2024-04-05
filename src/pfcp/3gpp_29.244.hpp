@@ -4115,54 +4115,6 @@ class pfcp_duration_measurement_ie : public pfcp_ie {
   }
 };
 
-// IE Packet Report
-//[FATEMEH]
-
-class pfcp_duration_measurement_ie :
-{
-    public:
-    uint32_t duration;
-
-    //--------
-    explicit pfcp_duration_measurement_ie(const pfcp::duration_measurement_t& b)
-            : pfcp_ie(PFCP_IE_DURATION_MEASUREMENT) {
-        duration = b.duration;
-        tlv.set_length(sizeof(duration));
-    }
-    //--------
-    pfcp_duration_measurement_ie() : pfcp_ie(PFCP_IE_DURATION_MEASUREMENT) {
-        duration = 0;
-        tlv.set_length(sizeof(duration));
-    }
-    //--------
-    explicit pfcp_duration_measurement_ie(const pfcp_tlv& t) : pfcp_ie(t) {
-        duration = 0;
-    };
-    //--------
-    void to_core_type(pfcp::duration_measurement_t& b) { b.duration = duration; }
-    //--------
-    void dump_to(std::ostream& os) {
-        tlv.dump_to(os);
-        auto be_duration = htobe32(duration);
-        os.write(reinterpret_cast<const char*>(&be_duration), sizeof(be_duration));
-    }
-    //--------
-    void load_from(std::istream& is) {
-        // tlv.load_from(is);
-        if (tlv.get_length() != sizeof(duration)) {
-            throw pfcp_tlv_bad_length_exception(
-                    tlv.type, tlv.get_length(), __FILE__, __LINE__);
-        }
-        is.read(reinterpret_cast<char*>(&duration), sizeof(duration));
-        duration = be32toh(duration);
-    }
-    //--------
-    void to_core_type(pfcp_ies_container& s) {
-        pfcp::duration_measurement_t v = {};
-        to_core_type(v);
-        s.set(v);
-    }
-};
 
 
 ////-------------------------------------
@@ -4275,7 +4227,7 @@ class pfcp_time_of_last_packet_ie : public pfcp_ie {
   //--------
   explicit pfcp_time_of_last_packet_ie(const pfcp::time_of_last_packet_t& b)
       : pfcp_ie(PFCP_IE_TIME_OF_LAST_PACKET) {
-    time_of_last_packet = 0;
+    time_of_last_packet = 0; //[FATEMEH] this is probably a bug
     tlv.set_length(sizeof(time_of_last_packet));
   }
   //--------
@@ -4320,10 +4272,233 @@ class pfcp_time_of_last_packet_ie : public pfcp_ie {
 };
 
 //---------------------------------------
-// [FATEMEH] IE Packet type
-ß
+// [FATEMEH] PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE
+
+class pfcp_fatemeh_packet_type_ie : public pfcp_ie {
+ public:
+  uint8_t fatemeh_packet_type;
+
+  //--------
+  explicit pfcp_fatemeh_packet_type_ie(const pfcp::fatemeh_packet_type_t& b)
+      : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE) {
+    fatemeh_packet_type = b;
+    tlv.set_length(sizeof(fatemeh_packet_type));
+  }
+  //--------
+  pfcp_fatemeh_packet_type_ie() : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE) {
+    fatemeh_packet_type = 4;
+    tlv.set_length(sizeof(fatemeh_packet_type));
+  }
+  //--------
+  pfcp_fatemeh_packet_type_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    fatemeh_packet_type = 4;
+  };
+  //--------
+  void to_core_type(pfcp::fatemeh_packet_type_t& b) {
+    b = fatemeh_packet_type;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_fatemeh_packet_type = uint8_t(fatemeh_packet_type);
+    os.write(
+        reinterpret_cast<const char*>(&be_fatemeh_packet_type),
+        sizeof(be_fatemeh_packet_type));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(fatemeh_packet_type)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(
+        reinterpret_cast<char*>(&fatemeh_packet_type),
+        sizeof(fatemeh_packet_type));
+//fatemeh_packet_type = uint_8(fatemeh_packet_type);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::fatemeh_packet_type_t fatemeh_packet_type = 4;
+    to_core_type(fatemeh_packet_type);
+    s.set(fatemeh_packet_type);
+  }
+};
 
 
+//---------------------------------------
+// [FATEMEH] PFCP_IE_TRAFFIC_REPORT_PACKET_DATA
+
+class pfcp_fatemeh_packet_data_ie : public pfcp_ie {
+ public:
+  uint8_t* fatemeh_packet_data;
+
+  //--------
+  explicit pfcp_fatemeh_packet_data_ie(const pfcp::fatemeh_packet_data_t& b)
+      : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_DATA) {
+    fatemeh_packet_data = b;
+    tlv.set_length(sizeof(fatemeh_packet_data));
+  }
+  //--------
+  pfcp_fatemeh_packet_data_ie() : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_DATA) {
+    fatemeh_packet_data = nullptr;  //?
+    tlv.set_length(sizeof(fatemeh_packet_data));
+  }
+  //--------
+  pfcp_fatemeh_packet_data_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    fatemeh_packet_data = nullptr;
+  };
+  //--------
+  void to_core_type(pfcp::& b) {
+    b = fatemeh_packet_data;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    auto be_fatemeh_packet_data = uint8_t*(fatemeh_packet_data);
+    os.write(
+        reinterpret_cast<const char*>(&be_fatemeh_packet_data),   //?
+        sizeof(be_fatemeh_packet_data));
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != sizeof(fatemeh_packet_data)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(
+        reinterpret_cast<char*>(&fatemeh_packet_data),
+        sizeof(fatemeh_packet_data));
+//    fatemeh_packet_data = uint_8*(fatemeh_packet_data);
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::fatemeh_packet_data_t fatemeh_packet_data = nullptr;
+    to_core_type(fatemeh_packet_data);
+    s.set(fatemeh_packet_data);
+  }
+};
+//---------------------------------------
+// [FATEMEH] PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER
+
+class pfcp_fatemeh_packet_header_ie : public pfcp_ie {
+ public:
+
+    uint8_t   ip_version_and_header_length;
+    uint8_t   tos;
+    uint16_t  length;
+    uint16_t  fragment_id;
+    uint16_t  flags_and_fragment_offset;
+    uint8_t   ttl;
+    uint8_t   protocol;
+    uint16_t  checksum;
+    uint32_t src;
+    uint32_t dst;
+
+  //--------
+  explicit pfcp_fatemeh_packet_header_ie(const pfcp::fatemeh_packet_header_t& b)
+      : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER) {
+    ip_version_and_header_length = b.ip_version_and_header_length;
+    tos = b.tos;
+    length = b.length;
+    fragment_id = b.fragment_id;
+    flags_and_fragment_offset = b.flags_and_fragment_offset;
+    ttl = b.ttl;
+    protocol = b.protocol;
+    checksum = b.checksum;
+    src = b.src;
+    dst = b.dst;
+    tlv.set_length(20 * sizeof(uint8_t));
+  }
+  //--------
+  pfcp_fatemeh_packet_header_ie() : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER) {
+    ip_version_and_header_length = 0;
+    tos = 0;
+    length = 0;
+    fragment_id = 0;
+    flags_and_fragment_offset = 0;
+    ttl = 0;
+    protocol = 0;
+    checksum = 0;
+    src = 0;
+    dst = 0;
+    tlv.set_length(20 * sizeof(uint8_t));
+  }
+  //--------
+  pfcp_fatemeh_packet_header_ie(const pfcp_tlv& t) : pfcp_ie(t) {
+    ip_version_and_header_length = 0;
+    tos = 0;
+    length = 0;
+    fragment_id = 0;
+    flags_and_fragment_offset = 0;
+    ttl = 0;
+    protocol = 0;
+    checksum = 0;
+    src = 0;
+    dst = 0;
+  };
+  //--------
+  void to_core_type(pfcp::& b) {
+    b.ip_version_and_header_length = ip_version_and_header_length;
+    b.tos = tos;
+    b.length = length;
+    b.fragment_id = fragment_id;
+    b.flags_and_fragment_offset = flags_and_fragment_offset;
+    b.ttl = ttl;
+    b.protocol = protocol;
+    b.checksum;
+    b.checksum;
+    b.checksum = checksum;
+    b.src = src;
+    b.dst;acket_data = dst;
+  }
+  //--------
+  void dump_to(std::ostream& os) {
+    tlv.dump_to(os);
+    os << ip_version_and_header_length;
+    os << tos;
+    os << length;
+    os << fragment_id;
+    os << flags_and_fragment_offset;
+    os << ttl;
+    os << protocol;
+    os << checksum;
+    os << src;
+    os << dst;
+  }
+  //--------
+  void load_from(std::istream& is) {
+    // tlv.load_from(is);
+    if (tlv.get_length() != 20 * sizeof(uint8_t)) {
+      throw pfcp_tlv_bad_length_exception(
+          tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    }
+    is.read(reinterpret_cast<char*>(&ip_version_and_header_length), sizeof(ip_version_and_header_length));
+    is.read(reinterpret_cast<char*>(&tos), sizeof(tos));
+    is.read(reinterpret_cast<char*>(&length), sizeof(length));
+    length = be16toh(length);
+    is.read(reinterpret_cast<char*>(&fragment_id), sizeof(fragment_id));
+    fragment_id = be16toh(fragment_id);
+    is.read(reinterpret_cast<char*>(&flags_and_fragment_offset), sizeof(flags_and_fragment_offset));
+    flags_and_fragment_offset = be16toh(flags_and_fragment_offset);
+    is.read(reinterpret_cast<char*>(&ttl), sizeof(ttl));
+    is.read(reinterpret_cast<char*>(&protocol), sizeof(protocol));
+    is.read(reinterpret_cast<char*>(&checksum), sizeof(checksum));
+    checksum = be16toh(checksum);
+    is.read(reinterpret_cast<char*>(&src), sizeof(src));
+    src = be32toh(src);
+    is.read(reinterpret_cast<char*>(&dst), sizeof(dst));
+    dst = be32toh(dst);
+
+  }
+  //--------
+  void to_core_type(pfcp_ies_container& s) {
+    pfcp::fatemeh_packet_header_t fatemeh_packet_header= {};
+    to_core_type(fatemeh_packet_header);
+    s.set(fatemeh_packet_header);
+  }
+};
 
 ////-------------------------------------
 //// IE QUOTA_HOLDING_TIME
