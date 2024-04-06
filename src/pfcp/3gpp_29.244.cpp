@@ -1421,6 +1421,13 @@ pfcp_msg::pfcp_msg(const pfcp_session_report_request& pfcp_ies)
             pfcp_ies.usage_report.second));
     add_ie(sie);
   }
+  if (pfcp_ies.fatemeh_packet_report.first) {
+    std::shared_ptr<pfcp_fatemeh_packet_report_ie> sie(
+        new pfcp_fatemeh_packet_report_ie(
+            pfcp_ies.fatemeh_packet_report.second));
+    add_ie(sie);
+  }
+
   // TODO std::pair<bool, pfcp::usage_report_within_pfcp_session_report_request>
   // usage_report;
   // TODO std::pair<bool, pfcp::error_indication_report>

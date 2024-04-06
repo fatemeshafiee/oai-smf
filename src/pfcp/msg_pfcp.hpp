@@ -5059,7 +5059,6 @@ public:
 
     }
 
-
     void set(const pfcp::fatemeh_packet_type_t& v) {
         fatemeh_packet_type.first  = true;
         fatemeh_packet_type.second = v;
