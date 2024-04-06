@@ -378,7 +378,7 @@ pfcp_ie* pfcp_ie::new_pfcp_ie_from_stream(std::istream& is) {
         //        pfcp_measurement_method_ie(tlv); ie->load_from(is); return ie;
         //      }
         //      break;
-        //[FATEMEH]:
+        
       case PFCP_IE_USAGE_REPORT_TRIGGER: {
         pfcp_usage_report_trigger_ie* ie =
             new pfcp_usage_report_trigger_ie(tlv);
@@ -386,12 +386,36 @@ pfcp_ie* pfcp_ie::new_pfcp_ie_from_stream(std::istream& is) {
         return ie;
       } break;
         // end of Fatemeh's section
+        //[FATEMEH]:
+          //#define PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE (181)
+          // #define PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER (182)
+          // #define PFCP_IE_TRAFFIC_REPORT_PACKET_DATA (183)
+
       case PFCP_IE_PACKET_REPORT: {
         pfcp_fatemeh_packet_report_ie* ie =
             new pfcp_fatemeh_packet_report_ie(tlv);
         ie->load_from(is);
         return ie;
       } break;
+       case PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE: {
+        pfcp_fatemeh_packet_type_ie* ie =
+            new pfcp_fatemeh_packet_type_ie(tlv);
+        ie->load_from(is);
+        return ie;
+      } break;
+       case PFCP_IE_TRAFFIC_REPORT_PACKET_HEADER: {
+        pfcp_fatemeh_packet_header_ie* ie =
+            new pfcp_fatemeh_packet_header_ie(tlv);
+        ie->load_from(is);
+        return ie;
+      } break;
+       case PFCP_IE_TRAFFIC_REPORT_PACKET_DATA: {
+        pfcp_fatemeh_packet_data_ie* ie =
+            new pfcp_fatemeh_packet_data_ie(tlv);
+        ie->load_from(is);
+        return ie;
+      } break;
+
       case PFCP_IE_MEASUREMENT_PERIOD: {
         pfcp_measurement_period_ie* ie = new pfcp_measurement_period_ie(tlv);
         ie->load_from(is);

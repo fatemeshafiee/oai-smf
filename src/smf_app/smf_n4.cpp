@@ -237,6 +237,7 @@ smf_n4::smf_n4()
 }
 
 //------------------------------------------------------------------------------
+// [FATEMEH]
 void smf_n4::handle_receive_pfcp_msg(
     pfcp_msg& msg, const endpoint& remote_endpoint) {
   Logger::smf_n4().debug(
@@ -689,6 +690,7 @@ void smf_n4::handle_receive_session_deletion_response(
 }
 
 //------------------------------------------------------------------------------
+// [FATEMEH]
 void smf_n4::handle_receive_session_report_request(
     pfcp::pfcp_msg& msg, const endpoint& remote_endpoint) {
   Logger::smf_n4().info("Received N4 SESSION REPORT REQUEST from an UPF");

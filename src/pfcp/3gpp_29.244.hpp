@@ -4282,7 +4282,7 @@ class pfcp_fatemeh_packet_type_ie : public pfcp_ie {
   //--------
   pfcp_fatemeh_packet_type_ie() : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_TYPE) {
     fatemeh_packet_type = 4;
-    tlv.set_length(sizeof(fatemeh_packet_type));
+    tlv.set_length(sizeof(uint8_t));
   }
   //--------
   pfcp_fatemeh_packet_type_ie(const pfcp_tlv& t) : pfcp_ie(t) {
@@ -4339,7 +4339,7 @@ class pfcp_fatemeh_packet_data_ie : public pfcp_ie {
   pfcp_fatemeh_packet_data_ie() : pfcp_ie(PFCP_IE_TRAFFIC_REPORT_PACKET_DATA) {
     length = 0;
     data = "";//?
-    tlv.set_length(sizeof((length * sizeof (char))+ sizeof(uint16_t)));
+    tlv.set_length(sizeof((sizeof (data))+ sizeof(uint16_t))); // can i use sizeof for variable?
   }
   //--------
   pfcp_fatemeh_packet_data_ie(const pfcp_tlv& t) : pfcp_ie(t) {
