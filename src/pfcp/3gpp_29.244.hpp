@@ -4364,10 +4364,10 @@ class pfcp_fatemeh_packet_data_ie : public pfcp_ie {
   //--------
   void load_from(std::istream& is) {
     // tlv.load_from(is);
-    if (tlv.get_length() != (length * sizeof (char))+ sizeof(uint16_t)) {
-      throw pfcp_tlv_bad_length_exception(
-          tlv.type, tlv.get_length(), __FILE__, __LINE__);
-    }
+    // if (tlv.get_length() != (length * sizeof (char))+ sizeof(uint16_t)) {
+    //   throw pfcp_tlv_bad_length_exception(
+    //       tlv.type, tlv.get_length(), __FILE__, __LINE__);
+    // }
     is.read(
         reinterpret_cast<char*>(&length),
         sizeof(length));
