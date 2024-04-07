@@ -1079,8 +1079,57 @@ void smf_context::handle_itti_msg(
 
     // Traffic packet report
     if (report_type.pack) {
-        Logger::smf_app().debug(
-                "PFCP_SESSION_REPORT_REQUEST/Traffic packet report");
+      Logger::smf_app().debug(
+          "PFCP_SESSION_REPORT_REQUEST/Traffic packet report");
+      pfcp::fatemeh_packet_report fpr;
+      if (req->pfcp_ies.get(fpr)) {
+        pfcp::fatemeh_packet_type_t fpt;
+        pfcp::fatemeh_packet_header_t fph;
+        pfcp::fatemeh_packet_data_t fpd;
+        Logger::smf_app().info("\t\t SEID            -> %lld", req->seid);
+
+        if(fpr.get(&fpt)){
+          Logger::smf_app().info("\t\t packet type            -> %d", fpt);
+
+        }
+        if (fpr.get(&fph)){
+          Logger::smf_app().info("\t\t ip version and header            -> %d", fph.ip_version_and_header_length);
+          Logger::smf_app().info("\t\t type of service         -> %d", fph.tos);
+          Logger::smf_app().info("\t\t packet length            -> %d", fph.length);
+          Logger::smf_app().info("\t\t fragment id            -> %d", fph.fragment_id);
+          Logger::smf_app().info("\t\t flags and fragment offset            -> %d", fph.flags_and_fragment_offset);
+          Logger::smf_app().info("\t\t time to live           -> %d", fph.ttl);
+          Logger::smf_app().info("\t\t protocol          -> %d", fph.protocol);
+          Logger::smf_app().info("\t\t checksum          -> %d", fph.checksum);
+          Logger::smf_app().info("\t\t src            -> %u.%u.%u.%u",
+                                 (fph.src >> 24) & 0xFF,
+                                 (fph.src >> 16) & 0xFF,
+                                 (fph.src >> 8) & 0xFF,
+                                 fph.src & 0xFF);
+          Logger::smf_app().info("\t\t dst            -> %u.%u.%u.%u",
+                                 (fph.dst >> 24) & 0xFF,
+                                 (fph.dst >> 16) & 0xFF,
+                                 (fph.dst >> 8) & 0xFF,
+                                 fph.dst & 0xFF);
+
+
+        }
+        if(fpr.get(&fpd)){
+          Logger::smf_app().info("\t\t packet length            -> %d", fpd.length);
+          Logger::smf_app().info("\t\t packet length            -> %s", fpd.data);
+        }
+
+
+
+
+
+
+
+
+
+
+      }
+
     }
 }
     }
