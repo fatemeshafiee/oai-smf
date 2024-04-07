@@ -638,6 +638,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     // Subscribe to QoS Monitoring Event
     ee_qos_monitoring_connection = event_sub.subscribe_ee_qos_monitoring(
         boost::bind(&smf_context::handle_qos_monitoring, this, _1, _2, _3));
+    // Subscribe to Packet Monitoring Event
+    // ee_packet_monitoring_connection = event_sub.subscribe_ee_packet_monitoring(
+    //     boost::bind(&smf_context::handle_packet_monitoring, this, _1, _2, _3));
+        
+    
 
     // Subscribe to PDU SESSION ESTABLISHMENT event
     ee_pdusesest = event_sub.subscribe_ee_pdusesest(

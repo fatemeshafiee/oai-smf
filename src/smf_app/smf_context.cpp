@@ -4472,6 +4472,13 @@ void smf_context::trigger_qos_monitoring(
     const uint8_t& http_version) const {
   event_sub.ee_qos_monitoring(seid, ev_notif_model, http_version);
 }
+// added by [FATEMEH]
+// void smf_context::trigger_packet_monitoring(
+//     const seid_t& seid,
+//     const oai::smf_server::model::EventNotification& ev_notif_model,
+//     const uint8_t& http_version) const {
+//   event_sub.ee_packet_monitoring(seid, ev_notif_model, http_version);
+// }
 
 //------------------------------------------------------------------------------
 void smf_context::handle_flexcn_event(

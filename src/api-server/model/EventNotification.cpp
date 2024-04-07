@@ -493,10 +493,10 @@ void EventNotification::unsetUsageReport() {
 }
 
 
-UsageReport EventNotification::getPacketReport() const {
+PacketReport EventNotification::getPacketReport() const {
   return m_packetReport;
 }
-void EventNotification::setPacketReport(UsageReport const& value) {
+void EventNotification::setPacketReport(PacketReport const& value) {
   m_packetReport      = value;
   m_packetReportIsSet = true;
 }
