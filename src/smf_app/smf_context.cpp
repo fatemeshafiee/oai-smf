@@ -1088,11 +1088,11 @@ void smf_context::handle_itti_msg(
         pfcp::fatemeh_packet_data_t fpd;
         Logger::smf_app().info("\t\t SEID            -> %lld", req->seid);
 
-        if(fpr.get(&fpt)){
+        if(fpr.get(fpt)){
           Logger::smf_app().info("\t\t packet type            -> %d", fpt);
 
         }
-        if (fpr.get(&fph)){
+        if (fpr.get(fph)){
           Logger::smf_app().info("\t\t ip version and header            -> %d", fph.ip_version_and_header_length);
           Logger::smf_app().info("\t\t type of service         -> %d", fph.tos);
           Logger::smf_app().info("\t\t packet length            -> %d", fph.length);
@@ -1114,7 +1114,7 @@ void smf_context::handle_itti_msg(
 
 
         }
-        if(fpr.get(&fpd)){
+        if(fpr.get(fpd)){
           Logger::smf_app().info("\t\t packet length            -> %d", fpd.length);
           Logger::smf_app().info("\t\t packet length            -> %s", fpd.data);
         }
