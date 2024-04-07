@@ -28,6 +28,7 @@
 #include "RouteToLocation.h"
 #include "AccessType.h"
 #include "UsageReport.h"
+#include "PacketReport.h"
 #include <nlohmann/json.hpp>
 
 namespace oai {
@@ -213,6 +214,11 @@ class EventNotification {
   bool usageReportIsSet() const;
   void unsetUsageReport();
 
+  PacketReport getPacketReport() const;
+  void setPacketReport(PacketReport const& value);
+  bool PacketReportIsSet() const;
+  void unsetPacketReport();
+
   friend void to_json(nlohmann::json& j, const EventNotification& o);
   friend void from_json(const nlohmann::json& j, EventNotification& o);
 
@@ -266,6 +272,8 @@ class EventNotification {
   // [FATEMEH]: might be intersting!
   UsageReport m_usageReport;
   bool m_usageReportIsSet;
+  PacketReport m_packetReport;
+  bool m_packetReportIsSet;
 };
 
 }  // namespace model

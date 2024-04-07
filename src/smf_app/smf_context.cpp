@@ -1111,13 +1111,53 @@ void smf_context::handle_itti_msg(
                                  (fph.dst >> 16) & 0xFF,
                                  (fph.dst >> 8) & 0xFF,
                                  fph.dst & 0xFF);
-
-
+        
         }
         if(fpr.get(fpd)){
           Logger::smf_app().info("\t\t packet length            -> %d", fpd.length);
           Logger::smf_app().info("\t\t packet length            -> %s", fpd.data);
         }
+
+
+        // Trigger QoS Monitoring Event report notification
+          std::shared_ptr<smf_context> pc = {};
+          if (smf_app_inst->seid_2_smf_context(req->seid, pc)) {
+            oai::smf_server::model::EventNotification ev_notif = {};
+            oai::smf_server::model::PacketReport pr_model = {};
+            if (fpr.get(fpt)) {
+              pr_model.setSEndID(req->seid);
+              pr_model.setpacket_type(fpt);
+
+              if (fpr.get(fpd)){
+                pr_model.setdata_length(fpd.length);
+                pr_model.setdata_length(fpd.data);
+              }
+
+              if (fpr.get(fph)){
+                pr_model.setipv(fph.ip_version_and_header_length);
+                pr_model.settos(fph.tos);
+                pr_model.setheaderlength(fph.length);
+                pr_model.setfrgID(fph.fragment_id);
+                pr_model.setflags(fph.flags_and_fragment_offset);
+                pr_model.setttl(fph.ttl);
+                pr_model.setprotocol(fph.protocol);
+                pr_model.setchecksum(fph.checksum);
+                pr_model.setsrc(fph.src);
+                pr_model.setdst(fph.dst);
+
+              }
+
+            }
+//            if (ur.usage_report_trigger.first)
+//              pr_model.setURTrigger(ur.usage_report_trigger.second);
+            ev_notif.setPacketReport(pr_model);
+            pc.get()->trigger_qos_monitoring(req->seid, ev_notif, 1);
+          } else {
+            Logger::smf_app().debug(
+                "No SFM context found for SEID " TEID_FMT
+                ". Unable to notify QoS Monitoring Event Report.",
+                req->seid);
+          }
       }
 
     }
