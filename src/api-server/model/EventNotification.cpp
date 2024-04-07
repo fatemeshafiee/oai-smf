@@ -91,6 +91,7 @@ void to_json(nlohmann::json& j, const EventNotification& o) {
   if (o.dddStatusIsSet()) j["dddStatus"] = o.m_DddStatus;
   if (o.maxWaitTimeIsSet()) j["maxWaitTime"] = o.m_MaxWaitTime;
   if (o.usageReportIsSet()) j["Usage Report"] = o.m_usageReport;
+  if (o.PacketReportIsSet()) j["Packet Report"] = o.m_packetReport;
 }
 
 void from_json(const nlohmann::json& j, EventNotification& o) {
@@ -183,6 +184,10 @@ void from_json(const nlohmann::json& j, EventNotification& o) {
   if (j.find("Usage Report") != j.end()) {
     j.at("Usage Report").get_to(o.m_usageReport);
     o.m_usageReportIsSet = true;
+  }
+    if (j.find("Packet Report") != j.end()) {
+    j.at("Packet Report").get_to(o.m_packetReport);
+    o.m_packetReportIsSet = true;
   }
 }
 
@@ -485,6 +490,21 @@ bool EventNotification::usageReportIsSet() const {
 }
 void EventNotification::unsetUsageReport() {
   m_usageReportIsSet = false;
+}
+
+
+UsageReport EventNotification::getPacketReport() const {
+  return m_packetReport;
+}
+void EventNotification::setPacketReport(UsageReport const& value) {
+  m_packetReport      = value;
+  m_packetReportIsSet = true;
+}
+bool EventNotification::PacketReportIsSet() const {
+  return m_packetReportIsSet;
+}
+void EventNotification::unsetPacketReport() {
+  m_packetReportIsSet = false;
 }
 
 }  // namespace model
