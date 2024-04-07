@@ -15,7 +15,7 @@ namespace smf_server {
 namespace model {
 
 // TODO: Redefine in separate files
-enum PacketReportTrigger { PERIO = 1, VOLTH, TIMTH, VOLQU, TIMQU };
+//enum PacketReportTrigger { PERIO = 1, VOLTH, TIMTH, VOLQU, TIMQU };
 
 /// <summary>
 ///
@@ -49,7 +49,7 @@ class PacketReport {
   ///
   /// </summary>
 
-  uint16_t getdata_length() const; ;
+  uint16_t getdata_length() const;
   void setdata_length(uint16_t const& value);
   bool lengthIsSet() const;
   void unsetdata_length();
@@ -58,7 +58,7 @@ class PacketReport {
   /// </summary>
  
 
-  std::string getdata_data();
+  std::string getdata_data() const;
   void setdata_data(std::string const& value);
   bool dataIsSet() const;
   void unsetdata_data();
@@ -67,7 +67,7 @@ class PacketReport {
   /// </summary>
   uint8_t getipv() const;
   void setipv(uint8_t const& value);
-  bool ipvIsSet() const
+  bool ipvIsSet() const;
   void unsetipv();
 
   /// <summary>
@@ -80,7 +80,7 @@ class PacketReport {
   uint8_t gettos() const;
   void settos(uint8_t const& value);
   bool tosIsSet() const;
-  void unsettos() 
+  void unsettos() ;
   /// <summary>
 
   /// </summary>

@@ -1130,7 +1130,7 @@ void smf_context::handle_itti_msg(
 
               if (fpr.get(fpd)){
                 pr_model.setdata_length(fpd.length);
-                pr_model.setdata_length(fpd.data);
+                pr_model.setdata_data(fpd.data);
               }
 
               if (fpr.get(fph)){
