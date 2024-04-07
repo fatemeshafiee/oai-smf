@@ -1118,16 +1118,6 @@ void smf_context::handle_itti_msg(
           Logger::smf_app().info("\t\t packet length            -> %d", fpd.length);
           Logger::smf_app().info("\t\t packet length            -> %s", fpd.data);
         }
-
-
-
-
-
-
-
-
-
-
       }
 
     }

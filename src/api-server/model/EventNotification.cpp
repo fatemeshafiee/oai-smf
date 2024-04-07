@@ -472,6 +472,7 @@ bool EventNotification::maxWaitTimeIsSet() const {
 void EventNotification::unsetMaxWaitTime() {
   m_MaxWaitTimeIsSet = false;
 }
+// [FATEMEH]: might be intersting!
 UsageReport EventNotification::getUsageReport() const {
   return m_usageReport;
 }

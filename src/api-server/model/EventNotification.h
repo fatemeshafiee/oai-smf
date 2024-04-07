@@ -207,6 +207,7 @@ class EventNotification {
   /// <summary>
   ///
   /// </summary>
+  // [FATEMEH]: might be intersting
   UsageReport getUsageReport() const;
   void setUsageReport(UsageReport const& value);
   bool usageReportIsSet() const;
@@ -262,6 +263,7 @@ class EventNotification {
   bool m_DddStatusIsSet;
   std::string m_MaxWaitTime;
   bool m_MaxWaitTimeIsSet;
+  // [FATEMEH]: might be intersting!
   UsageReport m_usageReport;
   bool m_usageReportIsSet;
 };
