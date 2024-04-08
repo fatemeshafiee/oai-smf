@@ -2278,6 +2278,7 @@ void smf_app::add_event_subscription(
 }
 
 //---------------------------------------------------------------------------------------------
+// [FATEMEH] Found log is here
 void smf_app::get_ee_subscriptions(
     smf_event_t ev,
     std::vector<std::shared_ptr<smf_subscription>>& subscriptions) {

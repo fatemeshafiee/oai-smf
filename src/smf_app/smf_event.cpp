@@ -80,6 +80,11 @@ bs2::connection smf_event::subscribe_ee_qos_monitoring(
 }
 
 //------------------------------------------------------------------------------
+// bs2::connection smf_event::subscribe_ee_packet_monitoring(
+//     const ee_packet_monitoring_sig_t::slot_type& sig) {
+//   return ee_packet_monitoring.connect(sig);
+// }
+//------------------------------------------------------------------------------
 bs2::connection smf_event::subscribe_ee_flexcn_event(
     const ee_flexcn_sig_t::slot_type& sig) {
   return ee_flexcn.connect(sig);

@@ -1449,6 +1449,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bs2::connection ee_ddds_connection;
   bs2::connection ee_pdusesest;
   bs2::connection ee_qos_monitoring_connection;
+  //bs2::connection ee_packet_monitoring_connection;
   bs2::connection ee_flexcn;
 };
 }  // namespace smf

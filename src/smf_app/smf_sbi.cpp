@@ -487,6 +487,7 @@ void smf_sbi::send_sm_context_status_notification(
 }
 
 //-----------------------------------------------------------------------------------------------------
+// CRAAAAASH
 void smf_sbi::notify_subscribed_event(
     std::shared_ptr<itti_n11_notify_subscribed_event> msg) {
   Logger::smf_sbi().debug(
@@ -533,10 +534,13 @@ void smf_sbi::notify_subscribed_event(
     }
 
     // customized data
+    Logger::smf_sbi().debug(
+        "[FATEMEH] Custom data");
     nlohmann::json customized_data = {};
     i.get_custom_info(customized_data);
     if (!customized_data.is_null())
       event_notif["customized_data"] = customized_data;
+      Logger::smf_sbi().debug(customized_data.dump());
     // timestamp
     std::time_t time_epoch_ntp = std::time(nullptr);
     uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
@@ -544,6 +548,9 @@ void smf_sbi::notify_subscribed_event(
     event_notifs.push_back(event_notif);
     json_data["eventNotifs"] = event_notifs;
     std::string body         = json_data.dump();
+    Logger::smf_sbi().debug(
+        "[FATEMEH] Real data");
+    Logger::smf_sbi().debug(body);
 
     std::string response_data;
     // Generate a promise and associate this promise to the curl handle

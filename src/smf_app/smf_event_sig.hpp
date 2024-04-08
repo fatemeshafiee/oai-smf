@@ -82,6 +82,11 @@ typedef bs2::signal_type<
     void(seid_t, oai::smf_server::model::EventNotification, uint8_t),
     bs2::keywords::mutex_type<bs2::dummy_mutex>>::type ee_qos_monitoring_sig_t;
 
+// typedef bs2::signal_type<
+//     void(seid_t, oai::smf_server::model::EventNotification, uint8_t),
+//     bs2::keywords::mutex_type<bs2::dummy_mutex>>::type ee_packet_monitoring_sig_t;
+    
+
 // Signal for FlexCN event (for Event Exposure)
 // SCID, HTTP version
 typedef bs2::signal_type<

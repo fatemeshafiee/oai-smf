@@ -86,6 +86,8 @@ class smf_event {
       const ee_pdusesest_sig_t::slot_type& sig);
   bs2::connection subscribe_ee_qos_monitoring(
       const ee_qos_monitoring_sig_t::slot_type& sig);
+//   bs2::connection subscribe_ee_packet_monitoring(
+//       const ee_packet_monitoring_sig_t::slot_type& sig);
 
   bs2::connection subscribe_ee_flexcn_event(
       const ee_flexcn_sig_t::slot_type& sig);
@@ -99,7 +101,8 @@ class smf_event {
   ee_plmn_change_sig_t ee_plmn_change;    // Signal for UE IP Addr change
   ee_ddds_sig_t ee_ddds;
   ee_pdusesest_sig_t ee_pdusesest;  // Signal for  pdu session establishment
-  ee_qos_monitoring_sig_t ee_qos_monitoring;  // Signal for QoS Monitoring
+  ee_qos_monitoring_sig_t ee_qos_monitoring; // Signal for QoS Monitoring
+  //ee_packet_monitoring_sig_t ee_packet_monitoring;  
   ee_flexcn_sig_t ee_flexcn;                  // Signal for FlexCN Event
 };
 }  // namespace smf
