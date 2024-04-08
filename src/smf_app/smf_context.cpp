@@ -1189,7 +1189,7 @@ void smf_context::handle_itti_msg(
 //            if (ur.usage_report_trigger.first)
 //              pr_model.setURTrigger(ur.usage_report_trigger.second);
             ev_notif.setPacketReport(pr_model);
-            pc.get()->trigger_qos_monitoring(req->seid, ev_notif, 1);
+            pc.get()->trigger_packet_monitoring(req->seid, ev_notif, 1);
           } else {
             Logger::smf_app().debug(
                 "No SFM context found for SEID " TEID_FMT
@@ -4511,13 +4511,79 @@ void smf_context::trigger_qos_monitoring(
     const uint8_t& http_version) const {
   event_sub.ee_qos_monitoring(seid, ev_notif_model, http_version);
 }
+//------------------------------------------------------------------------------
 // added by [FATEMEH]
-// void smf_context::trigger_packet_monitoring(
-//     const seid_t& seid,
-//     const oai::smf_server::model::EventNotification& ev_notif_model,
-//     const uint8_t& http_version) const {
-//   event_sub.ee_packet_monitoring(seid, ev_notif_model, http_version);
-// }
+//------------------------------------------------------------------------------
+// [FATEMEH]
+void smf_context::handle_packet_monitoring(
+    const seid_t& seid,
+    const oai::smf_server::model::EventNotification& ev_notif_model,
+    const uint8_t& http_version) const {
+  Logger::smf_app().debug(
+      "Send request to N11 to trigger Packet Monitoring (Packet Report) Event, "
+      "SMF Context-related SEID  " SEID_FMT,
+      seid);
+
+  // Get the smf context
+  std::shared_ptr<smf_context> pc = {};
+  if (!smf_app_inst->seid_2_smf_context(seid, pc)) {
+    Logger::smf_app().warn(
+        "Context associated with this SEID " SEID_FMT " does not exit!", seid);
+    return;
+  }
+
+  supi_t supi     = pc.get()->supi;
+  supi64_t supi64 = smf_supi_to_u64(supi);
+
+  std::vector<std::shared_ptr<smf_subscription>> subscriptions = {};
+  smf_app_inst->get_ee_subscriptions(
+      smf_event_t::SMF_EVENT_PACKET_MON, subscriptions);
+
+  if (subscriptions.size() > 0) {
+    // Send request to N11 to trigger the notification to the subscribed event
+    Logger::smf_app().debug(
+        "Send ITTI msg to SMF N11 to trigger the event notification");
+    std::shared_ptr<itti_n11_notify_subscribed_event> itti_msg =
+        std::make_shared<itti_n11_notify_subscribed_event>(
+            TASK_SMF_APP, TASK_SMF_SBI);
+
+    for (auto i : subscriptions) {
+      event_notification ev_notif = {};
+      ev_notif.set_supi(supi64);
+      ev_notif.set_smf_event(smf_event_t::SMF_EVENT_PACKET_MON);
+      ev_notif.set_notif_uri(i.get()->notif_uri);
+      ev_notif.set_notif_id(i.get()->notif_id);
+      // timestamp
+      std::time_t time_epoch_ntp = std::time(nullptr);
+      uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
+      ev_notif.set_timestamp(std::to_string(tv_ntp));
+
+      // Custom json for Usage Report
+      nlohmann::json cj = {};
+      to_json(cj, ev_notif_model);
+
+      ev_notif.set_custom_info(cj);
+      itti_msg->event_notifs.push_back(ev_notif);
+    }
+
+    itti_msg->http_version = http_version;
+
+    int ret = itti_inst->send_msg(itti_msg);
+    if (RETURNok != ret) {
+      Logger::smf_app().error(
+          "Could not send ITTI message %s to task TASK_SMF_SBI",
+          itti_msg->get_msg_name());
+    }
+  } else {
+    Logger::smf_app().debug("No subscription available for this event");
+  }
+}
+ void smf_context::trigger_packet_monitoring(
+     const seid_t& seid,
+     const oai::smf_server::model::EventNotification& ev_notif_model,
+     const uint8_t& http_version) const {
+   event_sub.ee_packet_monitoring(seid, ev_notif_model, http_version);
+ }
 
 //------------------------------------------------------------------------------
 void smf_context::handle_flexcn_event(

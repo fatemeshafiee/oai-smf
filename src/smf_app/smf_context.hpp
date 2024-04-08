@@ -639,8 +639,8 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
     ee_qos_monitoring_connection = event_sub.subscribe_ee_qos_monitoring(
         boost::bind(&smf_context::handle_qos_monitoring, this, _1, _2, _3));
     // Subscribe to Packet Monitoring Event
-    // ee_packet_monitoring_connection = event_sub.subscribe_ee_packet_monitoring(
-    //     boost::bind(&smf_context::handle_packet_monitoring, this, _1, _2, _3));
+     ee_packet_monitoring_connection = event_sub.subscribe_ee_packet_monitoring(
+         boost::bind(&smf_context::handle_packet_monitoring, this, _1, _2, _3));
         
     
 
@@ -1270,6 +1270,16 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       const seid_t& seid,
       const oai::smf_server::model::EventNotification& ev_notif_model,
       const uint8_t& http_version) const;
+  // add packet monitring
+  void smf_context::trigger_packet_monitoring(
+      const seid_t& seid,
+      const oai::smf_server::model::EventNotification& ev_notif_model,
+      const uint8_t& http_version) const;
+  void smf_context::handle_packet_monitoring(
+      const seid_t& seid,
+      const oai::smf_server::model::EventNotification& ev_notif_model,
+      const uint8_t& http_version) const;
+
 
   void trigger_flexcn_event(
       const scid_t& scid, const uint8_t& http_version) const;
@@ -1449,7 +1459,7 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
   bs2::connection ee_ddds_connection;
   bs2::connection ee_pdusesest;
   bs2::connection ee_qos_monitoring_connection;
-  //bs2::connection ee_packet_monitoring_connection;
+  bs2::connection ee_packet_monitoring_connection;
   bs2::connection ee_flexcn;
 };
 }  // namespace smf
