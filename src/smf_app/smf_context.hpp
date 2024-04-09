@@ -1271,11 +1271,11 @@ class smf_context : public std::enable_shared_from_this<smf_context> {
       const oai::smf_server::model::EventNotification& ev_notif_model,
       const uint8_t& http_version) const;
   // add packet monitring
-  void smf_context::trigger_packet_monitoring(
+  void trigger_packet_monitoring(
       const seid_t& seid,
       const oai::smf_server::model::EventNotification& ev_notif_model,
       const uint8_t& http_version) const;
-  void smf_context::handle_packet_monitoring(
+  void handle_packet_monitoring(
       const seid_t& seid,
       const oai::smf_server::model::EventNotification& ev_notif_model,
       const uint8_t& http_version) const;

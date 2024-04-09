@@ -33,8 +33,8 @@ typedef enum smf_event_e {
   SMF_EVENT_DDDS        = 6,
   SMF_EVENT_PDUSESEST   = 97,  // Customized event
   SMF_EVENT_QOS_MON     = 98,  // Customized event
-  SMF_EVENT_FLEXCN      = 99   // Customized event
-  SMF_EVENT_PACK_MON    = 100
+  SMF_EVENT_FLEXCN      = 99,   // Customized event
+  SMF_EVENT_PACKET_MON    = 100
 } smf_event_t;
 
 static std::string smf_event_from_enum(smf_event_t e) {
@@ -47,7 +47,7 @@ static std::string smf_event_from_enum(smf_event_t e) {
   if (e == smf_event_t::SMF_EVENT_DDDS) return "DDDS";
   if (e == smf_event_t::SMF_EVENT_PDUSESEST) return "PDU_SES_EST";
   if (e == smf_event_t::SMF_EVENT_FLEXCN) return "FLEXCN";
-  if (e == smf_event_t::SMF_EVENT_PACK_MON) return "PACK_MON";
+  if (e == smf_event_t::SMF_EVENT_PACKET_MON) return "PACKET_MON";
   return "";
 }
 

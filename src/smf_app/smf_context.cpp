@@ -4558,7 +4558,7 @@ void smf_context::handle_packet_monitoring(
       uint64_t tv_ntp            = time_epoch_ntp + SECONDS_SINCE_FIRST_EPOCH;
       ev_notif.set_timestamp(std::to_string(tv_ntp));
 
-      // Custom json for Usage Report
+      // Custom json for Packet Report
       nlohmann::json cj = {};
       to_json(cj, ev_notif_model);
 
