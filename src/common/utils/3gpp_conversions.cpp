@@ -549,8 +549,7 @@ void xgpp_conv::smf_event_exposure_notification_from_openapi(
       event_subscription.smf_event = smf_event_e::SMF_EVENT_PDUSESEST;
     } else if (event_id.compare("PACKET_MON") == 0) {
       event_subscription.smf_event = smf_event_e::SMF_EVENT_PACKET_MON;
-    }
-      else if (event_id.compare("QOS_MON") == 0) {
+    } else if (event_id.compare("QOS_MON") == 0) {
         event_subscription.smf_event = smf_event_e::SMF_EVENT_QOS_MON;
     } else if (event_id.compare("FLEXCN") == 0) {
       event_subscription.smf_event = smf_event_e::SMF_EVENT_FLEXCN;

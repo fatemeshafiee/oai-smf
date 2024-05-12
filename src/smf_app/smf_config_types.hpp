@@ -162,7 +162,7 @@ class subscription_info_config : public config_type {
  private:
   string_config_value m_dnn;
   int_config_value m_ssc_mode;
-  qos_profile_config_value m_qos_profile;
+  qos_profile_config_value m_qos_profile; // FATEMEH
   oai::model::common::Snssai m_snssai;
 
  public:

@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  ngtest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: {}
+    platform: linux/amd64
+    container_name: ngtest
+    ports:
+      - "8080:3000"
+      - "4560:22"
+    networks:
+      public_net:
+        ipv4_address: 192.168.70.169
+networks:
+  public_net:
+    external:
+      name: demo-oai-public-net

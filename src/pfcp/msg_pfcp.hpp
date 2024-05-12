@@ -75,13 +75,7 @@ class aggregated_urrs;
 class create_traffic_endpoint;
 class created_traffic_endpoint;
 class update_traffic_endpoint;
-class remove_traffic_endpoint;
-class ethernet_traffic_information;
-class additional_monitoring_time;
-//  class event_information;
-//  class event_reporting;
-class ethernet_packet_filter;
-class fatemeh_packet_report;
+class remove_traffic_endpoint;Heh_packet_report;
 }  // namespace pfcp
 
 namespace pfcp {

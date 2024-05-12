@@ -1208,6 +1208,7 @@ void smf_app::handle_pdu_session_update_sm_context_request(
   return;
 }
 //------------------------------------------------------------------------------
+// [FATEMEH] to close the loop
 void smf_app::handle_pdu_session_release_sm_context_request(
     std::shared_ptr<itti_n11_release_sm_context_request> smreq) {
   Logger::smf_app().info(
@@ -1333,6 +1334,7 @@ void smf_app::trigger_pdu_session_modification(
 }
 
 //------------------------------------------------------------------------------
+//FATEMEH
 evsub_id_t smf_app::handle_event_exposure_subscription(
     std::shared_ptr<itti_sbi_event_exposure_request> msg) {
   Logger::smf_app().info(
