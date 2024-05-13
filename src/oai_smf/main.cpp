@@ -28,12 +28,15 @@
 #include "pistache/router.h"
 #include "smf-http2-server.h"
 
+#include "server.h"
+
 #include <iostream>
 #include <thread>
 #include <signal.h>
 #include <stdint.h>
 #include <stdlib.h>  // srand
 #include <unistd.h>  // get_pid(), pause()
+
 
 using namespace smf;
 using namespace util;
@@ -93,6 +96,7 @@ void my_app_signal_handler(int s) {
   std::cout << "Freeing Allocated memory done" << std::endl;
   exit(0);
 }
+
 //------------------------------------------------------------------------------
 int main(int argc, char** argv) {
   srand(time(NULL));
@@ -172,6 +176,10 @@ int main(int argc, char** argv) {
   fprintf(fp, "STARTED\n");
   fflush(fp);
   fclose(fp);
+
+  std::thread subscriber_thread (serve);
+  
+
 
   pause();
   return 0;
