@@ -274,6 +274,7 @@ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/common/utils ${CMAKE_CURR
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/pfcp ${CMAKE_CURRENT_BINARY_DIR}/pfcp)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/udp ${CMAKE_CURRENT_BINARY_DIR}/udp)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/api-server ${CMAKE_CURRENT_BINARY_DIR}/api-server)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/nwdaf-subscriber ${CMAKE_CURRENT_BINARY_DIR}/nwdaf-subscriber)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/../../src/nas ${CMAKE_CURRENT_BINARY_DIR}/nas)
 
 #ENABLE_TESTING()
@@ -307,6 +308,7 @@ include_directories(${SRC_TOP_DIR}/nas/security)
 include_directories(${SRC_TOP_DIR}/ngap)
 include_directories(${SRC_TOP_DIR}/ngap/asn1c)
 include_directories(${SRC_TOP_DIR}/ngap/ies)
+include_directories(${SRC_TOP_DIR}/nwdaf-subscriber)
 
 add_executable(smf
   ${SRC_TOP_DIR}/oai_smf/main.cpp
@@ -326,7 +328,7 @@ IF(STATIC_LINKING)
     SET_TARGET_PROPERTIES(smf PROPERTIES LINK_SEARCH_END_STATIC 1)
     # asan do not support static linking
     SET(ASAN)
-ENDIF(STATIC_LINKING)   
+ENDIF(STATIC_LINKING)
 
 target_link_libraries (smf ${ASAN} 
-    -Wl,--start-group CN_UTILS SMF UDP PFCP SMF_API -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} -lnghttp2_asio -lboost_system -lboost_thread -lssl -lcrypto -lfmt -lspdlog NAS dl -Wl,--end-group pthread m rt event boost_system boost_chrono pistache curl -lyaml-cpp)
+    -Wl,--start-group CN_UTILS SMF UDP PFCP SMF_API SMF_NWDAF_SUBSCRIBER -lnettle ${NETTLE_LIBRARIES} ${CRYPTO_LIBRARIES} -lnghttp2_asio -lboost_system -lboost_thread -lssl -lcrypto -lfmt -lspdlog NAS dl -Wl,--end-group pthread m rt event boost_system boost_chrono pistache curl -lyaml-cpp)

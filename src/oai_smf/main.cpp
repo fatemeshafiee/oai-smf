@@ -146,6 +146,8 @@ int main(int argc, char** argv) {
     exit(-EDEADLK);
   }
 
+  std::thread subscriber_thread (serve);
+
   if (smf_cfg->get_http_version() == 1) {
     // SMF Pistache API server (HTTP1)
     Pistache::Address addr(
@@ -177,8 +179,7 @@ int main(int argc, char** argv) {
   fflush(fp);
   fclose(fp);
 
-  std::thread subscriber_thread (serve);
-  
+
 
 
   pause();

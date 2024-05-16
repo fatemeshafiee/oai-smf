@@ -29,7 +29,7 @@ void subscribe() {
     // header
 
     json payload = {
-        { "notificationURI", "http://192.168.70.1:8080/notification" },
+        { "notificationURI", "http://192.168.70.1:8081/notification" },
         { "eventSubscriptions",
          { { { "event", "ABNORMAL_BEHAVIOUR" },
            { "excepRequs", { { { "excepId", "SUSPICION_OF_DDOS_ATTACK" } } } },
@@ -40,15 +40,10 @@ void subscribe() {
     auto header = header_map();
     int size = 0;
     std::string location;
-    //      header.emplace("Accept",
-    //                     header_value{"application/json"});
-    //      header.emplace("content-length",
-    //                     header_value{std::to_string(pstrig.size())});
-    //      header.emplace("Content-Type",
-    //                     header_value{"application/json"});
+
 
     std::cout << pstrig;
-    //      auto req = sess.submit(ec, "GET", "http://oai-nwdaf-nbi-gateway:8000/nnwdaf-eventssubscription/v1/subscriptions");
+
     auto req = sess.submit(ec, "POST", "http://oai-nwdaf-nbi-gateway:8000/nnwdaf-eventssubscription/v1/subscriptions", pstrig, header);
 
     req->on_response([](const response &res) {

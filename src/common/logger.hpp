@@ -43,6 +43,7 @@ static const std::string SMF_N7         = "smf_n7 ";
 static const std::string SMF_API_SERVER = "smf_api";
 static const std::string ITTI           = "itti   ";
 static const std::string ASYNC          = "async  ";
+static const std::string NWDAF_SUBSCRIBER = "nwdaf_subscriber";
 
 class Logger {
  public:
@@ -72,6 +73,8 @@ class Logger {
         name, ITTI, log_stdout, log_rot_file);
     oai::logger::logger_registry::register_logger(
         name, ASYNC, log_stdout, log_rot_file);
+    oai::logger::logger_registry::register_logger(
+        name, NWDAF_SUBSCRIBER, log_stdout, log_rot_file);
   }
   static void set_level(spdlog::level::level_enum level) {
     oai::logger::logger_registry::set_level(level);
@@ -125,5 +128,8 @@ class Logger {
 
   static const oai::logger::printf_logger& async_cmd() {
     return oai::logger::logger_registry::get_logger(ASYNC);
+  }
+  static const oai::logger::printf_logger& nwdaf_sub() {
+    return oai::logger::logger_registry::get_logger(NWDAF_SUBSCRIBER);
   }
 };
