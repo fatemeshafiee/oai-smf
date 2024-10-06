@@ -10,9 +10,9 @@
 #include <utility>
 struct UEPduRatioPair {
   std::string ueIP;
-  int pduSessId;
+//  int pduSessId;
   int seId;
-  double ratio;
+//  double ratio;
 
 };
 void release_ue_session(std::set<std::pair<int, int>> toBanSessIDs);

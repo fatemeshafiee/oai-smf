@@ -44,9 +44,9 @@ server.handle("/subscribe", [](const request &req, const response &res) {
           for (const auto& entry : ddosEntries) {
             UEPduRatioPair pair;
             pair.ueIP = entry["ue_ip"];
-            pair.pduSessId = entry["pdu_sess_id"];
+//            pair.pduSessId = entry["pdu_sess_id"];
             pair.seId = entry["seid"];
-            pair.ratio = entry["ratio"];
+//            pair.ratio = entry["ratio"];
             ueRatioList.push_back(pair);
 //            std::cout << "UE IP: " << pair.ueIP << std::endl;
 //            std::cout << "PDU session ID: " << pair.pduSessId << std::endl;
