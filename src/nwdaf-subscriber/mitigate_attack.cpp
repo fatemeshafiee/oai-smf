@@ -14,7 +14,17 @@ extern smf::smf_app* smf_app_inst;
 
 using namespace smf;
 
-
+std::string get_current_time_m(int input) {
+  auto now = std::chrono::system_clock::now();
+  if (input >= 0) {
+    now += std::chrono::minutes(input);
+  }
+  std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+  std::tm local_tm = *std::localtime(&now_time);
+  std::ostringstream oss;
+  oss << std::put_time(&local_tm, "%Y-%m-%d %H:%M:%S");
+  return oss.str();
+}
 void release_ue_session(std::set <std::pair<int, int>>  toBanSessIDs){
   for (auto ids : toBanSessIDs) {
     std::shared_ptr<smf_pdu_session> sp = {};
@@ -67,7 +77,7 @@ void release_ue_session(std::set <std::pair<int, int>>  toBanSessIDs){
         uint64_t seid = smf_app_inst->generate_seid();
         sp->set_seid(seid);
         proc->send_n4_session_deletion_request();
-        Logger::nwdaf_sub().warn("[FATEMEH]This is the End!");
+        Logger::nwdaf_sub().warn("[DSN_Latency_SMF] the request to release the PDU session has been sent: %s", get_current_time_m(-1));
       }
     }
 
@@ -89,6 +99,7 @@ void manage_suspicious_session(std::vector<UEPduRatioPair> ueRatioList){
   }
   if (toBanSessIDs.size()!=0){
     Logger::nwdaf_sub().warn("[FATEMEH] There are some suspicious UEs.");
+    Logger::nwdaf_sub().warn("[DSN_Latency_SMF] Calling the release function to mitigate the risk! the time is: %s", get_current_time_m(-1));
     release_ue_session(toBanSessIDs);
   }
 

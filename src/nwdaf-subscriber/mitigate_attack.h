@@ -8,6 +8,7 @@
 #include <set>
 #include <vector>
 #include <utility>
+
 struct UEPduRatioPair {
   std::string ueIP;
 //  int pduSessId;
@@ -15,6 +16,7 @@ struct UEPduRatioPair {
 //  double ratio;
 
 };
+std::string get_current_time_m(int input);
 void release_ue_session(std::set<std::pair<int, int>> toBanSessIDs);
 void manage_suspicious_session(std::vector<UEPduRatioPair> ueRatioList);
 #endif  // OAI_SMF_MITIGATE_ATTACK_H

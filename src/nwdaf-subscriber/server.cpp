@@ -25,42 +25,39 @@ server.handle("/subscribe", [](const request &req, const response &res) {
       if (len == 0 || !data) {
         return;
       }
+      Logger::nwdaf_sub().warn("[DSN_Latency_SMF] The notification for Abnormal behaviour request received, the time is: {}", get_current_time(-1));
 
       std::string jsonData(reinterpret_cast<const char*>(data), len);
 
       std::vector<UEPduRatioPair> ueRatioList;
-      Logger::nwdaf_sub().warn("The Json data is: %s", jsonData);
+      Logger::nwdaf_sub().warn("[DSN_Latency_SMF] The Json data is: %s", jsonData);
 
 
       json jsonObj = json::parse(jsonData);
 
       if (jsonObj.contains("abnorBehavrs")) {
-        Logger::nwdaf_sub().warn("The JSON contains an array named 'ddos_entries'.");
-//        std::cout << "The JSON contains an array named 'ddos_entries'." << std::endl;
+        Logger::nwdaf_sub().warn("The JSON contains an array named abnorBehavrs.");
         auto  abnorBehavrs= jsonObj["abnorBehavrs"];
         for (const auto& abnorBehavr : abnorBehavrs) {
-          // Access the "ddos_entries" array
-          auto ddosEntries = abnorBehavr["ddos_entries"];
-          for (const auto& entry : ddosEntries) {
-            UEPduRatioPair pair;
-            pair.ueIP = entry["ue_ip"];
-//            pair.pduSessId = entry["pdu_sess_id"];
-            pair.seId = entry["seid"];
-//            pair.ratio = entry["ratio"];
-            ueRatioList.push_back(pair);
-//            std::cout << "UE IP: " << pair.ueIP << std::endl;
-//            std::cout << "PDU session ID: " << pair.pduSessId << std::endl;
-//            std::cout << "Ratio: " << pair.ratio << std::endl;
-//            std::cout << std::endl;
+          if (abnorBehavr.contains("ddos_entries")) {
+            auto ddosEntries = abnorBehavr["ddos_entries"];
+            for (const auto& entry : ddosEntries) {
+              UEPduRatioPair pair;
+              pair.ueIP = entry["ue_ip"];
+              pair.seId = entry["seid"];
+              ueRatioList.push_back(pair);}
 
+            Logger::nwdaf_sub().warn(
+                "[DSN_Latency_SMF] Calling the manage function to mitigate the risk! the time is: {}",
+                get_current_time(-1));
+            manage_suspicious_session(ueRatioList);
           }
-          //Logger::smf_app().warn("[FATEMEH] The subscription triggerred!",ueRatioList[0]);
-          Logger::nwdaf_sub().warn("[FATEMEH] Calling the manage function!");
-          manage_suspicious_session(ueRatioList);
-        }}
+        }
+      }
+      
     });
 
-    //    std::cout <<"this is a request body" << req.on_data()
+
     res.write_head(200);
     res.end("hello, world\n");
   });
