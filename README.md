@@ -5,6 +5,8 @@ Enabled the SMF to subscribe to the NWDAF and receive periodic notifications.
 Enabled the SMF to release the PDU session of abnormal UEs based on NWDAF notifications.
 
 Additionally, introduced experimental modifications to PFCP messages as part of our own research.
+
+
 ------------------------------------------------------------------------------
 
                              OPENAIR-CN-5G
