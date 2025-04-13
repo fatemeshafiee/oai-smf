@@ -1116,6 +1116,7 @@ void smf_context::handle_itti_msg(
     }
 
     // Traffic packet report
+    // [STEP 1]
     if (report_type.pack) {
       Logger::smf_app().debug(
           "PFCP_SESSION_REPORT_REQUEST/Traffic packet report");
@@ -4515,6 +4516,7 @@ void smf_context::trigger_qos_monitoring(
 // added by [FATEMEH]
 //------------------------------------------------------------------------------
 // [FATEMEH]
+// [STEP 5]
 void smf_context::handle_packet_monitoring(
     const seid_t& seid,
     const oai::smf_server::model::EventNotification& ev_notif_model,
@@ -4578,6 +4580,8 @@ void smf_context::handle_packet_monitoring(
     Logger::smf_app().debug("No subscription available for this event");
   }
 }
+
+// [STEP 4]
  void smf_context::trigger_packet_monitoring(
      const seid_t& seid,
      const oai::smf_server::model::EventNotification& ev_notif_model,
