@@ -26,7 +26,11 @@
  \date 2019
  \email: lionel.gauthier@eurecom.fr, tien-thinh.nguyen@eurecom.fr
  */
-
+/*
+ * Modified by: Fatemeh Shafiei Ardestani
+ * Date: 2025-04-06
+ * See Git history for complete list of changes.
+ */
 #include "smf_context.hpp"
 
 #include <algorithm>

@@ -1,3 +1,7 @@
+#/*
+#* Added by: Fatemeh Shafiei Ardestani
+#* See Git history for complete list of changes.
+#*/
 set(SMF_NWDAF_SUBSCRIBER_DIR "${SRC_TOP_DIR}/nwdaf-subscriber")
 
 #

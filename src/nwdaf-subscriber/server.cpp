@@ -1,3 +1,7 @@
+/*
+* Added by: Fatemeh Shafiei Ardestani
+* See Git history for complete list of changes.
+ */
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <nghttp2/asio_http2_server.h>

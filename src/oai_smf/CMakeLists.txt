@@ -20,6 +20,11 @@
 ################################################################################
 # Author: laurent THOMAS, Lionel GAUTHIER
 ###############################################################################
+#/*
+#* Modified by: Fatemeh Shafiei Ardestani
+#* Date: 2025-04-06
+#* See Git history for complete list of changes.
+#*/
 
 cmake_minimum_required (VERSION 3.0.2)
 

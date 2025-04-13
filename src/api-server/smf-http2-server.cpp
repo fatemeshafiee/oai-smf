@@ -26,6 +26,11 @@
  \date 2020
  \email: tien-thinh.nguyen@eurecom.fr
  */
+/*
+ * Modified by: Fatemeh Shafiei Ardestani
+ * Date: 2025-04-06
+ * See Git history for complete list of changes.
+ */
 
 #include "smf-http2-server.h"
 #include <string>

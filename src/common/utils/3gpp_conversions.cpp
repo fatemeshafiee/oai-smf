@@ -25,6 +25,12 @@
  * \company Eurecom
  * \email: lionel.gauthier@eurecom.fr
  */
+/*
+ * Modified by: Fatemeh Shafiei Ardestani
+ * Date: 2025-04-06
+ * See Git history for complete list of changes.
+ */
+
 #include "3gpp_conversions.hpp"
 
 #include <stdlib.h>
