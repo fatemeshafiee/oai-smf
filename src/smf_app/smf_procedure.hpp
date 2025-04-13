@@ -102,6 +102,18 @@ class smf_session_procedure : public smf_procedure {
 
   pfcp::create_pdr pfcp_create_pdr_dl(edge& edge, const pfcp::qfi_t& qfi);
 
+
+  /**
+   * Helper function to get next UPF from graph in a safe way
+   * @param dl_edges
+   * @param ul_edges
+   * @param current_upf
+   * @return ERROR in case not successful, OK when UPF graph is empty and
+   * CONTINUE if UPF is not null
+   */
+  smf_procedure_code get_next_upf(
+      std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
+      std::shared_ptr<pfcp_association>& next_upf);
   // TODO eventuell if used more than once
  private:
   // pfcp::destination_interface_value_e get_interface_value(const edge& edge);
@@ -126,18 +138,6 @@ class smf_session_procedure : public smf_procedure {
   smf_procedure_code get_current_upf(
       std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
       std::shared_ptr<pfcp_association>& current_upf);
-
-  /**
-   * Helper function to get next UPF from graph in a safe way
-   * @param dl_edges
-   * @param ul_edges
-   * @param current_upf
-   * @return ERROR in case not successful, OK when UPF graph is empty and
-   * CONTINUE if UPF is not null
-   */
-  smf_procedure_code get_next_upf(
-      std::vector<edge>& dl_edges, std::vector<edge>& ul_edges,
-      std::shared_ptr<pfcp_association>& next_upf);
 };
 
 //------------------------------------------------------------------------------
@@ -293,8 +293,8 @@ class session_release_sm_context_procedure : public smf_session_procedure {
   std::shared_ptr<itti_n11_release_sm_context_response> n11_triggered_pending;
   session_management_procedures_type_e session_procedure_type;
 
- private:
   smf_procedure_code send_n4_session_deletion_request();
+// private:
 };
 
 }  // namespace smf

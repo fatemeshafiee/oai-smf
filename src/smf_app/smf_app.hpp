@@ -865,6 +865,7 @@ class smf_app {
    * information of the subscription
    * @return void
    */
+  //FATEMEH
   void add_event_subscription(
       evsub_id_t sub_id, smf_event_t ev, std::shared_ptr<smf_subscription> ss);
 

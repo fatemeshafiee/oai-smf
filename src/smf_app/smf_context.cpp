@@ -1344,6 +1344,7 @@ void smf_context::get_default_qos_flow_description(
 }
 
 //------------------------------------------------------------------------------
+//FATEMEH
 void smf_context::get_session_ambr(
     SessionAMBR& session_ambr, const snssai_t& snssai, const std::string& dnn) {
   Logger::smf_app().debug(
@@ -1448,6 +1449,7 @@ void smf_context::get_session_ambr(
 }
 
 //------------------------------------------------------------------------------
+//FATEMEH
 void smf_context::get_session_ambr(
     Ngap_PDUSessionAggregateMaximumBitRate_t& session_ambr,
     const snssai_t& snssai, const std::string& dnn) {
@@ -3333,12 +3335,15 @@ bool smf_context::handle_pdu_session_update_sm_context_request(
 }
 
 //-------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------
+// [FATEMEH] PDU
 void smf_context::handle_pdu_session_release_sm_context_request(
     std::shared_ptr<itti_n11_release_sm_context_request> smreq) {
   Logger::smf_app().info("Handle a PDU Session Release SM Context Request");
 
   // Step 1. get SMF PDU session context. At this stage, pdu_session must be
   // existed
+  // [FATEMEH::PDU] STEP 1. get smf_pdu_session
   std::shared_ptr<smf_pdu_session> sp = {};
   if (!find_pdu_session(smreq->req.get_pdu_session_id(), sp)) {
     // error
